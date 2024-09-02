@@ -35,9 +35,10 @@ need to interact with a real database - for other tests the relevant repository 
 
 #### Backend
 
-Controllers can be found in the `controllers` package, entities and respositories can be found in the `database`
+Controllers can be found in the `controllers` package, entities and repositories can be found in the `database`
 package.
 
 #### Frontend
 
-TODO
+The project uses the Thymeleaf templating engine, combined with the Gov.UK design system. The top-level templates can be
+found in `src/main/resources/templates`, and reusable fragments can be found in the `fragments` subfolder.
