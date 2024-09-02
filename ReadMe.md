@@ -9,6 +9,13 @@ functionality for prsd-webapp.
 
 ### Dependencies
 
+For the easiest local development experience, use Intellij, and have a docker daemon running on your machine. The repo
+includes a `local` launch configuration which will use docker compose to setup the required local dependencies before
+starting the application.
+
+A running docker daemon is also required to run the integration tests, which make use
+of [testcontainers](https://testcontainers.com/).
+
 The application requires Java 17 - Gradle will automatically install this for you the first time you run the
 application locally.
 
@@ -20,9 +27,6 @@ installing the pre-commit hook by running the `addKtlintCheckGitPreCommitHook` t
 
 ### Testing
 
-A running docker daemon is required to run the integration tests, which make use
-of [testcontainers](https://testcontainers.com/).
-
 The project uses a combination of unit tests and integration tests. The integration tests use a testcontainer to run a
 postgres database. This is relatively time-consuming to spin up, and so should only be used for integration tests that
 need to interact with a real database - for other tests the relevant repository beans should be mocked instead.
@@ -31,7 +35,8 @@ need to interact with a real database - for other tests the relevant repository 
 
 #### Backend
 
-TODO
+Controllers can be found in the `controllers` package, entities and respositories can be found in the `database`
+package.
 
 #### Frontend
 
