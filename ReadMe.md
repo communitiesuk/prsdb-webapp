@@ -38,6 +38,10 @@ need to interact with a real database - for other tests the relevant repository 
 Controllers can be found in the `controllers` package, entities and repositories can be found in the `database`
 package.
 
+When developing locally, third party APIs should be stubbed by pointing the requests back at http://localhost:8080, and
+adding an equivalent endpoint to the one you're calling to the `local.api` package. Those controllers should be
+annotated by `@Profile("local")` to ensure that they are not included in any non-local builds.
+
 #### Frontend
 
 The project uses the Thymeleaf templating engine, combined with the Gov.UK design system. The top-level templates can be
