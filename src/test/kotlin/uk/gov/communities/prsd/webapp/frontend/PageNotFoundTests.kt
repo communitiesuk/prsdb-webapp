@@ -6,16 +6,16 @@ import org.openqa.selenium.By
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.web.context.WebApplicationContext
-import uk.gov.communities.prsd.webapp.controllers.SearchRegisterController
+import uk.gov.communities.prsd.webapp.controllers.CustomErrorController
 
-@WebMvcTest(SearchRegisterController::class)
-class SearchRegisterControllerTests(
-    @Autowired webContext: WebApplicationContext,
+@WebMvcTest(CustomErrorController::class)
+class PageNotFoundTests(
+    @Autowired val webContext: WebApplicationContext,
 ) : FrontendTest(webContext) {
     @Test
-    fun `search for private rented sector information page renders`() {
-        driver.get("http://localhost:8080/search")
+    fun `404 page renders when error controller path called`() {
+        driver.get("http://localhost:8080/error")
         val header = driver.findElement(By.tagName("h1"))
-        assertThat(header.text).isEqualTo("Search for Private Rented Sector information")
+        assertThat(header.text).isEqualTo("Sorry, there is a problem with the service")
     }
 }

@@ -22,3 +22,7 @@ spring:
     init:
       mode: always
       platform: local
+
+server:
+  error:
+    path: /error

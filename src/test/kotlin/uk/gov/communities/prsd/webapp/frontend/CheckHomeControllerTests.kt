@@ -13,7 +13,7 @@ class CheckHomeControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : FrontendTest(webContext) {
     @Test
-    fun layoutTest() {
+    fun `check a home for rent page renders`() {
         driver.get("http://localhost:8080/check")
         val header = driver.findElement(By.tagName("h1"))
         assertThat(header.text).isEqualTo("Check a home to rent")

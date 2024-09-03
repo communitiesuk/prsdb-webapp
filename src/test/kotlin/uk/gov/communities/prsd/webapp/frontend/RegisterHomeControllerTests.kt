@@ -10,10 +10,10 @@ import uk.gov.communities.prsd.webapp.controllers.RegisterHomeController
 
 @WebMvcTest(RegisterHomeController::class)
 class RegisterHomeControllerTests(
-    @Autowired webContext: WebApplicationContext,
+    @Autowired val webContext: WebApplicationContext,
 ) : FrontendTest(webContext) {
     @Test
-    fun layoutTest() {
+    fun `register a home to rent page renders`() {
         driver.get("http://localhost:8080/registration")
         val header = driver.findElement(By.tagName("h1"))
         assertThat(header.text).isEqualTo("Register a home to rent")
