@@ -9,11 +9,11 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsd.webapp.controllers.CustomErrorController
 
 @WebMvcTest(CustomErrorController::class)
-class PageNotFoundTests(
+class ErrorPageTests(
     @Autowired val webContext: WebApplicationContext,
 ) : FrontendTest(webContext) {
     @Test
-    fun `404 page renders when error controller path called`() {
+    fun `500 page renders when error controller path called`() {
         driver.get("http://localhost:8080/error")
         val header = driver.findElement(By.tagName("h1"))
         assertThat(header.text).isEqualTo("Sorry, there is a problem with the service")
