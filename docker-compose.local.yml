@@ -9,3 +9,10 @@ services:
       - POSTGRES_PASSWORD=notarealpassword
       - POSTGRES_USER=postgres
       - POSTGRES_DB=prsdlocal
+  redis:
+    image: redis:7.4-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_ARGS="--requirepass notarealpassword"
