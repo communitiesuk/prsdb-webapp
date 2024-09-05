@@ -14,5 +14,4 @@ services:
     restart: always
     ports:
       - "6379:6379"
-    environment:
-      - REDIS_ARGS="--requirepass notarealpassword"
+    command: /bin/sh -c "redis-server --requirepass notarealpassword"

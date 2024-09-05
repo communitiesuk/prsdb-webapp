@@ -23,6 +23,12 @@ spring:
       mode: always
       platform: local
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: notarealpassword
+
 server:
   error:
     path: /error
