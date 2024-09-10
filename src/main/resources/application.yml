@@ -5,3 +5,8 @@ spring:
 server:
   error:
     path: /error
+
+one-login:
+  jwt:
+    public.key: classpath:public_key.pem
+    private.key: classpath:private_key.pem

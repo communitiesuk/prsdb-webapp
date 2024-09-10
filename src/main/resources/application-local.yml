@@ -29,6 +29,24 @@ spring:
       port: 6379
       password: notarealpassword
 
+  security:
+    oauth2:
+      client:
+        registration:
+          one-login:
+            client-id: l0AE7SbEHrEa8QeQCGdml9KQ4bk
+            client-authentication-method: private_key_jwt
+            authorization-grant-type: authorization_code
+            scope: openid
+        provider:
+          one-login:
+            issuer-uri: https://oidc.integration.account.gov.uk/
+
+one-login:
+  jwt:
+    public.key: classpath:public_key.pem
+    private.key: classpath:private_key.pem
+
 server:
   error:
     path: /error
