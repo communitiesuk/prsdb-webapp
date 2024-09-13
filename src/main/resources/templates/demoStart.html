@@ -1,0 +1,7 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(${title}, ${serviceName}, ~{::main})}">
+<main class="govuk-main-wrapper" id="main-content">
+    <h1 class="govuk-heading-xl" th:text="${contentHeader}">Default page template</h1>
+    <div th:replace="~{fragments/button :: button( ${startButtonHref}, ${startButtonText} )}"></div>
+</main>
+</html>

@@ -5,6 +5,8 @@ import com.nimbusds.jose.jwk.RSAKey
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.security.config.Customizer
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient
 import org.springframework.security.oauth2.client.endpoint.NimbusJwtClientAuthenticationParametersConverter
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequestEntityConverter
@@ -13,6 +15,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm
 import org.springframework.security.oauth2.jwt.JwtDecoderFactory
+import org.springframework.security.web.SecurityFilterChain
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 import java.util.UUID
@@ -56,5 +59,20 @@ class OneLoginConfig {
         val idTokenDecoderFactory = OidcIdTokenDecoderFactory()
         idTokenDecoderFactory.setJwsAlgorithmResolver { SignatureAlgorithm.ES256 }
         return idTokenDecoderFactory
+    }
+
+    @Bean
+    fun filterChain(http: HttpSecurity): SecurityFilterChain {
+        http
+            .authorizeHttpRequests { requests ->
+                requests
+                    .requestMatchers("/")
+                    .permitAll()
+                    .requestMatchers("/assets/**")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated()
+            }.oauth2Login(Customizer.withDefaults())
+        return http.build()
     }
 }

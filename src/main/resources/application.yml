@@ -2,11 +2,40 @@ spring:
   application:
     name: 'prsd-webapp'
 
+  datasource:
+    url: ${RDS_URL}
+    username: ${RDS_USERNAME}
+    password: ${RDS_PASSWORD}
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  data:
+    redis:
+      host: ${ELASTICACHE_URL}
+      port: ${ELASTICACHE_PORT}
+      password: ${ELASTICACHE_PASSWORD}
+
+  security:
+    oauth2:
+      client:
+        registration:
+          one-login:
+            client-id: ${ONE_LOGIN_CLIENT_ID}
+            client-authentication-method: private_key_jwt
+            authorization-grant-type: authorization_code
+            scope: openid
+        provider:
+          one-login:
+            issuer-uri: ${ONE_LOGIN_ISSUER_URL}
+
 server:
   error:
     path: /error
 
 one-login:
   jwt:
-    public.key: classpath:public_key.pem
-    private.key: classpath:private_key.pem
+    public.key: ${ONE_LOGIN_PUBLIC_KEY}
+    private.key: ${ONE_LOGIN_PRIVATE_KEY}

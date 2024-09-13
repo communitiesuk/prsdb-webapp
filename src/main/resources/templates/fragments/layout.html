@@ -15,7 +15,8 @@
           th:href="@{/assets/images/govuk-icon-180.png}">
     <link rel="manifest" href="/static/assets/manifest.json" th:href="@{/assets/manifest.json}"
           crossorigin="use-credentials">
-    <link rel="stylesheet" href="/static/govuk-frontend-5.5.0.min.css" th:href="@{/govuk-frontend-5.5.0.min.css}">
+    <link rel="stylesheet" href="/static/assets/css/govuk-frontend-5.5.0.min.css"
+          th:href="@{/assets/css/govuk-frontend-5.5.0.min.css}">
 </head>
 
 <body class="govuk-template__body">
@@ -28,11 +29,12 @@
     <div th:replace="${content}"></div>
 </div>
 <div th:replace="~{ fragments/footer :: footer }"></div>
-<script type="module" src="/static/govuk-frontend-5.5.0.min.js" th:src="@{/govuk-frontend-5.5.0.min.js}"></script>
+<script type="module" src="/static/assets/js/govuk-frontend-5.5.0.min.js"
+        th:src="@{/assets/js/govuk-frontend-5.5.0.min.js}"></script>
 <script type="module">
     import {
         initAll
-    } from '/govuk-frontend-5.5.0.min.js'
+    } from '/assets/js/govuk-frontend-5.5.0.min.js'
 
     initAll()
 </script>
