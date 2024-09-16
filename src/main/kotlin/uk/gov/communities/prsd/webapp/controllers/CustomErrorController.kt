@@ -28,6 +28,11 @@ class CustomErrorController : ErrorController {
                 model.addAttribute("title", "Page not found - $SERVICE_NAME - GOV.UK")
                 return "error/404"
             }
+            if (statusCode == HttpStatus.FORBIDDEN.value()) {
+                model.addAttribute("contentHeader", "Access denied")
+                model.addAttribute("title", "Access denied - $SERVICE_NAME - GOV.UK")
+                return "error/403"
+            }
         }
         model.addAttribute(
             "contentHeader",

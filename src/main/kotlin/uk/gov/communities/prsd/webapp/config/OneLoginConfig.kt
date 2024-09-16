@@ -78,6 +78,8 @@ class OneLoginConfig {
                     .permitAll()
                     .requestMatchers("/assets/**")
                     .permitAll()
+                    .requestMatchers("/registration/**")
+                    .hasRole("LANDLORD")
                     .anyRequest()
                     .authenticated()
             }.oauth2Login(Customizer.withDefaults())
