@@ -7,7 +7,7 @@ import jakarta.persistence.Id
 @Entity
 class OneLoginUser : AuditableEntity() {
     @Id
-    private val id: Long? = null
+    private val id: String? = null
 
     @Column(nullable = false)
     var name: String? = null
