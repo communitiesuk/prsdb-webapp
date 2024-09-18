@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsd.webapp.controllers.CustomErrorController
 
+// TODO: Replace with Playwright tests
 @WebMvcTest(CustomErrorController::class)
 class ErrorPageTests(
     @Autowired val webContext: WebApplicationContext,

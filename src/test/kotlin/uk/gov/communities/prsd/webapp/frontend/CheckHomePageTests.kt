@@ -6,16 +6,17 @@ import org.openqa.selenium.By
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.web.context.WebApplicationContext
-import uk.gov.communities.prsd.webapp.controllers.SearchRegisterController
+import uk.gov.communities.prsd.webapp.controllers.CheckHomeController
 
-@WebMvcTest(SearchRegisterController::class)
-class SearchRegisterControllerTests(
-    @Autowired webContext: WebApplicationContext,
+// TODO: Replace with Playwright tests
+@WebMvcTest(CheckHomeController::class)
+class CheckHomePageTests(
+    @Autowired val webContext: WebApplicationContext,
 ) : FrontendTest(webContext) {
     @Test
-    fun `search for private rented sector information page renders`() {
-        driver.get("http://localhost:8080/search")
+    fun `check a home for rent page renders`() {
+        driver.get("http://localhost:8080/check")
         val header = driver.findElement(By.tagName("h1"))
-        assertThat(header.text).isEqualTo("Search for Private Rented Sector information")
+        assertThat(header.text).isEqualTo("Check a home to rent")
     }
 }
