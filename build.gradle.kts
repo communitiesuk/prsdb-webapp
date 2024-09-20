@@ -8,7 +8,7 @@ plugins {
     id("org.flywaydb.flyway") version "10.18.0"
 }
 
-group = "uk.gov.communities.prsd"
+group = "uk.gov.communities.prsdb"
 version = "0.0.1-SNAPSHOT"
 
 java {

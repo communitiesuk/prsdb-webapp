@@ -1,6 +1,6 @@
 spring:
   application:
-    name: 'prsd-webapp'
+    name: 'prsdb-webapp'
 
   datasource:
     url: ${RDS_URL}

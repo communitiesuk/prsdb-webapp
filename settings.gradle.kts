@@ -1,1 +1,1 @@
-rootProject.name = "prsd-webapp"
+rootProject.name = "prsdb-webapp"

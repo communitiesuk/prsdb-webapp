@@ -1,12 +1,12 @@
 spring:
   application:
-    name: 'prsd-webapp'
+    name: 'prsdb-webapp'
 
   thymeleaf:
     cache: false
 
   datasource:
-    url: jdbc:postgresql://localhost:5433/prsdlocal
+    url: jdbc:postgresql://localhost:5433/prsdblocal
     username: postgres
     password: notarealpassword
 

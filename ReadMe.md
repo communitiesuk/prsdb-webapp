@@ -1,11 +1,12 @@
 # Private Rental Sector Database - Web App
 
-This is the web app code for the Private Rental Sector Database (PRSD).
+This is the web app code for the Private Rental Sector Database (PRSDB).
 
 ## Development
 
-The prsd-webapp is a Spring Boot application written in Kotlin. The following should allow you to get started developing
-functionality for prsd-webapp.
+The prsdb-webapp is a Spring Boot application written in Kotlin. The following should allow you to get started
+developing
+functionality for prsdb-webapp.
 
 ### Dependencies
 
