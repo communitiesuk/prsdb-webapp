@@ -8,9 +8,14 @@ spring:
     password: ${RDS_PASSWORD}
 
   jpa:
+    hibernate:
+      ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  flyway:
+    enabled: false
 
   data:
     redis:
@@ -31,11 +36,11 @@ spring:
           one-login:
             issuer-uri: ${ONE_LOGIN_ISSUER_URL}
 
-server:
-  error:
-    path: /error
-
 one-login:
   jwt:
     public.key: ${ONE_LOGIN_PUBLIC_KEY}
     private.key: ${ONE_LOGIN_PRIVATE_KEY}
+
+server:
+  error:
+    path: /error

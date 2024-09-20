@@ -10,14 +10,19 @@ spring:
     username: postgres
     password: notarealpassword
 
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    properties:
+    jpa:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-    defer-datasource-initialization: true
-    show-sql: true
+        ddl-auto: validate
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.PostgreSQLDialect
+      defer-datasource-initialization: true
+      show-sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migrations
+    validate-on-migrate: true
 
   sql:
     init:
