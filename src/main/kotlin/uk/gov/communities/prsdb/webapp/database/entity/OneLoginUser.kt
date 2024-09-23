@@ -10,10 +10,10 @@ class OneLoginUser : AuditableEntity() {
     private val id: String? = null
 
     @Column(nullable = false)
-    var name: String? = null
+    lateinit var name: String
         private set
 
     @Column(nullable = false)
-    var email: String? = null
+    lateinit var email: String
         private set
 }

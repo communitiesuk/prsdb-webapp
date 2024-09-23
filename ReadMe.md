@@ -29,6 +29,10 @@ installing the pre-commit hook by running the `addKtlintCheckGitPreCommitHook` t
 There are also some local secrets that will need to be set up if you need to test integrations with other services when
 running the project locally. Ask the team lead where these can be found.
 
+When running your build against the integration environment of Gov.UK One Login you will be prompted for credentials to
+access the integration environment, these can be found in the One Login technical documentation
+here: https://docs.sign-in.service.gov.uk/before-integrating/register-and-manage-your-service/#register-and-manage-your-service
+
 ### Testing
 
 The project uses a combination of unit tests and integration tests. The integration tests use a testcontainer to run a

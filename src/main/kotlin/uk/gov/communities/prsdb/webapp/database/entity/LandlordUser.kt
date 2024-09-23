@@ -17,14 +17,15 @@ class LandlordUser : AuditableEntity() {
     private val id: Long? = null
 
     @Column(nullable = false)
-    var phoneNumber: String? = null
+    lateinit var phoneNumber: String
         private set
 
     @Column(nullable = false)
-    var dateOfBirth: Date? = null
+    lateinit var dateOfBirth: Date
         private set
 
     @OneToOne(optional = false)
     @JoinColumn(name = "subject_identifier", nullable = false, foreignKey = ForeignKey(name = "FK_LANDLORD_1L_USER"))
-    var baseUser: OneLoginUser? = null
+    lateinit var baseUser: OneLoginUser
+        private set
 }
