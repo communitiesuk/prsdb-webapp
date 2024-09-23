@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.config
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.Customizer
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -16,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import kotlin.collections.HashSet
 
 @Configuration
+@EnableMethodSecurity
 class CustomSecurityConfig {
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
@@ -26,12 +28,10 @@ class CustomSecurityConfig {
                     .permitAll()
                     .requestMatchers("/assets/**")
                     .permitAll()
+                    .requestMatchers("/error/**")
+                    .permitAll()
                     .requestMatchers("/check/**")
                     .permitAll()
-                    .requestMatchers("/registration/**")
-                    .hasRole("LANDLORD")
-                    .requestMatchers("/search/**")
-                    .hasAnyRole("LA_USER", "LA_ADMIN")
                     .anyRequest()
                     .authenticated()
             }.oauth2Login(Customizer.withDefaults())
