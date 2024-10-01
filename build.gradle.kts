@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
@@ -75,6 +77,21 @@ kotlin {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+val frontendAssetsSpec: CopySpec =
+    copySpec {
+        from("dist")
+        include("**/*")
+    }
+
+tasks.register<Copy>("copyBuiltAssets") {
+    into(layout.buildDirectory.dir("resources/main/static/assets"))
+    with(frontendAssetsSpec)
+}
+
+tasks.withType<KotlinCompile> {
+    dependsOn("copyBuiltAssets")
 }
 
 buildscript {

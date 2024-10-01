@@ -64,6 +64,10 @@ included in any deployed builds.
 The project uses the Thymeleaf templating engine, combined with the Gov.UK design system. The top-level templates can be
 found in `src/main/resources/templates`, and reusable fragments can be found in the `fragments` subfolder.
 
+Static assets should be added to the `src/main/resources/assets` folder. These will be copied into
+the `src/main/resources/static/assets` folder at build time. Assets should not be added to the `static/assets` folder
+directly as this is excluded from source control.
+
 ### Database migrations
 
 The project uses Flyway to manage migrations. To add a migration, create a new SQL file

@@ -41,3 +41,9 @@ out/
 
 ### Secrets ###
 *.pem
+
+### Node ###
+/node_modules
+
+### Built assets ###
+/dist
