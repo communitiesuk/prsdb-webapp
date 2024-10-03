@@ -28,6 +28,7 @@ spring:
     init:
       mode: always
       platform: local
+      continue-on-error: true
 
   data:
     redis:
