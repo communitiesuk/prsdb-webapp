@@ -15,7 +15,6 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.web.SecurityFilterChain
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
-import kotlin.collections.HashSet
 
 @Configuration
 class CustomSecurityConfig {
@@ -31,6 +30,8 @@ class CustomSecurityConfig {
                     .requestMatchers("/error/**")
                     .permitAll()
                     .requestMatchers("/check/**")
+                    .permitAll()
+                    .requestMatchers("/register-as-a-landlord")
                     .permitAll()
                     .anyRequest()
                     .authenticated()
