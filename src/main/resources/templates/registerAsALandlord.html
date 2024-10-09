@@ -2,7 +2,7 @@
 <html th:replace="~{fragments/layout :: layout(${title}, ${serviceName}, ~{::main})}">
 <main class="govuk-main-wrapper" id="main-content">
     <header>
-        <h1 class="govuk-heading-xl" th:text="#{registerAsALandlord.heading}">Private Rented Sector Database</h1>
+        <h1 class="govuk-heading-xl" th:text="#{registerAsALandlord.heading}">registerAsALandlord.heading</h1>
         <p class="govuk-body" th:text="#{registerAsALandlord.intro}">This service holds information about private
             landlords and their rented properties. Private landlords in England are legally required to use this
             service.</p>
@@ -34,7 +34,8 @@
     <section>
         <h2 class="govuk-heading-l" th:text="#{registerAsALandlord.access.heading}">Access the Private Rented Sector
             Database</h2>
-        <p class="govuk-body" th:text="#{registerAsALandlord.access.body}">You'll be asked to sign in using GOV UK One
+        <p class="govuk-body" th:text="#{registerAsALandlord.access.paragraph}">You'll be asked to sign in using GOV UK
+            One
             Login and then you can sign in or register for the service.</p>
         <a th:replace="~{fragments/startButton :: button( '/registration', 'Start Now' )}"></a>
     </section>
@@ -42,68 +43,75 @@
         <h2 class="govuk-heading-l" th:text="#{registerAsALandlord.responsibility.heading}">Your responsibility to
             register</h2>
         <p class="govuk-body">
-            <span th:text="#{registerAsALandlord.responsibility.body.one.beforeLink}">Landlords who let under an</span>
-            <a class="govuk-link" th:text="#{registerAsALandlord.responsibility.body.one.link}" href=#>assured or
+            <span th:text="#{registerAsALandlord.responsibility.paragraph.one.beforeLink}">Landlords who let under an</span>
+            <a class="govuk-link" th:text="#{registerAsALandlord.responsibility.paragraph.one.link}" href=#>assured or
                 regulated tenancy</a>
-            <span th:text="#{registerAsALandlord.responsibility.body.one.afterLink}">in England must register for this service.</span>
+            <span th:text="#{registerAsALandlord.responsibility.paragraph.one.afterLink}">in England must register for this service.</span>
         </p>
         <p class="govuk-body">
-            <span th:text="#{registerAsALandlord.responsibility.body.two.beforeLink}">Understand your responsibility to register in the</span>
-            <a class="govuk-link" th:text="#{registerAsALandlord.responsibility.body.two.link}" href=#>Guide to the
+            <span th:text="#{registerAsALandlord.responsibility.paragraph.two.beforeLink}">Understand your responsibility to register in the</span>
+            <a class="govuk-link" th:text="#{registerAsALandlord.responsibility.paragraph.two.link}" href=#>Guide to the
                 Renters' Rights Bill</a>
-            <span th:text="#{registerAsALandlord.responsibility.body.two.afterLink}">.</span>
+            <span th:text="#{registerAsALandlord.responsibility.paragraph.two.afterLink}">.</span>
         </p>
-        <p class="govuk-body" th:text="#{registerAsALandlord.responsibility.body.three}">When registering, you must
+        <p class="govuk-body" th:text="#{registerAsALandlord.responsibility.paragraph.three}">When registering, you must
             provide accurate and up to date information about:</p>
         <ul class="govuk-list govuk-list--bullet">
-            <li th:text="#{registerAsALandlord.responsibility.body.bullet.one}">yourself</li>
-            <li th:text="#{registerAsALandlord.responsibility.body.bullet.two}">a landlord can assign you properties to
+            <li th:text="#{registerAsALandlord.responsibility.paragraph.three.bullet.one}">yourself</li>
+            <li th:text="#{registerAsALandlord.responsibility.paragraph.three.bullet.two}">a landlord can assign you
+                properties to
                 manage
             </li>
-            <li th:text="#{registerAsALandlord.responsibility.body.bullet.three}">joint owners or interested parties
+            <li th:text="#{registerAsALandlord.responsibility.paragraph.three.bullet.three}">joint owners or interested
+                parties
             </li>
         </ul>
-        <p class="govuk-body" th:text="#{registerAsALandlord.responsibility.body.four}">You'll be asked to pay a
+        <p class="govuk-body" th:text="#{registerAsALandlord.responsibility.paragraph.four}">You'll be asked to pay a
             specific amount for each property your register.</p>
-        <p class="govuk-body" th:text="#{registerAsALandlord.responsibility.body.five}">You should renew your details
+        <p class="govuk-body" th:text="#{registerAsALandlord.responsibility.paragraph.five}">You should renew your
+            details
             every 3 years.</p>
     </section>
     <section>
         <h2 class="govuk-heading-l" th:text="#{registerAsALandlord.how.heading}">How to register</h2>
-        <p class="govuk-body" th:text="#{registerAsALandlord.how.body}">You can register:</p>
+        <p class="govuk-body" th:text="#{registerAsALandlord.how.paragraph}">You can register:</p>
         <ul class="govuk-list govuk-list--bullet">
-            <li th:text="#{registerAsALandlord.how.body.bullet.one}">online using this page</li>
-            <li th:text="#{registerAsALandlord.how.body.bullet.two}">by telephone</li>
-            <li th:text="#{registerAsALandlord.how.body.bullet.three}">using a paper form
+            <li th:text="#{registerAsALandlord.how.bullet.one}">online using this page</li>
+            <li th:text="#{registerAsALandlord.how.bullet.two}">by telephone</li>
+            <li th:text="#{registerAsALandlord.how.bullet.three}">using a paper form
             </li>
         </ul>
     </section>
     <section>
         <h2 class="govuk-heading-l" th:text="#{registerAsALandlord.byPhone.heading}">Register by phone</h2>
-        <p class="govuk-body" th:text="#{registerAsALandlord.byPhone.body.one}">If you need additional help to register,
+        <p class="govuk-body" th:text="#{registerAsALandlord.byPhone.paragraph.one}">If you need additional help to
+            register,
             you contact the helpline centres by calling:</p>
         <ul class="govuk-list govuk-list--bullet">
-            <li th:text="#{registerAsALandlord.byPhone.body.bullet.one}">Telephone: 0000 000 000</li>
-            <li th:text="#{registerAsALandlord.byPhone.body.bullet.two}">Telephone: +44 00 0000 0000 (if calling from
+            <li th:text="#{registerAsALandlord.byPhone.paragraph.one.bullet.one}">Telephone: 0000 000 000</li>
+            <li th:text="#{registerAsALandlord.byPhone.paragraph.one.bullet.two}">Telephone: +44 00 0000 0000 (if
+                calling from
                 outside the UK)
             </li>
         </ul>
-        <p class="govuk-body" th:text="#{registerAsALandlord.byPhone.body.two}">You can also contact the helpline and
+        <p class="govuk-body" th:text="#{registerAsALandlord.byPhone.paragraph.two}">You can also contact the helpline
+            and
             ask for a form.</p>
     </section>
     <section>
         <h2 class="govuk-heading-l" th:text="#{registerAsALandlord.byEmail.heading}">Register by email or post</h2>
         <p class="govuk-body">
-            <span th:text="#{registerAsALandlord.byEmail.body.one.beforeLink}">You can</span>
-            <a class="govuk-link" th:text="#{registerAsALandlord.byEmail.body.one.link}" href=#>download an application
+            <span th:text="#{registerAsALandlord.byEmail.paragraph.one.beforeLink}">You can</span>
+            <a class="govuk-link" th:text="#{registerAsALandlord.byEmail.paragraph.one.link}" href=#>download an
+                application
                 form
                 to register as a landlord</a>
-            <span th:text="#{registerAsALandlord.byEmail.body.one.afterLink}">.</span>
+            <span th:text="#{registerAsALandlord.byEmail.paragraph.one.afterLink}">.</span>
         </p>
         <p class="govuk-body">
-            <span th:text="#{registerAsALandlord.byEmail.body.two.beforeLink}">You can email the completed form to</span>
-            <a class="govuk-link" th:text="#{registerAsALandlord.byEmail.body.two.link}" href=#>landlordregistration@uk.gov.uk</a>
-            <span th:text="#{registerAsALandlord.byEmail.body.two.afterLink}">.</span>
+            <span th:text="#{registerAsALandlord.byEmail.paragraph.two.beforeLink}">You can email the completed form to</span>
+            <a class="govuk-link" th:text="#{registerAsALandlord.byEmail.paragraph.two.link}" href=#>landlordregistration@uk.gov.uk</a>
+            <span th:text="#{registerAsALandlord.byEmail.paragraph.two.afterLink}">.</span>
         </p>
     </section>
 </main>
