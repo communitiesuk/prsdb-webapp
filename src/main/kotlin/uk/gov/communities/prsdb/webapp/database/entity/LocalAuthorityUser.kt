@@ -16,12 +16,12 @@ class LocalAuthorityUser : AuditableEntity() {
     private val id: Long? = null
 
     @OneToOne(optional = false)
-    @JoinColumn(name = "subject_identifier", nullable = false, foreignKey = ForeignKey(name = "FK_LANDLORD_1L_USER"))
+    @JoinColumn(name = "subject_identifier", nullable = false, foreignKey = ForeignKey(name = "FK_LA_USER_1L_USER"))
     lateinit var baseUser: OneLoginUser
         private set
 
     @Column(nullable = false)
-    var isManager: Boolean? = null
+    var isManager: Boolean = false
         private set
 
     @OneToOne(optional = false)

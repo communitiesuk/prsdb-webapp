@@ -33,7 +33,6 @@ CREATE TABLE local_authority
     created_date       TIMESTAMPTZ(6),
     last_modified_date TIMESTAMPTZ(6),
     name               VARCHAR(255),
-    custodian_code     VARCHAR(255),
     PRIMARY KEY (id)
 );
 ALTER TABLE IF EXISTS landlord_user
@@ -41,4 +40,4 @@ ALTER TABLE IF EXISTS landlord_user
 ALTER TABLE IF EXISTS local_authority_user
     ADD CONSTRAINT FK_LA_USER_LA FOREIGN KEY (local_authority_id) REFERENCES local_authority;
 ALTER TABLE IF EXISTS local_authority_user
-    ADD CONSTRAINT FK_LANDLORD_1L_USER FOREIGN KEY (subject_identifier) REFERENCES one_login_user;
+    ADD CONSTRAINT FK_LA_USER_1L_USER FOREIGN KEY (subject_identifier) REFERENCES one_login_user;

@@ -7,8 +7,8 @@ INSERT INTO landlord_user (subject_identifier, phone_number, date_of_birth, crea
 VALUES ('urn:fdc:gov.uk:2022:ABCDE', '07712345678', '01/01/00', '09/13/24', '09/13/24'),
        ('urn:fdc:gov.uk:2022:FGHIJ', '07811111111', '11/23/98', '09/13/24', '09/13/24');
 
-INSERT INTO local_authority (name, custodian_code, created_date, last_modified_date)
-VALUES ('Betelgeuse','42','09/13/24', '09/13/24');
+INSERT INTO local_authority (name, created_date, last_modified_date)
+VALUES ('Betelgeuse','09/13/24', '09/13/24');
 
 INSERT INTO local_authority_user (subject_identifier, is_manager, local_authority_id, created_date, last_modified_date)
 VALUES ('urn:fdc:gov.uk:2022:KLMNO',true, 1,'10/07/24', '10/07/24')

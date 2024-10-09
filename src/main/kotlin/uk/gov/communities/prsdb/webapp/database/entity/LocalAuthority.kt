@@ -15,8 +15,4 @@ class LocalAuthority : AuditableEntity() {
     @Column(nullable = false)
     lateinit var name: String
         private set
-
-    @Column(nullable = false)
-    lateinit var custodianCode: String
-        private set
 }
