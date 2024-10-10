@@ -62,10 +62,10 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("net.sourceforge.htmlunit:htmlunit")
-    testImplementation("org.seleniumhq.selenium:htmlunit-driver")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("com.microsoft.playwright:playwright:1.47.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -92,6 +92,11 @@ tasks.register<Copy>("copyBuiltAssets") {
 
 tasks.withType<KotlinCompile> {
     dependsOn("copyBuiltAssets")
+}
+
+tasks.register<JavaExec>("playwright") {
+    classpath(sourceSets["test"].runtimeClasspath)
+    mainClass.set("com.microsoft.playwright.CLI")
 }
 
 buildscript {
