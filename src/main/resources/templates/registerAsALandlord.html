@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(${title}, ${serviceName}, ~{::main})}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
+        <div id="page-content">
+            <header>
+                <h1 class="govuk-heading-l" th:text="#{registerAsALandlord.heading}">registerAsALandlord.heading</h1>
+                <p class="govuk-body" th:text="#{registerAsALandlord.intro}">registerAsALandlord.intro</p>
+            </header>
+            <section>
+                <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.whoCanAccess.heading}">
+                    registerAsALandlord.whoCanAccess.heading
+                </h2>
+                <span class="govuk-body"><b th:text="#{registerAsALandlord.whoCanAccess.landlord.heading}">
+                    registerAsALandlord.whoCanAccess.landlord.heading
+                </b></span>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{registerAsALandlord.whoCanAccess.landlord.bullet}">
+                        registerAsALandlord.whoCanAccess.landlord.bullet
+                    </li>
+                </ul>
+                <span class="govuk-body"><b th:text="#{registerAsALandlord.whoCanAccess.onBehalf.heading}">
+                        registerAsALandlord.whoCanAccess.onBehalf.heading
+                </b></span>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{registerAsALandlord.whoCanAccess.onBehalf.bullet.one}">
+                        registerAsALandlord.whoCanAccess.onBehalf.bullet.one
+                    </li>
+                    <li th:text="#{registerAsALandlord.whoCanAccess.onBehalf.bullet.two}">
+                        registerAsALandlord.whoCanAccess.onBehalf.bullet.two
+                    </li>
+                </ul>
+            </section>
+            <section>
+                <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.access.heading}">
+                    registerAsALandlord.access.heading
+                </h2>
+                <p class="govuk-body" th:text="#{registerAsALandlord.access.paragraph}">
+                    registerAsALandlord.access.paragraph
+                </p>
+                <a th:replace="~{fragments/startButton :: button( '/registration', 'Start Now' )}"></a>
+            </section>
+            <section>
+                <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.responsibility.heading}">
+                    registerAsALandlord.responsibility.heading
+                </h2>
+                <p class="govuk-body">
+                    <span th:text="#{registerAsALandlord.responsibility.paragraph.one.beforeLink}">
+                        registerAsALandlord.responsibility.paragraph.one.beforeLink
+                    </span>
+                    <a class="govuk-link" th:text="#{registerAsALandlord.responsibility.paragraph.one.link}" href=#>
+                        registerAsALandlord.responsibility.paragraph.one.link
+                    </a>
+                    <span th:text="#{registerAsALandlord.responsibility.paragraph.one.afterLink}">
+                        registerAsALandlord.responsibility.paragraph.one.afterLink
+                    </span>
+                </p>
+                <p class="govuk-body">
+                    <span th:text="#{registerAsALandlord.responsibility.paragraph.two.beforeLink}">
+                        registerAsALandlord.responsibility.paragraph.two.beforeLink
+                    </span>
+                    <a class="govuk-link" th:text="#{registerAsALandlord.responsibility.paragraph.two.link}" href=#>
+                        registerAsALandlord.responsibility.paragraph.two.link
+                    </a>
+                    <span th:text="#{registerAsALandlord.responsibility.paragraph.two.afterLink}">
+                        registerAsALandlord.responsibility.paragraph.two.afterLink
+                    </span>
+                </p>
+                <p class="govuk-body" th:text="#{registerAsALandlord.responsibility.paragraph.three}">
+                    registerAsALandlord.responsibility.paragraph.three
+                </p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{registerAsALandlord.responsibility.paragraph.three.bullet.one}">
+                        registerAsALandlord.responsibility.paragraph.three.bullet.one
+                    </li>
+                    <li th:text="#{registerAsALandlord.responsibility.paragraph.three.bullet.two}">
+                        registerAsALandlord.responsibility.paragraph.three.bullet.two
+                    </li>
+                    <li th:text="#{registerAsALandlord.responsibility.paragraph.three.bullet.three}">
+                        registerAsALandlord.responsibility.paragraph.three.bullet.three
+                    </li>
+                </ul>
+                <p class="govuk-body" th:text="#{registerAsALandlord.responsibility.paragraph.four}">
+                    registerAsALandlord.responsibility.paragraph.four
+                </p>
+                <p class="govuk-body" th:text="#{registerAsALandlord.responsibility.paragraph.five}">
+                    registerAsALandlord.responsibility.paragraph.five
+                </p>
+            </section>
+            <section>
+                <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.how.heading}">
+                    registerAsALandlord.how.heading
+                </h2>
+                <p class="govuk-body" th:text="#{registerAsALandlord.how.paragraph}">
+                    registerAsALandlord.how.paragraph
+                </p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{registerAsALandlord.how.bullet.one}">registerAsALandlord.how.bullet.one</li>
+                    <li th:text="#{registerAsALandlord.how.bullet.two}">registerAsALandlord.how.bullet.two</li>
+                    <li th:text="#{registerAsALandlord.how.bullet.three}">registerAsALandlord.how.bullet.three</li>
+                </ul>
+            </section>
+            <section>
+                <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.byPhone.heading}">
+                    registerAsALandlord.byPhone.heading
+                </h2>
+                <p class="govuk-body" th:text="#{registerAsALandlord.byPhone.paragraph.one}">
+                    registerAsALandlord.byPhone.paragraph.one
+                </p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{registerAsALandlord.byPhone.paragraph.one.bullet.one}">
+                        registerAsALandlord.byPhone.paragraph.one.bullet.one
+                    </li>
+                    <li th:text="#{registerAsALandlord.byPhone.paragraph.one.bullet.two}">
+                        registerAsALandlord.byPhone.paragraph.one.bullet.two
+                    </li>
+                </ul>
+                <p class="govuk-body" th:text="#{registerAsALandlord.byPhone.paragraph.two}">
+                    registerAsALandlord.byPhone.paragraph.two
+                </p>
+            </section>
+            <section>
+                <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.byEmail.heading}">
+                    registerAsALandlord.byEmail.heading
+                </h2>
+                <p class="govuk-body">
+                    <span th:text="#{registerAsALandlord.byEmail.paragraph.one.beforeLink}">
+                        registerAsALandlord.byEmail.paragraph.one.beforeLink
+                    </span>
+                    <a class="govuk-link" th:text="#{registerAsALandlord.byEmail.paragraph.one.link}" href=#>
+                        registerAsALandlord.byEmail.paragraph.one.link
+                    </a>
+                    <span th:text="#{registerAsALandlord.byEmail.paragraph.one.afterLink}">
+                        registerAsALandlord.byEmail.paragraph.one.afterLink
+                    </span>
+                </p>
+                <p class="govuk-body">
+                    <span th:text="#{registerAsALandlord.byEmail.paragraph.two.beforeLink}">
+                        registerAsALandlord.byEmail.paragraph.two.beforeLink
+                    </span>
+                    <a class="govuk-link" th:text="#{registerAsALandlord.byEmail.paragraph.two.link}" href=#>
+                        registerAsALandlord.byEmail.paragraph.two.link
+                    </a>
+                    <span th:text="#{registerAsALandlord.byEmail.paragraph.two.afterLink}">
+                        registerAsALandlord.byEmail.paragraph.two.afterLink
+                    </span>
+                </p>
+            </section>
+        </div>
+    </div>
+</main>
+</html>

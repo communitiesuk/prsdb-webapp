@@ -5,6 +5,7 @@ import jakarta.persistence.MappedSuperclass
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
 import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedDate
 import java.io.Serializable
 import java.time.OffsetDateTime
 
@@ -16,7 +17,7 @@ abstract class AuditableEntity : Serializable {
     lateinit var createdDate: OffsetDateTime
         private set
 
-    @CreatedDate
+    @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
     @Column(insertable = false)
     lateinit var lastModifiedDate: OffsetDateTime

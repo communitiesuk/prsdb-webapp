@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -14,10 +15,8 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.web.SecurityFilterChain
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
-import kotlin.collections.HashSet
 
 @Configuration
-@EnableMethodSecurity
 class CustomSecurityConfig {
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
@@ -31,6 +30,8 @@ class CustomSecurityConfig {
                     .requestMatchers("/error/**")
                     .permitAll()
                     .requestMatchers("/check/**")
+                    .permitAll()
+                    .requestMatchers("/register-as-a-landlord")
                     .permitAll()
                     .anyRequest()
                     .authenticated()
@@ -58,3 +59,8 @@ class CustomSecurityConfig {
         }
     }
 }
+
+@Configuration
+@EnableMethodSecurity
+@Profile("!INTEGRATION_TEST")
+class EnableMethodSecurityConfig
