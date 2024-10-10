@@ -2,15 +2,18 @@ INSERT INTO one_login_user (id, name, email, created_date, last_modified_date)
 VALUES ('urn:fdc:gov.uk:2022:ABCDE', 'Bob T Builder', 'bobthebuilder@gmail.com', '09/13/24', '09/13/24'),
        ('urn:fdc:gov.uk:2022:FGHIJ', 'Anne Other', 'Anne.Other@hotmail.com', '09/13/24', '09/13/24'),
        ('urn:fdc:gov.uk:2022:KLMNO', 'Ford Prefect', 'Ford.Prefect@hotmail.com', '10/07/24', '10/07/24'),
-       ('urn:fdc:gov.uk:2022:PQRST', 'Arthur Dent', 'Arthur.Dent@hotmail.com', '10/09/24', '10/09/24');
+       ('urn:fdc:gov.uk:2022:PQRST', 'Arthur Dent', 'Arthur.Dent@hotmail.com', '10/09/24', '10/09/24'),
+       ('urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', 'Jasmin Conterio', 'jasmin.conterio@softwire.com', '10/07/24', '10/07/24');
 
 INSERT INTO landlord_user (subject_identifier, phone_number, date_of_birth, created_date, last_modified_date)
 VALUES ('urn:fdc:gov.uk:2022:ABCDE', '07712345678', '01/01/00', '09/13/24', '09/13/24'),
-       ('urn:fdc:gov.uk:2022:FGHIJ', '07811111111', '11/23/98', '09/13/24', '09/13/24');
+       ('urn:fdc:gov.uk:2022:FGHIJ', '07811111111', '11/23/98', '09/13/24', '09/13/24'),
+       ('urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', '01223456789','02/01/00','10/09/24', '10/09/24');
 
 INSERT INTO local_authority (name, created_date, last_modified_date)
 VALUES ('Betelgeuse','09/13/24', '09/13/24');
 
 INSERT INTO local_authority_user (subject_identifier, is_manager, local_authority_id, created_date, last_modified_date)
 VALUES ('urn:fdc:gov.uk:2022:KLMNO',true, 1,'10/07/24', '10/07/24'),
-       ('urn:fdc:gov.uk:2022:PQRST',false, 1,'10/09/24', '10/09/24')
+       ('urn:fdc:gov.uk:2022:PQRST',false, 1,'10/09/24', '10/09/24'),
+       ('urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI',true,1,'10/09/24', '10/09/24');
