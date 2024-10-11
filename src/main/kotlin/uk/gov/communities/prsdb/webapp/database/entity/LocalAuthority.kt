@@ -7,7 +7,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 
 @Entity
-class LocalAuthority : AuditableEntity() {
+class LocalAuthority : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Int? = null

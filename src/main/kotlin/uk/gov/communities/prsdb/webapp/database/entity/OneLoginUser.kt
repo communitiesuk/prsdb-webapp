@@ -5,7 +5,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.Id
 
 @Entity
-class OneLoginUser : AuditableEntity() {
+class OneLoginUser : ModifiableAuditableEntity() {
     @Id
     private val id: String? = null
 

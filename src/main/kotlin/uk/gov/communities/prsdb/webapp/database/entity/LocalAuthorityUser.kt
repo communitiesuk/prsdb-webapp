@@ -10,7 +10,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
 
 @Entity
-class LocalAuthorityUser : AuditableEntity() {
+class LocalAuthorityUser : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Long? = null
