@@ -33,9 +33,15 @@ class CustomSecurityConfig {
                     .permitAll()
                     .requestMatchers("/register-as-a-landlord")
                     .permitAll()
+                    .requestMatchers("/one-login-local/**")
+                    .permitAll()
                     .anyRequest()
                     .authenticated()
             }.oauth2Login(Customizer.withDefaults())
+            .csrf { requests ->
+                requests.ignoringRequestMatchers("/one-login-local/**")
+            }
+
         return http.build()
     }
 
