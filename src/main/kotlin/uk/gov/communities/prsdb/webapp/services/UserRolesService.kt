@@ -9,11 +9,11 @@ class UserRolesService(
     val landlordRepository: LandlordUserRepository,
     val localAuthorityUserRepository: LocalAuthorityUserRepository,
 ) {
-    fun getRolesforSubjectId(subjectId: String): List<String> {
+    fun getRolesForSubjectId(subjectId: String): List<String> {
         val roles = mutableListOf<String>()
 
         val matchingLandlordUser = landlordRepository.findByBaseUser_Id(subjectId)
-        if (matchingLandlordUser.isNotEmpty()) {
+        if (matchingLandlordUser != null) {
             roles.add("ROLE_LANDLORD")
         }
 

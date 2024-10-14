@@ -48,7 +48,7 @@ class CustomSecurityConfig {
             val subjectId = oidcUser.subject
             val mappedAuthorities = HashSet<GrantedAuthority>()
             if (subjectId != null) {
-                val userRoles = userRolesService.getRolesforSubjectId(subjectId)
+                val userRoles = userRolesService.getRolesForSubjectId(subjectId)
                 mappedAuthorities.addAll(
                     userRoles.map { role ->
                         SimpleGrantedAuthority(role)
