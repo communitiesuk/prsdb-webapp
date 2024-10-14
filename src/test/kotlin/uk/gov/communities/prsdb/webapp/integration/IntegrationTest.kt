@@ -12,7 +12,9 @@ import org.springframework.security.oauth2.jwt.JwtDecoderFactory
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
+import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OneLoginConfig
+import uk.gov.service.notify.NotificationClient
 
 @Import(TestcontainersConfiguration::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -33,6 +35,12 @@ abstract class IntegrationTest {
 
     @MockBean
     lateinit var oneLoginConfig: OneLoginConfig
+
+    @MockBean
+    lateinit var notifyConfig: NotifyConfig
+
+    @MockBean
+    lateinit var notificationClient: NotificationClient
 
     @MockBean
     lateinit var securityFilterChain: SecurityFilterChain
