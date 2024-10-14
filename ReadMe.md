@@ -39,6 +39,8 @@ postgres database. This takes extra time to spin up, and spins up a clean contai
 for integration tests that need to interact with a real database - for other tests the relevant repository beans should
 be mocked instead.
 
+You can run the unit tests by running the `verification\test` task from the Gradle tab in Intellij.
+
 ### Code structure
 
 #### Backend
@@ -81,3 +83,34 @@ the `flywayMigrate` Gradle task. When developing locally using the `local` profi
 application start up. If you are using the `local` launch profile in IntelliJ, this will also run the `flywayClean` task
 before running the migrations. After the migrations have run Spring Boot will then run the SQL in `data-local.sql` to
 populate the database with seed data. 
+
+### One Login accounts
+When you run the app and try to view pages, you will be prompted to sign in or create a One Login account. 
+
+To view most pages, your account will need to have been added to the relevant database (e.g. LandlordUser, 
+LocalAuthorityUser) for you to be able to see the page. 
+
+For local dev, you can add your account by modifying the `data-local.sql` file. Insert an entry into the 
+`one_login_user` database with a subject_identifier matching your real one login id (see below).
+Then you can add entries to any other user database that you need access to (e.g. landlord_user, local_authority_user 
+with is_manager set to true to see local authority admin pages).
+
+#### Finding your One Login id
+One way to find your id is:
+* Inject the principle into somewhere like the start page (ExampleStartPageController.kt)
+```kotlin
+class ExampleStartPageController {
+    @GetMapping
+    fun index(
+        model: Model,
+        principal: Principal,
+    ): String {
+        // No need to change the contents
+    }
+}
+```
+* Run the app in debug mode, add a break point in your index function and load the page
+* When you hit the debug point, your one login id should be available in `principal.name`
+  (it should look like `urn:fdc:gov.uk:2022:string-of-characters`)
+
+If anyone knows a better way to do this please add it here!
