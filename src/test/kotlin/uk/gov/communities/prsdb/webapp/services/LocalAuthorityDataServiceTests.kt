@@ -20,23 +20,82 @@ class LocalAuthorityDataServiceTests {
         localAuthorityDataService = LocalAuthorityDataService(localAuthorityUsersRepository)
     }
 
+    fun createOneLoginUser(username: String): OneLoginUser {
+        val user = OneLoginUser()
+        ReflectionTestUtils.setField(user, "name", username)
+        ReflectionTestUtils.setField(user, "id", username.lowercase().replace(" ", "-"))
+        return user
+    }
+
+    fun createLocalAuthority(id: Int): LocalAuthority {
+        val localAuthority = LocalAuthority()
+        ReflectionTestUtils.setField(localAuthority, "id", id)
+
+        return localAuthority
+    }
+
+    fun createLocalAuthorityUser(
+        baseUser: OneLoginUser,
+        isManager: Boolean,
+        localAuthority: LocalAuthority,
+    ): LocalAuthorityUser {
+        val user = LocalAuthorityUser()
+        ReflectionTestUtils.setField(user, "baseUser", baseUser)
+        ReflectionTestUtils.setField(user, "isManager", isManager)
+        ReflectionTestUtils.setField(user, "localAuthority", localAuthority)
+
+        return user
+    }
+
     @Test
     fun `getLocalAuthorityUsersForLocalAuthority returns a populated list of LocalAuthorityUserDataModel`() {
         // Arrange
-        val baseUser1 = OneLoginUser()
-        val localAuthorityTest = LocalAuthority()
-        val localAuthorityUser1 = LocalAuthorityUser()
-        ReflectionTestUtils.setField(localAuthorityTest, "id", 123)
-        ReflectionTestUtils.setField(baseUser1, "name", "Test user 1")
-        ReflectionTestUtils.setField(localAuthorityUser1, "isManager", true)
-        ReflectionTestUtils.setField(localAuthorityUser1, "baseUser", baseUser1)
-        ReflectionTestUtils.setField(localAuthorityUser1, "localAuthority", localAuthorityTest)
-        Mockito.`when`(localAuthorityUsersRepository.findByLocalAuthority_Id(123)).thenReturn(listOf(localAuthorityUser1))
+        val localAuthorityId = 123
+        val localAuthorityTest = createLocalAuthority(localAuthorityId)
+        val baseUser1 = createOneLoginUser("Test user 1")
+        val baseUser2 = createOneLoginUser("Test user 2")
+        val localAuthorityUser1 = createLocalAuthorityUser(baseUser1, true, localAuthorityTest)
+        val localAuthorityUser2 = createLocalAuthorityUser(baseUser2, false, localAuthorityTest)
+        Mockito
+            .`when`(localAuthorityUsersRepository.findByLocalAuthority_Id(localAuthorityId))
+            .thenReturn(listOf(localAuthorityUser1, localAuthorityUser2))
 
         // Act
-        val laUserList = localAuthorityDataService.getLocalAuthorityUsersForLocalAuthority(123)
+        val laUserList = localAuthorityDataService.getLocalAuthorityUsersForLocalAuthority(localAuthorityId)
 
         // Assert
-        Assertions.assertEquals(1, laUserList.size)
+        Assertions.assertEquals(2, laUserList.size)
+        Assertions.assertEquals("Test user 1", laUserList[0].userName)
+        Assertions.assertEquals("Test user 2", laUserList[1].userName)
+        Assertions.assertEquals(true, laUserList[0].isManager)
+        Assertions.assertEquals(false, laUserList[1].isManager)
+    }
+
+    @Test
+    fun `getLocalAuthorityForUser returns local authority if it exists for the user`() {
+        // Arrange
+        val localAuthority = createLocalAuthority(123)
+        val baseUser = createOneLoginUser("Test user 1")
+        val localAuthorityUser = createLocalAuthorityUser(baseUser, false, localAuthority)
+        Mockito
+            .`when`(localAuthorityUsersRepository.findByBaseUser_Id("test-user-1"))
+            .thenReturn(localAuthorityUser)
+
+        // Act
+        val returnedLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser("test-user-1")
+
+        // Assert
+        Assertions.assertEquals(localAuthority, returnedLocalAuthority)
+    }
+
+    @Test
+    fun `getLocalAuthorityForUser returns null if user is not in a local authority`() {
+        // Arrange
+        Mockito
+            .`when`(localAuthorityUsersRepository.findByBaseUser_Id("test-user-1"))
+            .thenReturn(null)
+
+        // Act, Assert
+        Assertions.assertNull(localAuthorityDataService.getLocalAuthorityForUser("test-user-1"))
     }
 }
