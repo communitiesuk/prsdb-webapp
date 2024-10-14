@@ -8,7 +8,7 @@ import uk.gov.service.notify.NotificationClient
 
 class NotifyEmailNotificationServiceTests {
     private lateinit var notifyClient: NotificationClient
-    private lateinit var emailNotificationService: NotifyEmailNotificationService
+    private lateinit var emailNotificationService: NotifyEmailNotificationService<TestEmail>
 
     @BeforeEach
     fun setup() {
@@ -25,7 +25,7 @@ class NotifyEmailNotificationServiceTests {
         val recipientEmail = "an email address"
 
         // Act
-        emailNotificationService.sendTestEmail(recipientEmail, email)
+        emailNotificationService.sendEmail(recipientEmail, email)
 
         // Assert
         Mockito

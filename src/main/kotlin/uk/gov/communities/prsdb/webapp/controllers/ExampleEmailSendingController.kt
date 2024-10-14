@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.viewmodel.TestEmail
 
 @Controller
 class ExampleEmailSendingController(
-    var emailSender: EmailNotificationService,
+    var emailSender: EmailNotificationService<TestEmail>,
 ) {
     @GetMapping("/send-test-email")
     fun testEmailPage(model: Model): String {
@@ -29,7 +29,7 @@ class ExampleEmailSendingController(
         model: Model,
         body: Submission,
     ): String {
-        emailSender.sendTestEmail(body.emailAddress, TestEmail("Lucky Recipient"))
+        emailSender.sendEmail(body.emailAddress, TestEmail("Lucky Recipient"))
         model.addAttribute("contentHeader", "Your have sent a test email to ${body.emailAddress}")
         model.addAttribute("title", "Email sent")
         model.addAttribute("serviceName", SERVICE_NAME)
