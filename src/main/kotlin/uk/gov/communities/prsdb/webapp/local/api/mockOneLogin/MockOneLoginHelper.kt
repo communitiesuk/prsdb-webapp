@@ -1,23 +1,71 @@
-package uk.gov.communities.prsdb.webapp.local.api.oneLoginMock
+package uk.gov.communities.prsdb.webapp.local.api.mockOneLogin
 
-import org.springframework.context.annotation.Profile
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
-import java.net.URI
+import com.nimbusds.jose.Algorithm
+import com.nimbusds.jose.JOSEObjectType
+import com.nimbusds.jose.JWSAlgorithm
+import com.nimbusds.jose.JWSHeader
+import com.nimbusds.jose.crypto.ECDSASigner
+import com.nimbusds.jose.jwk.Curve
+import com.nimbusds.jose.jwk.ECKey
+import com.nimbusds.jose.jwk.KeyUse
+import com.nimbusds.jose.jwk.gen.ECKeyGenerator
+import com.nimbusds.jwt.JWTClaimsSet
+import com.nimbusds.jwt.SignedJWT
+import java.time.Instant
+import java.util.Date
 
-@Profile("local")
-@RestController
-@RequestMapping("/one-login-local")
-class MockOneLoginController(
-    private var jwtBuilder: JWTBuilder = JWTBuilder(),
-) {
-    @GetMapping("/.well-known/openid-configuration")
-    fun example(): String =
+class MockOneLoginHelper {
+    companion object {
+        val ecKey = generateSecretKey()
+
+        private fun generateSecretKey(): ECKey {
+            val ecKey =
+                ECKeyGenerator(Curve.P_256)
+                    .keyUse(KeyUse.SIGNATURE)
+                    .keyID("6a4bc1e3-9530-4d5b-90c5-10dcf3ffccd0")
+                    .algorithm(Algorithm("ES256"))
+                    .generate()
+
+            return ecKey
+        }
+    }
+
+    private val userId = "urn:fdc:gov.uk:2022:PQRST"
+    private val userEmail = "julia.jones@hotmail.com"
+    private val userNumber = "07123456789"
+
+    val authorizationCode = "SplxlOBeZQQYbYS6WxSbIA"
+
+    var lastReceivedNonce: String? = null
+
+    private fun getIdToken(): String {
+        val headerBuilder: JWSHeader.Builder =
+            JWSHeader
+                .Builder(JWSAlgorithm.ES256)
+                .type(JOSEObjectType.JWT)
+                .jwk(ecKey.toPublicJWK())
+
+        val claimSetBBuilder: JWTClaimsSet.Builder =
+            JWTClaimsSet
+                .Builder()
+                .subject(userId)
+                .audience("l0AE7SbEHrEa8QeQCGdml9KQ4bk")
+                .issuer("http://localhost:8080/one-login-local/")
+                .issueTime(Date())
+                .expirationTime(Date.from(Instant.now().plusSeconds(300)))
+                .claim("vot", "Cl.Cm")
+                .claim("nonce", lastReceivedNonce)
+                .claim("vtm", "http://localhost:8080/one-login-local/trustmark")
+                .claim("sid", "Nzk0M2NiNWUtYWZhNC00ZjZmLThiOTItNzUxNjcyNjUwOGNl")
+
+        val signedJwt = SignedJWT(headerBuilder.build(), claimSetBBuilder.build())
+
+        signedJwt.sign(ECDSASigner(ecKey))
+
+        return signedJwt.serialize()
+    }
+
+    fun getOpenidConfigurationResponse(): String =
         "{\n" +
             "\"authorization_endpoint\": \"http://localhost:8080/one-login-local/authorize\",\n" +
             "\"token_endpoint\": \"http://localhost:8080/one-login-local/token\",\n" +
@@ -90,8 +138,7 @@ class MockOneLoginController(
             "\"backchannel_logout_session_supported\": false\n" +
             "}\n"
 
-    @GetMapping("/.well-known/jwks.json")
-    fun jwksjson(): String =
+    fun getJwksJsonResponse(): String =
         "{\n" +
             "\"keys\": [\n" +
             "{\n" +
@@ -99,8 +146,8 @@ class MockOneLoginController(
             "\"use\": \"sig\",\n" +
             "\"crv\": \"P-256\",\n" +
             "\"kid\": \"6a4bc1e3-9530-4d5b-90c5-10dcf3ffccd0\",\n" +
-            "\"x\": \"${JWTBuilder.ecKey.toPublicJWK().x}\",\n" +
-            "\"y\": \"${JWTBuilder.ecKey.toPublicJWK().y}\",\n" +
+            "\"x\": \"${ecKey.toPublicJWK().x}\",\n" +
+            "\"y\": \"${ecKey.toPublicJWK().y}\",\n" +
             "\"alg\": \"ES256\"\n" +
             "},\n" +
             "{\n" +
@@ -124,33 +171,8 @@ class MockOneLoginController(
             "]\n" +
             "}"
 
-    @GetMapping("/authorize")
-    fun authorize(
-        @RequestParam response_type: String,
-        @RequestParam client_id: String,
-        @RequestParam scope: String,
-        @RequestParam state: String,
-        @RequestParam redirect_uri: String,
-        @RequestParam nonce: String,
-    ): ResponseEntity<Unit> {
-        LastReceivedNonce.nonce = nonce
-        val authorizationCode = "SplxlOBeZQQYbYS6WxSbIA"
-        val locationURI: URI = URI.create("$redirect_uri?code=$authorizationCode&state=$state")
-
-        return ResponseEntity.status(302).location(locationURI).build()
-    }
-
-    @PostMapping("/token")
-    fun token(
-        @RequestParam grant_type: String,
-        @RequestParam redirect_uri: String,
-        @RequestParam client_assertion: String,
-        @RequestParam client_assertion_type: String,
-        @RequestParam code: String,
-    ): ResponseEntity<String> {
-        // TODO data send to the jwtbuilder - subject: useridentifier, sid: session identifier
-
-        val idToken: String = jwtBuilder.getIdToken()
+    fun getTokenResponse(): String {
+        val idToken: String = getIdToken()
 
         val responseBody =
             "{\n" +
@@ -160,48 +182,15 @@ class MockOneLoginController(
                 "\"id_token\": \"$idToken\"\n" +
                 "}"
 
-        val responseBuild = ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(responseBody)
-
-        return responseBuild
+        return responseBody
     }
 
-    @GetMapping("/connect/register")
-    fun example4(): String = "Hello World"
-
-    @GetMapping("/trustmark")
-    fun example5(): String =
+    fun getUserInfoResponse(): String =
         "{\n" +
-            "\"idp\": \"http://localhost:8080//one-login-local/\",\n" +
-            "\"trustmark_provider\": \"http://localhost:8080//one-login-local/\",\n" +
-            "\"C\": [\n" +
-            "\"Cl\",\n" +
-            "\"Cl.Cm\"\n" +
-            "],\n" +
-            "\"P\": [\n" +
-            "\"P0\",\n" +
-            "\"PCL200\",\n" +
-            "\"PCL250\",\n" +
-            "\"P1\",\n" +
-            "\"P2\"\n" +
-            "]\n" +
+            "  \"sub\": \"$userId\",\n" +
+            "  \"email\": \"$userEmail\",\n" +
+            "  \"email_verified\": true,\n" +
+            "  \"phone_number\": \"$userNumber\",\n" +
+            "  \"phone_number_verified\": true\n" +
             "}"
-
-    @GetMapping("/logout")
-    fun example6(): String = "Hello World"
-
-    @GetMapping("/userinfo")
-    fun example7(): ResponseEntity<String> {
-        val responseBody =
-            "{\n" +
-                "  \"sub\": \"urn:fdc:gov.uk:2022:ABCDE\",\n" +
-                "  \"email\": \"test@example.com\",\n" +
-                "  \"email_verified\": true,\n" +
-                "  \"phone_number\": \"01406946277\",\n" +
-                "  \"phone_number_verified\": true\n" +
-                "}"
-
-        val responseBuild = ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(responseBody)
-
-        return responseBuild
-    }
 }
