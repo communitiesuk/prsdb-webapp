@@ -54,6 +54,9 @@ dependencies {
     // Templating
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 
+    // External service clients
+    implementation("uk.gov.service.notify:notifications-java-client:5.2.1-RELEASE")
+
     // Development
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 

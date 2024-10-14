@@ -41,6 +41,7 @@ out/
 
 ### Secrets ###
 *.pem
+*.env
 
 ### Node ###
 /node_modules
