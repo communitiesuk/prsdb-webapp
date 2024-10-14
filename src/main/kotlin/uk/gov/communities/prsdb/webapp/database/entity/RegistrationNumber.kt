@@ -14,7 +14,8 @@ class RegistrationNumber() : AuditableEntity() {
     private val id: Long? = null
 
     @Column(nullable = false, unique = true)
-    private var number: Long? = null
+    var number: Long? = null
+        private set
 
     @Column(nullable = false)
     lateinit var type: RegistrationNumberType
