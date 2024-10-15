@@ -13,6 +13,6 @@ class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
         email: EmailModel,
     ) {
         val emailParameters = email.toHashMap()
-        notificationClient.sendEmail(email.templateId, recipientAddress, emailParameters, null)
+        notificationClient.sendEmail(email.templateId.idValue, recipientAddress, emailParameters, null)
     }
 }

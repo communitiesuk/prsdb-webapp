@@ -32,6 +32,6 @@ class NotifyEmailNotificationServiceTests {
             .verify(
                 notifyClient,
                 Mockito.times(1),
-            ).sendEmail(email.templateId, recipientEmail, hashMapOf("first name" to email.firstName), null)
+            ).sendEmail(email.templateId.idValue, recipientEmail, hashMapOf("first name" to email.firstName), null)
     }
 }
