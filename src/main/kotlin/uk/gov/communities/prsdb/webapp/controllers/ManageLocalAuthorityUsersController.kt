@@ -23,9 +23,8 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
     ): String {
         val currentUserLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
-        currentUserLocalAuthority.id!!
 
-        val users = localAuthorityDataService.getLocalAuthorityUsersForLocalAuthority(currentUserLocalAuthority.id)
+        val users = localAuthorityDataService.getLocalAuthorityUsersForLocalAuthority(currentUserLocalAuthority)
         val usersJson = Json.encodeToString(users)
         model.addAttribute("usersJson", usersJson)
 

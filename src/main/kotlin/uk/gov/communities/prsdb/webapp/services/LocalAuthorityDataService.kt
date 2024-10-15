@@ -9,8 +9,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataM
 class LocalAuthorityDataService(
     val localAuthorityUserRepository: LocalAuthorityUserRepository,
 ) {
-    fun getLocalAuthorityUsersForLocalAuthority(localAuthorityId: Int): List<LocalAuthorityUserDataModel> {
-        val usersInThisLocalAuthority = localAuthorityUserRepository.findByLocalAuthority_Id(localAuthorityId)
+    fun getLocalAuthorityUsersForLocalAuthority(localAuthority: LocalAuthority): List<LocalAuthorityUserDataModel> {
+        val usersInThisLocalAuthority = localAuthorityUserRepository.findByLocalAuthority(localAuthority)
         return usersInThisLocalAuthority.map { LocalAuthorityUserDataModel(it.baseUser.name, it.isManager) }
     }
 

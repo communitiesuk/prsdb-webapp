@@ -57,11 +57,11 @@ class LocalAuthorityDataServiceTests {
         val localAuthorityUser1 = createLocalAuthorityUser(baseUser1, true, localAuthorityTest)
         val localAuthorityUser2 = createLocalAuthorityUser(baseUser2, false, localAuthorityTest)
         Mockito
-            .`when`(localAuthorityUsersRepository.findByLocalAuthority_Id(localAuthorityId))
+            .`when`(localAuthorityUsersRepository.findByLocalAuthority(localAuthorityTest))
             .thenReturn(listOf(localAuthorityUser1, localAuthorityUser2))
 
         // Act
-        val laUserList = localAuthorityDataService.getLocalAuthorityUsersForLocalAuthority(localAuthorityId)
+        val laUserList = localAuthorityDataService.getLocalAuthorityUsersForLocalAuthority(localAuthorityTest)
 
         // Assert
         Assertions.assertEquals(2, laUserList.size)
