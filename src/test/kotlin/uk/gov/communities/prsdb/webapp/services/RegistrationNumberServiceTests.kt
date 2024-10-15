@@ -9,6 +9,8 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import uk.gov.communities.prsdb.webapp.constants.MAX_REG_NUM
+import uk.gov.communities.prsdb.webapp.constants.MIN_REG_NUM
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.enums.RegistrationNumberType
@@ -43,13 +45,18 @@ class RegistrationNumberServiceTests : ServiceTest() {
 
     @Test
     fun `retrieveEntity retrieves a landlord given their registration number`() {
-        val decRegNum = 0L
-        val formattedRegNum = "L-CCCC-CCCC"
+        val decRegNum =
+            listOf(
+                MIN_REG_NUM,
+                MAX_REG_NUM,
+            )
+        val formattedRegNum = listOf("L-CCCC-CCCC", "L-9999-9999")
         val landlord = Landlord()
 
-        `when`(mockLandlordRepository.findByRegistrationNumberNumber(decRegNum)).thenReturn(landlord)
-
-        assertEquals(regNumService.retrieveEntity(formattedRegNum), landlord)
+        for (i in decRegNum.indices) {
+            `when`(mockLandlordRepository.findByRegistrationNumberNumber(decRegNum[i])).thenReturn(landlord)
+            assertEquals(regNumService.retrieveEntity(formattedRegNum[i]), landlord)
+        }
     }
 
     @Test
