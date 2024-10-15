@@ -55,6 +55,7 @@ class RegistrationNumberServiceTests : ServiceTest() {
 
         for (i in decRegNums.indices) {
             `when`(mockLandlordRepository.findByRegistrationNumberNumber(decRegNums[i])).thenReturn(landlord)
+
             assertEquals(regNumService.retrieveEntity(formattedRegNums[i]), landlord)
         }
     }
