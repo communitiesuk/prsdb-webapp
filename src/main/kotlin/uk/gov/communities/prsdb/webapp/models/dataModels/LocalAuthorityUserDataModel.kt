@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models
+package uk.gov.communities.prsdb.webapp.models.dataModels
 
 import kotlinx.serialization.Serializable
 

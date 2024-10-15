@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
-import uk.gov.communities.prsdb.webapp.models.LocalAuthorityUserDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 
 @Service
 class LocalAuthorityDataService(
