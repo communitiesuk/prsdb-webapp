@@ -5,7 +5,7 @@ data class TestEmail(
 ) : EmailTemplateModel {
     private val firstNameKey = "first name"
 
-    override val templateId = "71551da6-f616-45c7-a4e0-23d6a8434561"
+    override val templateId = EmailTemplateId.TEST_EMAIL
 
     override fun toHashMap(): HashMap<String, String> = hashMapOf(firstNameKey to firstName)
 }

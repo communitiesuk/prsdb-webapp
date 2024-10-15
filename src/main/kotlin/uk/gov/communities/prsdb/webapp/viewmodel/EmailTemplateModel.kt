@@ -1,7 +1,13 @@
 package uk.gov.communities.prsdb.webapp.viewmodel
 
 interface EmailTemplateModel {
-    val templateId: String
+    val templateId: EmailTemplateId
 
     fun toHashMap(): HashMap<String, String>
+}
+
+enum class EmailTemplateId(
+    val idValue: String,
+) {
+    TEST_EMAIL("71551da6-f616-45c7-a4e0-23d6a8434561"),
 }
