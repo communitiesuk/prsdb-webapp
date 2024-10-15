@@ -45,9 +45,14 @@ spring:
             client-authentication-method: private_key_jwt
             authorization-grant-type: authorization_code
             scope: openid
+            redirect-uri: http://localhost:8080/login/oauth2/code/one-login
         provider:
           one-login:
-            issuer-uri: https://oidc.integration.account.gov.uk/
+            authorization-uri: http://localhost:8080/one-login-local/authorize
+            token-uri: http://localhost:8080/one-login-local/token
+            jwk-set-uri: http://localhost:8080/one-login-local/.well-known/jwks.json
+            user-info-uri: http://localhost:8080//one-login-local/userinfo
+            userNameAttribute: "sub"
 
 one-login:
   jwt:
