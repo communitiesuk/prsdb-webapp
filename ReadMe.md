@@ -88,7 +88,10 @@ populate the database with seed data.
 When you run the app and try to view pages, you will be prompted to sign in or create a One Login account. 
 
 To view most pages, your account will need to have been added to the relevant database (e.g. LandlordUser, 
-LocalAuthorityUser) for you to be able to see the page. 
+LocalAuthorityUser) for you to be able to see the page. It checks the database on login (you can step through 
+`getRolesforSubjectId` in `UserRolesService` to test it), so you will need to log in again to see the change in 
+permissions (if logging out is not yet implemented, try running in an incognito tab so you are prompted to log in 
+again). 
 
 For local dev, you can add your account by modifying the `data-local.sql` file. Insert an entry into the 
 `one_login_user` database with a subject_identifier matching your real one login id (see below).
@@ -96,21 +99,13 @@ Then you can add entries to any other user database that you need access to (e.g
 with is_manager set to true to see local authority admin pages).
 
 #### Finding your One Login id
-One way to find your id is:
-* Inject the principle into somewhere like the start page (ExampleStartPageController.kt)
-```kotlin
-class ExampleStartPageController {
-    @GetMapping
-    fun index(
-        model: Model,
-        principal: Principal,
-    ): String {
-        // No need to change the contents
-    }
-}
-```
-* Run the app in debug mode, add a break point in your index function and load the page
-* When you hit the debug point, your one login id should be available in `principal.name`
+One way to find your id is to check the `subjectId` in `getRolesForSubjectId` in the `UserRolesService` while you are 
+logging in.
+
+* Run the app in debug mode, add a break point in `getRolesForSubjectId`
+* If you are already logged in it won't hit the breakpoint. Load the app in an incognito tab so that you are prompted 
+  to log in again.
+* When you hit the debug point, your one login id should be available in `subjectId`
   (it should look like `urn:fdc:gov.uk:2022:string-of-characters`)
 
 If anyone knows a better way to do this please add it here!
