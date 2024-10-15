@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels
 
-import uk.gov.communities.prsdb.webapp.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 
 data class FormContextDataModel(
     var id: Long,

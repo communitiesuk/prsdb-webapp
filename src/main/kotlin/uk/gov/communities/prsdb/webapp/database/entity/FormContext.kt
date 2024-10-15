@@ -8,7 +8,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
-import uk.gov.communities.prsdb.webapp.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 
 @Entity
 class FormContext : AuditableEntity() {
