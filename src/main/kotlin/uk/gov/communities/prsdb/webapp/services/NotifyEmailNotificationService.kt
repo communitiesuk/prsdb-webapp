@@ -1,18 +1,18 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.stereotype.Service
-import uk.gov.communities.prsdb.webapp.viewmodel.EmailTemplate
+import uk.gov.communities.prsdb.webapp.viewmodel.EmailTemplateModel
 import uk.gov.service.notify.NotificationClient
 
 @Service
-class NotifyEmailNotificationService<Template : EmailTemplate>(
+class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
     var notificationClient: NotificationClient,
-) : EmailNotificationService<Template> {
+) : EmailNotificationService<EmailModel> {
     override fun sendEmail(
         recipientAddress: String,
-        email: Template,
+        email: EmailModel,
     ) {
-        val emailParameters = email.asHashMap()
+        val emailParameters = email.toHashMap()
         notificationClient.sendEmail(email.templateId, recipientAddress, emailParameters, null)
     }
 }

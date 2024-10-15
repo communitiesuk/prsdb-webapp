@@ -17,7 +17,7 @@ class NotifyEmailNotificationServiceTests {
     }
 
     // This test currently tests that the test email hash map matches the corresponding template
-    // TODO: When bringing templates into source control, test each template creates a hash map that matches the Notify template
+    // TODO PRSD-364: When bringing templates into source control, test each template creates a hash map that matches the Notify template
     @Test
     fun `sendTestEmail sends a matching email using the notification client`() {
         // Arrange

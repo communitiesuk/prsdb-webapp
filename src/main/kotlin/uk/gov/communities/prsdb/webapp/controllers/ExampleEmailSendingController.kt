@@ -9,6 +9,9 @@ import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.viewmodel.TestEmail
 
+// TODO PRSD-404: Remove this controller once there is another way to reach the EmailNotificationService
+// This controller is an example controller to demo our integration with notify and should be removed once
+// there is an integration that belongs to an intended releasable feature.
 @Controller
 class ExampleEmailSendingController(
     var emailSender: EmailNotificationService<TestEmail>,

@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.viewmodel
 
-interface EmailTemplate {
+interface EmailTemplateModel {
     val templateId: String
 
-    fun asHashMap(): HashMap<String, String>
+    fun toHashMap(): HashMap<String, String>
 }
