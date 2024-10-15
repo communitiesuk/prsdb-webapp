@@ -1,8 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.stereotype.Service
-import uk.gov.communities.prsdb.webapp.constants.MAX_REGISTRATION_NUMBER
-import uk.gov.communities.prsdb.webapp.constants.MIN_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.MAX_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.MIN_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.REG_NUM_BASE
@@ -34,10 +32,21 @@ class RegistrationNumberService(
         }
     }
 
+    fun formatRegNum(regNum: RegistrationNumber): String {
+        var formattedRegNum = ""
+        var quotient = regNum.number!!
+        while (quotient > 0) {
+            formattedRegNum = REG_NUM_CHARSET[(quotient % REG_NUM_BASE).toInt()] + formattedRegNum
+            quotient /= REG_NUM_BASE
+        }
+        formattedRegNum = formattedRegNum.padStart(8, REG_NUM_CHARSET[0])
+
+        return regNum.type.toInitial() + "-" + formattedRegNum.substring(0, 4) + "-" + formattedRegNum.substring(4)
+    }
+
     private fun generateUniqueRegNum(): Long {
         var registrationNumber: Long
         do {
-            registrationNumber = (MIN_REGISTRATION_NUMBER..MAX_REGISTRATION_NUMBER).random()
             registrationNumber = (MIN_REG_NUM..MAX_REG_NUM).random()
         } while (regNumRepository.existsByNumber(registrationNumber))
         return registrationNumber

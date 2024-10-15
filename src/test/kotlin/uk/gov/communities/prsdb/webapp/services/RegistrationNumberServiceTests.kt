@@ -70,4 +70,18 @@ class RegistrationNumberServiceTests : ServiceTest() {
 
         assertNull(regNumService.retrieveEntity(formattedRegNum))
     }
+
+    @Test
+    fun `formatRegNum returns a formatted registration number`() {
+        val regNums =
+            listOf(
+                RegistrationNumber(RegistrationNumberType.LANDLORD, MIN_REG_NUM),
+                RegistrationNumber(RegistrationNumberType.PROPERTY, MAX_REG_NUM),
+            )
+        val formattedRegNums = listOf("L-CCCC-CCCC", "P-9999-9999")
+
+        for (i in regNums.indices) {
+            assertEquals(regNumService.formatRegNum(regNums[i]), formattedRegNums[i])
+        }
+    }
 }
