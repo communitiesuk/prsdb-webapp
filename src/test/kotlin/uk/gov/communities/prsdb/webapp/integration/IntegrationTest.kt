@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.config.OneLoginConfig
 @Import(TestcontainersConfiguration::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @UsePlaywright
-@ActiveProfiles("INTEGRATION_TEST")
+@ActiveProfiles("integration-test")
 abstract class IntegrationTest {
     @LocalServerPort
     val port: Int = 0
