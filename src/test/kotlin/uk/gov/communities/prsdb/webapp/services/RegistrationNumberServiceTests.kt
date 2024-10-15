@@ -45,17 +45,17 @@ class RegistrationNumberServiceTests : ServiceTest() {
 
     @Test
     fun `retrieveEntity retrieves a landlord given their registration number`() {
-        val decRegNum =
+        val decRegNums =
             listOf(
                 MIN_REG_NUM,
                 MAX_REG_NUM,
             )
-        val formattedRegNum = listOf("L-CCCC-CCCC", "L-9999-9999")
+        val formattedRegNums = listOf("L-CCCC-CCCC", "L-9999-9999")
         val landlord = Landlord()
 
-        for (i in decRegNum.indices) {
-            `when`(mockLandlordRepository.findByRegistrationNumberNumber(decRegNum[i])).thenReturn(landlord)
-            assertEquals(regNumService.retrieveEntity(formattedRegNum[i]), landlord)
+        for (i in decRegNums.indices) {
+            `when`(mockLandlordRepository.findByRegistrationNumberNumber(decRegNums[i])).thenReturn(landlord)
+            assertEquals(regNumService.retrieveEntity(formattedRegNums[i]), landlord)
         }
     }
 
