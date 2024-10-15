@@ -41,6 +41,9 @@ one-login:
     public.key: ${ONE_LOGIN_PUBLIC_KEY}
     private.key: ${ONE_LOGIN_PRIVATE_KEY}
 
+notify:
+  api-key: ${EMAILNOTIFICATIONS_APIKEY}
+
 server:
   error:
     path: /error

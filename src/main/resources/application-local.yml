@@ -54,6 +54,9 @@ one-login:
     public.key: classpath:public_key.pem
     private.key: classpath:private_key.pem
 
+notify:
+  api-key: ${EMAILNOTIFICATIONS_APIKEY}
+
 server:
   error:
     path: /error
