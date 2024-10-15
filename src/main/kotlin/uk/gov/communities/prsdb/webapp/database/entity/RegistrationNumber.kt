@@ -5,7 +5,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import uk.gov.communities.prsdb.webapp.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 
 @Entity
 class RegistrationNumber() : AuditableEntity() {

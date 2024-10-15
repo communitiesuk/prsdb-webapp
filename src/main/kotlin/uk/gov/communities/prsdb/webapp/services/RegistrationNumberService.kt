@@ -5,11 +5,11 @@ import uk.gov.communities.prsdb.webapp.constants.MAX_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.MIN_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.REG_NUM_BASE
 import uk.gov.communities.prsdb.webapp.constants.REG_NUM_CHARSET
+import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.RegisteredEntity
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.RegistrationNumberRepository
-import uk.gov.communities.prsdb.webapp.enums.RegistrationNumberType
 
 @Service
 class RegistrationNumberService(

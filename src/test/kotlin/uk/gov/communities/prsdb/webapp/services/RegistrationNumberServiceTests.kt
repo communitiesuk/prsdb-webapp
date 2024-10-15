@@ -11,9 +11,9 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import uk.gov.communities.prsdb.webapp.constants.MAX_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.MIN_REG_NUM
+import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
-import uk.gov.communities.prsdb.webapp.enums.RegistrationNumberType
 
 class RegistrationNumberServiceTests : ServiceTest() {
     private lateinit var regNumService: RegistrationNumberService
