@@ -36,7 +36,7 @@ class NotifyEmailTemplateTests(
         fun haveNotifyTemplatesBeenFetched() = ::notifyTemplates.isInitialized
 
         @JvmStatic
-        fun willNotifyClientBeAvailable(): Boolean = System.getenv("NOTIFY_APIKEY") != null
+        fun willNotifyClientBeAvailable(): Boolean = System.getenv("EMAILNOTIFICATIONS_APIKEY") != null
     }
 
     @MockBean
