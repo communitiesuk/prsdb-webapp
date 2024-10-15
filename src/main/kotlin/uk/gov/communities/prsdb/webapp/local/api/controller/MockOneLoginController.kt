@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.local.api.mockOneLogin
+package uk.gov.communities.prsdb.webapp.local.api.controller
 
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import uk.gov.communities.prsdb.webapp.local.api.helper.MockOneLoginHelper
 import java.net.URI
 
 @Profile("local")

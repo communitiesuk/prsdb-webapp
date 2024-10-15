@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.local.api.mockOneLogin
+package uk.gov.communities.prsdb.webapp.local.api.helper
 
 import com.nimbusds.jose.Algorithm
 import com.nimbusds.jose.JOSEObjectType
@@ -13,16 +13,19 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import java.time.Instant
 import java.util.Date
+import java.util.UUID
 
 class MockOneLoginHelper {
     companion object {
+        val keyId = UUID.randomUUID().toString()
+
         val ecKey = generateSecretKey()
 
         private fun generateSecretKey(): ECKey {
             val ecKey =
                 ECKeyGenerator(Curve.P_256)
                     .keyUse(KeyUse.SIGNATURE)
-                    .keyID("6a4bc1e3-9530-4d5b-90c5-10dcf3ffccd0")
+                    .keyID(keyId)
                     .algorithm(Algorithm("ES256"))
                     .generate()
 
@@ -145,7 +148,7 @@ class MockOneLoginHelper {
             "\"kty\": \"EC\",\n" +
             "\"use\": \"sig\",\n" +
             "\"crv\": \"P-256\",\n" +
-            "\"kid\": \"6a4bc1e3-9530-4d5b-90c5-10dcf3ffccd0\",\n" +
+            "\"kid\": \"$keyId\",\n" +
             "\"x\": \"${ecKey.toPublicJWK().x}\",\n" +
             "\"y\": \"${ecKey.toPublicJWK().y}\",\n" +
             "\"alg\": \"ES256\"\n" +
