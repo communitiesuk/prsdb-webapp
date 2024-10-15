@@ -26,7 +26,7 @@ class RegistrationNumberService(
 
         val regNumType = RegistrationNumberType.initialToType(formattedRegNum[0])
         return when (regNumType) {
-            RegistrationNumberType.LANDLORD -> landlordRepository.findByRegistrationNumberNumber(decRegNum)
+            RegistrationNumberType.LANDLORD -> landlordRepository.findByRegistrationNumber_Number(decRegNum)
             RegistrationNumberType.PROPERTY -> TODO()
             RegistrationNumberType.AGENT -> TODO()
         }
