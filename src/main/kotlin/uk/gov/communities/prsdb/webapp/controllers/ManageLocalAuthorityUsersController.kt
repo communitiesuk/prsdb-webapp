@@ -22,13 +22,12 @@ class ManageLocalAuthorityUsersController(
         model: Model,
         principal: Principal,
     ): String {
-        val currentUserLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)
-        if (currentUserLocalAuthority?.id != null) {
-            // We should always get to here as only LA_ADMINs can access this page
-            val users = localAuthorityDataService.getLocalAuthorityUsersForLocalAuthority(currentUserLocalAuthority.id)
-            val usersJson = Json.encodeToString(users)
-            model.addAttribute("usersJson", usersJson)
-        }
+        val currentUserLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
+        currentUserLocalAuthority.id!!
+
+        val users = localAuthorityDataService.getLocalAuthorityUsersForLocalAuthority(currentUserLocalAuthority.id)
+        val usersJson = Json.encodeToString(users)
+        model.addAttribute("usersJson", usersJson)
 
         model.addAttribute("contentHeader", "Manage Local Authority Users")
         model.addAttribute("title", "Manage Local Authority Users")

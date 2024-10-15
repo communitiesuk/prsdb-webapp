@@ -21,9 +21,8 @@ class UserRolesService(
         if (matchingLocalAuthorityUser != null) {
             if (matchingLocalAuthorityUser.isManager) {
                 roles.add("ROLE_LA_ADMIN")
-            } else {
-                roles.add("ROLE_LA_USER")
             }
+            roles.add("ROLE_LA_USER")
         }
 
         return roles

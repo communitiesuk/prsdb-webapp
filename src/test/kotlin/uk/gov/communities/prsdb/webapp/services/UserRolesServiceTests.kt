@@ -63,8 +63,9 @@ class UserRolesServiceTests {
         val roles = userRolesService.getRolesForSubjectId("test-user-1")
 
         // Assert
-        Assertions.assertEquals(1, roles.size)
+        Assertions.assertEquals(2, roles.size)
         Assertions.assertEquals("ROLE_LA_ADMIN", roles[0])
+        Assertions.assertEquals("ROLE_LA_USER", roles[1])
     }
 
     @Test

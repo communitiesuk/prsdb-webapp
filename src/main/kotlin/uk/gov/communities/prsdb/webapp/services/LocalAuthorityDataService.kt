@@ -16,10 +16,6 @@ class LocalAuthorityDataService(
 
     fun getLocalAuthorityForUser(subjectId: String): LocalAuthority? {
         val localAuthorityUser = localAuthorityUserRepository.findByBaseUser_Id(subjectId)
-        if (localAuthorityUser == null) {
-            return null
-        }
-
-        return localAuthorityUser.localAuthority
+        return localAuthorityUser?.localAuthority
     }
 }
