@@ -62,5 +62,5 @@ class CustomSecurityConfig {
 
 @Configuration
 @EnableMethodSecurity
-@Profile("!INTEGRATION_TEST")
+@Profile("!integration-test")
 class EnableMethodSecurityConfig
