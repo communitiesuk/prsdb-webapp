@@ -6,6 +6,7 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
+import uk.gov.communities.prsdb.webapp.exceptions.EmailWasNotSentException
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.viewmodel.ExampleEmail
 
@@ -18,6 +19,7 @@ class ExampleEmailSendingController(
 ) {
     @GetMapping("/send-test-email")
     fun exampleEmailPage(model: Model): String {
+        model.addAttribute("contentHeader", "Send a test email using notify")
         model.addAttribute("title", "Send an email")
         model.addAttribute("serviceName", SERVICE_NAME)
         return "sendTestEmail"
@@ -32,10 +34,16 @@ class ExampleEmailSendingController(
         model: Model,
         body: Submission,
     ): String {
-        emailSender.sendEmail(body.emailAddress, ExampleEmail("Lucky Recipient"))
-        model.addAttribute("contentHeader", "You have sent a test email to ${body.emailAddress}")
-        model.addAttribute("title", "Email sent")
         model.addAttribute("serviceName", SERVICE_NAME)
-        return "index"
+        try {
+            emailSender.sendEmail(body.emailAddress, ExampleEmail("Lucky Recipient"))
+            model.addAttribute("contentHeader", "You have sent a test email to ${body.emailAddress}")
+            model.addAttribute("title", "Email sent")
+            return "index"
+        } catch (retryException: EmailWasNotSentException) {
+            model.addAttribute("contentHeader", "That didn't work. Please try again.")
+            model.addAttribute("title", "Send an email")
+            return "sendTestEmail"
+        }
     }
 }
