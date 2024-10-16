@@ -3,6 +3,6 @@
     "id": "71551da6-f616-45c7-a4e0-23d6a8434561",
     "name": "Example email",
     "subject": "This is an example",
-    "bodyLocation": "/emails/TestEmail.md"
+    "bodyLocation": "/emails/ExampleEmail.md"
   }
 ]

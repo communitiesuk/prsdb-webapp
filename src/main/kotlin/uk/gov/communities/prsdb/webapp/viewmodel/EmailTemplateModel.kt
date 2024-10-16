@@ -9,5 +9,5 @@ interface EmailTemplateModel {
 enum class EmailTemplateId(
     val idValue: String,
 ) {
-    TEST_EMAIL("71551da6-f616-45c7-a4e0-23d6a8434561"),
+    EXAMPLE_EMAIL("71551da6-f616-45c7-a4e0-23d6a8434561"),
 }
