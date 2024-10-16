@@ -25,6 +25,8 @@ class RegistrationNumberService(
     fun stringToRegNum(regNumString: String): RegistrationNumberDataModel {
         val baseRegNumString = getBaseRegNumString(regNumString)
 
+        validateBaseRegNumString(baseRegNumString)
+
         val regNumType = RegistrationNumberType.initialToType(baseRegNumString[0])
 
         var regNumNumber = 0L
@@ -60,4 +62,13 @@ class RegistrationNumberService(
     }
 
     private fun getBaseRegNumString(regNumString: String): String = regNumString.filter { it.isLetterOrDigit() }.uppercase()
+
+    private fun validateBaseRegNumString(baseRegNumString: String) {
+        if (baseRegNumString.length != REG_NUM_LENGTH + 1) {
+            throw IllegalArgumentException("Invalid registration number string length")
+        }
+        if (baseRegNumString.substring(1).any { !REG_NUM_CHARSET.contains(it) }) {
+            throw IllegalArgumentException("Invalid registration number string characters")
+        }
+    }
 }
