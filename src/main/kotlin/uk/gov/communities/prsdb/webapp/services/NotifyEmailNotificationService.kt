@@ -40,41 +40,41 @@ class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
         }
     }
 
-    fun parseNotifyExceptionError(message: String): NotifyErrorType {
+    private fun parseNotifyExceptionError(message: String): NotifyErrorType {
         var nonJsonRegex = Regex("^Status code: \\d\\d\\d")
         var jsonString = nonJsonRegex.replace(message, "")
         var parsed = Json.decodeFromString<NotifyErrors>(jsonString)
 
         return parsed.errors.first().error
     }
-}
 
-@Serializable
-data class NotifyErrors(
-    val errors: List<NotifyErrorClass>,
-    val status_code: Int,
-)
+    @Serializable
+    private data class NotifyErrors(
+        val errors: List<NotifyErrorClass>,
+        val status_code: Int,
+    )
 
-@Serializable
-data class NotifyErrorClass(
-    val error: NotifyErrorType,
-    val message: String,
-)
+    @Serializable
+    private data class NotifyErrorClass(
+        val error: NotifyErrorType,
+        val message: String,
+    )
 
-@Serializable
-enum class NotifyErrorType {
-    @SerialName("AuthError")
-    AUTH,
+    @Serializable
+    private enum class NotifyErrorType {
+        @SerialName("AuthError")
+        AUTH,
 
-    @SerialName("BadRequestError")
-    BAD_REQUEST,
+        @SerialName("BadRequestError")
+        BAD_REQUEST,
 
-    @SerialName("RateLimitError")
-    RATE_LIMIT,
+        @SerialName("RateLimitError")
+        RATE_LIMIT,
 
-    @SerialName("TooManyRequestsError")
-    TOO_MANY_REQUESTS,
+        @SerialName("TooManyRequestsError")
+        TOO_MANY_REQUESTS,
 
-    @SerialName("Exception")
-    EXCEPTION,
+        @SerialName("Exception")
+        EXCEPTION,
+    }
 }

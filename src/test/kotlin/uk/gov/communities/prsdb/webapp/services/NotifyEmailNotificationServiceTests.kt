@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
@@ -53,16 +52,6 @@ class NotifyEmailNotificationServiceTests {
                 notifyClient,
                 Mockito.times(1),
             ).sendEmail(expectedTemplateId.idValue, recipientEmail, expectedHashmap, null)
-    }
-
-    @ParameterizedTest
-    @MethodSource("getNotifyErrorMessages")
-    fun `Correctly parses exception messages`(
-        errorMessage: String,
-        expectedError: NotifyErrorType,
-    ) {
-        val parsed = emailNotificationService.parseNotifyExceptionError(errorMessage)
-        assertEquals(parsed, expectedError)
     }
 
     @ParameterizedTest
@@ -133,41 +122,6 @@ class NotifyEmailNotificationServiceTests {
                     "Status code: 429 {" +
                         "\"errors\":[{\"error\":\"TooManyRequestsError\",\"message\":\"Exceeded send limits for today\"}]," +
                         "\"status_code\":429}",
-                ),
-            )
-
-        @JvmStatic
-        fun getNotifyErrorMessages(): List<Arguments> =
-            listOf(
-                Arguments.of(
-                    "Status code: 403 {" +
-                        "\"errors\":[{\"error\":\"AuthError\",\"message\":\"Invalid token: service not found\"}]," +
-                        "\"status_code\":403}",
-                    NotifyErrorType.AUTH,
-                ),
-                Arguments.of(
-                    "Status code: 403 {" +
-                        "\"errors\":[{\"error\":\"BadRequestError\",\"message\":\"Invalid token: service not found\"}]," +
-                        "\"status_code\":403}",
-                    NotifyErrorType.BAD_REQUEST,
-                ),
-                Arguments.of(
-                    "Status code: 403 {" +
-                        "\"errors\":[{\"error\":\"RateLimitError\",\"message\":\"Invalid token: service not found\"}]," +
-                        "\"status_code\":403}",
-                    NotifyErrorType.RATE_LIMIT,
-                ),
-                Arguments.of(
-                    "Status code: 403 {" +
-                        "\"errors\":[{\"error\":\"TooManyRequestsError\",\"message\":\"Invalid token: service not found\"}]," +
-                        "\"status_code\":403}",
-                    NotifyErrorType.TOO_MANY_REQUESTS,
-                ),
-                Arguments.of(
-                    "Status code: 403 {" +
-                        "\"errors\":[{\"error\":\"Exception\",\"message\":\"Invalid token: service not found\"}]," +
-                        "\"status_code\":403}",
-                    NotifyErrorType.EXCEPTION,
                 ),
             )
     }
