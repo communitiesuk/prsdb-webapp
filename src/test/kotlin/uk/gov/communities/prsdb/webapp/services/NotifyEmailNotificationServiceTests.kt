@@ -1,7 +1,11 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito
 import uk.gov.communities.prsdb.webapp.viewmodel.EmailTemplateId
 import uk.gov.communities.prsdb.webapp.viewmodel.EmailTemplateModel
@@ -41,5 +45,28 @@ class NotifyEmailNotificationServiceTests {
                 notifyClient,
                 Mockito.times(1),
             ).sendEmail(expectedTemplateId.idValue, recipientEmail, expectedHashmap, null)
+    }
+
+    @ParameterizedTest
+    @MethodSource("getNotifyErrorMessages")
+    fun `Correctly parses exception messages`(
+        errorMessage: String,
+        expectedError: NotifyErrorType,
+    ) {
+        val parsed = emailNotificationService.parseNotifyExceptionErrors(errorMessage)
+        assertEquals(parsed, expectedError)
+    }
+
+    companion object {
+        @JvmStatic
+        fun getNotifyErrorMessages(): List<Arguments> =
+            listOf(
+                Arguments.of(
+                    "Status code: 403 {" +
+                        "\"errors\":[{\"error\":\"AuthError\",\"message\":\"Invalid token: service not found\"}]," +
+                        "\"status_code\":403}",
+                    NotifyErrorType.AUTH,
+                ),
+            )
     }
 }
