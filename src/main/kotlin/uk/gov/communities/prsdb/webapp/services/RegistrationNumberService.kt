@@ -37,20 +37,20 @@ class RegistrationNumberService(
         }
     }
 
-    fun formatRegNum(regNum: RegistrationNumber): String {
-        var formattedRegNum = ""
+    fun regNumToString(regNum: RegistrationNumber): String {
+        var regNumString = ""
         var quotient = regNum.number!!
         while (quotient > 0) {
-            formattedRegNum = REG_NUM_CHARSET[(quotient % REG_NUM_BASE).toInt()] + formattedRegNum
+            regNumString = REG_NUM_CHARSET[(quotient % REG_NUM_BASE).toInt()] + regNumString
             quotient /= REG_NUM_BASE
         }
-        formattedRegNum = formattedRegNum.padStart(REG_NUM_LENGTH, REG_NUM_CHARSET[0])
+        regNumString = regNumString.padStart(REG_NUM_LENGTH, REG_NUM_CHARSET[0])
 
         return regNum.type.toInitial() +
             "-" +
-            formattedRegNum.substring(0, REG_NUM_SEG_LENGTH) +
+            regNumString.substring(0, REG_NUM_SEG_LENGTH) +
             "-" +
-            formattedRegNum.substring(REG_NUM_SEG_LENGTH)
+            regNumString.substring(REG_NUM_SEG_LENGTH)
     }
 
     private fun generateUniqueRegNum(): Long {
