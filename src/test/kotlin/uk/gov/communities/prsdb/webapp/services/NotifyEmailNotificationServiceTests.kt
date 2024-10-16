@@ -3,12 +3,13 @@ package uk.gov.communities.prsdb.webapp.services
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import uk.gov.communities.prsdb.webapp.viewmodel.TestEmail
+import uk.gov.communities.prsdb.webapp.viewmodel.EmailTemplateId
+import uk.gov.communities.prsdb.webapp.viewmodel.EmailTemplateModel
 import uk.gov.service.notify.NotificationClient
 
 class NotifyEmailNotificationServiceTests {
     private lateinit var notifyClient: NotificationClient
-    private lateinit var emailNotificationService: NotifyEmailNotificationService<TestEmail>
+    private lateinit var emailNotificationService: NotifyEmailNotificationService<TestEmailTemplate>
 
     @BeforeEach
     fun setup() {
@@ -16,12 +17,19 @@ class NotifyEmailNotificationServiceTests {
         emailNotificationService = NotifyEmailNotificationService(notifyClient)
     }
 
-    // This test currently tests that the test email hash map matches the corresponding template
-    // TODO PRSD-364: When bringing templates into source control, test each template creates a hash map that matches the Notify template
+    private class TestEmailTemplate(
+        val hashMap: HashMap<String, String>,
+        override val templateId: EmailTemplateId,
+    ) : EmailTemplateModel {
+        override fun toHashMap(): HashMap<String, String> = hashMap
+    }
+
     @Test
-    fun `sendTestEmail sends a matching email using the notification client`() {
+    fun `sendEmail sends a matching email using the notification client`() {
         // Arrange
-        val email = TestEmail("Recipient")
+        val expectedHashmap = hashMapOf("test key 1" to "test value", "test key 2" to "test value")
+        val expectedTemplateId = EmailTemplateId.TEST_EMAIL
+        val email = TestEmailTemplate(expectedHashmap, expectedTemplateId)
         val recipientEmail = "an email address"
 
         // Act
@@ -32,6 +40,6 @@ class NotifyEmailNotificationServiceTests {
             .verify(
                 notifyClient,
                 Mockito.times(1),
-            ).sendEmail(email.templateId.idValue, recipientEmail, hashMapOf("first name" to email.firstName), null)
+            ).sendEmail(expectedTemplateId.idValue, recipientEmail, expectedHashmap, null)
     }
 }
