@@ -8,53 +8,33 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.condition.EnabledIf
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.context.annotation.Import
-import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient
-import org.springframework.security.oauth2.client.registration.ClientRegistration
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
-import org.springframework.security.oauth2.jwt.JwtDecoderFactory
-import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
-import uk.gov.communities.prsdb.webapp.config.OneLoginConfig
 import uk.gov.communities.prsdb.webapp.viewmodel.EmailTemplateId
 import uk.gov.service.notify.NotificationClient
 import uk.gov.service.notify.Template
 import uk.gov.service.notify.TemplateList
 
-@Import(TestcontainersConfiguration::class)
-@SpringBootTest
-@EnabledIf("willNotifyClientBeAvailable")
-class NotifyEmailTemplateTests(
-    @Autowired private val notifyClient: NotificationClient,
-) {
+@EnabledIf("canFetchNotifyTemplates")
+class NotifyEmailTemplateTests {
     companion object NotifyTestsCompanion {
         val jsonMetadataList = javaClass.getResource("/emails/emailTemplates.json")?.readText() ?: ""
         lateinit var notifyTemplates: TemplateList
 
         fun haveNotifyTemplatesBeenFetched() = ::notifyTemplates.isInitialized
 
+        fun fetchNotifyTemplates() {
+            val apikey = System.getenv("EMAILNOTIFICATIONS_APIKEY")
+            val notifyClient = NotificationClient(apikey)
+            notifyTemplates = notifyClient.getAllTemplates("email")
+        }
+
         @JvmStatic
-        fun willNotifyClientBeAvailable(): Boolean = System.getenv("EMAILNOTIFICATIONS_APIKEY") != null
+        fun canFetchNotifyTemplates(): Boolean = System.getenv("EMAILNOTIFICATIONS_APIKEY") != null
     }
-
-    @MockBean
-    lateinit var mockClientRegistrationRepository: ClientRegistrationRepository
-
-    @MockBean
-    lateinit var mockDefaultAuthorizationCodeTokenResponseClient: DefaultAuthorizationCodeTokenResponseClient
-
-    @MockBean
-    lateinit var jwtDecoderFactory: JwtDecoderFactory<ClientRegistration?>
-
-    @MockBean
-    lateinit var oneLoginConfig: OneLoginConfig
 
     @BeforeEach
     fun getNotifyTemplatesOnce() {
         if (!haveNotifyTemplatesBeenFetched()) {
-            notifyTemplates = notifyClient.getAllTemplates("email")
+            fetchNotifyTemplates()
         }
     }
 
