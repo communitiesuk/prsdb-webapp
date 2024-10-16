@@ -9,7 +9,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
 
 @Entity
-class Landlord : RegisteredEntity {
+class Landlord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Long? = null
@@ -20,6 +20,6 @@ class Landlord : RegisteredEntity {
         nullable = false,
         foreignKey = ForeignKey(name = "FK_LANDLORD_REG_NUM"),
     )
-    override lateinit var registrationNumber: RegistrationNumber
+    lateinit var registrationNumber: RegistrationNumber
         private set
 }
