@@ -2,14 +2,21 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Named
+import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
+import uk.gov.communities.prsdb.webapp.exceptions.CannotSendEmailsException
+import uk.gov.communities.prsdb.webapp.exceptions.EmailWasNotSentException
 import uk.gov.communities.prsdb.webapp.viewmodel.EmailTemplateId
 import uk.gov.communities.prsdb.webapp.viewmodel.EmailTemplateModel
 import uk.gov.service.notify.NotificationClient
+import uk.gov.service.notify.NotificationClientException
 
 class NotifyEmailNotificationServiceTests {
     private lateinit var notifyClient: NotificationClient
@@ -26,6 +33,7 @@ class NotifyEmailNotificationServiceTests {
         override val templateId: EmailTemplateId,
     ) : EmailTemplateModel {
         override fun toHashMap(): HashMap<String, String> = hashMap
+        constructor() : this(hashMapOf(), EmailTemplateId.EXAMPLE_EMAIL)
     }
 
     @Test
@@ -53,11 +61,81 @@ class NotifyEmailNotificationServiceTests {
         errorMessage: String,
         expectedError: NotifyErrorType,
     ) {
-        val parsed = emailNotificationService.parseNotifyExceptionErrors(errorMessage)
+        val parsed = emailNotificationService.parseNotifyExceptionError(errorMessage)
         assertEquals(parsed, expectedError)
     }
 
+    @ParameterizedTest
+    @MethodSource("getIndefiniteProblemExceptionMessages")
+    fun `Throws CannotSendEmailsException when the service is unable to send emails`(errorMessage: String) {
+        // Arrange
+        var innerException = NotificationClientException(errorMessage)
+        Mockito
+            .doThrow(innerException)
+            .`when`(notifyClient)
+            .sendEmail(any(), any(), any(), any())
+
+        var thrownException = assertThrows<CannotSendEmailsException> { emailNotificationService.sendEmail("", TestEmailTemplate()) }
+
+        assertEquals(thrownException.cause, innerException)
+    }
+
+    @ParameterizedTest
+    @MethodSource("getTemporaryProblemExceptionMessages")
+    fun `Throws EmailWasNotSentException when the service failed to send that email`(error: String) {
+        // Arrange
+        var innerException = NotificationClientException(error)
+        Mockito
+            .doThrow(innerException)
+            .`when`(notifyClient)
+            .sendEmail(any(), any(), any(), any())
+
+        var thrownException = assertThrows<EmailWasNotSentException> { emailNotificationService.sendEmail("", TestEmailTemplate()) }
+
+        assertEquals(thrownException.cause, innerException)
+    }
+
     companion object {
+        @JvmStatic
+        fun getTemporaryProblemExceptionMessages(): List<Named<String>> =
+            listOf(
+                named(
+                    "Rate Limit Error",
+                    "Status code: 429 {" +
+                        "\"errors\":[{\"error\":\"RateLimitError\",\"message\":\"Exceeded rate limit for key type\"}]," +
+                        "\"status_code\":429}",
+                ),
+                named(
+                    "Exception",
+                    "Status code: 500 {" +
+                        "\"errors\":[{\"error\":\"Exception\",\"message\":\"Internal server error\"}]," +
+                        "\"status_code\":500}",
+                ),
+            )
+
+        @JvmStatic
+        fun getIndefiniteProblemExceptionMessages(): List<Named<String>> =
+            listOf(
+                named(
+                    "Auth Error",
+                    "Status code: 403 {" +
+                        "\"errors\":[{\"error\":\"AuthError\",\"message\":\"Invalid token: service not found\"}]," +
+                        "\"status_code\":403}",
+                ),
+                named(
+                    "Bad Request Error",
+                    "Status code: 400 {" +
+                        "\"errors\":[{\"error\":\"BadRequestError\",\"message\":\"Cant send to this recipient using a this API key\"}]," +
+                        "\"status_code\":400}",
+                ),
+                named(
+                    "Too Many Requests Error",
+                    "Status code: 429 {" +
+                        "\"errors\":[{\"error\":\"TooManyRequestsError\",\"message\":\"Exceeded send limits for today\"}]," +
+                        "\"status_code\":429}",
+                ),
+            )
+
         @JvmStatic
         fun getNotifyErrorMessages(): List<Arguments> =
             listOf(
@@ -66,6 +144,30 @@ class NotifyEmailNotificationServiceTests {
                         "\"errors\":[{\"error\":\"AuthError\",\"message\":\"Invalid token: service not found\"}]," +
                         "\"status_code\":403}",
                     NotifyErrorType.AUTH,
+                ),
+                Arguments.of(
+                    "Status code: 403 {" +
+                        "\"errors\":[{\"error\":\"BadRequestError\",\"message\":\"Invalid token: service not found\"}]," +
+                        "\"status_code\":403}",
+                    NotifyErrorType.BAD_REQUEST,
+                ),
+                Arguments.of(
+                    "Status code: 403 {" +
+                        "\"errors\":[{\"error\":\"RateLimitError\",\"message\":\"Invalid token: service not found\"}]," +
+                        "\"status_code\":403}",
+                    NotifyErrorType.RATE_LIMIT,
+                ),
+                Arguments.of(
+                    "Status code: 403 {" +
+                        "\"errors\":[{\"error\":\"TooManyRequestsError\",\"message\":\"Invalid token: service not found\"}]," +
+                        "\"status_code\":403}",
+                    NotifyErrorType.TOO_MANY_REQUESTS,
+                ),
+                Arguments.of(
+                    "Status code: 403 {" +
+                        "\"errors\":[{\"error\":\"Exception\",\"message\":\"Invalid token: service not found\"}]," +
+                        "\"status_code\":403}",
+                    NotifyErrorType.EXCEPTION,
                 ),
             )
     }

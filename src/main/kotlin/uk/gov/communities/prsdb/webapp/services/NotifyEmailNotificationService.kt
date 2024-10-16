@@ -4,8 +4,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.exceptions.CannotSendEmailsException
+import uk.gov.communities.prsdb.webapp.exceptions.EmailWasNotSentException
 import uk.gov.communities.prsdb.webapp.viewmodel.EmailTemplateModel
 import uk.gov.service.notify.NotificationClient
+import uk.gov.service.notify.NotificationClientException
 
 @Service
 class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
@@ -16,10 +19,28 @@ class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
         email: EmailModel,
     ) {
         val emailParameters = email.toHashMap()
-        notificationClient.sendEmail(email.templateId.idValue, recipientAddress, emailParameters, null)
+        try {
+            notificationClient.sendEmail(email.templateId.idValue, recipientAddress, emailParameters, null)
+        } catch (notifyException: NotificationClientException) {
+            val errorType = parseNotifyExceptionError(notifyException.message ?: "")
+            when (errorType) {
+                NotifyErrorType.AUTH, NotifyErrorType.BAD_REQUEST -> throw CannotSendEmailsException(
+                    "prsdb-web does not have the correct credentials to send emails with Notify." +
+                        " No emails can be sent until the authentication issue is fixed.",
+                    notifyException,
+                )
+                NotifyErrorType.TOO_MANY_REQUESTS -> throw CannotSendEmailsException(
+                    "Too many emails have been sent with Notify today. Email sending will not work until tomorrow.",
+                    notifyException,
+                )
+                NotifyErrorType.EXCEPTION, NotifyErrorType.RATE_LIMIT -> throw EmailWasNotSentException(
+                    notifyException,
+                )
+            }
+        }
     }
 
-    fun parseNotifyExceptionErrors(message: String): NotifyErrorType {
+    fun parseNotifyExceptionError(message: String): NotifyErrorType {
         var nonJsonRegex = Regex("^Status code: \\d\\d\\d")
         var jsonString = nonJsonRegex.replace(message, "")
         var parsed = Json.decodeFromString<NotifyErrors>(jsonString)
