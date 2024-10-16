@@ -3,14 +3,14 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.viewmodel.EmailTemplateModel
-import uk.gov.communities.prsdb.webapp.viewmodel.TestEmail
+import uk.gov.communities.prsdb.webapp.viewmodel.ExampleEmail
 
 class EmailTemplateModelsTests {
     companion object {
         @JvmStatic
         private fun templateList() =
             listOf(
-                EmailTemplateTestData(TestEmail("test string"), "/emails/TestEmail.md"),
+                EmailTemplateTestData(ExampleEmail("test string"), "/emails/ExampleEmail.md"),
             )
     }
 

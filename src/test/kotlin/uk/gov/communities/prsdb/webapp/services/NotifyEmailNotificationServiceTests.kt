@@ -28,7 +28,7 @@ class NotifyEmailNotificationServiceTests {
     fun `sendEmail sends a matching email using the notification client`() {
         // Arrange
         val expectedHashmap = hashMapOf("test key 1" to "test value", "test key 2" to "test value")
-        val expectedTemplateId = EmailTemplateId.TEST_EMAIL
+        val expectedTemplateId = EmailTemplateId.EXAMPLE_EMAIL
         val email = TestEmailTemplate(expectedHashmap, expectedTemplateId)
         val recipientEmail = "an email address"
 
