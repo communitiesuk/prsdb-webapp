@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/layout :: layout(${title}, ${serviceName}, ~{::main})}">
 <main class="govuk-main-wrapper" id="main-content">
-    <h1 class="govuk-heading-xl">Send a test email using notify</h1>
+    <h1 class="govuk-heading-xl" th:text="${contentHeader}">Default page template</h1>
     <form class="form" method="post" th:action="@{/send-test-email}">
         <div class="govuk-form-group">
             <h1 class="govuk-label-wrapper">
