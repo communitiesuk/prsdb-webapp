@@ -9,32 +9,30 @@ import uk.gov.communities.prsdb.webapp.constants.REG_NUM_CHARSET
 import uk.gov.communities.prsdb.webapp.constants.REG_NUM_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.REG_NUM_SEG_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
-import uk.gov.communities.prsdb.webapp.database.entity.RegisteredEntity
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.RegistrationNumberRepository
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 @Service
 class RegistrationNumberService(
     val regNumRepository: RegistrationNumberRepository,
-    val landlordRepository: LandlordRepository,
 ) {
     @Transactional
     fun createRegistrationNumber(type: RegistrationNumberType) {
         regNumRepository.save(RegistrationNumber(type, generateUniqueRegNum()))
     }
 
-    fun retrieveEntity(formattedRegNum: String): RegisteredEntity? {
-        val charsetRegNum =
-            formattedRegNum.substring(2, REG_NUM_SEG_LENGTH + 2) + formattedRegNum.substring(REG_NUM_SEG_LENGTH + 3)
-        val decRegNum = charsetToDec(charsetRegNum)
+    fun stringToRegNum(regNumString: String): RegistrationNumberDataModel {
+        val baseRegNumString = getBaseRegNumString(regNumString)
 
-        val regNumType = RegistrationNumberType.initialToType(formattedRegNum[0])
-        return when (regNumType) {
-            RegistrationNumberType.LANDLORD -> landlordRepository.findByRegistrationNumber_Number(decRegNum)
-            RegistrationNumberType.PROPERTY -> TODO()
-            RegistrationNumberType.AGENT -> TODO()
+        val regNumType = RegistrationNumberType.initialToType(baseRegNumString[0])
+
+        var regNumNumber = 0L
+        for (char in baseRegNumString.substring(1)) {
+            regNumNumber = REG_NUM_BASE * regNumNumber + REG_NUM_CHARSET.indexOf(char)
         }
+
+        return RegistrationNumberDataModel(regNumType, regNumNumber)
     }
 
     fun regNumToString(regNum: RegistrationNumber): String {
@@ -61,11 +59,5 @@ class RegistrationNumberService(
         return registrationNumber
     }
 
-    private fun charsetToDec(charsetRegNum: String): Long {
-        var decRegNum = 0L
-        for (char in charsetRegNum) {
-            decRegNum = REG_NUM_BASE * decRegNum + REG_NUM_CHARSET.indexOf(char)
-        }
-        return decRegNum
-    }
+    private fun getBaseRegNumString(regNumString: String): String = regNumString.filter { it.isLetterOrDigit() }.uppercase()
 }
