@@ -8,22 +8,27 @@ import org.junit.jupiter.api.condition.EnabledIf
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.MethodSource
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.viewmodel.EmailTemplateId
 import uk.gov.service.notify.NotificationClient
 import uk.gov.service.notify.Template
 import uk.gov.service.notify.TemplateList
 
 @EnabledIf("canFetchNotifyTemplates")
+@SpringBootTest(classes = [NotifyConfig::class])
 class NotifyEmailTemplateTests {
+    @Autowired
+    private lateinit var notifyClient: NotificationClient
+
     companion object NotifyTestsCompanion {
         val jsonMetadataList = javaClass.getResource("/emails/emailTemplates.json")?.readText() ?: ""
         lateinit var notifyTemplates: TemplateList
 
         fun haveNotifyTemplatesBeenFetched() = ::notifyTemplates.isInitialized
 
-        fun fetchNotifyTemplates() {
-            val apikey = System.getenv("EMAILNOTIFICATIONS_APIKEY")
-            val notifyClient = NotificationClient(apikey)
+        fun fetchNotifyTemplates(notifyClient: NotificationClient) {
             notifyTemplates = notifyClient.getAllTemplates("email")
         }
 
@@ -37,7 +42,7 @@ class NotifyEmailTemplateTests {
     @BeforeEach
     fun getNotifyTemplatesOnce() {
         if (!haveNotifyTemplatesBeenFetched()) {
-            fetchNotifyTemplates()
+            fetchNotifyTemplates(notifyClient)
         }
     }
 
@@ -65,7 +70,11 @@ class NotifyEmailTemplateTests {
         // Assert
         assertBodiesMatch(metadata, notifyTemplate)
         Assertions.assertEquals(metadata.name, notifyTemplate.name, "Notify template name did not match")
-        Assertions.assertEquals(metadata.subject, notifyTemplate.subject.orElse(null), "Notify template subject did not match")
+        Assertions.assertEquals(
+            metadata.subject,
+            notifyTemplate.subject.orElse(null),
+            "Notify template subject did not match",
+        )
     }
 
     private fun assertBodiesMatch(
