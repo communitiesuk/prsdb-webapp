@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.MAX_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.MIN_REG_NUM
@@ -16,6 +17,7 @@ class RegistrationNumberService(
     val regNumRepository: RegistrationNumberRepository,
     val landlordRepository: LandlordRepository,
 ) {
+    @Transactional
     fun createRegistrationNumber(type: RegistrationNumberType) {
         regNumRepository.save(RegistrationNumber(type, generateUniqueRegNum()))
     }
