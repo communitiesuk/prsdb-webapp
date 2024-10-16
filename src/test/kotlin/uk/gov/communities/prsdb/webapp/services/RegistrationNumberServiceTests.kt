@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -14,12 +15,18 @@ import uk.gov.communities.prsdb.webapp.constants.MIN_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.RegistrationNumberRepository
 
-class RegistrationNumberServiceTests : ServiceTest() {
+class RegistrationNumberServiceTests {
+    private lateinit var mockRegNumRepository: RegistrationNumberRepository
+    private lateinit var mockLandlordRepository: LandlordRepository
     private lateinit var regNumService: RegistrationNumberService
 
     @BeforeEach
     fun setup() {
+        mockRegNumRepository = mock()
+        mockLandlordRepository = mock()
         regNumService = RegistrationNumberService(mockRegNumRepository, mockLandlordRepository)
     }
 
