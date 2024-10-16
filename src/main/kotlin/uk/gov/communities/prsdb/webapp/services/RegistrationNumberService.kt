@@ -6,6 +6,8 @@ import uk.gov.communities.prsdb.webapp.constants.MAX_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.MIN_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.REG_NUM_BASE
 import uk.gov.communities.prsdb.webapp.constants.REG_NUM_CHARSET
+import uk.gov.communities.prsdb.webapp.constants.REG_NUM_LENGTH
+import uk.gov.communities.prsdb.webapp.constants.REG_NUM_SEG_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.RegisteredEntity
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
@@ -23,7 +25,8 @@ class RegistrationNumberService(
     }
 
     fun retrieveEntity(formattedRegNum: String): RegisteredEntity? {
-        val charsetRegNum = formattedRegNum.substring(2, 6) + formattedRegNum.substring(7)
+        val charsetRegNum =
+            formattedRegNum.substring(2, REG_NUM_SEG_LENGTH + 2) + formattedRegNum.substring(REG_NUM_SEG_LENGTH + 3)
         val decRegNum = charsetToDec(charsetRegNum)
 
         val regNumType = RegistrationNumberType.initialToType(formattedRegNum[0])
@@ -41,9 +44,13 @@ class RegistrationNumberService(
             formattedRegNum = REG_NUM_CHARSET[(quotient % REG_NUM_BASE).toInt()] + formattedRegNum
             quotient /= REG_NUM_BASE
         }
-        formattedRegNum = formattedRegNum.padStart(8, REG_NUM_CHARSET[0])
+        formattedRegNum = formattedRegNum.padStart(REG_NUM_LENGTH, REG_NUM_CHARSET[0])
 
-        return regNum.type.toInitial() + "-" + formattedRegNum.substring(0, 4) + "-" + formattedRegNum.substring(4)
+        return regNum.type.toInitial() +
+            "-" +
+            formattedRegNum.substring(0, REG_NUM_SEG_LENGTH) +
+            "-" +
+            formattedRegNum.substring(REG_NUM_SEG_LENGTH)
     }
 
     private fun generateUniqueRegNum(): Long {
