@@ -33,7 +33,7 @@ class ExampleEmailSendingController(
         body: Submission,
     ): String {
         emailSender.sendEmail(body.emailAddress, ExampleEmail("Lucky Recipient"))
-        model.addAttribute("contentHeader", "Your have sent a test email to ${body.emailAddress}")
+        model.addAttribute("contentHeader", "You have sent a test email to ${body.emailAddress}")
         model.addAttribute("title", "Email sent")
         model.addAttribute("serviceName", SERVICE_NAME)
         return "index"
