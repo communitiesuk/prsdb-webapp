@@ -4,10 +4,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.condition.EnabledIf
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.viewmodel.EmailTemplateId
 import uk.gov.service.notify.NotificationClient
 import uk.gov.service.notify.Template
@@ -29,6 +29,9 @@ class NotifyEmailTemplateTests {
 
         @JvmStatic
         fun canFetchNotifyTemplates(): Boolean = System.getenv("EMAILNOTIFICATIONS_APIKEY") != null
+
+        @JvmStatic
+        fun getMetadataList() = Json.decodeFromString<List<EmailTemplateMetadata>>(jsonMetadataList)
     }
 
     @BeforeEach
@@ -38,13 +41,13 @@ class NotifyEmailTemplateTests {
         }
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @EnumSource(EmailTemplateId::class)
     fun `notify contains a template for each template id`(id: EmailTemplateId) {
         notifyTemplates.templates.single { template -> template.id.toString() == id.idValue }
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @EnumSource(EmailTemplateId::class)
     fun `there is a source controlled copy for each template id`(id: EmailTemplateId) {
         var metadataList = Json.decodeFromString<List<EmailTemplateMetadata>>(jsonMetadataList)
@@ -52,24 +55,17 @@ class NotifyEmailTemplateTests {
         metadataList.single { templateMetadata -> templateMetadata.id == id.idValue }
     }
 
-    @Test
-    fun `all source controlled templates match their notify equivalent`() {
-        // Arrange
-        var metadataList = Json.decodeFromString<List<EmailTemplateMetadata>>(jsonMetadataList)
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("getMetadataList")
+    fun `all source controlled templates match their notify equivalent`(metadata: EmailTemplateMetadata) {
+        // Act
+        var templateId = metadata.id
+        var notifyTemplate = notifyTemplates.templates.single { template -> template.id.toString() == templateId }
 
-        for (metadata in metadataList) {
-            println("Testing template \"${metadata.name}\"...")
-            // Act
-            var templateId = metadata.id
-            var notifyTemplate = notifyTemplates.templates.single { template -> template.id.toString() == templateId }
-
-            // Assert
-            assertBodiesMatch(metadata, notifyTemplate)
-            Assertions.assertEquals(metadata.name, notifyTemplate.name)
-            Assertions.assertEquals(metadata.subject, notifyTemplate.subject.orElse(null))
-
-            println("Template \"${metadata.name}\" matches Notify")
-        }
+        // Assert
+        assertBodiesMatch(metadata, notifyTemplate)
+        Assertions.assertEquals(metadata.name, notifyTemplate.name, "Notify template name did not match")
+        Assertions.assertEquals(metadata.subject, notifyTemplate.subject.orElse(null), "Notify template subject did not match")
     }
 
     private fun assertBodiesMatch(
@@ -85,7 +81,7 @@ class NotifyEmailTemplateTests {
         // Notify returns body with CRLF end lines: convert to LF before comparison
         var cleanedNotifyBody = notifyBody.replace("\r", "")
 
-        Assertions.assertEquals(cleanedStoredBody, cleanedNotifyBody)
+        Assertions.assertEquals(cleanedStoredBody, cleanedNotifyBody, "Notify template body did not match")
     }
 
     @Serializable
@@ -94,5 +90,7 @@ class NotifyEmailTemplateTests {
         val name: String,
         val subject: String,
         val bodyLocation: String,
-    )
+    ) {
+        override fun toString() = name
+    }
 }
