@@ -21,7 +21,7 @@ class ExampleStartPageController(
         model.addAttribute("serviceName", SERVICE_NAME)
         model.addAttribute(
             "landlordRegNum",
-            regNumService.formatRegNum(RegistrationNumber(RegistrationNumberType.LANDLORD, 205498766)),
+            regNumService.regNumToString(RegistrationNumber(RegistrationNumberType.LANDLORD, 205498766)),
         )
         model.addAttribute("startButtonHref", "/registration")
         model.addAttribute("startButtonText", "Start now")
