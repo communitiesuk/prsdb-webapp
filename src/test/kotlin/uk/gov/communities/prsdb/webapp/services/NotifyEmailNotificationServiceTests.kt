@@ -100,6 +100,14 @@ class NotifyEmailNotificationServiceTests {
                         "\"errors\":[{\"error\":\"Exception\",\"message\":\"Internal server error\"}]," +
                         "\"status_code\":500}",
                 ),
+                named(
+                    "Multiple transient errors",
+                    "Status code: 500 {" +
+                        "\"errors\":[" +
+                        "{\"error\":\"Exception\",\"message\":\"Internal server error\"}," +
+                        "{\"error\":\"RateLimitError\",\"message\":\"Exceeded rate limit for key type\"}]," +
+                        "\"status_code\":500}",
+                ),
             )
 
         @JvmStatic
@@ -121,6 +129,22 @@ class NotifyEmailNotificationServiceTests {
                     "Too Many Requests Error",
                     "Status code: 429 {" +
                         "\"errors\":[{\"error\":\"TooManyRequestsError\",\"message\":\"Exceeded send limits for today\"}]," +
+                        "\"status_code\":429}",
+                ),
+                named(
+                    "Multiple permanent errors",
+                    "Status code: 429 {" +
+                        "\"errors\":[" +
+                        "{\"error\":\"TooManyRequestsError\",\"message\":\"Exceeded send limits for today\"}," +
+                        "{\"error\":\"AuthError\",\"message\":\"Invalid token: service not found\"}]," +
+                        "\"status_code\":429}",
+                ),
+                named(
+                    "Transient and permanent errors",
+                    "Status code: 429 {" +
+                        "\"errors\":[" +
+                        "{\"error\":\"TooManyRequestsError\",\"message\":\"Exceeded send limits for today\"}," +
+                        "{\"error\":\"Exception\",\"message\":\"Internal server error\"}]," +
                         "\"status_code\":429}",
                 ),
             )
