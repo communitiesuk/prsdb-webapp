@@ -1,0 +1,9 @@
+<table th:fragment="table(theadFields, tbodyFragment)" class="govuk-table">
+    <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header" th:each="heading: ${theadFields}" th:text="${heading}"></th>
+        </tr>
+    </thead>
+    <tbody th:replace="${tbodyFragment}">
+    </tbody>
+</table>

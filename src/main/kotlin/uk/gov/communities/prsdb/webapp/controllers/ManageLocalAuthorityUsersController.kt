@@ -37,9 +37,7 @@ class ManageLocalAuthorityUsersController(
         model.addAttribute("title", "Manage Local Authority Users")
         model.addAttribute("serviceName", SERVICE_NAME)
         model.addAttribute("userList", users)
-        model.addAttribute("tableColumn1Heading", "Username")
-        model.addAttribute("tableColumn2Heading", "Access level")
-        model.addAttribute("tableColumn3Heading", "Account status")
+        model.addAttribute("tableColumnHeadings", listOf("Username", "Access level", "Account status", ""))
 
         return "manageLAUsers"
     }
