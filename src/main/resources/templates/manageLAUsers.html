@@ -1,7 +1,34 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/layout :: layout(${title}, ${serviceName}, ~{::main})}">
 <main class="govuk-main-wrapper" id="main-content">
-  <h1 class="govuk-heading-xl" th:text="${contentHeader}">Default page template</h1>
-  <p th:text="${usersJson}"></p>
+  <div id="page-content">
+    <header>
+      <h1 class="govuk-heading-l" th:text="${contentHeader}">Default page template</h1>
+    </header>
+    <section>
+      <table class="govuk-table">
+        <thead class="govuk-table__head">
+            <tr class="govuk-table__row">
+              <th scope="col" class="govuk-table__header" th:text="${tableColumn1Heading}"></th>
+              <th scope="col" class="govuk-table__header" th:text="${tableColumn2Heading}"></th>
+              <th scope="col" class="govuk-table__header" th:text="${tableColumn3Heading}"></th>
+              <th scope="col" class="govuk-table__header"></th>
+            </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          <tr class="govuk_table__row" th:each="user: ${userList}">
+            <td class="govuk-table__cell" th:text="${user.userName}"></td>
+            <td class="govuk-table__cell" th:text="${user.manager ? 'Admin' : 'Basic'}"></td>
+            <td class="govuk-table__cell" >
+              <span class="govuk-tag" th:classappend="${user.pending ? 'govuk-tag--blue' : 'govuk-tag--green'}">
+                <strong th:text="${user.pending ? 'PENDING' : 'ACTIVE'}"></strong>
+              </span>
+            </td>
+            <td class="govuk-table__cell"><a href="#" class="govuk-link" th:text="Change"></a></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
 </main>
 </html>
