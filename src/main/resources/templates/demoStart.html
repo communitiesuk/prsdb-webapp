@@ -2,6 +2,10 @@
 <html th:replace="~{fragments/layout :: layout(${title}, ${serviceName}, ~{::main})}">
 <main class="govuk-main-wrapper" id="main-content">
     <h1 class="govuk-heading-xl" th:text="${contentHeader}">Default page template</h1>
+    <p class="govuk-body">
+        <span>Example Landlord Registration Number: </span>
+        <span th:text="${landlordRegNum}">Example Landlord Registration Number</span>
+    </p>
     <div th:replace="~{fragments/startButton :: button( ${startButtonHref}, ${startButtonText} )}"></div>
 </main>
 </html>
