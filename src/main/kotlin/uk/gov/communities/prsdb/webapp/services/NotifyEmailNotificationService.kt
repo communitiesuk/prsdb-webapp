@@ -22,31 +22,54 @@ class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
         try {
             notificationClient.sendEmail(email.templateId.idValue, recipientAddress, emailParameters, null)
         } catch (notifyException: NotificationClientException) {
-            val errorType = parseNotifyExceptionError(notifyException.message ?: "")
-            when (errorType) {
-                NotifyErrorType.AUTH, NotifyErrorType.BAD_REQUEST -> throw PersistentEmailSendException(
-                    "prsdb-web cannot currently send emails of that type with Notify. " +
-                        "No emails can be sent until the issue is fixed. See inner exception for details.",
-                    notifyException,
-                )
-                NotifyErrorType.TOO_MANY_REQUESTS -> throw PersistentEmailSendException(
-                    "Too many emails have been sent with Notify today. Email sending will not work until tomorrow.",
-                    notifyException,
-                )
-                NotifyErrorType.EXCEPTION, NotifyErrorType.RATE_LIMIT -> throw TransientEmailSentException(
-                    "Notify has not sent that email, but retrying may work.",
-                    notifyException,
-                )
-            }
+            throwEmailSendException(notifyException)
         }
     }
 
-    private fun parseNotifyExceptionError(message: String): NotifyErrorType {
+    private fun throwEmailSendException(notifyException: NotificationClientException) {
+        val errorTypes = parseNotifyExceptionErrors(notifyException.message ?: "")
+        val multipleErrorMessagePrefix =
+            if (errorTypes.size > 1) "There were multiple errors sending an email with Notify. " else ""
+        when {
+            NotifyErrorType.AUTH in errorTypes -> throw PersistentEmailSendException(
+                multipleErrorMessagePrefix +
+                    "prsdb-web credentials were not accepted by Notify. " +
+                    "No emails can be sent until the issue is fixed. See inner exception for details.",
+                notifyException,
+            )
+            NotifyErrorType.BAD_REQUEST in errorTypes -> throw PersistentEmailSendException(
+                multipleErrorMessagePrefix +
+                    "Send email request was rejected by notify as a bad request. " +
+                    "That email cannot be sent until the issue is fixed. See inner exception for details.",
+                notifyException,
+            )
+
+            NotifyErrorType.TOO_MANY_REQUESTS in errorTypes -> throw PersistentEmailSendException(
+                multipleErrorMessagePrefix +
+                    "Too many emails have been sent with Notify today. Email sending will not work until tomorrow.",
+                notifyException,
+            )
+
+            NotifyErrorType.RATE_LIMIT in errorTypes -> throw TransientEmailSentException(
+                multipleErrorMessagePrefix +
+                    "Too many email have been sent with Notify in the last minute, but retrying may work.",
+                notifyException,
+            )
+
+            NotifyErrorType.EXCEPTION in errorTypes -> throw TransientEmailSentException(
+                multipleErrorMessagePrefix +
+                    "Notify has not sent that email, but retrying may work.",
+                notifyException,
+            )
+        }
+    }
+
+    private fun parseNotifyExceptionErrors(message: String): Collection<NotifyErrorType> {
         var nonJsonRegex = Regex("^Status code: \\d\\d\\d")
         var jsonString = nonJsonRegex.replace(message, "")
         var parsed = Json.decodeFromString<NotifyErrors>(jsonString)
 
-        return parsed.errors.first().error
+        return parsed.errors.map { t -> t.error }
     }
 
     @Serializable
