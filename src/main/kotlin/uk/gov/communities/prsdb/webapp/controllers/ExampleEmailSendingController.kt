@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
+import uk.gov.communities.prsdb.webapp.models.viewModels.ExampleEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
-import uk.gov.communities.prsdb.webapp.viewmodel.ExampleEmail
 
 // TODO PRSD-404: Remove this controller once there is another way to reach the EmailNotificationService
 // This controller is an example controller to demo our integration with notify and should be removed once

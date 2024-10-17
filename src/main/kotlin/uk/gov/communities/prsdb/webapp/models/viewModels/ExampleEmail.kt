@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.viewmodel
+package uk.gov.communities.prsdb.webapp.models.viewModels
 
 data class ExampleEmail(
     var firstName: String,

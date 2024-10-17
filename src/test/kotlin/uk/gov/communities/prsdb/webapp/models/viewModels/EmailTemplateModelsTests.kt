@@ -1,9 +1,8 @@
-package uk.gov.communities.prsdb.webapp.viewmodels
+package uk.gov.communities.prsdb.webapp.models.viewModels
+
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import uk.gov.communities.prsdb.webapp.viewmodel.EmailTemplateModel
-import uk.gov.communities.prsdb.webapp.viewmodel.ExampleEmail
 
 class EmailTemplateModelsTests {
     companion object {

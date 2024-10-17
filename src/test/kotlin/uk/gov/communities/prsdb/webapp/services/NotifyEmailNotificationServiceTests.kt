@@ -12,8 +12,8 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
-import uk.gov.communities.prsdb.webapp.viewmodel.EmailTemplateId
-import uk.gov.communities.prsdb.webapp.viewmodel.EmailTemplateModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateId
+import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateModel
 import uk.gov.service.notify.NotificationClient
 import uk.gov.service.notify.NotificationClientException
 

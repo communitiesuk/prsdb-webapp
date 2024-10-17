@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import uk.gov.communities.prsdb.webapp.viewmodel.EmailTemplateModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateModel
 
 interface EmailNotificationService<EmailModel : EmailTemplateModel> {
     fun sendEmail(
