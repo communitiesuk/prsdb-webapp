@@ -36,6 +36,7 @@ class ManageLocalAuthorityUsersControllerTests(
     fun `ManageLocalAuthorityUsersController returns 200 for authorized user`() {
         val localAuthority = LocalAuthority()
         ReflectionTestUtils.setField(localAuthority, "id", 123)
+        ReflectionTestUtils.setField(localAuthority, "name", "Test Local Authority")
         Mockito
             .`when`(localAuthorityDataService.getLocalAuthorityForUser("user"))
             .thenReturn(localAuthority)
