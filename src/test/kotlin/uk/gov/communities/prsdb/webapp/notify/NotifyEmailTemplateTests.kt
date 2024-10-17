@@ -16,6 +16,18 @@ import uk.gov.service.notify.NotificationClient
 import uk.gov.service.notify.Template
 import uk.gov.service.notify.TemplateList
 
+/*
+ * These tests verify that the templates we have in this code base match the templates stored in notify. This means
+ * they need to query notify to retrieve the templates to compare. That requires the notify api key to be available
+ * for these tests to be able to run.
+ *
+ * By default, these tests are disabled so that they don't fail when you don't have an environment variable set. To
+ * run them locally, get the notify api key and set the appropriate environment variable on the gradle run
+ * configuration. Under no circumstances should you commit the api key or configuration containing the api in git.
+ * There is a prepared run configuration called "notify-template-tests.run.xml" that runs these tests - if you want
+ * this ask your team lead where it can be found.
+ */
+
 @EnabledIf("canFetchNotifyTemplates")
 @SpringBootTest(classes = [NotifyConfig::class])
 class NotifyEmailTemplateTests {
