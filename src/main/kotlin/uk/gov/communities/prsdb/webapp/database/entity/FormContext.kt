@@ -11,7 +11,7 @@ import jakarta.persistence.ManyToOne
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 
 @Entity
-class FormContext : ModifiableAuditableEntity() {
+class FormContext() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Long? = null
@@ -22,7 +22,6 @@ class FormContext : ModifiableAuditableEntity() {
 
     @Column(columnDefinition = "TEXT", nullable = false)
     lateinit var context: String
-        private set
 
     @ManyToOne(optional = false)
     @JoinColumn(
@@ -32,4 +31,10 @@ class FormContext : ModifiableAuditableEntity() {
     )
     lateinit var user: OneLoginUser
         private set
+
+    constructor(journeyType: JourneyType, context: String, user: OneLoginUser) : this() {
+        this.journeyType = journeyType
+        this.context = context
+        this.user = user
+    }
 }
