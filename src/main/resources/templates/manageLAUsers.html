@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/layout :: layout(${title}, ${serviceName}, ~{::main})}">
 <main class="govuk-main-wrapper" id="main-content">
-  <div id="page-content">
-    <header>
-      <h1 class="govuk-heading-l" th:text="${contentHeader}">Default page template</h1>
+  <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#header})}">
+    <header id="header">
+      <h1 class="govuk-heading-l" th:text="${contentHeader}"></h1>
     </header>
-    <section>
-      <table class="govuk-table">
+  </div>
+  <section>
+    <div th:replace="~{fragments/fullWidthLayout :: fullWidthLayout(~{::#LA-users-table})}">
+      <table id="LA-users-table" class="govuk-table">
         <thead class="govuk-table__head">
             <tr class="govuk-table__row">
               <th scope="col" class="govuk-table__header" th:text="${tableColumn1Heading}"></th>
@@ -28,7 +30,13 @@
           </tr>
         </tbody>
       </table>
-    </section>
-  </div>
+    </div>
+    <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#action-buttons})}">
+      <div class="govuk-button-group" id="action-buttons">
+        <button th:replace="~{fragments/primaryButton :: primaryButton('Invite another user')}"></button>
+        <button th:replace="~{fragments/secondaryButton :: secondaryButton('Return to dashboard')}"></button>
+      </div>
+    </div>
+  </section>
 </main>
 </html>
