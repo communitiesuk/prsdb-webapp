@@ -10,8 +10,8 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
-import uk.gov.communities.prsdb.webapp.exceptions.CannotSendEmailsException
-import uk.gov.communities.prsdb.webapp.exceptions.EmailWasNotSentException
+import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
+import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.viewmodel.EmailTemplateId
 import uk.gov.communities.prsdb.webapp.viewmodel.EmailTemplateModel
 import uk.gov.service.notify.NotificationClient
@@ -64,7 +64,7 @@ class NotifyEmailNotificationServiceTests {
             .`when`(notifyClient)
             .sendEmail(any(), any(), any(), any())
 
-        var thrownException = assertThrows<CannotSendEmailsException> { emailNotificationService.sendEmail("", TestEmailTemplate()) }
+        var thrownException = assertThrows<PersistentEmailSendException> { emailNotificationService.sendEmail("", TestEmailTemplate()) }
 
         assertEquals(thrownException.cause, innerException)
     }
@@ -79,7 +79,7 @@ class NotifyEmailNotificationServiceTests {
             .`when`(notifyClient)
             .sendEmail(any(), any(), any(), any())
 
-        var thrownException = assertThrows<EmailWasNotSentException> { emailNotificationService.sendEmail("", TestEmailTemplate()) }
+        var thrownException = assertThrows<TransientEmailSentException> { emailNotificationService.sendEmail("", TestEmailTemplate()) }
 
         assertEquals(thrownException.cause, innerException)
     }
