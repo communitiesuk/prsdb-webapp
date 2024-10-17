@@ -11,7 +11,7 @@ import jakarta.persistence.ManyToOne
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 
 @Entity
-class FormContext : AuditableEntity() {
+class FormContext : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Long? = null
