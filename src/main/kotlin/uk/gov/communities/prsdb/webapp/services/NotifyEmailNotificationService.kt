@@ -4,8 +4,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.springframework.stereotype.Service
-import uk.gov.communities.prsdb.webapp.exceptions.CannotSendEmailsException
-import uk.gov.communities.prsdb.webapp.exceptions.EmailWasNotSentException
+import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
+import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.viewmodel.EmailTemplateModel
 import uk.gov.service.notify.NotificationClient
 import uk.gov.service.notify.NotificationClientException
@@ -24,16 +24,17 @@ class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
         } catch (notifyException: NotificationClientException) {
             val errorType = parseNotifyExceptionError(notifyException.message ?: "")
             when (errorType) {
-                NotifyErrorType.AUTH, NotifyErrorType.BAD_REQUEST -> throw CannotSendEmailsException(
-                    "prsdb-web does not have the correct credentials to send emails with Notify." +
-                        " No emails can be sent until the authentication issue is fixed.",
+                NotifyErrorType.AUTH, NotifyErrorType.BAD_REQUEST -> throw PersistentEmailSendException(
+                    "prsdb-web cannot currently send emails of that type with Notify. " +
+                        "No emails can be sent until the issue is fixed. See inner exception for details.",
                     notifyException,
                 )
-                NotifyErrorType.TOO_MANY_REQUESTS -> throw CannotSendEmailsException(
+                NotifyErrorType.TOO_MANY_REQUESTS -> throw PersistentEmailSendException(
                     "Too many emails have been sent with Notify today. Email sending will not work until tomorrow.",
                     notifyException,
                 )
-                NotifyErrorType.EXCEPTION, NotifyErrorType.RATE_LIMIT -> throw EmailWasNotSentException(
+                NotifyErrorType.EXCEPTION, NotifyErrorType.RATE_LIMIT -> throw TransientEmailSentException(
+                    "Notify has not sent that email, but retrying may work.",
                     notifyException,
                 )
             }

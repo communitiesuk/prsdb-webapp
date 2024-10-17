@@ -6,7 +6,7 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
-import uk.gov.communities.prsdb.webapp.exceptions.EmailWasNotSentException
+import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.viewmodel.ExampleEmail
 
@@ -40,7 +40,7 @@ class ExampleEmailSendingController(
             model.addAttribute("contentHeader", "You have sent a test email to ${body.emailAddress}")
             model.addAttribute("title", "Email sent")
             return "index"
-        } catch (retryException: EmailWasNotSentException) {
+        } catch (retryException: TransientEmailSentException) {
             model.addAttribute("contentHeader", "That didn't work. Please try again.")
             model.addAttribute("title", "Send an email")
             return "sendTestEmail"
