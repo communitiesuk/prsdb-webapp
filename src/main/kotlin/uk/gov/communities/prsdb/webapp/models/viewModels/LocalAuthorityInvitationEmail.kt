@@ -5,7 +5,7 @@ data class LocalAuthorityInvitationEmail(
     var invitationUrl: String,
 ) : EmailTemplateModel {
     private val localAuthorityKey = "name of council"
-    private val invitationKey = "invite url"
+    private val invitationKey = "invitation url"
 
     override val templateId = EmailTemplateId.LOCAL_AUTHORITY_INVITATION_EMAIL
 
