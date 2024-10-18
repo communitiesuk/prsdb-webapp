@@ -44,12 +44,12 @@ class JourneyService(
 
     fun updateFormContextAndGetNextStep(
         journeyType: JourneyType,
-        previousStep: JourneyStep,
+        journeyStep: JourneyStep,
         userId: String,
         formData: String,
         formContextId: Long? = null,
     ): String {
-        validateFormData(previousStep, formData)
+        validateFormData(journeyStep, formData)
         val formContext: FormContext
         if (formContextId != null) {
             val retrieveFormContext = formContextRepository.findById(formContextId)
@@ -73,7 +73,7 @@ class JourneyService(
             formContext = FormContext(journeyType, formData, user)
             formContextRepository.save(formContext)
         }
-        return getRedirectUrl(journeyType, previousStep, formContext.context)
+        return getRedirectUrl(journeyType, journeyStep, formContext.context)
     }
 
     // TODO - throws Exception("Invalid form data")
