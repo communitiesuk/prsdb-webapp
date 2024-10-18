@@ -10,6 +10,10 @@ class EmailTemplateModelsTests {
         private fun templateList() =
             listOf(
                 EmailTemplateTestData(ExampleEmail("test string"), "/emails/ExampleEmail.md"),
+                EmailTemplateTestData(
+                    LocalAuthorityInvitationEmail("authority", "https://example.com"),
+                    "/emails/LocalAuthorityInvitation.md",
+                ),
             )
     }
 
@@ -25,7 +29,7 @@ class EmailTemplateModelsTests {
     fun `EmailTemplateModels hashmaps have keys that match the parameters in their markdown templates`(testData: EmailTemplateTestData) {
         // Arrange
         var storedBody = javaClass.getResource(testData.markdownLocation)?.readText() ?: ""
-        var parameters = getParametersFromBody(storedBody)
+        var parameters = getParametersFromBody(storedBody).distinct()
 
         // Act
         var modelHashMap = testData.model.toHashMap()
