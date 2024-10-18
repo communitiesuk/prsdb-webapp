@@ -85,8 +85,12 @@ populate the database with seed data.
 ### Mock One Login Oauth2
 
 For development, we've mocked elements of the governments one login system (that the web app will be using in deployment).
-When you start the app using the `local` profile this will be available, when you attempt to login, This will automatically log you in as a user that has every role - and therefore can access all pages.
+When you start the app using the `local` run configuration, this will be available, when you attempt to login. It will automatically log you in as a user that has every role - and therefore can access all pages.
 
 If you are adding new roles please add the user with the `userId` set in `MockOneLoginHelper` to that new role/table.
 
 If you need to be able to login as a user that has specific roles then you can change the `userId` in `MockOneLoginHelper` to the id from the `one_login_user` table of a user that has the permissions you want.
+
+#### Disabling the mock One Login Oauth2
+
+If you need to disable the mock to run the app with One login's integration system, you start the app using the `local-with-auth` run configuration in `.run`.

@@ -36,6 +36,22 @@ spring:
       port: 6379
       password: notarealpassword
 
+one-login:
+  jwt:
+    public.key: classpath:public_key.pem
+    private.key: classpath:private_key.pem
+
+server:
+  error:
+    path: /error
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: local-no-auth
+
   security:
     oauth2:
       client:
@@ -54,11 +70,22 @@ spring:
             user-info-uri: http://localhost:8080//one-login-local/userinfo
             userNameAttribute: "sub"
 
-one-login:
-  jwt:
-    public.key: classpath:public_key.pem
-    private.key: classpath:private_key.pem
+---
 
-server:
-  error:
-    path: /error
+spring:
+  config:
+    activate:
+      on-profile: local-auth
+
+  security:
+    oauth2:
+      client:
+        registration:
+          one-login:
+            client-id: l0AE7SbEHrEa8QeQCGdml9KQ4bk
+            client-authentication-method: private_key_jwt
+            authorization-grant-type: authorization_code
+            scope: openid
+        provider:
+          one-login:
+            issuer-uri: https://oidc.integration.account.gov.uk/

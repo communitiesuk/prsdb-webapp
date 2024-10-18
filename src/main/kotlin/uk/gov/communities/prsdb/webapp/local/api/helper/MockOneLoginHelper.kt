@@ -33,10 +33,11 @@ class MockOneLoginHelper {
         }
     }
 
-    private val userId = "urn:fdc:gov.uk:2022:PQRST"
-    private val userEmail = "julia.jones@hotmail.com"
-    private val userNumber = "07123456789"
+    private val userId = "urn:fdc:gov.uk:2022:UVWXY"
 
+    // These values are from One-Login's publicly available docs (https://docs.sign-in.service.gov.uk/integrate-with-integration-environment/authenticate-your-user/)
+    private val userEmail = "test@example.com"
+    private val userNumber = "01406946277"
     val authorizationCode = "SplxlOBeZQQYbYS6WxSbIA"
 
     var lastReceivedNonce: String? = null
@@ -59,7 +60,7 @@ class MockOneLoginHelper {
                 .claim("vot", "Cl.Cm")
                 .claim("nonce", lastReceivedNonce)
                 .claim("vtm", "http://localhost:8080/one-login-local/trustmark")
-                .claim("sid", "Nzk0M2NiNWUtYWZhNC00ZjZmLThiOTItNzUxNjcyNjUwOGNl")
+                .claim("sid", "dX5xv0XgHh6yfD1xy-ss_1EDK0I")
 
         val signedJwt = SignedJWT(headerBuilder.build(), claimSetBBuilder.build())
 
@@ -67,6 +68,44 @@ class MockOneLoginHelper {
 
         return signedJwt.serialize()
     }
+
+    fun getJwksJsonResponse(): String =
+        "{\n" +
+            "\"keys\": [\n" +
+            "{\n" +
+            "\"kty\": \"EC\",\n" +
+            "\"use\": \"sig\",\n" +
+            "\"crv\": \"P-256\",\n" +
+            "\"kid\": \"$keyId\",\n" +
+            "\"x\": \"${ecKey.toPublicJWK().x}\",\n" +
+            "\"y\": \"${ecKey.toPublicJWK().y}\",\n" +
+            "\"alg\": \"ES256\"\n" +
+            "}" +
+            "]\n" +
+            "}"
+
+    fun getTokenResponse(): String {
+        val idToken: String = getIdToken()
+
+        val responseBody =
+            "{\n" +
+                "\"access_token\": \"SlAV32hkKG\",\n" +
+                "\"token_type\": \"Bearer\",\n" +
+                "\"expires_in\": 180,\n" +
+                "\"id_token\": \"$idToken\"\n" +
+                "}"
+
+        return responseBody
+    }
+
+    fun getUserInfoResponse(): String =
+        "{\n" +
+            "  \"sub\": \"$userId\",\n" +
+            "  \"email\": \"$userEmail\",\n" +
+            "  \"email_verified\": true,\n" +
+            "  \"phone_number\": \"$userNumber\",\n" +
+            "  \"phone_number_verified\": true\n" +
+            "}"
 
     fun getOpenidConfigurationResponse(): String =
         "{\n" +
@@ -140,60 +179,4 @@ class MockOneLoginHelper {
             "\"backchannel_logout_supported\": true,\n" +
             "\"backchannel_logout_session_supported\": false\n" +
             "}\n"
-
-    fun getJwksJsonResponse(): String =
-        "{\n" +
-            "\"keys\": [\n" +
-            "{\n" +
-            "\"kty\": \"EC\",\n" +
-            "\"use\": \"sig\",\n" +
-            "\"crv\": \"P-256\",\n" +
-            "\"kid\": \"$keyId\",\n" +
-            "\"x\": \"${ecKey.toPublicJWK().x}\",\n" +
-            "\"y\": \"${ecKey.toPublicJWK().y}\",\n" +
-            "\"alg\": \"ES256\"\n" +
-            "},\n" +
-            "{\n" +
-            "\"kty\": \"EC\",\n" +
-            "\"use\": \"sig\",\n" +
-            "\"crv\": \"P-256\",\n" +
-            "\"kid\": \"644af598b780f54106ca0f3c017341bc230c4f8373f35f32e18e3e40cc7acff6\",\n" +
-            "\"x\": \"5URVCgH4HQgkg37kiipfOGjyVft0R5CdjFJahRoJjEw\",\n" +
-            "\"y\": \"QzrvsnDy3oY1yuz55voaAq9B1M5tfhgW3FBjh_n_F0U\",\n" +
-            "\"alg\": \"ES256\"\n" +
-            "},\n" +
-            "{\n" +
-            "\"kty\": \"EC\",\n" +
-            "\"use\": \"sig\",\n" +
-            "\"crv\": \"P-256\",\n" +
-            "\"kid\": \"e1f5699d068448882e7866b49d24431b2f21bf1a8f3c2b2dde8f4066f0506f1b\",\n" +
-            "\"x\": \"BJnIZvnzJ9D_YRu5YL8a3CXjBaa5AxlX1xSeWDLAn9k\",\n" +
-            "\"y\": \"x4FU3lRtkeDukSWVJmDuw2nHVFVIZ8_69n4bJ6ik4bQ\",\n" +
-            "\"alg\": \"ES256\"\n" +
-            "}\n" +
-            "]\n" +
-            "}"
-
-    fun getTokenResponse(): String {
-        val idToken: String = getIdToken()
-
-        val responseBody =
-            "{\n" +
-                "\"access_token\": \"SlAV32hkKG\",\n" +
-                "\"token_type\": \"Bearer\",\n" +
-                "\"expires_in\": 180,\n" +
-                "\"id_token\": \"$idToken\"\n" +
-                "}"
-
-        return responseBody
-    }
-
-    fun getUserInfoResponse(): String =
-        "{\n" +
-            "  \"sub\": \"$userId\",\n" +
-            "  \"email\": \"$userEmail\",\n" +
-            "  \"email_verified\": true,\n" +
-            "  \"phone_number\": \"$userNumber\",\n" +
-            "  \"phone_number_verified\": true\n" +
-            "}"
 }

@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="local" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <option name="ACTIVE_PROFILES" value="local,local-no-auth" />
+  <configuration default="false" name="local-with-auth" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <option name="ACTIVE_PROFILES" value="local,local-auth" />
     <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
     <module name="prsdb-webapp.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="uk.gov.communities.prsdb.webapp.PrsdbWebappApplication" />
