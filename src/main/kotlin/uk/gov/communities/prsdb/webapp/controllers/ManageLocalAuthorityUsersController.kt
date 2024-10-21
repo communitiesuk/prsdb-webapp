@@ -34,13 +34,7 @@ class ManageLocalAuthorityUsersController(
         val currentUserLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
 
         val activeUsers = localAuthorityDataService.getLocalAuthorityUsersForLocalAuthority(currentUserLocalAuthority)
-        // TODO: Get these from LocalAuthorityUserInvitation with userName=email, isManager=false and isPending=true
-        val pendingUsers =
-            listOf(
-                LocalAuthorityUserDataModel("Invited user 1", isManager = false, isPending = true),
-                LocalAuthorityUserDataModel("Invited user 2", isManager = false, isPending = true),
-            )
-
+        val pendingUsers = localAuthorityDataService.getLocalAuthorityPendingUsersForLocalAuthority(currentUserLocalAuthority)
         val users = activeUsers + pendingUsers
 
         model.addAttribute("localAuthority", currentUserLocalAuthority.name)

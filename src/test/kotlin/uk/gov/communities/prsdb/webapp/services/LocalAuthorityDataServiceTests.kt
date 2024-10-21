@@ -8,17 +8,25 @@ import org.mockito.kotlin.whenever
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
+import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUserInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
+import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
 
 class LocalAuthorityDataServiceTests {
     private lateinit var localAuthorityUsersRepository: LocalAuthorityUserRepository
+    private lateinit var localAuthorityUserInvitationRepository: LocalAuthorityUserInvitationRepository
     private lateinit var localAuthorityDataService: LocalAuthorityDataService
 
     @BeforeEach
     fun setup() {
         localAuthorityUsersRepository = Mockito.mock(LocalAuthorityUserRepository::class.java)
-        localAuthorityDataService = LocalAuthorityDataService(localAuthorityUsersRepository)
+        localAuthorityUserInvitationRepository = Mockito.mock(LocalAuthorityUserInvitationRepository::class.java)
+        localAuthorityDataService =
+            LocalAuthorityDataService(
+                localAuthorityUsersRepository,
+                localAuthorityUserInvitationRepository,
+            )
     }
 
     fun createOneLoginUser(username: String): OneLoginUser {
@@ -48,6 +56,17 @@ class LocalAuthorityDataServiceTests {
         return user
     }
 
+    fun createLocalAuthorityUserInvitation(
+        invitedEmail: String,
+        localAuthority: LocalAuthority,
+    ): LocalAuthorityUserInvitation {
+        val invitation = LocalAuthorityUserInvitation()
+        ReflectionTestUtils.setField(invitation, "invitedEmailAddress", invitedEmail)
+        ReflectionTestUtils.setField(invitation, "localAuthority", localAuthority)
+
+        return invitation
+    }
+
     @Test
     fun `getLocalAuthorityUsersForLocalAuthority returns a populated list of LocalAuthorityUserDataModel`() {
         // Arrange
@@ -69,6 +88,8 @@ class LocalAuthorityDataServiceTests {
         Assertions.assertEquals("Test user 2", laUserList[1].userName)
         Assertions.assertEquals(true, laUserList[0].isManager)
         Assertions.assertEquals(false, laUserList[1].isManager)
+        Assertions.assertEquals(false, laUserList[0].isPending)
+        Assertions.assertEquals(false, laUserList[1].isPending)
     }
 
     @Test
@@ -95,5 +116,29 @@ class LocalAuthorityDataServiceTests {
 
         // Act, Assert
         Assertions.assertNull(localAuthorityDataService.getLocalAuthorityForUser("test-user-1"))
+    }
+
+    @Test
+    fun `getLocalAuthorityPendingUsersForLocalAuthority returns a populated list of LocalAuthorityUserDataModel`() {
+        // Arrange
+        val localAuthorityId = 123
+        val localAuthorityTest = createLocalAuthority(localAuthorityId)
+        val invitation1 = createLocalAuthorityUserInvitation("invited.user@example.com", localAuthorityTest)
+        val invitation2 = createLocalAuthorityUserInvitation("another.user@example.com", localAuthorityTest)
+        Mockito
+            .`when`(localAuthorityUserInvitationRepository.findByLocalAuthority(localAuthorityTest))
+            .thenReturn(listOf(invitation1, invitation2))
+
+        // Act
+        val laInvitedUsers = localAuthorityDataService.getLocalAuthorityPendingUsersForLocalAuthority(localAuthorityTest)
+
+        // Assert
+        Assertions.assertEquals(2, laInvitedUsers.size)
+        Assertions.assertEquals("invited.user@example.com", laInvitedUsers[0].userName)
+        Assertions.assertEquals("another.user@example.com", laInvitedUsers[1].userName)
+        Assertions.assertEquals(false, laInvitedUsers[0].isManager)
+        Assertions.assertEquals(false, laInvitedUsers[1].isManager)
+        Assertions.assertEquals(true, laInvitedUsers[0].isPending)
+        Assertions.assertEquals(true, laInvitedUsers[1].isPending)
     }
 }
