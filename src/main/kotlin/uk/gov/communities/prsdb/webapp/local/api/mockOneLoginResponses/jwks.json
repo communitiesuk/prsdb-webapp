@@ -1,0 +1,14 @@
+{
+  "keys":
+  [
+    {
+      "kty": "EC",
+      "use": "sig",
+      "crv": "P-256",
+      "kid": "keyId",
+      "x": "publicJWK_x",
+      "y": "publicJWK_y",
+      "alg": "ES256"
+    }
+  ]
+}
