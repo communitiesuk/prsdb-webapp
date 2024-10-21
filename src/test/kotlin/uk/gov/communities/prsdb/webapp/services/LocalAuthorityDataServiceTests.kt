@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
@@ -75,12 +77,13 @@ class LocalAuthorityDataServiceTests {
         val baseUser2 = createOneLoginUser("Test user 2")
         val localAuthorityUser1 = createLocalAuthorityUser(baseUser1, true, localAuthorityTest)
         val localAuthorityUser2 = createLocalAuthorityUser(baseUser2, false, localAuthorityTest)
+        val pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "baseUser_name"))
         Mockito
-            .`when`(localAuthorityUsersRepository.findByLocalAuthorityOrderByBaseUser_Name(localAuthorityTest))
+            .`when`(localAuthorityUsersRepository.findByLocalAuthority(localAuthorityTest, pageRequest))
             .thenReturn(listOf(localAuthorityUser1, localAuthorityUser2))
 
         // Act
-        val laUserList = localAuthorityDataService.getLocalAuthorityUsersForLocalAuthority(localAuthorityTest)
+        val laUserList = localAuthorityDataService.getLocalAuthorityUsersForLocalAuthority(localAuthorityTest, pageRequest)
 
         // Assert
         Assertions.assertEquals(2, laUserList.size)
@@ -127,12 +130,13 @@ class LocalAuthorityDataServiceTests {
         val localAuthorityTest = createLocalAuthority(localAuthorityId)
         val invitation1 = createLocalAuthorityUserInvitation("invited.user@example.com", localAuthorityTest)
         val invitation2 = createLocalAuthorityUserInvitation("another.user@example.com", localAuthorityTest)
+        val pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "invitedEmail"))
         Mockito
-            .`when`(localAuthorityInvitationRepository.findByInvitingAuthorityOrderByInvitedEmail(localAuthorityTest))
+            .`when`(localAuthorityInvitationRepository.findByInvitingAuthority(localAuthorityTest, pageRequest))
             .thenReturn(listOf(invitation1, invitation2))
 
         // Act
-        val laInvitedUsers = localAuthorityDataService.getLocalAuthorityPendingUsersForLocalAuthority(localAuthorityTest)
+        val laInvitedUsers = localAuthorityDataService.getLocalAuthorityPendingUsersForLocalAuthority(localAuthorityTest, pageRequest)
 
         // Assert
         Assertions.assertEquals(2, laInvitedUsers.size)
