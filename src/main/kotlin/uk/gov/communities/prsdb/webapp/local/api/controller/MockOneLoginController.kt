@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.util.UriComponentsBuilder
 import java.io.File
 import java.net.URI
 import java.time.Instant
@@ -56,12 +57,12 @@ class MockOneLoginController {
 
     @GetMapping("/.well-known/openid-configuration")
     fun openidConfiguration(): String =
-        File("src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/helper/openid-configuration.json")
+        File("src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/mockOneLoginResponses/openid-configuration.json")
             .readText(Charsets.UTF_8)
 
     @GetMapping("/.well-known/jwks.json")
     fun jwksJson(): String =
-        File("src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/helper/jwks.json")
+        File("src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/mockOneLoginResponses/jwks.json")
             .readText(Charsets.UTF_8)
             .replace("keyId", keyId)
             .replace(
@@ -88,7 +89,14 @@ class MockOneLoginController {
         @RequestParam nonce: String,
     ): ResponseEntity<Unit> {
         lastReceivedNonce = nonce
-        val locationURI: URI = URI.create("$redirect_uri?code=SplxlOBeZQQYbYS6WxSbIA&state=$state")
+        val locationURI: URI =
+            UriComponentsBuilder
+                .newInstance()
+                .uri(URI.create(redirect_uri))
+                .query("code=SplxlOBeZQQYbYS6WxSbIA")
+                .query("state=$state")
+                .build()
+                .toUri()
 
         return ResponseEntity.status(302).location(locationURI).build()
     }
@@ -102,7 +110,7 @@ class MockOneLoginController {
         @RequestParam code: String,
     ): ResponseEntity<String> {
         val responseBody =
-            File("src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/helper/token.json")
+            File("src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/mockOneLoginResponses/token.json")
                 .readText(Charsets.UTF_8)
                 .replace("idToken", getIdToken())
 
@@ -114,7 +122,7 @@ class MockOneLoginController {
     @GetMapping("/userinfo")
     fun userInfo(): ResponseEntity<String> {
         val responseBody =
-            File("src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/helper/userInfo.json")
+            File("src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/mockOneLoginResponses/userInfo.json")
                 .readText(Charsets.UTF_8)
                 .replace("userId", userId)
                 .replace("userEmail", userEmail)
