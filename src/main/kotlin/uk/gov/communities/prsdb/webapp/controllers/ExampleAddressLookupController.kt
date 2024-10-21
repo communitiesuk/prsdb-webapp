@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 
+/* TODO PRSD-371: Remove this template once there is another way to reach the AddressLookupService
+ * This template is for an example page to demo our integration with OS Places and should be removed once
+ * there is an integration that belongs to an intended releasable feature.
+ */
 @Controller
 @RequestMapping("/lookup-an-address")
 class ExampleAddressLookupController(
