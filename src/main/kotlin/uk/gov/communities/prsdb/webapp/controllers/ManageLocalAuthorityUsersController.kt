@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.validation.Valid
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
@@ -9,6 +11,7 @@ import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ConfirmedEmailDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
@@ -26,6 +29,8 @@ class ManageLocalAuthorityUsersController(
     var invitationService: LocalAuthorityInvitationService,
     val localAuthorityDataService: LocalAuthorityDataService,
 ) {
+    val maxUsersDisplayed = 2
+
     @GetMapping
     fun index(
         model: Model,
@@ -33,8 +38,8 @@ class ManageLocalAuthorityUsersController(
     ): String {
         val currentUserLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
 
-        val activeUsers = localAuthorityDataService.getLocalAuthorityUsersForLocalAuthority(currentUserLocalAuthority)
-        val pendingUsers = localAuthorityDataService.getLocalAuthorityPendingUsersForLocalAuthority(currentUserLocalAuthority)
+        val activeUsers = getActiveUsersPaginated(currentUserLocalAuthority, 1, maxUsersDisplayed)
+        val pendingUsers = getPendingUsersPaginated(currentUserLocalAuthority, 1, maxUsersDisplayed)
         val users = activeUsers + pendingUsers
 
         model.addAttribute("localAuthority", currentUserLocalAuthority.name)
@@ -50,6 +55,31 @@ class ManageLocalAuthorityUsersController(
         )
 
         return "manageLAUsers"
+    }
+
+    private fun shouldPaginate(localAuthority: LocalAuthority): Boolean =
+        (
+            localAuthorityDataService.countActiveLocalAuthorityUsersForLocalAuthority(localAuthority) +
+                localAuthorityDataService.countPendingLocalAuthorityUsersForLocalAuthority(localAuthority)
+                > maxUsersDisplayed
+        )
+
+    private fun getActiveUsersPaginated(
+        localAuthority: LocalAuthority,
+        page: Int,
+        nUsers: Int,
+    ): List<LocalAuthorityUserDataModel> {
+        val pageRequest = PageRequest.of(page - 1, nUsers, Sort.by(Sort.Direction.ASC, "baseUser_name"))
+        return localAuthorityDataService.getLocalAuthorityUsersForLocalAuthority(localAuthority, pageRequest)
+    }
+
+    private fun getPendingUsersPaginated(
+        localAuthority: LocalAuthority,
+        page: Int,
+        nUsers: Int,
+    ): List<LocalAuthorityUserDataModel> {
+        val pageRequest = PageRequest.of(page - 1, nUsers, Sort.by(Sort.Direction.ASC, "invitedEmail"))
+        return localAuthorityDataService.getLocalAuthorityPendingUsersForLocalAuthority(localAuthority, pageRequest)
     }
 
     @GetMapping("/invite-new-user")
