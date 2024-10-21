@@ -7,9 +7,12 @@ import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
 
 @Configuration
 class OSPlacesConfig {
+    @Value("\${os-places.base-url}")
+    lateinit var baseURL: String
+
     @Value("\${os-places.api-key}")
     lateinit var apiKey: String
 
     @Bean
-    fun osPlacesClient(): OSPlacesClient = OSPlacesClient(apiKey)
+    fun osPlacesClient(): OSPlacesClient = OSPlacesClient(baseURL, apiKey)
 }

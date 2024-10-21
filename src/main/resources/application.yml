@@ -46,6 +46,7 @@ notify:
 
 os-places:
   api-key: ${OS_PLACES_API_KEY}
+  base-url: https://api.os.uk/search/places/v1
 
 server:
   error:

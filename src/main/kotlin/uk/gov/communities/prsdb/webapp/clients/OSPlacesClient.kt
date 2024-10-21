@@ -8,19 +8,19 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
 class OSPlacesClient(
+    private val baseURL: String,
     private val apiKey: String,
 ) {
     private val client = HttpClient.newHttpClient()
 
-    fun searchByPostcode(postcode: String): String =
-        getResponse("https://api.os.uk/search/places/v1/postcode?dataset=lpi&postcode=$postcode")
+    fun searchByPostcode(postcode: String): String = getResponse("/postcode?postcode=${postcode.replace(" ", "")}")
 
-    private fun getResponse(url: String): String {
+    private fun getResponse(endpoint: String): String {
         val request: HttpRequest =
             HttpRequest
                 .newBuilder()
                 .header("key", apiKey)
-                .uri(URI.create(url))
+                .uri(URI.create(baseURL + endpoint))
                 .build()
 
         val response = client.send(request, HttpResponse.BodyHandlers.ofString())

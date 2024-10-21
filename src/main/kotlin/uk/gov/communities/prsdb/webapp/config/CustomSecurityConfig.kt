@@ -35,6 +35,8 @@ class CustomSecurityConfig {
                     .permitAll()
                     .requestMatchers("/lookup-an-address")
                     .permitAll()
+                    .requestMatchers("/postcode")
+                    .permitAll()
                     .anyRequest()
                     .authenticated()
             }.oauth2Login(Customizer.withDefaults())
