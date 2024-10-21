@@ -9,7 +9,7 @@ class OSPlacesAddressLookupService(
     val osPlacesClient: OSPlacesClient,
 ) : AddressLookupService {
     override fun searchByPostcode(postcode: String): List<String> {
-        val response = osPlacesClient.searchByPostcode(postcode)
+        val response = osPlacesClient.searchByPostcode(postcode.replace(" ", ""))
         val results = JSONObject(response).getJSONArray("results")
         val addresses = mutableListOf<String>()
         for (i in 0 until results.length()) {
