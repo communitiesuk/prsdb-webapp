@@ -76,7 +76,7 @@ class LocalAuthorityDataServiceTests {
         val baseUser2 = createOneLoginUser("Test user 2")
         val localAuthorityUser1 = createLocalAuthorityUser(baseUser1, true, localAuthorityTest)
         val localAuthorityUser2 = createLocalAuthorityUser(baseUser2, false, localAuthorityTest)
-        whenever(localAuthorityUsersRepository.findByLocalAuthority(localAuthorityTest))
+        whenever(localAuthorityUsersRepository.findByLocalAuthorityOrderByBaseUser_Name(localAuthorityTest))
             .thenReturn(listOf(localAuthorityUser1, localAuthorityUser2))
 
         // Act
@@ -125,8 +125,7 @@ class LocalAuthorityDataServiceTests {
         val localAuthorityTest = createLocalAuthority(localAuthorityId)
         val invitation1 = createLocalAuthorityUserInvitation("invited.user@example.com", localAuthorityTest)
         val invitation2 = createLocalAuthorityUserInvitation("another.user@example.com", localAuthorityTest)
-        Mockito
-            .`when`(localAuthorityUserInvitationRepository.findByLocalAuthority(localAuthorityTest))
+        whenever(localAuthorityUserInvitationRepository.findByLocalAuthorityOrderByInvitedEmailAddress(localAuthorityTest))
             .thenReturn(listOf(invitation1, invitation2))
 
         // Act
