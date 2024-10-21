@@ -6,6 +6,6 @@
         <span>Example Landlord Registration Number: </span>
         <span th:text="${landlordRegNum}">Example Landlord Registration Number</span>
     </p>
-    <div th:replace="~{fragments/startButton :: startButton( href, buttonText )utton( ${startButtonHref}, ${startButtonText} )}"></div>
+    <div th:replace="~{fragments/startButton :: startButton( ${startButtonHref}, ${startButtonText} )}"></div>
 </main>
 </html>
