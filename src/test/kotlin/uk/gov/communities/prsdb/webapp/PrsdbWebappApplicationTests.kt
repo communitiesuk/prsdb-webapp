@@ -40,8 +40,8 @@ class PrsdbWebappApplicationTests {
     lateinit var notificationClient: NotificationClient
 
     @MockBean
-    lateinit var OSPlaces: OSPlacesConfig
+    lateinit var osPlaces: OSPlacesConfig
 
     @MockBean
-    lateinit var OSPlacesClient: OSPlacesClient
+    lateinit var osPlacesClient: OSPlacesClient
 }
