@@ -38,6 +38,6 @@ VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 1, '10/07/24', '10/07/24'),
        ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', true, 1, '10/15/24', '10/15/24'),
        ('urn:fdc:gov.uk:2022:cgVX2oJWKHMwzm8Gzx25CSoVXixVS0rw32Sar4Om8vQ', false, 1, '10/15/24', '10/15/24');
 
-INSERT INTO local_authority_user_invitation (invited_email_address, local_authority_id)
-VALUES ('invited.user@example.com', 1),
-       ('another.user@example.com', 1)
+INSERT INTO local_authority_invitation (invited_email, inviting_authority_id, token)
+VALUES ('invited.user@example.com', 1, gen_random_uuid()),
+       ('another.user@example.com', 1, gen_random_uuid())
