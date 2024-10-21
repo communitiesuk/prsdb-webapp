@@ -33,6 +33,8 @@ class CustomSecurityConfig {
                     .permitAll()
                     .requestMatchers("/register-as-a-landlord")
                     .permitAll()
+                    .requestMatchers("/lookup-an-address")
+                    .permitAll()
                     .anyRequest()
                     .authenticated()
             }.oauth2Login(Customizer.withDefaults())
