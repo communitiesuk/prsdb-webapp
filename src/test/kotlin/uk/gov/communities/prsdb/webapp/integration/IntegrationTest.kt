@@ -12,7 +12,9 @@ import org.springframework.security.oauth2.jwt.JwtDecoderFactory
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
+import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
+import uk.gov.communities.prsdb.webapp.config.OSPlacesConfig
 import uk.gov.communities.prsdb.webapp.config.OneLoginConfig
 import uk.gov.service.notify.NotificationClient
 
@@ -41,6 +43,12 @@ abstract class IntegrationTest {
 
     @MockBean
     lateinit var notificationClient: NotificationClient
+
+    @MockBean
+    lateinit var OSPlaces: OSPlacesConfig
+
+    @MockBean
+    lateinit var OSPlacesClient: OSPlacesClient
 
     @MockBean
     lateinit var securityFilterChain: SecurityFilterChain
