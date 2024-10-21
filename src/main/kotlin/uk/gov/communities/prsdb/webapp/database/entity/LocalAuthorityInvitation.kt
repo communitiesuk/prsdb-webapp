@@ -17,11 +17,11 @@ class LocalAuthorityInvitation() : AuditableEntity() {
     private val id: Long? = null
 
     @Column(nullable = false, unique = true)
-    var token: UUID? = null
+    lateinit var token: UUID
         private set
 
     @Column(nullable = false)
-    var invitedEmail: String? = null
+    lateinit var invitedEmail: String
         private set
 
     @ManyToOne(optional = false)
