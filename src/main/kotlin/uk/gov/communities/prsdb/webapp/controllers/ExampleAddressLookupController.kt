@@ -27,7 +27,7 @@ class ExampleAddressLookupController(
     )
 
     @PostMapping(consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
-    fun sendEmail(
+    fun lookupAddress(
         model: Model,
         body: Submission,
     ): String {
