@@ -3,6 +3,9 @@ package uk.gov.communities.prsdb.webapp.models.viewModels
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import java.net.URI
 
 class EmailTemplateModelsTests {
     companion object {
@@ -11,10 +14,21 @@ class EmailTemplateModelsTests {
             listOf(
                 EmailTemplateTestData(ExampleEmail("test string"), "/emails/ExampleEmail.md"),
                 EmailTemplateTestData(
-                    LocalAuthorityInvitationEmail("authority", "https://example.com"),
+                    LocalAuthorityInvitationEmail(createLocalAuthority(1, "name"), URI("https://example.com")),
                     "/emails/LocalAuthorityInvitation.md",
                 ),
             )
+
+        private fun createLocalAuthority(
+            id: Int,
+            name: String,
+        ): LocalAuthority {
+            val localAuthority = LocalAuthority()
+            ReflectionTestUtils.setField(localAuthority, "id", id)
+            ReflectionTestUtils.setField(localAuthority, "name", name)
+
+            return localAuthority
+        }
     }
 
     data class EmailTemplateTestData(
