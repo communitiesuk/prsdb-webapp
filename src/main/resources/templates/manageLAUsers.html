@@ -16,8 +16,8 @@
     </div>
     <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#action-buttons})}">
       <div class="govuk-button-group" id="action-buttons">
-        <button th:replace="~{fragments/primaryButton :: primaryButton('Invite another user')}"></button>
-        <button th:replace="~{fragments/secondaryButton :: secondaryButton('Return to dashboard')}"></button>
+        <button th:replace="~{fragments/primaryButton :: primaryButton(#{manageLAUsers.primaryButtonText})}"></button>
+        <button th:replace="~{fragments/secondaryButton :: secondaryButton(#{manageLAUsers.secondaryButtonText})}"></button>
       </div>
     </div>
   </section>
