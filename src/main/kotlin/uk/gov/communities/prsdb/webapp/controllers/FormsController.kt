@@ -1,13 +1,11 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.springframework.stereotype.Controller
-import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyStep
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.services.JourneyService
@@ -23,11 +21,15 @@ class FormsController(
     fun getForm(
         @PathVariable("journeyType") journeyType: String,
         @PathVariable("journeyStep") journeyStep: String,
-        model: Model,
+        @RequestParam(required = false, name = "formContextId") formContextId: Long,
+        principal: Principal,
     ): String {
-        model.addAttribute("contentHeader", "getForms for $journeyType with $journeyStep")
-        model.addAttribute("title", "getForms for $journeyType with $journeyStep")
-        model.addAttribute("serviceName", SERVICE_NAME)
+        journeyService.getJourneyView(
+            JourneyType.valueOf(journeyType),
+            JourneyStep.valueOf(journeyStep),
+            principal.name,
+            formContextId,
+        )
         return "index"
     }
 
@@ -36,6 +38,7 @@ class FormsController(
         @PathVariable("journeyType") journeyType: String,
         @PathVariable("journeyStep") journeyStep: String,
         @RequestParam("formData") formData: String,
+        @RequestParam(required = false, name = "formContextId") formContextId: Long,
         principal: Principal,
     ): String {
         journeyService.updateFormContextAndGetNextStep(
@@ -43,8 +46,8 @@ class FormsController(
             JourneyStep.valueOf(journeyStep),
             principal.name,
             formData,
+            formContextId,
         )
-
         return "index"
     }
 }

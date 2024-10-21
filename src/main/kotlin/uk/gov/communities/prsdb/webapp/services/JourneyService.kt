@@ -1,5 +1,8 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyStep
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
@@ -15,26 +18,31 @@ class JourneyService(
     fun getJourneyView(
         journeyType: JourneyType,
         journeyStep: JourneyStep,
+        principalName: String,
         formContextId: Long? = null,
     ): String {
         if (formContextId != null) {
-            val retrieveFormContext = formContextRepository.findById(formContextId)
-            if (retrieveFormContext.isPresent) {
-                val formContext = retrieveFormContext.get()
-                validateStep(journeyType, journeyStep, formContext.context)
+            val formContext = formContextRepository.findById(formContextId).get()
+            if (principalName == formContext.id.toString()) {
+                validateFormContextForStep(journeyType, journeyStep, formContext)
             } else {
-                throw Exception("Invalid Form Context Id")
+                throw Exception("Should this be a 404??")
             }
         }
         return getView(journeyType, journeyStep)
     }
 
     // TODO - throws Exception("Invalid journey step")
-    private fun validateStep(
+    private fun validateFormContextForStep(
         journeyType: JourneyType,
         journeyStep: JourneyStep,
-        context: String,
-    ): Boolean = true
+        formContext: FormContext,
+    ): Boolean {
+        // TODO add validation process
+        // TODO - if not valid throws Exception("Invalid journey step")
+
+        return true
+    }
 
     // TODO
     private fun getView(
@@ -45,47 +53,62 @@ class JourneyService(
     fun updateFormContextAndGetNextStep(
         journeyType: JourneyType,
         journeyStep: JourneyStep,
-        userId: String,
+        principalName: String,
         formData: String,
-        formContextId: Long? = null,
     ): String {
         validateFormData(journeyStep, formData)
-        val formContext: FormContext
-        if (formContextId != null) {
-            val retrieveFormContext = formContextRepository.findById(formContextId)
-            if (retrieveFormContext.isPresent) {
-                formContext = retrieveFormContext.get()
-                // TODO:
-                //      formContext.context -> journeyModel (based on journeyType)
-                //      journeyModel.add(formData)
-                //      journeyModel -> string
-                formContext.context += formData
-                formContextRepository.save(formContext)
-            } else {
-                throw Exception("Invalid Form Context Id")
-            }
-        } else {
-            val user = oneLoginUserRepository.getReferenceById(userId)
-            // TODO:
-            //       new journeyModel (based on journeyType)
-            //       journeyModel.add(formData)
-            //       journeyModel -> string
-            formContext = FormContext(journeyType, formData, user)
-            formContextRepository.save(formContext)
-        }
-        return getRedirectUrl(journeyType, journeyStep, formContext.context)
+        val user = oneLoginUserRepository.findById(principalName).get()
+        val context = getMappedData(formData)
+        val formContext = FormContext(journeyType, context.toString(), user)
+        val formContextId = formContextRepository.save(formContext).id
+        return getRedirectUrl(journeyType, journeyStep, context, formContextId)
+
+//        if (formContextId != null) {
+//            val retrieveFormContext = formContextRepository.findById(formContextId)
+//            if (retrieveFormContext.isPresent) {
+//                formContext = retrieveFormContext.get()
+//                // TODO:
+//                //      formContext.context -> journeyModel (based on journeyType)
+//                //      journeyModel.add(formData)
+//                //      journeyModel -> string
+//                formContext.context += formData
+//                formContextRepository.save(formContext)
+//            } else {
+//                throw Exception("Invalid Form Context Id")
+//            }
+//        } else {
+//            val user = oneLoginUserRepository.findById(principal.name).get()
+//            // TODO:
+//            //       new journeyModel (based on journeyType)
+//            //       journeyModel.add(formData)
+//            //       journeyModel -> string
+//            formContext = FormContext(journeyType, formData, user)
+//            formContextRepository.save(formContext)
+//        }
+//        return getRedirectUrl(journeyType, journeyStep, formContext.context)
     }
 
-    // TODO - throws Exception("Invalid form data")
+    private fun getMappedData(formData: String): Map<String, JsonElement> {
+        val data = Json.parseToJsonElement(formData)
+        require(data is JsonObject) { "Only Json Objects can be converted to a Map" }
+        return data
+    }
+
     private fun validateFormData(
         step: JourneyStep,
         formData: String,
-    ): Boolean = true
+    ): Boolean {
+        // TODO add validation process
+        // TODO - if not valid throws Exception("Invalid form data")
 
-    // TODO
+        return true
+    }
+
+    // TODO get the redirect url AND add the formContextId as a Request param!!
     private fun getRedirectUrl(
         journeyType: JourneyType,
         journeyStep: JourneyStep,
-        context: String,
+        context: Map<String, JsonElement>,
+        id: Long?,
     ): String = "redirect"
 }
