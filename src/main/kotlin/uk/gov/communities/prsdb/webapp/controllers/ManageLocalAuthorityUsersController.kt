@@ -8,7 +8,6 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
-import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import java.security.Principal
 import java.util.Locale
@@ -28,13 +27,7 @@ class ManageLocalAuthorityUsersController(
         val currentUserLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
 
         val activeUsers = localAuthorityDataService.getLocalAuthorityUsersForLocalAuthority(currentUserLocalAuthority)
-        // TODO: Get these from LocalAuthorityUserInvitation with userName=email, isManager=false and isPending=true
-        val pendingUsers =
-            listOf(
-                LocalAuthorityUserDataModel("Invited user 1", isManager = false, isPending = true),
-                LocalAuthorityUserDataModel("Invited user 2", isManager = false, isPending = true),
-            )
-
+        val pendingUsers = localAuthorityDataService.getLocalAuthorityPendingUsersForLocalAuthority(currentUserLocalAuthority)
         val users = activeUsers + pendingUsers
 
         model.addAttribute(
