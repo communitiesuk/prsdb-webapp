@@ -6,7 +6,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationEmail
@@ -47,7 +46,11 @@ class ExampleEmailSendingController(
         try {
             val currentAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
             val token = invitationService.createInvitationToken(body.emailAddress, currentAuthority)
-            sendInvitation(body.emailAddress, currentAuthority.name, token)
+            val invitationLinkAddress = invitationService.buildInvitationUri(token)
+            emailSender.sendEmail(
+                body.emailAddress,
+                LocalAuthorityInvitationEmail(currentAuthority, invitationLinkAddress),
+            )
 
             model.addAttribute("contentHeader", "You have sent a test email to ${body.emailAddress}")
             model.addAttribute("title", "Email sent")
@@ -57,26 +60,6 @@ class ExampleEmailSendingController(
             model.addAttribute("title", "Send an email")
             return "sendTestEmail"
         }
-    }
-
-    // TODO-404: This should not live in the controller layer (and the route should have a bit more thought!). When these end points are
-    // moved to their own controller, URI building should be moved to the service layer and appropriate endpoint names should be chosen.
-    private fun sendInvitation(
-        recipient: String,
-        autorityName: String,
-        token: String,
-    ) {
-        val uri =
-            ServletUriComponentsBuilder
-                .fromCurrentContextPath()
-                .path("invitation")
-                .queryParam("token", token)
-                .build()
-                .toUri()
-        emailSender.sendEmail(
-            recipient,
-            LocalAuthorityInvitationEmail(autorityName, uri.toString()),
-        )
     }
 
     @GetMapping("/invitation")
