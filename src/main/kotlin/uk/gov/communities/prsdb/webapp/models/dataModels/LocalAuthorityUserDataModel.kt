@@ -6,4 +6,5 @@ import kotlinx.serialization.Serializable
 data class LocalAuthorityUserDataModel(
     val userName: String,
     val isManager: Boolean,
+    val isPending: Boolean = false,
 )
