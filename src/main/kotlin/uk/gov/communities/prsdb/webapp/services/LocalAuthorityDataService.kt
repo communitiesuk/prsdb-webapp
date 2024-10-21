@@ -12,12 +12,12 @@ class LocalAuthorityDataService(
     val localAuthorityUserInvitationRepository: LocalAuthorityUserInvitationRepository,
 ) {
     fun getLocalAuthorityUsersForLocalAuthority(localAuthority: LocalAuthority): List<LocalAuthorityUserDataModel> {
-        val usersInThisLocalAuthority = localAuthorityUserRepository.findByLocalAuthority(localAuthority)
+        val usersInThisLocalAuthority = localAuthorityUserRepository.findByLocalAuthorityOrderByBaseUser_Name(localAuthority)
         return usersInThisLocalAuthority.map { LocalAuthorityUserDataModel(it.baseUser.name, it.isManager) }
     }
 
     fun getLocalAuthorityPendingUsersForLocalAuthority(localAuthority: LocalAuthority): List<LocalAuthorityUserDataModel> {
-        val pendingUsers = localAuthorityUserInvitationRepository.findByLocalAuthority(localAuthority)
+        val pendingUsers = localAuthorityUserInvitationRepository.findByLocalAuthorityOrderByInvitedEmailAddress(localAuthority)
         return pendingUsers.map { LocalAuthorityUserDataModel(it.invitedEmailAddress!!, isManager = false, isPending = true) }
     }
 

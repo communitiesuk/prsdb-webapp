@@ -6,5 +6,5 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUserInvitat
 
 interface LocalAuthorityUserInvitationRepository : JpaRepository<LocalAuthorityUserInvitation, Long?> {
     @Suppress("ktlint:standard:function-naming")
-    fun findByLocalAuthority(localAuthority: LocalAuthority): List<LocalAuthorityUserInvitation>
+    fun findByLocalAuthorityOrderByInvitedEmailAddress(localAuthority: LocalAuthority): List<LocalAuthorityUserInvitation>
 }
