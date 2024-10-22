@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service
 import org.springframework.ui.ExtendedModelMap
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.on
-import uk.gov.communities.prsdb.webapp.controllers.ExampleEmailSendingController
+import uk.gov.communities.prsdb.webapp.controllers.ExampleInvitationTokenController
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
@@ -29,10 +29,10 @@ class LocalAuthorityInvitationService(
         return invitationRepository.findByToken(tokenUuid).invitingAuthority
     }
 
-    // TODO-404: This path should be set to match the necessary route on the new invitation controller once created
+    // TODO-405: This function call should be set to match the controller method on the new invitation controller once created
     fun buildInvitationUri(token: String): URI =
         MvcUriComponentsBuilder
-            .fromMethodCall(on(ExampleEmailSendingController::class.java).magicLink(ExtendedModelMap(), token))
+            .fromMethodCall(on(ExampleInvitationTokenController::class.java).acceptInvitation(ExtendedModelMap(), token))
             .build()
             .toUri()
 }
