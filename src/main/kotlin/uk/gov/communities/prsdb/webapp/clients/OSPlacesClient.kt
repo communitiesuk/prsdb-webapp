@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.clients
 import org.apache.http.HttpException
 import org.json.JSONException
 import org.json.JSONObject
+import uk.gov.communities.prsdb.webapp.exceptions.RateLimitExceededException
 import java.net.URI
 import java.net.URLEncoder
 import java.net.http.HttpClient
@@ -26,18 +27,21 @@ class OSPlacesClient(
                 .build()
 
         val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-        val responseBody = response.body()
 
-        if (response.statusCode() != 200) {
-            var errorMessage = "Error ${response.statusCode()}"
-            try {
-                errorMessage += JSONObject(responseBody).getJSONObject("error").getString("message")
-            } catch (e: JSONException) {
-                println("Warn: Unexpected error response format from OS Places - ${e.message}")
-            }
-            throw HttpException(errorMessage)
+        when (response.statusCode()) {
+            200 -> return response.body()
+            429 -> throw RateLimitExceededException("Rate limit exceeded for OS Places requests")
+            else -> throw HttpException(getErrorMessage(response))
         }
+    }
 
-        return responseBody
+    private fun getErrorMessage(response: HttpResponse<String>): String {
+        var errorMessage = "Error ${response.statusCode()}"
+        try {
+            errorMessage += ": ${JSONObject(response.body()).getJSONObject("error").getString("message")}"
+        } catch (e: JSONException) {
+            println("Warn: Unexpected error response format from OS Places - ${e.message}")
+        }
+        return errorMessage
     }
 }
