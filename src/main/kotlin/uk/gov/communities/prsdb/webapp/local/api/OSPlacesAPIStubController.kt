@@ -13,8 +13,8 @@ class OSPlacesAPIStubController {
         @RequestParam postcode: String,
     ): String =
         "{'results':[" +
-            "{'DPA':{'ADDRESS':'1, Example Road, $postcode'}}," +
-            "{'DPA':{'ADDRESS':'2, Example Road, $postcode'}}," +
-            "{'DPA':{'ADDRESS':'3, Example Road, $postcode'}}" +
+            "{'DPA':{'ADDRESS':'1, Example Road, $postcode','POSTCODE':'$postcode','BUILDING_NUMBER':1}}," +
+            "{'DPA':{'ADDRESS':'Main Building, Example Road, $postcode','POSTCODE':'$postcode','BUILDING_NAME':'Main Building'}}," +
+            "{'DPA':{'ADDRESS':'PO1, Example Road, $postcode','POSTCODE':'$postcode','PO_BOX_NUMBER':'PO1'}}," +
             "]}"
 }

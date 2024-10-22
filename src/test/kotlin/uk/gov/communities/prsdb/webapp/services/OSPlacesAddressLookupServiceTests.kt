@@ -9,6 +9,7 @@ import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import kotlin.test.assertEquals
 
 class OSPlacesAddressLookupServiceTests {
@@ -23,8 +24,18 @@ class OSPlacesAddressLookupServiceTests {
 
     @Test
     fun `searchByPostcode returns a corresponding list of addresses given a valid postcode`() {
-        val addressesJSON = "{'results':[{'LPI':{'ADDRESS':'1 Example Road'}},{'LPI':{'ADDRESS':'2 Example Road'}}]}"
-        val expectedAddresses = listOf("1 Example Road", "2 Example Road")
+        val addressesJSON =
+            "{'results':[" +
+                "{'DPA':{'ADDRESS':'1, Example Road, EG','POSTCODE':'EG','BUILDING_NUMBER':1}}," +
+                "{'DPA':{'ADDRESS':'Main Building, Example Road, EG','POSTCODE':'EG','BUILDING_NAME':'Main Building'}}," +
+                "{'DPA':{'ADDRESS':'PO1, Example Road, EG','POSTCODE':'EG','PO_BOX_NUMBER':'PO1'}}," +
+                "]}"
+        val expectedAddresses =
+            listOf(
+                AddressDataModel("1, Example Road, EG", "EG", 1),
+                AddressDataModel("Main Building, Example Road, EG", "EG", buildingName = "Main Building"),
+                AddressDataModel("PO1, Example Road, EG", "EG", poBoxNumber = "PO1"),
+            )
 
         `when`(
             mockOSPlacesClient.searchByPostcode(anyString()),

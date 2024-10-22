@@ -21,7 +21,7 @@
         </div>
     </form>
     <p class="govuk-body" th:if="${addresses != null}" th:each="address: ${addresses}">
-        <span th:text="${address}">Address</span>
+        <span th:text="${address.address}">Address</span>
     </p>
 </main>
 </html>
