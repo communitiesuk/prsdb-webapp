@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.MessageSource
 import org.springframework.http.MediaType
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
-import uk.gov.communities.prsdb.webapp.models.dataModels.EmailDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.ConfirmedEmailDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -79,7 +80,8 @@ class ManageLocalAuthorityUsersController(
     @PostMapping("/invite-new-user", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
     fun sendEmail(
         model: Model,
-        emailModel: EmailDataModel,
+        @Valid
+        emailModel: ConfirmedEmailDataModel,
         principal: Principal,
     ): String {
         model.addAttribute("serviceName", SERVICE_NAME)
