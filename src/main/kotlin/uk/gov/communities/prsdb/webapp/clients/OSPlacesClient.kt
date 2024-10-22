@@ -11,11 +11,10 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
 class OSPlacesClient(
+    private val client: HttpClient,
     private val baseURL: String,
     private val apiKey: String,
 ) {
-    private val client = HttpClient.newHttpClient()
-
     fun searchByPostcode(postcode: String): String = getResponse("/postcode?postcode=${URLEncoder.encode(postcode, "UTF-8")}")
 
     private fun getResponse(endpoint: String): String {
