@@ -1,0 +1,6 @@
+<nav th:fragment="pagination(totalPages, currentPage, isLastPage)" class="govuk-pagination" aria-label="Pagination">
+    <span th:text="${currentPage}"></span>
+    <div th:if="${currentPage != 1}">
+        <div th:replace="~{fragments/pagination/paginationPrevious :: previous(${currentPage}-1)}"></div>
+    </div>
+</nav>

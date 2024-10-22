@@ -14,6 +14,10 @@
         </table>
       </div>
     </div>
+    <div th:if="${shouldPaginate}">
+      <nav  th:replace="~{fragments/pagination/pagination :: pagination(${totalPages}, ${currentPage}, ${isLastPage})}">
+      </nav>
+    </div>
     <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#action-buttons})}">
       <div class="govuk-button-group" id="action-buttons">
         <button th:replace="~{fragments/primaryButton :: primaryButton(#{manageLAUsers.primaryButtonText})}"></button>
