@@ -9,5 +9,10 @@ class ConfirmedEmailValidator : ConstraintValidator<ValidConfirmedEmail, Confirm
     override fun isValid(
         value: ConfirmedEmailDataModel?,
         context: ConstraintValidatorContext?,
-    ): Boolean = value!!.confirmEmail == value.email
+    ): Boolean =
+        if (value == null) {
+            false
+        } else {
+            value.confirmEmail == value.email
+        }
 }
