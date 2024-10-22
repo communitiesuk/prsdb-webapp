@@ -59,8 +59,8 @@ class OSPlacesClientTests {
 
     @Test
     fun `OSPlacesClient throws a HttpException when the response has an error status code and is not in the expected format`() {
-        val unexpectedErrorBody = "error"
-        val expectedErrorMessage = "Error 400"
+        val unexpectedErrorBody = "wrong error format"
+        val expectedErrorMessage = "Error 400: wrong error format"
 
         `when`(mockHttpClient.send(any(), any<HttpResponse.BodyHandler<String>>())).thenReturn(
             MockHttpResponse(

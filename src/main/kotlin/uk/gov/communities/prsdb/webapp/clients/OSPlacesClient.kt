@@ -35,11 +35,12 @@ class OSPlacesClient(
     }
 
     private fun getErrorMessage(response: HttpResponse<String>): String {
-        var errorMessage = "Error ${response.statusCode()}"
+        var errorMessage = "Error ${response.statusCode()}: "
         try {
-            errorMessage += ": ${JSONObject(response.body()).getJSONObject("error").getString("message")}"
+            errorMessage += JSONObject(response.body()).getJSONObject("error").getString("message")
         } catch (e: JSONException) {
             println("Warn: Unexpected error response format from OS Places - ${e.message}")
+            errorMessage += response.body()
         }
         return errorMessage
     }
