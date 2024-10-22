@@ -40,52 +40,19 @@ class ManageLocalAuthorityUsersController(
         @RequestParam(required = false) page: String?,
     ): String {
         val currentUserLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
-        var activeUsers = listOf<LocalAuthorityUserDataModel>()
-        var pendingUsers = listOf<LocalAuthorityUserDataModel>()
 
         val nActiveUsers = localAuthorityDataService.countActiveLocalAuthorityUsersForLocalAuthority(currentUserLocalAuthority)
         val nPendingUsers = localAuthorityDataService.countPendingLocalAuthorityUsersForLocalAuthority(currentUserLocalAuthority)
         val totalUsers = nActiveUsers + nPendingUsers
         val totalPages = ceil((totalUsers.toDouble() / maxUsersDisplayed.toDouble())).toInt()
-        val shouldPaginate = totalPages > 1
 
+        val shouldPaginate = totalPages > 1
         val currentPageNumber = getCurrentPage(page)
 
-        if (shouldPaginate) {
-            val firstDisplayedUserTotalIndex = (currentPageNumber - 1) * maxUsersDisplayed
-            if (firstDisplayedUserTotalIndex < nActiveUsers) {
-                activeUsers = getActiveUsersPaginated(currentUserLocalAuthority, currentPageNumber, maxUsersDisplayed)
-            }
-
-            if (activeUsers.size < maxUsersDisplayed) {
-                if (activeUsers.isNotEmpty()) {
-                    val nPendingUsersOnMixedPage = maxUsersDisplayed - activeUsers.size
-                    pendingUsers = getPendingUsersPaginated(currentUserLocalAuthority, 1, nPendingUsersOnMixedPage, 0)
-                } else {
-                    val nPagesWithActiveUsers = ceil(nActiveUsers.toDouble() / maxUsersDisplayed.toDouble()).toInt()
-                    val pendingUserPage = currentPageNumber - nPagesWithActiveUsers
-
-                    val nActiveUsersOnMixedPage = (nActiveUsers % maxUsersDisplayed).toInt()
-                    val nPendingUsersOnMixedPage = maxUsersDisplayed - nActiveUsersOnMixedPage
-
-                    pendingUsers =
-                        getPendingUsersPaginated(
-                            currentUserLocalAuthority,
-                            pendingUserPage,
-                            maxUsersDisplayed,
-                            nPendingUsersOnMixedPage,
-                        )
-                }
-            }
-        } else {
-            activeUsers = getActiveUsersPaginated(currentUserLocalAuthority, 1, maxUsersDisplayed)
-            pendingUsers = getPendingUsersPaginated(currentUserLocalAuthority, 1, maxUsersDisplayed, 0)
-        }
-
-        val users = activeUsers + pendingUsers
+        val pagedUserList = getUserList(currentUserLocalAuthority, currentPageNumber, nActiveUsers, shouldPaginate)
 
         model.addAttribute("localAuthority", currentUserLocalAuthority.name)
-        model.addAttribute("userList", users)
+        model.addAttribute("userList", pagedUserList)
         model.addAttribute(
             "tableColumnHeadings",
             listOf(
@@ -101,6 +68,48 @@ class ManageLocalAuthorityUsersController(
         model.addAttribute("isLastPage", currentPageNumber == totalPages)
 
         return "manageLAUsers"
+    }
+
+    private fun getUserList(
+        localAuthority: LocalAuthority,
+        currentPageNumber: Int,
+        nActiveUsers: Long,
+        shouldPaginate: Boolean,
+    ): List<LocalAuthorityUserDataModel> {
+        var activeUsers = listOf<LocalAuthorityUserDataModel>()
+        var pendingUsers = listOf<LocalAuthorityUserDataModel>()
+        if (shouldPaginate) {
+            val firstDisplayedUserTotalIndex = (currentPageNumber - 1) * maxUsersDisplayed
+            if (firstDisplayedUserTotalIndex < nActiveUsers) {
+                activeUsers = getActiveUsersPaginated(localAuthority, currentPageNumber, maxUsersDisplayed)
+            }
+
+            if (activeUsers.size < maxUsersDisplayed) {
+                if (activeUsers.isNotEmpty()) {
+                    val nPendingUsersOnMixedPage = maxUsersDisplayed - activeUsers.size
+                    pendingUsers = getPendingUsersPaginated(localAuthority, 1, nPendingUsersOnMixedPage, 0)
+                } else {
+                    val nPagesWithActiveUsers = ceil(nActiveUsers.toDouble() / maxUsersDisplayed.toDouble()).toInt()
+                    val pendingUserPage = currentPageNumber - nPagesWithActiveUsers
+
+                    val nActiveUsersOnMixedPage = (nActiveUsers % maxUsersDisplayed).toInt()
+                    val nPendingUsersOnMixedPage = maxUsersDisplayed - nActiveUsersOnMixedPage
+
+                    pendingUsers =
+                        getPendingUsersPaginated(
+                            localAuthority,
+                            pendingUserPage,
+                            maxUsersDisplayed,
+                            nPendingUsersOnMixedPage,
+                        )
+                }
+            }
+        } else {
+            activeUsers = getActiveUsersPaginated(localAuthority, 1, maxUsersDisplayed)
+            pendingUsers = getPendingUsersPaginated(localAuthority, 1, maxUsersDisplayed, 0)
+        }
+
+        return activeUsers + pendingUsers
     }
 
     private fun getActiveUsersPaginated(
