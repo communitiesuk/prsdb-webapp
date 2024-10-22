@@ -41,7 +41,9 @@ class OSPlacesAddressLookupServiceTests {
             mockOSPlacesClient.searchByPostcode(anyString()),
         ).thenReturn(addressesJSON)
 
-        assertEquals(expectedAddresses, addressLookupService.searchByPostcode("EG"))
+        val addresses = addressLookupService.searchByPostcode("EG")
+
+        assertEquals(expectedAddresses, addresses)
     }
 
     @Test
