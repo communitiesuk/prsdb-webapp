@@ -7,6 +7,7 @@ import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
+import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -82,10 +83,12 @@ class ManageLocalAuthorityUsersController(
         model: Model,
         @Valid
         emailModel: ConfirmedEmailDataModel,
+        result: BindingResult,
         principal: Principal,
     ): String {
         model.addAttribute("serviceName", SERVICE_NAME)
         try {
+            result.allErrors.forEach { println(it.toString()) }
             val emailAddress: String = emailModel.email
             val currentAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
             val token = invitationService.createInvitationToken(emailAddress, currentAuthority)
