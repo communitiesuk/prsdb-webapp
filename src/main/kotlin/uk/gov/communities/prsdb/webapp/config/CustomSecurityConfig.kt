@@ -25,6 +25,8 @@ class CustomSecurityConfig {
                 requests
                     .requestMatchers("/")
                     .permitAll()
+                    .requestMatchers("/register-as-a-landlord")
+                    .permitAll()
                     .requestMatchers("/assets/**")
                     .permitAll()
                     .requestMatchers("/error/**")
