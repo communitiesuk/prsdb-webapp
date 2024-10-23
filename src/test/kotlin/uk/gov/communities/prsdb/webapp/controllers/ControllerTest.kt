@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.CustomSecurityConfig
 import uk.gov.communities.prsdb.webapp.config.EnableMethodSecurityConfig
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @Import(CustomSecurityConfig::class, EnableMethodSecurityConfig::class)
@@ -33,4 +34,7 @@ abstract class ControllerTest(
 
     @MockBean
     lateinit var userRolesService: UserRolesService
+
+    @MockBean
+    lateinit var localAuthorityDataService: LocalAuthorityDataService
 }

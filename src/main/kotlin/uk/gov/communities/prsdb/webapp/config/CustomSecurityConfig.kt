@@ -35,6 +35,10 @@ class CustomSecurityConfig {
                     .permitAll()
                     .requestMatchers("/one-login-local/**")
                     .permitAll()
+                    .requestMatchers("/lookup-an-address")
+                    .permitAll()
+                    .requestMatchers("/postcode")
+                    .permitAll()
                     .anyRequest()
                     .authenticated()
             }.oauth2Login(Customizer.withDefaults())
@@ -54,7 +58,7 @@ class CustomSecurityConfig {
             val subjectId = oidcUser.subject
             val mappedAuthorities = HashSet<GrantedAuthority>()
             if (subjectId != null) {
-                val userRoles = userRolesService.getRolesforSubjectId(subjectId)
+                val userRoles = userRolesService.getRolesForSubjectId(subjectId)
                 mappedAuthorities.addAll(
                     userRoles.map { role ->
                         SimpleGrantedAuthority(role)
@@ -68,5 +72,5 @@ class CustomSecurityConfig {
 
 @Configuration
 @EnableMethodSecurity
-@Profile("!INTEGRATION_TEST")
+@Profile("!integration-test")
 class EnableMethodSecurityConfig

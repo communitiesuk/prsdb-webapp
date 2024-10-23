@@ -28,6 +28,13 @@ one-login:
     public.key: ${ONE_LOGIN_PUBLIC_KEY}
     private.key: ${ONE_LOGIN_PRIVATE_KEY}
 
+notify:
+  api-key: ${EMAILNOTIFICATIONS_APIKEY}
+
+os-places:
+  api-key: ${OS_PLACES_API_KEY}
+  base-url: https://api.os.uk/search/places/v1
+
 server:
   error:
     path: /error
@@ -51,4 +58,3 @@ spring:
         provider:
           one-login:
             issuer-uri: ${ONE_LOGIN_ISSUER_URL}
-

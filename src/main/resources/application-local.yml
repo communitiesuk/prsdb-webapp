@@ -41,9 +41,17 @@ one-login:
     public.key: classpath:public_key.pem
     private.key: classpath:private_key.pem
 
+notify:
+  api-key: ${EMAILNOTIFICATIONS_APIKEY}
+
 server:
   error:
     path: /error
+
+local:
+  emails:
+    transientExceptionAddress: transient@example.com
+    persistentExceptionAddress: persistent@example.com
 
 ---
 
@@ -89,3 +97,13 @@ spring:
         provider:
           one-login:
             issuer-uri: https://oidc.integration.account.gov.uk/
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: local-mock-os-places
+
+os-places:
+  base-url: http://localhost:8080

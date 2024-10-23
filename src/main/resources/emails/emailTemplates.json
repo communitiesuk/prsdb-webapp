@@ -1,0 +1,14 @@
+[
+  {
+    "id": "71551da6-f616-45c7-a4e0-23d6a8434561",
+    "name": "Example email",
+    "subject": "This is an example",
+    "bodyLocation": "/emails/ExampleEmail.md"
+  },
+  {
+    "id": "66924ee6-40a3-4330-b502-0dbf288f71e5",
+    "name": "LA User Invitation",
+    "subject": "PRD - You've been invited by a local authority to register on the Privately Rented Database",
+    "bodyLocation": "/emails/LocalAuthorityInvitation.md"
+  }
+]

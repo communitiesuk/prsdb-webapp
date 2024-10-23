@@ -8,7 +8,11 @@ import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationC
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.jwt.JwtDecoderFactory
+import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
+import uk.gov.communities.prsdb.webapp.config.NotifyConfig
+import uk.gov.communities.prsdb.webapp.config.OSPlacesConfig
 import uk.gov.communities.prsdb.webapp.config.OneLoginConfig
+import uk.gov.service.notify.NotificationClient
 
 @Import(TestcontainersConfiguration::class)
 @SpringBootTest
@@ -28,4 +32,16 @@ class PrsdbWebappApplicationTests {
 
     @MockBean
     lateinit var oneLoginConfig: OneLoginConfig
+
+    @MockBean
+    lateinit var notifyConfig: NotifyConfig
+
+    @MockBean
+    lateinit var notificationClient: NotificationClient
+
+    @MockBean
+    lateinit var osPlacesConfig: OSPlacesConfig
+
+    @MockBean
+    lateinit var osPlacesClient: OSPlacesClient
 }

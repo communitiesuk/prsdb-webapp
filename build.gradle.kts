@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
+    kotlin("plugin.serialization") version "2.0.20"
     id("org.springframework.boot") version "3.3.3"
     id("io.spring.dependency-management") version "1.1.6"
     kotlin("plugin.jpa") version "1.9.25"
@@ -54,6 +55,9 @@ dependencies {
     // Templating
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 
+    // External service clients
+    implementation("uk.gov.service.notify:notifications-java-client:5.2.1-RELEASE")
+
     // Development
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
@@ -67,6 +71,9 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("com.microsoft.playwright:playwright:1.47.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    // Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
 }
 
 kotlin {

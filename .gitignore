@@ -41,6 +41,8 @@ out/
 
 ### Secrets ###
 *.pem
+*.env
+notify-template-tests.run.xml
 
 ### Node ###
 /node_modules

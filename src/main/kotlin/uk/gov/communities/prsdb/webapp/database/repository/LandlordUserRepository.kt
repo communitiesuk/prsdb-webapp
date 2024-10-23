@@ -6,5 +6,5 @@ import uk.gov.communities.prsdb.webapp.database.entity.LandlordUser
 interface LandlordUserRepository : JpaRepository<LandlordUser?, Long?> {
     // The underscore tells JPA to access fields relating to the referenced table
     @Suppress("ktlint:standard:function-naming")
-    fun findByBaseUser_Id(userName: String): List<LandlordUser>
+    fun findByBaseUser_Id(userName: String): LandlordUser?
 }

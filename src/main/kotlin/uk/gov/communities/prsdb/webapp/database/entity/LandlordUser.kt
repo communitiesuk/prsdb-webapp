@@ -11,7 +11,7 @@ import jakarta.persistence.OneToOne
 import java.util.Date
 
 @Entity
-class LandlordUser : AuditableEntity() {
+class LandlordUser : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Long? = null

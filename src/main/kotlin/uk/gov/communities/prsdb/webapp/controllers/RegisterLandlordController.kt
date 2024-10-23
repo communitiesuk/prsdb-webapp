@@ -1,17 +1,23 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.context.MessageSource
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
+import java.util.Locale
 
 @Controller
 @RequestMapping("/register-as-a-landlord")
-class RegisterLandlordController {
+class RegisterLandlordController(
+    @Qualifier("messageSource")
+    private val messageSource: MessageSource,
+) {
     @GetMapping
     fun index(model: Model): String {
-        model.addAttribute("title", "Register as a Landlord")
+        model.addAttribute("title", messageSource.getMessage("registerAsALandlord.title", null, Locale("en")))
         model.addAttribute("serviceName", SERVICE_NAME)
         return "registerAsALandlord"
     }

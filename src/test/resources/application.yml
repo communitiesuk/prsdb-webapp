@@ -1,3 +1,7 @@
 spring:
   application:
     name: 'prsdb-webapp'
+notify:
+  api-key: ${EMAILNOTIFICATIONS_APIKEY}
+os-places:
+  api-key: ${OS_PLACES_API_KEY}

@@ -12,12 +12,17 @@ import org.springframework.security.oauth2.jwt.JwtDecoderFactory
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
+import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
+import uk.gov.communities.prsdb.webapp.config.NotifyConfig
+import uk.gov.communities.prsdb.webapp.config.OSPlacesConfig
 import uk.gov.communities.prsdb.webapp.config.OneLoginConfig
+import uk.gov.service.notify.NotificationClient
+import java.security.Principal
 
 @Import(TestcontainersConfiguration::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @UsePlaywright
-@ActiveProfiles("INTEGRATION_TEST")
+@ActiveProfiles("integration-test")
 abstract class IntegrationTest {
     @LocalServerPort
     val port: Int = 0
@@ -35,5 +40,20 @@ abstract class IntegrationTest {
     lateinit var oneLoginConfig: OneLoginConfig
 
     @MockBean
+    lateinit var notifyConfig: NotifyConfig
+
+    @MockBean
+    lateinit var notificationClient: NotificationClient
+
+    @MockBean
+    lateinit var osPlacesConfig: OSPlacesConfig
+
+    @MockBean
+    lateinit var osPlacesClient: OSPlacesClient
+
+    @MockBean
     lateinit var securityFilterChain: SecurityFilterChain
+
+    @MockBean
+    lateinit var principal: Principal
 }
