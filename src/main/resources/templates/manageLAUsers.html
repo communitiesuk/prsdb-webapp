@@ -17,7 +17,7 @@
             </div>
         </div>
         <div th:if="${shouldPaginate}">
-            <nav  th:replace="~{fragments/pagination/pagination :: pagination(${totalPages}, ${currentPage}, ${isLastPage})}">
+            <nav  th:replace="~{fragments/pagination/pagination :: pagination(${totalPages}, ${currentPage}, ${isLastPage}, ${baseUri})}">
             </nav>
         </div>
         <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#action-buttons})}">

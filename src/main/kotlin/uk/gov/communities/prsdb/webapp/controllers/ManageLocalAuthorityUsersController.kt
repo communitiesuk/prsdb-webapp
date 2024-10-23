@@ -1,6 +1,9 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.validation.Valid
+import jakarta.servlet.http.HttpServletRequest
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.context.MessageSource
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.http.MediaType
@@ -38,6 +41,7 @@ class ManageLocalAuthorityUsersController(
         model: Model,
         principal: Principal,
         @RequestParam(required = false) page: String?,
+        httpServletRequest: HttpServletRequest,
     ): String {
         val currentUserLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
 
@@ -66,6 +70,7 @@ class ManageLocalAuthorityUsersController(
         model.addAttribute("totalPages", totalPages)
         model.addAttribute("currentPage", currentPageNumber)
         model.addAttribute("isLastPage", currentPageNumber == totalPages)
+        model.addAttribute("baseUri", httpServletRequest.requestURI)
 
         return "manageLAUsers"
     }
