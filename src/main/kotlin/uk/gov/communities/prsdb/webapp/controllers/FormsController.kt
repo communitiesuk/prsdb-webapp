@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import jakarta.servlet.http.HttpSession
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -15,6 +16,7 @@ import java.security.Principal
 @Controller
 @RequestMapping("/forms")
 class FormsController(
+    var session: HttpSession,
     private val journeyService: JourneyService,
 ) {
     @GetMapping("/{journeyType}/{journeyStep}")
@@ -24,11 +26,13 @@ class FormsController(
         @RequestParam(required = false, name = "formContextId") formContextId: Long,
         principal: Principal,
     ): String {
+        val context: String? = session.getAttribute("FORM_CONTEXT").toString()
         journeyService.getJourneyView(
             JourneyType.valueOf(journeyType),
             JourneyStep.valueOf(journeyStep),
             principal.name,
             formContextId,
+            context,
         )
         return "index"
     }
@@ -41,13 +45,17 @@ class FormsController(
         @RequestParam(required = false, name = "formContextId") formContextId: Long,
         principal: Principal,
     ): String {
-        journeyService.updateFormContextAndGetNextStep(
-            JourneyType.valueOf(journeyType),
-            JourneyStep.valueOf(journeyStep),
-            principal.name,
-            formData,
-            formContextId,
-        )
+        val context =
+            journeyService.updateFormContextAndGetNextStep(
+                JourneyType.valueOf(journeyType),
+                JourneyStep.valueOf(journeyStep),
+                principal.name,
+                formData,
+                formContextId,
+            )
+        session.setAttribute("FORM_CONTEXT", context)
+
+        // return redirect uri, think this should be a speerate method
         return "index"
     }
 }

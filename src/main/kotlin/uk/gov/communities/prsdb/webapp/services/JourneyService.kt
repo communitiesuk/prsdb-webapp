@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -20,7 +21,11 @@ class JourneyService(
         journeyStep: JourneyStep,
         principalName: String,
         formContextId: Long? = null,
+        context: String?,
     ): String {
+        // TODO if there is no session AND but there is a formContextId should the behaviour differ in anyway
+        // TODO if there is a session and a formContextId do we need to validate them/check the session context in any way
+        // TODO if there is a session but NO formContextId - has something gone wrong? What does tha mean?
         if (formContextId != null) {
             val formContext = formContextRepository.findById(formContextId).get()
             if (principalName == formContext.id.toString()) {
@@ -55,37 +60,35 @@ class JourneyService(
         journeyStep: JourneyStep,
         principalName: String,
         formData: String,
+        formContextId: Long,
+    ): String {
+        validateFormData(journeyStep, formData)
+        val formContext = formContextRepository.findById(formContextId).get()
+
+        if (principalName == formContext.id.toString()) {
+            val context = getMappedData(formData)
+            val content = getMappedData(formContext.context) + context
+            formContext.context = Json.encodeToString(content)
+            formContextRepository.save(formContext)
+            return getRedirectUrl(journeyType, journeyStep, content, formContextId)
+        } else {
+            throw Exception("Should this be a 404??")
+        }
+    }
+
+    fun updateFormContextAndGetNextStep(
+        journeyType: JourneyType,
+        journeyStep: JourneyStep,
+        principalName: String,
+        formData: String,
     ): String {
         validateFormData(journeyStep, formData)
         val user = oneLoginUserRepository.findById(principalName).get()
         val context = getMappedData(formData)
         val formContext = FormContext(journeyType, context.toString(), user)
         val formContextId = formContextRepository.save(formContext).id
-        return getRedirectUrl(journeyType, journeyStep, context, formContextId)
 
-//        if (formContextId != null) {
-//            val retrieveFormContext = formContextRepository.findById(formContextId)
-//            if (retrieveFormContext.isPresent) {
-//                formContext = retrieveFormContext.get()
-//                // TODO:
-//                //      formContext.context -> journeyModel (based on journeyType)
-//                //      journeyModel.add(formData)
-//                //      journeyModel -> string
-//                formContext.context += formData
-//                formContextRepository.save(formContext)
-//            } else {
-//                throw Exception("Invalid Form Context Id")
-//            }
-//        } else {
-//            val user = oneLoginUserRepository.findById(principal.name).get()
-//            // TODO:
-//            //       new journeyModel (based on journeyType)
-//            //       journeyModel.add(formData)
-//            //       journeyModel -> string
-//            formContext = FormContext(journeyType, formData, user)
-//            formContextRepository.save(formContext)
-//        }
-//        return getRedirectUrl(journeyType, journeyStep, formContext.context)
+        return getRedirectUrl(journeyType, journeyStep, context, formContextId)
     }
 
     private fun getMappedData(formData: String): Map<String, JsonElement> {
