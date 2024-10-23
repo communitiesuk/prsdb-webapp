@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_TABLE_PAGE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ConfirmedEmailDataModel
@@ -34,7 +35,7 @@ class ManageLocalAuthorityUsersController(
     var invitationService: LocalAuthorityInvitationService,
     val localAuthorityDataService: LocalAuthorityDataService,
 ) {
-    val maxUsersDisplayed = 3
+    val maxUsersDisplayed = MAX_ENTRIES_IN_TABLE_PAGE
 
     @GetMapping
     fun index(
@@ -84,8 +85,8 @@ class ManageLocalAuthorityUsersController(
         var activeUsers = listOf<LocalAuthorityUserDataModel>()
         var pendingUsers = listOf<LocalAuthorityUserDataModel>()
         if (shouldPaginate) {
-            val firstDisplayedUserTotalIndex = (currentPageNumber - 1) * maxUsersDisplayed
-            if (firstDisplayedUserTotalIndex < nActiveUsers) {
+            val firstDisplayedUserIndex = (currentPageNumber - 1) * maxUsersDisplayed
+            if (firstDisplayedUserIndex < nActiveUsers) {
                 activeUsers = getActiveUsersPaginated(localAuthority, currentPageNumber, maxUsersDisplayed)
             }
 
