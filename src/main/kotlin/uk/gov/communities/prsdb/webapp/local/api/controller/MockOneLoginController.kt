@@ -94,7 +94,7 @@ class MockOneLoginController {
                 .newInstance()
                 .uri(URI.create(redirect_uri))
                 .query("code=SplxlOBeZQQYbYS6WxSbIA")
-                .query("state=$state")
+                .queryParam("state", state)
                 .build()
                 .toUri()
 
