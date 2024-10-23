@@ -84,8 +84,21 @@ application start up. If you are using the `local` launch profile in IntelliJ, t
 before running the migrations. After the migrations have run Spring Boot will then run the SQL in `data-local.sql` to
 populate the database with seed data. 
 
+### Mock One Login Oauth2
+
+For development, we've mocked elements of the governments one login system (that the web app will be using in deployment).
+When you start the app using the `local` run configuration, this will be available, when you attempt to login. It will automatically log you in as a user that has every role - and therefore can access all pages.
+
+If you are adding new roles please add the user with the `userId` set in `MockOneLoginHelper` to that new role/table.
+
+If you need to be able to login as a user that has specific roles then you can change the `userId` in `MockOneLoginHelper` to the id from the `one_login_user` table of a user that has the permissions you want.
+
+#### Disabling the mock One Login Oauth2
+
+If you need to disable the mock to run the app with One login's integration system, you start the app using the `local-with-auth` run configuration in `.run`.
+
 ### One Login accounts
-When you run the app and try to view pages, you will be prompted to sign in or create a One Login account. 
+When you run the app without mocking the one login (e.g. using `local-with-auth run configurations) and try to view pages, you will be prompted to sign in or create a One Login account. 
 
 To view most pages, your account will need to have been added to the relevant database (e.g. LandlordUser, 
 LocalAuthorityUser) for you to be able to see the page. It checks the database on login (you can step through 

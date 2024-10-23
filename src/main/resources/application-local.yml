@@ -36,19 +36,6 @@ spring:
       port: 6379
       password: notarealpassword
 
-  security:
-    oauth2:
-      client:
-        registration:
-          one-login:
-            client-id: l0AE7SbEHrEa8QeQCGdml9KQ4bk
-            client-authentication-method: private_key_jwt
-            authorization-grant-type: authorization_code
-            scope: openid
-        provider:
-          one-login:
-            issuer-uri: https://oidc.integration.account.gov.uk/
-
 one-login:
   jwt:
     public.key: classpath:public_key.pem
@@ -65,6 +52,51 @@ local:
   emails:
     transientExceptionAddress: transient@example.com
     persistentExceptionAddress: persistent@example.com
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: local-no-auth
+
+  security:
+    oauth2:
+      client:
+        registration:
+          one-login:
+            client-id: l0AE7SbEHrEa8QeQCGdml9KQ4bk
+            client-authentication-method: private_key_jwt
+            authorization-grant-type: authorization_code
+            scope: openid
+            redirect-uri: http://localhost:8080/login/oauth2/code/one-login
+        provider:
+          one-login:
+            authorization-uri: http://localhost:8080/one-login-local/authorize
+            token-uri: http://localhost:8080/one-login-local/token
+            jwk-set-uri: http://localhost:8080/one-login-local/.well-known/jwks.json
+            user-info-uri: http://localhost:8080//one-login-local/userinfo
+            userNameAttribute: "sub"
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: local-auth
+
+  security:
+    oauth2:
+      client:
+        registration:
+          one-login:
+            client-id: l0AE7SbEHrEa8QeQCGdml9KQ4bk
+            client-authentication-method: private_key_jwt
+            authorization-grant-type: authorization_code
+            scope: openid
+        provider:
+          one-login:
+            issuer-uri: https://oidc.integration.account.gov.uk/
 
 ---
 

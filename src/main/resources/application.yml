@@ -23,19 +23,6 @@ spring:
       port: ${ELASTICACHE_PORT}
       password: ${ELASTICACHE_PASSWORD}
 
-  security:
-    oauth2:
-      client:
-        registration:
-          one-login:
-            client-id: ${ONE_LOGIN_CLIENT_ID}
-            client-authentication-method: private_key_jwt
-            authorization-grant-type: authorization_code
-            scope: openid
-        provider:
-          one-login:
-            issuer-uri: ${ONE_LOGIN_ISSUER_URL}
-
 one-login:
   jwt:
     public.key: ${ONE_LOGIN_PUBLIC_KEY}
@@ -51,3 +38,23 @@ os-places:
 server:
   error:
     path: /error
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: default
+
+  security:
+    oauth2:
+      client:
+        registration:
+          one-login:
+            client-id: ${ONE_LOGIN_CLIENT_ID}
+            client-authentication-method: private_key_jwt
+            authorization-grant-type: authorization_code
+            scope: openid
+        provider:
+          one-login:
+            issuer-uri: ${ONE_LOGIN_ISSUER_URL}

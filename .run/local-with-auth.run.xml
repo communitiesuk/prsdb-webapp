@@ -1,14 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="local" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <option name="ACTIVE_PROFILES" value="local, local-no-auth, local-mock-os-places" />
-    <option name="envFilePaths">
-      <option value="$PROJECT_DIR$/.env" />
-    </option>
+  <configuration default="false" name="local-with-auth" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <option name="ACTIVE_PROFILES" value="local,local-auth" />
     <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
     <module name="prsdb-webapp.main" />
-    <selectedOptions>
-      <option name="environmentVariables" />
-    </selectedOptions>
     <option name="SPRING_BOOT_MAIN_CLASS" value="uk.gov.communities.prsdb.webapp.PrsdbWebappApplication" />
     <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
       <option name="credential" />
