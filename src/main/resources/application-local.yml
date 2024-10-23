@@ -65,3 +65,13 @@ local:
   emails:
     transientExceptionAddress: transient@example.com
     persistentExceptionAddress: persistent@example.com
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: local-mock-os-places
+
+os-places:
+  base-url: http://localhost:8080

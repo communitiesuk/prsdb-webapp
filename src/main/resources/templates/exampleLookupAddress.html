@@ -1,0 +1,27 @@
+<!-- TODO PRSD-371: Remove this template once there is another way to reach the AddressLookupService
+ This template is for an example page to demo our integration with OS Places and should be removed once
+ there is an integration that belongs to an intended releasable feature. -->
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(${title}, ${serviceName}, ~{::main})}">
+<main class="govuk-main-wrapper" id="main-content">
+    <h1 class="govuk-heading-xl" th:text="${contentHeader}">Default page template</h1>
+    <form class="form" method="post" th:action="@{/lookup-an-address}">
+        <div class="govuk-form-group">
+            <h1 class="govuk-label-wrapper">
+                <label class="govuk-label govuk-label--l" for="postcode">
+                    Enter a Postcode:
+                </label>
+            </h1>
+            <input class="govuk-input" id="postcode" name="postcode" type="text">
+        </div>
+        <div>
+            <button type="submit" class="govuk-button" data-module="govuk-button">
+                Submit
+            </button>
+        </div>
+    </form>
+    <p class="govuk-body" th:if="${addresses != null}" th:each="address: ${addresses}">
+        <span th:text="${address.address}">Address</span>
+    </p>
+</main>
+</html>
