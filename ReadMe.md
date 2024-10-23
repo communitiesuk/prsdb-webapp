@@ -98,7 +98,7 @@ If you need to be able to login as a user that has specific roles then you can c
 If you need to disable the mock to run the app with One login's integration system, edit the run configuration so that it uses the `local-auth` profile instead of the `local-no-auth` profile.
 
 ### One Login accounts
-When you run the app this the one login mock disabled and try to view pages, you will be prompted to sign in or create a One Login account. 
+When you run the app with the one login mock disabled and try to view pages, you will be prompted to sign in or create a One Login account. 
 
 To view most pages, your account will need to have been added to the relevant database (e.g. LandlordUser, 
 LocalAuthorityUser) for you to be able to see the page. It checks the database on login (you can step through 
