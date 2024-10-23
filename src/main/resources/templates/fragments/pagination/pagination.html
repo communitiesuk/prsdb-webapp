@@ -1,8 +1,10 @@
-<nav th:fragment="pagination(totalPages, currentPage, isLastPage, baseUri)" class="govuk-pagination" aria-label="Pagination">
+<nav th:fragment="pagination(totalPages, currentPage, baseUri)" class="govuk-pagination" aria-label="Pagination">
     <div th:if="${currentPage != 1}">
         <div th:replace="~{fragments/pagination/paginationPrevious :: previous(${baseUri},${currentPage}-1)}"></div>
     </div>
-    <div th:if="${!isLastPage}">
+    <ul th:replace="~{fragments/pagination/paginationList :: pageList(${currentPage}, ${totalPages}, ${baseUri})}">
+    </ul>
+    <div th:if="${currentPage != totalPages}">
         <div th:replace="~{fragments/pagination/paginationNext :: next(${baseUri},${currentPage}+1)}"></div>
     </div>
 </nav>

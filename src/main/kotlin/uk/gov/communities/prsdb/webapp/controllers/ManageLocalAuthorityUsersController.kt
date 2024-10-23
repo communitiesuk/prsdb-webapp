@@ -10,12 +10,10 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
-import java.security.Principal
 import java.util.Locale
 import kotlin.math.ceil
 
@@ -31,11 +29,9 @@ class ManageLocalAuthorityUsersController(
     @GetMapping
     fun index(
         model: Model,
-        principal: Principal,
-        @RequestParam(required = false) page: String?,
         httpServletRequest: HttpServletRequest,
     ): String {
-        val currentUserLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
+        val currentUserLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser(httpServletRequest.userPrincipal.name)!!
 
         val nActiveUsers = localAuthorityDataService.countActiveLocalAuthorityUsersForLocalAuthority(currentUserLocalAuthority)
         val nPendingUsers = localAuthorityDataService.countPendingLocalAuthorityUsersForLocalAuthority(currentUserLocalAuthority)
@@ -43,16 +39,11 @@ class ManageLocalAuthorityUsersController(
         val totalPages = ceil((totalUsers.toDouble() / maxUsersDisplayed.toDouble())).toInt()
 
         val shouldPaginate = totalPages > 1
-        val currentPageNumber = getCurrentPage(page)
+        val currentPageNumber = getCurrentPage(httpServletRequest.getParameter("page"))
 
         val pagedUserList = getUserList(currentUserLocalAuthority, currentPageNumber, nActiveUsers, shouldPaginate)
 
-        model.addAttribute(
-            "contentHeader",
-            messageSource.getMessage("manageLAUsers.contentHeader.part1", null, Locale("en")) +
-                " " + currentUserLocalAuthority.name +
-                messageSource.getMessage("manageLAUsers.contentHeader.part2", null, Locale("en")),
-        )
+        model.addAttribute("localAuthority", currentUserLocalAuthority.name)
         model.addAttribute("title", messageSource.getMessage("manageLAUsers.title", null, Locale("en")))
         model.addAttribute("serviceName", SERVICE_NAME)
         model.addAttribute("userList", pagedUserList)
@@ -68,7 +59,6 @@ class ManageLocalAuthorityUsersController(
         model.addAttribute("shouldPaginate", shouldPaginate)
         model.addAttribute("totalPages", totalPages)
         model.addAttribute("currentPage", currentPageNumber)
-        model.addAttribute("isLastPage", currentPageNumber == totalPages)
         model.addAttribute("baseUri", httpServletRequest.requestURI)
 
         return "manageLAUsers"

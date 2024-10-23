@@ -1,0 +1,8 @@
+<ul th:fragment="pageList(currentPage, totalPages, baseUri)" class="govuk-pagination__list">
+    <li th:each="page : ${#numbers.sequence(1, totalPages)}"
+        class="govuk-pagination__item"
+        th:classappend="${page==currentPage ? 'govuk-pagination__item--current' : ''}">
+        <a th:replace="~{fragments/pagination/paginationPageLink :: pageLink(${baseUri},${page},${page==currentPage})}">
+        </a>
+    </li>
+</ul>
