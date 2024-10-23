@@ -107,3 +107,4 @@ spring:
 
 os-places:
   base-url: http://localhost:8080
+  api-key: fake-key
