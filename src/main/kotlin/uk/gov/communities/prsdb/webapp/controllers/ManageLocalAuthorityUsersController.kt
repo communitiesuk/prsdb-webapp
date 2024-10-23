@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_TABLE_PAGE
 import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
@@ -24,7 +25,7 @@ class ManageLocalAuthorityUsersController(
     val localAuthorityDataService: LocalAuthorityDataService,
     @Qualifier("messageSource") private val messageSource: MessageSource,
 ) {
-    val maxUsersDisplayed = 3
+    val maxUsersDisplayed = MAX_ENTRIES_IN_TABLE_PAGE
 
     @GetMapping
     fun index(
@@ -73,8 +74,8 @@ class ManageLocalAuthorityUsersController(
         var activeUsers = listOf<LocalAuthorityUserDataModel>()
         var pendingUsers = listOf<LocalAuthorityUserDataModel>()
         if (shouldPaginate) {
-            val firstDisplayedUserTotalIndex = (currentPageNumber - 1) * maxUsersDisplayed
-            if (firstDisplayedUserTotalIndex < nActiveUsers) {
+            val firstDisplayedUserIndex = (currentPageNumber - 1) * maxUsersDisplayed
+            if (firstDisplayedUserIndex < nActiveUsers) {
                 activeUsers = getActiveUsersPaginated(localAuthority, currentPageNumber, maxUsersDisplayed)
             }
 

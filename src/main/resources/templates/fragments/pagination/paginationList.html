@@ -1,8 +1,52 @@
-<ul th:fragment="pageList(currentPage, totalPages, baseUri)" class="govuk-pagination__list">
+<ul th:fragment="listAllPages(currentPage, totalPages, baseUri)" class="govuk-pagination__list">
     <li th:each="page : ${#numbers.sequence(1, totalPages)}"
         class="govuk-pagination__item"
         th:classappend="${page==currentPage ? 'govuk-pagination__item--current' : ''}">
         <a th:replace="~{fragments/pagination/paginationPageLink :: pageLink(${baseUri},${page},${page==currentPage})}">
+        </a>
+    </li>
+</ul>
+
+<ul th:fragment="listHighlightedPages(currentPage, totalPages, baseUri)" class="govuk-pagination__list">
+    <!--Link to first page-->
+    <li class="govuk-pagination__item"
+        th:classappend="${1==currentPage ? 'govuk-pagination__item--current' : ''}">
+        <a th:replace="~{fragments/pagination/paginationPageLink :: pageLink(${baseUri},${1},${1==currentPage})}">
+        </a>
+    </li>
+
+    <!--Ellipsis if there will be a gap in page numbers between the first page and the previous or current pages-->
+    <li th:if="${currentPage > 3}" class="govuk-pagination__item govuk-pagination__item--ellipses">
+        &ctdot;
+    </li>
+
+    <!--Link to previous page if applicable-->
+    <li th:if="${currentPage > 2}" class="govuk-pagination__item">
+        <a th:replace="~{fragments/pagination/paginationPageLink :: pageLink(${baseUri},${currentPage}-1,false)}">
+        </a>
+    </li>
+
+    <!--Link to current page if not already shown-->
+    <li th:if="${currentPage > 1 && currentPage < totalPages}" class="govuk-pagination__item govuk-pagination__item--current">
+        <a th:replace="~{fragments/pagination/paginationPageLink :: pageLink(${baseUri},${currentPage},true)}">
+        </a>
+    </li>
+
+    <!--Link to next page if applicable-->
+    <li th:if="${currentPage<totalPages - 1}" class="govuk-pagination__item">
+        <a th:replace="~{fragments/pagination/paginationPageLink :: pageLink(${baseUri},${currentPage}+1,false)}">
+        </a>
+    </li>
+
+    <!--Ellipsis if there will be a gap in page numbers between the last page and the next or current pages-->
+    <li th:if="${currentPage<totalPages - 2}" class="govuk-pagination__item govuk-pagination__item--ellipses">
+        &ctdot;
+    </li>
+
+    <!--Link to last page-->
+    <li class="govuk-pagination__item"
+        th:classappend="${totalPages==currentPage ? 'govuk-pagination__item--current' : ''}">
+        <a th:replace="~{fragments/pagination/paginationPageLink :: pageLink(${baseUri},${totalPages},${totalPages==currentPage})}">
         </a>
     </li>
 </ul>
