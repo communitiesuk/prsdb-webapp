@@ -35,6 +35,14 @@ export default {
                         src: 'node_modules/govuk-frontend/dist/govuk/assets/manifest.json',
                         dest: 'dist',
                     },
+                    {
+                        src: 'node_modules/govuk-one-login-service-header/dist/scripts/service-header.js',
+                        dest: 'dist/js',
+                    },
+                    {
+                        src: 'node_modules/govuk-one-login-service-header/dist/styles/service-header.css',
+                        dest: 'dist/css',
+                    },
                 ],
             }
         )

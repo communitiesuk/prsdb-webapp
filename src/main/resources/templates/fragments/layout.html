@@ -19,6 +19,7 @@
           crossorigin="use-credentials">
     <link rel="stylesheet" href="/static/assets/css/govuk-frontend.min.css"
           th:href="@{/assets/css/govuk-frontend.min.css}">
+    <link rel="stylesheet" href="/static/assets/css/service-header.css" th:href="@{/assets/css/service-header.css}">
 </head>
 
 <body class="govuk-template__body">
@@ -26,13 +27,13 @@
     document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
 </script>
 <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>
-<div th:replace="~{ fragments/header :: header (serviceName=${serviceName}) }"></div>
+<div th:replace="~{fragments/header/header :: header(${serviceName}, ${navLinks})}"></div>
 <div class="govuk-width-container">
     <div th:replace="${content}"></div>
 </div>
 <div th:replace="~{ fragments/footer :: footer }"></div>
-<script type="module" src="/static/asset/js/index.js"
-        th:src="@{/assets/js/index.js}"></script>
+<script type="module" src="/static/asset/js/index.js" th:src="@{/assets/js/index.js}"></script>
+<script type="module" src="/static/asset/js/service-header.js" th:src="@{/assets/js/service-header.js}"></script>
 </body>
 
 </html>

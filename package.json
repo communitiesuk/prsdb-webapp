@@ -16,6 +16,7 @@
     "rollup-plugin-delete": "^2.1.0"
   },
   "dependencies": {
-    "govuk-frontend": "^5.6.0"
+    "govuk-frontend": "^5.6.0",
+    "govuk-one-login-service-header": "github:govuk-one-login/service-header"
   }
 }
