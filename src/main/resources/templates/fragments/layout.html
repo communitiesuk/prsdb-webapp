@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html th:fragment="layout(title, serviceName, content)" lang="en" class="govuk-template">
+<html th:fragment="layout(title, serviceName, content)" lang="en" class="govuk-template"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <meta charset="utf-8">
@@ -27,7 +28,14 @@
     document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
 </script>
 <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>
-<div th:replace="~{ fragments/header :: header (serviceName=${serviceName}) }"></div>
+<div id="header">
+    <div sec:authorize="isAuthenticated()">
+        <div th:replace="~{ fragments/loggedInHeader :: loggedInHeader(${serviceName}, ${navLinks}) }"></div>
+    </div>
+    <div sec:authorize="isAnonymous()">
+        <div th:replace="~{ fragments/header :: header (serviceName=${serviceName}) }"></div>
+    </div>
+</div>
 <div class="govuk-width-container">
     <div th:replace="${content}"></div>
 </div>
