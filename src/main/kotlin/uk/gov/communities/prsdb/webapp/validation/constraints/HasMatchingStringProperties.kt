@@ -8,7 +8,7 @@ import kotlin.reflect.KClass
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 @Constraint(validatedBy = [MatchingPropertiesValidator::class])
-annotation class HasMatchingProperties(
+annotation class HasMatchingStringProperties(
     val message: String = "Property values must match",
     val groups: Array<KClass<Any>> = [],
     val payload: Array<KClass<Payload>> = [],
