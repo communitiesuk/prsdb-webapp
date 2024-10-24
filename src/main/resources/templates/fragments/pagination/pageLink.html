@@ -1,5 +1,5 @@
-<a th:fragment="pageLink(baseUri,page, isCurrentPage)" class="govuk-link govuk-pagination__link"
-   th:href="@{${baseUri}(page=${page})}"
+<a th:fragment="pageLink(page, isCurrentPage)" class="govuk-link govuk-pagination__link"
+   th:href="@{${#ctx.#requestdatavalues.url('')}(page=${page})}"
    th:text="${page}"
    th:attr="aria-label='Page '+${page}, type='test'"
    th:attrappend="aria-current=${isCurrentPage}?'page'"
