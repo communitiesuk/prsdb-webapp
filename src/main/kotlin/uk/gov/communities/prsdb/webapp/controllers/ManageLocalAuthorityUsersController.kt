@@ -71,11 +71,15 @@ class ManageLocalAuthorityUsersController(
     }
 
     @GetMapping("/invite-new-user")
-    fun exampleEmailPage(model: Model): String {
-        model.addAttribute("contentHeader", "Send a test email using notify")
-        model.addAttribute("title", "Send an email")
+    fun exampleEmailPage(
+        model: Model,
+        principal: Principal,
+    ): String {
+        val currentAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
+        model.addAttribute("councilName", currentAuthority.name)
+        model.addAttribute("councilEmail", currentAuthority.name + ".co.uk")
         model.addAttribute("serviceName", SERVICE_NAME)
-        return "sendTestEmail"
+        return "inviteLAUser"
     }
 
     @PostMapping("/invite-new-user", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
@@ -87,9 +91,10 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
     ): String {
         model.addAttribute("serviceName", SERVICE_NAME)
+        result.allErrors.forEach { println(it.toString()) }
+        val emailAddress: String = emailModel.email
+        val currentAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
         try {
-            val emailAddress: String = emailModel.email
-            val currentAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
             val token = invitationService.createInvitationToken(emailAddress, currentAuthority)
             val invitationLinkAddress = invitationService.buildInvitationUri(token)
             emailSender.sendEmail(
@@ -101,9 +106,9 @@ class ManageLocalAuthorityUsersController(
             model.addAttribute("title", "Email sent")
             return "index"
         } catch (retryException: TransientEmailSentException) {
-            model.addAttribute("contentHeader", "That didn't work. Please try again.")
-            model.addAttribute("title", "Send an email")
-            return "sendTestEmail"
+            model.addAttribute("councilName", currentAuthority.name)
+            model.addAttribute("councilEmail", currentAuthority.name + ".co.uk")
+            return "inviteLAUser"
         }
     }
 }

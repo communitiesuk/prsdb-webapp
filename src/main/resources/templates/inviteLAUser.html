@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(${title}, ${serviceName}, ~{::main})}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#header})}">
+        <header id="header">
+            <h1 class="govuk-heading-l" th:text="#{addLAUser.heading(${councilName})}"></h1>
+        </header>
+        </div>
+    <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#explanation})}">
+        <section id="explanation">
+            <p th:text="#{addLAUser.paragraph.one}" class="govuk-body">
+            </p>
+            <p th:text="#{addLAUser.paragraph.two}" class="govuk-body">
+            </p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{addLAUser.paragraph.two.bullet.one}">
+                </li>
+                <li th:text="#{addLAUser.paragraph.two.bullet.two}">
+                </li>
+                <li th:text="#{addLAUser.paragraph.two.bullet.three}">
+                </li>
+            </ul>
+            <p th:utext="#{addLAUser.paragraph.four.part1} + '&lt;b&gt; ' + ${councilName} + ' &lt;/b&gt;' + #{addLAUser.paragraph.four.part2}" class="govuk-body">
+            </p>
+        </section>
+    </div>
+    <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#email-form})}">
+    <form class="form" id="email-form" method="post" th:action="@{/manage-users/invite-new-user}">
+        <div class="govuk-form-group">
+                <label class="govuk-label" for="email" th:text="#{addLAUser.form.primaryEmailLabel(${councilEmail})}"></label>
+            <input class="govuk-input" id="email" name="email" type="text">
+        </div>
+        <div>
+            <div class="govuk-form-group">
+                    <label class="govuk-label" for="confirm-email" th:text="#{addLAUser.form.confirmEmailLabel}"></label>
+                <input class="govuk-input" id="confirm-email" name="confirmEmail" type="text">
+            </div>
+            <button type="submit" class="govuk-button" data-module="govuk-button" th:text="#{addLAUser.form.submitButton}">
+            </button>
+        </div>
+    </form>
+    </div>
+</main>
+</html>
