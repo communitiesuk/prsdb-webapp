@@ -1,11 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import jakarta.validation.Valid
 import jakarta.servlet.http.HttpServletRequest
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.context.MessageSource
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
+import jakarta.validation.Valid
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
@@ -16,10 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_TABLE_PAGE
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ConfirmedEmailDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
@@ -35,8 +29,6 @@ class ManageLocalAuthorityUsersController(
     var invitationService: LocalAuthorityInvitationService,
     val localAuthorityDataService: LocalAuthorityDataService,
 ) {
-    val maxUsersDisplayed = MAX_ENTRIES_IN_TABLE_PAGE
-
     @GetMapping
     fun index(
         model: Model,
@@ -49,12 +41,18 @@ class ManageLocalAuthorityUsersController(
         val nActiveUsers = localAuthorityDataService.countActiveLocalAuthorityUsersForLocalAuthority(currentUserLocalAuthority)
         val nPendingUsers = localAuthorityDataService.countPendingLocalAuthorityUsersForLocalAuthority(currentUserLocalAuthority)
         val totalUsers = nActiveUsers + nPendingUsers
-        val totalPages = ceil((totalUsers.toDouble() / maxUsersDisplayed.toDouble())).toInt()
+        val totalPages = ceil((totalUsers.toDouble() / MAX_ENTRIES_IN_TABLE_PAGE.toDouble())).toInt()
 
         val shouldPaginate = totalPages > 1
         val currentPageNumber = getCurrentPage(page)
 
-        val pagedUserList = getUserList(currentUserLocalAuthority, currentPageNumber, nActiveUsers, shouldPaginate)
+        val pagedUserList =
+            localAuthorityDataService.getUserList(
+                currentUserLocalAuthority,
+                currentPageNumber,
+                nActiveUsers,
+                shouldPaginate,
+            )
 
         model.addAttribute("localAuthority", currentUserLocalAuthority.name)
         model.addAttribute("userList", pagedUserList)
@@ -74,62 +72,6 @@ class ManageLocalAuthorityUsersController(
         model.addAttribute("baseUri", httpServletRequest.requestURI)
 
         return "manageLAUsers"
-    }
-
-    private fun getUserList(
-        localAuthority: LocalAuthority,
-        currentPageNumber: Int,
-        nActiveUsers: Long,
-        shouldPaginate: Boolean,
-    ): List<LocalAuthorityUserDataModel> {
-        var activeUsers = listOf<LocalAuthorityUserDataModel>()
-        var pendingUsers = listOf<LocalAuthorityUserDataModel>()
-        if (shouldPaginate) {
-            val firstDisplayedUserCombinedIndex = (currentPageNumber - 1) * maxUsersDisplayed
-            if (firstDisplayedUserCombinedIndex < nActiveUsers) {
-                activeUsers = getActiveUsersPaginated(localAuthority, currentPageNumber, maxUsersDisplayed)
-            }
-
-            if (activeUsers.size < maxUsersDisplayed) {
-                if (activeUsers.isNotEmpty()) {
-                    val nPendingUsersOnMixedPage = maxUsersDisplayed - activeUsers.size
-                    pendingUsers = getPendingUsersPaginated(localAuthority, 1, nPendingUsersOnMixedPage, 0)
-                } else {
-                    val nPagesWithActiveUsers = ceil(nActiveUsers.toDouble() / maxUsersDisplayed.toDouble()).toInt()
-                    val pendingUserPageNumber = currentPageNumber - nPagesWithActiveUsers
-
-                    val nActiveUsersOnMixedPage = (nActiveUsers % maxUsersDisplayed).toInt()
-                    val nPendingUsersOnMixedPage = if (nActiveUsersOnMixedPage == 0) 0 else (maxUsersDisplayed - nActiveUsersOnMixedPage)
-
-                    pendingUsers =
-                        getPendingUsersPaginated(localAuthority, pendingUserPageNumber, maxUsersDisplayed, nPendingUsersOnMixedPage)
-                }
-            }
-        } else {
-            activeUsers = getActiveUsersPaginated(localAuthority, 1, maxUsersDisplayed)
-            pendingUsers = getPendingUsersPaginated(localAuthority, 1, maxUsersDisplayed, 0)
-        }
-
-        return activeUsers + pendingUsers
-    }
-
-    private fun getActiveUsersPaginated(
-        localAuthority: LocalAuthority,
-        page: Int,
-        nUsers: Int,
-    ): List<LocalAuthorityUserDataModel> {
-        val pageRequest = PageRequest.of(page - 1, nUsers, Sort.by(Sort.Direction.ASC, "baseUser_name"))
-        return localAuthorityDataService.getLocalAuthorityUsersForLocalAuthority(localAuthority, pageRequest)
-    }
-
-    private fun getPendingUsersPaginated(
-        localAuthority: LocalAuthority,
-        page: Int,
-        nUsers: Int,
-        initialOffset: Int,
-    ): List<LocalAuthorityUserDataModel> {
-        val pageRequest = MyPageRequest(page - 1, nUsers, Sort.by(Sort.Direction.ASC, "invitedEmail"), initialOffset)
-        return localAuthorityDataService.getLocalAuthorityPendingUsersForLocalAuthority(localAuthority, pageRequest)
     }
 
     private fun getCurrentPage(pageString: String?): Int {
@@ -177,13 +119,4 @@ class ManageLocalAuthorityUsersController(
             return "sendTestEmail"
         }
     }
-}
-
-class MyPageRequest(
-    pageNumber: Int,
-    pageSize: Int,
-    sort: Sort,
-    private val initialOffset: Int,
-) : PageRequest(pageNumber, pageSize, sort) {
-    override fun getOffset(): Long = (this.pageNumber * this.pageSize + initialOffset).toLong()
 }
