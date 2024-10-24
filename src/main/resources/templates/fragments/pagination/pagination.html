@@ -1,16 +1,16 @@
-<nav th:fragment="pagination(totalPages, currentPage, baseUri)" class="govuk-pagination" aria-label="Pagination">
+<nav th:fragment="pagination(totalPages, currentPage)" class="govuk-pagination" aria-label="Pagination">
     <div th:if="${currentPage != 1}">
-        <div th:replace="~{fragments/pagination/previous :: previous(${baseUri},${currentPage}-1)}"></div>
+        <div th:replace="~{fragments/pagination/previous :: previous(${currentPage}-1)}"></div>
     </div>
     <div th:if="${totalPages<=5}" >
-        <ul th:replace="~{fragments/pagination/listAllPages :: listAllPages(${currentPage}, ${totalPages}, ${baseUri})}">
+        <ul th:replace="~{fragments/pagination/listAllPages :: listAllPages(${currentPage}, ${totalPages})}">
         </ul>
     </div>
     <div th:if="${totalPages>5}">
-        <ul  th:replace="~{fragments/pagination/listHighlightedPages :: listHighlightedPages(${currentPage}, ${totalPages}, ${baseUri})}">
+        <ul  th:replace="~{fragments/pagination/listHighlightedPages :: listHighlightedPages(${currentPage}, ${totalPages})}">
         </ul>
     </div>
     <div th:if="${currentPage != totalPages}">
-        <div th:replace="~{fragments/pagination/next :: next(${baseUri},${currentPage}+1)}"></div>
+        <div th:replace="~{fragments/pagination/next :: next(${currentPage}+1)}"></div>
     </div>
 </nav>
