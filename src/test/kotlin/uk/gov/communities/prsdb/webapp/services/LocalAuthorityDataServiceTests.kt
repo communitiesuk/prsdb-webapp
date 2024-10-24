@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 
 class LocalAuthorityDataServiceTests {
     private lateinit var localAuthorityUsersRepository: LocalAuthorityUserRepository
@@ -81,18 +82,18 @@ class LocalAuthorityDataServiceTests {
         Mockito
             .`when`(localAuthorityUsersRepository.findByLocalAuthority(localAuthorityTest, pageRequest))
             .thenReturn(listOf(localAuthorityUser1, localAuthorityUser2))
+        val expectedLaUserList =
+            listOf(
+                LocalAuthorityUserDataModel("Test user 1", true, false),
+                LocalAuthorityUserDataModel("Test user 2", false, false),
+            )
 
         // Act
         val laUserList = localAuthorityDataService.getLocalAuthorityUsersForLocalAuthority(localAuthorityTest, pageRequest)
 
         // Assert
         Assertions.assertEquals(2, laUserList.size)
-        Assertions.assertEquals("Test user 1", laUserList[0].userName)
-        Assertions.assertEquals("Test user 2", laUserList[1].userName)
-        Assertions.assertEquals(true, laUserList[0].isManager)
-        Assertions.assertEquals(false, laUserList[1].isManager)
-        Assertions.assertEquals(false, laUserList[0].isPending)
-        Assertions.assertEquals(false, laUserList[1].isPending)
+        Assertions.assertEquals(expectedLaUserList, laUserList)
     }
 
     @Test
@@ -134,17 +135,17 @@ class LocalAuthorityDataServiceTests {
         Mockito
             .`when`(localAuthorityInvitationRepository.findByInvitingAuthority(localAuthorityTest, pageRequest))
             .thenReturn(listOf(invitation1, invitation2))
+        val expectedUserList =
+            listOf(
+                LocalAuthorityUserDataModel("invited.user@example.com", false, true),
+                LocalAuthorityUserDataModel("another.user@example.com", false, true),
+            )
 
         // Act
         val laInvitedUsers = localAuthorityDataService.getLocalAuthorityPendingUsersForLocalAuthority(localAuthorityTest, pageRequest)
 
         // Assert
         Assertions.assertEquals(2, laInvitedUsers.size)
-        Assertions.assertEquals("invited.user@example.com", laInvitedUsers[0].userName)
-        Assertions.assertEquals("another.user@example.com", laInvitedUsers[1].userName)
-        Assertions.assertEquals(false, laInvitedUsers[0].isManager)
-        Assertions.assertEquals(false, laInvitedUsers[1].isManager)
-        Assertions.assertEquals(true, laInvitedUsers[0].isPending)
-        Assertions.assertEquals(true, laInvitedUsers[1].isPending)
+        Assertions.assertEquals(expectedUserList, laInvitedUsers)
     }
 }

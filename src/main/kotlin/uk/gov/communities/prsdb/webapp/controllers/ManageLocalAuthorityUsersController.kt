@@ -8,9 +8,11 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_TABLE_PAGE
 import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
+import java.security.Principal
 import java.util.Locale
 import kotlin.math.ceil
 
@@ -24,9 +26,11 @@ class ManageLocalAuthorityUsersController(
     @GetMapping
     fun index(
         model: Model,
+        principal: Principal,
+        @RequestParam(value = "page", required = false) page: Int = 1,
         httpServletRequest: HttpServletRequest,
     ): String {
-        val currentUserLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser(httpServletRequest.userPrincipal.name)!!
+        val currentUserLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
 
         val nActiveUsers = localAuthorityDataService.countActiveLocalAuthorityUsersForLocalAuthority(currentUserLocalAuthority)
         val nPendingUsers = localAuthorityDataService.countPendingLocalAuthorityUsersForLocalAuthority(currentUserLocalAuthority)
@@ -34,12 +38,11 @@ class ManageLocalAuthorityUsersController(
         val totalPages = ceil((totalUsers.toDouble() / MAX_ENTRIES_IN_TABLE_PAGE.toDouble())).toInt()
 
         val shouldPaginate = totalPages > 1
-        val currentPageNumber = getCurrentPage(httpServletRequest.getParameter("page"))
 
         val pagedUserList =
             localAuthorityDataService.getUserList(
                 currentUserLocalAuthority,
-                currentPageNumber,
+                page,
                 nActiveUsers,
                 shouldPaginate,
             )
@@ -59,19 +62,9 @@ class ManageLocalAuthorityUsersController(
         )
         model.addAttribute("shouldPaginate", shouldPaginate)
         model.addAttribute("totalPages", totalPages)
-        model.addAttribute("currentPage", currentPageNumber)
+        model.addAttribute("currentPage", page)
         model.addAttribute("baseUri", httpServletRequest.requestURI)
 
         return "manageLAUsers"
-    }
-
-    private fun getCurrentPage(pageString: String?): Int {
-        if (pageString == null) return 1
-
-        try {
-            return pageString.toInt()
-        } catch (e: NumberFormatException) {
-            return 1
-        }
     }
 }
