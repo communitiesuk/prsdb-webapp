@@ -19,6 +19,7 @@
           crossorigin="use-credentials">
     <link rel="stylesheet" href="/static/assets/css/govuk-frontend.min.css"
           th:href="@{/assets/css/govuk-frontend.min.css}">
+    <link rel="stylesheet" href="/static/assets/css/service-header.css" th:href="@{/assets/css/service-header.css}">
 </head>
 
 <body class="govuk-template__body">
@@ -31,8 +32,8 @@
     <div th:replace="${content}"></div>
 </div>
 <div th:replace="~{ fragments/footer :: footer }"></div>
-<script type="module" src="/static/asset/js/index.js"
-        th:src="@{/assets/js/index.js}"></script>
+<script type="module" src="/static/asset/js/index.js" th:src="@{/assets/js/index.js}"></script>
+<script type="module" src="/static/asset/js/service-header.js" th:src="@{/assets/js/service-header.js}"></script>
 </body>
 
 </html>
