@@ -33,7 +33,7 @@ class ManageLocalAuthorityUsersController(
     fun index(
         model: Model,
         principal: Principal,
-        @RequestParam(required = false) page: String?,
+        @RequestParam(value = "page", required = false) page: Int = 1,
         httpServletRequest: HttpServletRequest,
     ): String {
         val currentUserLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
@@ -44,12 +44,11 @@ class ManageLocalAuthorityUsersController(
         val totalPages = ceil((totalUsers.toDouble() / MAX_ENTRIES_IN_TABLE_PAGE.toDouble())).toInt()
 
         val shouldPaginate = totalPages > 1
-        val currentPageNumber = getCurrentPage(page)
 
         val pagedUserList =
             localAuthorityDataService.getUserList(
                 currentUserLocalAuthority,
-                currentPageNumber,
+                page,
                 nActiveUsers,
                 shouldPaginate,
             )
@@ -67,21 +66,11 @@ class ManageLocalAuthorityUsersController(
         )
         model.addAttribute("shouldPaginate", shouldPaginate)
         model.addAttribute("totalPages", totalPages)
-        model.addAttribute("currentPage", currentPageNumber)
-        model.addAttribute("isLastPage", currentPageNumber == totalPages)
+        model.addAttribute("currentPage", page)
+        model.addAttribute("isLastPage", page == totalPages)
         model.addAttribute("baseUri", httpServletRequest.requestURI)
 
         return "manageLAUsers"
-    }
-
-    private fun getCurrentPage(pageString: String?): Int {
-        if (pageString == null) return 1
-
-        try {
-            return pageString.toInt()
-        } catch (e: NumberFormatException) {
-            return 1
-        }
     }
 
     @GetMapping("/invite-new-user")

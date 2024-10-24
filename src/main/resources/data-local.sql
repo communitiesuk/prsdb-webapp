@@ -40,4 +40,4 @@ VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 1, '10/07/24', '10/07/24'),
 
 INSERT INTO local_authority_invitation (invited_email, inviting_authority_id, token)
 VALUES ('invited.user@example.com', 1, gen_random_uuid()),
-       ('another.user@example.com', 1, gen_random_uuid())
+       ('another.user@example.com', 1, gen_random_uuid());
