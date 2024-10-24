@@ -7,11 +7,13 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_TABLE_PAGE
 import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
-import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import java.security.Principal
 import java.util.Locale
+import kotlin.math.ceil
 
 @PreAuthorize("hasRole('LA_ADMIN')")
 @Controller
@@ -24,28 +26,29 @@ class ManageLocalAuthorityUsersController(
     fun index(
         model: Model,
         principal: Principal,
+        @RequestParam(value = "page", required = false) page: Int = 1,
     ): String {
         val currentUserLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
 
-        val activeUsers = localAuthorityDataService.getLocalAuthorityUsersForLocalAuthority(currentUserLocalAuthority)
-        // TODO: Get these from LocalAuthorityUserInvitation with userName=email, isManager=false and isPending=true
-        val pendingUsers =
-            listOf(
-                LocalAuthorityUserDataModel("Invited user 1", isManager = false, isPending = true),
-                LocalAuthorityUserDataModel("Invited user 2", isManager = false, isPending = true),
+        val nActiveUsers = localAuthorityDataService.countActiveLocalAuthorityUsersForLocalAuthority(currentUserLocalAuthority)
+        val nPendingUsers = localAuthorityDataService.countPendingLocalAuthorityUsersForLocalAuthority(currentUserLocalAuthority)
+        val totalUsers = nActiveUsers + nPendingUsers
+        val totalPages = ceil((totalUsers.toDouble() / MAX_ENTRIES_IN_TABLE_PAGE.toDouble())).toInt()
+
+        val shouldPaginate = totalPages > 1
+
+        val pagedUserList =
+            localAuthorityDataService.getUserList(
+                currentUserLocalAuthority,
+                page,
+                nActiveUsers,
+                shouldPaginate,
             )
 
-        val users = activeUsers + pendingUsers
-
-        model.addAttribute(
-            "contentHeader",
-            messageSource.getMessage("manageLAUsers.contentHeader.part1", null, Locale("en")) +
-                " " + currentUserLocalAuthority.name +
-                messageSource.getMessage("manageLAUsers.contentHeader.part2", null, Locale("en")),
-        )
+        model.addAttribute("localAuthority", currentUserLocalAuthority.name)
         model.addAttribute("title", messageSource.getMessage("manageLAUsers.title", null, Locale("en")))
         model.addAttribute("serviceName", SERVICE_NAME)
-        model.addAttribute("userList", users)
+        model.addAttribute("userList", pagedUserList)
         model.addAttribute(
             "tableColumnHeadings",
             listOf(
@@ -55,6 +58,9 @@ class ManageLocalAuthorityUsersController(
                 "",
             ),
         )
+        model.addAttribute("shouldPaginate", shouldPaginate)
+        model.addAttribute("totalPages", totalPages)
+        model.addAttribute("currentPage", page)
 
         return "manageLAUsers"
     }

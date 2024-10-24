@@ -1,3 +1,4 @@
 package uk.gov.communities.prsdb.webapp.constants
 
 const val SERVICE_NAME = "Private Rented Sector Database"
+const val MAX_ENTRIES_IN_TABLE_PAGE = 10
