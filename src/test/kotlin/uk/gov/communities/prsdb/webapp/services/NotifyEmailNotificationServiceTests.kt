@@ -10,6 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
+import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateId
@@ -61,7 +62,7 @@ class NotifyEmailNotificationServiceTests {
         var innerException = NotificationClientException(errorMessage)
         Mockito
             .doThrow(innerException)
-            .`when`(notifyClient)
+            .whenever(notifyClient)
             .sendEmail(any(), any(), any(), any())
 
         var thrownException = assertThrows<PersistentEmailSendException> { emailNotificationService.sendEmail("", TestEmailTemplate()) }
@@ -76,7 +77,7 @@ class NotifyEmailNotificationServiceTests {
         var innerException = NotificationClientException(error)
         Mockito
             .doThrow(innerException)
-            .`when`(notifyClient)
+            .whenever(notifyClient)
             .sendEmail(any(), any(), any(), any())
 
         var thrownException = assertThrows<TransientEmailSentException> { emailNotificationService.sendEmail("", TestEmailTemplate()) }

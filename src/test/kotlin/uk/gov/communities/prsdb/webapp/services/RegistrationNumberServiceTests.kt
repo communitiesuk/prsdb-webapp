@@ -8,7 +8,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
+import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.RegistrationNumberRepository
@@ -25,7 +25,7 @@ class RegistrationNumberServiceTests {
 
     @Test
     fun `createRegistrationNumber creates a registration number for the given entity type`() {
-        `when`(mockRegNumRepository.existsByNumber(any(Long::class.java))).thenReturn(false)
+        whenever(mockRegNumRepository.existsByNumber(any(Long::class.java))).thenReturn(false)
 
         regNumService.createRegistrationNumber(RegistrationNumberType.LANDLORD)
 
@@ -36,7 +36,7 @@ class RegistrationNumberServiceTests {
 
     @Test
     fun `createRegistrationNumber creates a unique registration number`() {
-        `when`(mockRegNumRepository.existsByNumber(any(Long::class.java))).thenReturn(true, false)
+        whenever(mockRegNumRepository.existsByNumber(any(Long::class.java))).thenReturn(true, false)
 
         regNumService.createRegistrationNumber(RegistrationNumberType.LANDLORD)
 

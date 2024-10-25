@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import org.mockito.Mockito
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.security.test.context.support.WithMockUser
@@ -37,8 +37,7 @@ class ManageLocalAuthorityUsersControllerTests(
         val localAuthority = LocalAuthority()
         ReflectionTestUtils.setField(localAuthority, "id", 123)
         ReflectionTestUtils.setField(localAuthority, "name", "Test Local Authority")
-        Mockito
-            .`when`(localAuthorityDataService.getLocalAuthorityForUser("user"))
+        whenever(localAuthorityDataService.getLocalAuthorityForUser("user"))
             .thenReturn(localAuthority)
 
         mvc

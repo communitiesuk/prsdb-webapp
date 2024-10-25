@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.mockito.kotlin.whenever
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
@@ -56,8 +57,7 @@ class LocalAuthorityDataServiceTests {
         val baseUser2 = createOneLoginUser("Test user 2")
         val localAuthorityUser1 = createLocalAuthorityUser(baseUser1, true, localAuthorityTest)
         val localAuthorityUser2 = createLocalAuthorityUser(baseUser2, false, localAuthorityTest)
-        Mockito
-            .`when`(localAuthorityUsersRepository.findByLocalAuthority(localAuthorityTest))
+        whenever(localAuthorityUsersRepository.findByLocalAuthority(localAuthorityTest))
             .thenReturn(listOf(localAuthorityUser1, localAuthorityUser2))
 
         // Act
@@ -77,8 +77,7 @@ class LocalAuthorityDataServiceTests {
         val localAuthority = createLocalAuthority(123)
         val baseUser = createOneLoginUser("Test user 1")
         val localAuthorityUser = createLocalAuthorityUser(baseUser, false, localAuthority)
-        Mockito
-            .`when`(localAuthorityUsersRepository.findByBaseUser_Id("test-user-1"))
+        whenever(localAuthorityUsersRepository.findByBaseUser_Id("test-user-1"))
             .thenReturn(localAuthorityUser)
 
         // Act
@@ -91,8 +90,7 @@ class LocalAuthorityDataServiceTests {
     @Test
     fun `getLocalAuthorityForUser returns null if user is not in a local authority`() {
         // Arrange
-        Mockito
-            .`when`(localAuthorityUsersRepository.findByBaseUser_Id("test-user-1"))
+        whenever(localAuthorityUsersRepository.findByBaseUser_Id("test-user-1"))
             .thenReturn(null)
 
         // Act, Assert
