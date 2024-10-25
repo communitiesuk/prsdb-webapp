@@ -1,7 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.context.MessageSource
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -10,14 +8,12 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import java.security.Principal
-import java.util.Locale
 
 @PreAuthorize("hasRole('LA_ADMIN')")
 @Controller
 @RequestMapping("/manage-users")
 class ManageLocalAuthorityUsersController(
     val localAuthorityDataService: LocalAuthorityDataService,
-    @Qualifier("messageSource") private val messageSource: MessageSource,
 ) {
     @GetMapping
     fun index(
@@ -36,20 +32,15 @@ class ManageLocalAuthorityUsersController(
 
         val users = activeUsers + pendingUsers
 
-        model.addAttribute(
-            "contentHeader",
-            messageSource.getMessage("manageLAUsers.contentHeader.part1", null, Locale("en")) +
-                " " + currentUserLocalAuthority.name +
-                messageSource.getMessage("manageLAUsers.contentHeader.part2", null, Locale("en")),
-        )
-        model.addAttribute("title", messageSource.getMessage("manageLAUsers.title", null, Locale("en")))
+        model.addAttribute("localAuthority", currentUserLocalAuthority.name)
+        model.addAttribute("title", "manageLAUsers.title")
         model.addAttribute("userList", users)
         model.addAttribute(
             "tableColumnHeadings",
             listOf(
-                messageSource.getMessage("manageLAUsers.table.column1Heading", null, Locale("en")),
-                messageSource.getMessage("manageLAUsers.table.column2Heading", null, Locale("en")),
-                messageSource.getMessage("manageLAUsers.table.column3Heading", null, Locale("en")),
+                "manageLAUsers.table.column1Heading",
+                "manageLAUsers.table.column2Heading",
+                "manageLAUsers.table.column3Heading",
                 "",
             ),
         )
