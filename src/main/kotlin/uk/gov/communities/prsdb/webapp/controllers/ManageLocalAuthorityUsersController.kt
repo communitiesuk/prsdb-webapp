@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.validation.Valid
@@ -11,7 +13,7 @@ import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
+import uk.gov.communities.prsdb.webapp.constants.*
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ConfirmedEmailDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
@@ -91,9 +93,19 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
     ): String {
         model.addAttribute("serviceName", SERVICE_NAME)
-        result.allErrors.forEach { println(it.toString()) }
-        val emailAddress: String = emailModel.email
         val currentAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
+        if (result.hasErrors()) {
+            model.addAttribute("councilName", currentAuthority.name)
+            model.addAttribute("councilEmail", currentAuthority.name + ".co.uk")
+            model.addAttribute(
+                "validationErrors",
+                getValidationErrors(emailModel, result),
+            )
+            return "inviteLAUser"
+        }
+        model.addAttribute("validationErrors", InviteUserValidationState(emailModel.email, emailModel.confirmEmail))
+
+        val emailAddress: String = emailModel.email
         try {
             val token = invitationService.createInvitationToken(emailAddress, currentAuthority)
             val invitationLinkAddress = invitationService.buildInvitationUri(token)
@@ -111,4 +123,58 @@ class ManageLocalAuthorityUsersController(
             return "inviteLAUser"
         }
     }
+
+    private fun getValidationErrors(
+        model: ConfirmedEmailDataModel,
+        result: BindingResult,
+    ): InviteUserValidationState =
+        InviteUserValidationState(
+            if (result.allErrors
+                    .map { it.defaultMessage }
+                    .contains(ConfirmedEmailDataModel.NO_EMAIL_ERROR_MESSAGE)
+            ) {
+                FieldValidation(model.email, ADD_LA_USER_MISSING_EMAIL)
+            } else if (result.allErrors
+                    .map { it.defaultMessage }
+                    .contains(ConfirmedEmailDataModel.NOT_AN_EMAIL_ERROR_MESSAGE)
+            ) {
+                FieldValidation(model.email, ADD_LA_USER_INVALID_EMAIL)
+            } else {
+                FieldValidation(model.email)
+            },
+            if (result.allErrors
+                    .map { it.defaultMessage }
+                    .contains(ConfirmedEmailDataModel.NO_CONFIRMATION_ERROR_MESSAGE)
+            ) {
+                FieldValidation(model.confirmEmail, ADD_LA_USER_MISSING_CONFIRMATION)
+            } else if (result.allErrors
+                    .map { it.defaultMessage }
+                    .contains(
+                        ConfirmedEmailDataModel.CONFIRMATION_DOES_NOT_MATCH_EMAIL_ERROR_MESSAGE,
+                    )
+            ) {
+                FieldValidation(model.confirmEmail, ADD_LA_USER_NON_MATCHING_CONFIRMATION)
+            } else {
+                FieldValidation(model.confirmEmail)
+            },
+        )
+}
+
+class InviteUserValidationState(
+    val emailValidation: FieldValidation,
+    val confirmEmailValidation: FieldValidation,
+) {
+    constructor(
+        validEmail: String,
+        validConfirmEmail: String,
+    ) : this(FieldValidation(validEmail), FieldValidation(validConfirmEmail))
+
+    val hasErrors: Boolean = emailValidation.hasError || confirmEmailValidation.hasError
+}
+
+class FieldValidation(
+    val value: String,
+    val messageKey: String? = null,
+) {
+    val hasError: Boolean = messageKey != null
 }

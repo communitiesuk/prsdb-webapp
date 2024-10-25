@@ -1,0 +1,8 @@
+    <div th:fragment="textInput(label, for, validationError)" th:class="${validationError?.hasError} ? 'govuk-form-group govuk-form-group--error':'govuk-form-group'">
+        <label class="govuk-label" th:for="${for}" th:text="${label}"></label>
+        <p th:if="${validationError?.hasError}" th:id="${for}+'-error'" class="govuk-error-message">
+            <span class="govuk-visually-hidden" th:text="#{errorPrefix}"></span>
+            <span th:remove="tag" th:text="#{${validationError?.messageKey}}"></span>
+        </p>
+        <input class="govuk-input" th:id="${for}" th:name="${for}" type="text" th:value="${validationError?.value}">
+    </div>
