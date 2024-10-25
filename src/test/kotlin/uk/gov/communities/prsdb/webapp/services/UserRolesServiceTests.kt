@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.mockito.kotlin.whenever
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
@@ -36,8 +37,7 @@ class UserRolesServiceTests {
         val baseUser = createOneLoginUser("Test User 1")
         val user = LandlordUser()
         ReflectionTestUtils.setField(user, "baseUser", baseUser)
-        Mockito
-            .`when`(landlordRepository.findByBaseUser_Id("test-user-1"))
+        whenever(landlordRepository.findByBaseUser_Id("test-user-1"))
             .thenReturn(user)
 
         // Act
@@ -55,8 +55,7 @@ class UserRolesServiceTests {
         val user = LocalAuthorityUser()
         ReflectionTestUtils.setField(user, "baseUser", baseUser)
         ReflectionTestUtils.setField(user, "isManager", true)
-        Mockito
-            .`when`(localAuthorityUserRepository.findByBaseUser_Id("test-user-1"))
+        whenever(localAuthorityUserRepository.findByBaseUser_Id("test-user-1"))
             .thenReturn(user)
 
         // Act
@@ -75,8 +74,7 @@ class UserRolesServiceTests {
         val user = LocalAuthorityUser()
         ReflectionTestUtils.setField(user, "baseUser", baseUser)
         ReflectionTestUtils.setField(user, "isManager", false)
-        Mockito
-            .`when`(localAuthorityUserRepository.findByBaseUser_Id("test-user-1"))
+        whenever(localAuthorityUserRepository.findByBaseUser_Id("test-user-1"))
             .thenReturn(user)
 
         // Act
