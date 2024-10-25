@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
-import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
 import uk.gov.communities.prsdb.webapp.services.ExampleCountingService
 
 @Controller
@@ -15,7 +14,6 @@ class ExampleCacheAccessController(
         var count = counter.getCountAndIncrement()
         model.addAttribute("contentHeader", "You have visited $count times")
         model.addAttribute("title", "Visit count")
-        model.addAttribute("serviceName", SERVICE_NAME)
         return "index"
     }
 }

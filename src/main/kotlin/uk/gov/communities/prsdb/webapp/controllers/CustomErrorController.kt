@@ -16,8 +16,6 @@ class CustomErrorController : ErrorController {
         request: HttpServletRequest,
         model: Model,
     ): String {
-        model.addAttribute("serviceName", SERVICE_NAME)
-
         val status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE)
 
         if (status != null) {

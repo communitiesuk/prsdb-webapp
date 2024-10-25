@@ -7,7 +7,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import java.security.Principal
@@ -44,7 +43,6 @@ class ManageLocalAuthorityUsersController(
                 messageSource.getMessage("manageLAUsers.contentHeader.part2", null, Locale("en")),
         )
         model.addAttribute("title", messageSource.getMessage("manageLAUsers.title", null, Locale("en")))
-        model.addAttribute("serviceName", SERVICE_NAME)
         model.addAttribute("userList", users)
         model.addAttribute(
             "tableColumnHeadings",

@@ -6,7 +6,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
-import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -28,7 +27,6 @@ class ExampleEmailSendingController(
     fun exampleEmailPage(model: Model): String {
         model.addAttribute("contentHeader", "Send a test email using notify")
         model.addAttribute("title", "Send an email")
-        model.addAttribute("serviceName", SERVICE_NAME)
         return "sendTestEmail"
     }
 
@@ -42,7 +40,6 @@ class ExampleEmailSendingController(
         body: Submission,
         principal: Principal,
     ): String {
-        model.addAttribute("serviceName", SERVICE_NAME)
         try {
             val currentAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
             val token = invitationService.createInvitationToken(body.emailAddress, currentAuthority)
@@ -70,7 +67,6 @@ class ExampleEmailSendingController(
         val authority = invitationService.getAuthorityForToken(token)
         model.addAttribute("contentHeader", "The local authority issuing that token was: ${authority.name}")
         model.addAttribute("title", "Magic link")
-        model.addAttribute("serviceName", SERVICE_NAME)
         return "index"
     }
 }

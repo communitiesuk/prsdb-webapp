@@ -6,7 +6,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
 import java.util.Locale
 
 @Controller
@@ -18,7 +17,6 @@ class RegisterLandlordController(
     @GetMapping
     fun index(model: Model): String {
         model.addAttribute("title", messageSource.getMessage("registerAsALandlord.title", null, Locale("en")))
-        model.addAttribute("serviceName", SERVICE_NAME)
         return "registerAsALandlord"
     }
 }

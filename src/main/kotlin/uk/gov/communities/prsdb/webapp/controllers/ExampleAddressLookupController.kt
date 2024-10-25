@@ -6,7 +6,6 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 
 /* TODO PRSD-371: Remove this template once there is another way to reach the AddressLookupService
@@ -22,7 +21,6 @@ class ExampleAddressLookupController(
     fun exampleAddressLookupPage(model: Model): String {
         model.addAttribute("contentHeader", "Address Lookup")
         model.addAttribute("title", "Address Lookup")
-        model.addAttribute("serviceName", SERVICE_NAME)
         return "exampleLookupAddress"
     }
 
@@ -40,7 +38,6 @@ class ExampleAddressLookupController(
 
         model.addAttribute("contentHeader", "Address Lookup")
         model.addAttribute("title", "Address Lookup")
-        model.addAttribute("serviceName", SERVICE_NAME)
         model.addAttribute("addresses", limitedAddresses)
         return "exampleLookupAddress"
     }
