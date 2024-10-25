@@ -22,6 +22,7 @@ class ExampleStartPageController {
         )
         model.addAttribute("startButtonHref", "/registration")
         model.addAttribute("startButtonText", "Start now")
+        model.addAttribute("isLandingPage", true)
         return "demoStart"
     }
 }
