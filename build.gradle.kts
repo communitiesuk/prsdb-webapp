@@ -73,6 +73,7 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("com.microsoft.playwright:playwright:1.47.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
 
     // Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
