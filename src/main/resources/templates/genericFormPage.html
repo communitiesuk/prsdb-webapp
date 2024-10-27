@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{${messageKeys[title]}}, ~{::main})}">
+<html th:replace="~{fragments/layout :: layout(#{${titleKey}}, ~{::main})}">
 <main class="govuk-main-wrapper" id="main-content">
-    <h1 class="govuk-heading-xl" th:text="#{${messageKeys[contentHeader]}}">Default page template</h1>
     <form method="post">
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-        <button type="submit">Next</button>
+        <div th:each="formComponent : ${formComponents}" th:remove="tag">
+            <div th:replace="~{|fragments/formcomponents/${formComponent.fragmentName}| :: ${formComponent.fragmentName}(model=${formComponent.model})}"></div>
+        </div>
+        <button th:replace="~{fragments/primaryButton :: primaryButton('Save and continue')}">Save and continue</button>
     </form>
-    <div th:replace="~{fragments/startButton :: startButton( ${startButtonHref}, ${startButtonText} )}"></div>
 </main>
 </html>

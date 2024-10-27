@@ -1,19 +1,20 @@
 package uk.gov.communities.prsdb.webapp.multipageforms
 
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.jvm.isAccessible
-
-data class Step<TForm : Any, TStepId : StepId>(
-    val page: Page<TForm>,
+data class Step<TStepId : StepId>(
+    val page: Page,
     val persistAfterSubmit: Boolean = false,
-    val nextStep: (Map<String, Any>) -> TStepId?,
-    val isSatisfied: (Map<String, Any>) -> Boolean = { sessionData ->
-        val formProperties = page.formType.memberProperties
-
-        formProperties.all { property ->
-            property.isAccessible = true
-            val fieldValue = sessionData[property.name]
-            fieldValue != null && (fieldValue is String && fieldValue.isNotBlank() || fieldValue !is String)
-        }
+    val nextStep: (Map<String, Any>) -> StepAction,
+    val isSatisfied: (Map<String, Any>) -> Boolean = { journeyData ->
+        page.isSatisfied(journeyData)
     },
 )
+
+sealed class StepAction {
+    data class GoToStep(
+        val stepId: StepId,
+    ) : StepAction()
+
+    data class Redirect(
+        val path: String,
+    ) : StepAction()
+}

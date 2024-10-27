@@ -10,4 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 class RegisterLandlordController {
     @GetMapping
     fun index(model: Model): String = "registerAsALandlord"
+
+    @GetMapping("check-answers")
+    fun checkAnswers(): String = "checkAnswersLandlord"
 }

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout('Register as a landlord', ${serviceName}, ~{::main})}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
+        <div id="page-content">
+            <header>
+                <h1 class="govuk-heading-l" th:text="#{registerAsALandlord.heading}">registerAsALandlord.heading</h1>
+                <p class="govuk-body">Review your answers here, etc etc</p>
+            </header>
+            <section>
+                Etc etc etc
+            </section>
+        </div>
+    </div>
+</main>
+</html>

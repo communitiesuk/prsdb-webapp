@@ -3,6 +3,8 @@ package uk.gov.communities.prsdb.webapp.multipageforms
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.multipageforms.components.EmailInput
+import uk.gov.communities.prsdb.webapp.multipageforms.components.PhoneNumberInput
 
 @Configuration
 class JourneysConfig {
@@ -18,29 +20,25 @@ class JourneysConfig {
                         Step(
                             page =
                                 Page(
-                                    formType = EmailFormModel::class,
-                                    messageKeys =
-                                        GenericFormPageMessages(
-                                            title = "registerAsALandlord.title",
-                                            contentHeader = "registerAsALandlord.heading",
-                                            formInstruction = "registerAsALandlord.heading",
+                                    titleKey = "registerAsALandlord.title",
+                                    formComponents =
+                                        listOf(
+                                            EmailInput(),
                                         ),
                                 ),
-                            nextStep = { LandlordRegistrationStepId.PhoneNumber },
+                            nextStep = { StepAction.GoToStep(LandlordRegistrationStepId.PhoneNumber) },
                         ),
                     LandlordRegistrationStepId.PhoneNumber to
                         Step(
                             page =
                                 Page(
-                                    formType = PhoneNumberFormModel::class,
-                                    messageKeys =
-                                        GenericFormPageMessages(
-                                            title = "registerAsALandlord.title",
-                                            contentHeader = "registerAsALandlord.heading",
-                                            formInstruction = "registerAsALandlord.heading",
+                                    titleKey = "registerAsALandlord.title",
+                                    formComponents =
+                                        listOf(
+                                            PhoneNumberInput(),
                                         ),
                                 ),
-                            nextStep = { null },
+                            nextStep = { StepAction.Redirect("/register-as-a-landlord/check-answers") },
                         ),
                 ),
         )

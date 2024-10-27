@@ -7,13 +7,12 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
-import org.springframework.validation.Validator
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
@@ -22,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.multipageforms.Journey
 import uk.gov.communities.prsdb.webapp.multipageforms.Step
+import uk.gov.communities.prsdb.webapp.multipageforms.StepAction
 import uk.gov.communities.prsdb.webapp.multipageforms.StepId
 import java.security.Principal
 import kotlin.reflect.jvm.javaMethod
@@ -71,7 +71,6 @@ class GenericFormController(
     private val formContextRepository: FormContextRepository,
     private val oneLoginUserRepository: OneLoginUserRepository,
     private val objectMapper: ObjectMapper,
-    private val validator: Validator,
 ) {
     @GetMapping
     fun showMultiPageFormStep(
@@ -89,11 +88,12 @@ class GenericFormController(
             return "redirect:/$journeyName/${journey.initialStepId.urlPathSegment}"
         }
 
+        // TODO: check flash attributes for errors
         val step = getStep(journey, stepId)
-        val formData = step.page.prepopulateForm(journeyData)
+        step.page.prepopulateForm(journeyData)
 
-        model.addAttribute("form", formData)
-        model.addAttribute("messageKeys", step.page.messageKeys)
+        model.addAttribute("titleKey", step.page.titleKey)
+        model.addAttribute("formComponents", step.page.formComponents)
 
         return step.page.templateName
     }
@@ -102,7 +102,7 @@ class GenericFormController(
     fun handleStepSubmission(
         @PathVariable journeyName: String,
         @PathVariable stepName: String,
-        @ModelAttribute formDataMap: HashMap<String, Any>,
+        @RequestParam formDataMap: Map<String, String>,
         session: HttpSession,
         redirectAttributes: RedirectAttributes,
         principal: Principal,
@@ -112,9 +112,9 @@ class GenericFormController(
         val step = getStep(journey, stepId)
 
         // Validate the form submission
-        val errors = step.page.validateSubmission(formDataMap, validator)
-        if (errors.isNotEmpty()) {
-            redirectAttributes.addFlashAttribute("errors", errors)
+        val isValid = step.page.validateSubmission(formDataMap)
+        if (!isValid) {
+            redirectAttributes.addFlashAttribute("errorPage", step.page)
             return "redirect:/$journeyName/$stepName"
         }
 
@@ -147,12 +147,15 @@ class GenericFormController(
             }
         }
 
-        // Determine the next step using the dynamic nextStep logic
-        val nextStepId =
-            step.nextStep(journeyData)?.urlPathSegment
-                ?: throw UnsupportedOperationException("Calculating the next step from $stepName returned null")
-
-        return "redirect:/$journeyName/$nextStepId"
+        when (val nextStepAction = step.nextStep(journeyData)) {
+            is StepAction.GoToStep -> {
+                val nextStepName = nextStepAction.stepId.urlPathSegment
+                return "redirect:/$journeyName/$nextStepName"
+            }
+            is StepAction.Redirect -> {
+                return "redirect:${nextStepAction.path}"
+            }
+        }
     }
 
     private fun getJourney(journeyName: String): Journey<*> =
@@ -171,5 +174,5 @@ class GenericFormController(
     private fun getStep(
         journey: Journey<*>,
         stepId: StepId,
-    ): Step<*, *> = journey.steps[stepId]!!
+    ): Step<*> = journey.steps[stepId]!!
 }

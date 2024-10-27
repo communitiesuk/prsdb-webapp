@@ -1,4 +1,5 @@
-<div th:fragment="emailInput ( errorKey )" class="govuk-form-group" th:classappend="${errorKey}? 'govuk-form-group--error'">
+<div th:fragment="emailInput ( model )" class="govuk-form-group"
+     th:classappend="${model.errorKey}? 'govuk-form-group--error'">
     <fieldset class="govuk-fieldset" role="group" aria-describedby="email-address-hint email-address-error">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
             <h1 class="govuk-fieldset__heading" th:text="#{formComponents.email.heading}">
@@ -8,14 +9,23 @@
         <div id="email-address-hint" class="govuk-hint" th:text="#{formComponents.email.hint}">
             We'll use this to contact you about your record.
         </div>
-        <p id="email-address-error" class="govuk-error-message" th:if="${errorKey}">
-            <span class="govuk-visually-hidden">Error:</span> <span th:text="#{${errorKey}}" th:remove="tag">Your email address must lorem ipsum</span>
+        <p id="email-address-error" class="govuk-error-message" th:if="${model.errorKey}">
+            <span class="govuk-visually-hidden">Error:</span> <span th:text="#{${model.errorKey}}" th:remove="tag">Your email address must lorem ipsum</span>
         </p>
         <div class="govuk-form-group">
             <label class="govuk-label" for="email" th:text="#{formComponents.email.label}">
                 Enter your email address
             </label>
-            <input class="govuk-input" id="email" name="email" type="email" spellcheck="false" aria-describedby="email-address-hint" autocomplete="email">
+            <input
+                    class="govuk-input"
+                    id="email"
+                    name="email"
+                    type="email"
+                    spellcheck="false"
+                    aria-describedby="email-address-hint"
+                    autocomplete="email"
+                    th:value="${model.value}"
+            >
         </div>
     </fieldset>
 </div>
