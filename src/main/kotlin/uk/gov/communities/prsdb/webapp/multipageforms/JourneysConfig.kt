@@ -3,8 +3,8 @@ package uk.gov.communities.prsdb.webapp.multipageforms
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
-import uk.gov.communities.prsdb.webapp.multipageforms.components.EmailInput
-import uk.gov.communities.prsdb.webapp.multipageforms.components.PhoneNumberInput
+import uk.gov.communities.prsdb.webapp.multipageforms.components.Email
+import uk.gov.communities.prsdb.webapp.multipageforms.components.PhoneNumber
 
 @Configuration
 class JourneysConfig {
@@ -23,7 +23,19 @@ class JourneysConfig {
                                     titleKey = "registerAsALandlord.title",
                                     formComponents =
                                         listOf(
-                                            EmailInput(),
+                                            Email(
+                                                fieldName = "email",
+                                                validationRules =
+                                                    listOf(
+                                                        {
+                                                            if (it?.matches(Regex(""".+@.+""")) == false) {
+                                                                listOf("formComponents.email.error.invalidFormat")
+                                                            } else {
+                                                                listOf()
+                                                            }
+                                                        },
+                                                    ),
+                                            ),
                                         ),
                                 ),
                             nextStep = { StepAction.GoToStep(LandlordRegistrationStepId.PhoneNumber) },
@@ -35,7 +47,19 @@ class JourneysConfig {
                                     titleKey = "registerAsALandlord.title",
                                     formComponents =
                                         listOf(
-                                            PhoneNumberInput(),
+                                            PhoneNumber(
+                                                fieldName = "phoneNumber",
+                                                validationRules =
+                                                    listOf(
+                                                        {
+                                                            if (it?.matches(Regex("""[\d ]+""")) == false) {
+                                                                listOf("formComponents.phoneNumber.error.invalidFormat")
+                                                            } else {
+                                                                listOf()
+                                                            }
+                                                        },
+                                                    ),
+                                            ),
                                         ),
                                 ),
                             nextStep = { StepAction.Redirect("/register-as-a-landlord/check-answers") },

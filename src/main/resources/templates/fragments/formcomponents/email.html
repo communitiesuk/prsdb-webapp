@@ -1,0 +1,32 @@
+<div th:fragment="email ( model )" class="govuk-form-group"
+     th:classappend="${not #lists.isEmpty(model.errors)} ? 'govuk-form-group--error'"
+>
+    <fieldset class="govuk-fieldset" role="group">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+            <h1 class="govuk-fieldset__heading" th:text="#{'formComponents.'+${model.fieldName}+'.fieldsetLegend'}">
+                What is your email address?
+            </h1>
+        </legend>
+        <div th:id="|${model.fieldName}-email-hint|" class="govuk-hint" th:text="#{'formComponents.'+${model.fieldName}+'.fieldsetHint'}">
+            We'll use this to send information and updates about your record.
+        </div>
+        <p th:id="|${model.fieldName}-email-error-${errorStat.count}|" class="govuk-error-message" th:each="errorKey, errorStat : ${model.errors}">
+            <span class="govuk-visually-hidden">Error:</span> <span th:text="#{${errorKey}}" th:remove="tag">Your email address must contain an @ symbol.</span>
+        </p>
+        <div class="govuk-form-group">
+            <label class="govuk-label" th:for="|${model.fieldName}-email|" th:text="#{'formComponents.'+${model.fieldName}+'.label'}">
+                Enter your email address
+            </label>
+            <input
+                    class="govuk-input"
+                    th:id="|${model.fieldName}-email|"
+                    th:name="${model.fieldName}"
+                    type="email"
+                    spellcheck="false"
+                    th:aria-describedby="|${model.fieldName}-email-hint|"
+                    autocomplete="email"
+                    th:value="${model.value}"
+            >
+        </div>
+    </fieldset>
+</div>

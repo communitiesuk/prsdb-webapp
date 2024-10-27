@@ -12,14 +12,14 @@ class Page(
     ) -> Map<String, List<String>> = { formDataMap ->
         formComponents
             .groupBy(
-                { it.fragmentName },
+                { it.fieldName },
                 { it.validate(formDataMap) },
             ).mapValues { it.value.flatten() }
     },
     val bindToModel: (Map<String, Any>, Map<String, List<String>>) -> List<FormComponentModel<*>> = { journeyData, errorsByFragment ->
         formComponents.map {
             val model = it.bindToModel(journeyData)
-            model.errors = errorsByFragment[it.fragmentName]
+            model.errors = errorsByFragment[it.fieldName]
             model
         }
     },
