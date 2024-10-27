@@ -1,5 +1,5 @@
 <div th:fragment="phoneNumber ( model )" class="govuk-form-group"
-     th:classappend="${model.errorKey}? 'govuk-form-group--error'">
+     th:classappend="${not #lists.isEmpty(model.errors)} ? 'govuk-form-group--error'">
     <fieldset class="govuk-fieldset" role="group" aria-describedby="phone-number-hint phone-number-error">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
             <h1 class="govuk-fieldset__heading" th:text="#{formComponents.phoneNumber.heading}">
@@ -9,8 +9,8 @@
         <div id="phone-number-hint" class="govuk-hint" th:text="#{formComponents.phoneNumber.hint}">
             We'll use this to contact you about your record.
         </div>
-        <p id="phone-number-error" class="govuk-error-message" th:if="${model.errorKey}">
-            <span class="govuk-visually-hidden">Error:</span> <span th:text="#{${model.errorKey}}" th:remove="tag">Your phone number must lorem ipsum</span>
+        <p id="phone-number-error" class="govuk-error-message" th:each="errorKey : ${model.errors}">
+            <span class="govuk-visually-hidden">Error:</span> <span th:text="#{${errorKey}}" th:remove="tag">Your phone number must lorem ipsum</span>
         </p>
         <div class="govuk-form-group">
             <label class="govuk-label" for="phone-number" th:text="#{formComponents.phoneNumber.label}">

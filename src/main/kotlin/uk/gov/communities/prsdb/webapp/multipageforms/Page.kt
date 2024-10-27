@@ -1,22 +1,32 @@
 package uk.gov.communities.prsdb.webapp.multipageforms
 
 import uk.gov.communities.prsdb.webapp.multipageforms.components.FormComponent
+import uk.gov.communities.prsdb.webapp.multipageforms.components.FormComponentModel
 
 class Page(
     val templateName: String = "genericFormPage",
     val titleKey: String,
     val formComponents: List<FormComponent<*>>,
-    val validateSubmission: (formDataMap: Map<String, String>) -> Boolean = { formDataMap ->
-        formComponents.all { formComponent ->
-            formComponent.validate(formDataMap)
+    val validateSubmission: (
+        formDataMap: Map<String, String>,
+    ) -> Map<String, List<String>> = { formDataMap ->
+        formComponents
+            .groupBy(
+                { it.fragmentName },
+                { it.validate(formDataMap) },
+            ).mapValues { it.value.flatten() }
+    },
+    val bindToModel: (Map<String, Any>, Map<String, List<String>>) -> List<FormComponentModel<*>> = { journeyData, errorsByFragment ->
+        formComponents.map {
+            val model = it.bindToModel(journeyData)
+            model.errors = errorsByFragment[it.fragmentName]
+            model
         }
     },
-    val prepopulateForm: (Map<String, Any>) -> Unit = { journeyData ->
-        formComponents.forEach { formComponent ->
-            formComponent.prepopulate(journeyData)
-        }
-    },
-    val updateJourneyData: (journeyData: MutableMap<String, Any>, formDataMap: Map<String, String>) -> Unit = { journeyData, formDataMap ->
+    val updateJourneyData: (
+        MutableMap<String, Any>,
+        Map<String, String>,
+    ) -> Unit = { journeyData, formDataMap ->
         formComponents.forEach { formComponent ->
             formComponent.updateJourneyData(journeyData, formDataMap)
         }

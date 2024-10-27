@@ -90,10 +90,10 @@ class GenericFormController(
 
         // TODO: check flash attributes for errors
         val step = getStep(journey, stepId)
-        step.page.prepopulateForm(journeyData)
+        val formComponents = step.page.bindToModel(journeyData, mapOf())
 
         model.addAttribute("titleKey", step.page.titleKey)
-        model.addAttribute("formComponents", step.page.formComponents)
+        model.addAttribute("formComponents", formComponents)
 
         return step.page.templateName
     }
@@ -112,9 +112,10 @@ class GenericFormController(
         val step = getStep(journey, stepId)
 
         // Validate the form submission
-        val isValid = step.page.validateSubmission(formDataMap)
-        if (!isValid) {
-            redirectAttributes.addFlashAttribute("errorPage", step.page)
+        val errors = step.page.validateSubmission(formDataMap)
+        val numErrors = errors.map { it.value.size }.sum()
+        if (numErrors > 0) {
+            redirectAttributes.addFlashAttribute("formErrors", errors)
             return "redirect:/$journeyName/$stepName"
         }
 

@@ -1,12 +1,11 @@
 package uk.gov.communities.prsdb.webapp.multipageforms.components
 
-interface FormComponent<TModel : Any> {
+interface FormComponent<TValue : Any> {
     val fragmentName: String
-    val model: TModel
 
-    fun validate(formData: Map<String, String>): Boolean
+    fun validate(formData: Map<String, String>): List<String>
 
-    fun prepopulate(journeyData: Map<String, Any>)
+    fun bindToModel(journeyData: Map<String, Any>): FormComponentModel<TValue>
 
     fun updateJourneyData(
         journeyData: MutableMap<String, Any>,
@@ -16,26 +15,26 @@ interface FormComponent<TModel : Any> {
     fun isSatisfied(journeyData: Map<String, Any>): Boolean
 }
 
+data class FormComponentModel<T : Any>(
+    val fragmentName: String,
+    var errors: List<String>? = null,
+    var value: T,
+)
+
 data class EmailInput(
     override val fragmentName: String = "emailInput",
-    override val model: Model = Model(value = ""),
-) : FormComponent<EmailInput.Model> {
-    data class Model(
-        var errorKey: String? = null,
-        var value: String,
-    )
-
-    override fun validate(formData: Map<String, String>): Boolean {
+) : FormComponent<String> {
+    override fun validate(formData: Map<String, String>): List<String> {
         val email = formData["email"]!!
         if (!email.matches(Regex(""".+@.+"""))) {
-            model.errorKey = "formComponents.email.error.invalidFormat"
-            return false
+            return listOf("formComponents.email.error.invalidFormat")
         }
-        return true
+        return listOf()
     }
 
-    override fun prepopulate(journeyData: Map<String, Any>) {
-        model.value = journeyData["email.email"] as? String ?: ""
+    override fun bindToModel(journeyData: Map<String, Any>): FormComponentModel<String> {
+        val value = journeyData["email.email"] as? String ?: ""
+        return FormComponentModel(fragmentName = fragmentName, value = value)
     }
 
     override fun updateJourneyData(
@@ -50,24 +49,18 @@ data class EmailInput(
 
 data class PhoneNumberInput(
     override val fragmentName: String = "phoneNumber",
-    override val model: Model = Model(value = ""),
-) : FormComponent<PhoneNumberInput.Model> {
-    data class Model(
-        var errorKey: String? = null,
-        var value: String,
-    )
-
-    override fun validate(formData: Map<String, String>): Boolean {
+) : FormComponent<String> {
+    override fun validate(formData: Map<String, String>): List<String> {
         val email = formData["phoneNumber"]!!
         if (!email.matches(Regex("""[\d ]+"""))) {
-            model.errorKey = "formComponents.phoneNumber.error.invalidFormat"
-            return false
+            return listOf("formComponents.phoneNumber.error.invalidFormat")
         }
-        return true
+        return listOf()
     }
 
-    override fun prepopulate(journeyData: Map<String, Any>) {
-        model.value = journeyData["phoneNumber.phoneNumber"] as? String ?: ""
+    override fun bindToModel(journeyData: Map<String, Any>): FormComponentModel<String> {
+        val value = journeyData["phoneNumber.phoneNumber"] as? String ?: ""
+        return FormComponentModel(fragmentName = fragmentName, value = value)
     }
 
     override fun updateJourneyData(
