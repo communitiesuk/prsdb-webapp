@@ -16,6 +16,7 @@ class ExampleStartPageController {
             "landlordRegNum",
             RegistrationNumberDataModel(RegistrationNumberType.LANDLORD, 205498766).toString(),
         )
+        model.addAttribute("hideBetaBanner", true)
         return "demoStart"
     }
 }

@@ -29,6 +29,7 @@
 <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>
 <div th:replace="~{fragments/header/header :: header(${navLinks})}"></div>
 <div class="govuk-width-container">
+    <div th:replace="~{ fragments/betaBanner :: betaBanner }"></div>
     <div th:replace="${content}"></div>
 </div>
 <div th:replace="~{ fragments/footer :: footer }"></div>
