@@ -5,11 +5,12 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import org.springframework.stereotype.Service
-import uk.gov.communities.prsdb.webapp.constants.enums.JourneyStep
-import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
+import uk.gov.communities.prsdb.webapp.models.journeyModels.Journey
+import uk.gov.communities.prsdb.webapp.models.journeyModels.Step
+import uk.gov.communities.prsdb.webapp.models.journeyModels.StepId
 
 @Service
 class JourneyService(
@@ -17,44 +18,42 @@ class JourneyService(
     val oneLoginUserRepository: OneLoginUserRepository,
 ) {
     fun getJourneyView(
-        journeyType: JourneyType,
-        journeyStep: JourneyStep,
+        journey: Journey<*>,
+        step: StepId,
         context: Map<String, JsonElement>?,
-    ): String {
+    ): Map<String, String> {
         if (context != null) {
-            validateFormContextForStep(journeyType, journeyStep, context)
+            validateFormContextForStep(journey, step, context)
         }
-        return getView(journeyType, journeyStep)
+        return getView(journey.steps[step]!!, context)
     }
 
     private fun validateFormContextForStep(
-        journeyType: JourneyType,
-        journeyStep: JourneyStep,
+        journey: Journey<*>,
+        step: StepId,
         context: Map<String, JsonElement>?,
-    ): Boolean = journeyType.validateFormContextForStep(journeyStep, context)
+    ): Boolean = journey.validateFormContextForStep(step, context)
 
     private fun getView(
-        journey: JourneyType,
-        journeyStep: JourneyStep,
-    ): String {
-        // TODO for step get page with content and view
-        // TODO get view and return
-        return "index"
-    }
+        step: Step<out StepId>,
+        context: Map<String, JsonElement>?,
+    ): Map<String, String> =
+        step.page
+            .getModelAttributes(context)
 
     fun updateFormContextAndGetNextStep(
-        journeyType: JourneyType,
-        journeyStep: JourneyStep,
+        journey: Journey<*>,
+        step: StepId,
         principalName: String,
         formData: Map<String, JsonElement>,
         formContextId: Long?,
         context: Map<String, JsonElement>?,
     ): Map<String, JsonElement> {
-        validateFormData(journeyStep, formData)
+        validateFormData(journey.steps[step]!!, formData)
         return if (context != null) {
-            updateFormContext(formData, principalName, context, formContextId!!, journeyStep)
+            updateFormContext(formData, principalName, context, formContextId!!, journey.steps[step]!!)
         } else {
-            createFormContext(formData, journeyType, principalName)
+            createFormContext(formData, journey, principalName)
         }
     }
 
@@ -63,11 +62,11 @@ class JourneyService(
         principalName: String,
         context: Map<String, JsonElement>,
         formContextId: Long,
-        journeyStep: JourneyStep,
+        step: Step<out StepId>,
     ): Map<String, JsonElement> {
         val formContext = formContextRepository.findById(formContextId).get()
         validateUser(principalName, formContext)
-        val updatedContext = journeyStep.updateContext(context, formData)
+        val updatedContext = step.updateContext(context, formData)
         formContext.context = Json.encodeToString(updatedContext)
         formContextRepository.save(formContext)
         return updatedContext
@@ -84,36 +83,33 @@ class JourneyService(
 
     private fun createFormContext(
         formData: Map<String, JsonElement>,
-        journeyType: JourneyType,
+        journey: Journey<*>,
         principalName: String,
     ): Map<String, JsonElement> {
         val user = oneLoginUserRepository.findById(principalName).get()
-        val formContext = formContextRepository.save(FormContext(journeyType, Json.encodeToString(formData), user))
+        val formContext = formContextRepository.save(FormContext(journey.journeyType, Json.encodeToString(formData), user))
         return getMappedData(formContext.context)
     }
 
     private fun validateFormData(
-        step: JourneyStep,
-        formData: Map<String, JsonElement>?,
-    ): Boolean {
-        // TODO add validation process
-        // TODO - if not valid throws Exception("Invalid form data")
-        return true
-    }
+        step: Step<out StepId>,
+        formData: Map<String, JsonElement>,
+    ): Boolean =
+        step
+            .page
+            .validateSubmission(formData)
 
     fun getRedirectUrl(
-        journey: JourneyType,
-        journeyStep: JourneyStep,
+        journey: Journey<*>,
+        step: StepId,
         context: Map<String, JsonElement>,
         id: Long?,
     ): String {
-        val nextStep =
-            journey.resolveNext(
-                context,
-                journeyStep,
-            )
-        // TODO get use next step and journey to the redirect url AND add the formContextId body submission
-        return "index"
+        val nextStepId =
+            journey.steps
+                .get(step)
+                ?.nextStep
+        return "redirect:/$journey/$nextStepId"
     }
 
     fun getMappedData(formData: String): Map<String, JsonElement> {

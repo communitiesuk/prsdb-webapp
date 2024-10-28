@@ -1,57 +1,77 @@
 package uk.gov.communities.prsdb.webapp.models.journeyModels
 
+import kotlinx.serialization.json.JsonElement
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+
 // TODO This could be an enumInterface OR an unsealed class
 sealed class StepId(
-    val name: String,
+    val urlPathSegment: String,
 )
 
 // TODO This could be an enum OR an unsealed class
 sealed class LandlordRegistrationStepId(
-    name: String,
-) : StepId(name) {
+    urlPathSegment: String,
+) : StepId(urlPathSegment) {
     data object Start : LandlordRegistrationStepId("start")
+
+    data object End : LandlordRegistrationStepId("end")
 }
 
-data class Step<T : Any>(
+data class Step<TStepId : StepId>(
     val page: Page,
-    val nextStep: (T, Map<String, Any>) -> StepId,
-    val isSatisfied: (Map<String, Any>) -> Boolean = {
-        // TODO this should check all required fields/values for step are present in context it is the same as the validation in journeyService.ValidateFormContextFromStep
-        true
-    },
-)
+    val nextStep: (Map<String, Any>) -> StepId,
+) {
+    fun updateContext(
+        context: Map<String, JsonElement>,
+        formData: Map<String, JsonElement>,
+    ): Map<String, JsonElement> {
+        // This is the default strategy to adding the new data but will need to be overridden for more complex data structures
+        // TODO add an example of the above?
+        return context + formData
+    }
+}
 
 // TODO this should maybe take type `subclass of form model`
-interface Page<T : Any> {
-    val formContext: Map<String, String>
-    val contentKeys: Map<String, String>
-
-    // TODO the page should return a map of the initial values (null or if user has input already) AND attributes from the FormModelClass
-    // TODO should return the above COMBINED with the message keys to the controller so that it can build the model
-
-    // TODO this should either have a form model or get one
-    fun validateSubmission(formContext: Map<String, String>): Boolean {
-        // TODO based on formfields should validate the data the user submits
-        return true
+class Page(
+    val messageKeys: Map<String, String>,
+    val formModel: FormModel,
+) {
+    fun getModelAttributes(formContext: Map<String, JsonElement>?): Map<String, String> {
+        // TODO combines message keys, with form model AND existing context to get model attributes
+        return messageKeys
     }
 
-    fun getTemplate(contentKeys: Map<String, String>) {
-        // TODO this will return either the template or the view model
+    fun validateSubmission(formContext: Map<String, JsonElement>): Boolean {
+        // TODO based on formfields should validate the data the user submits using Spring validation
+        return true
     }
 }
 
 // TODO nothing - keep it as is
-data class Journey<T : StepId>(
-    val id: String,
-    val initialStepId: T,
-    val steps: Map<T, Step<*>>,
-    val isReachable: (Map<String, Any>, T) -> Boolean = { _, _ -> true },
-)
+data class Journey<TStepId : StepId>(
+    val journeyType: JourneyType,
+    val initialStepId: TStepId,
+    val steps: Map<TStepId, Step<TStepId>>,
+    // TODO add isReachable/getStep logic
+) {
+    fun validateFormContextForStep(
+        step: StepId,
+        context: Map<String, JsonElement>?,
+    ): Boolean {
+        TODO("Not yet implemented")
+    }
 
+    fun getStep(step: StepId) {
+        TODO("This will return the step/page data that will populate the model attribute")
+    }
+}
+
+class FormModel {
 // TODO Create a FormModelClass it:
 // Knows what the fields on the model are
 // Can produce a map of their values/attributes
 // And maybe the template names (that might be on the page)
 // - INCLUDES everything specific to the data page
+}
 
 // TODO check notes in forms controller
