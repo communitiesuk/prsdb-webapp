@@ -1,8 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.validation.Valid
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.context.MessageSource
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
@@ -11,7 +9,6 @@ import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ConfirmedEmailDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
@@ -20,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import java.security.Principal
-import java.util.Locale
 
 @PreAuthorize("hasRole('LA_ADMIN')")
 @Controller
@@ -29,7 +25,6 @@ class ManageLocalAuthorityUsersController(
     var emailSender: EmailNotificationService<LocalAuthorityInvitationEmail>,
     var invitationService: LocalAuthorityInvitationService,
     val localAuthorityDataService: LocalAuthorityDataService,
-    @Qualifier("messageSource") private val messageSource: MessageSource,
 ) {
     @GetMapping
     fun index(
@@ -48,21 +43,14 @@ class ManageLocalAuthorityUsersController(
 
         val users = activeUsers + pendingUsers
 
-        model.addAttribute(
-            "contentHeader",
-            messageSource.getMessage("manageLAUsers.contentHeader.part1", null, Locale("en")) +
-                " " + currentUserLocalAuthority.name +
-                messageSource.getMessage("manageLAUsers.contentHeader.part2", null, Locale("en")),
-        )
-        model.addAttribute("title", messageSource.getMessage("manageLAUsers.title", null, Locale("en")))
-        model.addAttribute("serviceName", SERVICE_NAME)
+        model.addAttribute("localAuthority", currentUserLocalAuthority.name)
         model.addAttribute("userList", users)
         model.addAttribute(
             "tableColumnHeadings",
             listOf(
-                messageSource.getMessage("manageLAUsers.table.column1Heading", null, Locale("en")),
-                messageSource.getMessage("manageLAUsers.table.column2Heading", null, Locale("en")),
-                messageSource.getMessage("manageLAUsers.table.column3Heading", null, Locale("en")),
+                "manageLAUsers.table.column1Heading",
+                "manageLAUsers.table.column2Heading",
+                "manageLAUsers.table.column3Heading",
                 "",
             ),
         )
@@ -72,9 +60,8 @@ class ManageLocalAuthorityUsersController(
 
     @GetMapping("/invite-new-user")
     fun exampleEmailPage(model: Model): String {
-        model.addAttribute("contentHeader", "Send a test email using notify")
-        model.addAttribute("title", "Send an email")
-        model.addAttribute("serviceName", SERVICE_NAME)
+        model.addAttribute("title", "sendEmail.send.title")
+        model.addAttribute("contentHeader", "sendEmail.send.header")
         return "sendTestEmail"
     }
 
@@ -86,7 +73,6 @@ class ManageLocalAuthorityUsersController(
         result: BindingResult,
         principal: Principal,
     ): String {
-        model.addAttribute("serviceName", SERVICE_NAME)
         try {
             val emailAddress: String = emailModel.email
             val currentAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
@@ -97,12 +83,13 @@ class ManageLocalAuthorityUsersController(
                 LocalAuthorityInvitationEmail(currentAuthority, invitationLinkAddress),
             )
 
-            model.addAttribute("contentHeader", "You have sent a test email to $emailAddress")
-            model.addAttribute("title", "Email sent")
+            model.addAttribute("title", "sendEmail.sent.title")
+            model.addAttribute("contentHeader", "sendEmail.sent.header")
+            model.addAttribute("contentHeaderParams", emailAddress)
             return "index"
         } catch (retryException: TransientEmailSentException) {
-            model.addAttribute("contentHeader", "That didn't work. Please try again.")
-            model.addAttribute("title", "Send an email")
+            model.addAttribute("title", "sendEmail.send.title")
+            model.addAttribute("contentHeader", "sendEmail.send.errorTitle")
             return "sendTestEmail"
         }
     }

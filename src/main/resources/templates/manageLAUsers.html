@@ -1,25 +1,27 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(${title}, ${serviceName}, ~{::main})}">
+<html th:replace="~{fragments/layout :: layout(#{manageLAUsers.title}, ~{::main})}">
 <main class="govuk-main-wrapper" id="main-content">
-  <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#header})}">
-    <header id="header">
-      <h1 class="govuk-heading-l" th:text="${contentHeader}"></h1>
-    </header>
-  </div>
-  <section>
-    <div th:replace="~{fragments/fullWidthLayout :: fullWidthLayout(~{::#LA-users-table})}">
-      <div id="LA-users-table">
-        <table th:replace="~{fragments/tables/table :: table(${tableColumnHeadings},
-        ~{fragments/tables/tableBodyLAUser :: tableBody(${userList})})}">
-        </table>
-      </div>
+    <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#header})}">
+        <header id="header">
+            <h1 class="govuk-heading-l" th:text="#{manageLAUsers.contentHeader(${localAuthority})}">
+                manageLAUsers.contentHeader
+            </h1>
+        </header>
     </div>
-    <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#action-buttons})}">
-      <div class="govuk-button-group" id="action-buttons">
-        <button th:replace="~{fragments/primaryButton :: primaryButton(#{manageLAUsers.primaryButtonText})}"></button>
-        <button th:replace="~{fragments/secondaryButton :: secondaryButton(#{manageLAUsers.secondaryButtonText})}"></button>
-      </div>
-    </div>
-  </section>
+    <section>
+        <div th:replace="~{fragments/fullWidthLayout :: fullWidthLayout(~{::#LA-users-table})}">
+            <div id="LA-users-table">
+                <table th:replace="~{fragments/tables/table ::
+                    table(${tableColumnHeadings}, ~{fragments/tables/tableBodyLAUser :: tableBody(${userList})})}">
+                </table>
+            </div>
+        </div>
+        <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#action-buttons})}">
+            <div class="govuk-button-group" id="action-buttons">
+                <button th:replace="~{fragments/primaryButton :: primaryButton(#{manageLAUsers.primaryButtonText})}"></button>
+                <button th:replace="~{fragments/secondaryButton :: secondaryButton(#{manageLAUsers.secondaryButtonText})}"></button>
+            </div>
+        </div>
+    </section>
 </main>
 </html>

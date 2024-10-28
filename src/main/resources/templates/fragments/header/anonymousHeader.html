@@ -1,4 +1,4 @@
-<header th:fragment="anonymousHeader(serviceName)" class="govuk-header" data-module="govuk-header">
+<header th:fragment="anonymousHeader" class="govuk-header" data-module="govuk-header">
     <div class="govuk-header__container govuk-width-container">
         <div class="govuk-header__logo">
             <a href="/" class="govuk-header__link govuk-header__link--homepage">
@@ -17,7 +17,7 @@
             </a>
         </div>
         <div class="govuk-header__content">
-            <a href="#" class="govuk-header__link govuk-header__service-name" th:text="${serviceName}">
+            <a href="#" class="govuk-header__link govuk-header__service-name" th:text="#{serviceName}">
                 Service name
             </a>
         </div>
