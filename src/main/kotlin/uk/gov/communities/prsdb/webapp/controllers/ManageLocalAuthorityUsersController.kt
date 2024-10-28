@@ -88,7 +88,6 @@ class ManageLocalAuthorityUsersController(
     ): String {
         model.addAttribute("serviceName", SERVICE_NAME)
         try {
-            result.allErrors.forEach { println(it.toString()) }
             val emailAddress: String = emailModel.email
             val currentAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
             val token = invitationService.createInvitationToken(emailAddress, currentAuthority)
