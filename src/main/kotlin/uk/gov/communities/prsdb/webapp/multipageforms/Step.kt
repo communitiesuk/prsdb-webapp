@@ -1,7 +1,10 @@
 package uk.gov.communities.prsdb.webapp.multipageforms
 
+import org.springframework.validation.Validator
+import kotlin.reflect.KClass
+
 data class Step<TStepId : StepId>(
-    val page: Page,
+    val page: Page<*>,
     val persistAfterSubmit: Boolean = false,
     val nextStep: (Map<String, Any>) -> StepAction<TStepId>,
     val isSatisfied: (Map<String, Any>) -> Boolean = { journeyData ->
@@ -19,12 +22,17 @@ sealed class StepAction<TStepId : StepId> {
     ) : StepAction<TStepId>()
 }
 
-class StepBuilder<TStepId : StepId> {
-    private var page: Page? = null
+class StepBuilder<TStepId : StepId>(
+    private val validator: Validator,
+) {
+    private var page: Page<*>? = null
     private var nextStep: ((Map<String, Any>) -> StepAction<TStepId>)? = null
 
-    fun page(init: PageBuilder.() -> Unit) {
-        page = PageBuilder().apply(init).build()
+    fun <TPageForm : FormModel> page(
+        pageFormClass: KClass<TPageForm>,
+        init: PageBuilder<TPageForm>.() -> Unit,
+    ) {
+        page = PageBuilder(pageFormClass, validator).apply(init).build()
     }
 
     fun goToStep(stepId: TStepId) {

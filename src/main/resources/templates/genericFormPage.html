@@ -13,23 +13,23 @@
             <div id="fieldset-hint" class="govuk-hint" th:text="#{${messageKeys.fieldsetHint}}">
                 We'll use this to perform some service or activity.
             </div>
-            <p th:if="${#lists.size(formComponents) == 1}" th:id="|fieldset-error-${errorStat.count}|" class="govuk-error-message" th:each="errorKey, errorStat : ${formComponents[0].errors}">
+            <p th:id="|fieldset-error-${errorStat.count}|" class="govuk-error-message" th:each="errorKey, errorStat : ${pageModel.pageErrorKeys}">
                 <span class="govuk-visually-hidden">Error:</span> <span th:text="#{${errorKey}}" th:remove="tag">Your email address must contain an @ symbol.</span>
             </p>
             <div class="govuk-form-group"
-                 th:classappend="${#lists.size(formComponents) > 1 && not #lists.isEmpty(model.errors)} ? 'govuk-form-group--error'"
-                 th:each="model : ${formComponents}"
+                 th:classappend="${not #lists.isEmpty(fieldModel.errorKeys)} ? 'govuk-form-group--error'"
+                 th:each="fieldModel : ${pageModel.fieldModels}"
             >
-                <label class="govuk-label" th:for="|${model.fieldName}-field|" th:text="#{${model.labelKey}}">
+                <label class="govuk-label" th:for="|${fieldModel.fieldName}-field|"> <!-- TODO: th:text based on annotation on field -->
                     Enter your information
                 </label>
-                <div th:if="${model.hintKey != null}" th:id="|${model.fieldName}-hint|" class="govuk-hint" th:text="#{${model.hintKey}}">
+                <div th:if="${fieldModel.hintKey != null}" th:id="|${fieldModel.fieldName}-hint|" class="govuk-hint" th:text="#{${fieldModel.hintKey}}">
                     We'll use this to perform some service or activity
                 </div>
-                <p th:if="${#lists.size(formComponents) > 1}" th:id="|${model.fieldName}-error-${errorStat.index}|" class="govuk-error-message" th:each="errorKey, errorStat : ${model.errors}">
+                <p th:id="|${fieldModel.fieldName}-error-${errorStat.index}|" class="govuk-error-message" th:each="errorKey, errorStat : ${fieldModel.errorKeys}">
                     <span class="govuk-visually-hidden">Error:</span> <span th:text="#{${errorKey}}" th:remove="tag">Please make sure to lorem ipsum</span>
                 </p>
-                <div th:replace="~{|fragments/formcomponents/${model.fragmentName}| :: ${model.fragmentName}(model=${model})}"></div>
+                <div th:replace="~{|fragments/formcomponents/${fieldModel.fragmentName}| :: ${fieldModel.fragmentName}(model=${fieldModel})}"></div>
             </div>
         </fieldset>
         <button th:replace="~{fragments/primaryButton :: primaryButton('Save and continue')}">Save and continue</button>

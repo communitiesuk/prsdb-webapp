@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.multipageforms
 
+import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 
 data class Journey<TStepId : StepId>(
@@ -28,7 +29,9 @@ data class Journey<TStepId : StepId>(
     },
 )
 
-class JourneyBuilder<TStepId : StepId> {
+class JourneyBuilder<TStepId : StepId>(
+    private val validator: Validator,
+) {
     lateinit var journeyType: JourneyType
     lateinit var initialStepId: TStepId
     private val steps = mutableMapOf<TStepId, Step<TStepId>>()
@@ -37,10 +40,13 @@ class JourneyBuilder<TStepId : StepId> {
         stepId: TStepId,
         init: StepBuilder<TStepId>.() -> Unit,
     ) {
-        steps[stepId] = StepBuilder<TStepId>().apply(init).build()
+        steps[stepId] = StepBuilder<TStepId>(validator).apply(init).build()
     }
 
     fun build(): Journey<TStepId> = Journey(journeyType, initialStepId, steps)
 }
 
-fun <TStepId : StepId> journey(init: JourneyBuilder<TStepId>.() -> Unit): Journey<TStepId> = JourneyBuilder<TStepId>().apply(init).build()
+fun <TStepId : StepId> journey(
+    validator: Validator,
+    init: JourneyBuilder<TStepId>.() -> Unit,
+): Journey<TStepId> = JourneyBuilder<TStepId>(validator).apply(init).build()
