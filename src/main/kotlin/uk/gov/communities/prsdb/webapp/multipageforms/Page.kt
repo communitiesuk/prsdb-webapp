@@ -18,10 +18,14 @@ class Page(
                 { it.validate(formDataMap) },
             ).mapValues { it.value.flatten() }
     },
-    val bindToModel: (Map<String, Any>, Map<String, List<String>>) -> List<FormComponentModel<*>> = { journeyData, errorsByFragment ->
+    val bindToModel: (
+        Map<String, Any>,
+        Map<String, List<String>>,
+        Map<String, String>,
+    ) -> List<FormComponentModel<*>> = { journeyData, errorsByField, valuesByField ->
         formComponents.map {
-            val model = it.bindToModel(journeyData)
-            model.errors = errorsByFragment[it.fieldName]
+            val model = it.bindToModel(journeyData, valuesByField)
+            model.errors = errorsByField[it.fieldName]
             model
         }
     },

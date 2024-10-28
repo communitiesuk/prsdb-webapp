@@ -90,8 +90,9 @@ class GenericFormController(
 
         val step = getStep(journey, stepId)
         val submissionErrors = model.getAttribute("formErrors") as Map<String, List<String>>? ?: mapOf()
+        val submittedFormData = model.getAttribute("formValues") as Map<String, String>? ?: mapOf()
         // TODO: Also get any submitted form values and bind them in
-        val formComponents = step.page.bindToModel(journeyData, submissionErrors)
+        val formComponents = step.page.bindToModel(journeyData, submissionErrors, submittedFormData)
 
         model.addAttribute("messageKeys", step.page.messageKeys)
         model.addAttribute("formComponents", formComponents)
@@ -116,7 +117,7 @@ class GenericFormController(
         val errors = step.page.validateSubmission(formDataMap)
         val numErrors = errors.map { it.value.size }.sum()
         if (numErrors > 0) {
-            // TODO: Also store the (invalid) form values
+            redirectAttributes.addFlashAttribute("formValues", formDataMap)
             redirectAttributes.addFlashAttribute("formErrors", errors)
             return "redirect:/$journeyName/$stepName"
         }

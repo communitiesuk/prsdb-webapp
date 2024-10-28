@@ -1,8 +1,11 @@
 package uk.gov.communities.prsdb.webapp.multipageforms.components
 
 abstract class StringFormComponent : FormComponent<String> {
-    override fun bindToModel(journeyData: Map<String, Any>): FormComponentModel<String> {
-        val value = journeyData["$fieldName.stringValue"] as? String ?: ""
+    override fun bindToModel(
+        journeyData: Map<String, Any>,
+        formData: Map<String, String>,
+    ): FormComponentModel<String> {
+        val value = formData[fieldName] ?: (journeyData["$fieldName.stringValue"] as? String ?: "")
         return FormComponentModel(fragmentName = fragmentName, fieldName = fieldName, labelKey = labelKey, hintKey = hintKey, value = value)
     }
 

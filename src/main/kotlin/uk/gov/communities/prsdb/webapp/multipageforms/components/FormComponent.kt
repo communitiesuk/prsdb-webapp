@@ -12,7 +12,10 @@ interface FormComponent<TValue : Any> {
         return validationRules.flatMap { it(value) }
     }
 
-    fun bindToModel(journeyData: Map<String, Any>): FormComponentModel<TValue>
+    fun bindToModel(
+        journeyData: Map<String, Any>,
+        formData: Map<String, String>,
+    ): FormComponentModel<TValue>
 
     fun updateJourneyData(
         journeyData: MutableMap<String, Any>,
