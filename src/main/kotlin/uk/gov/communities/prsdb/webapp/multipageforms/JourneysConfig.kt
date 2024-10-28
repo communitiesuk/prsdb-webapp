@@ -10,60 +10,29 @@ import uk.gov.communities.prsdb.webapp.multipageforms.components.PhoneNumber
 class JourneysConfig {
     @Bean
     fun landlordRegistrationJourney(): Journey<LandlordRegistrationStepId> =
-        Journey(
-            stepIdType = LandlordRegistrationStepId::class,
-            journeyType = JourneyType.LANDLORD_REGISTRATION,
-            initialStepId = LandlordRegistrationStepId.Email,
-            steps =
-                mapOf(
-                    LandlordRegistrationStepId.Email to
-                        Step(
-                            page =
-                                Page(
-                                    titleKey = "registerAsALandlord.title",
-                                    formComponents =
-                                        listOf(
-                                            Email(
-                                                fieldName = "email",
-                                                validationRules =
-                                                    listOf(
-                                                        {
-                                                            if (it?.matches(Regex(""".+@.+""")) == false) {
-                                                                listOf("formComponents.email.error.invalidFormat")
-                                                            } else {
-                                                                listOf()
-                                                            }
-                                                        },
-                                                    ),
-                                            ),
-                                        ),
-                                ),
-                            nextStep = { StepAction.GoToStep(LandlordRegistrationStepId.PhoneNumber) },
-                        ),
-                    LandlordRegistrationStepId.PhoneNumber to
-                        Step(
-                            page =
-                                Page(
-                                    titleKey = "registerAsALandlord.title",
-                                    formComponents =
-                                        listOf(
-                                            PhoneNumber(
-                                                fieldName = "phoneNumber",
-                                                validationRules =
-                                                    listOf(
-                                                        {
-                                                            if (it?.matches(Regex("""[\d ]+""")) == false) {
-                                                                listOf("formComponents.phoneNumber.error.invalidFormat")
-                                                            } else {
-                                                                listOf()
-                                                            }
-                                                        },
-                                                    ),
-                                            ),
-                                        ),
-                                ),
-                            nextStep = { StepAction.Redirect("/register-as-a-landlord/check-answers") },
-                        ),
-                ),
-        )
+        journey {
+            stepIdType = LandlordRegistrationStepId::class
+            journeyType = JourneyType.LANDLORD_REGISTRATION
+            initialStepId = LandlordRegistrationStepId.Email
+
+            step(LandlordRegistrationStepId.Email) {
+                page {
+                    titleKey = "registerAsALandlord.title"
+                    email("email") {
+                        validateRegex(Regex(""".+@.+"""), "formComponents.email.error.invalidFormat")
+                    }
+                }
+                goToStep(LandlordRegistrationStepId.PhoneNumber)
+            }
+
+            step(LandlordRegistrationStepId.PhoneNumber) {
+                page {
+                    titleKey = "registerAsALandlord.title"
+                    phoneNumber("phoneNumber") {
+                        validateRegex(Regex("""[\d ]+"""), "formComponents.phoneNumber.error.invalidFormat")
+                    }
+                }
+                redirect("/register-as-a-landlord/check-answers")
+            }
+        }
 }

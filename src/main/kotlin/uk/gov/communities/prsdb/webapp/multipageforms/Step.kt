@@ -18,3 +18,22 @@ sealed class StepAction {
         val path: String,
     ) : StepAction()
 }
+
+class StepBuilder<TStepId : StepId> {
+    private var page: Page? = null
+    private var nextStep: ((Map<String, Any>) -> StepAction)? = null
+
+    fun page(init: PageBuilder.() -> Unit) {
+        page = PageBuilder().apply(init).build()
+    }
+
+    fun goToStep(stepId: TStepId) {
+        nextStep = { StepAction.GoToStep(stepId) }
+    }
+
+    fun redirect(path: String) {
+        nextStep = { StepAction.Redirect(path) }
+    }
+
+    fun build() = Step<TStepId>(page = page!!, nextStep = nextStep!!)
+}

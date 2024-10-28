@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.multipageforms
 
+import uk.gov.communities.prsdb.webapp.multipageforms.components.EmailBuilder
 import uk.gov.communities.prsdb.webapp.multipageforms.components.FormComponent
 import uk.gov.communities.prsdb.webapp.multipageforms.components.FormComponentModel
+import uk.gov.communities.prsdb.webapp.multipageforms.components.PhoneNumberBuilder
 
 class Page(
     val templateName: String = "genericFormPage",
@@ -36,4 +38,25 @@ class Page(
         formComponents.all { formComponent ->
             formComponent.isSatisfied(journeyData)
         }
+}
+
+class PageBuilder {
+    var titleKey: String? = null
+    private val formComponents = mutableListOf<FormComponent<*>>()
+
+    fun email(
+        fieldName: String,
+        init: EmailBuilder.() -> Unit,
+    ) {
+        formComponents.add(EmailBuilder(fieldName).apply(init).build())
+    }
+
+    fun phoneNumber(
+        fieldName: String,
+        init: PhoneNumberBuilder.() -> Unit,
+    ) {
+        formComponents.add(PhoneNumberBuilder(fieldName).apply(init).build())
+    }
+
+    fun build() = Page(titleKey = titleKey!!, formComponents = formComponents)
 }

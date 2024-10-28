@@ -35,3 +35,21 @@ data class Journey<TStepId : StepId>(
         currentStepId == stepId
     },
 )
+
+class JourneyBuilder<TStepId : StepId> {
+    lateinit var stepIdType: KClass<TStepId>
+    lateinit var journeyType: JourneyType
+    lateinit var initialStepId: TStepId
+    private val steps = mutableMapOf<TStepId, Step<TStepId>>()
+
+    fun step(
+        stepId: TStepId,
+        init: StepBuilder<TStepId>.() -> Unit,
+    ) {
+        steps[stepId] = StepBuilder<TStepId>().apply(init).build()
+    }
+
+    fun build() = Journey(stepIdType, journeyType, initialStepId, steps)
+}
+
+fun <TStepId : StepId> journey(init: JourneyBuilder<TStepId>.() -> Unit): Journey<TStepId> = JourneyBuilder<TStepId>().apply(init).build()

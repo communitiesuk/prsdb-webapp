@@ -26,6 +26,32 @@ data class FormComponentModel<T : Any>(
     var value: T,
 )
 
+abstract class FormComponentBuilder<TValue : Any> {
+    abstract val fieldName: String
+    protected val validationRules = mutableListOf<(TValue?) -> List<String>>()
+
+    fun validationRule(rule: (TValue?) -> List<String>) {
+        validationRules.add(rule)
+    }
+
+    abstract fun build(): FormComponent<TValue>
+}
+
+abstract class StringFormComponentBuilder : FormComponentBuilder<String>() {
+    fun validateRegex(
+        regex: Regex,
+        errorKey: String,
+    ) {
+        validationRules.add({
+            if (it != null && it is String && !it.matches(regex)) {
+                listOf(errorKey)
+            } else {
+                listOf()
+            }
+        })
+    }
+}
+
 data class Email(
     override val fragmentName: String = "email",
     override val fieldName: String,
@@ -56,6 +82,12 @@ data class Email(
     override fun getValueFromForm(formData: Map<String, String>): String? = formData[fieldName]
 }
 
+class EmailBuilder(
+    override val fieldName: String,
+) : StringFormComponentBuilder() {
+    override fun build() = Email(fieldName = fieldName, validationRules = validationRules)
+}
+
 data class PhoneNumber(
     override val fragmentName: String = "phoneNumber",
     override val fieldName: String,
@@ -84,4 +116,10 @@ data class PhoneNumber(
     override fun isSatisfied(journeyData: Map<String, Any>): Boolean = journeyData["$fieldName.textInput"] != null
 
     override fun getValueFromForm(formData: Map<String, String>): String? = formData[fieldName]
+}
+
+class PhoneNumberBuilder(
+    override val fieldName: String,
+) : StringFormComponentBuilder() {
+    override fun build() = PhoneNumber(fieldName = fieldName, validationRules = validationRules)
 }
