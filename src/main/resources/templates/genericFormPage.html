@@ -26,7 +26,7 @@
                 <div th:if="${model.hintKey != null}" th:id="|${model.fieldName}-hint|" class="govuk-hint" th:text="#{${model.hintKey}}">
                     We'll use this to perform some service or activity
                 </div>
-                <p th:id="|${model.fieldName}-error-${errorStat.index}|" class="govuk-error-message" th:each="errorKey, errorStat : ${model.errors}">
+                <p th:if="${#lists.size(formComponents) > 1}" th:id="|${model.fieldName}-error-${errorStat.index}|" class="govuk-error-message" th:each="errorKey, errorStat : ${model.errors}">
                     <span class="govuk-visually-hidden">Error:</span> <span th:text="#{${errorKey}}" th:remove="tag">Please make sure to lorem ipsum</span>
                 </p>
                 <div th:replace="~{|fragments/formcomponents/${model.fragmentName}| :: ${model.fragmentName}(model=${model})}"></div>
