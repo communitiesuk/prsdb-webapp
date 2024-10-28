@@ -1,6 +1,8 @@
 <div th:fragment="email ( model )" class="govuk-form-group"
      th:classappend="${not #lists.isEmpty(model.errors)} ? 'govuk-form-group--error'"
 >
+    <!-- TODO: much of this could be moved into genericFormPage, leaving just the input -->
+    <!-- TODO: the messages are actually page-specific, not form field type specific, so those keys should be provided in the Page -->
     <fieldset class="govuk-fieldset" role="group">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
             <h1 class="govuk-fieldset__heading" th:text="#{'formComponents.'+${model.fieldName}+'.fieldsetLegend'}">
@@ -17,6 +19,7 @@
             <label class="govuk-label" th:for="|${model.fieldName}-email|" th:text="#{'formComponents.'+${model.fieldName}+'.label'}">
                 Enter your email address
             </label>
+            <!-- TODO: aria-describeby should probably include error ids, too -->
             <input
                     class="govuk-input"
                     th:id="|${model.fieldName}-email|"
