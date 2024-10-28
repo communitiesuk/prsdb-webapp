@@ -19,99 +19,106 @@ class JourneyService(
     fun getJourneyView(
         journeyType: JourneyType,
         journeyStep: JourneyStep,
-        principalName: String,
-        formContextId: Long? = null,
-        context: String?,
+        context: Map<String, JsonElement>?,
     ): String {
-        // TODO if there is no session AND but there is a formContextId should the behaviour differ in anyway
-        // TODO if there is a session and a formContextId do we need to validate them/check the session context in any way
-        // TODO if there is a session but NO formContextId - has something gone wrong? What does tha mean?
-        if (formContextId != null) {
-            val formContext = formContextRepository.findById(formContextId).get()
-            if (principalName == formContext.id.toString()) {
-                validateFormContextForStep(journeyType, journeyStep, formContext)
-            } else {
-                throw Exception("Should this be a 404??")
-            }
+        if (context != null) {
+            validateFormContextForStep(journeyType, journeyStep, context)
         }
         return getView(journeyType, journeyStep)
     }
 
-    // TODO - throws Exception("Invalid journey step")
     private fun validateFormContextForStep(
         journeyType: JourneyType,
         journeyStep: JourneyStep,
-        formContext: FormContext,
-    ): Boolean {
-        // TODO add validation process
-        // TODO - if not valid throws Exception("Invalid journey step")
+        context: Map<String, JsonElement>?,
+    ): Boolean = journeyType.validateFormContextForStep(journeyStep, context)
 
-        return true
-    }
-
-    // TODO
     private fun getView(
-        journeyType: JourneyType,
+        journey: JourneyType,
         journeyStep: JourneyStep,
-    ): String = "view"
+    ): String {
+        // TODO for step get page with content and view
+        // TODO get view and return
+        return "index"
+    }
 
     fun updateFormContextAndGetNextStep(
         journeyType: JourneyType,
         journeyStep: JourneyStep,
         principalName: String,
-        formData: String,
-        formContextId: Long,
-    ): String {
+        formData: Map<String, JsonElement>,
+        formContextId: Long?,
+        context: Map<String, JsonElement>?,
+    ): Map<String, JsonElement> {
         validateFormData(journeyStep, formData)
-        val formContext = formContextRepository.findById(formContextId).get()
-
-        if (principalName == formContext.id.toString()) {
-            val context = getMappedData(formData)
-            val content = getMappedData(formContext.context) + context
-            formContext.context = Json.encodeToString(content)
-            formContextRepository.save(formContext)
-            return getRedirectUrl(journeyType, journeyStep, content, formContextId)
+        return if (context != null) {
+            updateFormContext(formData, principalName, context, formContextId!!, journeyStep)
         } else {
-            throw Exception("Should this be a 404??")
+            createFormContext(formData, journeyType, principalName)
         }
     }
 
-    fun updateFormContextAndGetNextStep(
-        journeyType: JourneyType,
-        journeyStep: JourneyStep,
+    private fun updateFormContext(
+        formData: Map<String, JsonElement>,
         principalName: String,
-        formData: String,
-    ): String {
-        validateFormData(journeyStep, formData)
-        val user = oneLoginUserRepository.findById(principalName).get()
-        val context = getMappedData(formData)
-        val formContext = FormContext(journeyType, context.toString(), user)
-        val formContextId = formContextRepository.save(formContext).id
-
-        return getRedirectUrl(journeyType, journeyStep, context, formContextId)
+        context: Map<String, JsonElement>,
+        formContextId: Long,
+        journeyStep: JourneyStep,
+    ): Map<String, JsonElement> {
+        val formContext = formContextRepository.findById(formContextId).get()
+        validateUser(principalName, formContext)
+        val updatedContext = journeyStep.updateContext(context, formData)
+        formContext.context = Json.encodeToString(updatedContext)
+        formContextRepository.save(formContext)
+        return updatedContext
     }
 
-    private fun getMappedData(formData: String): Map<String, JsonElement> {
-        val data = Json.parseToJsonElement(formData)
-        require(data is JsonObject) { "Only Json Objects can be converted to a Map" }
-        return data
+    private fun validateUser(
+        principalName: String,
+        formContext: FormContext,
+    ) {
+        if (principalName != formContext.id.toString()) {
+            throw Exception("Should this be an unauthorized???")
+        }
+    }
+
+    private fun createFormContext(
+        formData: Map<String, JsonElement>,
+        journeyType: JourneyType,
+        principalName: String,
+    ): Map<String, JsonElement> {
+        val user = oneLoginUserRepository.findById(principalName).get()
+        val formContext = formContextRepository.save(FormContext(journeyType, Json.encodeToString(formData), user))
+        return getMappedData(formContext.context)
     }
 
     private fun validateFormData(
         step: JourneyStep,
-        formData: String,
+        formData: Map<String, JsonElement>?,
     ): Boolean {
         // TODO add validation process
         // TODO - if not valid throws Exception("Invalid form data")
-
         return true
     }
 
-    // TODO get the redirect url AND add the formContextId as a Request param!!
-    private fun getRedirectUrl(
-        journeyType: JourneyType,
+    fun getRedirectUrl(
+        journey: JourneyType,
         journeyStep: JourneyStep,
         context: Map<String, JsonElement>,
         id: Long?,
-    ): String = "redirect"
+    ): String {
+        val nextStep =
+            journey.resolveNext(
+                context,
+                journeyStep,
+            )
+        // TODO get use next step and journey to the redirect url AND add the formContextId body submission
+        return "index"
+    }
+
+    fun getMappedData(formData: String): Map<String, JsonElement> {
+        val data = Json.parseToJsonElement(formData)
+        require(data is JsonObject) { "Only Json Objects can be converted to a Map" }
+        return data
+    }
 }

@@ -43,12 +43,9 @@ class CustomSecurityConfig {
                     .authenticated()
             }.oauth2Login(Customizer.withDefaults())
             .csrf { requests ->
-                requests.ignoringRequestMatchers("/one-login-local/**")
-                requests.ignoringRequestMatchers("/forms/**")
-                
+                requests.ignoringRequestMatchers("/one-login-local/**", "/forms/**")
             }
 
-            
         return http.build()
     }
 

@@ -1,20 +1,25 @@
 package uk.gov.communities.prsdb.webapp.models.journeyModels
 
-import uk.gov.communities.prsdb.webapp.database.entity.FormContext
-import uk.gov.communities.prsdb.webapp.services.JourneyService
-
-class Journey(
-    val journeyService: JourneyService,
+open class NotJourney(
     val steps: List<JourneyStep>,
-    val previousStep: JourneyStep,
 ) {
+    open lateinit var previousStep: JourneyStep
+
     fun resolveNext(
-        formContext: FormContext,
+        context: String,
         currentStep: JourneyStep,
     ): JourneyStep {
-        currentStep.nextStep(formContext.context)
-        // TODO remove default return
+        val nextStep = currentStep.nextStep(context)
         return currentStep
+    }
+
+    fun validateFormContextForStep(
+        journeyStep: uk.gov.communities.prsdb.webapp.constants.enums.JourneyStep,
+        context: String,
+    ): Boolean {
+        // TODO get step
+        // validate context rules for step
+        return true
     }
 
     // TODO add something?? to iterate through collection of Steps?
@@ -32,25 +37,30 @@ class Journey(
 //  TODO Consider if we want breadcrumbs here - how are we keeping track of previous step/are we?
 }
 
-class JourneyStep(
+open class JourneyStep(
     val id: Int,
+    val name: String,
     val page: JourneyPage,
 ) {
     // TODO id? yes/no
 
-    fun nextStep(context: String) {
-        // TODO take context do some logic return next step
+    open fun nextStep(context: String): Int {
+        // TodO this should iterate through journey.steps - getting the next one unless there are conditions for which is the next step
+        return id + 1
     }
 }
 
-class JourneyPage(
+open class JourneyPage(
     val dto: JourneyPageDTO,
     val contentKeys: String,
 ) {
-//    TODO add isValid function to run validation on DTO based on form context (maybe this will be on the DTO?)
+    open fun isValid(formData: String): Boolean {
+        //    TODO add isValid function to run validation on DTO based on form context - e.g. if phonenumber validate by phone number, this will use bean  annotation
+        return true
+    }
 }
 
-class JourneyPageDTO(
+open class JourneyPageDTO(
     val formFields: List<String>,
     val annotations: List<String>,
 )
