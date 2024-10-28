@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
-import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 
 // TODO PRSD-405: Remove this controller once there is another way to use invitation tokens
@@ -19,9 +18,9 @@ class ExampleInvitationTokenController(
         token: String,
     ): CharSequence {
         val authority = invitationService.getAuthorityForToken(token)
-        model.addAttribute("contentHeader", "The local authority issuing that token was: ${authority.name}")
-        model.addAttribute("title", "Magic link")
-        model.addAttribute("serviceName", SERVICE_NAME)
+        model.addAttribute("title", "invitation.title")
+        model.addAttribute("contentHeader", "invitation.header")
+        model.addAttribute("contentHeaderParams", authority.name)
 
         // TODO PRSD-405: This is using a CharSequence instead of returning a String to handle an error that otherwise occurs in
         // the LocalAuthorityInvitationService method that creates the invitation url using MvcUriComponentsBuilder.fromMethodName

@@ -60,9 +60,8 @@ class ManageLocalAuthorityUsersController(
 
     @GetMapping("/invite-new-user")
     fun exampleEmailPage(model: Model): String {
-        model.addAttribute("contentHeader", "Send a test email using notify")
-        model.addAttribute("title", "Send an email")
-        model.addAttribute("serviceName", SERVICE_NAME)
+        model.addAttribute("title", "sendEmail.send.title")
+        model.addAttribute("contentHeader", "sendEmail.send.header")
         return "sendTestEmail"
     }
 
@@ -74,7 +73,6 @@ class ManageLocalAuthorityUsersController(
         result: BindingResult,
         principal: Principal,
     ): String {
-        model.addAttribute("serviceName", SERVICE_NAME)
         try {
             result.allErrors.forEach { println(it.toString()) }
             val emailAddress: String = emailModel.email
@@ -86,12 +84,13 @@ class ManageLocalAuthorityUsersController(
                 LocalAuthorityInvitationEmail(currentAuthority, invitationLinkAddress),
             )
 
-            model.addAttribute("contentHeader", "You have sent a test email to $emailAddress")
-            model.addAttribute("title", "Email sent")
+            model.addAttribute("title", "sendEmail.sent.title")
+            model.addAttribute("contentHeader", "sendEmail.sent.header")
+            model.addAttribute("contentHeaderParams", emailAddress)
             return "index"
         } catch (retryException: TransientEmailSentException) {
-            model.addAttribute("contentHeader", "That didn't work. Please try again.")
-            model.addAttribute("title", "Send an email")
+            model.addAttribute("title", "sendEmail.send.title")
+            model.addAttribute("contentHeader", "sendEmail.send.errorTitle")
             return "sendTestEmail"
         }
     }
