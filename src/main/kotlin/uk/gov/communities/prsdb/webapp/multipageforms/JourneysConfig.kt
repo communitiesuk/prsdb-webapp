@@ -3,8 +3,6 @@ package uk.gov.communities.prsdb.webapp.multipageforms
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
-import uk.gov.communities.prsdb.webapp.multipageforms.components.Email
-import uk.gov.communities.prsdb.webapp.multipageforms.components.PhoneNumber
 
 @Configuration
 class JourneysConfig {
