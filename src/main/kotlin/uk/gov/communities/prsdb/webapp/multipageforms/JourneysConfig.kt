@@ -7,23 +7,22 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 @Configuration
 class JourneysConfig {
     @Bean
-    fun landlordRegistrationJourney(): Journey<LandlordRegistrationStepId> =
+    fun landlordRegistrationJourney(): Journey<RegisterLandlordStepId> =
         journey {
-            stepIdType = LandlordRegistrationStepId::class
             journeyType = JourneyType.LANDLORD_REGISTRATION
-            initialStepId = LandlordRegistrationStepId.Email
+            initialStepId = RegisterLandlordStepId.Email
 
-            step(LandlordRegistrationStepId.Email) {
+            step(RegisterLandlordStepId.Email) {
                 page {
                     titleKey = "registerAsALandlord.title"
                     email("email") {
                         validateRegex(Regex(""".+@.+"""), "formComponents.email.error.invalidFormat")
                     }
                 }
-                goToStep(LandlordRegistrationStepId.PhoneNumber)
+                goToStep(RegisterLandlordStepId.PhoneNumber)
             }
 
-            step(LandlordRegistrationStepId.PhoneNumber) {
+            step(RegisterLandlordStepId.PhoneNumber) {
                 page {
                     titleKey = "registerAsALandlord.title"
                     phoneNumber("phoneNumber") {

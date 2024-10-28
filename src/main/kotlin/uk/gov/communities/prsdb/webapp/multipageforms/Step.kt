@@ -3,25 +3,25 @@ package uk.gov.communities.prsdb.webapp.multipageforms
 data class Step<TStepId : StepId>(
     val page: Page,
     val persistAfterSubmit: Boolean = false,
-    val nextStep: (Map<String, Any>) -> StepAction,
+    val nextStep: (Map<String, Any>) -> StepAction<TStepId>,
     val isSatisfied: (Map<String, Any>) -> Boolean = { journeyData ->
         page.isSatisfied(journeyData)
     },
 )
 
-sealed class StepAction {
-    data class GoToStep(
-        val stepId: StepId,
-    ) : StepAction()
+sealed class StepAction<TStepId : StepId> {
+    data class GoToStep<TStepId : StepId>(
+        val stepId: TStepId,
+    ) : StepAction<TStepId>()
 
-    data class Redirect(
+    data class Redirect<TStepId : StepId>(
         val path: String,
-    ) : StepAction()
+    ) : StepAction<TStepId>()
 }
 
 class StepBuilder<TStepId : StepId> {
     private var page: Page? = null
-    private var nextStep: ((Map<String, Any>) -> StepAction)? = null
+    private var nextStep: ((Map<String, Any>) -> StepAction<TStepId>)? = null
 
     fun page(init: PageBuilder.() -> Unit) {
         page = PageBuilder().apply(init).build()
@@ -35,5 +35,5 @@ class StepBuilder<TStepId : StepId> {
         nextStep = { StepAction.Redirect(path) }
     }
 
-    fun build() = Step<TStepId>(page = page!!, nextStep = nextStep!!)
+    fun build() = Step(page = page!!, nextStep = nextStep!!)
 }
