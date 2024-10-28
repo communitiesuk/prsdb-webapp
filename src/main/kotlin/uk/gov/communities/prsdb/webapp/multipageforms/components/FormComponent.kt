@@ -3,6 +3,8 @@ package uk.gov.communities.prsdb.webapp.multipageforms.components
 interface FormComponent<TValue : Any> {
     val fragmentName: String
     val fieldName: String
+    val labelKey: String
+    val hintKey: String?
     val validationRules: List<(TValue?) -> List<String>>
 
     fun validate(formData: Map<String, String>): List<String> {
@@ -25,12 +27,16 @@ interface FormComponent<TValue : Any> {
 data class FormComponentModel<T : Any>(
     val fragmentName: String,
     val fieldName: String,
+    val labelKey: String,
+    val hintKey: String?,
     var errors: List<String>? = null,
     var value: T,
 )
 
 abstract class FormComponentBuilder<TValue : Any> {
     abstract val fieldName: String
+    var labelKey: String? = null
+    var hintKey: String? = null
     protected val validationRules = mutableListOf<(TValue?) -> List<String>>()
 
     fun validationRule(rule: (TValue?) -> List<String>) {

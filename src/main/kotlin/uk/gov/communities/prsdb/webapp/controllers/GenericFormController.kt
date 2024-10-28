@@ -67,7 +67,7 @@ class JourneyPathRegistrar(
 @Controller
 @RequestMapping // URLs are mapped by JourneyPathRegistrar
 class GenericFormController(
-    private val journeys: List<Journey<StepId>>,
+    private val journeys: List<Journey<*>>,
     private val formContextRepository: FormContextRepository,
     private val oneLoginUserRepository: OneLoginUserRepository,
     private val objectMapper: ObjectMapper,
@@ -92,7 +92,7 @@ class GenericFormController(
         val step = getStep(journey, stepId)
         val formComponents = step.page.bindToModel(journeyData, mapOf())
 
-        model.addAttribute("titleKey", step.page.titleKey)
+        model.addAttribute("messageKeys", step.page.messageKeys)
         model.addAttribute("formComponents", formComponents)
 
         return step.page.templateName
@@ -150,7 +150,7 @@ class GenericFormController(
 
         when (val nextStepAction = step.nextStep(journeyData)) {
             is StepAction.GoToStep<*> -> {
-                val nextStepName = nextStepAction.stepId
+                val nextStepName = nextStepAction.stepId.urlPathSegment
                 return "redirect:/$journeyName/$nextStepName"
             }
             is StepAction.Redirect<*> -> {
@@ -160,11 +160,13 @@ class GenericFormController(
     }
 
     private fun getJourney(journeyName: String): Journey<StepId> =
-        journeys.find { it.journeyType.urlPathSegment.equals(journeyName, ignoreCase = true) }
-            ?: throw IllegalArgumentException("Journey named \"$journeyName\" not found")
+        (
+            journeys.find { it.journeyType.urlPathSegment.equals(journeyName, ignoreCase = true) }
+                ?: throw IllegalArgumentException("Journey named \"$journeyName\" not found")
+        ) as Journey<StepId>
 
     private fun getStepId(
-        journey: Journey<StepId>,
+        journey: Journey<*>,
         stepName: String,
     ): StepId {
         val stepIds = journey.steps.keys

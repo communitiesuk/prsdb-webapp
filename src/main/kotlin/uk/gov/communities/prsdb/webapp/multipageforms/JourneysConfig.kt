@@ -14,9 +14,14 @@ class JourneysConfig {
 
             step(RegisterLandlordStepId.Email) {
                 page {
-                    titleKey = "registerAsALandlord.title"
+                    messageKeys {
+                        title = "registerAsALandlord.title"
+                        fieldsetHeading = "registerAsALandlord.email.fieldsetHeading"
+                        fieldsetHint = "registerAsALandlord.email.fieldsetHint"
+                    }
                     email("email") {
-                        validateRegex(Regex(""".+@.+"""), "formComponents.email.error.invalidFormat")
+                        labelKey = "registerAsALandlord.email.label"
+                        validateRegex(Regex(""".+@.+"""), "registerAsALandlord.email.error.invalidFormat")
                     }
                 }
                 goToStep(RegisterLandlordStepId.PhoneNumber)
@@ -24,9 +29,15 @@ class JourneysConfig {
 
             step(RegisterLandlordStepId.PhoneNumber) {
                 page {
-                    titleKey = "registerAsALandlord.title"
+                    messageKeys {
+                        title = "registerAsALandlord.title"
+                        fieldsetHeading = "registerAsALandlord.phoneNumber.fieldsetHeading"
+                        fieldsetHint = "registerAsALandlord.phoneNumber.fieldsetHint"
+                    }
                     phoneNumber("phoneNumber") {
-                        validateRegex(Regex("""[\d ]+"""), "formComponents.phoneNumber.error.invalidFormat")
+                        labelKey = "registerAsALandlord.phoneNumber.label"
+                        hintKey = "registerAsALandlord.phoneNumber.hint"
+                        validateRegex(Regex("""[\d ]+"""), "registerAsALandlord.phoneNumber.error.invalidFormat")
                     }
                 }
                 redirect("/register-as-a-landlord/check-answers")

@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.multipageforms.components.PhoneNumberBuil
 
 class Page(
     val templateName: String = "genericFormPage",
-    val titleKey: String,
+    val messageKeys: MessageKeys,
     val formComponents: List<FormComponent<*>>,
     val validateSubmission: (
         formDataMap: Map<String, String>,
@@ -40,9 +40,27 @@ class Page(
         }
 }
 
+class MessageKeys(
+    val title: String,
+    val fieldsetHeading: String,
+    val fieldsetHint: String? = null,
+)
+
+class MessageKeysBuilder {
+    var title: String? = null
+    var fieldsetHeading: String? = null
+    var fieldsetHint: String? = null
+
+    fun build() = MessageKeys(title = title!!, fieldsetHeading = fieldsetHeading!!, fieldsetHint = fieldsetHint)
+}
+
 class PageBuilder {
-    var titleKey: String? = null
+    private var messageKeys: MessageKeys? = null
     private val formComponents = mutableListOf<FormComponent<*>>()
+
+    fun messageKeys(init: MessageKeysBuilder.() -> Unit) {
+        messageKeys = MessageKeysBuilder().apply(init).build()
+    }
 
     fun email(
         fieldName: String,
@@ -58,5 +76,5 @@ class PageBuilder {
         formComponents.add(PhoneNumberBuilder(fieldName).apply(init).build())
     }
 
-    fun build() = Page(titleKey = titleKey!!, formComponents = formComponents)
+    fun build() = Page(messageKeys = messageKeys!!, formComponents = formComponents)
 }
