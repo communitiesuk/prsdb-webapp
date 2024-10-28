@@ -11,9 +11,10 @@ class ExampleCacheAccessController(
 ) {
     @GetMapping("/visit-count")
     fun visitCount(model: Model): String {
-        var count = counter.getCountAndIncrement()
-        model.addAttribute("contentHeader", "You have visited $count times")
-        model.addAttribute("title", "Visit count")
+        val count = counter.getCountAndIncrement()
+        model.addAttribute("title", "visitCount.title")
+        model.addAttribute("contentHeader", "visitCount.header")
+        model.addAttribute("contentHeaderParams", count.toString())
         return "index"
     }
 }

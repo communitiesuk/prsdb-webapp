@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 class CheckHomeController {
     @GetMapping
     fun index(model: Model): String {
-        model.addAttribute("contentHeader", "Check a home to rent")
-        model.addAttribute("title", "Check a home to rent")
+        model.addAttribute("title", "checkHome")
+        model.addAttribute("contentHeader", "checkHome")
         return "index"
     }
 }

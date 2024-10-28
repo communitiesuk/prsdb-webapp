@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(${title}, ~{::main})}">
+<html th:replace="~{fragments/layout :: layout(#{${title}}, ~{::main})}">
 <main class="govuk-main-wrapper" id="main-content">
-    <h1 class="govuk-heading-xl" th:text="${contentHeader}">Default page template</h1>
+    <h1 class="govuk-heading-xl" th:text="${#messages.msgWithParams(contentHeader,contentHeaderParams)}">Default
+        page header</h1>
 </main>
 </html>

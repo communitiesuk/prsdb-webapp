@@ -13,8 +13,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.NavigationLinkDataModel
 class RegisterHomeController {
     @GetMapping
     fun index(model: Model): String {
-        model.addAttribute("contentHeader", "Register a home to rent")
-        model.addAttribute("title", "Register a home to rent")
+        model.addAttribute("title", "registerAHome")
+        model.addAttribute("contentHeader", "registerAHome")
         model.addAttribute(
             "navLinks",
             listOf(

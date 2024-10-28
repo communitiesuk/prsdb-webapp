@@ -18,11 +18,7 @@ class ExampleAddressLookupController(
     val addressLookupService: AddressLookupService,
 ) {
     @GetMapping
-    fun exampleAddressLookupPage(model: Model): String {
-        model.addAttribute("contentHeader", "Address Lookup")
-        model.addAttribute("title", "Address Lookup")
-        return "exampleLookupAddress"
-    }
+    fun exampleAddressLookupPage(model: Model): String = "exampleLookupAddress"
 
     class Submission(
         val postcode: String,
@@ -36,8 +32,6 @@ class ExampleAddressLookupController(
         val addresses = addressLookupService.searchByPostcode(body.postcode)
         val limitedAddresses = if (addresses.size > 5) addresses.subList(0, 5) else addresses
 
-        model.addAttribute("contentHeader", "Address Lookup")
-        model.addAttribute("title", "Address Lookup")
         model.addAttribute("addresses", limitedAddresses)
         return "exampleLookupAddress"
     }

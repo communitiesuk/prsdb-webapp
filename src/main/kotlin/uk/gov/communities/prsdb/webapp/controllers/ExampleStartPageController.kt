@@ -12,14 +12,10 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 class ExampleStartPageController {
     @GetMapping
     fun index(model: Model): String {
-        model.addAttribute("contentHeader", "Welcome to the Private Rental Sector Database")
-        model.addAttribute("title", "Private Rental Sector Database")
         model.addAttribute(
             "landlordRegNum",
             RegistrationNumberDataModel(RegistrationNumberType.LANDLORD, 205498766).toString(),
         )
-        model.addAttribute("startButtonHref", "/registration")
-        model.addAttribute("startButtonText", "Start now")
         return "demoStart"
     }
 }

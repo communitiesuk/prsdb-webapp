@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 class SearchRegisterController {
     @GetMapping
     fun index(model: Model): String {
-        model.addAttribute("contentHeader", "Search for Private Rented Sector information")
-        model.addAttribute("title", "Search for Private Rented Sector information")
+        model.addAttribute("title", "search")
+        model.addAttribute("contentHeader", "search")
         return "index"
     }
 }

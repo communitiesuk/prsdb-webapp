@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping
 class SignOutController {
     @GetMapping("/signout")
     fun signOut(model: Model): String {
-        model.addAttribute("contentHeader", "Sign Out")
-        model.addAttribute("title", "You have signed out")
+        model.addAttribute("title", "signOut.title")
+        model.addAttribute("contentHeader", "signOut.header")
         return "index"
     }
 }

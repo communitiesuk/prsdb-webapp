@@ -33,7 +33,6 @@ class ManageLocalAuthorityUsersController(
         val users = activeUsers + pendingUsers
 
         model.addAttribute("localAuthority", currentUserLocalAuthority.name)
-        model.addAttribute("title", "manageLAUsers.title")
         model.addAttribute("userList", users)
         model.addAttribute(
             "tableColumnHeadings",

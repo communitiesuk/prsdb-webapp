@@ -25,8 +25,8 @@ class ExampleEmailSendingController(
 ) {
     @GetMapping("/send-test-email")
     fun exampleEmailPage(model: Model): String {
-        model.addAttribute("contentHeader", "Send a test email using notify")
-        model.addAttribute("title", "Send an email")
+        model.addAttribute("title", "sendEmail.send.title")
+        model.addAttribute("contentHeader", "sendEmail.send.header")
         return "sendTestEmail"
     }
 
@@ -49,12 +49,13 @@ class ExampleEmailSendingController(
                 LocalAuthorityInvitationEmail(currentAuthority, invitationLinkAddress),
             )
 
-            model.addAttribute("contentHeader", "You have sent a test email to ${body.emailAddress}")
-            model.addAttribute("title", "Email sent")
+            model.addAttribute("title", "sendEmail.sent.title")
+            model.addAttribute("contentHeader", "sendEmail.sent.header")
+            model.addAttribute("contentHeaderParams", body.emailAddress)
             return "index"
         } catch (retryException: TransientEmailSentException) {
-            model.addAttribute("contentHeader", "That didn't work. Please try again.")
-            model.addAttribute("title", "Send an email")
+            model.addAttribute("title", "sendEmail.send.title")
+            model.addAttribute("contentHeader", "sendEmail.send.errorTitle")
             return "sendTestEmail"
         }
     }
@@ -65,8 +66,9 @@ class ExampleEmailSendingController(
         token: String,
     ): String {
         val authority = invitationService.getAuthorityForToken(token)
-        model.addAttribute("contentHeader", "The local authority issuing that token was: ${authority.name}")
-        model.addAttribute("title", "Magic link")
+        model.addAttribute("title", "invitation.title")
+        model.addAttribute("contentHeader", "invitation.header")
+        model.addAttribute("contentHeaderParams", authority.name)
         return "index"
     }
 }
