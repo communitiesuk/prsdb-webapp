@@ -16,4 +16,4 @@ data class PhoneNumberForm(
     @field:NotBlank(message = "registerAsALandlord.phoneNumber.error.missing")
     @field:Pattern(regexp = """(\d+ ?)+""", message = "registerAsALandlord.phoneNumber.error.invalidFormat")
     var phoneNumber: String? = null,
-) : FormModel
+) : FormModel<PhoneNumberForm>

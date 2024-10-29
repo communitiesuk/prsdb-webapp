@@ -37,7 +37,7 @@ class StepBuilder<TStepId : StepId>(
     private var page: Page<*>? = null
     private var nextStep: ((Map<String, Any>) -> StepAction<TStepId>)? = null
 
-    fun <TPageForm : FormModel> page(
+    fun <TPageForm : FormModel<TPageForm>> page(
         pageFormClass: KClass<TPageForm>,
         init: PageBuilder<TPageForm>.() -> Unit,
     ) {

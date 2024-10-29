@@ -15,4 +15,4 @@ data class EmailForm(
     @field:NotBlank(message = "registerAsALandlord.email.error.missing")
     @field:Email(message = "registerAsALandlord.email.error.invalidFormat")
     var email: String? = null,
-) : FormModel
+) : FormModel<EmailForm>

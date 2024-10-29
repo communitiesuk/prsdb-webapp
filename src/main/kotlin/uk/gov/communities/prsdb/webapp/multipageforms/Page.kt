@@ -6,7 +6,7 @@ import org.springframework.web.bind.WebDataBinder
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
-class Page<TPageForm : FormModel>(
+class Page<TPageForm : FormModel<TPageForm>>(
     private val validator: Validator,
     val templateName: String = "genericFormPage",
     val pageFormType: KClass<TPageForm>,
@@ -74,7 +74,7 @@ class MessageKeysBuilder {
     fun build() = MessageKeys(title = title!!, fieldsetHeading = fieldsetHeading!!, fieldsetHint = fieldsetHint)
 }
 
-class PageBuilder<TPageForm : FormModel>(
+class PageBuilder<TPageForm : FormModel<TPageForm>>(
     val pageFormType: KClass<TPageForm>,
     val validator: Validator,
 ) {
