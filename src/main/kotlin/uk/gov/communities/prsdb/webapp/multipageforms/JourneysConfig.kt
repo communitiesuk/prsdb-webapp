@@ -6,6 +6,7 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.multipageforms.registerlandlord.EmailForm
 import uk.gov.communities.prsdb.webapp.multipageforms.registerlandlord.PhoneNumberForm
+import uk.gov.communities.prsdb.webapp.multipageforms.registerlandlord.RegisterLandlordStepId
 
 @Configuration
 class JourneysConfig {
