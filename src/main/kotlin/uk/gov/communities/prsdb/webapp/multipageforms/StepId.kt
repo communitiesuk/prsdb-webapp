@@ -8,5 +8,6 @@ enum class RegisterLandlordStepId(
     override val urlPathSegment: String,
 ) : StepId {
     Email("email"),
+    QuickBreak("quick-break"),
     PhoneNumber("phone-number"),
 }

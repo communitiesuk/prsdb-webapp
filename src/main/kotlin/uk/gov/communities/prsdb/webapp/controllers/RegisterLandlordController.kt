@@ -11,6 +11,9 @@ class RegisterLandlordController {
     @GetMapping
     fun index(model: Model): String = "registerAsALandlord"
 
+    @GetMapping("quick-break")
+    fun quickBreak(): String = "quickBreak"
+
     @GetMapping("check-answers")
     fun checkAnswers(): String = "checkAnswersLandlord"
 }

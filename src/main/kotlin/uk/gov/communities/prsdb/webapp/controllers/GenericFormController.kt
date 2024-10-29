@@ -39,7 +39,11 @@ class JourneyPathRegistrar(
 
         // Register each path for every journey and step combination
         journeyDefinitions.forEach { journey ->
-            journey.steps.keys.forEach { stepId ->
+            val standardStepIds =
+                journey.steps
+                    .filter { (_, step) -> step is Step.StandardStep }
+                    .map { (id, _) -> id }
+            standardStepIds.forEach { stepId ->
                 val path =
                     "/{journeyName:${Regex.escape(journey.journeyType.urlPathSegment)}}/{stepName:${Regex.escape(stepId.urlPathSegment)}}"
 
@@ -181,5 +185,5 @@ class GenericFormController(
     private fun getStep(
         journey: Journey<*>,
         stepId: StepId,
-    ): Step<*> = journey.steps[stepId]!!
+    ): Step.StandardStep<*> = journey.steps[stepId] as Step.StandardStep<*>
 }

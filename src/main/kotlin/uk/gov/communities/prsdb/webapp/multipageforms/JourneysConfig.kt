@@ -19,8 +19,10 @@ class JourneysConfig {
                 page(EmailForm::class) {
                     messageKeys("registerAsALandlord", "email")
                 }
-                goToStep(RegisterLandlordStepId.PhoneNumber)
+                goToStep(RegisterLandlordStepId.QuickBreak)
             }
+
+            interstitial(RegisterLandlordStepId.QuickBreak, RegisterLandlordStepId.PhoneNumber)
 
             step(RegisterLandlordStepId.PhoneNumber) {
                 page(PhoneNumberForm::class) {

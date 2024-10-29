@@ -43,6 +43,13 @@ class JourneyBuilder<TStepId : StepId>(
         steps[stepId] = StepBuilder<TStepId>(validator).apply(init).build()
     }
 
+    fun interstitial(
+        stepId: TStepId,
+        nextStepId: TStepId,
+    ) {
+        steps[stepId] = Step.InterstitialStep(StepAction.GoToStep(nextStepId))
+    }
+
     fun build(): Journey<TStepId> = Journey(journeyType, initialStepId, steps)
 }
 

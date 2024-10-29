@@ -3,14 +3,23 @@ package uk.gov.communities.prsdb.webapp.multipageforms
 import org.springframework.validation.Validator
 import kotlin.reflect.KClass
 
-data class Step<TStepId : StepId>(
-    val page: Page<*>,
-    val persistAfterSubmit: Boolean = false,
+sealed class Step<TStepId : StepId>(
+    val isSatisfied: (Map<String, Any>) -> Boolean,
     val nextStep: (Map<String, Any>) -> StepAction<TStepId>,
-    val isSatisfied: (Map<String, Any>) -> Boolean = { journeyData ->
-        page.isSatisfied(journeyData)
-    },
-)
+) {
+    class StandardStep<TStepId : StepId>(
+        val page: Page<*>,
+        val persistAfterSubmit: Boolean = false,
+        nextStep: (Map<String, Any>) -> StepAction<TStepId>,
+        isSatisfied: (Map<String, Any>) -> Boolean = { journeyData ->
+            page.isSatisfied(journeyData)
+        },
+    ) : Step<TStepId>(isSatisfied, nextStep)
+
+    class InterstitialStep<TStepId : StepId>(
+        nextStep: StepAction<TStepId>,
+    ) : Step<TStepId>(isSatisfied = { true }, nextStep = { nextStep })
+}
 
 sealed class StepAction<TStepId : StepId> {
     data class GoToStep<TStepId : StepId>(
@@ -43,5 +52,5 @@ class StepBuilder<TStepId : StepId>(
         nextStep = { StepAction.Redirect(path) }
     }
 
-    fun build() = Step(page = page!!, nextStep = nextStep!!)
+    fun build() = Step.StandardStep(page = page!!, nextStep = nextStep!!)
 }

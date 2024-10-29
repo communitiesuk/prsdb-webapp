@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout('Quick break', ~{::main})}">
+<main class="govuk-main-wrapper" id="main-content">
+    <section>
+        <h2 class="govuk-heading-m">
+            Time for a quick break
+        </h2>
+        <p class="govuk-body">
+            Okay, let's continue!
+        </p>
+        <a th:replace="~{fragments/startButton :: startButton( @{phone-number}, 'Continue' )}"></a>
+    </section>
+</main>
+</html>
