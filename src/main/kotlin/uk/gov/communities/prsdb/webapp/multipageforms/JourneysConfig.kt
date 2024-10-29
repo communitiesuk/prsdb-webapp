@@ -17,22 +17,14 @@ class JourneysConfig {
 
             step(RegisterLandlordStepId.Email) {
                 page(EmailForm::class) {
-                    messageKeys {
-                        title = "registerAsALandlord.title"
-                        fieldsetHeading = "registerAsALandlord.email.fieldsetHeading"
-                        fieldsetHint = "registerAsALandlord.email.fieldsetHint"
-                    }
+                    messageKeys("registerAsALandlord", "email")
                 }
                 goToStep(RegisterLandlordStepId.PhoneNumber)
             }
 
             step(RegisterLandlordStepId.PhoneNumber) {
                 page(PhoneNumberForm::class) {
-                    messageKeys {
-                        title = "registerAsALandlord.title"
-                        fieldsetHeading = "registerAsALandlord.phoneNumber.fieldsetHeading"
-                        fieldsetHint = "registerAsALandlord.phoneNumber.fieldsetHint"
-                    }
+                    messageKeys("registerAsALandlord", "phoneNumber")
                 }
                 redirect("/register-as-a-landlord/check-answers")
             }

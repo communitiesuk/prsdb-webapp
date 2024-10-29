@@ -84,5 +84,17 @@ class PageBuilder<TPageForm : FormModel>(
         messageKeys = MessageKeysBuilder().apply(init).build()
     }
 
+    fun messageKeys(
+        journeySubkey: String,
+        fieldSubkey: String,
+    ) {
+        messageKeys =
+            MessageKeys(
+                title = "$journeySubkey.title",
+                fieldsetHeading = "$journeySubkey.$fieldSubkey.fieldsetHeading",
+                fieldsetHint = "$journeySubkey.$fieldSubkey.fieldsetHint",
+            )
+    }
+
     fun build() = Page(validator, pageFormType = pageFormType, messageKeys = messageKeys!!)
 }
