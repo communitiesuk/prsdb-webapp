@@ -1,8 +1,7 @@
-@file:Suppress("ktlint:standard:no-wildcard-imports")
-
 package uk.gov.communities.prsdb.webapp.controllers
 
-import jakarta.validation.Valid
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToJsonElement
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.MessageSource
 import org.springframework.http.MediaType
@@ -13,7 +12,8 @@ import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.gov.communities.prsdb.webapp.constants.*
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
+import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ConfirmedEmailDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitatio
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
+import uk.gov.communities.prsdb.webapp.services.ValidationService
 import java.security.Principal
 import java.util.Locale
 
@@ -31,6 +32,7 @@ class ManageLocalAuthorityUsersController(
     var emailSender: EmailNotificationService<LocalAuthorityInvitationEmail>,
     var invitationService: LocalAuthorityInvitationService,
     val localAuthorityDataService: LocalAuthorityDataService,
+    val validator: ValidationService,
     @Qualifier("messageSource") private val messageSource: MessageSource,
 ) {
     @GetMapping
@@ -73,108 +75,61 @@ class ManageLocalAuthorityUsersController(
     }
 
     @GetMapping("/invite-new-user")
-    fun exampleEmailPage(
+    fun inviteNewUser(
         model: Model,
         principal: Principal,
+        confirmedEmailDataModel: ConfirmedEmailDataModel,
     ): String {
         val currentAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
         model.addAttribute("councilName", currentAuthority.name)
-        model.addAttribute("councilEmail", currentAuthority.name + ".co.uk")
         model.addAttribute("serviceName", SERVICE_NAME)
+
+        val dataModelJson = model.getAttribute("serializedDataModel") as String?
+        if (dataModelJson is String) {
+            val previousDataModel = Json.decodeFromString<ConfirmedEmailDataModel>(dataModelJson)
+            val bindingResult = validator.validateDataModel(previousDataModel)
+
+            model.addAttribute("confirmedEmailDataModel", previousDataModel)
+            model.addAttribute(BindingResult.MODEL_KEY_PREFIX + "confirmedEmailDataModel", bindingResult)
+        }
+
         return "inviteLAUser"
     }
 
     @PostMapping("/invite-new-user", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
-    fun sendEmail(
+    fun sendInvitation(
         model: Model,
-        @Valid
         emailModel: ConfirmedEmailDataModel,
-        result: BindingResult,
         principal: Principal,
+        redirectAttributes: RedirectAttributes,
     ): String {
         model.addAttribute("serviceName", SERVICE_NAME)
         val currentAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
-        if (result.hasErrors()) {
-            model.addAttribute("councilName", currentAuthority.name)
-            model.addAttribute("councilEmail", currentAuthority.name + ".co.uk")
-            model.addAttribute(
-                "validationErrors",
-                getValidationErrors(emailModel, result),
-            )
-            return "inviteLAUser"
-        }
-        model.addAttribute("validationErrors", InviteUserValidationState(emailModel.email, emailModel.confirmEmail))
+        model.addAttribute("councilName", currentAuthority.name)
 
-        val emailAddress: String = emailModel.email
+        val result = validator.validateDataModel(emailModel)
+        if (result.hasErrors()) {
+            redirectAttributes.addFlashAttribute(
+                "serializedDataModel",
+                Json.encodeToJsonElement(emailModel).toString(),
+            )
+            return "redirect:invite-new-user"
+        }
+
         try {
-            val token = invitationService.createInvitationToken(emailAddress, currentAuthority)
+            val token = invitationService.createInvitationToken(emailModel.email, currentAuthority)
             val invitationLinkAddress = invitationService.buildInvitationUri(token)
             emailSender.sendEmail(
-                emailAddress,
+                emailModel.email,
                 LocalAuthorityInvitationEmail(currentAuthority, invitationLinkAddress),
             )
 
-            model.addAttribute("contentHeader", "You have sent a test email to $emailAddress")
+            model.addAttribute("contentHeader", "You have sent a test email to ${emailModel.email}")
             model.addAttribute("title", "Email sent")
             return "index"
         } catch (retryException: TransientEmailSentException) {
-            model.addAttribute("councilName", currentAuthority.name)
-            model.addAttribute("councilEmail", currentAuthority.name + ".co.uk")
+            result.reject("addLAUser.error.retryable")
             return "inviteLAUser"
         }
     }
-
-    private fun getValidationErrors(
-        model: ConfirmedEmailDataModel,
-        result: BindingResult,
-    ): InviteUserValidationState =
-        InviteUserValidationState(
-            if (result.allErrors
-                    .map { it.defaultMessage }
-                    .contains(ConfirmedEmailDataModel.NO_EMAIL_ERROR_MESSAGE)
-            ) {
-                FieldValidation(model.email, ADD_LA_USER_MISSING_EMAIL)
-            } else if (result.allErrors
-                    .map { it.defaultMessage }
-                    .contains(ConfirmedEmailDataModel.NOT_AN_EMAIL_ERROR_MESSAGE)
-            ) {
-                FieldValidation(model.email, ADD_LA_USER_INVALID_EMAIL)
-            } else {
-                FieldValidation(model.email)
-            },
-            if (result.allErrors
-                    .map { it.defaultMessage }
-                    .contains(ConfirmedEmailDataModel.NO_CONFIRMATION_ERROR_MESSAGE)
-            ) {
-                FieldValidation(model.confirmEmail, ADD_LA_USER_MISSING_CONFIRMATION)
-            } else if (result.allErrors
-                    .map { it.defaultMessage }
-                    .contains(
-                        ConfirmedEmailDataModel.CONFIRMATION_DOES_NOT_MATCH_EMAIL_ERROR_MESSAGE,
-                    )
-            ) {
-                FieldValidation(model.confirmEmail, ADD_LA_USER_NON_MATCHING_CONFIRMATION)
-            } else {
-                FieldValidation(model.confirmEmail)
-            },
-        )
-}
-
-class InviteUserValidationState(
-    val emailValidation: FieldValidation,
-    val confirmEmailValidation: FieldValidation,
-) {
-    constructor(
-        validEmail: String,
-        validConfirmEmail: String,
-    ) : this(FieldValidation(validEmail), FieldValidation(validConfirmEmail))
-
-    val hasErrors: Boolean = emailValidation.hasError || confirmEmailValidation.hasError
-}
-
-class FieldValidation(
-    val value: String,
-    val messageKey: String? = null,
-) {
-    val hasError: Boolean = messageKey != null
 }

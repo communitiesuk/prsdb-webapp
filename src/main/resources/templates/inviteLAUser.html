@@ -1,21 +1,14 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(${(validationErrors?.hasErrors ?: false) ? 'Error: ' : ''} + #{addLAUser.title}, ${serviceName}, ~{::main})}">
+<html th:replace="~{fragments/layout :: layout(#{addLAUser.title}, ${serviceName}, ~{::main})}">
 <main class="govuk-main-wrapper" id="main-content">
     <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#header})}">
         <header id="header">
             <h1 class="govuk-heading-l" th:text="#{addLAUser.heading(${councilName})}"></h1>
         </header>
     </div>
-    <div th:replace="${validationErrors?.hasErrors ?: false} ? ~{fragments/error-summary :: summary(#{addLAUser.error.summaryHeading}, ~{:: #errorList})} : ~{}">
-    <ul id='errorList' th:remove="tag">
-        <li th:if="${validationErrors.emailValidation.hasError}">
-            <a href="#email" th:text="#{${validationErrors.emailValidation.messageKey}}"></a>
-        </li>
-        <li th:if="${validationErrors.confirmEmailValidation.hasError}">
-            <a href="#confirmEmail" th:text="#{${validationErrors.confirmEmailValidation.messageKey}}"></a>
-        </li>
-    </ul>
-    </div>
+    <th:block  th:object="${confirmedEmailDataModel}">
+        <div  th:replace="~{fragments/error-summary :: summary(#{addLAUser.error.summaryHeading}, ${ {'email', 'confirmEmail'} }) }"></div>
+    </th:block>
     <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#explanation})}">
         <section id="explanation">
             <p th:text="#{addLAUser.paragraph.one}" class="govuk-body">
@@ -30,17 +23,13 @@
                 <li th:text="#{addLAUser.paragraph.two.bullet.three}">
                 </li>
             </ul>
-            <p class="govuk-body">
-                <span th:utext="#{addLAUser.paragraph.four.part1}" th:remove="tag"></span>
-                <strong th:text="${councilName}"></strong>
-                <span th:text="#{addLAUser.paragraph.four.part2}" th:remove="tag"></span>
-            </p>
         </section>
     </div>
     <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#email-form})}">
-    <form class="form" id="email-form" method="post" th:action="@{/manage-users/invite-new-user}">
-        <div th:replace="~{fragments/forms/textInput :: textInput(#{addLAUser.form.primaryEmailLabel(${councilEmail})}, 'email', ${validationErrors?.emailValidation})}"></div>
-        <div th:replace="~{fragments/forms/textInput :: textInput(#{addLAUser.form.confirmEmailLabel}, 'confirmEmail', ${validationErrors?.confirmEmailValidation})}"></div>
+    <form class="form" id="email-form" method="post" th:action="@{/manage-users/invite-new-user}" th:object="${confirmedEmailDataModel}">
+        <input th:replace="~{fragments/forms/textInput :: textInput(#{addLAUser.form.primaryEmailLabel}, 'email')}">
+        <input th:replace="~{fragments/forms/textInput :: textInput(#{addLAUser.form.confirmEmailLabel}, 'confirmEmail')}">
+
         <button th:replace="~{fragments/primaryButton :: primaryButton(#{addLAUser.form.submitButton})}"></button>
     </form>
     </div>

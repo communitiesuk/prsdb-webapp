@@ -1,8 +1,8 @@
-    <div th:fragment="textInput(label, for, validationError)" th:class="${validationError?.hasError} ? 'govuk-form-group govuk-form-group--error':'govuk-form-group'">
-        <label class="govuk-label" th:for="${for}" th:text="${label}"></label>
-        <p th:if="${validationError?.hasError}" th:id="${for}+'-error'" class="govuk-error-message">
+    <div th:fragment="textInput(label, fieldName)" class="govuk-form-group" th:classappend='${#fields.hasErrors(fieldName) ? "govuk-form-group--error" : ""}'>
+        <label class="govuk-label" th:for="__${fieldName}__" th:text="${label}"></label>
+        <p th:if="${#fields.hasErrors(fieldName)}" th:id="__${fieldName}__+'-error'" class="govuk-error-message">
             <span class="govuk-visually-hidden" th:text="#{errorPrefix}"></span>
-            <span th:remove="tag" th:text="#{${validationError?.messageKey}}"></span>
+            <th:block th:errors="*{__${fieldName}__}"></th:block>
         </p>
-        <input class="govuk-input" th:id="${for}" th:name="${for}" type="text" th:value="${validationError?.value}">
+        <input class="govuk-input" type="text" th:field="*{__${fieldName}__}">
     </div>
