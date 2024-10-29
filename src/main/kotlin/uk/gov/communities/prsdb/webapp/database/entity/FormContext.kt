@@ -11,19 +11,30 @@ import jakarta.persistence.ManyToOne
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 
 @Entity
-class FormContext(
+class FormContext() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+    val id: Long? = null
+
     @Column(nullable = false)
-    val journeyType: JourneyType,
+    lateinit var journeyType: JourneyType
+        private set
+
     @Column(columnDefinition = "TEXT", nullable = false)
-    var context: String,
+    lateinit var context: String
+
     @ManyToOne(optional = false)
     @JoinColumn(
         name = "subject_identifier",
         nullable = false,
         foreignKey = ForeignKey(name = "FK_FORM_CONTEXT_1L_USER"),
     )
-    val user: OneLoginUser,
-) : AuditableEntity()
+    lateinit var user: OneLoginUser
+        private set
+
+    constructor(journeyType: JourneyType, context: String, user: OneLoginUser) : this() {
+        this.journeyType = journeyType
+        this.context = context
+        this.user = user
+    }
+}
