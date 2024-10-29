@@ -5,6 +5,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import org.springframework.stereotype.Service
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
@@ -14,44 +15,56 @@ import uk.gov.communities.prsdb.webapp.models.journeyModels.StepId
 
 @Service
 class JourneyService(
+    val journeys: List<Journey<*>>,
     val formContextRepository: FormContextRepository,
     val oneLoginUserRepository: OneLoginUserRepository,
 ) {
     fun getJourneyView(
-        journey: Journey<*>,
-        step: StepId,
+        journeyType: String,
+        stepName: String,
         context: Map<String, JsonElement>?,
-    ): Map<String, String> {
+    ): ModelAndView {
+        // TODO this can be one function that returns the three as needed?
+        val journey = getJourney(journeyType)
+        val stepId = getStepId(journey, stepName)
+        val step = getStep(journey, stepId)
         if (context != null) {
-            validateFormContextForStep(journey, step, context)
+            validateFormContextForStep(journey, stepId, context)
         }
-        return getView(journey.steps[step]!!, context)
+        return getView(step, context)
     }
 
     private fun validateFormContextForStep(
         journey: Journey<*>,
-        step: StepId,
+        stepId: StepId,
         context: Map<String, JsonElement>?,
-    ): Boolean = journey.validateFormContextForStep(step, context)
+        // TODO this should return either a success or error
+    ): Boolean = journey.validateFormContextForStep(stepId, context)
 
     private fun getView(
         step: Step<out StepId>,
         context: Map<String, JsonElement>?,
-    ): Map<String, String> =
-        step.page
-            .getModelAttributes(context)
+    ): ModelAndView {
+        val pageFields: Map<String, String> = step.getSubmissionFromFormContext(context)
+        return step.page
+            .getModelAttributes(pageFields)
+    }
 
     fun updateFormContextAndGetNextStep(
-        journey: Journey<*>,
-        step: StepId,
+        journeyType: String,
+        stepName: String,
         principalName: String,
         formData: Map<String, JsonElement>,
         formContextId: Long?,
         context: Map<String, JsonElement>?,
     ): Map<String, JsonElement> {
-        validateFormData(journey.steps[step]!!, formData)
+        val journey = getJourney(journeyType)
+        val stepId = getStepId(journey, stepName)
+        val step = getStep(journey, stepId)
+
+        validateFormData(step, formData)
         return if (context != null) {
-            updateFormContext(formData, principalName, context, formContextId!!, journey.steps[step]!!)
+            updateFormContext(formData, principalName, context, formContextId!!, step)
         } else {
             createFormContext(formData, journey, principalName)
         }
@@ -100,15 +113,15 @@ class JourneyService(
             .validateSubmission(formData)
 
     fun getRedirectUrl(
-        journey: Journey<*>,
-        step: StepId,
+        journeyType: String,
+        stepName: String,
         context: Map<String, JsonElement>,
         id: Long?,
     ): String {
-        val nextStepId =
-            journey.steps
-                .get(step)
-                ?.nextStep
+        val journey = getJourney(journeyType)
+        val stepId = getStepId(journey, stepName)
+        val step = getStep(journey, stepId)
+        val nextStepId = step.nextStep
         return "redirect:/$journey/$nextStepId"
     }
 
@@ -117,4 +130,22 @@ class JourneyService(
         require(data is JsonObject) { "Only Json Objects can be converted to a Map" }
         return data
     }
+
+    private fun getJourney(journeyName: String): Journey<*> =
+        journeys.find { it.journeyType.urlPathSegment.equals(journeyName, ignoreCase = true) }
+            ?: throw IllegalArgumentException("Journey named \"$journeyName\" not found")
+
+    private fun getStepId(
+        journey: Journey<*>,
+        stepName: String,
+    ): StepId {
+        val stepIds = journey.steps.keys
+        return stepIds.find { it.urlPathSegment.equals(stepName, ignoreCase = true) }
+            ?: throw IllegalArgumentException("No step named \"$stepName\" found in journey \"${journey.journeyType.name}\"")
+    }
+
+    private fun getStep(
+        journey: Journey<*>,
+        stepId: StepId,
+    ): Step<*> = journey.steps[stepId]!!
 }
