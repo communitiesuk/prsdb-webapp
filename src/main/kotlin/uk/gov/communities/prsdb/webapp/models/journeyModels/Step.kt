@@ -11,7 +11,7 @@ open class Step<TStepId : StepId>(
     }
 
     fun getSubmissionFromFormContext(formContext: Map<String, Any>): Map<String, String> {
-        // TODO add logic here - it will not always be this simple
+        //  TODO-PRSD-422 this should return any values for this step's fields that are already in the map
         return formContext as Map<String, String>
     }
 }
@@ -20,6 +20,10 @@ class StepBuilder<TStepId : StepId> {
     var page: Page? = null
     var nextStep: ((Map<String, Any>) -> StepId)? = null
     var updateContext: (((Map<String, Any>), (Map<String, String>)) -> Map<String, String>)? = null
+
+    fun page(init: PageBuilder.() -> Unit) {
+        page = PageBuilder().apply(init).build()
+    }
 
     fun build(): Step<TStepId> = Step(page = page!!, nextStep = nextStep!!, updateContext = updateContext!!)
 }

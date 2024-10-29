@@ -24,13 +24,11 @@ class JourneyService(
         stepName: String,
         context: Map<String, Any>,
     ): ModelAndView {
-        // TODO this can be one function that returns the three as needed?
+        //  TODO-PRSD-422 these 3 lines are repeated 3 times in the service - extract them out?
         val journey = getJourney(journeyType)
         val stepId = getStepId(journey, stepName)
         val step = getStep(journey, stepId)
-        if (context.isNotEmpty()) {
-            validateFormContextForStep(journey, stepId, context)
-        }
+        validateFormContextForStep(journey, stepId, context)
         return getView(step, context)
     }
 
@@ -38,7 +36,7 @@ class JourneyService(
         journey: Journey<*>,
         stepId: StepId,
         context: Map<String, Any>,
-        // TODO this should return either a success or error
+        //  TODO-PRSD-422 if this check is not successful - redirect to first page of the form
     ): Boolean = journey.validateFormContextForStep(context, stepId)
 
     private fun getView(
@@ -50,7 +48,7 @@ class JourneyService(
             .getModelAttributes(pageFields)
     }
 
-    fun updateFormContextAndGetNextStep(
+    fun updateFormContext(
         journeyType: String,
         stepName: String,
         principalName: String,
@@ -62,6 +60,12 @@ class JourneyService(
         val stepId = getStepId(journey, stepName)
         val step = getStep(journey, stepId)
 
+        //  TODO-PRSD-422 when creating and updating the form context:
+        // The formContextId should be stored in the context
+        // The context should be a mapOf(stepId, mapOf(context))
+        // if there was a queryParameter in the request it should be concatenated with the stepId then it is being added to the context
+        // e.g. mapOf(stepId${queryParam}, mapOf(context))
+        // when the context is being updated the stepId(plus optional queryParam) should be stored with it
         validateFormData(step, formData)
         return if (context.isNotEmpty()) {
             updateFormContext(formData, principalName, context, formContextId!!, step)
@@ -121,7 +125,8 @@ class JourneyService(
         val journey = getJourney(journeyType)
         val stepId = getStepId(journey, stepName)
         val step = getStep(journey, stepId)
-        val nextStepId = step.nextStep
+        val nextStepId = step.nextStep.toString()
+        // TODO-PRSD-422 if there was a query parameter in the request it should be returned as part of the Url
         return "redirect:/$journey/$nextStepId"
     }
 

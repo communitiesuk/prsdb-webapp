@@ -6,10 +6,7 @@ import kotlinx.serialization.json.Json
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.services.JourneyService
 import java.security.Principal
@@ -20,6 +17,8 @@ class FormsController(
     var session: HttpSession,
     private val journeyService: JourneyService,
 ) {
+    // TODO-PRSD-422 both endpoints should also take an optional query parameter (it should probably be an integer)
+    // This will be required if the same journeyStep has to be repeated in a journey e.g. is there are two interested parties being registered we will need to differentiate between them
     @GetMapping("/{journeyName}/{stepName}")
     fun getForm(
         @PathVariable("journeyName") journeyName: String,
@@ -39,17 +38,18 @@ class FormsController(
     fun postForms(
         @PathVariable("journeyName") journeyName: String,
         @PathVariable("stepName") stepName: String,
-        body: PostSubmission,
+        @RequestParam formDataMap: Map<String, String>,
         principal: Principal,
     ): String {
         val context = session.getAttribute("FORM_CONTEXT") as? Map<String, Any> ?: emptyMap()
+        // TODO-PRSD-422 Remove formContextId from session - it should be stored as part of the context and accessed from there
         val formContextId: Long? = session.getAttribute("FORM_CONTEXT_ID")?.toString()?.toLongOrNull()
         val updatedContext: Map<String, Any> =
-            journeyService.updateFormContextAndGetNextStep(
+            journeyService.updateFormContext(
                 journeyName,
                 stepName,
                 principal.name,
-                body.formData,
+                formDataMap,
                 formContextId,
                 context,
             )
@@ -64,8 +64,4 @@ class FormsController(
             formContextId,
         )
     }
-
-    class PostSubmission(
-        val formData: Map<String, String>,
-    )
 }
