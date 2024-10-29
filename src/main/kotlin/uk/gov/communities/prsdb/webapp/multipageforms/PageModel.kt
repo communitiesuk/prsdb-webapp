@@ -1,5 +1,8 @@
 package uk.gov.communities.prsdb.webapp.multipageforms
 
+/**
+ * A PageModel represents the state relating to a particular Page at a particular moment in time. It is used in rendering the view.
+ */
 data class PageModel<TPageForm : FormModel<TPageForm>>(
     val pageForm: TPageForm,
     val pageErrorKeys: List<String>,

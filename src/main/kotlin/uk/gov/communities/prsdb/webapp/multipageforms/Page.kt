@@ -6,6 +6,9 @@ import org.springframework.web.bind.WebDataBinder
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
+/**
+ * The Page is a definition of the presentation and data management of a step in a multi-page form flow
+ */
 class Page<TPageForm : FormModel<TPageForm>>(
     private val validator: Validator,
     val templateName: String = "genericFormPage",
@@ -56,8 +59,6 @@ class Page<TPageForm : FormModel<TPageForm>>(
             val formDataMap = journeyData[pageFormType.simpleName!!] as? Map<String, String> ?: mapOf()
             bindFormDataToModel(formDataMap)
         }
-
-    fun isSatisfied(journeyData: Map<String, Any>): Boolean = !bindJourneyDataToModel(journeyData).hasErrors()
 }
 
 class MessageKeys(

@@ -3,6 +3,9 @@ package uk.gov.communities.prsdb.webapp.multipageforms
 import org.springframework.validation.Validator
 import kotlin.reflect.KClass
 
+/**
+ * A Step is a definition of one step along the flow of a multi-page form. The Step class deals only with concerns relating to that flow.
+ */
 sealed class Step<TStepId : StepId>(
     val isSatisfied: (Map<String, Any>) -> Boolean,
     val nextStep: (Map<String, Any>) -> StepAction<TStepId>,
@@ -12,7 +15,7 @@ sealed class Step<TStepId : StepId>(
         val persistAfterSubmit: Boolean = false,
         nextStep: (Map<String, Any>) -> StepAction<TStepId>,
         isSatisfied: (Map<String, Any>) -> Boolean = { journeyData ->
-            page.isSatisfied(journeyData)
+            !page.bindJourneyDataToModel(journeyData).hasErrors()
         },
     ) : Step<TStepId>(isSatisfied, nextStep)
 

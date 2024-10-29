@@ -5,6 +5,10 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 
+/**
+ * A FormModel both describes a single form that is part of a Page and holds data from a submission from that form.
+ * Each Page is expected to have a data class that implements FormModel.
+ */
 interface FormModel<TSelf : FormModel<TSelf>> {
     // Get the property names in the order they're defined in the primary constructor
     fun getFieldNames(): List<String> = this::class.primaryConstructor?.parameters?.map { it.name!! }!!

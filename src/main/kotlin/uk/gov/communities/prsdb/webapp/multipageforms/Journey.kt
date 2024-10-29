@@ -3,6 +3,9 @@ package uk.gov.communities.prsdb.webapp.multipageforms
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 
+/**
+ * A Journey is a definition of a flow that a user can take to complete a multi-page form
+ */
 data class Journey<TStepId : StepId>(
     val journeyType: JourneyType,
     val initialStepId: TStepId,
