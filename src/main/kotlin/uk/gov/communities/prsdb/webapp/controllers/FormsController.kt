@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 import jakarta.servlet.http.HttpSession
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -27,32 +27,31 @@ class FormsController(
         model: Model,
         session: HttpSession,
     ): ModelAndView {
-        val context: String? = session.getAttribute("FORM_CONTEXT")?.toString()
+        val context = session.getAttribute("FORM_CONTEXT") as? Map<String, Any> ?: emptyMap()
         return journeyService.getJourneyView(
             journeyName,
             stepName,
-            // TODO context should be taken as form submission and mapped (if required) to the same format as Map<String, String>
-            context?.let { journeyService.getMappedData(it) },
+            context,
         )
     }
 
-    @PostMapping("/{journeyName}/{stepName}")
+    @PostMapping("/{journeyName}/{stepName}", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
     fun postForms(
         @PathVariable("journeyName") journeyName: String,
         @PathVariable("stepName") stepName: String,
         body: PostSubmission,
         principal: Principal,
     ): String {
-        val context: String? = session.getAttribute("FORM_CONTEXT")?.toString()
+        val context = session.getAttribute("FORM_CONTEXT") as? Map<String, Any> ?: emptyMap()
         val formContextId: Long? = session.getAttribute("FORM_CONTEXT_ID")?.toString()?.toLongOrNull()
-        val updatedContext: Map<String, JsonElement> =
+        val updatedContext: Map<String, Any> =
             journeyService.updateFormContextAndGetNextStep(
                 journeyName,
                 stepName,
                 principal.name,
-                journeyService.getMappedData(body.formData),
+                body.formData,
                 formContextId,
-                context?.let { journeyService.getMappedData(it) },
+                context,
             )
 
         session.setAttribute("FORM_CONTEXT", Json.encodeToString(updatedContext))
@@ -67,6 +66,6 @@ class FormsController(
     }
 
     class PostSubmission(
-        val formData: String,
+        val formData: Map<String, String>,
     )
 }

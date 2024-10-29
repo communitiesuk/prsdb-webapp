@@ -8,5 +8,6 @@ enum class LandlordRegistrationStepId(
     override val urlPathSegment: String,
 ) : StepId {
     Start("start"),
+    Second("second"),
     End("end"),
 }

@@ -26,12 +26,28 @@ class JourneyConfig {
                                         mapOf(
                                             "title" to "start",
                                             "serviceName" to "multipage form",
-                                            "postURI" to "register-as-a-landlord/end",
+                                            "postURI" to "register-as-a-landlord/start",
+                                        ),
+                                    validateSubmission = { _ -> true },
+                                ),
+                            nextStep = { _ -> LandlordRegistrationStepId.Second },
+                            updateContext = { _, _ -> mapOf("fieldName" to "fieldValue") },
+                        ),
+                    LandlordRegistrationStepId.Second to
+                        Step(
+                            page =
+                                Page(
+                                    template = "multiFormFrameworkDemo",
+                                    messageKeys =
+                                        mapOf(
+                                            "title" to "start",
+                                            "serviceName" to "multipage form",
+                                            "postURI" to "register-as-a-landlord/second",
                                         ),
                                     validateSubmission = { _ -> true },
                                 ),
                             nextStep = { _ -> LandlordRegistrationStepId.End },
-                            getSubmissionFromFormContext = { _ -> mapOf("fieldName" to "value") },
+                            updateContext = { _, _ -> mapOf("postCode" to "fieldValue") },
                         ),
                     LandlordRegistrationStepId.End to
                         Step(
@@ -42,12 +58,12 @@ class JourneyConfig {
                                         mapOf(
                                             "title" to "end",
                                             "serviceName" to "multipage form",
-                                            "postURI" to "register-as-a-landlord/start",
+                                            "postURI" to "register-as-a-landlord/end",
                                         ),
                                     validateSubmission = { _ -> true },
                                 ),
                             nextStep = { _ -> LandlordRegistrationStepId.Start },
-                            getSubmissionFromFormContext = { _ -> mapOf("fieldName" to "value") },
+                            updateContext = { _, _ -> mapOf("fieldName" to "fieldValue") },
                         ),
                 ),
         )

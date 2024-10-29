@@ -1,24 +1,30 @@
 package uk.gov.communities.prsdb.webapp.models.journeyModels
 
-import kotlinx.serialization.json.JsonElement
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 
 data class Journey<TStepId : StepId>(
     val journeyType: JourneyType,
-    val initialStepId: TStepId,
+    val initialStepId: StepId,
     val steps: Map<TStepId, Step<TStepId>>,
-) {
-    fun validateFormContextForStep(
-        step: StepId,
-        context: Map<String, JsonElement>?,
-    ): Boolean {
-        // starts at the first step
-        // val stepSubmission = step.getSubmissionFromFormContext(context)
-        // step.page.validateSubmission(stepSubmission)
-        // go to next step
-        // repeat
-        // until reaching current step
-        // return either a success or error
-        TODO("Not yet implemented")
-    }
+    val validateFormContextForStep: (Map<String, Any>, StepId) -> Boolean = { formContext, targetStepId ->
+        var currentStepId = initialStepId
+        while (currentStepId != targetStepId) {
+            val currentStep = steps[currentStepId]!!
+            if (!currentStep.isSatisfied(formContext)) {
+                break
+            }
+            val nextStep = currentStep.nextStep(formContext)
+            currentStepId = nextStep
+        }
+        currentStepId == targetStepId
+    },
+)
+
+class JourneyBuilder<TStepId : StepId> {
+    lateinit var journeyType: JourneyType
+    lateinit var initialStepId: StepId
+    lateinit var steps: Map<TStepId, Step<TStepId>>
+    lateinit var validateFormContextForNextstep: (Map<String, Any>, StepId) -> Boolean
+
+    fun build(): Journey<TStepId> = Journey(journeyType, initialStepId, steps, validateFormContextForNextstep)
 }

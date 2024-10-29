@@ -22,13 +22,13 @@ class JourneyService(
     fun getJourneyView(
         journeyType: String,
         stepName: String,
-        context: Map<String, JsonElement>?,
+        context: Map<String, Any>,
     ): ModelAndView {
         // TODO this can be one function that returns the three as needed?
         val journey = getJourney(journeyType)
         val stepId = getStepId(journey, stepName)
         val step = getStep(journey, stepId)
-        if (context != null) {
+        if (context.isNotEmpty()) {
             validateFormContextForStep(journey, stepId, context)
         }
         return getView(step, context)
@@ -37,13 +37,13 @@ class JourneyService(
     private fun validateFormContextForStep(
         journey: Journey<*>,
         stepId: StepId,
-        context: Map<String, JsonElement>?,
+        context: Map<String, Any>,
         // TODO this should return either a success or error
-    ): Boolean = journey.validateFormContextForStep(stepId, context)
+    ): Boolean = journey.validateFormContextForStep(context, stepId)
 
     private fun getView(
         step: Step<out StepId>,
-        context: Map<String, JsonElement>?,
+        context: Map<String, Any>,
     ): ModelAndView {
         val pageFields: Map<String, String> = step.getSubmissionFromFormContext(context)
         return step.page
@@ -54,16 +54,16 @@ class JourneyService(
         journeyType: String,
         stepName: String,
         principalName: String,
-        formData: Map<String, JsonElement>,
+        formData: Map<String, String>,
         formContextId: Long?,
-        context: Map<String, JsonElement>?,
-    ): Map<String, JsonElement> {
+        context: Map<String, Any>,
+    ): Map<String, Any> {
         val journey = getJourney(journeyType)
         val stepId = getStepId(journey, stepName)
         val step = getStep(journey, stepId)
 
         validateFormData(step, formData)
-        return if (context != null) {
+        return if (context.isNotEmpty()) {
             updateFormContext(formData, principalName, context, formContextId!!, step)
         } else {
             createFormContext(formData, journey, principalName)
@@ -71,12 +71,12 @@ class JourneyService(
     }
 
     private fun updateFormContext(
-        formData: Map<String, JsonElement>,
+        formData: Map<String, String>,
         principalName: String,
-        context: Map<String, JsonElement>,
+        context: Map<String, Any>,
         formContextId: Long,
         step: Step<out StepId>,
-    ): Map<String, JsonElement> {
+    ): Map<String, Any> {
         val formContext = formContextRepository.findById(formContextId).get()
         validateUser(principalName, formContext)
         val updatedContext = step.updateContext(context, formData)
@@ -95,10 +95,10 @@ class JourneyService(
     }
 
     private fun createFormContext(
-        formData: Map<String, JsonElement>,
+        formData: Map<String, String>,
         journey: Journey<*>,
         principalName: String,
-    ): Map<String, JsonElement> {
+    ): Map<String, Any> {
         val user = oneLoginUserRepository.findById(principalName).get()
         val formContext = formContextRepository.save(FormContext(journey.journeyType, Json.encodeToString(formData), user))
         return getMappedData(formContext.context)
@@ -106,7 +106,7 @@ class JourneyService(
 
     private fun validateFormData(
         step: Step<out StepId>,
-        formData: Map<String, JsonElement>,
+        formData: Map<String, String>,
     ): Boolean =
         step
             .page
@@ -115,7 +115,7 @@ class JourneyService(
     fun getRedirectUrl(
         journeyType: String,
         stepName: String,
-        context: Map<String, JsonElement>,
+        context: Map<String, Any>,
         id: Long?,
     ): String {
         val journey = getJourney(journeyType)
