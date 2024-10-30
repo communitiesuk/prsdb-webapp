@@ -10,14 +10,19 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService
+import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @Configuration
-class CustomSecurityConfig {
+class CustomSecurityConfig(
+    val clientRegistrationRepository: ClientRegistrationRepository,
+) {
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
@@ -26,6 +31,8 @@ class CustomSecurityConfig {
                     .requestMatchers("/")
                     .permitAll()
                     .requestMatchers("/register-as-a-landlord")
+                    .permitAll()
+                    .requestMatchers("/signout")
                     .permitAll()
                     .requestMatchers("/assets/**")
                     .permitAll()
@@ -40,7 +47,9 @@ class CustomSecurityConfig {
                     .anyRequest()
                     .authenticated()
             }.oauth2Login(Customizer.withDefaults())
-            .csrf { requests ->
+            .logout { logout ->
+                logout.logoutSuccessHandler(oidcLogoutSuccessHandler())
+            }.csrf { requests ->
                 requests.ignoringRequestMatchers("/one-login-local/**")
             }
 
@@ -65,6 +74,12 @@ class CustomSecurityConfig {
             }
             DefaultOidcUser(mappedAuthorities, oidcUser.idToken, oidcUser.userInfo)
         }
+    }
+
+    private fun oidcLogoutSuccessHandler(): LogoutSuccessHandler {
+        val oidcLogoutSuccessHandler = OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository)
+        oidcLogoutSuccessHandler.setPostLogoutRedirectUri("{baseUrl}/signout")
+        return oidcLogoutSuccessHandler
     }
 }
 
