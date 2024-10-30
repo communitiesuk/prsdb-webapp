@@ -20,7 +20,7 @@
                  th:classappend="${not #lists.isEmpty(fieldModel.errorKeys)} ? 'govuk-form-group--error'"
                  th:each="fieldModel : ${pageModel.fieldModels}"
             >
-                <label class="govuk-label" th:for="|${fieldModel.fieldName}-field|"> <!-- TODO: th:text based on annotation on field -->
+                <label class="govuk-label" th:for="|${fieldModel.fieldName}-field|" th:text="#{${fieldModel.labelKey}}">
                     Enter your information
                 </label>
                 <div th:if="${fieldModel.hintKey != null}" th:id="|${fieldModel.fieldName}-hint|" class="govuk-hint" th:text="#{${fieldModel.hintKey}}">
