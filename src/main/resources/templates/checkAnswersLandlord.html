@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout('Register as a landlord', ${serviceName}, ~{::main})}">
+<html th:replace="~{fragments/layout :: layout('Register as a landlord', ~{::main})}">
 <main class="govuk-main-wrapper" id="main-content">
     <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
         <div id="page-content">
@@ -7,9 +7,30 @@
                 <h1 class="govuk-heading-l" th:text="#{registerAsALandlord.heading}">registerAsALandlord.heading</h1>
                 <p class="govuk-body">Review your answers here, etc etc</p>
             </header>
-            <section>
-                Etc etc etc
-            </section>
+            <dl class="govuk-summary-list">
+                <div class="govuk-summary-list__row">
+                    <dt class="govuk-summary-list__key">
+                        Email address
+                    </dt>
+                    <dd class="govuk-summary-list__value" th:text="${journeyData.email[0].email}">
+                        test@example.com
+                    </dd>
+                    <dd class="govuk-summary-list__actions">
+                        <a class="govuk-link" href="/register-as-a-landlord/email">Change<span class="govuk-visually-hidden"> email address</span></a>
+                    </dd>
+                </div>
+                <div class="govuk-summary-list__row" th:each="phoneNumber, phoneNumberStat : ${journeyData['phone-number']}">
+                    <dt class="govuk-summary-list__key" th:text="|Phone Number ${phoneNumberStat.count}|">
+                        Phone Number
+                    </dt>
+                    <dd class="govuk-summary-list__value" th:text="${phoneNumber.phoneNumber}">
+                        012345678
+                    </dd>
+                    <dd class="govuk-summary-list__actions">
+                        <a class="govuk-link" th:href="|/register-as-a-landlord/phone-number?entityIndex=${phoneNumberStat.index}|">Change<span class="govuk-visually-hidden"> phone number</span></a>
+                    </dd>
+                </div>
+            </dl>
         </div>
     </div>
 </main>
