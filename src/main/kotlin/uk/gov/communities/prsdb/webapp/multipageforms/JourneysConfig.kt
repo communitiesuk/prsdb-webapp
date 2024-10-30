@@ -15,7 +15,6 @@ class JourneysConfig {
         journey(validator) {
             journeyType = JourneyType.LANDLORD_REGISTRATION
             initialStepId = RegisterLandlordStepId.Email
-
             step(RegisterLandlordStepId.Email) {
                 page(EmailForm::class) {
                     messageKeys("registerAsALandlord", "email")
@@ -26,10 +25,13 @@ class JourneysConfig {
             interstitial(RegisterLandlordStepId.QuickBreak, RegisterLandlordStepId.PhoneNumber)
 
             step(RegisterLandlordStepId.PhoneNumber) {
+                allowRepeats = true
                 page(PhoneNumberForm::class) {
                     messageKeys("registerAsALandlord", "phoneNumber")
+                    saveAndContinueButton()
+                    repeatButton("registerAsALandlord.phoneNumber.addAnother")
                 }
-                redirect("/register-as-a-landlord/check-answers")
+                redirectOrLoop("/register-as-a-landlord/check-answers", RegisterLandlordStepId.PhoneNumber)
             }
         }
 }

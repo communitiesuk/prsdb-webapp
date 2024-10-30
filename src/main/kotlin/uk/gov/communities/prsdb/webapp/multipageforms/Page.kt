@@ -14,50 +14,47 @@ class Page<TPageForm : FormModel<TPageForm>>(
     val templateName: String = "genericFormPage",
     val pageFormType: KClass<TPageForm>,
     val messageKeys: MessageKeys,
-    val updateJourneyData: (
-        MutableMap<String, Any>,
-        Map<String, String>,
-    ) -> Unit = { journeyData, formDataMap ->
-        journeyData[pageFormType.simpleName!!] = formDataMap
-    },
-    bindFormDataToModel: ((Map<String, String>) -> PageModel<TPageForm>)? = null,
-    bindJourneyDataToModel: ((Map<String, Any>) -> PageModel<TPageForm>)? = null,
+    val buttons: List<FormButton>,
+    bindFormDataToModel: ((Map<String, String>?) -> PageModel<TPageForm>)? = null,
 ) {
-    val bindFormDataToModel: (Map<String, String>) -> PageModel<TPageForm> =
+    val bindFormDataToModel: (Map<String, String>?) -> PageModel<TPageForm> =
         bindFormDataToModel ?: { formData ->
             val pageForm = pageFormType.createInstance()
-            val binder = WebDataBinder(pageForm)
-            binder.validator = validator
-            binder.bind(MutablePropertyValues(formData))
-            binder.validate()
+            if (formData != null) {
+                val binder = WebDataBinder(pageForm)
+                binder.validator = validator
+                binder.bind(MutablePropertyValues(formData))
+                binder.validate()
 
-            // Get page-level error keys and per-field error keys
-            val fieldNames = pageForm.getFieldNames()
-            val bindResult = binder.bindingResult
-            val pageErrorKeys = bindResult.globalErrors.mapNotNull { it.defaultMessage }.toMutableList()
-            val errorKeysByField =
-                fieldNames
-                    .associateWith { fieldName ->
-                        bindResult.getFieldErrors(fieldName).mapNotNull { it.defaultMessage }
-                    }.toMutableMap()
+                // Get page-level error keys and per-field error keys
+                val fieldNames = pageForm.getFieldNames()
+                val bindResult = binder.bindingResult
+                val pageErrorKeys = bindResult.globalErrors.mapNotNull { it.defaultMessage }.toMutableList()
+                val errorKeysByField =
+                    fieldNames
+                        .associateWith { fieldName ->
+                            bindResult.getFieldErrors(fieldName).mapNotNull { it.defaultMessage }
+                        }.toMutableMap()
 
-            // If there's only one field, promote any errors for that field to page errors
-            if (fieldNames.size == 1) {
-                val singleFieldErrors = errorKeysByField.values.flatten()
-                pageErrorKeys.addAll(singleFieldErrors)
-                errorKeysByField.clear()
+                // If there's only one field, promote any errors for that field to page errors
+                if (fieldNames.size == 1) {
+                    val singleFieldErrors = errorKeysByField.values.flatten()
+                    pageErrorKeys.addAll(singleFieldErrors)
+                    errorKeysByField.clear()
+                }
+
+                PageModel(
+                    pageForm = pageForm,
+                    pageErrorKeys = pageErrorKeys,
+                    errorKeysByField = errorKeysByField,
+                )
+            } else {
+                PageModel(
+                    pageForm = pageForm,
+                    pageErrorKeys = listOf(),
+                    errorKeysByField = mapOf(),
+                )
             }
-
-            PageModel(
-                pageForm = pageForm,
-                pageErrorKeys = pageErrorKeys,
-                errorKeysByField = errorKeysByField,
-            )
-        }
-    val bindJourneyDataToModel: (Map<String, Any>) -> PageModel<TPageForm> =
-        bindJourneyDataToModel ?: { journeyData ->
-            val formDataMap = journeyData[pageFormType.simpleName!!] as? Map<String, String> ?: mapOf()
-            bindFormDataToModel(formDataMap)
         }
 }
 
@@ -80,6 +77,7 @@ class PageBuilder<TPageForm : FormModel<TPageForm>>(
     val validator: Validator,
 ) {
     private var messageKeys: MessageKeys? = null
+    private var buttons: MutableList<FormButton> = mutableListOf()
 
     fun messageKeys(init: MessageKeysBuilder.() -> Unit) {
         messageKeys = MessageKeysBuilder().apply(init).build()
@@ -97,5 +95,18 @@ class PageBuilder<TPageForm : FormModel<TPageForm>>(
             )
     }
 
-    fun build() = Page(validator, pageFormType = pageFormType, messageKeys = messageKeys!!)
+    fun saveAndContinueButton() {
+        buttons.add(FormButton("common.forms.saveAndContinue", "next", "action", isPrimary = true))
+    }
+
+    fun repeatButton(textKey: String) {
+        buttons.add(FormButton(textKey, "repeat", "action"))
+    }
+
+    fun build(): Page<TPageForm> {
+        if (buttons.isEmpty()) {
+            buttons.add(FormButton("common.forms.saveAndContinue", isPrimary = true))
+        }
+        return Page(validator, pageFormType = pageFormType, messageKeys = messageKeys!!, buttons = buttons)
+    }
 }

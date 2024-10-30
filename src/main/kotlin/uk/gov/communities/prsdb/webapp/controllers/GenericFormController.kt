@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.multipageforms.Journey
+import uk.gov.communities.prsdb.webapp.multipageforms.JourneyData
 import uk.gov.communities.prsdb.webapp.multipageforms.Step
 import uk.gov.communities.prsdb.webapp.multipageforms.StepAction
 import uk.gov.communities.prsdb.webapp.multipageforms.StepId
@@ -41,7 +42,7 @@ class JourneyPathRegistrar(
         journeyDefinitions.forEach { journey ->
             val standardStepIds =
                 journey.steps
-                    .filter { (_, step) -> step is Step.StandardStep }
+                    .filter { (_, step) -> step is Step.StandardStep<*, *> }
                     .map { (id, _) -> id }
             standardStepIds.forEach { stepId ->
                 val path =
@@ -80,13 +81,14 @@ class GenericFormController(
     fun showMultiPageFormStep(
         @PathVariable journeyName: String,
         @PathVariable stepName: String,
+        @RequestParam(required = false) entityIndex: Int?,
         model: Model,
         session: HttpSession,
     ): String {
         val journey = getJourney(journeyName)
         val stepId = getStepId(journey, stepName)
 
-        val journeyData = session.getAttribute("journeyData") as? Map<String, Any> ?: emptyMap()
+        val journeyData = session.getAttribute("journeyData") as? JourneyData ?: mutableMapOf()
 
         if (!journey.isReachable(journeyData, stepId)) {
             return "redirect:/$journeyName/${journey.initialStepId.urlPathSegment}"
@@ -98,11 +100,12 @@ class GenericFormController(
             if (submittedFormData != null) {
                 step.page.bindFormDataToModel(submittedFormData)
             } else {
-                step.page.bindJourneyDataToModel(journeyData)
+                step.bindJourneyDataToModel(journeyData, entityIndex)
             }
 
         model.addAttribute("messageKeys", step.page.messageKeys)
         model.addAttribute("pageModel", pageModel)
+        model.addAttribute("buttons", step.page.buttons)
 
         return step.page.templateName
     }
@@ -112,6 +115,7 @@ class GenericFormController(
         @PathVariable journeyName: String,
         @PathVariable stepName: String,
         @RequestParam formDataMap: Map<String, String>,
+        @RequestParam(required = false) entityIndex: Int?,
         session: HttpSession,
         redirectAttributes: RedirectAttributes,
         principal: Principal,
@@ -128,8 +132,8 @@ class GenericFormController(
         }
 
         // Update session data with form input
-        val journeyData = session.getAttribute("journeyData") as? MutableMap<String, Any> ?: mutableMapOf()
-        step.page.updateJourneyData(journeyData, formDataMap)
+        val journeyData = session.getAttribute("journeyData") as? JourneyData ?: mutableMapOf()
+        step.updateJourneyData(journeyData, formDataMap, entityIndex)
         session.setAttribute("journeyData", journeyData)
 
         // If required, update the database with the latest journey data
@@ -156,13 +160,27 @@ class GenericFormController(
             }
         }
 
-        when (val nextStepAction = step.nextStep(journeyData)) {
+        return when (val nextStepAction = step.nextStepAction) {
             is StepAction.GoToStep<*> -> {
                 val nextStepName = nextStepAction.stepId.urlPathSegment
-                return "redirect:/$journeyName/$nextStepName"
+                "redirect:/$journeyName/$nextStepName"
             }
             is StepAction.Redirect<*> -> {
-                return "redirect:${nextStepAction.path}"
+                "redirect:${nextStepAction.path}"
+            }
+            is StepAction.GoToOrLoop<*> -> {
+                if (formDataMap["action"] == "repeat") {
+                    "redirect:/$journeyName/${nextStepAction.loopId.urlPathSegment}"
+                } else {
+                    "redirect:/$journeyName/${nextStepAction.nextId.urlPathSegment}"
+                }
+            }
+            is StepAction.RedirectOrLoop<*> -> {
+                if (formDataMap["action"] == "repeat") {
+                    "redirect:/$journeyName/${nextStepAction.loopId.urlPathSegment}"
+                } else {
+                    "redirect:${nextStepAction.path}"
+                }
             }
         }
     }
@@ -185,5 +203,5 @@ class GenericFormController(
     private fun getStep(
         journey: Journey<*>,
         stepId: StepId,
-    ): Step.StandardStep<*> = journey.steps[stepId] as Step.StandardStep<*>
+    ): Step.StandardStep<*, *> = journey.steps[stepId] as Step.StandardStep<*, *>
 }

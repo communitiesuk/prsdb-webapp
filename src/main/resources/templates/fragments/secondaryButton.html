@@ -1,6 +1,9 @@
 <button th:fragment="secondaryButton(buttonText)"
+        th:with="name=${name} ?: null, value=${value} ?: null"
         type="submit"
         class="govuk-button govuk-button--secondary"
         data-module="govuk-button"
-        th:text="${buttonText}">Previous
+        th:name="${name}"
+        th:value="${value}"
+        th:text="#{${buttonText}}">Previous
 </button>

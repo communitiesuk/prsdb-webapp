@@ -32,7 +32,15 @@
                 <div th:replace="~{|fragments/formcomponents/${fieldModel.fragmentName}| :: ${fieldModel.fragmentName}(model=${fieldModel})}"></div>
             </div>
         </fieldset>
-        <button th:replace="~{fragments/primaryButton :: primaryButton('Save and continue')}">Save and continue</button>
+        <div
+                th:each="button : ${buttons}"
+                th:with="buttonType = ${button.isPrimary ? 'primaryButton' : 'secondaryButton'}"
+                th:remove="tag"
+        >
+            <button th:replace="~{|fragments/${buttonType}| :: ${buttonType}(buttonText=${button.textKey}, name=${button.name}, value=${button.value})}">
+                Save and continue
+            </button>
+        </div>
     </form>
 </main>
 </html>
