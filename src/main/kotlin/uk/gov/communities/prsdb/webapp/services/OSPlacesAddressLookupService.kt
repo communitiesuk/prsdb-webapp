@@ -15,7 +15,13 @@ class OSPlacesAddressLookupService(
     ): List<AddressDataModel> = responseToAddressList(osPlacesClient.search(buildingNameOrNumber, postcode))
 
     private fun responseToAddressList(response: String): List<AddressDataModel> {
-        val results = JSONObject(response).getJSONArray("results")
+        val jsonResponse = JSONObject(response)
+
+        if (!jsonResponse.has("results")) {
+            return emptyList()
+        }
+
+        val results = jsonResponse.getJSONArray("results")
         val addresses = mutableListOf<AddressDataModel>()
         for (i in 0 until results.length()) {
             val dataset = results.getJSONObject(i).getJSONObject("DPA")
