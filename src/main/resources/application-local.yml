@@ -106,5 +106,5 @@ spring:
       on-profile: local-mock-os-places
 
 os-places:
-  base-url: http://localhost:8080
+  base-url: http://localhost:8080/os-places-local
   api-key: fake-key

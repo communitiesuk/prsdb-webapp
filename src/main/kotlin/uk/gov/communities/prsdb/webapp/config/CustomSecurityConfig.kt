@@ -35,7 +35,7 @@ class CustomSecurityConfig {
                     .permitAll()
                     .requestMatchers("/one-login-local/**")
                     .permitAll()
-                    .requestMatchers("/postcode")
+                    .requestMatchers("/os-places-local/**")
                     .permitAll()
                     .anyRequest()
                     .authenticated()
