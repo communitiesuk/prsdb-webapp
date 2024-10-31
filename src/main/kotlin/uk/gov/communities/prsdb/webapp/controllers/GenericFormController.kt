@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
+import uk.gov.communities.prsdb.webapp.multipageforms.FormData
 import uk.gov.communities.prsdb.webapp.multipageforms.Journey
 import uk.gov.communities.prsdb.webapp.multipageforms.JourneyData
 import uk.gov.communities.prsdb.webapp.multipageforms.Step
@@ -96,13 +97,9 @@ class GenericFormController(
         }
 
         val step = getStep(journey, stepId)
-        val submittedFormData = model.getAttribute("formValues") as Map<String, String>?
-        val pageModel =
-            if (submittedFormData != null) {
-                step.page.bindFormDataToModel(submittedFormData)
-            } else {
-                step.bindJourneyDataToModel(journeyData, entityIndex)
-            }
+        val submittedFormData = model.getAttribute("formValues") as FormData?
+        val formData = submittedFormData ?: step.getFormDataOrNull(journeyData, entityIndex)
+        val pageModel = step.page.bindFormDataToModel(formData)
 
         model.addAttribute("messageKeys", step.page.messageKeys)
         model.addAttribute("pageModel", pageModel)
@@ -115,7 +112,7 @@ class GenericFormController(
     fun handleStepSubmission(
         @PathVariable journeyName: String,
         @PathVariable stepName: String,
-        @RequestParam formDataMap: Map<String, String>,
+        @RequestParam formDataMap: FormData,
         @RequestParam(required = false) entityIndex: Int?,
         session: HttpSession,
         redirectAttributes: RedirectAttributes,

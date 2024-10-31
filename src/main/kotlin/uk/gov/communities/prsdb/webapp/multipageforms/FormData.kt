@@ -1,3 +1,3 @@
 package uk.gov.communities.prsdb.webapp.multipageforms
 
-typealias JourneyData = MutableMap<String, StepData>
+typealias FormData = Map<String, String>

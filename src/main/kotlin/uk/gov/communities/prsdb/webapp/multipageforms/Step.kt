@@ -19,17 +19,25 @@ sealed class Step<TStepId : StepId>(
         nextStepActions: List<StepAction<TStepId, out StepActionTarget<TStepId>>>,
         private val isSatisfiedOverride: ((JourneyData) -> Boolean)? = null,
     ) : Step<TStepId>(nextStepActions) {
-        val bindJourneyDataToModel: (JourneyData, Int?) -> PageModel<TPageForm> =
-            { journeyData, entityIndex ->
-                val formDataList = getFormDataList(journeyData)
-                val index = getEntityIndex(entityIndex, journeyData)
-                val formData = formDataList.getOrNull(index)
-                page.bindFormDataToModel(formData)
-            }
+        fun getFormDataOrNull(
+            journeyData: JourneyData,
+            entityIndex: Int?,
+        ): FormData? {
+            val index = getEntityIndex(entityIndex, journeyData)
+            return journeyData[stepId.urlPathSegment]?.getOrNull(index)
+        }
+
+        fun getFormDataOrDefault(
+            journeyData: JourneyData,
+            entityIndex: Int?,
+        ): FormData {
+            val index = getEntityIndex(entityIndex, journeyData)
+            return journeyData[stepId.urlPathSegment]?.getOrNull(index) ?: emptyMap()
+        }
 
         val updateJourneyData: (
             JourneyData,
-            Map<String, String>,
+            FormData,
             Int?,
         ) -> Unit =
             { journeyData, formDataMap, entityIndex ->
@@ -38,7 +46,7 @@ sealed class Step<TStepId : StepId>(
                 formDataList.add(index, formDataMap)
             }
 
-        private fun getFormDataList(journeyData: JourneyData): MutableList<Map<String, String>> =
+        private fun getFormDataList(journeyData: JourneyData): StepData =
             journeyData.getOrPut(stepId.urlPathSegment, {
                 mutableListOf()
             })
@@ -56,7 +64,7 @@ sealed class Step<TStepId : StepId>(
         }
 
         override fun isSatisfied(journeyData: JourneyData): Boolean =
-            isSatisfiedOverride?.invoke(journeyData) ?: !bindJourneyDataToModel(journeyData, 0).hasErrors()
+            isSatisfiedOverride?.invoke(journeyData) ?: !page.bindFormDataToModel(getFormDataOrDefault(journeyData, 0)).hasErrors()
     }
 
     class InterstitialStep<TStepId : StepId>(
@@ -85,7 +93,7 @@ sealed class StepAction<TStepId : StepId, TTarget : StepActionTarget<TStepId>>(
 
     class SavedFormsCondition<TStepId : StepId>(
         target: StepActionTarget.Step<TStepId>,
-        val condition: (List<Map<String, String>>) -> Boolean,
+        val condition: (ImmutableStepData) -> Boolean,
     ) : StepAction<TStepId, StepActionTarget.Step<TStepId>>(target)
 
     class UserActionCondition<TStepId : StepId>(
@@ -99,7 +107,7 @@ class NextStepBuilder<TStepId : StepId> {
 
     fun ifSavedForms(
         stepId: TStepId,
-        condition: (List<Map<String, String>>) -> Boolean,
+        condition: (ImmutableStepData) -> Boolean,
     ) {
         val target = StepActionTarget.Step(stepId)
         nextStepActions.add(StepAction.SavedFormsCondition(target, condition))

@@ -15,9 +15,9 @@ class Page<TPageForm : FormModel<TPageForm>>(
     val pageFormType: KClass<TPageForm>,
     val messageKeys: MessageKeys,
     val buttons: List<FormButton>,
-    bindFormDataToModel: ((Map<String, String>?) -> PageModel<TPageForm>)? = null,
+    bindFormDataToModel: ((FormData?) -> PageModel<TPageForm>)? = null,
 ) {
-    val bindFormDataToModel: (Map<String, String>?) -> PageModel<TPageForm> =
+    val bindFormDataToModel: (FormData?) -> PageModel<TPageForm> =
         bindFormDataToModel ?: { formData ->
             val pageForm = pageFormType.createInstance()
             if (formData != null) {
