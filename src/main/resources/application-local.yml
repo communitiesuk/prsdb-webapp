@@ -72,10 +72,10 @@ spring:
             redirect-uri: http://localhost:8080/login/oauth2/code/one-login
         provider:
           one-login:
-            authorization-uri: http://localhost:8080/one-login-local/authorize
-            token-uri: http://localhost:8080/one-login-local/token
-            jwk-set-uri: http://localhost:8080/one-login-local/.well-known/jwks.json
-            user-info-uri: http://localhost:8080//one-login-local/userinfo
+            authorization-uri: http://localhost:8080/local/one-login/authorize
+            token-uri: http://localhost:8080/local/one-login/token
+            jwk-set-uri: http://localhost:8080/local/one-login/.well-known/jwks.json
+            user-info-uri: http://localhost:8080/local/one-login/userinfo
             userNameAttribute: "sub"
 
 ---
@@ -106,5 +106,5 @@ spring:
       on-profile: local-mock-os-places
 
 os-places:
-  base-url: http://localhost:8080/os-places-local
+  base-url: http://localhost:8080/local/os-places
   api-key: fake-key
