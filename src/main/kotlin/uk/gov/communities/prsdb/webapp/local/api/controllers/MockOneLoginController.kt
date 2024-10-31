@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.local.api.controller
+package uk.gov.communities.prsdb.webapp.local.api.controllers
 
 import com.nimbusds.jose.Algorithm
 import com.nimbusds.jose.JOSEObjectType
