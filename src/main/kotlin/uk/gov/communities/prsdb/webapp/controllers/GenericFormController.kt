@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.multipageforms.Journey
 import uk.gov.communities.prsdb.webapp.multipageforms.JourneyData
 import uk.gov.communities.prsdb.webapp.multipageforms.Step
 import uk.gov.communities.prsdb.webapp.multipageforms.StepAction
+import uk.gov.communities.prsdb.webapp.multipageforms.StepActionTarget
 import uk.gov.communities.prsdb.webapp.multipageforms.StepId
 import java.security.Principal
 import kotlin.reflect.jvm.javaMethod
@@ -160,29 +161,20 @@ class GenericFormController(
             }
         }
 
-        return when (val nextStepAction = step.nextStepAction) {
-            is StepAction.GoToStep<*> -> {
-                val nextStepName = nextStepAction.stepId.urlPathSegment
-                "redirect:/$journeyName/$nextStepName"
-            }
-            is StepAction.Redirect<*> -> {
-                "redirect:${nextStepAction.path}"
-            }
-            is StepAction.GoToOrLoop<*> -> {
-                if (formDataMap["action"] == "repeat") {
-                    "redirect:/$journeyName/${nextStepAction.loopId.urlPathSegment}"
-                } else {
-                    "redirect:/$journeyName/${nextStepAction.nextId.urlPathSegment}"
+        val nextAction =
+            step.nextStepActions.first {
+                when (it) {
+                    is StepAction.Unconditional -> true
+                    is StepAction.UserActionCondition -> it.condition(formDataMap["__user-action__"]!!)
+                    is StepAction.SavedFormsCondition -> it.condition(journeyData[it.target.stepId.urlPathSegment] ?: emptyList())
                 }
             }
-            is StepAction.RedirectOrLoop<*> -> {
-                if (formDataMap["action"] == "repeat") {
-                    "redirect:/$journeyName/${nextStepAction.loopId.urlPathSegment}"
-                } else {
-                    "redirect:${nextStepAction.path}"
-                }
+        val redirectPath =
+            when (nextAction.target) {
+                is StepActionTarget.Step -> "/$journeyName/${nextAction.target.stepId.urlPathSegment}"
+                is StepActionTarget.Path -> nextAction.target.path
             }
-        }
+        return "redirect:$redirectPath"
     }
 
     private fun getJourney(journeyName: String): Journey<StepId> =

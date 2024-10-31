@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout('Register as a landlord', ~{::main})}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
+        <div id="page-content">
+            <header>
+                <h1 class="govuk-heading-l" th:text="#{registerAsALandlord.heading}">registerAsALandlord.heading</h1>
+                <p class="govuk-body">Review your answers here, etc etc</p>
+            </header>
+            <dl class="govuk-summary-list">
+                <div class="govuk-summary-list__row" th:each="phoneNumber, phoneNumberStat : ${phoneNumbers}">
+                    <dt class="govuk-summary-list__key" th:text="|Phone Number ${phoneNumberStat.count}|">
+                        Phone Number
+                    </dt>
+                    <dd class="govuk-summary-list__value" th:text="${phoneNumber.phoneNumber}">
+                        012345678
+                    </dd>
+                    <dd class="govuk-summary-list__actions">
+                        <a class="govuk-link" th:href="|/register-as-a-landlord/phone-number?entityIndex=${phoneNumberStat.index}|">Change<span class="govuk-visually-hidden"> phone number</span></a>
+                    </dd>
+                </div>
+            </dl>
+            <a th:replace="~{fragments/startButton :: startButton( @{phone-number}, 'Add another phone number' )}"></a>
+            <a th:replace="~{fragments/startButton :: startButton( @{check-answers}, 'Continue' )}"></a>
+        </div>
+    </div>
+</main>
+</html>

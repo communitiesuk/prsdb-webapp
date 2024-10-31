@@ -77,7 +77,7 @@ class PageBuilder<TPageForm : FormModel<TPageForm>>(
     val validator: Validator,
 ) {
     private var messageKeys: MessageKeys? = null
-    private var buttons: MutableList<FormButton> = mutableListOf()
+    private var buttons: List<FormButton>? = null
 
     fun messageKeys(init: MessageKeysBuilder.() -> Unit) {
         messageKeys = MessageKeysBuilder().apply(init).build()
@@ -95,18 +95,31 @@ class PageBuilder<TPageForm : FormModel<TPageForm>>(
             )
     }
 
-    fun saveAndContinueButton() {
-        buttons.add(FormButton("common.forms.saveAndContinue", "next", "action", isPrimary = true))
-    }
-
-    fun repeatButton(textKey: String) {
-        buttons.add(FormButton(textKey, "repeat", "action"))
+    fun userActions(init: ButtonsBuilder.() -> Unit) {
+        buttons = ButtonsBuilder().apply(init).build()
     }
 
     fun build(): Page<TPageForm> {
-        if (buttons.isEmpty()) {
-            buttons.add(FormButton("common.forms.saveAndContinue", isPrimary = true))
+        if (buttons == null) {
+            buttons = listOf(FormButton("common.forms.saveAndContinue", isPrimary = true))
         }
-        return Page(validator, pageFormType = pageFormType, messageKeys = messageKeys!!, buttons = buttons)
+        return Page(validator, pageFormType = pageFormType, messageKeys = messageKeys!!, buttons = buttons!!)
     }
+}
+
+class ButtonsBuilder {
+    private var buttons: MutableList<FormButton> = mutableListOf()
+
+    fun saveAndContinue(value: String) {
+        buttons.add(FormButton("common.forms.saveAndContinue", value, "__user-action__", isPrimary = true))
+    }
+
+    fun custom(
+        value: String,
+        textKey: String,
+    ) {
+        buttons.add(FormButton(textKey, value, "__user-action__", isPrimary = false))
+    }
+
+    fun build(): List<FormButton> = buttons
 }

@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.multipageforms.registerlandlord.BestFriendEmailForm
 import uk.gov.communities.prsdb.webapp.multipageforms.registerlandlord.EmailForm
 import uk.gov.communities.prsdb.webapp.multipageforms.registerlandlord.PhoneNumberForm
 import uk.gov.communities.prsdb.webapp.multipageforms.registerlandlord.RegisterLandlordStepId
@@ -19,19 +20,43 @@ class JourneysConfig {
                 page(EmailForm::class) {
                     messageKeys("registerAsALandlord", "email")
                 }
-                goToStep(RegisterLandlordStepId.QuickBreak)
+                nextStep(RegisterLandlordStepId.QuickBreak)
             }
 
-            interstitial(RegisterLandlordStepId.QuickBreak, RegisterLandlordStepId.PhoneNumber)
+            interstitial(RegisterLandlordStepId.QuickBreak) {
+                nextStep(RegisterLandlordStepId.BestFriendEmail)
+            }
+
+            step(RegisterLandlordStepId.BestFriendEmail) {
+                page(BestFriendEmailForm::class) {
+                    messageKeys("registerAsALandlord", "bestfriendemail")
+                }
+                nextStep {
+                    ifSavedForms(RegisterLandlordStepId.PhoneNumber) { it.isEmpty() }
+                    default(RegisterLandlordStepId.ReviewPhoneNumbers)
+                }
+            }
+
+            interstitial(RegisterLandlordStepId.ReviewPhoneNumbers) {
+                nextStep {
+                    ifUserAction(RegisterLandlordStepId.PhoneNumber) { it == "add-new" }
+                    default("/register-as-a-landlord/check-answers")
+                }
+            }
 
             step(RegisterLandlordStepId.PhoneNumber) {
                 allowRepeats = true
                 page(PhoneNumberForm::class) {
                     messageKeys("registerAsALandlord", "phoneNumber")
-                    saveAndContinueButton()
-                    repeatButton("registerAsALandlord.phoneNumber.addAnother")
+                    userActions {
+                        saveAndContinue("next")
+                        custom("repeat", "registerAsALandlord.phoneNumber.addAnother")
+                    }
                 }
-                redirectOrLoop("/register-as-a-landlord/check-answers", RegisterLandlordStepId.PhoneNumber)
+                nextStep {
+                    ifUserAction(RegisterLandlordStepId.PhoneNumber) { it == "repeat" }
+                    default("/register-as-a-landlord/check-answers")
+                }
             }
         }
 }

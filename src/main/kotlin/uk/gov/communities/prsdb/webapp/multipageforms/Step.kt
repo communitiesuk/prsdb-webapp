@@ -7,7 +7,7 @@ import kotlin.reflect.KClass
  * A Step is a definition of one step along the flow of a multi-page form. The Step class deals only with concerns relating to that flow.
  */
 sealed class Step<TStepId : StepId>(
-    val nextStepAction: StepAction<TStepId>,
+    val nextStepActions: List<StepAction<TStepId, out StepActionTarget<TStepId>>>,
 ) {
     abstract fun isSatisfied(journeyData: JourneyData): Boolean
 
@@ -16,9 +16,9 @@ sealed class Step<TStepId : StepId>(
         val page: Page<TPageForm>,
         val persistAfterSubmit: Boolean = false,
         val allowRepeats: Boolean = false,
-        nextStepAction: StepAction<TStepId>,
+        nextStepActions: List<StepAction<TStepId, out StepActionTarget<TStepId>>>,
         private val isSatisfiedOverride: ((JourneyData) -> Boolean)? = null,
-    ) : Step<TStepId>(nextStepAction) {
+    ) : Step<TStepId>(nextStepActions) {
         val bindJourneyDataToModel: (JourneyData, Int?) -> PageModel<TPageForm> =
             { journeyData, entityIndex ->
                 val formDataList = getFormDataList(journeyData)
@@ -60,38 +60,99 @@ sealed class Step<TStepId : StepId>(
     }
 
     class InterstitialStep<TStepId : StepId>(
-        nextStepAction: StepAction<TStepId>,
-    ) : Step<TStepId>(nextStepAction) {
+        nextStepActions: List<StepAction<TStepId, out StepActionTarget<TStepId>>>,
+    ) : Step<TStepId>(nextStepActions) {
         override fun isSatisfied(journeyData: JourneyData): Boolean = true
     }
 }
 
-sealed class StepAction<TStepId : StepId> {
-    data class GoToStep<TStepId : StepId>(
+sealed class StepActionTarget<TStepId : StepId> {
+    data class Step<TStepId : StepId>(
         val stepId: TStepId,
-    ) : StepAction<TStepId>()
+    ) : StepActionTarget<TStepId>()
 
-    data class Redirect<TStepId : StepId>(
+    data class Path<TStepId : StepId>(
         val path: String,
-    ) : StepAction<TStepId>()
-
-    data class GoToOrLoop<TStepId : StepId>(
-        val nextId: TStepId,
-        val loopId: TStepId,
-    ) : StepAction<TStepId>()
-
-    data class RedirectOrLoop<TStepId : StepId>(
-        val path: String,
-        val loopId: TStepId,
-    ) : StepAction<TStepId>()
+    ) : StepActionTarget<TStepId>()
 }
 
-class StepBuilder<TStepId : StepId>(
+sealed class StepAction<TStepId : StepId, TTarget : StepActionTarget<TStepId>>(
+    val target: TTarget,
+) {
+    class Unconditional<TStepId : StepId>(
+        target: StepActionTarget<TStepId>,
+    ) : StepAction<TStepId, StepActionTarget<TStepId>>(target)
+
+    class SavedFormsCondition<TStepId : StepId>(
+        target: StepActionTarget.Step<TStepId>,
+        val condition: (List<Map<String, String>>) -> Boolean,
+    ) : StepAction<TStepId, StepActionTarget.Step<TStepId>>(target)
+
+    class UserActionCondition<TStepId : StepId>(
+        target: StepActionTarget<TStepId>,
+        val condition: (String) -> Boolean,
+    ) : StepAction<TStepId, StepActionTarget<TStepId>>(target)
+}
+
+class NextStepBuilder<TStepId : StepId> {
+    private val nextStepActions: MutableList<StepAction<TStepId, out StepActionTarget<TStepId>>> = mutableListOf()
+
+    fun ifSavedForms(
+        stepId: TStepId,
+        condition: (List<Map<String, String>>) -> Boolean,
+    ) {
+        val target = StepActionTarget.Step(stepId)
+        nextStepActions.add(StepAction.SavedFormsCondition(target, condition))
+    }
+
+    fun ifUserAction(
+        stepId: TStepId,
+        condition: (String) -> Boolean,
+    ) {
+        val target = StepActionTarget.Step(stepId)
+        nextStepActions.add(StepAction.UserActionCondition(target, condition))
+    }
+
+    fun default(stepId: TStepId) {
+        val target = StepActionTarget.Step(stepId)
+        nextStepActions.add(StepAction.Unconditional(target))
+    }
+
+    fun default(path: String) {
+        val target = StepActionTarget.Path<TStepId>(path)
+        nextStepActions.add(StepAction.Unconditional(target))
+    }
+
+    fun build() = nextStepActions
+}
+
+abstract class StepBuilder<TStepId : StepId> {
+    protected lateinit var nextStepActions: List<StepAction<TStepId, out StepActionTarget<TStepId>>>
+
+    fun nextStep(stepId: TStepId) {
+        val target = StepActionTarget.Step(stepId)
+        nextStepActions = listOf(StepAction.Unconditional(target))
+    }
+
+    fun nextStep(path: String) {
+        val target = StepActionTarget.Path<TStepId>(path)
+        nextStepActions = listOf(StepAction.Unconditional(target))
+    }
+
+    fun nextStep(init: NextStepBuilder<TStepId>.() -> Unit) {
+        nextStepActions = NextStepBuilder<TStepId>().apply(init).build()
+    }
+}
+
+class InterstitialStepBuilder<TStepId : StepId> : StepBuilder<TStepId>() {
+    fun build() = Step.InterstitialStep(nextStepActions)
+}
+
+class StandardStepBuilder<TStepId : StepId>(
     private val validator: Validator,
     private val stepId: TStepId,
-) {
+) : StepBuilder<TStepId>() {
     private var page: Page<*>? = null
-    private var nextStepAction: StepAction<TStepId>? = null
     var allowRepeats: Boolean = false
 
     fun <TPageForm : FormModel<TPageForm>> page(
@@ -101,27 +162,5 @@ class StepBuilder<TStepId : StepId>(
         page = PageBuilder(pageFormClass, validator).apply(init).build()
     }
 
-    fun goToStep(stepId: TStepId) {
-        nextStepAction = StepAction.GoToStep(stepId)
-    }
-
-    fun redirect(path: String) {
-        nextStepAction = StepAction.Redirect(path)
-    }
-
-    fun goToOrLoop(
-        nextId: TStepId,
-        loopId: TStepId,
-    ) {
-        nextStepAction = StepAction.GoToOrLoop(nextId, loopId)
-    }
-
-    fun redirectOrLoop(
-        nextPath: String,
-        loopId: TStepId,
-    ) {
-        nextStepAction = StepAction.RedirectOrLoop(nextPath, loopId)
-    }
-
-    fun build() = Step.StandardStep(page = page!!, nextStepAction = nextStepAction!!, allowRepeats = allowRepeats, stepId = stepId)
+    fun build() = Step.StandardStep(page = page!!, nextStepActions = nextStepActions, allowRepeats = allowRepeats, stepId = stepId)
 }

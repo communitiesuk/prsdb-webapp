@@ -25,4 +25,15 @@ class RegisterLandlordController {
         model.addAttribute("journeyData", journeyData)
         return "checkAnswersLandlord"
     }
+
+    @GetMapping("check-phone-numbers")
+    fun checkPhoneNumbers(
+        model: Model,
+        session: HttpSession,
+    ): String {
+        val journeyData = session.getAttribute("journeyData") as? JourneyData ?: mutableMapOf()
+        val savedForms = journeyData["phone-number"] ?: emptyList()
+        model.addAttribute("phoneNumbers", savedForms)
+        return "checkPhoneNumbersLandlord"
+    }
 }

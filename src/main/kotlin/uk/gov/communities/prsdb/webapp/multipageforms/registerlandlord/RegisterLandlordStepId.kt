@@ -7,5 +7,7 @@ enum class RegisterLandlordStepId(
 ) : StepId {
     Email("email"),
     QuickBreak("quick-break"),
+    BestFriendEmail("best-friend-email"),
+    ReviewPhoneNumbers("check-phone-numbers"),
     PhoneNumber("phone-number"),
 }
