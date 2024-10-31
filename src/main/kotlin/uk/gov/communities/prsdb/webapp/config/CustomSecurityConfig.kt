@@ -40,9 +40,7 @@ class CustomSecurityConfig(
                     .permitAll()
                     .requestMatchers("/check/**")
                     .permitAll()
-                    .requestMatchers("/one-login-local/**")
-                    .permitAll()
-                    .requestMatchers("/postcode")
+                    .requestMatchers("/local/**")
                     .permitAll()
                     .anyRequest()
                     .authenticated()
@@ -50,7 +48,7 @@ class CustomSecurityConfig(
             .logout { logout ->
                 logout.logoutSuccessHandler(oidcLogoutSuccessHandler())
             }.csrf { requests ->
-                requests.ignoringRequestMatchers("/one-login-local/**")
+                requests.ignoringRequestMatchers("/local/**")
             }
 
         return http.build()
