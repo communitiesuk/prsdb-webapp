@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Profile("local-mock-os-places")
 @RestController
-@RequestMapping("/os-places-local")
+@RequestMapping("/local/os-places")
 class OSPlacesAPIStubController {
     @GetMapping("/postcode")
     fun lookupAddressesByPostcode(

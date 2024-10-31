@@ -33,15 +33,13 @@ class CustomSecurityConfig {
                     .permitAll()
                     .requestMatchers("/check/**")
                     .permitAll()
-                    .requestMatchers("/one-login-local/**")
-                    .permitAll()
-                    .requestMatchers("/os-places-local/**")
+                    .requestMatchers("/local/**")
                     .permitAll()
                     .anyRequest()
                     .authenticated()
             }.oauth2Login(Customizer.withDefaults())
             .csrf { requests ->
-                requests.ignoringRequestMatchers("/one-login-local/**")
+                requests.ignoringRequestMatchers("/local/**")
             }
 
         return http.build()

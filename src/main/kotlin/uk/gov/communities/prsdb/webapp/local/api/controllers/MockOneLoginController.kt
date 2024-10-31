@@ -28,7 +28,7 @@ import java.util.UUID
 
 @Profile("local")
 @RestController
-@RequestMapping("/one-login-local")
+@RequestMapping("/local/one-login")
 class MockOneLoginController {
     companion object {
         val keyId = UUID.randomUUID().toString()
