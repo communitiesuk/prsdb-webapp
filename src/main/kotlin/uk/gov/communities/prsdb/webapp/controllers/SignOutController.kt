@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.GetMapping
 
 @Controller
 class SignOutController {
+    @GetMapping("/confirm-sign-out")
+    fun confirmSignOut(model: Model): String = "exampleConfirmSignOut"
+
     @GetMapping("/signout")
     fun signOut(model: Model): String {
         model.addAttribute("title", "signOut.title")

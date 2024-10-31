@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout('Confirm Log Out', ~{::main})}">
+<main class="govuk-main-wrapper" id="main-content">
+    <form method="post" th:action="@{/logout}">
+        <h1 class="govuk-heading-l">
+            Are you sure you want to log out?
+        </h1>
+        <button type="submit" class="govuk-button" data-module="govuk-button">
+            Log Out
+        </button>
+    </form>
+</main>
+</html>
