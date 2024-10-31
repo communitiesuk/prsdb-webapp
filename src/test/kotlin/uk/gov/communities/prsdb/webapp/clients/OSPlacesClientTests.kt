@@ -30,7 +30,7 @@ class OSPlacesClientTests {
             mockHttpClient.send(any(), any<HttpResponse.BodyHandler<String>>()),
         ).thenReturn(MockHttpResponse(body = expectedResponseBody))
 
-        val responseBody = osPlacesClient.searchByPostcode("")
+        val responseBody = osPlacesClient.search("", "")
         assertEquals(expectedResponseBody, responseBody)
     }
 
@@ -38,7 +38,7 @@ class OSPlacesClientTests {
     fun `OSPlacesClient throws a RateLimitExceededException when the response's status code is 429`() {
         whenever(mockHttpClient.send(any(), any<HttpResponse.BodyHandler<String>>())).thenReturn(MockHttpResponse(429))
 
-        assertThrows<RateLimitExceededException> { osPlacesClient.searchByPostcode("") }
+        assertThrows<RateLimitExceededException> { osPlacesClient.search("", "") }
     }
 
     @Test
@@ -53,7 +53,7 @@ class OSPlacesClientTests {
             ),
         )
 
-        val thrownException = assertThrows<HttpException> { osPlacesClient.searchByPostcode("") }
+        val thrownException = assertThrows<HttpException> { osPlacesClient.search("", "") }
         assertEquals(expectedErrorMessage, thrownException.message)
     }
 
@@ -69,7 +69,7 @@ class OSPlacesClientTests {
             ),
         )
 
-        val thrownException = assertThrows<HttpException> { osPlacesClient.searchByPostcode("") }
+        val thrownException = assertThrows<HttpException> { osPlacesClient.search("", "") }
         assertEquals(expectedErrorMessage, thrownException.message)
     }
 }
