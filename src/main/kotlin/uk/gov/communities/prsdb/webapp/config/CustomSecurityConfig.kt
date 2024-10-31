@@ -79,6 +79,7 @@ class CustomSecurityConfig(
     private fun oidcLogoutSuccessHandler(): LogoutSuccessHandler {
         val oidcLogoutSuccessHandler = OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository)
         oidcLogoutSuccessHandler.setPostLogoutRedirectUri("{baseUrl}/signout")
+        oidcLogoutSuccessHandler.setDefaultTargetUrl("/signout")
         return oidcLogoutSuccessHandler
     }
 }
