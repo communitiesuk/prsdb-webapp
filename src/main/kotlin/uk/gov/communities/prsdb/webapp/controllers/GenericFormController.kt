@@ -1,8 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.annotation.PostConstruct
-import jakarta.servlet.http.HttpSession
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
@@ -15,17 +13,12 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
-import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
-import uk.gov.communities.prsdb.webapp.database.entity.FormContext
-import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
-import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.multipageforms.FormData
 import uk.gov.communities.prsdb.webapp.multipageforms.Journey
-import uk.gov.communities.prsdb.webapp.multipageforms.JourneyData
 import uk.gov.communities.prsdb.webapp.multipageforms.Step
-import uk.gov.communities.prsdb.webapp.multipageforms.StepAction
-import uk.gov.communities.prsdb.webapp.multipageforms.StepActionTarget
-import uk.gov.communities.prsdb.webapp.multipageforms.StepId
+import uk.gov.communities.prsdb.webapp.services.FormContextService
+import uk.gov.communities.prsdb.webapp.services.MultiPageFormJourneyService
+import uk.gov.communities.prsdb.webapp.services.MultiPageFormSessionService
 import java.security.Principal
 import kotlin.reflect.jvm.javaMethod
 
@@ -71,13 +64,14 @@ class JourneyPathRegistrar(
     }
 }
 
+private const val SUBMITTED_FORM_DATA_FLASH_NAME = "__submittedFormData__"
+
 @Controller
 @RequestMapping // URLs are mapped by JourneyPathRegistrar
 class GenericFormController(
-    private val journeys: List<Journey<*>>,
-    private val formContextRepository: FormContextRepository,
-    private val oneLoginUserRepository: OneLoginUserRepository,
-    private val objectMapper: ObjectMapper,
+    private val sessionService: MultiPageFormSessionService,
+    private val journeyService: MultiPageFormJourneyService,
+    private val formContextService: FormContextService,
 ) {
     @GetMapping
     fun showMultiPageFormStep(
@@ -85,19 +79,17 @@ class GenericFormController(
         @PathVariable stepName: String,
         @RequestParam(required = false) entityIndex: Int?,
         model: Model,
-        session: HttpSession,
     ): String {
-        val journey = getJourney(journeyName)
-        val stepId = getStepId(journey, stepName)
+        val (journey, step) = journeyService.getJourneyAndStandardStep(journeyName, stepName)
 
-        val journeyData = session.getAttribute("journeyData") as? JourneyData ?: mutableMapOf()
+        val journeyData = sessionService.getJourneyData()
 
-        if (!journey.isReachable(journeyData, stepId)) {
+        if (!journey.isReachable(journeyData, step.stepId)) {
             return "redirect:/$journeyName/${journey.initialStepId.urlPathSegment}"
         }
 
-        val step = getStep(journey, stepId)
-        val submittedFormData = model.getAttribute("formValues") as FormData?
+        @Suppress("UNCHECKED_CAST")
+        val submittedFormData = model.getAttribute(SUBMITTED_FORM_DATA_FLASH_NAME) as FormData?
         val formData = submittedFormData ?: step.getFormDataOrNull(journeyData, entityIndex)
         val pageModel = step.page.bindFormDataToModel(formData)
 
@@ -112,85 +104,33 @@ class GenericFormController(
     fun handleStepSubmission(
         @PathVariable journeyName: String,
         @PathVariable stepName: String,
-        @RequestParam formDataMap: FormData,
+        @RequestParam formData: FormData,
         @RequestParam(required = false) entityIndex: Int?,
-        session: HttpSession,
         redirectAttributes: RedirectAttributes,
         principal: Principal,
     ): String {
-        val journey = getJourney(journeyName)
-        val stepId = getStepId(journey, stepName)
-        val step = getStep(journey, stepId)
+        val (journey, step) = journeyService.getJourneyAndStandardStep(journeyName, stepName)
 
         // Validate the form submission
-        val pageModel = step.page.bindFormDataToModel(formDataMap)
+        val pageModel = step.page.bindFormDataToModel(formData)
         if (pageModel.hasErrors()) {
-            redirectAttributes.addFlashAttribute("formValues", formDataMap)
+            redirectAttributes.addFlashAttribute(SUBMITTED_FORM_DATA_FLASH_NAME, formData)
             return "redirect:/$journeyName/$stepName"
         }
 
         // Update session data with form input
-        val journeyData = session.getAttribute("journeyData") as? JourneyData ?: mutableMapOf()
-        step.updateJourneyData(journeyData, formDataMap, entityIndex)
-        session.setAttribute("journeyData", journeyData)
+        val journeyData = sessionService.getJourneyData()
+        step.updateJourneyData(journeyData, formData, entityIndex)
+        sessionService.setJourneyData(journeyData)
 
         // If required, update the database with the latest journey data
         if (step.persistAfterSubmit) {
-            val contextId = session.getAttribute("contextId") as? Long
-            if (contextId != null) {
-                // Update existing FormContext
-                val formContext =
-                    formContextRepository
-                        .findById(contextId)
-                        .orElseThrow { IllegalStateException("FormContext with ID $contextId not found") }!!
-                formContext.context = objectMapper.writeValueAsString(journeyData)
-                formContextRepository.save(formContext)
-            } else {
-                // Create a new FormContext if one does not exist
-                val formContext =
-                    FormContext(
-                        journeyType = JourneyType.valueOf(journeyName),
-                        context = objectMapper.writeValueAsString(journeyData),
-                        user = oneLoginUserRepository.getReferenceById(principal.name),
-                    )
-                formContextRepository.save(formContext)
-                session.setAttribute("contextId", formContext.id)
-            }
+            val contextIdOrNull = sessionService.getContextId()
+            val contextId = formContextService.saveFormContext(contextIdOrNull, journeyData, journey, principal)
+            sessionService.setContextId(contextId)
         }
 
-        val nextAction =
-            step.nextStepActions.first {
-                when (it) {
-                    is StepAction.Unconditional -> true
-                    is StepAction.UserActionCondition -> it.condition(formDataMap["__user-action__"]!!)
-                    is StepAction.SavedFormsCondition -> it.condition(journeyData[it.target.stepId.urlPathSegment] ?: emptyList())
-                }
-            }
-        val redirectPath =
-            when (nextAction.target) {
-                is StepActionTarget.Step -> "/$journeyName/${nextAction.target.stepId.urlPathSegment}"
-                is StepActionTarget.Path -> nextAction.target.path
-            }
+        val redirectPath = journeyService.resolveNextStepRedirect(step, formData, journeyData, journeyName)
         return "redirect:$redirectPath"
     }
-
-    private fun getJourney(journeyName: String): Journey<StepId> =
-        (
-            journeys.find { it.journeyType.urlPathSegment.equals(journeyName, ignoreCase = true) }
-                ?: throw IllegalArgumentException("Journey named \"$journeyName\" not found")
-        ) as Journey<StepId>
-
-    private fun getStepId(
-        journey: Journey<*>,
-        stepName: String,
-    ): StepId {
-        val stepIds = journey.steps.keys
-        return stepIds.find { it.urlPathSegment.equals(stepName, ignoreCase = true) }
-            ?: throw IllegalArgumentException("No step named \"$stepName\" found in journey \"${journey.journeyType.name}\"")
-    }
-
-    private fun getStep(
-        journey: Journey<*>,
-        stepId: StepId,
-    ): Step.StandardStep<*, *> = journey.steps[stepId] as Step.StandardStep<*, *>
 }
