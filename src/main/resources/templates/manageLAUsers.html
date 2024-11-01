@@ -12,13 +12,13 @@
           <tbody class="govuk-table__body">
             <tr class="govuk_table__row" th:each="user: ${userList}">
               <td class="govuk-table__cell" th:text="${user.userName}"></td>
-              <td class="govuk-table__cell" th:text="${user.manager ? 'Admin' : 'Basic'}"></td>
+              <td class="govuk-table__cell" th:text="${user.manager} ? #{manageLAUsers.table.admin} : #{manageLAUsers.table.basic}"></td>
               <td class="govuk-table__cell" >
                 <span class="govuk-tag" th:classappend="${user.pending ? 'govuk-tag--blue' : 'govuk-tag--green'}">
-                  <strong th:text="${user.pending ? 'PENDING' : 'ACTIVE'}"></strong>
+                  <strong th:text="${user.pending} ? #{manageLAUsers.table.pending} : #{manageLAUsers.table.active}"></strong>
                 </span>
               </td>
-              <td class="govuk-table__cell"><a href="#" class="govuk-link" th:text="Change"></a></td>
+              <td class="govuk-table__cell"><a href="#" class="govuk-link" th:text="#{manageLAUsers.table.change}"></a></td>
             </tr>
           </tbody>
         </table>
