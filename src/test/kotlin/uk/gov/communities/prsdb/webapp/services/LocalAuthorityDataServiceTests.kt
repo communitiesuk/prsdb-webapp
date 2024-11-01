@@ -1,35 +1,34 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.InjectMocks
+import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.junit.jupiter.MockitoExtension
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
+import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUserOrInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
-import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 
+@ExtendWith(MockitoExtension::class)
 class LocalAuthorityDataServiceTests {
-    private lateinit var localAuthorityUsersRepository: LocalAuthorityUserRepository
-    private lateinit var localAuthorityInvitationRepository: LocalAuthorityInvitationRepository
-    private lateinit var localAuthorityDataService: LocalAuthorityDataService
+    @Mock
+    private lateinit var localAuthorityUserRepository: LocalAuthorityUserRepository
 
-    @BeforeEach
-    fun setup() {
-        localAuthorityUsersRepository = Mockito.mock(LocalAuthorityUserRepository::class.java)
-        localAuthorityInvitationRepository = Mockito.mock(LocalAuthorityInvitationRepository::class.java)
-        localAuthorityDataService =
-            LocalAuthorityDataService(
-                localAuthorityUsersRepository,
-                localAuthorityInvitationRepository,
-            )
-    }
+    @Mock
+    private lateinit var localAuthorityUserOrInvitationRepository: LocalAuthorityUserOrInvitationRepository
+
+    @InjectMocks
+    private lateinit var localAuthorityDataService: LocalAuthorityDataService
 
     fun createOneLoginUser(username: String): OneLoginUser {
         val user = OneLoginUser()
@@ -58,44 +57,6 @@ class LocalAuthorityDataServiceTests {
         return user
     }
 
-    fun createLocalAuthorityUserInvitation(
-        invitedEmail: String,
-        localAuthority: LocalAuthority,
-    ): LocalAuthorityInvitation {
-        val invitation = LocalAuthorityInvitation()
-        ReflectionTestUtils.setField(invitation, "invitedEmail", invitedEmail)
-        ReflectionTestUtils.setField(invitation, "invitingAuthority", localAuthority)
-
-        return invitation
-    }
-
-    @Test
-    fun `getLocalAuthorityUsersForLocalAuthority returns a populated list of LocalAuthorityUserDataModel`() {
-        // Arrange
-        val localAuthorityId = 123
-        val localAuthorityTest = createLocalAuthority(localAuthorityId)
-        val baseUser1 = createOneLoginUser("Test user 1")
-        val baseUser2 = createOneLoginUser("Test user 2")
-        val localAuthorityUser1 = createLocalAuthorityUser(baseUser1, true, localAuthorityTest)
-        val localAuthorityUser2 = createLocalAuthorityUser(baseUser2, false, localAuthorityTest)
-        val pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "baseUser_name"))
-        Mockito
-            .`when`(localAuthorityUsersRepository.findByLocalAuthority(localAuthorityTest, pageRequest))
-            .thenReturn(listOf(localAuthorityUser1, localAuthorityUser2))
-        val expectedLaUserList =
-            listOf(
-                LocalAuthorityUserDataModel("Test user 1", true, false),
-                LocalAuthorityUserDataModel("Test user 2", false, false),
-            )
-
-        // Act
-        val laUserList = localAuthorityDataService.getLocalAuthorityUsersForLocalAuthority(localAuthorityTest, pageRequest)
-
-        // Assert
-        Assertions.assertEquals(2, laUserList.size)
-        Assertions.assertEquals(expectedLaUserList, laUserList)
-    }
-
     @Test
     fun `getLocalAuthorityForUser returns local authority if it exists for the user`() {
         // Arrange
@@ -103,7 +64,7 @@ class LocalAuthorityDataServiceTests {
         val baseUser = createOneLoginUser("Test user 1")
         val localAuthorityUser = createLocalAuthorityUser(baseUser, false, localAuthority)
         Mockito
-            .`when`(localAuthorityUsersRepository.findByBaseUser_Id("test-user-1"))
+            .`when`(localAuthorityUserRepository.findByBaseUser_Id("test-user-1"))
             .thenReturn(localAuthorityUser)
 
         // Act
@@ -117,7 +78,7 @@ class LocalAuthorityDataServiceTests {
     fun `getLocalAuthorityForUser returns null if user is not in a local authority`() {
         // Arrange
         Mockito
-            .`when`(localAuthorityUsersRepository.findByBaseUser_Id("test-user-1"))
+            .`when`(localAuthorityUserRepository.findByBaseUser_Id("test-user-1"))
             .thenReturn(null)
 
         // Act, Assert
@@ -125,27 +86,29 @@ class LocalAuthorityDataServiceTests {
     }
 
     @Test
-    fun `getLocalAuthorityPendingUsersForLocalAuthority returns a populated list of LocalAuthorityUserDataModel`() {
-        // Arrange
-        val localAuthorityId = 123
-        val localAuthorityTest = createLocalAuthority(localAuthorityId)
-        val invitation1 = createLocalAuthorityUserInvitation("invited.user@example.com", localAuthorityTest)
-        val invitation2 = createLocalAuthorityUserInvitation("another.user@example.com", localAuthorityTest)
-        val pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "invitedEmail"))
-        Mockito
-            .`when`(localAuthorityInvitationRepository.findByInvitingAuthority(localAuthorityTest, pageRequest))
-            .thenReturn(listOf(invitation1, invitation2))
-        val expectedUserList =
-            listOf(
-                LocalAuthorityUserDataModel("invited.user@example.com", false, true),
-                LocalAuthorityUserDataModel("another.user@example.com", false, true),
+    fun `getUserList returns LocalAuthorityUserDataModels from the LocalAuthorityUserOrInvitationRepository`() {
+        val localAuthority = createLocalAuthority(123)
+        val expectedPageRequest =
+            PageRequest.of(
+                1,
+                10,
+                Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("name")),
             )
+        val user1 = LocalAuthorityUserOrInvitation(1, "local_authority_user", "User 1", true, localAuthority)
+        val user2 = LocalAuthorityUserOrInvitation(2, "local_authority_user", "User 2", false, localAuthority)
+        val invitation = LocalAuthorityUserOrInvitation(3, "local_authority_invitation", "invite@test.com", false, localAuthority)
+        Mockito
+            .`when`(localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, expectedPageRequest))
+            .thenReturn(PageImpl(listOf(user1, user2, invitation), expectedPageRequest, 3))
 
-        // Act
-        val laInvitedUsers = localAuthorityDataService.getLocalAuthorityPendingUsersForLocalAuthority(localAuthorityTest, pageRequest)
+        val userList = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 1)
 
-        // Assert
-        Assertions.assertEquals(2, laInvitedUsers.size)
-        Assertions.assertEquals(expectedUserList, laInvitedUsers)
+        val expectedLaUserList =
+            listOf(
+                LocalAuthorityUserDataModel("User 1", true, false),
+                LocalAuthorityUserDataModel("User 2", false, false),
+                LocalAuthorityUserDataModel("invite@test.com", false, true),
+            )
+        Assertions.assertIterableEquals(expectedLaUserList, userList)
     }
 }

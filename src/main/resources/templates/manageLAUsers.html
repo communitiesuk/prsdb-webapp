@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(${title}, ${serviceName}, ~{::main})}">
+<html th:replace="~{fragments/layout :: layout(#{manageLAUsers.title}, ${serviceName}, ~{::main})}">
 <main class="govuk-main-wrapper" id="main-content">
   <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#header})}">
     <header id="header">
@@ -7,21 +7,20 @@
     </header>
   </div>
   <section>
-    <div th:replace="~{fragments/fullWidthLayout :: fullWidthLayout(~{::#LA-users-table})}">
-      <div id="LA-users-table">
-        <table th:replace="~{fragments/tables/table :: table(${tableColumnHeadings},
-        ~{fragments/tables/tableBodyLAUser :: tableBody(${userList})})}">
-        </table>
-      </div>
+    <div th:replace="~{fragments/fullWidthLayout :: fullWidthLayout(~{::table})}">
+      <table th:with="colA=#{manageLAUsers.table.usernameHeading}, colB=#{manageLAUsers.table.accessLevelHeading}, colC=#{manageLAUsers.table.accountStatusHeading}"
+              th:replace="~{fragments/tables/table :: table(${ { colA, colB, colC, '' } }, ~{fragments/tables/tableBodyLAUser :: tableBody(${userList})})}"
+      >
+      </table>
     </div>
-    <div th:if="${shouldPaginate}">
-      <nav  th:replace="~{fragments/pagination/pagination :: pagination(${totalPages}, ${currentPage})}">
+    <div th:if="${totalPages > 1}">
+      <nav th:replace="~{fragments/pagination/pagination :: pagination(${totalPages}, ${currentPage})}">
       </nav>
     </div>
     <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#action-buttons})}">
       <div class="govuk-button-group" id="action-buttons">
-        <button th:replace="~{fragments/primaryButton :: primaryButton(#{manageLAUsers.primaryButtonText})}"></button>
-        <button th:replace="~{fragments/secondaryButton :: secondaryButton(#{manageLAUsers.secondaryButtonText})}"></button>
+        <button th:replace="~{fragments/primaryButton :: primaryButton(#{manageLAUsers.inviteAnotherUserButtonText})}"></button>
+        <button th:replace="~{fragments/secondaryButton :: secondaryButton(#{manageLAUsers.returnToDashboardButton})}"></button>
       </div>
     </div>
   </section>
