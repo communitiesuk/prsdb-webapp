@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_TABLE_PAGE
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ConfirmedEmailDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationEmail
@@ -18,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import java.security.Principal
-import kotlin.math.ceil
 
 @PreAuthorize("hasRole('LA_ADMIN')")
 @Controller
@@ -36,36 +34,16 @@ class ManageLocalAuthorityUsersController(
     ): String {
         val currentUserLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
 
-        val nActiveUsers = localAuthorityDataService.countActiveLocalAuthorityUsersForLocalAuthority(currentUserLocalAuthority)
-        val nPendingUsers = localAuthorityDataService.countPendingLocalAuthorityUsersForLocalAuthority(currentUserLocalAuthority)
-        val totalUsers = nActiveUsers + nPendingUsers
-        val totalPages = ceil((totalUsers.toDouble() / MAX_ENTRIES_IN_TABLE_PAGE.toDouble())).toInt()
-
-        val shouldPaginate = totalPages > 1
-
         val pagedUserList =
-            localAuthorityDataService.getUserList(
+            localAuthorityDataService.getPaginatedUsersAndInvitations(
                 currentUserLocalAuthority,
-                page,
-                nActiveUsers,
-                shouldPaginate,
+                page - 1,
             )
 
         model.addAttribute("localAuthority", currentUserLocalAuthority.name)
         model.addAttribute("userList", pagedUserList)
-        model.addAttribute(
-            "tableColumnHeadings",
-            listOf(
-                "manageLAUsers.table.column1Heading",
-                "manageLAUsers.table.column2Heading",
-                "manageLAUsers.table.column3Heading",
-                "",
-            ),
-        )
-        model.addAttribute("shouldPaginate", shouldPaginate)
-        model.addAttribute("totalPages", totalPages)
+        model.addAttribute("totalPages", pagedUserList.totalPages)
         model.addAttribute("currentPage", page)
-        model.addAttribute("isLastPage", page == totalPages)
 
         return "manageLAUsers"
     }

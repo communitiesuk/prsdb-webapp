@@ -6,6 +6,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
@@ -18,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.controllers.ExampleInvitationTokenControl
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationEmail
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import java.net.URLEncoder
 import kotlin.test.Test
 
@@ -26,6 +28,9 @@ import kotlin.test.Test
 class InvitationUrlTests(
     context: WebApplicationContext,
 ) : ControllerTest(context) {
+    @MockBean
+    private lateinit var localAuthorityDataService: LocalAuthorityDataService
+
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `The invitation URL generated when a new user is invited is routed to the accept invitation controller method`() {
