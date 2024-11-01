@@ -1,0 +1,12 @@
+<div th:fragment="inputGroup(label, fieldName, input, hint)" class="govuk-form-group"
+     th:classappend='${#fields.hasErrors(fieldName) ? "govuk-form-group--error" : ""}'>
+    <label class="govuk-label" th:for="__${fieldName}__" th:text="${label}"></label>
+    <div th:if="${hint}" th:id="__${fieldName}__+'-details-hint'" class="govuk-hint" th:text="${hint}">
+        Input hint
+    </div>
+    <p th:if="${#fields.hasErrors(fieldName)}" th:id="__${fieldName}__+'-error'" class="govuk-error-message">
+        <span class="govuk-visually-hidden" th:text="#{forms.errorMessage.prefix}"></span>
+        <span th:text="#{${#fields.errors(fieldName)[0]}}"></span>
+    </p>
+    <input th:replace="${input}">
+</div>
