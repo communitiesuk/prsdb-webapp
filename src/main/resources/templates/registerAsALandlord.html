@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/layout :: layout(#{registerAsALandlord.title}, ~{::main})}">
 <main class="govuk-main-wrapper" id="main-content">
-    <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
+    <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
         <div id="page-content">
             <header>
                 <h1 class="govuk-heading-l" th:text="#{registerAsALandlord.heading}">registerAsALandlord.heading</h1>

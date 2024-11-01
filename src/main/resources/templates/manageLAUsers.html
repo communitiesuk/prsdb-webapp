@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/layout :: layout(#{manageLAUsers.title}, ~{::main})}">
 <main class="govuk-main-wrapper" id="main-content">
-    <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#header})}">
+    <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#header})}">
         <header id="header">
             <h1 class="govuk-heading-l" th:text="#{manageLAUsers.contentHeader(${localAuthority})}">
                 manageLAUsers.contentHeader
@@ -9,14 +9,14 @@
         </header>
     </div>
     <section>
-        <div th:replace="~{fragments/fullWidthLayout :: fullWidthLayout(~{::#LA-users-table})}">
+        <div th:replace="~{fragments/layouts/fullWidthLayout :: fullWidthLayout(~{::#LA-users-table})}">
             <div id="LA-users-table">
                 <table th:replace="~{fragments/tables/table ::
                     table(${tableColumnHeadings}, ~{fragments/tables/tableBodyLAUser :: tableBody(${userList})})}">
                 </table>
             </div>
         </div>
-        <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#action-buttons})}">
+        <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#action-buttons})}">
             <div class="govuk-button-group" id="action-buttons">
                 <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{manageLAUsers.primaryButtonText})}"></button>
                 <button th:replace="~{fragments/buttons/secondaryButton :: secondaryButton(#{manageLAUsers.secondaryButtonText})}"></button>
