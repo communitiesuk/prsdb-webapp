@@ -1,9 +1,11 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.constants.SERVICE_NAME
@@ -12,17 +14,23 @@ import java.security.Principal
 
 @PreAuthorize("hasRole('LA_ADMIN')")
 @Controller
-@RequestMapping("/manage-users")
+@RequestMapping("/local-authority/{localAuthorityId}/manage-users")
 class ManageLocalAuthorityUsersController(
     val localAuthorityDataService: LocalAuthorityDataService,
 ) {
     @GetMapping
     fun index(
+        @PathVariable localAuthorityId: Int,
         model: Model,
         principal: Principal,
         @RequestParam(value = "page", required = false) page: Int = 1,
     ): String {
         val currentUserLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
+        if (currentUserLocalAuthority.id != localAuthorityId) {
+            throw AccessDeniedException(
+                "Local authority user for LA ${currentUserLocalAuthority.id} tried to manage users for LA $localAuthorityId",
+            )
+        }
 
         val pagedUserList =
             localAuthorityDataService.getPaginatedUsersAndInvitations(
