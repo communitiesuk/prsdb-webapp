@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(${title}, ${serviceName}, ~{::main})}">
+<html th:replace="~{fragments/layout :: layout(${title}, ${serviceName}, ~{::main}, false)}">
     <main class="govuk-main-wrapper" id="main-content">
         <h1 class="govuk-heading-xl" th:text="${contentHeader}">Default page template</h1>
     </main>

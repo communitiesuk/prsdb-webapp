@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{addLAUser.title}, ${serviceName}, ~{::main})}">
+<html th:replace="~{fragments/layout :: layout(#{addLAUser.title}, ${serviceName}, ~{::main}, ${#fields.hasErrors('${confirmedEmailDataModel.*}')})}">
 <main class="govuk-main-wrapper" id="main-content">
     <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#header})}">
         <header id="header">
             <h1 class="govuk-heading-l" th:text="#{addLAUser.heading(${councilName})}"></h1>
         </header>
     </div>
-    <th:block  th:object="${confirmedEmailDataModel}">
+    <th:block th:object="${confirmedEmailDataModel}">
         <div  th:replace="~{fragments/error-summary :: summary(#{addLAUser.error.summaryHeading}, ${ {'email', 'confirmEmail'} }) }"></div>
     </th:block>
     <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#explanation})}">
