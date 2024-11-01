@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 class ConfirmedEmailDataModel(
     @field:NotBlank(message = NO_EMAIL_ERROR_MESSAGE) @field:Email(message = NOT_AN_EMAIL_ERROR_MESSAGE) val email: String = "",
     @field:NotBlank(message = NO_CONFIRMATION_ERROR_MESSAGE) val confirmEmail: String = "",
-) {
+) : ValidatableDataModel {
     @AssertTrue(message = CONFIRMATION_DOES_NOT_MATCH_ERROR_MESSAGE)
     fun isConfirmEmailSameAsEmail(): Boolean = email.trim() == confirmEmail.trim()
 
@@ -20,8 +20,8 @@ class ConfirmedEmailDataModel(
         const val CONFIRMATION_DOES_NOT_MATCH_ERROR_MESSAGE = "addLAUser.error.confirmationDoesNotMatch"
     }
 
-    val errorFieldMap = mapOf(CONFIRMATION_DOES_NOT_MATCH_ERROR_MESSAGE to ::confirmEmail.name)
-    val errorPrecedenceList =
+    override val errorFieldMap = mapOf(CONFIRMATION_DOES_NOT_MATCH_ERROR_MESSAGE to ::confirmEmail.name)
+    override val errorPrecedenceList =
         listOf(
             NO_EMAIL_ERROR_MESSAGE,
             NOT_AN_EMAIL_ERROR_MESSAGE,
