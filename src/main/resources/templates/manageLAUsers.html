@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/layout :: layout(#{manageLAUsers.title}, ${serviceName}, ~{::main})}">
 <main class="govuk-main-wrapper" id="main-content">
-  <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#contents})}">
-    <!--/*/ <th:block id="contents"> /*/-->
+  <div id="page-contents" th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
       <header id="header">
         <h1 class="govuk-heading-l" th:text="#{manageLAUsers.contentHeader(${localAuthority})}"></h1>
       </header>
@@ -32,7 +31,6 @@
           <button th:replace="~{fragments/secondaryButton :: secondaryButton(#{manageLAUsers.returnToDashboardButton})}"></button>
         </div>
       </section>
-    <!--/*/ </th:block> /*/-->
   </div>
 </main>
 </html>
