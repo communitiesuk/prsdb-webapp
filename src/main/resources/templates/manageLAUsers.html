@@ -1,28 +1,38 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/layout :: layout(#{manageLAUsers.title}, ${serviceName}, ~{::main})}">
 <main class="govuk-main-wrapper" id="main-content">
-  <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#header})}">
-    <header id="header">
-      <h1 class="govuk-heading-l" th:text="#{manageLAUsers.contentHeader(${localAuthority})}"></h1>
-    </header>
+  <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#contents})}">
+    <!--/*/ <th:block id="contents"> /*/-->
+      <header id="header">
+        <h1 class="govuk-heading-l" th:text="#{manageLAUsers.contentHeader(${localAuthority})}"></h1>
+      </header>
+      <section>
+        <!--/*/ <th:block th:with="colA=#{manageLAUsers.table.usernameHeading}, colB=#{manageLAUsers.table.accessLevelHeading}, colC=#{manageLAUsers.table.accountStatusHeading}"> /*/-->
+        <table th:replace="~{fragments/tables/table :: table(${ { colA, colB, colC, '' } }, ~{::tbody})}">
+          <tbody class="govuk-table__body">
+            <tr class="govuk_table__row" th:each="user: ${userList}">
+              <td class="govuk-table__cell" th:text="${user.userName}"></td>
+              <td class="govuk-table__cell" th:text="${user.manager ? 'Admin' : 'Basic'}"></td>
+              <td class="govuk-table__cell" >
+                <span class="govuk-tag" th:classappend="${user.pending ? 'govuk-tag--blue' : 'govuk-tag--green'}">
+                  <strong th:text="${user.pending ? 'PENDING' : 'ACTIVE'}"></strong>
+                </span>
+              </td>
+              <td class="govuk-table__cell"><a href="#" class="govuk-link" th:text="Change"></a></td>
+            </tr>
+          </tbody>
+        </table>
+        <!--/*/ </th:block> /*/-->
+        <div th:if="${totalPages > 1}">
+          <nav th:replace="~{fragments/pagination/pagination :: pagination(${totalPages}, ${currentPage})}">
+          </nav>
+        </div>
+        <div class="govuk-button-group" id="action-buttons">
+          <button th:replace="~{fragments/primaryButton :: primaryButton(#{manageLAUsers.inviteAnotherUserButtonText})}"></button>
+          <button th:replace="~{fragments/secondaryButton :: secondaryButton(#{manageLAUsers.returnToDashboardButton})}"></button>
+        </div>
+      </section>
+    <!--/*/ </th:block> /*/-->
   </div>
-  <section>
-    <div th:replace="~{fragments/fullWidthLayout :: fullWidthLayout(~{::table})}">
-      <table th:with="colA=#{manageLAUsers.table.usernameHeading}, colB=#{manageLAUsers.table.accessLevelHeading}, colC=#{manageLAUsers.table.accountStatusHeading}"
-              th:replace="~{fragments/tables/table :: table(${ { colA, colB, colC, '' } }, ~{fragments/tables/tableBodyLAUser :: tableBody(${userList})})}"
-      >
-      </table>
-    </div>
-    <div th:if="${totalPages > 1}">
-      <nav th:replace="~{fragments/pagination/pagination :: pagination(${totalPages}, ${currentPage})}">
-      </nav>
-    </div>
-    <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#action-buttons})}">
-      <div class="govuk-button-group" id="action-buttons">
-        <button th:replace="~{fragments/primaryButton :: primaryButton(#{manageLAUsers.inviteAnotherUserButtonText})}"></button>
-        <button th:replace="~{fragments/secondaryButton :: secondaryButton(#{manageLAUsers.returnToDashboardButton})}"></button>
-      </div>
-    </div>
-  </section>
 </main>
 </html>
