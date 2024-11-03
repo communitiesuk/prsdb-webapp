@@ -6,7 +6,7 @@
             <h1 class="govuk-heading-l" th:text="#{addLAUser.heading(${councilName})}"></h1>
         </header>
     </div>
-    <th:block th:object="${confirmedEmailDataModel}">
+    <th:block th:object="${confirmedEmailDataModel}" th:if="confirmedEmailDataModel != null">
         <div  th:replace="~{fragments/error-summary :: summary(#{addLAUser.error.summaryHeading}, ${ {'email', 'confirmEmail'} }) }"></div>
     </th:block>
     <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#explanation})}">

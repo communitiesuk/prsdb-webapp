@@ -2,7 +2,7 @@
         <label class="govuk-label" th:for="__${fieldName}__" th:text="${label}"></label>
         <p th:if="${#fields.hasErrors(fieldName)}" th:id="__${fieldName}__+'-error'" class="govuk-error-message">
             <span class="govuk-visually-hidden" th:text="#{errorPrefix}"></span>
-            <th:block th:errors="*{__${fieldName}__}"></th:block>
+            <span th:text="#{${#fields.errors(fieldName)[0]}}"></span>
         </p>
         <input class="govuk-input" type="text" th:field="*{__${fieldName}__}">
     </div>

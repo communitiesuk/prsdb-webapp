@@ -16,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
-import uk.gov.communities.prsdb.webapp.services.ValidationService
 
 @Import(CustomSecurityConfig::class, EnableMethodSecurityConfig::class)
 abstract class ControllerTest(
@@ -47,7 +46,4 @@ abstract class ControllerTest(
 
     @MockBean
     lateinit var localAuthorityInvitationService: LocalAuthorityInvitationService
-
-    @MockBean
-    lateinit var validationService: ValidationService
 }

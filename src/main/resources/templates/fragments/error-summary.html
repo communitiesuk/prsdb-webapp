@@ -6,7 +6,7 @@
             <div class="govuk-error-summary__body">
                 <ul class="govuk-list govuk-error-summary__list">
                     <li th:each="field: ${formFields}" th:if="${#fields.hasErrors(field)}">
-                        <a th:href="'#' + __${field}__" th:errors="*{__${field}__}"></a>
+                        <a th:href="'#' + __${field}__" th:text="#{${#fields.errors(field)[0]}}"></a>
                     </li>
                 </ul>
             </div>

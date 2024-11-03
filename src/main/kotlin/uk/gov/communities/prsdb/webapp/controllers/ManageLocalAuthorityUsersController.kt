@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.encodeToJsonElement
+import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.MessageSource
 import org.springframework.http.MediaType
@@ -10,6 +9,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
@@ -21,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitatio
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
-import uk.gov.communities.prsdb.webapp.services.ValidationService
 import java.security.Principal
 import java.util.Locale
 
@@ -32,7 +31,6 @@ class ManageLocalAuthorityUsersController(
     var emailSender: EmailNotificationService<LocalAuthorityInvitationEmail>,
     var invitationService: LocalAuthorityInvitationService,
     val localAuthorityDataService: LocalAuthorityDataService,
-    val validator: ValidationService,
     @Qualifier("messageSource") private val messageSource: MessageSource,
 ) {
     @GetMapping
@@ -78,20 +76,11 @@ class ManageLocalAuthorityUsersController(
     fun inviteNewUser(
         model: Model,
         principal: Principal,
-        confirmedEmailDataModel: ConfirmedEmailDataModel,
     ): String {
         val currentAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
         model.addAttribute("councilName", currentAuthority.name)
         model.addAttribute("serviceName", SERVICE_NAME)
-
-        val dataModelJson = model.getAttribute("serializedDataModel") as String?
-        if (dataModelJson is String) {
-            val previousDataModel = Json.decodeFromString<ConfirmedEmailDataModel>(dataModelJson)
-            val bindingResult = validator.validateDataModel(previousDataModel)
-
-            model.addAttribute("confirmedEmailDataModel", previousDataModel)
-            model.addAttribute(BindingResult.MODEL_KEY_PREFIX + "confirmedEmailDataModel", bindingResult)
-        }
+        model.addAttribute("confirmedEmailDataModel", ConfirmedEmailDataModel())
 
         return "inviteLAUser"
     }
@@ -99,7 +88,10 @@ class ManageLocalAuthorityUsersController(
     @PostMapping("/invite-new-user", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
     fun sendInvitation(
         model: Model,
+        @Valid
+        @ModelAttribute
         emailModel: ConfirmedEmailDataModel,
+        bindingResult: BindingResult,
         principal: Principal,
         redirectAttributes: RedirectAttributes,
     ): String {
@@ -107,13 +99,8 @@ class ManageLocalAuthorityUsersController(
         val currentAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
         model.addAttribute("councilName", currentAuthority.name)
 
-        val result = validator.validateDataModel(emailModel)
-        if (result.hasErrors()) {
-            redirectAttributes.addFlashAttribute(
-                "serializedDataModel",
-                Json.encodeToJsonElement(emailModel).toString(),
-            )
-            return "redirect:invite-new-user"
+        if (bindingResult.hasErrors()) {
+            return "inviteLAUser"
         }
 
         try {
@@ -124,12 +111,15 @@ class ManageLocalAuthorityUsersController(
                 LocalAuthorityInvitationEmail(currentAuthority, invitationLinkAddress),
             )
 
-            model.addAttribute("contentHeader", "You have sent a test email to ${emailModel.email}")
-            model.addAttribute("title", "Email sent")
-            return "index"
+            redirectAttributes.addFlashAttribute("contentHeader", "You have sent a test email to ${emailModel.email}")
+            redirectAttributes.addFlashAttribute("title", "Email sent")
+            return "redirect:invite-new-user/success"
         } catch (retryException: TransientEmailSentException) {
-            result.reject("addLAUser.error.retryable")
+            bindingResult.reject("addLAUser.error.retryable")
             return "inviteLAUser"
         }
     }
+
+    @GetMapping("/invite-new-user/success")
+    fun successInvitedNewUser() = "index"
 }

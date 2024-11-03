@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import org.mockito.Mockito
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
@@ -41,8 +40,6 @@ class InvitationUrlTests(
         whenever(localAuthorityInvitationService.getAuthorityForToken(testToken)).thenReturn(localAuthority)
         whenever(localAuthorityInvitationService.buildInvitationUri(testToken)).thenCallRealMethod()
 
-        whenever(validationService.validateDataModel(any())).thenReturn(mock())
-
         val invitationCaptor = argumentCaptor<LocalAuthorityInvitationEmail>()
         Mockito
             .doNothing()
@@ -58,7 +55,7 @@ class InvitationUrlTests(
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 content = encodedConfirmedEmailContent
                 with(csrf())
-            }.andExpect { status { isOk() } }
+            }.andExpect { status { is3xxRedirection() } }
 
         mvc
             .get(invitationCaptor.firstValue.invitationUri)
