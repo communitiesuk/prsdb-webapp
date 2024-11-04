@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html th:fragment="layout(title, serviceName, content, hasErrors)" lang="en" class="govuk-template">
+<html th:fragment="layout(title, content, hasErrors)" lang="en" class="govuk-template">
 
 <head>
     <meta charset="utf-8">
@@ -27,7 +27,7 @@
     document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
 </script>
 <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>
-<div th:replace="~{fragments/header/header :: header(${serviceName}, ${navLinks})}"></div>
+<div th:replace="~{fragments/header/header :: header(${navLinks})}"></div>
 <div class="govuk-width-container">
     <div th:replace="~{ fragments/betaBanner :: betaBanner }"></div>
     <div th:replace="${content}"></div>

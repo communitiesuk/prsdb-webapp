@@ -7,7 +7,7 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
+import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import kotlin.test.assertEquals
@@ -37,19 +37,19 @@ class OSPlacesAddressLookupServiceTests {
                 AddressDataModel("PO1, Example Road, EG", "EG", poBoxNumber = "PO1"),
             )
 
-        `when`(
-            mockOSPlacesClient.searchByPostcode(anyString()),
+        whenever(
+            mockOSPlacesClient.search(anyString(), anyString()),
         ).thenReturn(addressesJSON)
 
-        val addresses = addressLookupService.searchByPostcode("EG")
+        val addresses = addressLookupService.search("", "EG")
 
         assertEquals(expectedAddresses, addresses)
     }
 
     @Test
     fun `searchByPostcode throws a HTTP error if the API call fails`() {
-        doAnswer { throw HttpException() }.`when`(mockOSPlacesClient).searchByPostcode(anyString())
+        doAnswer { throw HttpException() }.whenever(mockOSPlacesClient).search(anyString(), anyString())
 
-        assertThrows<HttpException> { addressLookupService.searchByPostcode("EG") }
+        assertThrows<HttpException> { addressLookupService.search("", "EG") }
     }
 }

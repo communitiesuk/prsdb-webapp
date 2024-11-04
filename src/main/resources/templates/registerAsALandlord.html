@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(${title}, ${serviceName}, ~{::main}, false)}">
+<html th:replace="~{fragments/layout :: layout(#{registerAsALandlord.title}, ~{::main}, false)}">
 <main class="govuk-main-wrapper" id="main-content">
     <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
         <div id="page-content">

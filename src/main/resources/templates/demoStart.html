@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(${title}, ${serviceName}, ~{::main}, false)}">
+<html th:replace="~{fragments/layout :: layout(#{serviceName}, ~{::main}, false)}">
 <main class="govuk-main-wrapper" id="main-content">
-    <h1 class="govuk-heading-xl" th:text="${contentHeader}">Default page template</h1>
+    <h1 class="govuk-heading-xl">Welcome to the Private Rental Sector Database</h1>
     <p class="govuk-body">
         <span>Example Landlord Registration Number: </span>
         <span th:text="${landlordRegNum}">Example Landlord Registration Number</span>
     </p>
-    <div th:replace="~{fragments/startButton :: startButton( ${startButtonHref}, ${startButtonText} )}"></div>
+    <div th:replace="~{fragments/startButton :: startButton( @{/registration}, #{startButtonText} )}"></div>
 </main>
 </html>

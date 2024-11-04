@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(${title}, ${serviceName}, ~{::main}, false)}">
+<html th:replace="~{fragments/layout :: layout(#{error.serviceProblem.title(#{serviceName})}, ~{::main}, false)}">
 <main class="govuk-main-wrapper govuk-main-wrapper--l" id="main-content" role="main">
     <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">
-            <h1 class="govuk-heading-l">Sorry, there is a problem with the service</h1>
-            <p class="govuk-body">Try again later.</p>
+            <h1 class="govuk-heading-l" th:text="#{error.serviceProblem.header}">error.serviceProblem.header</h1>
+            <p class="govuk-body" th:text="#{error.serviceProblem.body}">error.serviceProblem.body</p>
         </div>
     </div>
 </main>

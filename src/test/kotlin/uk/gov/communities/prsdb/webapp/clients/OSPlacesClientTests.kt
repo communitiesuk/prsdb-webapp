@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
+import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.RateLimitExceededException
 import java.net.http.HttpClient
 import java.net.http.HttpResponse
@@ -26,19 +26,19 @@ class OSPlacesClientTests {
     fun `OSPlacesClient returns the response body when the response's status code is 200`() {
         val expectedResponseBody = "body"
 
-        `when`(
+        whenever(
             mockHttpClient.send(any(), any<HttpResponse.BodyHandler<String>>()),
         ).thenReturn(MockHttpResponse(body = expectedResponseBody))
 
-        val responseBody = osPlacesClient.searchByPostcode("")
+        val responseBody = osPlacesClient.search("", "")
         assertEquals(expectedResponseBody, responseBody)
     }
 
     @Test
     fun `OSPlacesClient throws a RateLimitExceededException when the response's status code is 429`() {
-        `when`(mockHttpClient.send(any(), any<HttpResponse.BodyHandler<String>>())).thenReturn(MockHttpResponse(429))
+        whenever(mockHttpClient.send(any(), any<HttpResponse.BodyHandler<String>>())).thenReturn(MockHttpResponse(429))
 
-        assertThrows<RateLimitExceededException> { osPlacesClient.searchByPostcode("") }
+        assertThrows<RateLimitExceededException> { osPlacesClient.search("", "") }
     }
 
     @Test
@@ -46,14 +46,14 @@ class OSPlacesClientTests {
         val expectedErrorBody = "{'error':{'message':'example error message','statuscode':'400'}}"
         val expectedErrorMessage = "Error 400: example error message"
 
-        `when`(mockHttpClient.send(any(), any<HttpResponse.BodyHandler<String>>())).thenReturn(
+        whenever(mockHttpClient.send(any(), any<HttpResponse.BodyHandler<String>>())).thenReturn(
             MockHttpResponse(
                 400,
                 expectedErrorBody,
             ),
         )
 
-        val thrownException = assertThrows<HttpException> { osPlacesClient.searchByPostcode("") }
+        val thrownException = assertThrows<HttpException> { osPlacesClient.search("", "") }
         assertEquals(expectedErrorMessage, thrownException.message)
     }
 
@@ -62,14 +62,14 @@ class OSPlacesClientTests {
         val unexpectedErrorBody = "wrong error format"
         val expectedErrorMessage = "Error 400: wrong error format"
 
-        `when`(mockHttpClient.send(any(), any<HttpResponse.BodyHandler<String>>())).thenReturn(
+        whenever(mockHttpClient.send(any(), any<HttpResponse.BodyHandler<String>>())).thenReturn(
             MockHttpResponse(
                 400,
                 unexpectedErrorBody,
             ),
         )
 
-        val thrownException = assertThrows<HttpException> { osPlacesClient.searchByPostcode("") }
+        val thrownException = assertThrows<HttpException> { osPlacesClient.search("", "") }
         assertEquals(expectedErrorMessage, thrownException.message)
     }
 }

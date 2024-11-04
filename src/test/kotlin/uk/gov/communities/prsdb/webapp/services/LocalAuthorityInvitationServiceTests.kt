@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
+import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
@@ -40,7 +40,7 @@ class LocalAuthorityInvitationServiceTests {
         val testUuid = UUID.randomUUID()
         val testEmail = "test@example.com"
         val testAuthority = LocalAuthority()
-        `when`(mockLaInviteRepository.findByToken(testUuid)).thenReturn(LocalAuthorityInvitation(testUuid, testEmail, testAuthority))
+        whenever(mockLaInviteRepository.findByToken(testUuid)).thenReturn(LocalAuthorityInvitation(testUuid, testEmail, testAuthority))
 
         val authority = inviteService.getAuthorityForToken(testUuid.toString())
 

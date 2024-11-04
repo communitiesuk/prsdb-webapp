@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.local.api
+package uk.gov.communities.prsdb.webapp.local.api.controllers
 
 import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.GetMapping

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{addLAUser.title}, ${serviceName}, ~{::main}, ${#fields.hasErrors('${confirmedEmailDataModel.*}')})}">
+<html th:replace="~{fragments/layout :: layout(#{addLAUser.title}, ~{::main}, ${#fields.hasErrors('${confirmedEmailDataModel.*}')})}">
 <main class="govuk-main-wrapper" id="main-content">
     <div id="page-contents" th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <header id="header">
@@ -24,7 +24,8 @@
                 </li>
             </ul>
         </section>
-        <form class="form" id="email-form" method="post" th:action="@{/manage-users/invite-new-user}" th:object="${confirmedEmailDataModel}">
+        <form class="form" id="email-form" method="post" th:object="${confirmedEmailDataModel}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <input th:replace="~{fragments/forms/textInput :: textInput(#{addLAUser.form.primaryEmailLabel}, 'email')}">
             <input th:replace="~{fragments/forms/textInput :: textInput(#{addLAUser.form.confirmEmailLabel}, 'confirmEmail')}">
 

@@ -1,0 +1,7 @@
+<a th:fragment="pageLink(page, isCurrentPage)" class="govuk-link govuk-pagination__link"
+   th:href="@{${#ctx.#requestdatavalues.url('')}(page=${page})}"
+   th:text="${page}"
+   th:attr="aria-label='Page '+${page}"
+   th:attrappend="aria-current=${isCurrentPage}?'page'"
+   >
+</a>

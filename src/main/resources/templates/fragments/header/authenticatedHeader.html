@@ -1,4 +1,4 @@
-<header th:fragment="loggedInHeader(serviceName, navLinks)" class="cross-service-header" role="banner"
+<header th:fragment="loggedInHeader(navLinks)" class="cross-service-header" role="banner"
         data-module="one-login-header">
     <div class="one-login-header" data-one-login-header-nav>
         <div class="one-login-header__container govuk-width-container">
@@ -96,7 +96,8 @@
                         </a>
                     </li>
                     <li class="one-login-header__nav__list-item">
-                        <a class="one-login-header__nav__link" th:href="@{/signout}" th:text="#{oneLoginHeader.logout}">
+                        <a class="one-login-header__nav__link" th:href="@{/confirm-sign-out}"
+                           th:text="#{oneLoginHeader.logout}">
                             oneLoginHeader.logout
                         </a>
                     </li>
@@ -107,7 +108,7 @@
     <div class="service-header" data-one-login-header-nav>
         <div class="govuk-width-container">
             <div class="service-header__container">
-                <h2 class="service-header__heading" th:text="${serviceName}">Service name</h2>
+                <h2 class="service-header__heading" th:text="#{serviceName}">Service name</h2>
                 <div>
                     <button type="button"
                             aria-controls="service-header__nav"
@@ -119,11 +120,11 @@
                             data-text-for-hide="Close"
                             aria-expanded="false"
                             class="cross-service-header__button cross-service-header__button--service-header js-x-header-toggle">
-                        <span class="service-header__button-content" th:text="${serviceName} + ' Menu'">
+                        <span class="service-header__button-content" th:text="#{serviceName} + ' Menu'">
                             Service Menu
                         </span>
                     </button>
-                    <nav th:attr="aria-label=${serviceName} + ' Menu'">
+                    <nav th:attr="aria-label=#{serviceName} + ' Menu'">
                         <ul class="service-header__nav-list service-header__nav" id="service-header__nav"
                             data-open-class="service-header__nav--open">
                             <li th:each="navLink: ${navLinks}" class="service-header__nav-list-item"

@@ -1,12 +1,12 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import org.junit.jupiter.api.BeforeEach
-import org.mockito.Mockito
+import org.mockito.kotlin.whenever
 
 class ManageLAUsersTests : IntegrationTest() {
     @BeforeEach
     fun setup() {
-        Mockito.`when`(principal.name).thenReturn("Test user")
+        whenever(principal.name).thenReturn("Test user")
     }
 
 // TODO: Add tests when OneLogin mockking is working

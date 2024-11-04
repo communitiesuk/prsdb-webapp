@@ -15,7 +15,13 @@ class OSPlacesClient(
     private val baseURL: String,
     private val apiKey: String,
 ) {
-    fun searchByPostcode(postcode: String): String = getResponse("/postcode?postcode=${URLEncoder.encode(postcode, "UTF-8")}")
+    fun search(
+        buildingNameOrNumber: String,
+        postcode: String,
+    ): String {
+        val query = URLEncoder.encode("$buildingNameOrNumber $postcode", "UTF-8")
+        return getResponse("/find?minmatch=0.4&maxresults=10&query=$query")
+    }
 
     private fun getResponse(endpoint: String): String {
         val request: HttpRequest =

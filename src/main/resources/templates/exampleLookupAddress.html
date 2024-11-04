@@ -2,10 +2,18 @@
  This template is for an example page to demo our integration with OS Places and should be removed once
  there is an integration that belongs to an intended releasable feature. -->
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(${title}, ${serviceName}, ~{::main}, false)}">
+<html th:replace="~{fragments/layout :: layout(#{addressLookup}, ~{::main}, false)}">
 <main class="govuk-main-wrapper" id="main-content">
-    <h1 class="govuk-heading-xl" th:text="${contentHeader}">Default page template</h1>
+    <h1 class="govuk-heading-xl" th:text="#{addressLookup}">Default page template</h1>
     <form class="form" method="post" th:action="@{/lookup-an-address}">
+        <div class="govuk-form-group">
+            <h1 class="govuk-label-wrapper">
+                <label class="govuk-label govuk-label--l" for="buildingNameOrNumber">
+                    Enter a Building Name or Number:
+                </label>
+            </h1>
+            <input class="govuk-input" id="buildingNameOrNumber" name="buildingNameOrNumber" type="text">
+        </div>
         <div class="govuk-form-group">
             <h1 class="govuk-label-wrapper">
                 <label class="govuk-label govuk-label--l" for="postcode">
