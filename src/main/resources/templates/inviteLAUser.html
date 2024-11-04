@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/layout :: layout(#{addLAUser.title}, ${serviceName}, ~{::main}, ${#fields.hasErrors('${confirmedEmailDataModel.*}')})}">
 <main class="govuk-main-wrapper" id="main-content">
-    <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#header})}">
+    <div id="page-contents" th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <header id="header">
             <h1 class="govuk-heading-l" th:text="#{addLAUser.heading(${councilName})}"></h1>
         </header>
-    </div>
-    <th:block th:object="${confirmedEmailDataModel}" th:if="confirmedEmailDataModel != null">
-        <div  th:replace="~{fragments/error-summary :: summary(#{addLAUser.error.summaryHeading}, ${ {'email', 'confirmEmail'} }) }"></div>
-    </th:block>
-    <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#explanation})}">
+        <!--/*/ <th:block th:object="${confirmedEmailDataModel}" th:if="confirmedEmailDataModel != null"> /*/-->
+            <div th:replace="~{fragments/error-summary :: summary(#{addLAUser.error.summaryHeading}, ${ {'email', 'confirmEmail'} }) }"></div>
+        <!--/*/ </th:block> /*/-->
         <section id="explanation">
             <p th:text="#{addLAUser.paragraph.one}" class="govuk-body">
                 addLAUser.paragraph.one
@@ -26,14 +24,12 @@
                 </li>
             </ul>
         </section>
-    </div>
-    <div th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#email-form})}">
-    <form class="form" id="email-form" method="post" th:action="@{/manage-users/invite-new-user}" th:object="${confirmedEmailDataModel}">
-        <input th:replace="~{fragments/forms/textInput :: textInput(#{addLAUser.form.primaryEmailLabel}, 'email')}">
-        <input th:replace="~{fragments/forms/textInput :: textInput(#{addLAUser.form.confirmEmailLabel}, 'confirmEmail')}">
+        <form class="form" id="email-form" method="post" th:action="@{/manage-users/invite-new-user}" th:object="${confirmedEmailDataModel}">
+            <input th:replace="~{fragments/forms/textInput :: textInput(#{addLAUser.form.primaryEmailLabel}, 'email')}">
+            <input th:replace="~{fragments/forms/textInput :: textInput(#{addLAUser.form.confirmEmailLabel}, 'confirmEmail')}">
 
-        <button th:replace="~{fragments/primaryButton :: primaryButton(#{addLAUser.form.submitButton})}"></button>
-    </form>
+            <button th:replace="~{fragments/primaryButton :: primaryButton(#{addLAUser.form.submitButton})}"></button>
+        </form>
     </div>
 </main>
 </html>

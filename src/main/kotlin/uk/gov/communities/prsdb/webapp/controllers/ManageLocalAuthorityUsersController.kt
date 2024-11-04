@@ -111,6 +111,7 @@ class ManageLocalAuthorityUsersController(
                 LocalAuthorityInvitationEmail(currentAuthority, invitationLinkAddress),
             )
 
+            // TODO PRSD-404 Create a more permanent success template, rather than (ab)using "index" here
             redirectAttributes.addFlashAttribute("contentHeader", "You have sent a test email to ${emailModel.email}")
             redirectAttributes.addFlashAttribute("title", "Email sent")
             return "redirect:invite-new-user/success"
