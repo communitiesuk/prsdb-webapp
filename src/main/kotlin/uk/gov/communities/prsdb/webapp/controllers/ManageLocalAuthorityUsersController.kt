@@ -22,13 +22,13 @@ import java.security.Principal
 
 @PreAuthorize("hasRole('LA_ADMIN')")
 @Controller
-@RequestMapping("/local-authority/{localAuthorityId}")
+@RequestMapping("/local-authority/{localAuthorityId}/manage-users")
 class ManageLocalAuthorityUsersController(
     var emailSender: EmailNotificationService<LocalAuthorityInvitationEmail>,
     var invitationService: LocalAuthorityInvitationService,
     val localAuthorityDataService: LocalAuthorityDataService,
 ) {
-    @GetMapping("/manage-users")
+    @GetMapping
     fun index(
         @PathVariable localAuthorityId: Int,
         model: Model,
