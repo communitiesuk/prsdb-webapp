@@ -93,9 +93,7 @@ class ManageLocalAuthorityUsersController(
                 LocalAuthorityInvitationEmail(currentAuthority, invitationLinkAddress),
             )
 
-            // TODO PRSD-404 Create a more permanent success template, rather than (ab)using "index" here
-            redirectAttributes.addFlashAttribute("contentHeader", "You have sent a test email to ${emailModel.email}")
-            redirectAttributes.addFlashAttribute("title", "Email sent")
+            redirectAttributes.addFlashAttribute("invitedEmailAddress", emailModel.email)
             return "redirect:invite-new-user/success"
         } catch (retryException: TransientEmailSentException) {
             bindingResult.reject("addLAUser.error.retryable")
@@ -104,7 +102,15 @@ class ManageLocalAuthorityUsersController(
     }
 
     @GetMapping("/invite-new-user/success")
-    fun successInvitedNewUser() = "index"
+    fun successInvitedNewUser(
+        @PathVariable localAuthorityId: Int,
+        principal: Principal,
+        model: Model,
+    ): String {
+        val currentAuthority = getCurrentUsersLocalAuthorityAndCheckAuthorisation(principal, localAuthorityId)
+        model.addAttribute("localAuthority", currentAuthority)
+        return "inviteLAUserSuccess"
+    }
 
     private fun getCurrentUsersLocalAuthorityAndCheckAuthorisation(
         principal: Principal,
