@@ -21,6 +21,7 @@ class ExampleAddressLookupController(
     fun exampleAddressLookupPage(model: Model): String = "exampleLookupAddress"
 
     class Submission(
+        val buildingNameOrNumber: String,
         val postcode: String,
     )
 
@@ -29,10 +30,8 @@ class ExampleAddressLookupController(
         model: Model,
         body: Submission,
     ): String {
-        val addresses = addressLookupService.searchByPostcode(body.postcode)
-        val limitedAddresses = if (addresses.size > 5) addresses.subList(0, 5) else addresses
-
-        model.addAttribute("addresses", limitedAddresses)
+        val addresses = addressLookupService.search(body.buildingNameOrNumber, body.postcode)
+        model.addAttribute("addresses", addresses)
         return "exampleLookupAddress"
     }
 }
