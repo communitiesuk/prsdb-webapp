@@ -8,10 +8,13 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
+import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ConfirmedEmailDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationEmail
@@ -35,12 +38,7 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         @RequestParam(value = "page", required = false) page: Int = 1,
     ): String {
-        val currentUserLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
-        if (currentUserLocalAuthority.id != localAuthorityId) {
-            throw AccessDeniedException(
-                "Local authority user for LA ${currentUserLocalAuthority.id} tried to manage users for LA $localAuthorityId",
-            )
-        }
+        val currentUserLocalAuthority = getCurrentUsersLocalAuthorityAndCheckAuthorisation(principal, localAuthorityId)
 
         val pagedUserList =
             localAuthorityDataService.getPaginatedUsersAndInvitations(
@@ -57,38 +55,67 @@ class ManageLocalAuthorityUsersController(
     }
 
     @GetMapping("/invite-new-user")
-    fun exampleEmailPage(model: Model): String {
-        model.addAttribute("title", "sendEmail.send.title")
-        model.addAttribute("contentHeader", "sendEmail.send.header")
-        return "sendTestEmail"
+    fun inviteNewUser(
+        @PathVariable localAuthorityId: Int,
+        model: Model,
+        principal: Principal,
+    ): String {
+        val currentAuthority = getCurrentUsersLocalAuthorityAndCheckAuthorisation(principal, localAuthorityId)
+        model.addAttribute("councilName", currentAuthority.name)
+        model.addAttribute("confirmedEmailDataModel", ConfirmedEmailDataModel())
+
+        return "inviteLAUser"
     }
 
     @PostMapping("/invite-new-user", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
-    fun sendEmail(
+    fun sendInvitation(
+        @PathVariable localAuthorityId: Int,
         model: Model,
         @Valid
+        @ModelAttribute
         emailModel: ConfirmedEmailDataModel,
-        result: BindingResult,
+        bindingResult: BindingResult,
         principal: Principal,
+        redirectAttributes: RedirectAttributes,
     ): String {
+        val currentAuthority = getCurrentUsersLocalAuthorityAndCheckAuthorisation(principal, localAuthorityId)
+        model.addAttribute("councilName", currentAuthority.name)
+
+        if (bindingResult.hasErrors()) {
+            return "inviteLAUser"
+        }
+
         try {
-            val emailAddress: String = emailModel.email
-            val currentAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
-            val token = invitationService.createInvitationToken(emailAddress, currentAuthority)
+            val token = invitationService.createInvitationToken(emailModel.email, currentAuthority)
             val invitationLinkAddress = invitationService.buildInvitationUri(token)
             emailSender.sendEmail(
-                emailAddress,
+                emailModel.email,
                 LocalAuthorityInvitationEmail(currentAuthority, invitationLinkAddress),
             )
 
-            model.addAttribute("title", "sendEmail.sent.title")
-            model.addAttribute("contentHeader", "sendEmail.sent.header")
-            model.addAttribute("contentHeaderParams", emailAddress)
-            return "index"
+            // TODO PRSD-404 Create a more permanent success template, rather than (ab)using "index" here
+            redirectAttributes.addFlashAttribute("contentHeader", "You have sent a test email to ${emailModel.email}")
+            redirectAttributes.addFlashAttribute("title", "Email sent")
+            return "redirect:invite-new-user/success"
         } catch (retryException: TransientEmailSentException) {
-            model.addAttribute("title", "sendEmail.send.title")
-            model.addAttribute("contentHeader", "sendEmail.send.errorTitle")
-            return "sendTestEmail"
+            bindingResult.reject("addLAUser.error.retryable")
+            return "inviteLAUser"
         }
+    }
+
+    @GetMapping("/invite-new-user/success")
+    fun successInvitedNewUser() = "index"
+
+    private fun getCurrentUsersLocalAuthorityAndCheckAuthorisation(
+        principal: Principal,
+        localAuthorityId: Int,
+    ): LocalAuthority {
+        val currentUserLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
+        if (currentUserLocalAuthority.id != localAuthorityId) {
+            throw AccessDeniedException(
+                "Local authority user for LA ${currentUserLocalAuthority.id} tried to manage users for LA $localAuthorityId",
+            )
+        }
+        return currentUserLocalAuthority
     }
 }
