@@ -5,9 +5,11 @@ import jakarta.validation.ConstraintValidatorContext
 import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.createType
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.valueParameters
 
 /**
  * Searches for all properties on the class of the instance which have @ValidatedBy annotations, then checks
@@ -66,17 +68,21 @@ class IsValidPrioritisedValidator : ConstraintValidator<IsValidPrioritised, Any>
                 "Constraint with validatorType ${constraint.validatorType.simpleName} must supply a targetMethod",
             )
         }
-        @Suppress("UNCHECKED_CAST")
-        val function =
-            instance::class.memberFunctions.firstOrNull { it.name == constraint.targetMethod }
-                as? KFunction<Boolean>
+        val function = instance::class.memberFunctions.firstOrNull { it.name == constraint.targetMethod }
         if (function == null) {
             throw IllegalArgumentException(
-                "No function named ${constraint.targetMethod} returning Boolean found on ${instance::class.simpleName}",
+                "No function named ${constraint.targetMethod} found on ${instance::class.simpleName}",
             )
         }
+        if (function.returnType != Boolean::class.createType() || function.valueParameters.isNotEmpty()) {
+            throw IllegalArgumentException(
+                "Function named ${constraint.targetMethod} on ${instance::class.simpleName} must return Boolean and take no parameters",
+            )
+        }
+        @Suppress("UNCHECKED_CAST")
+        val typedFunction = function as KFunction<Boolean>
 
-        return if (!function.call(instance)) {
+        return if (!typedFunction.call(instance)) {
             buildViolation(context, constraint.messageKey, propertyName)
             false
         } else {
