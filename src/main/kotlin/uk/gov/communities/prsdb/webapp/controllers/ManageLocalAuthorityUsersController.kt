@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.validation.Valid
 import org.springframework.http.MediaType
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -35,12 +34,8 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         @RequestParam(value = "page", required = false) page: Int = 1,
     ): String {
-        val currentUserLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
-        if (currentUserLocalAuthority.id != localAuthorityId) {
-            throw AccessDeniedException(
-                "Local authority user for LA ${currentUserLocalAuthority.id} tried to manage users for LA $localAuthorityId",
-            )
-        }
+        val currentUserLocalAuthority =
+            localAuthorityDataService.getLocalAuthorityIfValidUser(localAuthorityId, principal.name)
 
         val pagedUserList =
             localAuthorityDataService.getPaginatedUsersAndInvitations(
@@ -65,6 +60,7 @@ class ManageLocalAuthorityUsersController(
 
     @PostMapping("/invite-new-user", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
     fun sendEmail(
+        @PathVariable localAuthorityId: Int,
         model: Model,
         @Valid
         emailModel: ConfirmedEmailDataModel,
@@ -73,7 +69,8 @@ class ManageLocalAuthorityUsersController(
     ): String {
         try {
             val emailAddress: String = emailModel.email
-            val currentAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
+            val currentAuthority =
+                localAuthorityDataService.getLocalAuthorityIfValidUser(localAuthorityId, principal.name)
             val token = invitationService.createInvitationToken(emailAddress, currentAuthority)
             val invitationLinkAddress = invitationService.buildInvitationUri(token)
             emailSender.sendEmail(

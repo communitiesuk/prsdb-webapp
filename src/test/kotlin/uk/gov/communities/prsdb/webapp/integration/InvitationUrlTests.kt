@@ -39,7 +39,7 @@ class InvitationUrlTests(
         val testToken = "test token"
         val testEmail = "test@example.com"
 
-        whenever(localAuthorityDataService.getLocalAuthorityForUser("user")).thenReturn(localAuthority)
+        whenever(localAuthorityDataService.getLocalAuthorityIfValidUser(1, "user")).thenReturn(localAuthority)
 
         whenever(localAuthorityInvitationService.createInvitationToken(testEmail, localAuthority)).thenReturn(testToken)
         whenever(localAuthorityInvitationService.getAuthorityForToken(testToken)).thenReturn(localAuthority)

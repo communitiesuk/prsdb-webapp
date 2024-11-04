@@ -68,21 +68,22 @@ class LocalAuthorityDataServiceTests {
             .thenReturn(localAuthorityUser)
 
         // Act
-        val returnedLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser("test-user-1")
+        val returnedLocalAuthority = localAuthorityDataService.getLocalAuthorityIfValidUser(123, "test-user-1")
 
         // Assert
         Assertions.assertEquals(localAuthority, returnedLocalAuthority)
     }
 
-    @Test
-    fun `getLocalAuthorityForUser returns null if user is not in a local authority`() {
-        // Arrange
-        whenever(localAuthorityUserRepository.findByBaseUser_Id("test-user-1"))
-            .thenReturn(null)
-
-        // Act, Assert
-        Assertions.assertNull(localAuthorityDataService.getLocalAuthorityForUser("test-user-1"))
-    }
+    // TODO: No longer applicable - throws error instead
+//    @Test
+//    fun `getLocalAuthorityForUser returns null if user is not in a local authority`() {
+//        // Arrange
+//        whenever(localAuthorityUserRepository.findByBaseUser_Id("test-user-1"))
+//            .thenReturn(null)
+//
+//        // Act, Assert
+//        Assertions.assertNull(localAuthorityDataService.getLocalAuthorityIfValidUser(123, "test-user-1"))
+//    }
 
     @Test
     fun `getUserList returns LocalAuthorityUserDataModels from the LocalAuthorityUserOrInvitationRepository`() {

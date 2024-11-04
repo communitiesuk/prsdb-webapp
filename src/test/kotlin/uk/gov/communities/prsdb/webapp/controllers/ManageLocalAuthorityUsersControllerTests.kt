@@ -6,6 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.test.web.servlet.get
@@ -44,7 +45,7 @@ class ManageLocalAuthorityUsersControllerTests(
         val localAuthority = LocalAuthority()
         ReflectionTestUtils.setField(localAuthority, "id", 123)
         ReflectionTestUtils.setField(localAuthority, "name", "Test Local Authority")
-        whenever(localAuthorityDataService.getLocalAuthorityForUser("user"))
+        whenever(localAuthorityDataService.getLocalAuthorityIfValidUser(123, "user"))
             .thenReturn(localAuthority)
         whenever(localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 0))
             .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 0))
@@ -62,8 +63,8 @@ class ManageLocalAuthorityUsersControllerTests(
         val localAuthority = LocalAuthority()
         ReflectionTestUtils.setField(localAuthority, "id", 123)
         ReflectionTestUtils.setField(localAuthority, "name", "Test Local Authority")
-        whenever(localAuthorityDataService.getLocalAuthorityForUser("user"))
-            .thenReturn(localAuthority)
+        whenever(localAuthorityDataService.getLocalAuthorityIfValidUser(456, "user"))
+            .thenThrow(AccessDeniedException(""))
         whenever(localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 0))
             .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 0))
 
