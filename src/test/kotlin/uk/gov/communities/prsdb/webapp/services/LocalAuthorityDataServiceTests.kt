@@ -41,7 +41,7 @@ class LocalAuthorityDataServiceTests {
     fun createLocalAuthority(id: Int): LocalAuthority {
         val localAuthority = LocalAuthority()
         ReflectionTestUtils.setField(localAuthority, "id", id)
-
+        ReflectionTestUtils.setField(localAuthority, "name", "name")
         return localAuthority
     }
 
@@ -95,7 +95,8 @@ class LocalAuthorityDataServiceTests {
             )
         val user1 = LocalAuthorityUserOrInvitation(1, "local_authority_user", "User 1", true, localAuthority)
         val user2 = LocalAuthorityUserOrInvitation(2, "local_authority_user", "User 2", false, localAuthority)
-        val invitation = LocalAuthorityUserOrInvitation(3, "local_authority_invitation", "invite@test.com", false, localAuthority)
+        val invitation =
+            LocalAuthorityUserOrInvitation(3, "local_authority_invitation", "invite@test.com", false, localAuthority)
         Mockito
             .`when`(localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, expectedPageRequest))
             .thenReturn(PageImpl(listOf(user1, user2, invitation), expectedPageRequest, 3))
@@ -104,9 +105,9 @@ class LocalAuthorityDataServiceTests {
 
         val expectedLaUserList =
             listOf(
-                LocalAuthorityUserDataModel("User 1", true, false),
-                LocalAuthorityUserDataModel("User 2", false, false),
-                LocalAuthorityUserDataModel("invite@test.com", false, true),
+                LocalAuthorityUserDataModel("User 1", localAuthority.name, true, false),
+                LocalAuthorityUserDataModel("User 2", localAuthority.name, false, false),
+                LocalAuthorityUserDataModel("invite@test.com", localAuthority.name, false, true),
             )
         Assertions.assertIterableEquals(expectedLaUserList, userList)
     }
