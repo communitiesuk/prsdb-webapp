@@ -8,6 +8,14 @@
     <form class="form" method="post" th:action="@{/lookup-an-address}">
         <div class="govuk-form-group">
             <h1 class="govuk-label-wrapper">
+                <label class="govuk-label govuk-label--l" for="buildingNameOrNumber">
+                    Enter a Building Name or Number:
+                </label>
+            </h1>
+            <input class="govuk-input" id="buildingNameOrNumber" name="buildingNameOrNumber" type="text">
+        </div>
+        <div class="govuk-form-group">
+            <h1 class="govuk-label-wrapper">
                 <label class="govuk-label govuk-label--l" for="postcode">
                     Enter a Postcode:
                 </label>

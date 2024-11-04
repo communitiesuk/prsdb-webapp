@@ -38,18 +38,18 @@ class OSPlacesAddressLookupServiceTests {
             )
 
         whenever(
-            mockOSPlacesClient.searchByPostcode(anyString()),
+            mockOSPlacesClient.search(anyString(), anyString()),
         ).thenReturn(addressesJSON)
 
-        val addresses = addressLookupService.searchByPostcode("EG")
+        val addresses = addressLookupService.search("", "EG")
 
         assertEquals(expectedAddresses, addresses)
     }
 
     @Test
     fun `searchByPostcode throws a HTTP error if the API call fails`() {
-        doAnswer { throw HttpException() }.whenever(mockOSPlacesClient).searchByPostcode(anyString())
+        doAnswer { throw HttpException() }.whenever(mockOSPlacesClient).search(anyString(), anyString())
 
-        assertThrows<HttpException> { addressLookupService.searchByPostcode("EG") }
+        assertThrows<HttpException> { addressLookupService.search("", "EG") }
     }
 }
