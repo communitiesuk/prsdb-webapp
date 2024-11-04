@@ -13,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.config.CustomSecurityConfig
 import uk.gov.communities.prsdb.webapp.config.EnableMethodSecurityConfig
 import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
@@ -37,9 +36,6 @@ abstract class ControllerTest(
 
     @MockBean
     lateinit var userRolesService: UserRolesService
-
-    @MockBean
-    lateinit var localAuthorityDataService: LocalAuthorityDataService
 
     @MockBean
     lateinit var anyEmailNotificationService: EmailNotificationService<EmailTemplateModel>
