@@ -10,9 +10,6 @@ import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.CustomSecurityConfig
-import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateModel
-import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @Import(CustomSecurityConfig::class)
@@ -35,10 +32,4 @@ abstract class ControllerTest(
 
     @MockBean
     lateinit var userRolesService: UserRolesService
-
-    @MockBean
-    lateinit var anyEmailNotificationService: EmailNotificationService<EmailTemplateModel>
-
-    @MockBean
-    lateinit var localAuthorityInvitationService: LocalAuthorityInvitationService
 }
