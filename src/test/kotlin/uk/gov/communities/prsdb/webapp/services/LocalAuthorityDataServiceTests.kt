@@ -68,7 +68,7 @@ class LocalAuthorityDataServiceTests {
             .thenReturn(localAuthorityUser)
 
         // Act
-        val returnedLocalAuthority = localAuthorityDataService.getLocalAuthorityIfValidUser(123, "test-user-1")
+        val returnedLocalAuthority = localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(123, "test-user-1")
 
         // Assert
         Assertions.assertEquals(localAuthority, returnedLocalAuthority)

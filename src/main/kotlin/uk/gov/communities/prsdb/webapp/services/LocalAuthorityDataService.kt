@@ -16,7 +16,7 @@ class LocalAuthorityDataService(
     val localAuthorityUserRepository: LocalAuthorityUserRepository,
     val localAuthorityUserOrInvitationRepository: LocalAuthorityUserOrInvitationRepository,
 ) {
-    fun getLocalAuthorityIfValidUser(
+    fun getLocalAuthorityIfAuthorizedUser(
         localAuthorityId: Int,
         subjectId: String,
     ): LocalAuthority {

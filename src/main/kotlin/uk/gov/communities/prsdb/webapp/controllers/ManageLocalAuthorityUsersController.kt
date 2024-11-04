@@ -35,7 +35,7 @@ class ManageLocalAuthorityUsersController(
         @RequestParam(value = "page", required = false) page: Int = 1,
     ): String {
         val currentUserLocalAuthority =
-            localAuthorityDataService.getLocalAuthorityIfValidUser(localAuthorityId, principal.name)
+            localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
 
         val pagedUserList =
             localAuthorityDataService.getPaginatedUsersAndInvitations(
@@ -70,7 +70,7 @@ class ManageLocalAuthorityUsersController(
         try {
             val emailAddress: String = emailModel.email
             val currentAuthority =
-                localAuthorityDataService.getLocalAuthorityIfValidUser(localAuthorityId, principal.name)
+                localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
             val token = invitationService.createInvitationToken(emailAddress, currentAuthority)
             val invitationLinkAddress = invitationService.buildInvitationUri(token)
             emailSender.sendEmail(
