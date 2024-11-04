@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class LocalAuthorityUserDataModel(
+    val id: Long,
     val userName: String,
     val localAuthorityName: String,
     val isManager: Boolean,

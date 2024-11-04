@@ -53,7 +53,7 @@ class ManageLocalAuthorityUsersController(
     }
 
     @GetMapping("/edit-user/{localAuthorityUserId}")
-    fun editAccessLevel(
+    fun getEditUserAccessLevelPage(
         @PathVariable localAuthorityId: Int,
         @PathVariable localAuthorityUserId: Long,
         principal: Principal,
@@ -82,6 +82,15 @@ class ManageLocalAuthorityUsersController(
 
         return "editLAUserAccess"
     }
+
+    @PostMapping("/edit-user/{localAuthorityUserId}")
+    fun patchUserAccessLevel(
+        @PathVariable localAuthorityId: Int,
+        @PathVariable localAuthorityUserId: Long,
+        principal: Principal,
+        // model: Model,
+        // localAuthorityUser: LocalAuthorityUserDataModel,
+    ): String = "redirect:/local-authority/{localAuthorityId}/manage-users"
 
     @GetMapping("/invite-new-user")
     fun exampleEmailPage(model: Model): String {

@@ -48,6 +48,7 @@ class LocalAuthorityDataService(
 
         val localAuthorityUser = retrieveLocalAuthorityUser.get()
         return LocalAuthorityUserDataModel(
+            localAuthorityUserId,
             localAuthorityUser.baseUser.name,
             localAuthorityUser.localAuthority.name,
             localAuthorityUser.isManager,
@@ -67,6 +68,7 @@ class LocalAuthorityDataService(
             )
         return localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest).map {
             LocalAuthorityUserDataModel(
+                id = it.id,
                 userName = it.name,
                 localAuthorityName = localAuthority.name,
                 isManager = it.isManager,

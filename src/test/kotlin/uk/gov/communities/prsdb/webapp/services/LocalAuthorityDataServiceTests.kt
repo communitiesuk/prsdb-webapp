@@ -106,9 +106,9 @@ class LocalAuthorityDataServiceTests {
 
         val expectedLaUserList =
             listOf(
-                LocalAuthorityUserDataModel("User 1", localAuthority.name, true, false),
-                LocalAuthorityUserDataModel("User 2", localAuthority.name, false, false),
-                LocalAuthorityUserDataModel("invite@test.com", localAuthority.name, false, true),
+                LocalAuthorityUserDataModel(1, "User 1", localAuthority.name, true, false),
+                LocalAuthorityUserDataModel(2, "User 2", localAuthority.name, false, false),
+                LocalAuthorityUserDataModel(3, "invite@test.com", localAuthority.name, false, true),
             )
         Assertions.assertIterableEquals(expectedLaUserList, userList)
     }
