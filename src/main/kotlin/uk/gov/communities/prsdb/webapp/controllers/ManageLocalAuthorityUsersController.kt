@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ConfirmedEmailDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.RadioButtonDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
@@ -49,6 +50,37 @@ class ManageLocalAuthorityUsersController(
         model.addAttribute("currentPage", page)
 
         return "manageLAUsers"
+    }
+
+    @GetMapping("/edit-user/{localAuthorityUserId}")
+    fun editAccessLevel(
+        @PathVariable localAuthorityId: Int,
+        @PathVariable localAuthorityUserId: Long,
+        principal: Principal,
+        model: Model,
+    ): String {
+        localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        val localAuthorityUser =
+            localAuthorityDataService.getLocalAuthorityUserIfAuthorizedUser(localAuthorityUserId, localAuthorityId)
+
+        model.addAttribute("localAuthorityUser", localAuthorityUser)
+        model.addAttribute(
+            "options",
+            listOf(
+                RadioButtonDataModel(
+                    false,
+                    "editLAUserAccess.radios.option.one.label",
+                    "editLAUserAccess.radios.option.one.hint",
+                ),
+                RadioButtonDataModel(
+                    true,
+                    "editLAUserAccess.radios.option.two.label",
+                    "editLAUserAccess.radios.option.two.hint",
+                ),
+            ),
+        )
+
+        return "editLAUserAccess"
     }
 
     @GetMapping("/invite-new-user")

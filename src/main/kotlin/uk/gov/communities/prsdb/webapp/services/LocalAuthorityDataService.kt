@@ -3,8 +3,10 @@ package uk.gov.communities.prsdb.webapp.services
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
+import org.springframework.http.HttpStatus
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_TABLE_PAGE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
@@ -29,6 +31,27 @@ class LocalAuthorityDataService(
         }
 
         return localAuthority
+    }
+
+    fun getLocalAuthorityUserIfAuthorizedUser(
+        localAuthorityUserId: Long,
+        localAuthorityId: Int,
+    ): LocalAuthorityUserDataModel {
+        val retrieveLocalAuthorityUser = localAuthorityUserRepository.findById(localAuthorityUserId)
+
+        if (retrieveLocalAuthorityUser.isEmpty || retrieveLocalAuthorityUser.get().localAuthority.id != localAuthorityId) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Local authority user $localAuthorityUserId does not exist for LA $localAuthorityId",
+            )
+        }
+
+        val localAuthorityUser = retrieveLocalAuthorityUser.get()
+        return LocalAuthorityUserDataModel(
+            localAuthorityUser.baseUser.name,
+            localAuthorityUser.localAuthority.name,
+            localAuthorityUser.isManager,
+        )
     }
 
     fun getPaginatedUsersAndInvitations(
