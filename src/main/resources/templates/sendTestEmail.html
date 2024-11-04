@@ -5,7 +5,7 @@
 <html th:replace="~{fragments/layout :: layout(#{${title}}, ~{::main})}">
 <main class="govuk-main-wrapper" id="main-content">
     <h1 class="govuk-heading-xl" th:text="#{${contentHeader}}">Default page template</h1>
-    <form class="form" method="post" th:action="@{/invite-new-user}">
+    <form class="form" method="post" th:action="@{${#ctx.#requestdatavalues.url('')}}">
         <div class="govuk-form-group">
             <h1 class="govuk-label-wrapper">
                 <label class="govuk-label govuk-label--l" for="email">
