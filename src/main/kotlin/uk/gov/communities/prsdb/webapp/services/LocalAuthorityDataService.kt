@@ -11,7 +11,13 @@ class LocalAuthorityDataService(
 ) {
     fun getLocalAuthorityUsersForLocalAuthority(localAuthority: LocalAuthority): List<LocalAuthorityUserDataModel> {
         val usersInThisLocalAuthority = localAuthorityUserRepository.findByLocalAuthority(localAuthority)
-        return usersInThisLocalAuthority.map { LocalAuthorityUserDataModel(it.baseUser.name, it.isManager) }
+        return usersInThisLocalAuthority.map {
+            LocalAuthorityUserDataModel(
+                it.baseUser.name,
+                localAuthority.name,
+                it.isManager,
+            )
+        }
     }
 
     fun getLocalAuthorityForUser(subjectId: String): LocalAuthority? {
