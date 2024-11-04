@@ -47,7 +47,7 @@ class ManageLocalAuthorityUsersControllerTests(
         whenever(localAuthorityDataService.getLocalAuthorityForUser("user"))
             .thenReturn(localAuthority)
         whenever(localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 0))
-            .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 0))
+            .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
 
         mvc
             .get("/local-authority/123/manage-users")
