@@ -25,8 +25,8 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUserOrInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_1L_ID
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_1L_USER_NAME
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_ID
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_USER_ID
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthorityUser
@@ -59,7 +59,7 @@ class LocalAuthorityDataServiceTests {
 
         // Act
         val returnedLocalAuthority =
-            localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(DEFAULT_1L_ID, get1LID(DEFAULT_1L_USER_NAME))
+            localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, get1LID(DEFAULT_1L_USER_NAME))
 
         // Assert
         Assertions.assertEquals(localAuthority, returnedLocalAuthority)
@@ -74,7 +74,7 @@ class LocalAuthorityDataServiceTests {
         // Act and Assert
         assertThrows<AccessDeniedException> {
             localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(
-                DEFAULT_1L_ID,
+                DEFAULT_LA_ID,
                 get1LID(DEFAULT_1L_USER_NAME),
             )
         }
@@ -92,7 +92,7 @@ class LocalAuthorityDataServiceTests {
         // Act and Assert
         assertThrows<AccessDeniedException> {
             localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(
-                DEFAULT_1L_ID - 1,
+                DEFAULT_LA_ID - 1,
                 get1LID(DEFAULT_1L_USER_NAME),
             )
         }
@@ -116,7 +116,7 @@ class LocalAuthorityDataServiceTests {
 
         // Act
         val returnedLocalAuthorityUser =
-            localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(DEFAULT_LA_USER_ID, DEFAULT_1L_ID)
+            localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(DEFAULT_LA_USER_ID, DEFAULT_LA_ID)
 
         // Assert
         Assertions.assertEquals(expectedLocalAuthorityUserDataModel, returnedLocalAuthorityUser)
@@ -132,7 +132,7 @@ class LocalAuthorityDataServiceTests {
             assertThrows<ResponseStatusException> {
                 localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(
                     DEFAULT_LA_USER_ID,
-                    DEFAULT_1L_ID,
+                    DEFAULT_LA_ID,
                 )
             }
         assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
@@ -152,7 +152,7 @@ class LocalAuthorityDataServiceTests {
             assertThrows<ResponseStatusException> {
                 localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(
                     DEFAULT_LA_USER_ID,
-                    DEFAULT_1L_ID + 1,
+                    DEFAULT_LA_ID + 1,
                 )
             }
         Assertions.assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)

@@ -18,9 +18,9 @@ class MockLocalAuthorityData {
             return user
         }
 
-        const val DEFAULT_1L_ID = 123
+        const val DEFAULT_LA_ID = 123
 
-        fun createLocalAuthority(id: Int = DEFAULT_1L_ID): LocalAuthority {
+        fun createLocalAuthority(id: Int = DEFAULT_LA_ID): LocalAuthority {
             val localAuthority = LocalAuthority()
             ReflectionTestUtils.setField(localAuthority, "id", id)
             ReflectionTestUtils.setField(localAuthority, "name", "name")
