@@ -16,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OSPlacesConfig
 import uk.gov.service.notify.NotificationClient
-import java.security.Principal
 
 @Import(TestcontainersConfiguration::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -37,9 +36,6 @@ abstract class IntegrationTest {
 
     @MockBean
     lateinit var osPlacesClient: OSPlacesClient
-
-    @MockBean
-    lateinit var principal: Principal
 
     @SpyBean
     lateinit var clientRegistrationRepository: ClientRegistrationRepository
