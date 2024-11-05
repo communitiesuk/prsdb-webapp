@@ -4,7 +4,6 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlin.test.Test
 
-// @ActiveProfiles("local-no-auth")
 class ManageLAUsersTests : IntegrationTest() {
     val localAuthorityId = 1
 
