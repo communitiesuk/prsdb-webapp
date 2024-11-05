@@ -61,12 +61,10 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         model: Model,
     ): String {
+        localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+
         val localAuthorityUser =
-            localAuthorityDataService.getLocalAuthorityUserIfAuthorizedUser(
-                localAuthorityUserId,
-                localAuthorityId,
-                principal.name,
-            )
+            localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
 
         model.addAttribute("localAuthorityUser", localAuthorityUser)
         model.addAttribute(
@@ -95,12 +93,10 @@ class ManageLocalAuthorityUsersController(
         @ModelAttribute localAuthorityUserAccessLevel: LocalAuthorityUserAccessLevelDataModel,
         principal: Principal,
     ): String {
-        localAuthorityDataService.updateUserAccessLevel(
-            localAuthorityUserAccessLevel,
-            localAuthorityUserId,
-            localAuthorityId,
-            principal.name,
-        )
+        localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
+
+        localAuthorityDataService.updateUserAccessLevel(localAuthorityUserAccessLevel, localAuthorityUserId)
         return "redirect:/local-authority/{localAuthorityId}/manage-users"
     }
 

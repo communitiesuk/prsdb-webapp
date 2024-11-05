@@ -37,13 +37,10 @@ class LocalAuthorityDataService(
         return localAuthority
     }
 
-    fun getLocalAuthorityUserIfAuthorizedUser(
+    fun getLocalAuthorityUserIfAuthorizedLA(
         localAuthorityUserId: Long,
         localAuthorityId: Int,
-        subjectId: String,
     ): LocalAuthorityUserDataModel {
-        getLocalAuthorityIfAuthorizedUser(localAuthorityId, subjectId)
-
         val localAuthorityUser = localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
 
         if (localAuthorityUser?.localAuthority?.id != localAuthorityId) {
@@ -86,14 +83,10 @@ class LocalAuthorityDataService(
     fun updateUserAccessLevel(
         localAuthorityUserAccessLevel: LocalAuthorityUserAccessLevelDataModel,
         localAuthorityUserId: Long,
-        localAuthorityId: Int,
-        subjectId: String,
     ) {
-        getLocalAuthorityUserIfAuthorizedUser(localAuthorityUserId, localAuthorityId, subjectId)
-
         val localAuthorityUser =
             localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
-                ?: throw AccessDeniedException("User $localAuthorityUserId does not exist for LA $localAuthorityId")
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $localAuthorityUserId does not exist")
 
         localAuthorityUser.isManager = localAuthorityUserAccessLevel.isManager
         localAuthorityUserRepository.save(localAuthorityUser)
