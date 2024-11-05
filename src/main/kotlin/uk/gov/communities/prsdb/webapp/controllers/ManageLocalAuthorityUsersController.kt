@@ -59,9 +59,12 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         model: Model,
     ): String {
-        localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
         val localAuthorityUser =
-            localAuthorityDataService.getLocalAuthorityUserIfAuthorizedUser(localAuthorityUserId, localAuthorityId)
+            localAuthorityDataService.getLocalAuthorityUserIfAuthorizedUser(
+                localAuthorityUserId,
+                localAuthorityId,
+                principal.name,
+            )
 
         model.addAttribute("localAuthorityUser", localAuthorityUser)
         model.addAttribute(

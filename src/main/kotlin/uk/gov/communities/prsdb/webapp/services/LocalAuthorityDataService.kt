@@ -22,7 +22,9 @@ class LocalAuthorityDataService(
         localAuthorityId: Int,
         subjectId: String,
     ): LocalAuthority {
-        val localAuthority = localAuthorityUserRepository.findByBaseUser_Id(subjectId)!!.localAuthority
+        val localAuthority =
+            localAuthorityUserRepository.findByBaseUser_Id(subjectId)?.localAuthority
+                ?: throw AccessDeniedException("User $subjectId is not an LA user")
 
         if (localAuthority.id != localAuthorityId) {
             throw AccessDeniedException(
@@ -36,7 +38,10 @@ class LocalAuthorityDataService(
     fun getLocalAuthorityUserIfAuthorizedUser(
         localAuthorityUserId: Long,
         localAuthorityId: Int,
+        subjectId: String,
     ): LocalAuthorityUserDataModel {
+        getLocalAuthorityIfAuthorizedUser(localAuthorityId, subjectId)
+
         val retrieveLocalAuthorityUser = localAuthorityUserRepository.findById(localAuthorityUserId)
 
         if (retrieveLocalAuthorityUser.isEmpty || retrieveLocalAuthorityUser.get().localAuthority.id != localAuthorityId) {
