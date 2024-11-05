@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
@@ -43,16 +44,15 @@ class LocalAuthorityDataService(
     ): LocalAuthorityUserDataModel {
         getLocalAuthorityIfAuthorizedUser(localAuthorityId, subjectId)
 
-        val retrieveLocalAuthorityUser = localAuthorityUserRepository.findById(localAuthorityUserId)
+        val localAuthorityUser = localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
 
-        if (retrieveLocalAuthorityUser.isEmpty || retrieveLocalAuthorityUser.get().localAuthority.id != localAuthorityId) {
+        if (localAuthorityUser?.localAuthority?.id != localAuthorityId) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Local authority user $localAuthorityUserId does not exist for LA $localAuthorityId",
             )
         }
 
-        val localAuthorityUser = retrieveLocalAuthorityUser.get()
         return LocalAuthorityUserDataModel(
             localAuthorityUserId,
             localAuthorityUser.baseUser.name,
@@ -91,17 +91,11 @@ class LocalAuthorityDataService(
     ) {
         getLocalAuthorityUserIfAuthorizedUser(localAuthorityUserId, localAuthorityId, subjectId)
 
-        localAuthorityUserRepository.findById(localAuthorityUserId).ifPresentOrElse(
-            { localAuthorityUser ->
-                if (localAuthorityUser == null) {
-                    throw AccessDeniedException("User $localAuthorityUserId does not exist for LA $localAuthorityId")
-                }
-                localAuthorityUser.isManager = localAuthorityUserAccessLevel.isManager
-                localAuthorityUserRepository.save(localAuthorityUser)
-            },
-            {
-                throw AccessDeniedException("User $localAuthorityUserId does not exist for LA $localAuthorityId")
-            },
-        )
+        val localAuthorityUser =
+            localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
+                ?: throw AccessDeniedException("User $localAuthorityUserId does not exist for LA $localAuthorityId")
+
+        localAuthorityUser.isManager = localAuthorityUserAccessLevel.isManager
+        localAuthorityUserRepository.save(localAuthorityUser)
     }
 }
