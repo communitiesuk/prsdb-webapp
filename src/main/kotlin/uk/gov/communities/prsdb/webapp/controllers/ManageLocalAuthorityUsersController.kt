@@ -46,7 +46,7 @@ class ManageLocalAuthorityUsersController(
                 page - 1,
             )
 
-        model.addAttribute("localAuthority", currentUserLocalAuthority.name)
+        model.addAttribute("localAuthority", currentUserLocalAuthority)
         model.addAttribute("userList", pagedUserList)
         model.addAttribute("totalPages", pagedUserList.totalPages)
         model.addAttribute("currentPage", page)
