@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_TABLE_PAGE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 
 @Service
@@ -80,5 +81,27 @@ class LocalAuthorityDataService(
                 isPending = it.entityType == "local_authority_invitation",
             )
         }
+    }
+
+    fun updateUserAccessLevel(
+        localAuthorityUserAccessLevel: LocalAuthorityUserAccessLevelDataModel,
+        localAuthorityUserId: Long,
+        localAuthorityId: Int,
+        subjectId: String,
+    ) {
+        getLocalAuthorityUserIfAuthorizedUser(localAuthorityUserId, localAuthorityId, subjectId)
+
+        localAuthorityUserRepository.findById(localAuthorityUserId).ifPresentOrElse(
+            { localAuthorityUser ->
+                if (localAuthorityUser == null) {
+                    throw AccessDeniedException("User $localAuthorityUserId does not exist for LA $localAuthorityId")
+                }
+                localAuthorityUser.isManager = localAuthorityUserAccessLevel.isManager
+                localAuthorityUserRepository.save(localAuthorityUser)
+            },
+            {
+                throw AccessDeniedException("User $localAuthorityUserId does not exist for LA $localAuthorityId")
+            },
+        )
     }
 }

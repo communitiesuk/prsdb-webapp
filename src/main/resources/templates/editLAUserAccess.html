@@ -10,7 +10,7 @@
                     <span th:remove="tag" th:text="${localAuthorityUser.email}"></span>
                 </p>
             </header>
-            <form method="POST" th:object="${localAuthorityUser}">
+            <form method="POST" th:object="${localAuthorityUser}" th:action="@{''}">
                 <div th:replace="~{fragments/radioButtons :: radioButtons(#{editLAUserAccess.radios.heading}, 'isManager', ${options})}"></div>
                 <div class="govuk-button-group">
                     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{saveAndReturnButtonText})}"></button>

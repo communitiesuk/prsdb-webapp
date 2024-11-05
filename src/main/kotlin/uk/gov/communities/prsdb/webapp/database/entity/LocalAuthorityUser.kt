@@ -22,7 +22,6 @@ class LocalAuthorityUser : ModifiableAuditableEntity() {
 
     @Column(nullable = false)
     var isManager: Boolean = false
-        private set
 
     @OneToOne(optional = false)
     @JoinColumn(name = "local_authority_id", nullable = false, foreignKey = ForeignKey(name = "FK_LA_USER_LA"))

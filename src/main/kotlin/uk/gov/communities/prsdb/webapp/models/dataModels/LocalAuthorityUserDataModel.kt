@@ -11,3 +11,8 @@ data class LocalAuthorityUserDataModel(
     val isPending: Boolean = false,
     val email: String = "$userName@$localAuthorityName.co.uk",
 )
+
+@Serializable
+data class LocalAuthorityUserAccessLevelDataModel(
+    val isManager: Boolean,
+)
