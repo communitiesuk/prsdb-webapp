@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @Configuration
+@EnableMethodSecurity
 class CustomSecurityConfig(
     val clientRegistrationRepository: ClientRegistrationRepository,
 ) {
@@ -80,7 +81,3 @@ class CustomSecurityConfig(
         return oidcLogoutSuccessHandler
     }
 }
-
-@Configuration
-@EnableMethodSecurity
-class EnableMethodSecurityConfig
