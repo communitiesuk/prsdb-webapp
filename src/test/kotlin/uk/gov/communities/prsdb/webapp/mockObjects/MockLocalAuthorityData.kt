@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.mockObjects
 
-import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
@@ -11,21 +10,12 @@ class MockLocalAuthorityData {
 
         fun get1LID(username: String) = username.lowercase().replace(" ", "-")
 
-        fun createOneLoginUser(username: String = DEFAULT_1L_USER_NAME): OneLoginUser {
-            val user = OneLoginUser()
-            ReflectionTestUtils.setField(user, "id", get1LID(username))
-            ReflectionTestUtils.setField(user, "name", username)
-            return user
-        }
+        fun createOneLoginUser(username: String = DEFAULT_1L_USER_NAME): OneLoginUser =
+            OneLoginUser(get1LID(username), username, "$username@example.com")
 
         const val DEFAULT_LA_ID = 123
 
-        fun createLocalAuthority(id: Int = DEFAULT_LA_ID): LocalAuthority {
-            val localAuthority = LocalAuthority()
-            ReflectionTestUtils.setField(localAuthority, "id", id)
-            ReflectionTestUtils.setField(localAuthority, "name", "name")
-            return localAuthority
-        }
+        fun createLocalAuthority(id: Int = DEFAULT_LA_ID): LocalAuthority = LocalAuthority(id, "name")
 
         const val DEFAULT_LA_USER_ID = 456L
 
@@ -34,13 +24,6 @@ class MockLocalAuthorityData {
             localAuthority: LocalAuthority,
             id: Long = DEFAULT_LA_USER_ID,
             isManager: Boolean = true,
-        ): LocalAuthorityUser {
-            val user = LocalAuthorityUser()
-            ReflectionTestUtils.setField(user, "baseUser", baseUser)
-            ReflectionTestUtils.setField(user, "localAuthority", localAuthority)
-            ReflectionTestUtils.setField(user, "id", id)
-            ReflectionTestUtils.setField(user, "isManager", isManager)
-            return user
-        }
+        ): LocalAuthorityUser = LocalAuthorityUser(id, baseUser, isManager, localAuthority)
     }
 }

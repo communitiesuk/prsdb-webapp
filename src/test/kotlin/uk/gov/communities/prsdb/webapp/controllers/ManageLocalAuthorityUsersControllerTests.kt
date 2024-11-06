@@ -102,7 +102,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .thenReturn(URI("https://test-service.gov.uk/sign-up-la-user"))
 
         mvc
-            .post("/local-authority/123/manage-users/invite-new-user") {
+            .post("/local-authority/123/invite-new-user") {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 content = urlEncodedConfirmedEmailDataModel("new-user@example.com")
                 with(csrf())
@@ -127,7 +127,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .thenThrow(AccessDeniedException(""))
 
         mvc
-            .get("/local-authority/$DEFAULT_LA_ID/manage-users/edit-user/1")
+            .get("/local-authority/$DEFAULT_LA_ID/edit-user/1")
             .andExpect {
                 status { isForbidden() }
             }
@@ -143,7 +143,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
 
         mvc
-            .get("/local-authority/$DEFAULT_LA_ID/manage-users/edit-user/$DEFAULT_LA_USER_ID")
+            .get("/local-authority/$DEFAULT_LA_ID/edit-user/$DEFAULT_LA_USER_ID")
             .andExpect {
                 status { isNotFound() }
             }
@@ -168,7 +168,7 @@ class ManageLocalAuthorityUsersControllerTests(
             )
 
         mvc
-            .get("/local-authority/$DEFAULT_LA_ID/manage-users/edit-user/$DEFAULT_LA_USER_ID")
+            .get("/local-authority/$DEFAULT_LA_ID/edit-user/$DEFAULT_LA_USER_ID")
             .andExpect {
                 status { isOk() }
             }

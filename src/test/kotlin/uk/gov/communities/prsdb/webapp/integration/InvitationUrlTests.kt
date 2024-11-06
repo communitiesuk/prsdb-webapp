@@ -65,7 +65,7 @@ class InvitationUrlTests(
 
         // Act
         mvc
-            .post("/local-authority/123/manage-users/invite-new-user") {
+            .post("/local-authority/123/invite-new-user") {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 content = encodedConfirmedEmailContent
                 with(csrf())

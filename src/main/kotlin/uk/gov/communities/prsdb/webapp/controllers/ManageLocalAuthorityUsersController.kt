@@ -25,13 +25,13 @@ import java.security.Principal
 
 @PreAuthorize("hasRole('LA_ADMIN')")
 @Controller
-@RequestMapping("/local-authority/{localAuthorityId}/manage-users")
+@RequestMapping("/local-authority/{localAuthorityId}")
 class ManageLocalAuthorityUsersController(
     var emailSender: EmailNotificationService<LocalAuthorityInvitationEmail>,
     var invitationService: LocalAuthorityInvitationService,
     val localAuthorityDataService: LocalAuthorityDataService,
 ) {
-    @GetMapping
+    @GetMapping("/manage-users")
     fun index(
         @PathVariable localAuthorityId: Int,
         model: Model,
@@ -77,13 +77,13 @@ class ManageLocalAuthorityUsersController(
             listOf(
                 RadioButtonDataModel(
                     false,
-                    "editLAUserAccess.radios.option.one.label",
-                    "editLAUserAccess.radios.option.one.hint",
+                    "editLAUserAccess.radios.option.basic.label",
+                    "editLAUserAccess.radios.option.basic.hint",
                 ),
                 RadioButtonDataModel(
                     true,
-                    "editLAUserAccess.radios.option.two.label",
-                    "editLAUserAccess.radios.option.two.hint",
+                    "editLAUserAccess.radios.option.admin.label",
+                    "editLAUserAccess.radios.option.admin.hint",
                 ),
             ),
         )

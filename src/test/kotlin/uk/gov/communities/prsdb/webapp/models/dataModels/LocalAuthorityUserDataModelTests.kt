@@ -8,7 +8,7 @@ class LocalAuthorityUserDataModelTests {
     fun `LocalAuthorityUserDataModel's constructor produces an email of the expected format`() {
         val userName = "name"
         val localAuthorityName = "LAName"
-        val expectedEmail = "$userName@$localAuthorityName.co.uk"
+        val expectedEmail = "$userName@$localAuthorityName.gov.uk"
 
         val localAuthorityUserDataModel = LocalAuthorityUserDataModel(1, userName, localAuthorityName, false)
 

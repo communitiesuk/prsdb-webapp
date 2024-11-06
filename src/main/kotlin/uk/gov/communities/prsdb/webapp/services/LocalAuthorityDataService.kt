@@ -26,7 +26,7 @@ class LocalAuthorityDataService(
     ): LocalAuthority {
         val localAuthority =
             localAuthorityUserRepository.findByBaseUser_Id(subjectId)?.localAuthority
-                ?: throw AccessDeniedException("User $subjectId is not an LA user")
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $subjectId is not an LA user")
 
         if (localAuthority.id != localAuthorityId) {
             throw AccessDeniedException(
@@ -41,13 +41,12 @@ class LocalAuthorityDataService(
         localAuthorityUserId: Long,
         localAuthorityId: Int,
     ): LocalAuthorityUserDataModel {
-        val localAuthorityUser = localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
+        val localAuthorityUser =
+            localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $localAuthorityUserId not found")
 
-        if (localAuthorityUser?.localAuthority?.id != localAuthorityId) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Local authority user $localAuthorityUserId does not exist for LA $localAuthorityId",
-            )
+        if (localAuthorityUser.localAuthority.id != localAuthorityId) {
+            throw AccessDeniedException("Local authority user $localAuthorityUserId does not belong to LA $localAuthorityId")
         }
 
         return LocalAuthorityUserDataModel(

@@ -5,10 +5,10 @@ import jakarta.persistence.Entity
 import jakarta.persistence.Id
 
 @Entity
-class OneLoginUser : ModifiableAuditableEntity() {
+class OneLoginUser(
     @Id
-    private val id: String? = null
-
+    private val id: String? = null,
+) : ModifiableAuditableEntity() {
     @Column(nullable = false)
     lateinit var name: String
         private set
@@ -16,4 +16,9 @@ class OneLoginUser : ModifiableAuditableEntity() {
     @Column(nullable = false)
     lateinit var email: String
         private set
+
+    constructor(id: String, name: String, email: String) : this(id) {
+        this.name = name
+        this.email = email
+    }
 }

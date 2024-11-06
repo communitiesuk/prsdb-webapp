@@ -7,7 +7,7 @@ class Navigator(
     private val port: Int,
 ) {
     fun goToInviteNewLaUser(authorityId: Int): InviteNewLaUserPage {
-        navigate("local-authority/$authorityId/manage-users/invite-new-user")
+        navigate("local-authority/$authorityId/invite-new-user")
         return BasePage.createValid<InviteNewLaUserPage>(page)
     }
 

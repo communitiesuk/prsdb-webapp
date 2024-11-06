@@ -9,7 +9,8 @@ data class LocalAuthorityUserDataModel(
     val localAuthorityName: String,
     val isManager: Boolean,
     val isPending: Boolean = false,
-    val email: String = "$userName@$localAuthorityName.co.uk",
+    // TODO PRSD-405: capture email during registration
+    val email: String = "$userName@$localAuthorityName.gov.uk",
 )
 
 @Serializable

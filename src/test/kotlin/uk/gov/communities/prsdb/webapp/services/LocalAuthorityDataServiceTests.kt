@@ -138,7 +138,7 @@ class LocalAuthorityDataServiceTests {
     }
 
     @Test
-    fun `getLocalAuthorityUserIfAuthorizedLA throws a NOT_FOUND error if the LA user belongs to a different LA`() {
+    fun `getLocalAuthorityUserIfAuthorizedLA throws an AccessDeniedException if the LA user belongs to a different LA`() {
         // Arrange
         val localAuthority = createLocalAuthority()
         val baseUser = createOneLoginUser()
@@ -147,14 +147,12 @@ class LocalAuthorityDataServiceTests {
         whenever(localAuthorityUserRepository.findById(DEFAULT_LA_USER_ID)).thenReturn(Optional.of(localAuthorityUser))
 
         // Act and Assert
-        val errorThrown =
-            assertThrows<ResponseStatusException> {
-                localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(
-                    DEFAULT_LA_USER_ID,
-                    DEFAULT_LA_ID + 1,
-                )
-            }
-        Assertions.assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
+        assertThrows<AccessDeniedException> {
+            localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(
+                DEFAULT_LA_USER_ID,
+                DEFAULT_LA_ID + 1,
+            )
+        }
     }
 
     @Test
@@ -199,7 +197,8 @@ class LocalAuthorityDataServiceTests {
             )
         val user1 = LocalAuthorityUserOrInvitation(1, "local_authority_user", "User 1", true, localAuthority)
         val user2 = LocalAuthorityUserOrInvitation(2, "local_authority_user", "User 2", false, localAuthority)
-        val invitation = LocalAuthorityUserOrInvitation(3, "local_authority_invitation", "invite@test.com", false, localAuthority)
+        val invitation =
+            LocalAuthorityUserOrInvitation(3, "local_authority_invitation", "invite@test.com", false, localAuthority)
         whenever(localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest))
             .thenReturn(PageImpl(listOf(user1, user2, invitation), pageRequest, 3))
 
@@ -216,7 +215,15 @@ class LocalAuthorityDataServiceTests {
         val localAuthority = createLocalAuthority(123)
         val usersFromRepository = mutableListOf<LocalAuthorityUserOrInvitation>()
         for (i in 1..20) {
-            usersFromRepository.add(LocalAuthorityUserOrInvitation(i.toLong(), "local_authority_user", "User $i", false, localAuthority))
+            usersFromRepository.add(
+                LocalAuthorityUserOrInvitation(
+                    i.toLong(),
+                    "local_authority_user",
+                    "User $i",
+                    false,
+                    localAuthority,
+                ),
+            )
         }
         val pageRequest1 =
             PageRequest.of(
