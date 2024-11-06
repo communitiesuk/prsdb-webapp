@@ -7,17 +7,16 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 
 @Entity
-class LocalAuthority() : ModifiableAuditableEntity() {
+class LocalAuthority(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Int? = null
-
+    val id: Int? = null,
+) : ModifiableAuditableEntity() {
     @Column(nullable = false)
     lateinit var name: String
         private set
 
-    constructor(id: Int, name: String) : this() {
-        this.id = id
+    constructor(id: Int, name: String) : this(id) {
         this.name = name
     }
 }
