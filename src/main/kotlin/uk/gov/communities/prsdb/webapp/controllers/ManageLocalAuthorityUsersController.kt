@@ -46,6 +46,10 @@ class ManageLocalAuthorityUsersController(
                 page - 1,
             )
 
+        if (pagedUserList.totalPages < page) {
+            return "redirect:/local-authority/{localAuthorityId}/manage-users"
+        }
+
         model.addAttribute("localAuthority", currentUserLocalAuthority.name)
         model.addAttribute("userList", pagedUserList)
         model.addAttribute("totalPages", pagedUserList.totalPages)
