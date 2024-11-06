@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageobjects.components
 
 import com.microsoft.playwright.Locator
-import org.junit.jupiter.api.Assertions.assertTrue
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 
 class TextInput(
     locator: Locator,
@@ -9,7 +9,6 @@ class TextInput(
     val input = locator.locator("input")
 
     fun assertErrorMessageContains(message: String) {
-        val foundText = locator.locator(".govuk-error-message").textContent()
-        assertTrue(foundText.contains(message))
+        assertThat(locator.locator(".govuk-error-message")).containsText(message)
     }
 }

@@ -1,12 +1,12 @@
 package uk.gov.communities.prsdb.webapp.integration.pageobjects.components
 
 import com.microsoft.playwright.Locator
-import org.junit.jupiter.api.Assertions.assertTrue
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 
 class ConfirmationPageBanner(
     locator: Locator,
 ) : BaseComponent(locator) {
     fun assertHasMessage(message: String) {
-        assertTrue(locator.textContent().contains(message))
+        assertThat(locator).containsText(message)
     }
 }
