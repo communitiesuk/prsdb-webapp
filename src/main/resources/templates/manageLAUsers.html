@@ -27,7 +27,7 @@
                         </span>
                     </td>
                     <td class="govuk-table__cell">
-                        <a th:href="@{${user.pending ? '#' : 'manage-users/edit-user/' + user.id}}"
+                        <a th:href="@{${user.pending ? '#' : 'edit-user/' + user.id}}"
                            class="govuk-link"
                            th:text="#{manageLAUsers.table.change}">
                         </a>
