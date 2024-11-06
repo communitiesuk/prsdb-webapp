@@ -2,13 +2,18 @@ package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.TextInput
+import kotlin.reflect.KClass
 
 abstract class BasePage(
     protected val page: Page,
 ) {
     companion object {
-        inline fun <reified T : BasePage> createValid(page: Page): T {
-            val pageInstance = T::class.constructors.first().call(page)
+        fun <T : BasePage> createValid(
+            page: Page,
+            targetClass: KClass<T>,
+        ): T {
+            page.waitForLoadState()
+            val pageInstance = targetClass.constructors.first().call(page)
             pageInstance.validate()
             return pageInstance
         }
