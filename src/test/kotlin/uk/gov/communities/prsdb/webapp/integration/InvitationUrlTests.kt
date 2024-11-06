@@ -18,8 +18,11 @@ import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.ExampleInvitationTokenController
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationEmail
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import java.net.URLEncoder
 import kotlin.test.Test
 
@@ -28,6 +31,12 @@ import kotlin.test.Test
 class InvitationUrlTests(
     context: WebApplicationContext,
 ) : ControllerTest(context) {
+    @MockBean
+    lateinit var anyEmailNotificationService: EmailNotificationService<EmailTemplateModel>
+
+    @MockBean
+    lateinit var localAuthorityInvitationService: LocalAuthorityInvitationService
+
     @MockBean
     private lateinit var localAuthorityDataService: LocalAuthorityDataService
 

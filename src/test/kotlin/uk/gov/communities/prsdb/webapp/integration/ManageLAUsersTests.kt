@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import com.microsoft.playwright.options.AriaRole
 import kotlin.test.Test
 
 class ManageLAUsersTests : IntegrationTest() {
@@ -28,8 +29,8 @@ class ManageLAUsersTests : IntegrationTest() {
     @Test
     fun `buttons render`(page: Page) {
         page.navigate("http://localhost:$port/local-authority/$localAuthorityId/manage-users")
-        assertThat(page.locator("button").getByText("Invite another user")).isVisible()
-        assertThat(page.locator("button").getByText("Return to dashboard")).isVisible()
+        assertThat(page.getByRole(AriaRole.BUTTON).getByText("Invite another user")).isVisible()
+        assertThat(page.getByRole(AriaRole.BUTTON).getByText("Return to dashboard")).isVisible()
     }
 
     @Test

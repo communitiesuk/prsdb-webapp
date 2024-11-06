@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
+import com.microsoft.playwright.Page
 import com.microsoft.playwright.junit.UsePlaywright
 import org.junit.jupiter.api.BeforeEach
 import org.mockito.kotlin.whenever
@@ -15,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OSPlacesConfig
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.Navigator
 import uk.gov.service.notify.NotificationClient
 
 @Import(TestcontainersConfiguration::class)
@@ -73,5 +75,12 @@ abstract class IntegrationTest {
 
             whenever(clientRegistrationRepository.findByRegistrationId("one-login")).thenReturn(updatedRegistration)
         }
+    }
+
+    lateinit var navigator: Navigator
+
+    @BeforeEach
+    fun setUp(page: Page) {
+        navigator = Navigator(page, port)
     }
 }
