@@ -11,6 +11,14 @@ class Navigator(
         return BasePage.createValid<InviteNewLaUserPage>(page)
     }
 
+    fun goToEditLaUser(
+        authorityId: Int,
+        userId: Int,
+    ): EditLaUserPage {
+        navigate("local-authority/$authorityId/edit-user/$userId")
+        return BasePage.createValid<EditLaUserPage>(page)
+    }
+
     private fun navigate(path: String) {
         page.navigate("http://localhost:$port/$path")
     }

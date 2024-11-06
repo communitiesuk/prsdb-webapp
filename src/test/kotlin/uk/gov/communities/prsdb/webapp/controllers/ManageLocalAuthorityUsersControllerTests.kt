@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.mockito.kotlin.any
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -22,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Compan
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createOneLoginUser
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -172,5 +174,26 @@ class ManageLocalAuthorityUsersControllerTests(
             .andExpect {
                 status { isOk() }
             }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_ADMIN"])
+    fun `patchUserAccessLevel updates the given user's access level`() {
+        mvc
+            .post("/local-authority/$DEFAULT_LA_ID/edit-user/$DEFAULT_LA_USER_ID") {
+                contentType = MediaType.APPLICATION_FORM_URLENCODED
+                content = "isManager=true"
+                with(csrf())
+            }.andExpect {
+                status {
+                    status { is3xxRedirection() }
+                    redirectedUrl("/local-authority/$DEFAULT_LA_ID/manage-users")
+                }
+            }
+
+        verify(localAuthorityDataService).updateUserAccessLevel(
+            LocalAuthorityUserAccessLevelDataModel(true),
+            DEFAULT_LA_USER_ID,
+        )
     }
 }
