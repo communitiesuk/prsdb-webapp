@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.Table
 private const val USERNAME_COL_INDEX: Int = 0
 private const val ACCESS_LEVEL_COL_INDEX: Int = 1
 private const val ACCOUNT_STATUS_COL_INDEX: Int = 2
+private const val ACTIONS_COL_INDEX: Int = 3
 
 class ManageLaUsersPage(
     page: Page,
@@ -43,10 +44,17 @@ class ManageLaUsersPage(
     class Row(
         rowLocator: Locator,
     ) : BaseComponent(rowLocator) {
+        private val changeLink: Locator = locator.locator("td").nth(ACTIONS_COL_INDEX).locator("a")
+
         fun username(): String = locator.locator("td, th").nth(USERNAME_COL_INDEX).textContent()
 
         fun accessLevel(): String = locator.locator("td, th").nth(ACCESS_LEVEL_COL_INDEX).textContent()
 
         fun accountStatus(): String = locator.locator("td, th").nth(ACCOUNT_STATUS_COL_INDEX).textContent()
+
+        fun editUser(): EditLaUserPage {
+            changeLink.click()
+            return createValid(locator.page(), EditLaUserPage::class)
+        }
     }
 }

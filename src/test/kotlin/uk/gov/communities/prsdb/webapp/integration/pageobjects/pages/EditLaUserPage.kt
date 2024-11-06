@@ -34,10 +34,9 @@ class EditLaUserPage(
         }
     }
 
-    // TODO: Return a ManageLaUsers page when it exists
-    fun submit() {
+    fun submit(): ManageLaUsersPage {
         submitButton.click()
-        page.waitForLoadState()
+        return createValid(page, ManageLaUsersPage::class)
     }
 
     enum class AccessLevelSelection {

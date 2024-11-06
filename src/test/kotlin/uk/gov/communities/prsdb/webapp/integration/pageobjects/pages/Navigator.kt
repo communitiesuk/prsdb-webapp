@@ -21,7 +21,7 @@ class Navigator(
         userId: Int,
     ): EditLaUserPage {
         navigate("local-authority/$authorityId/edit-user/$userId")
-        return BasePage.createValid<EditLaUserPage>(page)
+        return BasePage.createValid(page, EditLaUserPage::class)
     }
 
     private fun navigate(path: String) {
