@@ -6,7 +6,7 @@
             <h1 class="govuk-heading-l" th:text="#{addLAUser.heading(${councilName})}"></h1>
         </header>
         <!--/*/ <th:block th:object="${confirmedEmailDataModel}" th:if="confirmedEmailDataModel != null"> /*/-->
-            <div th:replace="~{fragments/errorSummary :: errorSummary }"></div>
+        <div th:replace="~{fragments/forms/errorSummary :: errorSummary }"></div>
         <!--/*/ </th:block> /*/-->
         <section id="explanation">
             <p th:text="#{addLAUser.paragraph.one}" class="govuk-body">
@@ -24,10 +24,10 @@
                 </li>
             </ul>
         </section>
-        <form class="form" id="email-form" method="post" th:object="${confirmedEmailDataModel}">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-            <input th:replace="~{fragments/forms/textInput :: textInput(#{addLAUser.form.primaryEmailLabel}, 'email')}">
-            <input th:replace="~{fragments/forms/textInput :: textInput(#{addLAUser.form.confirmEmailLabel}, 'confirmEmail')}">
+        <form class="form" id="email-form" method="post" th:object="${confirmedEmailDataModel}" novalidate>
+            <!--/*/ <th:block th:replace="~{fragments/forms/csrfToken :: csrfToken()}"></th:block> /*/-->
+            <input th:replace="~{fragments/forms/basicTextInput :: textInput(#{addLAUser.form.primaryEmailLabel}, 'email')}">
+            <input th:replace="~{fragments/forms/basicTextInput :: textInput(#{addLAUser.form.confirmEmailLabel}, 'confirmEmail')}">
 
             <button th:replace="~{fragments/primaryButton :: primaryButton(#{addLAUser.form.submitButton})}"></button>
         </form>
