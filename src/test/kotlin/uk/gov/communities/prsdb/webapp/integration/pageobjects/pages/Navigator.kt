@@ -8,7 +8,12 @@ class Navigator(
 ) {
     fun goToInviteNewLaUser(authorityId: Int): InviteNewLaUserPage {
         navigate("local-authority/$authorityId/invite-new-user")
-        return BasePage.createValid<InviteNewLaUserPage>(page)
+        return BasePage.createValid(page, InviteNewLaUserPage::class)
+    }
+
+    fun goToManageLaUsers(authorityId: Int): ManageLaUsersPage {
+        navigate("local-authority/$authorityId/manage-users")
+        return BasePage.createValid(page, ManageLaUsersPage::class)
     }
 
     private fun navigate(path: String) {

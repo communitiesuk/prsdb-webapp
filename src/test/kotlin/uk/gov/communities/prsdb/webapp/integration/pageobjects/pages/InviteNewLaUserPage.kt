@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages
 
 import com.microsoft.playwright.Page
-import org.junit.jupiter.api.Assertions.assertEquals
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 
 class InviteNewLaUserPage(
     page: Page,
@@ -11,7 +11,7 @@ class InviteNewLaUserPage(
     private val submitButton = page.locator("button[type=\"submit\"]")
 
     override fun validate() {
-        assertEquals("Invite someone from Betelgeuse to the database", header.textContent())
+        assertThat(header).containsText("Invite someone from Betelgeuse to the database")
     }
 
     fun fillEmail(text: String) = emailInputFormGroup.input.fill(text)
@@ -25,8 +25,7 @@ class InviteNewLaUserPage(
 
     fun submit(): InviteNewLaUserSuccessPage {
         submitButton.click()
-        page.waitForLoadState()
-        return createValid<InviteNewLaUserSuccessPage>(page)
+        return createValid(page, InviteNewLaUserSuccessPage::class)
     }
 
     fun submitUnsuccessfully() {
