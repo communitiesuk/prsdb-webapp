@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ConfirmedEmailDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
@@ -46,7 +47,11 @@ class ManageLocalAuthorityUsersController(
                 page - 1,
             )
 
-        model.addAttribute("localAuthority", currentUserLocalAuthority.name)
+        if (pagedUserList.totalPages < page) {
+            return "redirect:/local-authority/{localAuthorityId}/manage-users"
+        }
+
+        model.addAttribute("localAuthority", currentUserLocalAuthority)
         model.addAttribute("userList", pagedUserList)
         model.addAttribute("totalPages", pagedUserList.totalPages)
         model.addAttribute("currentPage", page)
@@ -101,40 +106,60 @@ class ManageLocalAuthorityUsersController(
     }
 
     @GetMapping("/invite-new-user")
-    fun exampleEmailPage(model: Model): String {
-        model.addAttribute("title", "sendEmail.send.title")
-        model.addAttribute("contentHeader", "sendEmail.send.header")
-        return "sendTestEmail"
+    fun inviteNewUser(
+        @PathVariable localAuthorityId: Int,
+        model: Model,
+        principal: Principal,
+    ): String {
+        val currentAuthority = localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        model.addAttribute("councilName", currentAuthority.name)
+        model.addAttribute("confirmedEmailDataModel", ConfirmedEmailDataModel())
+
+        return "inviteLAUser"
     }
 
     @PostMapping("/invite-new-user", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
-    fun sendEmail(
+    fun sendInvitation(
         @PathVariable localAuthorityId: Int,
         model: Model,
         @Valid
+        @ModelAttribute
         emailModel: ConfirmedEmailDataModel,
-        result: BindingResult,
+        bindingResult: BindingResult,
         principal: Principal,
+        redirectAttributes: RedirectAttributes,
     ): String {
+        val currentAuthority = localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        model.addAttribute("councilName", currentAuthority.name)
+
+        if (bindingResult.hasErrors()) {
+            return "inviteLAUser"
+        }
+
         try {
-            val emailAddress: String = emailModel.email
-            val currentAuthority =
-                localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
-            val token = invitationService.createInvitationToken(emailAddress, currentAuthority)
+            val token = invitationService.createInvitationToken(emailModel.email, currentAuthority)
             val invitationLinkAddress = invitationService.buildInvitationUri(token)
             emailSender.sendEmail(
-                emailAddress,
+                emailModel.email,
                 LocalAuthorityInvitationEmail(currentAuthority, invitationLinkAddress),
             )
 
-            model.addAttribute("title", "sendEmail.sent.title")
-            model.addAttribute("contentHeader", "sendEmail.sent.header")
-            model.addAttribute("contentHeaderParams", emailAddress)
-            return "index"
+            redirectAttributes.addFlashAttribute("invitedEmailAddress", emailModel.email)
+            return "redirect:invite-new-user/success"
         } catch (retryException: TransientEmailSentException) {
-            model.addAttribute("title", "sendEmail.send.title")
-            model.addAttribute("contentHeader", "sendEmail.send.errorTitle")
-            return "sendTestEmail"
+            bindingResult.reject("addLAUser.error.retryable")
+            return "inviteLAUser"
         }
+    }
+
+    @GetMapping("/invite-new-user/success")
+    fun successInvitedNewUser(
+        @PathVariable localAuthorityId: Int,
+        principal: Principal,
+        model: Model,
+    ): String {
+        val currentAuthority = localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        model.addAttribute("localAuthority", currentAuthority)
+        return "inviteLAUserSuccess"
     }
 }

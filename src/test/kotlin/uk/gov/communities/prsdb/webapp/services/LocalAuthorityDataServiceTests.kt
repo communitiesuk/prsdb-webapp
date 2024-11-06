@@ -10,7 +10,6 @@ import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
@@ -160,8 +159,9 @@ class LocalAuthorityDataServiceTests {
 
     @Test
     fun `getUserList returns LocalAuthorityUserDataModels from the LocalAuthorityUserOrInvitationRepository`() {
+        // Arrange
         val localAuthority = createLocalAuthority()
-        val expectedPageRequest =
+        val pageRequest =
             PageRequest.of(
                 1,
                 10,
@@ -171,19 +171,86 @@ class LocalAuthorityDataServiceTests {
         val user2 = LocalAuthorityUserOrInvitation(2, "local_authority_user", "User 2", false, localAuthority)
         val invitation =
             LocalAuthorityUserOrInvitation(3, "local_authority_invitation", "invite@test.com", false, localAuthority)
-        Mockito
-            .`when`(localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, expectedPageRequest))
-            .thenReturn(PageImpl(listOf(user1, user2, invitation), expectedPageRequest, 3))
-
-        val userList = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 1)
-
+        whenever(localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest))
+            .thenReturn(PageImpl(listOf(user1, user2, invitation), pageRequest, 3))
         val expectedLaUserList =
             listOf(
                 LocalAuthorityUserDataModel(1, "User 1", localAuthority.name, true, false),
                 LocalAuthorityUserDataModel(2, "User 2", localAuthority.name, false, false),
                 LocalAuthorityUserDataModel(3, "invite@test.com", localAuthority.name, false, true),
             )
+
+        // Act
+        val userList = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 1)
+
+        // Assert
         Assertions.assertIterableEquals(expectedLaUserList, userList)
+    }
+
+    @Test
+    fun `Returns all users if there are fewer users in the database than MAX_ENTRIES_IN_TABLE_PAGE`() {
+        // Arrange
+        val localAuthority = createLocalAuthority(123)
+        val pageRequest =
+            PageRequest.of(
+                1,
+                10,
+                Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("name")),
+            )
+        val user1 = LocalAuthorityUserOrInvitation(1, "local_authority_user", "User 1", true, localAuthority)
+        val user2 = LocalAuthorityUserOrInvitation(2, "local_authority_user", "User 2", false, localAuthority)
+        val invitation = LocalAuthorityUserOrInvitation(3, "local_authority_invitation", "invite@test.com", false, localAuthority)
+        whenever(localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest))
+            .thenReturn(PageImpl(listOf(user1, user2, invitation), pageRequest, 3))
+
+        // Act
+        val userList = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 1)
+
+        // Assert
+        Assertions.assertEquals(3, userList.content.size)
+    }
+
+    @Test
+    fun `Returns the requested page of users if there are more users in the database than MAX_ENTRIES_IN_TABLE_PAGE`() {
+        // Arrange
+        val localAuthority = createLocalAuthority(123)
+        val usersFromRepository = mutableListOf<LocalAuthorityUserOrInvitation>()
+        for (i in 1..20) {
+            usersFromRepository.add(LocalAuthorityUserOrInvitation(i.toLong(), "local_authority_user", "User $i", false, localAuthority))
+        }
+        val pageRequest1 =
+            PageRequest.of(
+                1,
+                10,
+                Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("name")),
+            )
+        val pageRequest2 =
+            PageRequest.of(
+                2,
+                10,
+                Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("name")),
+            )
+        whenever(localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest1))
+            .thenReturn(PageImpl(usersFromRepository.subList(0, 10).toList(), pageRequest1, 3))
+        whenever(localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest2))
+            .thenReturn(PageImpl(usersFromRepository.subList(10, 20).toList(), pageRequest2, 3))
+
+        val expectedUserListPage1 = mutableListOf<LocalAuthorityUserDataModel>()
+        val expectedUserListPage2 = mutableListOf<LocalAuthorityUserDataModel>()
+        for (i in 1..10) {
+            expectedUserListPage1.add(LocalAuthorityUserDataModel(i.toLong(), "User $i", "name", false, false))
+        }
+        for (i in 11..20) {
+            expectedUserListPage2.add(LocalAuthorityUserDataModel(i.toLong(), "User $i", "name", false, false))
+        }
+
+        // Act
+        val userListPage1 = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 1)
+        val userListPage2 = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 2)
+
+        // Assert
+        Assertions.assertIterableEquals(expectedUserListPage1, userListPage1)
+        Assertions.assertIterableEquals(expectedUserListPage2, userListPage2)
     }
 
     @Test

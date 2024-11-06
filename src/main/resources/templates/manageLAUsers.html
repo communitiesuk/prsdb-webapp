@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{manageLAUsers.title}, ~{::main})}">
+<html th:replace="~{fragments/layout :: layout(#{manageLAUsers.title}, ~{::main}, false)}">
 <main class="govuk-main-wrapper" id="main-content">
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <header id="header">
-            <h1 class="govuk-heading-l" th:text="#{manageLAUsers.contentHeader(${localAuthority})}">
+            <h1 class="govuk-heading-l" th:text="#{manageLAUsers.contentHeader(${localAuthority.name})}">
                 manageLAUsers.contentHeader
             </h1>
         </header>
@@ -37,7 +37,9 @@
                 </nav>
             </div>
             <div class="govuk-button-group" id="action-buttons">
-                <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{manageLAUsers.inviteAnotherUserButtonText})}"></button>
+                <a th:replace="~{fragments/primaryButtonLink :: primaryButtonLink(@{/local-authority/{id}/invite-new-user(id=${localAuthority.id})}, #{manageLAUsers.inviteAnotherUserButtonText})}">
+                    manageLAUsers.inviteAnotherUserButtonText
+                </a>
                 <button th:replace="~{fragments/buttons/secondaryButton :: secondaryButton(#{manageLAUsers.returnToDashboardButton})}"></button>
             </div>
         </section>

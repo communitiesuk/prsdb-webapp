@@ -1,13 +1,32 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels
 
-import jakarta.validation.constraints.AssertTrue
-import jakarta.validation.constraints.Email
-import jakarta.validation.constraints.NotBlank
+import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
+import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
+import uk.gov.communities.prsdb.webapp.validation.EmailConstraintValidator
+import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
+import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
+import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
+@IsValidPrioritised
 class ConfirmedEmailDataModel(
-    @field:NotBlank @field:Email val email: String,
-    @field:NotBlank val confirmEmail: String,
+    @ValidatedBy(
+        constraints = [
+            ConstraintDescriptor(messageKey = "addLAUser.error.missingEmail", validatorType = NotBlankConstraintValidator::class),
+            ConstraintDescriptor(messageKey = "addLAUser.error.notAnEmail", validatorType = EmailConstraintValidator::class),
+        ],
+    )
+    val email: String = "",
+    @ValidatedBy(
+        constraints = [
+            ConstraintDescriptor(messageKey = "addLAUser.error.noConfirmation", validatorType = NotBlankConstraintValidator::class),
+            ConstraintDescriptor(
+                messageKey = "addLAUser.error.confirmationDoesNotMatch",
+                validatorType = DelegatedPropertyConstraintValidator::class,
+                targetMethod = "isConfirmEmailSameAsEmail",
+            ),
+        ],
+    )
+    val confirmEmail: String = "",
 ) {
-    @AssertTrue
     fun isConfirmEmailSameAsEmail(): Boolean = email.trim() == confirmEmail.trim()
 }

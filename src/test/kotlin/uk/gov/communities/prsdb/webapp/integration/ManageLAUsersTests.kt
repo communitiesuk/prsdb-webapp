@@ -1,20 +1,48 @@
 package uk.gov.communities.prsdb.webapp.integration
 
-import org.junit.jupiter.api.BeforeEach
-import org.mockito.kotlin.whenever
+import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import com.microsoft.playwright.options.AriaRole
+import kotlin.test.Test
 
 class ManageLAUsersTests : IntegrationTest() {
-    @BeforeEach
-    fun setup() {
-        whenever(principal.name).thenReturn("Test user")
+    val localAuthorityId = 1
+
+    @Test
+    fun `manageLAUsers page renders`(page: Page) {
+        page.navigate("http://localhost:$port/local-authority/$localAuthorityId/manage-users")
+        assertThat(page.locator("h1")).containsText("Manage Betelgeuse's users")
     }
 
-// TODO: Add tests when OneLogin mockking is working
+    @Test
+    fun `table of users renders`(page: Page) {
+        page.navigate("http://localhost:$port/local-authority/$localAuthorityId/manage-users")
+        assertThat(page.locator("table")).containsText("Username")
+        assertThat(page.locator("table")).containsText("Access level")
+        assertThat(page.locator("table")).containsText("Account status")
+        assertThat(page.locator("table")).containsText("Arthur Dent")
+        assertThat(page.locator("table")).containsText("Basic")
+        assertThat(page.locator("table")).containsText("ACTIVE")
+        assertThat(page.locator("table")).containsText("Admin")
+    }
 
-/*    @Test
-    fun `manageLAUsers page renders`(page: Page) {
-        page.navigate("http://localhost:$port/manage-users")
-        assertThat(page.getByRole(AriaRole.HEADING)).containsText("Manage")
-        assertThat(page.getByRole(AriaRole.HEADING)).containsText("'s users'")
-    }*/
+    @Test
+    fun `buttons render`(page: Page) {
+        page.navigate("http://localhost:$port/local-authority/$localAuthorityId/manage-users")
+        assertThat(page.getByRole(AriaRole.BUTTON).getByText("Invite another user")).isVisible()
+        assertThat(page.getByRole(AriaRole.BUTTON).getByText("Return to dashboard")).isVisible()
+    }
+
+    @Test
+    fun `pagination component renders with more than 10 table entries`(page: Page) {
+        page.navigate("http://localhost:$port/local-authority/$localAuthorityId/manage-users")
+        assertThat(page.locator("nav.govuk-pagination")).isVisible()
+        assertThat(page.locator("nav.govuk-pagination")).containsText("Next")
+        assertThat(page.locator("li.govuk-pagination__item--current")).containsText("1")
+
+        page.navigate("http://localhost:$port/local-authority/$localAuthorityId/manage-users?page=2")
+        assertThat(page.locator("nav.govuk-pagination")).isVisible()
+        assertThat(page.locator("nav.govuk-pagination")).containsText("Previous")
+        assertThat(page.locator("li.govuk-pagination__item--current")).containsText("2")
+    }
 }

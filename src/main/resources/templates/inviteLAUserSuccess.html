@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{addLAUserSuccess.title}, ~{::main}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div id="page-contents" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <div id="confirmation-banner" th:replace="~{fragments/confirmationPageBanner :: confirmationPageBanner(#{addLAUserSuccess.banner.title}, ~{::#confirmation-banner/content()})}">
+            <span th:text="#{addLAUserSuccess.banner.body(${invitedEmailAddress})}" th:remove="tag">addLAUserSuccess.banner.body</span>
+        </div>
+        <h2 class="govuk-heading-m" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h2>
+        <p class="govuk-body" th:text="#{addLAUserSuccess.whatHappensNext.paragraph.one}">
+            addLAUserSuccess.whatHappensNext.para1
+        </p>
+        <p class="govuk-body" th:text="#{addLAUserSuccess.whatHappensNext.paragraph.two(${localAuthority.name})}">
+            addLAUserSuccess.whatHappensNext.para2
+        </p>
+        <div class="govuk-button-group">
+            <a th:replace="~{fragments/primaryButtonLink :: primaryButtonLink(@{/local-authority/{id}/invite-new-user(id=${localAuthority.id})}, #{addLAUserSuccess.inviteAnother})}">
+                addLAUserSuccess.inviteAnother
+            </a>
+            <a th:replace="~{fragments/secondaryButtonLink :: secondaryButtonLink('#', #{addLAUserSuccess.returnToDashboard})}">
+                addLAUserSuccess.returnToDashboard
+            </a>
+        </div>
+    </div>
+</main>
+</html>

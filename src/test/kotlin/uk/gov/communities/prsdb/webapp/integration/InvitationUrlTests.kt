@@ -18,8 +18,11 @@ import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.ExampleInvitationTokenController
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationEmail
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import java.net.URLEncoder
 import kotlin.test.Test
 
@@ -28,6 +31,12 @@ import kotlin.test.Test
 class InvitationUrlTests(
     context: WebApplicationContext,
 ) : ControllerTest(context) {
+    @MockBean
+    lateinit var anyEmailNotificationService: EmailNotificationService<EmailTemplateModel>
+
+    @MockBean
+    lateinit var localAuthorityInvitationService: LocalAuthorityInvitationService
+
     @MockBean
     private lateinit var localAuthorityDataService: LocalAuthorityDataService
 
@@ -39,7 +48,7 @@ class InvitationUrlTests(
         val testToken = "test token"
         val testEmail = "test@example.com"
 
-        whenever(localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(1, "user")).thenReturn(localAuthority)
+        whenever(localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(123, "user")).thenReturn(localAuthority)
 
         whenever(localAuthorityInvitationService.createInvitationToken(testEmail, localAuthority)).thenReturn(testToken)
         whenever(localAuthorityInvitationService.getAuthorityForToken(testToken)).thenReturn(localAuthority)
@@ -56,11 +65,11 @@ class InvitationUrlTests(
 
         // Act
         mvc
-            .post("/local-authority/1/manage-users/invite-new-user") {
+            .post("/local-authority/123/manage-users/invite-new-user") {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 content = encodedConfirmedEmailContent
                 with(csrf())
-            }.andExpect { status { isOk() } }
+            }.andExpect { status { is3xxRedirection() } }
 
         mvc
             .get(invitationCaptor.firstValue.invitationUri)
