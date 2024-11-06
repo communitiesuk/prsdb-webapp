@@ -178,7 +178,7 @@ class ManageLocalAuthorityUsersControllerTests(
 
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
-    fun `patchUserAccessLevel updates the given user's access level`() {
+    fun `updateUserAccessLevel updates the given user's access level`() {
         mvc
             .post("/local-authority/$DEFAULT_LA_ID/edit-user/$DEFAULT_LA_USER_ID") {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED

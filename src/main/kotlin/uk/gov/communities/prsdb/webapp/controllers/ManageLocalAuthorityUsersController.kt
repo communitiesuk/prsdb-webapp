@@ -92,7 +92,7 @@ class ManageLocalAuthorityUsersController(
     }
 
     @PostMapping("/edit-user/{localAuthorityUserId}")
-    fun patchUserAccessLevel(
+    fun updateUserAccessLevel(
         @PathVariable localAuthorityId: Int,
         @PathVariable localAuthorityUserId: Long,
         @ModelAttribute localAuthorityUserAccessLevel: LocalAuthorityUserAccessLevelDataModel,
