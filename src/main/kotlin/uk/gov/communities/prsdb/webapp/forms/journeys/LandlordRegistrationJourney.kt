@@ -36,7 +36,7 @@ class LandlordRegistrationJourney(
                                     "backUrl" to "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}",
                                 ),
                         ),
-                    nextAction = { _, subPageNumber: Int? -> Pair(LandlordRegistrationStepId.PhoneNumber, 0) },
+                    nextAction = { _, subPageNumber: Int? -> Pair(LandlordRegistrationStepId.PhoneNumber, null) },
                 ),
                 Step(
                     id = LandlordRegistrationStepId.PhoneNumber,
