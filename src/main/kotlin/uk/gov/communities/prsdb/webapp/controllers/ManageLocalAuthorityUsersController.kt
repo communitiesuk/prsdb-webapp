@@ -16,7 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ConfirmedEmailDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.RadioButtonDataModel
+import uk.gov.communities.prsdb.webapp.models.formModels.RadioButtonDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
