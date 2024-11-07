@@ -71,6 +71,7 @@ class ManageLocalAuthorityUsersController(
         val localAuthorityUser =
             localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
 
+        model.addAttribute("backLinkPath", "../manage-users")
         model.addAttribute("localAuthorityUser", localAuthorityUser)
         model.addAttribute(
             "options",
@@ -115,6 +116,7 @@ class ManageLocalAuthorityUsersController(
         localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
         val user = localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
         model.addAttribute("user", user)
+        model.addAttribute("backLinkPath", "../edit-user/$localAuthorityUserId")
         return "deleteLAUser"
     }
 

@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{manageLAUsers.title}, ~{::main}, false)}">
-<main class="govuk-main-wrapper" id="main-content">
-    <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
-        <div id="page-content">
+<html>
+    <body th:replace="~{fragments/layout :: layout(#{manageLAUsers.title}, ~{::body/content()}, false)}">
+        <a th:replace="~{fragments/forms/backLink :: backLink(${backLinkPath})}">backLink</a>
+        <th:block th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main})}">
+        <main class="govuk-main-wrapper">
             <header>
                 <h1 class="govuk-heading-l" th:text="${localAuthorityUser.userName}"></h1>
                 <p class="govuk-body">
@@ -21,7 +22,7 @@
                     ></button>
                 </div>
             </form>
-        </div>
-    </div>
-</main>
+        </main>
+        </th:block>
+    </body>
 </html>
