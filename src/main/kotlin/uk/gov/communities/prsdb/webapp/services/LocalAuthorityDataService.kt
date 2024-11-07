@@ -20,21 +20,28 @@ class LocalAuthorityDataService(
     val localAuthorityUserRepository: LocalAuthorityUserRepository,
     val localAuthorityUserOrInvitationRepository: LocalAuthorityUserOrInvitationRepository,
 ) {
-    fun getLocalAuthorityIfAuthorizedUser(
+    fun getUserAndLocalAuthorityIfAuthorizedUser(
         localAuthorityId: Int,
         subjectId: String,
-    ): LocalAuthority {
-        val localAuthority =
-            localAuthorityUserRepository.findByBaseUser_Id(subjectId)?.localAuthority
+    ): Pair<LocalAuthorityUserDataModel, LocalAuthority> {
+        val localAuthorityUser =
+            localAuthorityUserRepository.findByBaseUser_Id(subjectId)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $subjectId is not an LA user")
+        val userModel =
+            LocalAuthorityUserDataModel(
+                localAuthorityUser.id!!,
+                localAuthorityUser.baseUser.name,
+                localAuthorityUser.localAuthority.name,
+                localAuthorityUser.isManager,
+            )
 
-        if (localAuthority.id != localAuthorityId) {
+        if (localAuthorityUser.localAuthority.id != localAuthorityId) {
             throw AccessDeniedException(
-                "Local authority user for LA ${localAuthority.id} tried to manage users for LA $localAuthorityId",
+                "Local authority user for LA ${localAuthorityUser.localAuthority.id} tried to manage users for LA $localAuthorityId",
             )
         }
 
-        return localAuthority
+        return Pair(userModel, localAuthorityUser.localAuthority)
     }
 
     fun getLocalAuthorityUserIfAuthorizedLA(

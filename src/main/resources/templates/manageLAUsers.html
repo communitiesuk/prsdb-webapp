@@ -29,7 +29,10 @@
                     <td class="govuk-table__cell">
                         <a th:href="@{${user.pending ? '#' : 'edit-user/' + user.id}}"
                            class="govuk-link"
-                           th:text="#{manageLAUsers.table.change}">
+                           th:text="#{manageLAUsers.table.change}"
+                           th:if="${currentUser.id} != ${user.id}"
+                        >
+                            manageLAUsers.table.change
                         </a>
                     </td>
                 </tr>

@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.ExampleInvitationTokenController
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createdLoggedInUserModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -44,11 +45,17 @@ class InvitationUrlTests(
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `The invitation URL generated when a new user is invited is routed to the accept invitation controller method`() {
         // Arrange
+        val loggedInUser = createdLoggedInUserModel()
         val localAuthority = createTestLocalAuthority()
         val testToken = "test token"
         val testEmail = "test@example.com"
 
-        whenever(localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(123, "user")).thenReturn(localAuthority)
+        whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(123, "user")).thenReturn(
+            Pair(
+                loggedInUser,
+                localAuthority,
+            ),
+        )
 
         whenever(localAuthorityInvitationService.createInvitationToken(testEmail, localAuthority)).thenReturn(testToken)
         whenever(localAuthorityInvitationService.getAuthorityForToken(testToken)).thenReturn(localAuthority)

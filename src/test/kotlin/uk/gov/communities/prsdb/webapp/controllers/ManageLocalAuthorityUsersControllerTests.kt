@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Compan
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createOneLoginUser
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createdLoggedInUserModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateModel
@@ -66,9 +67,10 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `ManageLocalAuthorityUsersController returns 200 for authorized user`() {
+        val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = LocalAuthority(DEFAULT_LA_ID, "Test Local Authority")
-        whenever(localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
-            .thenReturn(localAuthority)
+        whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            .thenReturn(Pair(loggedInUserModel, localAuthority))
         whenever(localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 0))
             .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
 
@@ -82,7 +84,7 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `index returns 403 for admin user accessing another LA`() {
-        whenever(localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+        whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenThrow(AccessDeniedException(""))
 
         mvc
@@ -95,9 +97,10 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `inviting new user with valid form redirects to confirmation page`() {
+        val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = LocalAuthority(DEFAULT_LA_ID, "Test Local Authority")
-        whenever(localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
-            .thenReturn(localAuthority)
+        whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            .thenReturn(Pair(loggedInUserModel, localAuthority))
         whenever(localAuthorityInvitationService.createInvitationToken(any(), any()))
             .thenReturn("test-token")
         whenever(localAuthorityInvitationService.buildInvitationUri("test-token"))
@@ -125,7 +128,8 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `getEditUserAccessLevelPage returns 403 for admin user accessing another LA`() {
-        whenever(localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+        createdLoggedInUserModel()
+        whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenThrow(AccessDeniedException(""))
 
         mvc
@@ -138,9 +142,10 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `getEditUserAccessLevelPage returns 404 for admin user accessing a LA user that does not exist or is from another LA`() {
+        val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = createLocalAuthority()
-        whenever(localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
-            .thenReturn(localAuthority)
+        whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            .thenReturn(Pair(loggedInUserModel, localAuthority))
         whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(DEFAULT_LA_USER_ID, DEFAULT_LA_ID))
             .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
 
@@ -153,10 +158,28 @@ class ManageLocalAuthorityUsersControllerTests(
 
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
-    fun `getEditUserAccessLevelPage returns 200 for admin user accessing a user from its LA`() {
+    fun `getEditUserAccessLevelPage returns 403 for admin user accessing their own edit page`() {
+        val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = createLocalAuthority()
-        whenever(localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
-            .thenReturn(localAuthority)
+        whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            .thenReturn(Pair(loggedInUserModel, localAuthority))
+        whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(loggedInUserModel.id, DEFAULT_LA_ID))
+            .thenReturn(loggedInUserModel)
+
+        mvc
+            .get("/local-authority/$DEFAULT_LA_ID/edit-user/${loggedInUserModel.id}")
+            .andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_ADMIN"])
+    fun `getEditUserAccessLevelPage returns 200 for admin user accessing a user from its LA`() {
+        val loggedInUserModel = createdLoggedInUserModel()
+        val localAuthority = createLocalAuthority()
+        whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            .thenReturn(Pair(loggedInUserModel, localAuthority))
         val baseUser = createOneLoginUser("user")
         val localAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority)
         whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(DEFAULT_LA_USER_ID, DEFAULT_LA_ID))
@@ -178,7 +201,30 @@ class ManageLocalAuthorityUsersControllerTests(
 
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
+    fun `updateUserAccessLevel gives a 403 when trying to update currently logged in user`() {
+        val loggedInUserModel = createdLoggedInUserModel()
+        val localAuthority = createLocalAuthority()
+        whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            .thenReturn(Pair(loggedInUserModel, localAuthority))
+
+        mvc
+            .post("/local-authority/$DEFAULT_LA_ID/edit-user/${loggedInUserModel.id}") {
+                contentType = MediaType.APPLICATION_FORM_URLENCODED
+                content = "isManager=false"
+                with(csrf())
+            }.andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_ADMIN"])
     fun `updateUserAccessLevel updates the given user's access level`() {
+        val loggedInUserModel = createdLoggedInUserModel()
+        val localAuthority = createLocalAuthority()
+        whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            .thenReturn(Pair(loggedInUserModel, localAuthority))
+
         mvc
             .post("/local-authority/$DEFAULT_LA_ID/edit-user/$DEFAULT_LA_USER_ID") {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED

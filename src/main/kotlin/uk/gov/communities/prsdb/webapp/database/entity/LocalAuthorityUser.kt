@@ -13,7 +13,7 @@ import jakarta.persistence.OneToOne
 class LocalAuthorityUser(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long? = null,
+    val id: Long? = null,
 ) : ModifiableAuditableEntity() {
     @OneToOne(optional = false)
     @JoinColumn(name = "subject_identifier", nullable = false, foreignKey = ForeignKey(name = "FK_LA_USER_1L_USER"))
