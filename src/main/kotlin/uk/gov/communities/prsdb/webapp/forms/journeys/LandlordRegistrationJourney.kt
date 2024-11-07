@@ -54,7 +54,8 @@ class LandlordRegistrationJourney(
                                     "hint" to "forms.phoneNumber.hint",
                                 ),
                         ),
-                    nextAction = { _, subPageNumber: Int? -> Pair(LandlordRegistrationStepId.Email, 0) },
+                    // TODO PRSD-371 the next action should be updated to the `Select Country` step
+                    nextAction = { _, subPageNumber: Int? -> Pair(LandlordRegistrationStepId.Email, null) },
                 ),
             ),
     )
