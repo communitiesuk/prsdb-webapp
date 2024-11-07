@@ -8,7 +8,7 @@ class InviteNewLaUserSuccessPage(
     page: Page,
 ) : BasePage(page) {
     override fun validate() {
-        assertEquals("User invited", page.title())
+        assertEquals("Invite sent", page.title())
     }
 
     val confirmationBanner: ConfirmationPageBanner = ConfirmationPageBanner(page.locator(".govuk-panel--confirmation"))

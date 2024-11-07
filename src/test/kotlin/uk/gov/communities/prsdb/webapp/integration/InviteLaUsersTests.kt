@@ -8,7 +8,7 @@ class InviteLaUsersTests : IntegrationTest() {
         val invitePage = navigator.goToInviteNewLaUser(1)
         invitePage.fillBothEmailFields("test@example.com")
         val successPage = invitePage.submit()
-        successPage.confirmationBanner.assertHasMessage("You've sent test@example.com an invitation to the database")
+        successPage.confirmationBanner.assertHasMessage("You've sent test@example.com an invite to the database")
     }
 
     @Test
