@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{manageLAUsers.title}, ~{::main}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
+        <div id="page-content">
+            <header>
+                <h1 class="govuk-heading-l" th:text="${localAuthorityUser.userName}"></h1>
+                <p class="govuk-body">
+                    <strong th:text="#{editLAUserAccess.subHeading.beforeEmail}">editLAUserAccess.subHeading.beforeEmail</strong>
+                    <span th:remove="tag" th:text="${localAuthorityUser.email}"></span>
+                </p>
+            </header>
+            <form method="POST" th:object="${localAuthorityUser}" th:action="@{''}">
+                <div th:replace="~{fragments/radioButtons :: radioButtons(#{editLAUserAccess.radios.heading}, 'isManager', ${options})}"></div>
+                <div class="govuk-button-group">
+                    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{editLAUserAccess.saveButton})}"></button>
+                    <button th:replace="~{fragments/buttons/warningButton :: warningButton(buttonText=#{editLAUserAccess.deleteAccountButton},href='#')}"></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+</html>

@@ -1,0 +1,32 @@
+<!--/* TODO PRSD-404: Remove this template once there is another way to reach the EmailNotificationService
+ This template is for an example page to demo our integration with notify and should be removed once
+ there is an integration that belongs to an intended releasable feature. */-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{${title}}, ~{::main})}">
+<main class="govuk-main-wrapper" id="main-content">
+    <h1 class="govuk-heading-xl" th:text="#{${contentHeader}}">Default page template</h1>
+    <form class="form" method="post" th:action="@{${#ctx.#requestdatavalues.url('')}}">
+        <div class="govuk-form-group">
+            <h1 class="govuk-label-wrapper">
+                <label class="govuk-label govuk-label--l" for="email">
+                    Choose a recipient
+                </label>
+            </h1>
+            <input class="govuk-input" id="email" name="email" type="text">
+        </div>
+        <div>
+            <div class="govuk-form-group">
+                <h1 class="govuk-label-wrapper">
+                    <label class="govuk-label govuk-label--l" for="confirm-email">
+                        Choose a recipient
+                    </label>
+                </h1>
+                <input class="govuk-input" id="confirm-email" name="confirmEmail" type="text">
+            </div>
+            <button type="submit" class="govuk-button" data-module="govuk-button">
+                Submit
+            </button>
+        </div>
+    </form>
+</main>
+</html>

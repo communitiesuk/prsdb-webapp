@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.clients
+package uk.gov.communities.prsdb.webapp.mockObjects
 
 import java.net.URI
 import java.net.http.HttpClient

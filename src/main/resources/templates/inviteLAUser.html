@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/layout :: layout(#{addLAUser.title}, ~{::main}, ${#fields.hasErrors('${confirmedEmailDataModel.*}')})}">
 <main class="govuk-main-wrapper" id="main-content">
-    <div id="page-contents" th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+    <div id="page-contents" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <header id="header">
             <h1 class="govuk-heading-l" th:text="#{addLAUser.heading(${councilName})}"></h1>
         </header>
@@ -29,7 +29,7 @@
             <input th:replace="~{fragments/forms/basicTextInput :: textInput(#{addLAUser.form.primaryEmailLabel}, 'email')}">
             <input th:replace="~{fragments/forms/basicTextInput :: textInput(#{addLAUser.form.confirmEmailLabel}, 'confirmEmail')}">
 
-            <button th:replace="~{fragments/primaryButton :: primaryButton(#{addLAUser.form.submitButton})}"></button>
+            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{addLAUser.form.submitButton})}"></button>
         </form>
     </div>
 </main>

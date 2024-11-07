@@ -16,6 +16,14 @@ class Navigator(
         return BasePage.createValid(page, ManageLaUsersPage::class)
     }
 
+    fun goToEditLaUser(
+        authorityId: Int,
+        userId: Int,
+    ): EditLaUserPage {
+        navigate("local-authority/$authorityId/edit-user/$userId")
+        return BasePage.createValid(page, EditLaUserPage::class)
+    }
+
     private fun navigate(path: String) {
         page.navigate("http://localhost:$port/$path")
     }

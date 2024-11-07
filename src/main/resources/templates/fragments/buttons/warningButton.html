@@ -1,0 +1,10 @@
+<div th:remove="tag" th:fragment="warningButton(buttonText)">
+    <a th:if="${href != null}" th:href="${href}" th:text="${buttonText}" role="button" draggable="false"
+       class="govuk-button govuk-button--warning" data-module="govuk-button">
+        Warning
+    </a>
+    <button th:if="${href == null}" th:text="${buttonText}" type="submit" class="govuk-button govuk-button--warning"
+            data-module="govuk-button">
+        Warning
+    </button>
+</div>

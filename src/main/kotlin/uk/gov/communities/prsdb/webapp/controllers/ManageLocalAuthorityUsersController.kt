@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.validation.Valid
 import org.springframework.http.MediaType
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -14,9 +13,10 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ConfirmedEmailDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
+import uk.gov.communities.prsdb.webapp.models.formModels.RadioButtonDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
@@ -38,7 +38,8 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         @RequestParam(value = "page", required = false) page: Int = 1,
     ): String {
-        val currentUserLocalAuthority = getCurrentUsersLocalAuthorityAndCheckAuthorisation(principal, localAuthorityId)
+        val currentUserLocalAuthority =
+            localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
 
         val pagedUserList =
             localAuthorityDataService.getPaginatedUsersAndInvitations(
@@ -58,13 +59,59 @@ class ManageLocalAuthorityUsersController(
         return "manageLAUsers"
     }
 
+    @GetMapping("/edit-user/{localAuthorityUserId}")
+    fun getEditUserAccessLevelPage(
+        @PathVariable localAuthorityId: Int,
+        @PathVariable localAuthorityUserId: Long,
+        principal: Principal,
+        model: Model,
+    ): String {
+        localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+
+        val localAuthorityUser =
+            localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
+
+        model.addAttribute("localAuthorityUser", localAuthorityUser)
+        model.addAttribute(
+            "options",
+            listOf(
+                RadioButtonDataModel(
+                    false,
+                    "editLAUserAccess.radios.option.basic.label",
+                    "editLAUserAccess.radios.option.basic.hint",
+                ),
+                RadioButtonDataModel(
+                    true,
+                    "editLAUserAccess.radios.option.admin.label",
+                    "editLAUserAccess.radios.option.admin.hint",
+                ),
+            ),
+        )
+
+        return "editLAUserAccess"
+    }
+
+    @PostMapping("/edit-user/{localAuthorityUserId}")
+    fun updateUserAccessLevel(
+        @PathVariable localAuthorityId: Int,
+        @PathVariable localAuthorityUserId: Long,
+        @ModelAttribute localAuthorityUserAccessLevel: LocalAuthorityUserAccessLevelDataModel,
+        principal: Principal,
+    ): String {
+        localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
+
+        localAuthorityDataService.updateUserAccessLevel(localAuthorityUserAccessLevel, localAuthorityUserId)
+        return "redirect:/local-authority/{localAuthorityId}/manage-users"
+    }
+
     @GetMapping("/invite-new-user")
     fun inviteNewUser(
         @PathVariable localAuthorityId: Int,
         model: Model,
         principal: Principal,
     ): String {
-        val currentAuthority = getCurrentUsersLocalAuthorityAndCheckAuthorisation(principal, localAuthorityId)
+        val currentAuthority = localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
         model.addAttribute("councilName", currentAuthority.name)
         model.addAttribute("confirmedEmailDataModel", ConfirmedEmailDataModel())
 
@@ -82,7 +129,7 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         redirectAttributes: RedirectAttributes,
     ): String {
-        val currentAuthority = getCurrentUsersLocalAuthorityAndCheckAuthorisation(principal, localAuthorityId)
+        val currentAuthority = localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
         model.addAttribute("councilName", currentAuthority.name)
 
         if (bindingResult.hasErrors()) {
@@ -111,21 +158,8 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         model: Model,
     ): String {
-        val currentAuthority = getCurrentUsersLocalAuthorityAndCheckAuthorisation(principal, localAuthorityId)
+        val currentAuthority = localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
         model.addAttribute("localAuthority", currentAuthority)
         return "inviteLAUserSuccess"
-    }
-
-    private fun getCurrentUsersLocalAuthorityAndCheckAuthorisation(
-        principal: Principal,
-        localAuthorityId: Int,
-    ): LocalAuthority {
-        val currentUserLocalAuthority = localAuthorityDataService.getLocalAuthorityForUser(principal.name)!!
-        if (currentUserLocalAuthority.id != localAuthorityId) {
-            throw AccessDeniedException(
-                "Local authority user for LA ${currentUserLocalAuthority.id} tried to manage users for LA $localAuthorityId",
-            )
-        }
-        return currentUserLocalAuthority
     }
 }
