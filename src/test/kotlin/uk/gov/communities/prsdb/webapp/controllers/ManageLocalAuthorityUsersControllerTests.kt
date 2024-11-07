@@ -246,9 +246,10 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `confirmDeleteUser gives a 200 for admins of the LA containing the user`() {
+        val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = createLocalAuthority()
-        whenever(localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
-            .thenReturn(localAuthority)
+        whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            .thenReturn(Pair(loggedInUserModel, localAuthority))
         val baseUser = createOneLoginUser("user")
         val localAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority)
         whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(DEFAULT_LA_USER_ID, DEFAULT_LA_ID))
@@ -270,10 +271,29 @@ class ManageLocalAuthorityUsersControllerTests(
 
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
-    fun `deleteUser deletes the specified user`() {
+    fun `confirmDeleteUser gives a 403 when trying to delete currently logged in user`() {
+        val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = createLocalAuthority()
-        whenever(localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
-            .thenReturn(localAuthority)
+        whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            .thenReturn(Pair(loggedInUserModel, localAuthority))
+
+        mvc
+            .post("/local-authority/$DEFAULT_LA_ID/delete-user/${loggedInUserModel.id}") {
+                contentType = MediaType.APPLICATION_FORM_URLENCODED
+                content = "isManager=false"
+                with(csrf())
+            }.andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_ADMIN"])
+    fun `deleteUser deletes the specified user`() {
+        val loggedInUserModel = createdLoggedInUserModel()
+        val localAuthority = createLocalAuthority()
+        whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            .thenReturn(Pair(loggedInUserModel, localAuthority))
         val baseUser = createOneLoginUser("user")
         val localAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority)
         whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(DEFAULT_LA_USER_ID, DEFAULT_LA_ID))
@@ -298,5 +318,22 @@ class ManageLocalAuthorityUsersControllerTests(
             }
 
         verify(localAuthorityDataService).deleteUser(DEFAULT_LA_USER_ID)
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_ADMIN"])
+    fun `deleteUser gives a 403 if attempting to remove the current user`() {
+        val loggedInUserModel = createdLoggedInUserModel()
+        val localAuthority = createLocalAuthority()
+        whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            .thenReturn(Pair(loggedInUserModel, localAuthority))
+
+        mvc
+            .post("/local-authority/$DEFAULT_LA_ID/delete-user/${loggedInUserModel.id}") {
+                contentType = MediaType.APPLICATION_FORM_URLENCODED
+                with(csrf())
+            }.andExpect {
+                status { isForbidden() }
+            }
     }
 }

@@ -121,9 +121,12 @@ class ManageLocalAuthorityUsersController(
         model: Model,
         principal: Principal,
     ): String {
-        localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
-        val user = localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
-        model.addAttribute("user", user)
+        val (currentUser, _) = localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        if (currentUser.id == localAuthorityUserId) {
+            throw AccessDeniedException("Local authority users cannot delete their own accounts; another admin must do so")
+        }
+        val userToDelete = localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
+        model.addAttribute("user", userToDelete)
         model.addAttribute("backLinkPath", "../edit-user/$localAuthorityUserId")
         return "deleteLAUser"
     }
@@ -135,7 +138,10 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         redirectAttributes: RedirectAttributes,
     ): String {
-        localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        val (currentUser, _) = localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        if (currentUser.id == localAuthorityUserId) {
+            throw AccessDeniedException("Local authority users cannot delete their own accounts; another admin must do so")
+        }
         val user = localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
 
         localAuthorityDataService.deleteUser(localAuthorityUserId)
@@ -150,7 +156,7 @@ class ManageLocalAuthorityUsersController(
         model: Model,
         principal: Principal,
     ): String {
-        val authority = localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        val (_, authority) = localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
         model.addAttribute("localAuthority", authority)
         return "deleteLAUserSuccess"
     }
