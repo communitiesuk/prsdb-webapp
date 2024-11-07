@@ -19,7 +19,7 @@ class EditLAUserTests : IntegrationTest() {
         // Editing the user shows Arthur Dent's page
         var editUserPage = row.editUser()
         assertThat(editUserPage.userName).containsText("Arthur Dent")
-        assertThat(editUserPage.email).containsText("Arthur Dent") // TODO: fix when LA users have email addresses
+        assertThat(editUserPage.email).containsText("Arthur Dent") // TODO PRSD-405: fix when LA users have email addresses
         assertEquals(EditLaUserPage.AccessLevelSelection.BASIC, editUserPage.accessLevel())
 
         // Update the user's access level to admin
@@ -47,7 +47,7 @@ class EditLAUserTests : IntegrationTest() {
         // Delete the user
         val confirmDeletePage = editUserPage.deleteUser()
         confirmDeletePage.assertUserNameVisible("Arthur Dent")
-        confirmDeletePage.assertEmailVisible("Arthur Dent") // TODO: fix when LA users have email addresses
+        confirmDeletePage.assertEmailVisible("Arthur Dent") // TODO PRSD-405: fix when LA users have email addresses
         val successPage = confirmDeletePage.deleteUser()
 
         // The success page confirms the user is deleted
