@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages
 
 import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 
 class Navigator(
     private val page: Page,
@@ -22,6 +23,16 @@ class Navigator(
     ): EditLaUserPage {
         navigate("local-authority/$authorityId/edit-user/$userId")
         return BasePage.createValid(page, EditLaUserPage::class)
+    }
+
+    fun goToEmailFormPage(journeyType: JourneyType): EmailFormPage {
+        navigate("${journeyType.urlPathSegment}/email")
+        return BasePage.createValid<EmailFormPage>(page)
+    }
+
+    fun goToPhoneNumberFormPage(journeyType: JourneyType): PhoneNumberFormPage {
+        navigate("${journeyType.urlPathSegment}/phone-number")
+        return BasePage.createValid<PhoneNumberFormPage>(page)
     }
 
     private fun navigate(path: String) {

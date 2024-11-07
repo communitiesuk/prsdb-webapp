@@ -15,9 +15,9 @@ class RegisterLandlordPageTests : IntegrationTest() {
     }
 
     @Test
-    fun `the 'Start Now' button directs a user to the registration page`(page: Page) {
+    fun `the 'Start Now' button directs a user to the landlord registration email page`(page: Page) {
         page.navigate("http://localhost:$port/register-as-a-landlord")
         page.getByRole(AriaRole.BUTTON, Page.GetByRoleOptions().setName("Start Now")).click()
-        assertEquals("/registration", URI(page.url()).path)
+        assertEquals("/register-as-a-landlord/email", URI(page.url()).path)
     }
 }

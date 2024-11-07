@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.TextIn
 import kotlin.reflect.KClass
 
 abstract class BasePage(
-    protected val page: Page,
+    val page: Page,
 ) {
     companion object {
         fun <T : BasePage> createValid(
@@ -21,7 +21,11 @@ abstract class BasePage(
 
     protected val header = page.locator("main header h1")
 
+    protected val fieldSetHeading = page.locator(".govuk-fieldset__heading")
+
     abstract fun validate()
 
     protected fun inputFormGroup(fieldName: String) = TextInput(page.locator(".govuk-form-group:has(input[name=\"$fieldName\"])"))
+
+    protected fun fieldsetInput(fieldName: String) = TextInput(page.locator(".govuk-fieldset:has(input[name=\"$fieldName\"])"))
 }
