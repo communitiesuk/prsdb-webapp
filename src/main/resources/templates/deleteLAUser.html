@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <body th:replace="~{fragments/layout :: layout(#{deleteLAUser.title}, ~{::body/content()}, false)}">
+        <a th:replace="~{fragments/forms/backLink :: backLink(${backLinkPath})}">backLink</a>
+        <th:block th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main})}">
+        <main class="govuk-main-wrapper">
+            <header id="header">
+                <h1 class="govuk-heading-l" th:text="#{deleteLAUser.heading}">deleteLAUser.heading</h1>
+            </header>
+            <section>
+                <p class="govuk-body">
+                    <strong th:text="${user.userName}">user.name</strong>
+                </p>
+                <p class="govuk-body">
+                    <strong th:text="#{deleteLAUser.emailLabel}+':'">deleteLAUser.emailLabel:</strong>
+                    <span th:text="${user.email}" th:remove="tag">user.email</span>
+                </p>
+            </section>
+            <section>
+                <p class="govuk-body" th:text="#{deleteLAUser.para.one}">deleteLAUser.para.one</p>
+                <p class="govuk-body" th:text="#{deleteLAUser.para.two}">deleteLAUser.para.two</p>
+                <div th:replace="~{fragments/warningText :: warningText(#{deleteLAUser.warning})}">deleteLAUser.warning</div>
+            </section>
+            <form method="post" th:action="@{''}">
+                <button th:replace="~{fragments/buttons/warningButton :: warningButton(buttonText=#{deleteLAUser.deleteAccountButton})}"></button>
+            </form>
+        </main>
+        </th:block>
+    </body>
+</html>
