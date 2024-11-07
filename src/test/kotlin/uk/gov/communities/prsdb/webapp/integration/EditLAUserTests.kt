@@ -31,7 +31,7 @@ class EditLAUserTests : IntegrationTest() {
         assertTrue(row.accessLevel().contains("Admin"))
 
         // The user's page also now defaults to admin
-        editUserPage = manageUsersPage.table.row(1).editUser()
+        editUserPage = manageUsersPage.table.row(0).editUser()
         assertEquals(EditLaUserPage.AccessLevelSelection.ADMIN, editUserPage.accessLevel())
 
         // Reset back to basic, because the tests don't seem to be isolated from each other(!)
