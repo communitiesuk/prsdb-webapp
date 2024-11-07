@@ -14,7 +14,11 @@
                 <div th:replace="~{fragments/radioButtons :: radioButtons(#{editLAUserAccess.radios.heading}, 'isManager', ${options})}"></div>
                 <div class="govuk-button-group">
                     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{editLAUserAccess.saveButton})}"></button>
-                    <button th:replace="~{fragments/buttons/warningButton :: warningButton(buttonText=#{editLAUserAccess.deleteAccountButton},href='#')}"></button>
+                    <button th:replace="~{fragments/buttons/warningButton :: warningButton(
+                            buttonText=#{editLAUserAccess.deleteAccountButton},
+                            href=@{/local-authority/{laId}/delete-user/{uid}(laId=${localAuthorityId}, uid=${localAuthorityUserId})}
+                        )}"
+                    ></button>
                 </div>
             </form>
         </div>

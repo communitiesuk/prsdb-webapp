@@ -12,6 +12,7 @@ class EditLaUserPage(
     val basicRadio: Locator = page.locator("form input[value='false']")
     val adminRadio: Locator = page.locator("form input[value='true']")
     private val submitButton = page.locator("button[type=\"submit\"]").filter(Locator.FilterOptions().apply { hasText = "Save" })
+    private val deleteButton = page.locator("form a").filter(Locator.FilterOptions().apply { hasText = "Remove" })
 
     override fun validate() {
         assertEquals("Manage Local Authority Users", page.title())
@@ -37,6 +38,11 @@ class EditLaUserPage(
     fun submit(): ManageLaUsersPage {
         submitButton.click()
         return createValid(page, ManageLaUsersPage::class)
+    }
+
+    fun deleteUser(): ConfirmDeleteLaUserPage {
+        deleteButton.click()
+        return createValid(page, ConfirmDeleteLaUserPage::class)
     }
 
     enum class AccessLevelSelection {

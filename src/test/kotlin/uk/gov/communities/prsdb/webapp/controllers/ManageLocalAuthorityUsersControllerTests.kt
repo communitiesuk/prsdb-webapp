@@ -186,7 +186,7 @@ class ManageLocalAuthorityUsersControllerTests(
                 with(csrf())
             }.andExpect {
                 status {
-                    status { is3xxRedirection() }
+                    is3xxRedirection()
                     redirectedUrl("/local-authority/$DEFAULT_LA_ID/manage-users")
                 }
             }
@@ -195,5 +195,62 @@ class ManageLocalAuthorityUsersControllerTests(
             LocalAuthorityUserAccessLevelDataModel(true),
             DEFAULT_LA_USER_ID,
         )
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_ADMIN"])
+    fun `confirmDeleteUser gives a 200 for admins of the LA containing the user`() {
+        val localAuthority = createLocalAuthority()
+        whenever(localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            .thenReturn(localAuthority)
+        val baseUser = createOneLoginUser("user")
+        val localAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority)
+        whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(DEFAULT_LA_USER_ID, DEFAULT_LA_ID))
+            .thenReturn(
+                LocalAuthorityUserDataModel(
+                    DEFAULT_LA_USER_ID,
+                    baseUser.name,
+                    localAuthority.name,
+                    localAuthorityUser.isManager,
+                ),
+            )
+
+        mvc
+            .get("/local-authority/$DEFAULT_LA_ID/delete-user/$DEFAULT_LA_USER_ID")
+            .andExpect {
+                status { isOk() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_ADMIN"])
+    fun `deleteUser deletes the specified user`() {
+        val localAuthority = createLocalAuthority()
+        whenever(localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            .thenReturn(localAuthority)
+        val baseUser = createOneLoginUser("user")
+        val localAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority)
+        whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(DEFAULT_LA_USER_ID, DEFAULT_LA_ID))
+            .thenReturn(
+                LocalAuthorityUserDataModel(
+                    DEFAULT_LA_USER_ID,
+                    baseUser.name,
+                    localAuthority.name,
+                    localAuthorityUser.isManager,
+                ),
+            )
+
+        mvc
+            .post("/local-authority/$DEFAULT_LA_ID/delete-user/$DEFAULT_LA_USER_ID") {
+                contentType = MediaType.APPLICATION_FORM_URLENCODED
+                with(csrf())
+            }.andExpect {
+                status {
+                    is3xxRedirection()
+                    redirectedUrl("../delete-user/success")
+                }
+            }
+
+        verify(localAuthorityDataService).deleteUser(DEFAULT_LA_USER_ID)
     }
 }

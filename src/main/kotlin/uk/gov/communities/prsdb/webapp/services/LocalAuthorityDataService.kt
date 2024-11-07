@@ -90,4 +90,8 @@ class LocalAuthorityDataService(
         localAuthorityUser.isManager = localAuthorityUserAccessLevel.isManager
         localAuthorityUserRepository.save(localAuthorityUser)
     }
+
+    fun deleteUser(localAuthorityUserId: Long) {
+        localAuthorityUserRepository.deleteById(localAuthorityUserId)
+    }
 }

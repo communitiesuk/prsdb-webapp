@@ -105,6 +105,46 @@ class ManageLocalAuthorityUsersController(
         return "redirect:/local-authority/{localAuthorityId}/manage-users"
     }
 
+    @GetMapping("/delete-user/{localAuthorityUserId}")
+    fun confirmDeleteUser(
+        @PathVariable localAuthorityId: Int,
+        @PathVariable localAuthorityUserId: Long,
+        model: Model,
+        principal: Principal,
+    ): String {
+        localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        val user = localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
+        model.addAttribute("user", user)
+        return "deleteLAUser"
+    }
+
+    @PostMapping("/delete-user/{localAuthorityUserId}")
+    fun deleteUser(
+        @PathVariable localAuthorityId: Int,
+        @PathVariable localAuthorityUserId: Long,
+        principal: Principal,
+        redirectAttributes: RedirectAttributes,
+    ): String {
+        localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        val user = localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
+
+        localAuthorityDataService.deleteUser(localAuthorityUserId)
+
+        redirectAttributes.addFlashAttribute("deletedUserName", user.userName)
+        return "redirect:../delete-user/success"
+    }
+
+    @GetMapping("/delete-user/success")
+    fun deleteUserSuccess(
+        @PathVariable localAuthorityId: Int,
+        model: Model,
+        principal: Principal,
+    ): String {
+        val authority = localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        model.addAttribute("localAuthority", authority)
+        return "deleteLAUserSuccess"
+    }
+
     @GetMapping("/invite-new-user")
     fun inviteNewUser(
         @PathVariable localAuthorityId: Int,
