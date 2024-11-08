@@ -1,8 +1,10 @@
 package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages
 
+import com.deque.html.axecore.playwright.AxeBuilder
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.TextInput
 import kotlin.reflect.KClass
+import kotlin.test.assertEquals
 
 abstract class BasePage(
     protected val page: Page,
@@ -15,6 +17,15 @@ abstract class BasePage(
             page.waitForLoadState()
             val pageInstance = targetClass.constructors.first().call(page)
             pageInstance.validate()
+            val axeResults =
+                AxeBuilder(page)
+                    .withTags(listOf("wcag2a", "wcag2aa", "wcag21a", "wcag21aa"))
+                    .analyze()
+            assertEquals(
+                listOf(),
+                axeResults.violations,
+                "There were Axe violations after creating and validating a ${targetClass.simpleName}",
+            )
             return pageInstance
         }
     }
