@@ -9,6 +9,6 @@ class CheckHomePageTests : IntegrationTest() {
     @Test
     fun `check a home for rent page renders`(page: Page) {
         page.navigate("http://localhost:$port/check")
-        assertThat(page.getByRole(AriaRole.HEADING)).containsText("Check a home to rent")
+        assertThat(page.getByRole(AriaRole.HEADING)).containsText("ZCheck a home to rent")
     }
 }
