@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.mockObjects
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 
 class MockLocalAuthorityData {
     companion object {
@@ -25,5 +26,19 @@ class MockLocalAuthorityData {
             id: Long = DEFAULT_LA_USER_ID,
             isManager: Boolean = true,
         ): LocalAuthorityUser = LocalAuthorityUser(id, baseUser, isManager, localAuthority)
+
+        const val DEFAULT_LOGGED_IN_LA_USER_ID = 789L
+
+        fun createdLoggedInUserModel(userId: Long = DEFAULT_LOGGED_IN_LA_USER_ID): LocalAuthorityUserDataModel {
+            val defaultLA = createLocalAuthority()
+            return LocalAuthorityUserDataModel(
+                id = userId,
+                localAuthorityName = defaultLA.name,
+                isManager = true,
+                userName = "Logged In User",
+                isPending = false,
+                email = "loggedinuser@example.gov.uk",
+            )
+        }
     }
 }

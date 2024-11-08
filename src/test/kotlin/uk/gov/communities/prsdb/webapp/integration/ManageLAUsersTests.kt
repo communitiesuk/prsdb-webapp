@@ -24,6 +24,9 @@ class ManageLAUsersTests : IntegrationTest() {
 
         val nextRow = managePage.table.row(1)
         assertTrue(nextRow.accessLevel().contains("Admin"))
+
+        val loggedInUsersRow = managePage.table.row(4)
+        loggedInUsersRow.assertHasNoEditLink()
     }
 
     @Test

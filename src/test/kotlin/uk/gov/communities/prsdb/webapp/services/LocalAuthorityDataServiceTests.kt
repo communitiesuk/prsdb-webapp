@@ -48,7 +48,7 @@ class LocalAuthorityDataServiceTests {
     private lateinit var localAuthorityDataService: LocalAuthorityDataService
 
     @Test
-    fun `getLocalAuthorityIfAuthorizedUser returns the local authority if the baseUser is authorized to access it`() {
+    fun `getUserAndLocalAuthorityIfAuthorizedUser returns the user and local authority if the baseUser is authorized to access it`() {
         // Arrange
         val baseUser = createOneLoginUser()
         val localAuthority = createLocalAuthority()
@@ -57,22 +57,31 @@ class LocalAuthorityDataServiceTests {
             .thenReturn(localAuthorityUser)
 
         // Act
-        val returnedLocalAuthority =
-            localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, get1LID(DEFAULT_1L_USER_NAME))
+        val (returnedUserModel, returnedLocalAuthority) =
+            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, get1LID(DEFAULT_1L_USER_NAME))
 
         // Assert
+        Assertions.assertEquals(
+            LocalAuthorityUserDataModel(
+                localAuthorityUser.id!!,
+                baseUser.name,
+                localAuthority.name,
+                localAuthorityUser.isManager,
+            ),
+            returnedUserModel,
+        )
         Assertions.assertEquals(localAuthority, returnedLocalAuthority)
     }
 
     @Test
-    fun `getLocalAuthorityIfAuthorizedUser throws an AccessDeniedException if the user is not an LA user`() {
+    fun `getUserAndLocalAuthorityIfAuthorizedUser throws an AccessDeniedException if the user is not an LA user`() {
         // Arrange
         whenever(localAuthorityUserRepository.findByBaseUser_Id(anyString()))
             .thenThrow(AccessDeniedException(""))
 
         // Act and Assert
         assertThrows<AccessDeniedException> {
-            localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(
+            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
                 DEFAULT_LA_ID,
                 get1LID(DEFAULT_1L_USER_NAME),
             )
@@ -80,7 +89,7 @@ class LocalAuthorityDataServiceTests {
     }
 
     @Test
-    fun `getLocalAuthorityIfAuthorizedUser throws an AccessDeniedException if the user's LA is not the given LA'`() {
+    fun `getUserAndLocalAuthorityIfAuthorizedUser throws an AccessDeniedException if the user's LA is not the given LA'`() {
         // Arrange
         val baseUser = createOneLoginUser()
         val localAuthority = createLocalAuthority()
@@ -90,7 +99,7 @@ class LocalAuthorityDataServiceTests {
 
         // Act and Assert
         assertThrows<AccessDeniedException> {
-            localAuthorityDataService.getLocalAuthorityIfAuthorizedUser(
+            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
                 DEFAULT_LA_ID - 1,
                 get1LID(DEFAULT_1L_USER_NAME),
             )
