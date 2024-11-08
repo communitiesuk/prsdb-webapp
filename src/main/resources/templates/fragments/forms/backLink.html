@@ -1,2 +1,9 @@
-<a th:fragment="backLink(backUrl)" th:href="@{${backUrl}}" class="govuk-back-link"
-   th:text="#{forms.buttons.back}">forms.buttons.back</a>
+<nav th:fragment="backLink(backUrl)">
+    <a th:href="@{${backUrl}}"
+       class="govuk-back-link"
+       th:text="#{forms.buttons.back}"
+       onclick="history.go(-1); return false"
+    >
+        forms.buttons.back
+    </a>
+</nav>
