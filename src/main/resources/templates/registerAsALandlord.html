@@ -38,7 +38,7 @@
                 <p class="govuk-body" th:text="#{registerAsALandlord.access.paragraph}">
                     registerAsALandlord.access.paragraph
                 </p>
-                <a th:replace="~{fragments/startButton :: startButton(${registerAsALandlordInitialStep}, 'Start Now' )}"></a>
+                <a th:replace="~{fragments/buttons/startButton :: startButton(${registerAsALandlordInitialStep}, #{forms.buttons.startNow})}"></a>
             </section>
             <section>
                 <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.responsibility.heading}">

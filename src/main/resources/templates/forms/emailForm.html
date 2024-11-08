@@ -12,6 +12,6 @@
         <div th:replace="~{fragments/forms/emailInput :: emailInput(#{${label}}, 'emailAddress', null)}">
         </div>
     </th:block>
-    <button th:replace="~{fragments/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
 </th:block>
 </html>

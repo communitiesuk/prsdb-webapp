@@ -27,12 +27,12 @@ class Navigator(
 
     fun goToEmailFormPage(journeyType: JourneyType): EmailFormPage {
         navigate("${journeyType.urlPathSegment}/email")
-        return BasePage.createValid<EmailFormPage>(page)
+        return BasePage.createValid(page, EmailFormPage::class)
     }
 
     fun goToPhoneNumberFormPage(journeyType: JourneyType): PhoneNumberFormPage {
         navigate("${journeyType.urlPathSegment}/phone-number")
-        return BasePage.createValid<PhoneNumberFormPage>(page)
+        return BasePage.createValid(page, PhoneNumberFormPage::class)
     }
 
     private fun navigate(path: String) {
