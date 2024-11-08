@@ -17,7 +17,6 @@ class EmailFormPage(
 
     inline fun <reified T : BasePage> submit(): T {
         submitButton.click()
-        page.waitForLoadState()
         return createValid(page, T::class)
     }
 
