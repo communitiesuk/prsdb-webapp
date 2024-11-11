@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.TextIn
 import kotlin.reflect.KClass
 
 abstract class BasePage(
-    val page: Page,
+    protected val page: Page,
 ) {
     companion object {
         fun <T : BasePage> createValid(
