@@ -35,9 +35,12 @@ class LaUserRegistrationJourney(
                             contentKeys =
                                 mapOf(
                                     "title" to "registerLAUser.title",
-                                    "fieldSetHeading" to "forms.email.fieldSetHeading",
-                                    "fieldSetHint" to "forms.email.fieldSetHint",
+                                    "fieldSetHeading" to "registerLAUser.email.fieldSetHeading",
+                                    "fieldSetHint" to "registerLAUser.email.fieldSetHint",
                                     "label" to "forms.email.label",
+                                    "submitButtonText" to "forms.buttons.continue",
+                                    // TODO: PRSD-540 check what this needs to be, may need to update after PRSD-369
+                                    // "backUrl" to "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}/"
                                 ),
                         ),
                     nextAction = { _, subPageNumber: Int? -> Pair(RegisterLaUserStepId.CheckAnswers, subPageNumber?.plus(1)) },
