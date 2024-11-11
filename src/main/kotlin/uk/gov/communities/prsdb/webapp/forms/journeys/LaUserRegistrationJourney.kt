@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 @Component
@@ -15,17 +16,29 @@ class LaUserRegistrationJourney(
     journeyDataService: JourneyDataService,
 ) : Journey<RegisterLaUserStepId>(
         journeyType = JourneyType.LA_USER_REGISTRATION,
-        initialStepId = RegisterLaUserStepId.Email,
+        initialStepId = RegisterLaUserStepId.Name,
         validator = validator,
         journeyDataService = journeyDataService,
         steps =
             listOf(
-                /*Step(
+                Step(
                     id = RegisterLaUserStepId.Name,
                     page =
-                        Page(),
+                        Page(
+                            formModel = NameFormModel::class,
+                            templateName = "forms/nameForm",
+                            contentKeys =
+                                mapOf(
+                                    "title" to "registerLAUser.title",
+                                    "fieldSetHeading" to "forms.name.fieldSetHeading",
+                                    "fieldSetHint" to "forms.name.fieldSetHint",
+                                    "label" to "forms.name.label",
+                                    "submitButtonText" to "forms.buttons.continue",
+                                    "backUrl" to "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/",
+                                ),
+                        ),
                     nextAction = { _, subPageNumber: Int? -> Pair(RegisterLaUserStepId.Email, subPageNumber?.plus(1)) },
-                ),*/
+                ),
                 Step(
                     id = RegisterLaUserStepId.Email,
                     page =
@@ -37,15 +50,15 @@ class LaUserRegistrationJourney(
                                     "title" to "registerLAUser.title",
                                     "fieldSetHeading" to "registerLAUser.email.fieldSetHeading",
                                     "fieldSetHint" to "registerLAUser.email.fieldSetHint",
-                                    "label" to "forms.email.label",
+                                    "label" to "registerLAUser.email.label",
                                     "submitButtonText" to "forms.buttons.continue",
-                                    // TODO: PRSD-540 check what this needs to be, may need to update after PRSD-369
-                                    // "backUrl" to "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}/"
+                                    "backUrl" to "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Name}",
                                 ),
                         ),
                     nextAction = { _, subPageNumber: Int? -> Pair(RegisterLaUserStepId.CheckAnswers, subPageNumber?.plus(1)) },
                 ),
-                /*Step(
+                /*TODO: PRSD-541 - check answers page
+                Step(
                     id = RegisterLaUserStepId.CheckAnswers,
                     page =
                         Page(),
