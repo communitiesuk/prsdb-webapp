@@ -1,6 +1,9 @@
 package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages
 
 import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 
 class Navigator(
     private val page: Page,
@@ -22,6 +25,16 @@ class Navigator(
     ): EditLaUserPage {
         navigate("local-authority/$authorityId/edit-user/$userId")
         return BasePage.createValid(page, EditLaUserPage::class)
+    }
+
+    fun goToLandlordRegistrationEmailFormPage(): EmailFormPageLandlordRegistration {
+        navigate("register-as-a-landlord/email")
+        return BasePage.createValid(page, EmailFormPageLandlordRegistration::class)
+    }
+
+    fun goToLandlordRegistrationPhoneNumberFormPage(): PhoneNumberFormPageLandlordRegistration {
+        navigate("register-as-a-landlord/phone-number")
+        return BasePage.createValid(page, PhoneNumberFormPageLandlordRegistration::class)
     }
 
     private fun navigate(path: String) {

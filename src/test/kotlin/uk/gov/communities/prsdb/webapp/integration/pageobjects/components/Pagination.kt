@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageobjects.components
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Locator.FilterOptions
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.BasePage
 import kotlin.reflect.KClass
 
 class Pagination<TPage : BasePage>(

@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.steps
 
-enum class RegisterLandlordStepId(
+enum class LandlordRegistrationStepId(
     override val urlPathSegment: String,
 ) : StepId {
     Email("email"),
