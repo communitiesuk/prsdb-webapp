@@ -5,7 +5,7 @@
             link</a>
         <main class="govuk-main-wrapper">
             <div id="page-content"
-                 th:replace="~{fragments/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
+                 th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
                 <form th:action="@{''}" method="post" novalidate th:object="${formModel}">
                     <div th:replace="~{fragments/forms/errorSummary :: errorSummary()}">Error Summary</div>
                     <th:block th:replace="${formContent}"></th:block>

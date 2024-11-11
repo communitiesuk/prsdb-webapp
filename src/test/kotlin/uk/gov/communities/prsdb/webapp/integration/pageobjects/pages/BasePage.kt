@@ -34,5 +34,5 @@ abstract class BasePage(
 
     abstract fun validate()
 
-    protected fun inputFormGroup(fieldName: String) = TextInput(page.locator(".govuk-form-group:has(input[name=\"$fieldName\"])"))
+    protected fun inputFormGroup(fieldName: String) = TextInput(page.locator(".govuk-form-group:has(>input[name=\"$fieldName\"])"))
 }
