@@ -1,7 +1,8 @@
 package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 
 class Navigator(
     private val page: Page,
@@ -25,14 +26,14 @@ class Navigator(
         return BasePage.createValid(page, EditLaUserPage::class)
     }
 
-    fun goToEmailFormPage(journeyType: JourneyType): EmailFormPage {
-        navigate("${journeyType.urlPathSegment}/email")
-        return BasePage.createValid(page, EmailFormPage::class)
+    fun goToLandlordRegistrationEmailFormPage(): EmailFormPageLandlordRegistration {
+        navigate("register-as-a-landlord/email")
+        return BasePage.createValid(page, EmailFormPageLandlordRegistration::class)
     }
 
-    fun goToPhoneNumberFormPage(journeyType: JourneyType): PhoneNumberFormPage {
-        navigate("${journeyType.urlPathSegment}/phone-number")
-        return BasePage.createValid(page, PhoneNumberFormPage::class)
+    fun goToLandlordRegistrationPhoneNumberFormPage(): PhoneNumberFormPageLandlordRegistration {
+        navigate("register-as-a-landlord/phone-number")
+        return BasePage.createValid(page, PhoneNumberFormPageLandlordRegistration::class)
     }
 
     private fun navigate(path: String) {

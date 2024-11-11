@@ -1,24 +1,23 @@
-package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages
+package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.journeyPageBasePages
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.BasePage
 
-class EmailFormPage(
+abstract class EmailFormBasePage(
     page: Page,
+    val pageHeading: String,
 ) : BasePage(page) {
     private val emailInputFormGroup = fieldsetInput("emailAddress")
     val submitButton = page.locator("button[type=\"submit\"]")
 
     override fun validate() {
-        assertThat(fieldSetHeading).containsText("What is your email address?")
+        assertThat(fieldSetHeading).containsText(pageHeading)
     }
+
+    abstract fun submit(): BasePage
 
     fun fillEmail(text: String) = emailInputFormGroup.input.fill(text)
-
-    inline fun <reified T : BasePage> submit(): T {
-        submitButton.click()
-        return createValid(page, T::class)
-    }
 
     fun submitUnsuccessfully() {
         submitButton.click()
