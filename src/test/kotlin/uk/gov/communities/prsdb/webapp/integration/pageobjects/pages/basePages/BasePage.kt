@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages
+package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages
 
 import com.deque.html.axecore.playwright.AxeBuilder
 import com.microsoft.playwright.Page
@@ -37,6 +37,6 @@ abstract class BasePage(
     abstract fun validate()
 
     protected fun fieldsetInput(fieldName: String) = TextInput(page.locator(".govuk-fieldset:has(input[name=\"$fieldName\"])"))
-    
+
     protected fun inputFormGroup(fieldName: String) = TextInput(page.locator(".govuk-form-group:has(>input[name=\"$fieldName\"])"))
 }

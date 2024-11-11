@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.BasePage
 
 class ConfirmDeleteLaUserPage(
     page: Page,

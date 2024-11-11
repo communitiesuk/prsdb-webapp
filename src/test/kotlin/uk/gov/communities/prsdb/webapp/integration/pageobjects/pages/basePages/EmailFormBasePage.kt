@@ -1,8 +1,7 @@
-package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.journeyPageBasePages
+package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.BasePage
 
 abstract class EmailFormBasePage(
     page: Page,

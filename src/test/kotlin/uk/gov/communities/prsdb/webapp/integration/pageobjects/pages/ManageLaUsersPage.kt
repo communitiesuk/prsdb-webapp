@@ -7,6 +7,7 @@ import com.microsoft.playwright.options.AriaRole
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.Pagination
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.Table
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.BasePage
 
 private const val USERNAME_COL_INDEX: Int = 0
 private const val ACCESS_LEVEL_COL_INDEX: Int = 1

@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRe
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.BasePage
 
 class PhoneNumberFormPageLandlordRegistration(
     page: Page,

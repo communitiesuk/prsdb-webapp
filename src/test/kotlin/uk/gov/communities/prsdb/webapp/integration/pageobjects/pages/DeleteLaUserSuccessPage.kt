@@ -4,6 +4,7 @@ import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Assertions.assertEquals
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.ConfirmationPageBanner
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.BasePage
 
 class DeleteLaUserSuccessPage(
     page: Page,
