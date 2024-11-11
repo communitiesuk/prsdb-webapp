@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 
@@ -35,6 +37,24 @@ class Navigator(
     fun goToLandlordRegistrationPhoneNumberFormPage(): PhoneNumberFormPageLandlordRegistration {
         navigate("register-as-a-landlord/phone-number")
         return BasePage.createValid(page, PhoneNumberFormPageLandlordRegistration::class)
+    }
+
+    fun goToLaUserRegistrationNameFormPage(): NameFormPageLaUserRegistration {
+        navigate("register-local-authority-user/name")
+        return BasePage.createValid(page, NameFormPageLaUserRegistration::class)
+    }
+
+    private fun completeLaUserRegistrationNameStep(): EmailFormPageLaUserRegistration {
+        val namePage = goToLaUserRegistrationNameFormPage()
+        namePage.fillName("Test user")
+        return namePage.submit()
+    }
+
+    fun goToLaUserRegistrationEmailFormPage(): EmailFormPageLaUserRegistration = completeLaUserRegistrationNameStep()
+
+    fun skipToLaUserRegistrationEmailFormPage(): NameFormPageLaUserRegistration {
+        navigate("register-local-authority-user/email")
+        return BasePage.createValid(page, NameFormPageLaUserRegistration::class)
     }
 
     private fun navigate(path: String) {
