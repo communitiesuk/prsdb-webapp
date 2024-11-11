@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/layout :: layout(#{addLAUser.title}, ~{::main}, ${#fields.hasErrors('${confirmedEmailDataModel.*}')})}">
 <main class="govuk-main-wrapper" id="main-content">
-    <div id="page-contents" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+    <div id="page-contents"
+         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <header id="header">
             <h1 class="govuk-heading-l" th:text="#{addLAUser.heading(${councilName})}"></h1>
         </header>
@@ -24,11 +25,13 @@
                 </li>
             </ul>
         </section>
-        <form class="form" id="email-form" method="post" th:object="${confirmedEmailDataModel}" novalidate>
-            <!--/*/ <th:block th:replace="~{fragments/forms/csrfToken :: csrfToken()}"></th:block> /*/-->
-            <input th:replace="~{fragments/forms/basicTextInput :: textInput(#{addLAUser.form.primaryEmailLabel}, 'email')}">
-            <input th:replace="~{fragments/forms/basicTextInput :: textInput(#{addLAUser.form.confirmEmailLabel}, 'confirmEmail')}">
-
+        <form th:action="@{''}" class="form" id="email-form" method="post" th:object="${confirmedEmailDataModel}"
+              novalidate>
+            <!--/*/ <th:block id="fieldset-content"
+                      th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'email', null, null)}"> /*/-->
+            <input th:replace="~{fragments/forms/emailInput :: emailInput(#{addLAUser.form.primaryEmailLabel}, 'email', null)}">
+            <input th:replace="~{fragments/forms/emailInput :: emailInput(#{addLAUser.form.confirmEmailLabel}, 'confirmEmail', null)}">
+            <!--/*/ </th:block> /*/-->
             <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{addLAUser.form.submitButton})}"></button>
         </form>
     </div>

@@ -74,6 +74,7 @@ dependencies {
     testImplementation("com.microsoft.playwright:playwright:1.47.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
+    testImplementation("com.deque.html.axe-core:playwright:4.4.1")
 
     // Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")

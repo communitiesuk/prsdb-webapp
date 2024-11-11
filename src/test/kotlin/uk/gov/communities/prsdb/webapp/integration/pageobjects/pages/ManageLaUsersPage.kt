@@ -56,5 +56,9 @@ class ManageLaUsersPage(
             changeLink.click()
             return createValid(locator.page(), EditLaUserPage::class)
         }
+
+        fun assertHasNoEditLink() {
+            assertThat(changeLink).hasCount(0)
+        }
     }
 }

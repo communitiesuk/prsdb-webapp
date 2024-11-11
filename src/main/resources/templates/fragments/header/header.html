@@ -1,10 +1,10 @@
 <html xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<div th:fragment="header(navLinks)">
-    <div sec:authorize="isAuthenticated()">
-        <div th:replace="~{ fragments/header/authenticatedHeader :: loggedInHeader(${navLinks}) }"></div>
-    </div>
-    <div sec:authorize="isAnonymous()">
-        <div th:replace="~{ fragments/header/anonymousHeader :: anonymousHeader }"></div>
-    </div>
-</div>
+<th:block th:fragment="header(navLinks)">
+    <th:block sec:authorize="isAuthenticated()">
+        <header th:replace="~{ fragments/header/authenticatedHeader :: loggedInHeader(${navLinks}) }"></header>
+    </th:block>
+    <th:block sec:authorize="isAnonymous()">
+        <header th:replace="~{ fragments/header/anonymousHeader :: anonymousHeader }"></header>
+    </th:block>
+</th:block>
 </html>
