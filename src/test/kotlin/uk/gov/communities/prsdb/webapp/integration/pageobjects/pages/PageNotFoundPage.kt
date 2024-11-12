@@ -11,4 +11,9 @@ class PageNotFoundPage(
         val heading = page.locator(".govuk-heading-l")
         assertThat(heading).containsText("Page not found")
     }
+
+    fun assertHeadingContains(text: String) {
+        val heading = page.locator(".govuk-heading-l")
+        assertThat(heading).containsText(text)
+    }
 }

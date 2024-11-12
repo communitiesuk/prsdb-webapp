@@ -37,7 +37,7 @@ class LaUserRegistrationJourney(
                                     "backUrl" to "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/",
                                 ),
                         ),
-                    nextAction = { _, subPageNumber: Int? -> Pair(RegisterLaUserStepId.Email, subPageNumber?.plus(1)) },
+                    nextAction = { _, subPageNumber: Int? -> Pair(RegisterLaUserStepId.Email, null) },
                 ),
                 Step(
                     id = RegisterLaUserStepId.Email,
@@ -52,17 +52,16 @@ class LaUserRegistrationJourney(
                                     "fieldSetHint" to "registerLAUser.email.fieldSetHint",
                                     "label" to "registerLAUser.email.label",
                                     "submitButtonText" to "forms.buttons.continue",
-                                    "backUrl" to "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Name}",
                                 ),
                         ),
-                    nextAction = { _, subPageNumber: Int? -> Pair(RegisterLaUserStepId.CheckAnswers, subPageNumber?.plus(1)) },
+                    nextAction = { _, subPageNumber: Int? -> Pair(RegisterLaUserStepId.CheckAnswers, null) },
                 ),
                 /*TODO: PRSD-541 - check answers page
                 Step(
                     id = RegisterLaUserStepId.CheckAnswers,
                     page =
                         Page(),
-                    nextAction = { _, subPageNumber: Int? -> Pair(RegisterLaUserStepId.CheckAnswers, subPageNumber?.plus(1)) },
+                    nextAction = { _, subPageNumber: Int? -> Pair(RegisterLaUserStepId.CheckAnswers, null) },
                 ),*/
             ),
     )
