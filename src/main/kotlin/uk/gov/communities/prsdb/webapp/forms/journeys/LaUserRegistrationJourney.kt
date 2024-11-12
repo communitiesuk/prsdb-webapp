@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.LandingPageFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
@@ -16,11 +17,24 @@ class LaUserRegistrationJourney(
     journeyDataService: JourneyDataService,
 ) : Journey<RegisterLaUserStepId>(
         journeyType = JourneyType.LA_USER_REGISTRATION,
-        initialStepId = RegisterLaUserStepId.Name,
+        initialStepId = RegisterLaUserStepId.LandingPage,
         validator = validator,
         journeyDataService = journeyDataService,
         steps =
             listOf(
+                Step(
+                    id = RegisterLaUserStepId.LandingPage,
+                    page =
+                        Page(
+                            formModel = LandingPageFormModel::class,
+                            templateName = "registerLaUser",
+                            contentKeys =
+                                mapOf(
+                                    "title" to "registerLAUser.title",
+                                ),
+                        ),
+                    nextAction = { _, subPageNumber: Int? -> Pair(RegisterLaUserStepId.Name, null) },
+                ),
                 Step(
                     id = RegisterLaUserStepId.Name,
                     page =
@@ -34,7 +48,6 @@ class LaUserRegistrationJourney(
                                     "fieldSetHint" to "forms.name.fieldSetHint",
                                     "label" to "forms.name.label",
                                     "submitButtonText" to "forms.buttons.continue",
-                                    "backUrl" to "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/",
                                 ),
                         ),
                     nextAction = { _, subPageNumber: Int? -> Pair(RegisterLaUserStepId.Email, null) },

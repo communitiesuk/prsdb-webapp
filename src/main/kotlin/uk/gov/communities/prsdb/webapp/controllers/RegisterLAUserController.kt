@@ -17,15 +17,6 @@ import java.security.Principal
 class RegisterLAUserController(
     var laUserRegistrationJourney: LaUserRegistrationJourney,
 ) {
-    @GetMapping
-    fun index(model: Model): String {
-        model.addAttribute(
-            "registerAsAnLaUserInitialStep",
-            "/${REGISTER_LA_USER_JOURNEY_URL}/${laUserRegistrationJourney.initialStepId.urlPathSegment}",
-        )
-        return "registerLaUser"
-    }
-
     @GetMapping("/{stepName}")
     fun getJourneyStep(
         @PathVariable("stepName") stepName: String,
