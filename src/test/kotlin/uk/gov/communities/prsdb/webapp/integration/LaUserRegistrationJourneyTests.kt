@@ -10,7 +10,8 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
         fun `Submitting a valid name redirects to the next step`() {
             val formPage = navigator.goToLaUserRegistrationNameFormPage()
             formPage.fillName("Test User")
-            formPage.submit()
+            val nextStep = formPage.submit()
+            nextStep.assertHeadingContains("What is your work email address?")
         }
 
         @Test
@@ -18,7 +19,7 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
             val formPage = navigator.goToLaUserRegistrationNameFormPage()
             formPage.fillName("")
             formPage.submitUnsuccessfully()
-            formPage.assertNameFormErrorContains("You must provide your name")
+            formPage.assertNameFormErrorContains("You must enter your full name")
         }
     }
 
@@ -26,14 +27,17 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
     inner class LaUserRegistrationStepEmail {
         @Test
         fun `Navigating directly to this step redirects to the name step`() {
-            navigator.skipToLaUserRegistrationEmailFormPage()
+            val firstStep = navigator.skipToLaUserRegistrationEmailFormPage()
+            firstStep.assertHeadingContains("What is your full name?")
         }
 
         @Test
         fun `Submitting a valid email redirects to the next step`() {
             val formPage = navigator.goToLaUserRegistrationEmailFormPage()
             formPage.fillEmail("test@example.com")
-            formPage.submit()
+            val nextStep = formPage.submit()
+            // This will need to change when the "check answers" page is implemented
+            nextStep.assertHeadingContains("Page not found")
         }
 
         @Test

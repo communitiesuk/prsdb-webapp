@@ -29,4 +29,8 @@ class NameFormPageLaUserRegistration(
     fun assertNameFormErrorContains(error: String) {
         nameInputFormGroup.assertErrorMessageContains(error)
     }
+
+    fun assertHeadingContains(text: String) {
+        assertThat(fieldSetHeading).containsText(text)
+    }
 }
