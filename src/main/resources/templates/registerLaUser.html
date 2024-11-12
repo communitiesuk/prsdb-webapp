@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{registerLAUser.title}, ~{::main}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
+        <div id="page-content">
+            <header>
+                <div th:replace="~{fragments/beforeYouRegister :: beforeYouRegister(#{registerLAUser.journeyName})}"></div>
+            </header>
+            <section>
+                <p class="govuk-body" th:text="#{registerLaUser.requirementsList.intro}">
+                    registerLaUser.requirementsList.intro
+                </p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{registerLaUser.requirementsList.personalDetails}">
+                        registerLaUser.requirementsList.personalDetails
+                    </li>
+                    <li th:text="#{registerLaUser.requirementsList.workDetails}">
+                        registerLaUser.requirementsList.workDetails
+                    </li>
+                </ul>
+                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${registerAsAnLaUserInitialStep}, #{registerLaUser.beginButtonText})}">
+                    registerLaUser.beginButtonText
+                </a>
+            </section>
+        </div>
+    </div>
+</main>
+</html>

@@ -42,7 +42,7 @@
                     <nav th:if="${totalPages > 1}" th:replace="~{fragments/pagination/pagination :: pagination(${totalPages}, ${currentPage})}">
                     </nav>
                     <div class="govuk-button-group" id="action-buttons">
-                        <a th:replace="~{fragments/primaryButtonLink :: primaryButtonLink(@{/local-authority/{id}/invite-new-user(id=${localAuthority.id})}, #{manageLAUsers.inviteAnotherUserButtonText})}">
+                        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/local-authority/{id}/invite-new-user(id=${localAuthority.id})}, #{manageLAUsers.inviteAnotherUserButtonText})}">
                             manageLAUsers.inviteAnotherUserButtonText
                         </a>
                         <button th:replace="~{fragments/buttons/secondaryButton :: secondaryButton(#{manageLAUsers.returnToDashboardButton})}"></button>
