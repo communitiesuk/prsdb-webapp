@@ -15,9 +15,11 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
-import uk.gov.communities.prsdb.webapp.controllers.ExampleInvitationTokenController
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createdLoggedInUserModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationEmail
@@ -27,8 +29,7 @@ import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import java.net.URLEncoder
 import kotlin.test.Test
 
-// TODO PRSD-405: Update the controller here to be the accept invitation controller
-@WebMvcTest(ManageLocalAuthorityUsersController::class, ExampleInvitationTokenController::class)
+@WebMvcTest(ManageLocalAuthorityUsersController::class, RegisterLAUserController::class)
 class InvitationUrlTests(
     context: WebApplicationContext,
 ) : ControllerTest(context) {
@@ -40,6 +41,9 @@ class InvitationUrlTests(
 
     @MockBean
     private lateinit var localAuthorityDataService: LocalAuthorityDataService
+
+    @MockBean
+    private lateinit var laUserRegistrationJourney: LaUserRegistrationJourney
 
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
@@ -60,6 +64,7 @@ class InvitationUrlTests(
         whenever(localAuthorityInvitationService.createInvitationToken(testEmail, localAuthority)).thenReturn(testToken)
         whenever(localAuthorityInvitationService.getAuthorityForToken(testToken)).thenReturn(localAuthority)
         whenever(localAuthorityInvitationService.buildInvitationUri(testToken)).thenCallRealMethod()
+        whenever(localAuthorityInvitationService.tokenIsValid(testToken)).thenReturn(true)
 
         val invitationCaptor = argumentCaptor<LocalAuthorityInvitationEmail>()
         Mockito
@@ -69,6 +74,8 @@ class InvitationUrlTests(
             ).sendEmail(any(), invitationCaptor.capture())
 
         val encodedConfirmedEmailContent = urlEncodedConfirmedEmailDataModel(testEmail)
+
+        whenever(laUserRegistrationJourney.initialStepId).thenReturn(RegisterLaUserStepId.LandingPage)
 
         // Act
         mvc
@@ -80,10 +87,10 @@ class InvitationUrlTests(
 
         mvc
             .get(invitationCaptor.firstValue.invitationUri)
-            .andExpect { status { isOk() } }
+            .andExpect { status { is3xxRedirection() } }
 
         // Assert
-        verify(localAuthorityInvitationService).getAuthorityForToken(testToken)
+        verify(localAuthorityInvitationService).tokenIsValid(testToken)
     }
 
     @Suppress("SameParameterValue")
