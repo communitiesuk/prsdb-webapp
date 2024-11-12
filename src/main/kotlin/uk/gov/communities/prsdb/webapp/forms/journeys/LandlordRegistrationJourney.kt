@@ -33,6 +33,7 @@ class LandlordRegistrationJourney(
                                     "fieldSetHeading" to "forms.email.fieldSetHeading",
                                     "fieldSetHint" to "forms.email.fieldSetHint",
                                     "label" to "forms.email.label",
+                                    "submitButtonText" to "forms.buttons.saveAndContinue",
                                     "backUrl" to "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}",
                                 ),
                         ),
