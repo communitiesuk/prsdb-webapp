@@ -1,16 +1,20 @@
 <th:block th:fragment="radios(field, options)">
     <div class="govuk-radios" data-module="govuk-radios">
-        <div class="govuk-radios__item" th:each="option, status : ${options}" th:with="hintID=|hint-${status.index}|">
-            <input class="govuk-radios__input" type="radio" th:field="*{__${field}__}" th:value="${option.value}"
-                   th:attr="aria-describedby=${option.hintMsgKey != null} ? ${hintID}">
-            <label class="govuk-label govuk-radios__label" th:for="${#ids.prev(field)}"
-                   th:text="#{${option.labelMsgKey}}">
-                Option Label Message Key
-            </label>
-            <div class="govuk-hint govuk-radios__hint" th:if="${option.hintMsgKey != null}"
-                 th:id="${hintID}" th:text="#{${option.hintMsgKey}}">
-                Option Hint Message Key
+        <th:block th:each="option: ${options}"
+                  th:with="radioItemID=|${field}-${option.value}|,  hintID=|${field}-${option.value}-hint|">
+            <div class="govuk-radios__item">
+                <input class="govuk-radios__input" type="radio" th:field="*{__${field}__}" th:value="${option.value}"
+                       th:id="${radioItemID}"
+                       th:attr="aria-describedby=${option.hintMsgKey != null} ? ${hintID}">
+                <label class="govuk-label govuk-radios__label" th:for="${radioItemID}"
+                       th:text="#{${option.labelMsgKey}}">
+                    Option Label Message Key
+                </label>
+                <div class="govuk-hint govuk-radios__hint" th:if="${option.hintMsgKey != null}"
+                     th:id="${hintID}" th:text="#{${option.hintMsgKey}}">
+                    Option Hint Message Key
+                </div>
             </div>
-        </div>
+        </th:block>
     </div>
 </th:block>
