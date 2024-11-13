@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
@@ -16,11 +17,29 @@ class LandlordRegistrationJourney(
     journeyDataService: JourneyDataService,
 ) : Journey<LandlordRegistrationStepId>(
         journeyType = JourneyType.LANDLORD_REGISTRATION,
-        initialStepId = LandlordRegistrationStepId.Email,
+        initialStepId = LandlordRegistrationStepId.Name,
         validator = validator,
         journeyDataService = journeyDataService,
         steps =
             listOf(
+                Step(
+                    id = LandlordRegistrationStepId.Name,
+                    page =
+                        Page(
+                            formModel = NameFormModel::class,
+                            templateName = "forms/nameForm",
+                            contentKeys =
+                                mapOf(
+                                    "title" to "registerAsALandlord.title",
+                                    "fieldSetHeading" to "forms.name.fieldSetHeading",
+                                    "fieldSetHint" to "forms.name.fieldSetHint",
+                                    "label" to "forms.name.label",
+                                    "submitButtonText" to "forms.buttons.saveAndContinue",
+                                    "backUrl" to "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}",
+                                ),
+                        ),
+                    nextAction = { _, subPageNumber: Int? -> Pair(LandlordRegistrationStepId.Email, null) },
+                ),
                 Step(
                     id = LandlordRegistrationStepId.Email,
                     page =
@@ -34,10 +53,9 @@ class LandlordRegistrationJourney(
                                     "fieldSetHint" to "forms.email.fieldSetHint",
                                     "label" to "forms.email.label",
                                     "submitButtonText" to "forms.buttons.saveAndContinue",
-                                    "backUrl" to "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}",
                                 ),
                         ),
-                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.PhoneNumber, null) },
+                    nextAction = { _, _: Int? -> Pair(LandlordRegistrationStepId.PhoneNumber, null) },
                 ),
                 Step(
                     id = LandlordRegistrationStepId.PhoneNumber,
