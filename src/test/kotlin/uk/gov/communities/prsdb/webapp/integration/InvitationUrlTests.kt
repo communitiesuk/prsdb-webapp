@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Compan
 import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import java.net.URLEncoder
@@ -41,6 +42,9 @@ class InvitationUrlTests(
 
     @MockBean
     private lateinit var localAuthorityDataService: LocalAuthorityDataService
+
+    @MockBean
+    private lateinit var journeyDataService: JourneyDataService
 
     @MockBean
     private lateinit var laUserRegistrationJourney: LaUserRegistrationJourney

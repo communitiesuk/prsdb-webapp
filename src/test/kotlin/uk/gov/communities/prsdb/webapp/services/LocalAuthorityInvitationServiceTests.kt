@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -7,6 +8,7 @@ import org.mockito.ArgumentCaptor.captor
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.whenever
+import org.springframework.mock.web.MockHttpSession
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
@@ -15,11 +17,15 @@ import java.util.UUID
 class LocalAuthorityInvitationServiceTests {
     private lateinit var mockLaInviteRepository: LocalAuthorityInvitationRepository
     private lateinit var inviteService: LocalAuthorityInvitationService
+    private lateinit var journeyDataService: JourneyDataService
+    private lateinit var session: HttpSession
 
     @BeforeEach
     fun setup() {
         mockLaInviteRepository = mock()
-        inviteService = LocalAuthorityInvitationService(mockLaInviteRepository)
+        session = MockHttpSession()
+        inviteService = LocalAuthorityInvitationService(mockLaInviteRepository, session)
+        journeyDataService = mock()
     }
 
     @Test
