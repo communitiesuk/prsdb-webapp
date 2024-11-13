@@ -33,8 +33,7 @@ class RegisterLAUserController(
             return "redirect:${laUserRegistrationJourney.initialStepId.urlPathSegment}"
         }
 
-        // TODO: This doesn't exist yet!
-        return "redirect:/invalid-token"
+        return "redirect:invalid-link"
     }
 
     @GetMapping("/{stepName}")
@@ -45,7 +44,7 @@ class RegisterLAUserController(
     ): String {
         val token = invitationService.getTokenFromSession()
         if (token == null || !invitationService.tokenIsValid(token)) {
-            return "redirect:/invalid-token"
+            return "redirect:invalid-link"
         }
 
         return laUserRegistrationJourney.populateModelAndGetViewName(
@@ -70,6 +69,9 @@ class RegisterLAUserController(
             subpage,
             principal,
         )
+
+    @GetMapping("/invalid-link")
+    fun invalidToken(model: Model): String = "invalidLink"
 
     fun prePopulateJourneyData(token: String) {
         val journeyData = journeyDataService.getJourneyDataFromSession()
