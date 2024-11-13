@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import java.security.Principal
 
@@ -18,6 +20,7 @@ import java.security.Principal
 class RegisterLAUserController(
     var laUserRegistrationJourney: LaUserRegistrationJourney,
     var invitationService: LocalAuthorityInvitationService,
+    var journeyDataService: JourneyDataService,
 ) {
     @GetMapping("/")
     fun acceptInvitation(token: String): CharSequence {
@@ -26,6 +29,7 @@ class RegisterLAUserController(
         // see https://github.com/spring-projects/spring-hateoas/issues/155 for details
         if (invitationService.tokenIsValid(token)) {
             invitationService.storeTokenInSession(token)
+            prePopulateJourneyData(token)
             return "redirect:${laUserRegistrationJourney.initialStepId.urlPathSegment}"
         }
 
@@ -66,4 +70,14 @@ class RegisterLAUserController(
             subpage,
             principal,
         )
+
+    fun prePopulateJourneyData(token: String) {
+        val journeyData = journeyDataService.getJourneyDataFromSession()
+
+        val emailStep = laUserRegistrationJourney.steps.singleOrNull { step -> step.id == RegisterLaUserStepId.Email }
+        val formData = mutableMapOf<String, String?>("emailAddress" to invitationService.getEmailAddressForToken(token)) as PageData
+        emailStep?.updateJourneyData(journeyData, formData, null)
+
+        journeyDataService.setJourneyData(journeyData)
+    }
 }
