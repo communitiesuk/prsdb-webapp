@@ -1,28 +1,31 @@
 <!DOCTYPE html>
 <html>
-    <body th:replace="~{fragments/layout :: layout(#{manageLAUsers.title}, ~{::body/content()}, false)}">
-        <a th:replace="~{fragments/forms/backLink :: backLink(${backLinkPath})}">backLink</a>
-        <th:block th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main})}">
-        <main class="govuk-main-wrapper">
-            <header>
-                <h1 class="govuk-heading-l" th:text="${localAuthorityUser.userName}"></h1>
-                <p class="govuk-body">
-                    <strong th:text="#{editLAUserAccess.subHeading.beforeEmail}">editLAUserAccess.subHeading.beforeEmail</strong>
-                    <span th:remove="tag" th:text="${localAuthorityUser.email}"></span>
-                </p>
-            </header>
-            <form method="POST" th:object="${localAuthorityUser}" th:action="@{''}">
-                <div th:replace="~{fragments/radioButtons :: radioButtons(#{editLAUserAccess.radios.heading}, 'isManager', ${options})}"></div>
-                <div class="govuk-button-group">
-                    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{editLAUserAccess.saveButton})}"></button>
-                    <button th:replace="~{fragments/buttons/warningButton :: warningButton(
-                            buttonText=#{editLAUserAccess.deleteAccountButton},
-                            href=@{/local-authority/{laId}/delete-user/{uid}(laId=${localAuthorityId}, uid=${localAuthorityUserId})}
-                        )}"
-                    ></button>
-                </div>
-            </form>
-        </main>
-        </th:block>
-    </body>
+<body th:replace="~{fragments/layout :: layout(#{manageLAUsers.title}, ~{::body/content()}, false)}">
+<a th:replace="~{fragments/forms/backLink :: backLink(${backLinkPath})}">backLink</a>
+<th:block th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main})}">
+    <main class="govuk-main-wrapper">
+        <header>
+            <h1 class="govuk-heading-l" th:text="${localAuthorityUser.userName}"></h1>
+            <p class="govuk-body">
+                <strong th:text="#{editLAUserAccess.subHeading.beforeEmail}">editLAUserAccess.subHeading.beforeEmail</strong>
+                <span th:remove="tag" th:text="${localAuthorityUser.email}"></span>
+            </p>
+        </header>
+        <form method="POST" th:object="${localAuthorityUser}" th:action="@{''}" th:with="field='isManager'">
+            <th:block id="fieldset-content"
+                      th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, ${field}, #{editLAUserAccess.radios.heading}, '')}">
+                <th:block th:replace="~{fragments/forms/radios :: radios(${field}, ${options})}"></th:block>
+            </th:block>
+            <div class="govuk-button-group">
+                <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{editLAUserAccess.saveButton})}"></button>
+                <button th:replace="~{fragments/buttons/warningButton :: warningButton(
+                                buttonText=#{editLAUserAccess.deleteAccountButton},
+                                href=@{/local-authority/{laId}/delete-user/{uid}(laId=${localAuthorityId}, uid=${localAuthorityUserId})}
+                            )}"
+                ></button>
+            </div>
+        </form>
+    </main>
+</th:block>
+</body>
 </html>
