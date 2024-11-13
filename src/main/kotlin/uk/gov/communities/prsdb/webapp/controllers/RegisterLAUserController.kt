@@ -25,11 +25,12 @@ class RegisterLAUserController(
         // the LocalAuthorityInvitationService method that creates the invitation url using MvcUriComponentsBuilder.fromMethodName
         // see https://github.com/spring-projects/spring-hateoas/issues/155 for details
         if (invitationService.tokenIsValid(token)) {
+            invitationService.storeTokenInSession(token)
             return "redirect:${laUserRegistrationJourney.initialStepId.urlPathSegment}"
         }
 
         // TODO: This doesn't exist yet!
-        return "redirect:${REGISTER_LA_USER_JOURNEY_URL}/invalid-token"
+        return "redirect:/invalid-token"
     }
 
     @GetMapping("/{stepName}")
@@ -37,12 +38,18 @@ class RegisterLAUserController(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
         model: Model,
-    ): String =
-        laUserRegistrationJourney.populateModelAndGetViewName(
+    ): String {
+        val token = invitationService.getTokenFromSession()
+        if (token == null || !invitationService.tokenIsValid(token)) {
+            return "redirect:/invalid-token"
+        }
+
+        return laUserRegistrationJourney.populateModelAndGetViewName(
             laUserRegistrationJourney.getStepId(stepName),
             model,
             subpage,
         )
+    }
 
     @PostMapping("/{stepName}")
     fun postJourneyData(
