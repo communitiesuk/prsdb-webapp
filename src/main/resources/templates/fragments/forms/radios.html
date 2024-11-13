@@ -1,11 +1,11 @@
 <th:block th:fragment="radios(field, options)">
     <div class="govuk-radios" data-module="govuk-radios">
         <th:block th:each="option: ${options}"
-                  th:with="radioItemID=|${field}-${option.value}|,  hintID=|${field}-${option.value}-hint|">
+                  th:with="radioItemID=|${field}-${option.value}|,  hintID=|${field}-${option.value}-hint|, conditionalFragID=|${field}-${option.value}-conditional|">
             <div class="govuk-radios__item">
                 <input class="govuk-radios__input" type="radio" th:field="*{__${field}__}" th:value="${option.value}"
                        th:id="${radioItemID}"
-                       th:attr="aria-describedby=${option.hintMsgKey != null} ? ${hintID}">
+                       th:attr="aria-describedby=${option.hintMsgKey != null} ? ${hintID}, data-aria-controls=${option.conditionalFragCall != null} ? ${conditionalFragID}">
                 <label class="govuk-label govuk-radios__label" th:for="${radioItemID}"
                        th:text="#{${option.labelMsgKey}}">
                     Option Label Message Key
@@ -14,6 +14,10 @@
                      th:id="${hintID}" th:text="#{${option.hintMsgKey}}">
                     Option Hint Message Key
                 </div>
+            </div>
+            <div class="govuk-radios__conditional govuk-radios__conditional--hidden"
+                 th:if="${option.conditionalFragCall}" th:id="${conditionalFragID}">
+                <th:block th:replace="~{__${option.conditionalFragCall}__}"></th:block>
             </div>
         </th:block>
     </div>

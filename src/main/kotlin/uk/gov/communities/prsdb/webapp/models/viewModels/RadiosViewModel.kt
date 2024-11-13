@@ -4,4 +4,5 @@ data class RadiosViewModel<T>(
     val value: T,
     val labelMsgKey: String,
     val hintMsgKey: String? = null,
+    val conditionalFragCall: String? = null,
 )
