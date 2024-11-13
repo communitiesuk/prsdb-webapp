@@ -107,7 +107,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             }
 
             @Test
-            fun `Submitting an international phone number without a country code returns an error`(regionCode: String) {
+            fun `Submitting an international phone number without a country code returns an error`() {
                 val formPage = navigator.goToLandlordRegistrationPhoneNumberFormPage()
                 formPage.fillPhoneNumber("0355501234")
                 formPage.submitUnsuccessfully()
