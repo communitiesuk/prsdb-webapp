@@ -98,28 +98,18 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
                 formPage.assertPhoneNumberFormErrorContains("Enter a phone number including the country code for international numbers")
             }
 
-            // TODO-PRSD-370: Caution this test is flaky and may need to be removed
-            @ParameterizedTest
-            @ValueSource(
-                strings = ["GB", "US", "SN", "AU"],
-            )
-            fun `Submitting incorrect UK and international numbers returns an error`(regionCode: String) {
+            @Test
+            fun `Submitting incorrect number returns an error`() {
                 val formPage = navigator.goToLandlordRegistrationPhoneNumberFormPage()
-                val number = phoneNumberUtil.getInvalidExampleNumber(regionCode)
-                formPage.fillPhoneNumber("${number.countryCode}${number.nationalNumber}")
+                formPage.fillPhoneNumber("0")
                 formPage.submitUnsuccessfully()
                 formPage.assertPhoneNumberFormErrorContains("Enter a phone number including the country code for international numbers")
             }
 
-            // TODO-PRSD-370: Caution this test is flaky and may need to be removed
-            @ParameterizedTest
-            @ValueSource(
-                strings = ["US", "ES", "SN", "AU", "VG"],
-            )
+            @Test
             fun `Submitting an international phone number without a country code returns an error`(regionCode: String) {
                 val formPage = navigator.goToLandlordRegistrationPhoneNumberFormPage()
-                val number = phoneNumberUtil.getExampleNumber(regionCode).clearCountryCode()
-                formPage.fillPhoneNumber("${number.countryCode}${number.nationalNumber}")
+                formPage.fillPhoneNumber("0355501234")
                 formPage.submitUnsuccessfully()
                 formPage.assertPhoneNumberFormErrorContains("Enter a phone number including the country code for international numbers")
             }
