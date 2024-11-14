@@ -18,6 +18,6 @@ class DeleteLaUserSuccessPage(
 
     fun returnToManageUsers(): ManageLaUsersPage {
         returnButton.click()
-        return createAndValidate(page, ManageLaUsersPage::class)
+        return createValid(page, ManageLaUsersPage::class)
     }
 }

@@ -4,6 +4,7 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.microsoft.playwright.Response
 import org.assertj.core.api.AssertionsForClassTypes.assertThat
 import org.junit.jupiter.api.BeforeEach
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -61,24 +62,28 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             fun `Submitting a valid email address redirects to the next step`() {
                 val formPage = navigator.goToLandlordRegistrationEmailFormPage()
                 formPage.fillInput("test@example.com")
-                val nextPage = formPage.submit()
-                BasePage.createAndValidate(nextPage, PhoneNumberFormPageLandlordRegistration::class)
+                val nextStep = BasePage.createValid(formPage.submit(), PhoneNumberFormPageLandlordRegistration::class)
+                assertThat(nextStep.fieldSetHeading).containsText("What is your phone number?")
             }
 
             @Test
             fun `Submitting an empty e-mail address returns an error`() {
                 val formPage = navigator.goToLandlordRegistrationEmailFormPage()
-                formPage.fillEmail("")
+                formPage.fillInput("")
                 formPage.submitUnsuccessfully()
-                formPage.assertEmailFormErrorContains("Enter a valid email address to continue. An email is required for contact purposes.")
+                assertThat(
+                    formPage.inputFormErrorMessage,
+                ).containsText("Enter a valid email address to continue. An email is required for contact purposes.")
             }
 
             @Test
             fun `Submitting an invalid e-mail address returns an error`() {
                 val formPage = navigator.goToLandlordRegistrationEmailFormPage()
-                formPage.fillEmail("notAnEmail")
+                formPage.fillInput("notAnEmail")
                 formPage.submitUnsuccessfully()
-                formPage.assertEmailFormErrorContains("Enter an email address in the right format")
+                assertThat(
+                    formPage.inputFormErrorMessage,
+                ).containsText("Enter an email address in the right format")
             }
         }
     }

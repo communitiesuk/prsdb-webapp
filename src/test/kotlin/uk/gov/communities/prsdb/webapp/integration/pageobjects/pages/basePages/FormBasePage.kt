@@ -30,5 +30,7 @@ abstract class FormBasePage(
 
     val fieldSetHeading = page.locator(".govuk-fieldset__heading")
 
+    val inputFormErrorMessage = page.locator(".govuk-error-message")
+
     protected fun fieldsetInput(fieldName: String) = TextInput(page.locator(".govuk-fieldset:has(input[name=\"$fieldName\"])"))
 }

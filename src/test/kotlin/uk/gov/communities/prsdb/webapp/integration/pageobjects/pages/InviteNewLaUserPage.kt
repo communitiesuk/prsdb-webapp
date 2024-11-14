@@ -26,7 +26,7 @@ class InviteNewLaUserPage(
 
     fun submit(): InviteNewLaUserSuccessPage {
         submitButton.click()
-        return createAndValidate(page, InviteNewLaUserSuccessPage::class)
+        return createValid(page, InviteNewLaUserSuccessPage::class)
     }
 
     fun submitUnsuccessfully() {

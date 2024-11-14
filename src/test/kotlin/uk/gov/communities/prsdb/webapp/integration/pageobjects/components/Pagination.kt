@@ -28,7 +28,7 @@ class Pagination<TPage : BasePage>(
 
     fun clickLink(pageNum: Int): TPage {
         linkWithText(pageNum.toString()).click()
-        return BasePage.createAndValidate(locator.page(), pageClass)
+        return BasePage.createValid(locator.page(), pageClass)
     }
 
     private fun linkWithText(text: String): Locator =

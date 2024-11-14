@@ -14,8 +14,8 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
         fun `Submitting a valid name redirects to the next step`() {
             val formPage = navigator.goToLaUserRegistrationNameFormPage()
             formPage.fillInput("Test User")
-            val nextStep = formPage.submit()
-            BasePage.createAndValidate(nextStep, EmailFormPageLaUserRegistration::class)
+            val nextStep = BasePage.createValid(formPage.submit(), EmailFormPageLaUserRegistration::class)
+            assertThat(nextStep.fieldSetHeading).containsText("What is your work email address?")
         }
 
         @Test
@@ -23,7 +23,9 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
             val formPage = navigator.goToLaUserRegistrationNameFormPage()
             formPage.fillInput("")
             formPage.submitUnsuccessfully()
-            formPage.inputFormGroup.assertErrorMessageContains("You must enter your full name")
+            assertThat(
+                formPage.inputFormErrorMessage,
+            ).containsText("You must enter your full name")
         }
     }
 
@@ -39,9 +41,9 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
         fun `Submitting a valid email redirects to the next step`() {
             val formPage = navigator.goToLaUserRegistrationEmailFormPage()
             formPage.fillInput("test@example.com")
-            val nextStep = formPage.submit()
             // This will need to change when the "check answers" page is implemented
-            BasePage.createAndValidate(nextStep, PageNotFoundPage::class)
+            val nextStep = BasePage.createValid(formPage.submit(), PageNotFoundPage::class)
+            assertThat(nextStep.heading).containsText("Page not found")
         }
 
         @Test
@@ -49,7 +51,9 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
             val formPage = navigator.goToLaUserRegistrationEmailFormPage()
             formPage.fillInput("")
             formPage.submitUnsuccessfully()
-            formPage.inputFormGroup.assertErrorMessageContains(
+            assertThat(
+                formPage.inputFormErrorMessage,
+            ).containsText(
                 "Enter a valid email address to continue. An email is required for contact purposes.",
             )
         }
@@ -59,7 +63,9 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
             val formPage = navigator.goToLaUserRegistrationEmailFormPage()
             formPage.fillInput("notAnEmail")
             formPage.submitUnsuccessfully()
-            formPage.inputFormGroup.assertErrorMessageContains("Enter an email address in the right format")
+            assertThat(
+                formPage.inputFormErrorMessage,
+            ).containsText("Enter an email address in the right format")
         }
     }
 }

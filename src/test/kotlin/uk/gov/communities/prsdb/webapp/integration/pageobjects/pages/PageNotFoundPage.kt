@@ -8,12 +8,8 @@ class PageNotFoundPage(
     page: Page,
 ) : BasePage(page) {
     override fun validate() {
-        val heading = page.locator(".govuk-heading-l")
         assertThat(heading).containsText("Page not found")
     }
 
-    fun assertHeadingContains(text: String) {
-        val heading = page.locator(".govuk-heading-l")
-        assertThat(heading).containsText(text)
-    }
+    val heading = page.locator(".govuk-heading-l")
 }

@@ -24,6 +24,6 @@ class ConfirmDeleteLaUserPage(
 
     fun deleteUser(): DeleteLaUserSuccessPage {
         deleteButton.click()
-        return createAndValidate(page, DeleteLaUserSuccessPage::class)
+        return createValid(page, DeleteLaUserSuccessPage::class)
     }
 }

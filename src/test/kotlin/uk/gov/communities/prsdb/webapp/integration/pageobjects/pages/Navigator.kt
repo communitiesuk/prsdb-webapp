@@ -15,12 +15,12 @@ class Navigator(
 ) {
     fun goToInviteNewLaUser(authorityId: Int): InviteNewLaUserPage {
         navigate("local-authority/$authorityId/invite-new-user")
-        return BasePage.createAndValidate(page, InviteNewLaUserPage::class)
+        return BasePage.createValid(page, InviteNewLaUserPage::class)
     }
 
     fun goToManageLaUsers(authorityId: Int): ManageLaUsersPage {
         navigate("local-authority/$authorityId/manage-users")
-        return BasePage.createAndValidate(page, ManageLaUsersPage::class)
+        return BasePage.createValid(page, ManageLaUsersPage::class)
     }
 
     fun goToEditLaUser(
@@ -28,7 +28,7 @@ class Navigator(
         userId: Int,
     ): EditLaUserPage {
         navigate("local-authority/$authorityId/edit-user/$userId")
-        return BasePage.createAndValidate(page, EditLaUserPage::class)
+        return BasePage.createValid(page, EditLaUserPage::class)
     }
 
     fun goToLandlordRegistrationNameFormPage(): NameFormPageLandlordRegistration {
@@ -38,30 +38,30 @@ class Navigator(
 
     fun goToLandlordRegistrationEmailFormPage(): EmailFormPageLandlordRegistration {
         navigate("register-as-a-landlord/email")
-        return BasePage.createAndValidate(page, EmailFormPageLandlordRegistration::class)
+        return BasePage.createValid(page, EmailFormPageLandlordRegistration::class)
     }
 
     fun goToLandlordRegistrationPhoneNumberFormPage(): PhoneNumberFormPageLandlordRegistration {
         navigate("register-as-a-landlord/phone-number")
-        return BasePage.createAndValidate(page, PhoneNumberFormPageLandlordRegistration::class)
+        return BasePage.createValid(page, PhoneNumberFormPageLandlordRegistration::class)
     }
 
     fun goToLaUserRegistrationNameFormPage(): NameFormPageLaUserRegistration {
         navigate("register-local-authority-user/name")
-        return BasePage.createAndValidate(page, NameFormPageLaUserRegistration::class)
+        return BasePage.createValid(page, NameFormPageLaUserRegistration::class)
     }
 
     private fun completeLaUserRegistrationNameStep(): EmailFormPageLaUserRegistration {
         val namePage = goToLaUserRegistrationNameFormPage()
         namePage.fillInput("Test user")
-        return BasePage.createAndValidate(namePage.submit(), EmailFormPageLaUserRegistration::class)
+        return BasePage.createValid(namePage.submit(), EmailFormPageLaUserRegistration::class)
     }
 
     fun goToLaUserRegistrationEmailFormPage(): EmailFormPageLaUserRegistration = completeLaUserRegistrationNameStep()
 
     fun skipToLaUserRegistrationEmailFormPage(): NameFormPageLaUserRegistration {
         navigate("register-local-authority-user/email")
-        return BasePage.createAndValidate(page, NameFormPageLaUserRegistration::class)
+        return BasePage.createValid(page, NameFormPageLaUserRegistration::class)
     }
 
     fun navigate(path: String): Response? = page.navigate("http://localhost:$port/$path")

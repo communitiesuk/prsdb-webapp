@@ -10,7 +10,7 @@ abstract class BasePage(
     val page: Page,
 ) {
     companion object {
-        fun <T : BasePage> createAndValidate(
+        fun <T : BasePage> createValid(
             page: Page,
             targetClass: KClass<T>,
         ): T {
