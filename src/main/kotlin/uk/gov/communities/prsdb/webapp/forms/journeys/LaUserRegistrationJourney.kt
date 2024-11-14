@@ -48,6 +48,7 @@ class LaUserRegistrationJourney(
                                     "fieldSetHint" to "forms.name.fieldSetHint",
                                     "label" to "forms.name.label",
                                     "submitButtonText" to "forms.buttons.continue",
+                                    "backUrl" to "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/",
                                 ),
                         ),
                     nextAction = { _, subPageNumber: Int? -> Pair(RegisterLaUserStepId.Email, null) },

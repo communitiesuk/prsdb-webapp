@@ -1,54 +1,55 @@
 <!DOCTYPE html>
 <html>
-    <body th:replace="~{fragments/layout :: layout(#{deleteLAUser.title}, ~{::body/content()}, false)}">
-        <main class="govuk-main-wrapper" id="main-content">
-            <th:block id="page-contents"
-                 th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
-                <header id="header">
-                    <h1 class="govuk-heading-l" th:text="#{manageLAUsers.contentHeader(${localAuthority.name})}">
-                        manageLAUsers.contentHeader
-                    </h1>
-                </header>
-                <section>
-                    <table th:replace="~{fragments/tables/table :: table(
+<body th:replace="~{fragments/layout :: layout(#{manageLAUsers.title}, ~{::body/content()}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <th:block id="page-contents"
+              th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <header id="header">
+            <h1 class="govuk-heading-l" th:text="#{manageLAUsers.contentHeader(${localAuthority.name})}">
+                manageLAUsers.contentHeader
+            </h1>
+        </header>
+        <section>
+            <table th:replace="~{fragments/tables/table :: table(
                             ${ { 'manageLAUsers.table.usernameHeading', 'manageLAUsers.table.accessLevelHeading', 'manageLAUsers.table.accountStatusHeading', '' } },
                             ~{::tbody}
                         )}
                     ">
-                        <tbody class="govuk-table__body">
-                        <tr class="govuk_table__row" th:each="user: ${userList}">
-                            <td class="govuk-table__cell" th:text="${user.userName}"></td>
-                            <td class="govuk-table__cell"
-                                th:text="${user.manager} ? #{manageLAUsers.table.admin} : #{manageLAUsers.table.basic}">
-                            </td>
-                            <td class="govuk-table__cell">
+                <tbody class="govuk-table__body">
+                <tr class="govuk_table__row" th:each="user: ${userList}">
+                    <td class="govuk-table__cell" th:text="${user.userName}"></td>
+                    <td class="govuk-table__cell"
+                        th:text="${user.manager} ? #{manageLAUsers.table.admin} : #{manageLAUsers.table.basic}">
+                    </td>
+                    <td class="govuk-table__cell">
                                 <span class="govuk-tag"
                                       th:classappend="${user.pending ? 'govuk-tag--blue' : 'govuk-tag--green'}">
                                     <strong th:text="${user.pending} ? #{manageLAUsers.table.pending} : #{manageLAUsers.table.active}"></strong>
                                 </span>
-                            </td>
-                            <td class="govuk-table__cell">
-                                <a th:href="@{${user.pending ? '#' : 'edit-user/' + user.id}}"
-                                   class="govuk-link"
-                                   th:text="#{manageLAUsers.table.change}"
-                                   th:if="${currentUser.id} != ${user.id}"
-                                >
-                                    manageLAUsers.table.change
-                                </a>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                    <nav th:if="${totalPages > 1}" th:replace="~{fragments/pagination/pagination :: pagination(${totalPages}, ${currentPage})}">
-                    </nav>
-                    <div class="govuk-button-group" id="action-buttons">
-                        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/local-authority/{id}/invite-new-user(id=${localAuthority.id})}, #{manageLAUsers.inviteAnotherUserButtonText})}">
-                            manageLAUsers.inviteAnotherUserButtonText
+                    </td>
+                    <td class="govuk-table__cell">
+                        <a th:href="@{${user.pending ? '#' : 'edit-user/' + user.id}}"
+                           class="govuk-link"
+                           th:text="#{manageLAUsers.table.change}"
+                           th:if="${currentUser.id} != ${user.id}"
+                        >
+                            manageLAUsers.table.change
                         </a>
-                        <button th:replace="~{fragments/buttons/secondaryButton :: secondaryButton(#{manageLAUsers.returnToDashboardButton})}"></button>
-                    </div>
-                </section>
-            </th:block>
-        </main>
-    </body>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <nav th:if="${totalPages > 1}"
+                 th:replace="~{fragments/pagination/pagination :: pagination(${totalPages}, ${currentPage})}">
+            </nav>
+            <div class="govuk-button-group" id="action-buttons">
+                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/local-authority/{id}/invite-new-user(id=${localAuthority.id})}, #{manageLAUsers.inviteAnotherUserButtonText})}">
+                    manageLAUsers.inviteAnotherUserButtonText
+                </a>
+                <button th:replace="~{fragments/buttons/secondaryButton :: secondaryButton(#{manageLAUsers.returnToDashboardButton})}"></button>
+            </div>
+        </section>
+    </th:block>
+</main>
+</body>
 </html>
