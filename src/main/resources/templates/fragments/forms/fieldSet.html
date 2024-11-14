@@ -1,7 +1,7 @@
 <div th:fragment="fieldSet(content, fieldName, fieldSetHeading, fieldSetHint)" class="govuk-form-group"
      th:classappend="${#fields.hasAnyErrors()} ? 'govuk-form-group--error'">
     <fieldset class="govuk-fieldset" role="group"
-              th:attrappend="aria-describedby=${#fields.hasAnyErrors() && fieldSetHint != null} ? ${fieldName} + '-hint ' + ${fieldName} + '-error' : ${fieldName} + '-hint'">
+              th:attrappend="aria-describedby=|${fieldSetHint != null ? fieldName + '-hint' : ''} ${#fields.hasAnyErrors() ? fieldName + '-error' : ''}|">
         <legend th:if="${fieldSetHeading != null}" class="govuk-fieldset__legend govuk-fieldset__legend--l">
             <h1 class="govuk-fieldset__heading" th:text="${fieldSetHeading}">
                 Heading for set of form fields
