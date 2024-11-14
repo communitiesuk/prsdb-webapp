@@ -7,7 +7,7 @@ import kotlin.reflect.KClass
 import kotlin.test.assertEquals
 
 abstract class BasePage(
-    protected val page: Page,
+    val page: Page,
 ) {
     companion object {
         fun <T : BasePage> createValid(

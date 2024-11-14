@@ -78,6 +78,9 @@ dependencies {
 
     // Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+
+    // PhoneNumbers
+    implementation("com.googlecode.libphonenumber:libphonenumber:8.13.49")
 }
 
 kotlin {
@@ -117,5 +120,6 @@ buildscript {
     dependencies {
         classpath("org.postgresql:postgresql:42.7.4")
         classpath("org.flywaydb:flyway-database-postgresql:10.18.0")
+//        classpath("com.googlecode.libphonenumber:libphonenumber:8.13.49")
     }
 }
