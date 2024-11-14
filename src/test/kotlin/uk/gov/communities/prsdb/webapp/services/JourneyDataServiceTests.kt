@@ -45,7 +45,7 @@ class JourneyDataServiceTests {
     @Nested
     inner class GetPageDataTests {
         @Test
-        fun `getPageData returns page data from journeyData if subPageNumber is null`() {
+        fun `returns page data from journeyData if subPageNumber is null`() {
             // Arrange
             val pageName = "testPage"
             val key = "testKey"
@@ -70,7 +70,7 @@ class JourneyDataServiceTests {
         }
 
         @Test
-        fun `getPageData returns null if page data is missing`() {
+        fun `returns null if page data is missing`() {
             // Arrange
             val pageName = "testPage"
             val journeyData: JourneyData = mutableMapOf()
@@ -90,7 +90,7 @@ class JourneyDataServiceTests {
         }
 
         @Test
-        fun `getPageData returns subPage data from journeyData if subPageNumber is provided`() {
+        fun `returns subPage data from journeyData if subPageNumber is provided`() {
             // Arrange
             val pageName = "testPage"
             val subPageNumber = 12
@@ -116,7 +116,7 @@ class JourneyDataServiceTests {
         }
 
         @Test
-        fun `getPageData returns null if sub page data is missing`() {
+        fun `returns null if sub page data is missing`() {
             // Arrange
             val pageName = "testPage"
             val subPageNumber = 12
@@ -140,7 +140,7 @@ class JourneyDataServiceTests {
     @Nested
     inner class SaveJourneyDataTests {
         @Test
-        fun `saveJourneyData creates new form context if contextId is null`() {
+        fun `creates new form context if contextId is null`() {
             // Arrange
             // Function Args
             val journeyType = JourneyType.LANDLORD_REGISTRATION
@@ -194,7 +194,7 @@ class JourneyDataServiceTests {
         }
 
         @Test
-        fun `saveJourneyData updates existing form context if it exists`() {
+        fun `updates existing form context if it exists`() {
             // Arrange
             // Function Args
             val journeyType = JourneyType.LANDLORD_REGISTRATION
@@ -254,7 +254,7 @@ class JourneyDataServiceTests {
         }
 
         @Test
-        fun `saveJourneyData throws an illegal state exception if form context is missing`() {
+        fun `throws an illegal state exception if form context is missing`() {
             // Arrange
             val journeyType = JourneyType.LANDLORD_REGISTRATION
             val principalId = "testPrincipleSub"
@@ -289,7 +289,7 @@ class JourneyDataServiceTests {
     @Nested
     inner class LoadJourneyDataIntoSessionTests {
         @Test
-        fun `loadJourneyDataIntoSession stores the new journey data in the session`() {
+        fun `stores the new journey data in the session`() {
             // Function Args
             val journeyType = JourneyType.LANDLORD_REGISTRATION
             val principalId = "testPrincipleSub"
@@ -338,7 +338,7 @@ class JourneyDataServiceTests {
         }
 
         @Test
-        fun `loadJourneyDataIntoSession throws an illegal state exception if form context is missing`() {
+        fun `throws an illegal state exception if form context is missing`() {
             // Arrange
             val contextId: Long = 123
             whenever(mockFormContextRepository.findById(contextId)).thenReturn(Optional.ofNullable(null))

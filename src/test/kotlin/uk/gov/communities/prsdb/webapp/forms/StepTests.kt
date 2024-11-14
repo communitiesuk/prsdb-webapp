@@ -19,7 +19,6 @@ class StepTests {
         override val urlPathSegment: String,
     ) : StepId {
         StepOne("step1"),
-        StepTwo("step2"),
     }
 
     @Test
