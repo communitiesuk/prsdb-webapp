@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 
 class Navigator(
@@ -28,6 +29,11 @@ class Navigator(
     ): EditLaUserPage {
         navigate("local-authority/$authorityId/edit-user/$userId")
         return BasePage.createValid(page, EditLaUserPage::class)
+    }
+
+    fun goToLandlordRegistrationNameFormPage(): NameFormPageLandlordRegistration {
+        navigate("register-as-a-landlord/name")
+        return BasePage.createValid(page, NameFormPageLandlordRegistration::class)
     }
 
     fun goToLandlordRegistrationEmailFormPage(): EmailFormPageLandlordRegistration {

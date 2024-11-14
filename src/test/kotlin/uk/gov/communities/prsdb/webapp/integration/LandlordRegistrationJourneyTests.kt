@@ -11,32 +11,72 @@ import org.junit.jupiter.params.provider.ValueSource
 
 class LandlordRegistrationJourneyTests : IntegrationTest() {
     final val journeyUrl = "register-as-a-landlord"
-    val initialStepUrl = "email"
+    val initialStepUrl = "name"
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
 
     @Nested
-    inner class LandlordRegistrationStepEmail {
+    inner class LandlordRegistrationStepName {
         @Test
-        fun `Submitting a valid email address redirects to the next step`() {
-            val formPage = navigator.goToLandlordRegistrationEmailFormPage()
-            formPage.fillEmail("test@example.com")
+        fun `Submitting a valid name to the next step`() {
+            val formPage = navigator.goToLandlordRegistrationNameFormPage()
+            formPage.fillName("Arthur Dent")
             formPage.submit()
         }
 
         @Test
-        fun `Submitting an empty e-mail address returns an error`() {
-            val formPage = navigator.goToLandlordRegistrationEmailFormPage()
-            formPage.fillEmail("")
+        fun `Submitting an empty name returns an error`() {
+            val formPage = navigator.goToLandlordRegistrationNameFormPage()
+            formPage.fillName("")
             formPage.submitUnsuccessfully()
-            formPage.assertEmailFormErrorContains("Enter a valid email address to continue. An email is required for contact purposes.")
+            formPage.assertNameFormErrorContains("You must enter your full name")
+        }
+    }
+
+    @Nested
+    inner class LandlordRegistrationStepEmail {
+        @Test
+        fun `Redirects to the first step in the journey if session data is not valid for step`() {
+            val formResponse: Response? = navigator.navigate("$journeyUrl/email")
+            assertThat(formResponse?.url()).contains("$journeyUrl/$initialStepUrl")
         }
 
-        @Test
-        fun `Submitting an invalid e-mail address returns an error`() {
-            val formPage = navigator.goToLandlordRegistrationEmailFormPage()
-            formPage.fillEmail("notAnEmail")
-            formPage.submitUnsuccessfully()
-            formPage.assertEmailFormErrorContains("Enter an email address in the right format")
+        @Nested
+        inner class LandlordRegistrationStepEmailWithPreviousStepsFulfilled {
+            @BeforeEach
+            fun setUp() {
+                val formPage = navigator.goToLandlordRegistrationNameFormPage()
+                formPage.fillName("Arthur Dent")
+                formPage.submitWithoutLoadingPage()
+            }
+
+            @Test
+            fun `Does not redirect away from step if session data is valid for step`() {
+                val formResponse: Response? = navigator.navigate("$journeyUrl/email")
+                assertThat(formResponse?.url()).contains("$journeyUrl/email")
+            }
+
+            @Test
+            fun `Submitting a valid email address redirects to the next step`() {
+                val formPage = navigator.goToLandlordRegistrationEmailFormPage()
+                formPage.fillEmail("test@example.com")
+                formPage.submit()
+            }
+
+            @Test
+            fun `Submitting an empty e-mail address returns an error`() {
+                val formPage = navigator.goToLandlordRegistrationEmailFormPage()
+                formPage.fillEmail("")
+                formPage.submitUnsuccessfully()
+                formPage.assertEmailFormErrorContains("Enter a valid email address to continue. An email is required for contact purposes.")
+            }
+
+            @Test
+            fun `Submitting an invalid e-mail address returns an error`() {
+                val formPage = navigator.goToLandlordRegistrationEmailFormPage()
+                formPage.fillEmail("notAnEmail")
+                formPage.submitUnsuccessfully()
+                formPage.assertEmailFormErrorContains("Enter an email address in the right format")
+            }
         }
     }
 
@@ -52,8 +92,10 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         inner class LandlordRegistrationStepPhoneNumberWithPreviousStepsFulfilled {
             @BeforeEach
             fun setUp() {
-                val formPage = navigator.goToLandlordRegistrationEmailFormPage()
-                formPage.fillEmail("test@example.com")
+                val formPage = navigator.goToLandlordRegistrationNameFormPage()
+                formPage.fillName("Arthur Dent")
+                val emailPage = formPage.submit()
+                emailPage.fillEmail("test@example.com")
                 formPage.submitWithoutLoadingPage()
             }
 
