@@ -14,7 +14,7 @@
         <form method="POST" th:object="${localAuthorityUser}" th:action="@{''}" th:with="field='isManager'">
             <th:block id="fieldset-content"
                       th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, ${field}, #{editLAUserAccess.radios.heading}, '')}">
-                <th:block th:replace="~{fragments/forms/radios :: radios(${field}, ${options})}"></th:block>
+                <th:block th:replace="~{fragments/forms/radios :: radios(null,${field}, null,${options})}"></th:block>
             </th:block>
             <div class="govuk-button-group">
                 <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{editLAUserAccess.saveButton})}"></button>
