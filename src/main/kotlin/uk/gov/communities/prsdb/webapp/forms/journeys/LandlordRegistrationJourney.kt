@@ -27,7 +27,7 @@ class LandlordRegistrationJourney(
                         Page(
                             formModel = EmailFormModel::class,
                             templateName = "forms/emailForm",
-                            contentKeys =
+                            content =
                                 mapOf(
                                     "title" to "registerAsALandlord.title",
                                     "fieldSetHeading" to "forms.email.fieldSetHeading",
@@ -45,7 +45,7 @@ class LandlordRegistrationJourney(
                         Page(
                             formModel = PhoneNumberFormModel::class,
                             templateName = "forms/phoneNumberForm",
-                            contentKeys =
+                            content =
                                 mapOf(
                                     "title" to "registerAsALandlord.title",
                                     "fieldSetHeading" to "forms.phoneNumber.fieldSetHeading",

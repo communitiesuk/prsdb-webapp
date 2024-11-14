@@ -13,7 +13,7 @@ import kotlin.reflect.full.createInstance
 class Page(
     private val formModel: KClass<out FormModel>,
     private val templateName: String,
-    private val contentKeys: Map<String, String>,
+    private val content: Map<String, Any>,
 ) {
     fun populateModelAndGetTemplateName(
         validator: Validator,
@@ -23,7 +23,7 @@ class Page(
     ): String {
         var bindingResult = bindDataToFormModel(validator, pageData)
         model.addAttribute(BindingResult.MODEL_KEY_PREFIX + "formModel", bindingResult)
-        for ((key, value) in contentKeys) {
+        for ((key, value) in content) {
             model.addAttribute(key, value)
         }
         if (prevStepUrl != null) {
