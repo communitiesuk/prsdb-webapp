@@ -2,6 +2,9 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor.captor
@@ -51,5 +54,57 @@ class LocalAuthorityInvitationServiceTests {
         val authority = inviteService.getAuthorityForToken(testUuid.toString())
 
         assertEquals(authority, testAuthority)
+    }
+
+    @Test
+    fun `getEmailAddressForToken returns the email the invitation was send to`() {
+        val testUuid = UUID.randomUUID()
+        val testEmail = "test@example.com"
+        val testAuthority = LocalAuthority()
+        whenever(mockLaInviteRepository.findByToken(testUuid)).thenReturn(LocalAuthorityInvitation(testUuid, testEmail, testAuthority))
+
+        val email = inviteService.getEmailAddressForToken(testUuid.toString())
+
+        assertEquals(email, testEmail)
+    }
+
+    @Test
+    fun `getInvitationFromToken returns an invitation if the token is in the database`() {
+        val testUuid = UUID.randomUUID()
+        val testEmail = "test@example.com"
+        val testAuthority = LocalAuthority()
+        val testInvitation = LocalAuthorityInvitation(testUuid, testEmail, testAuthority)
+        whenever(mockLaInviteRepository.findByToken(testUuid)).thenReturn(testInvitation)
+
+        val invitation = inviteService.getInvitationFromToken(testUuid.toString())
+
+        assertEquals(invitation, testInvitation)
+    }
+
+    @Test
+    fun `getInvitationFromToken throws an exception if the token is not in the database`() {
+        val testUuid = UUID.randomUUID()
+        whenever(mockLaInviteRepository.findByToken(testUuid)).thenReturn(null)
+
+        val thrown = assertThrows(Exception::class.java) { inviteService.getInvitationFromToken(testUuid.toString()) }
+        assertEquals("Token not found in database", thrown.message)
+    }
+
+    @Test
+    fun `tokenIsValid returns true if the token is in the database`() {
+        val testUuid = UUID.randomUUID()
+        val testEmail = "test@example.com"
+        val testAuthority = LocalAuthority()
+        whenever(mockLaInviteRepository.findByToken(testUuid)).thenReturn(LocalAuthorityInvitation(testUuid, testEmail, testAuthority))
+
+        assertTrue(inviteService.tokenIsValid(testUuid.toString()))
+    }
+
+    @Test
+    fun `tokenIsValid returns false if the token is not in the database`() {
+        val testUuid = UUID.randomUUID()
+        whenever(mockLaInviteRepository.findByToken(testUuid)).thenReturn(null)
+
+        assertFalse(inviteService.tokenIsValid(testUuid.toString()))
     }
 }

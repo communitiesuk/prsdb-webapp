@@ -23,7 +23,9 @@ class RegisterLAUserController(
     var journeyDataService: JourneyDataService,
 ) {
     @GetMapping("/")
-    fun acceptInvitation(token: String): CharSequence {
+    fun acceptInvitation(
+        @RequestParam(value = "token", required = true) token: String,
+    ): CharSequence {
         // This is using a CharSequence instead of returning a String to handle an error that otherwise occurs in
         // the LocalAuthorityInvitationService method that creates the invitation url using MvcUriComponentsBuilder.fromMethodName
         // see https://github.com/spring-projects/spring-hateoas/issues/155 for details

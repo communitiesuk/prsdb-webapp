@@ -23,6 +23,7 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Click submit redirects to the name step`() {
             val formPage = navigator.goToLaUserRegistrationLandingPage()
+            formPage.assertHeadingContains("Registering as a local authority user")
             val nextStep = formPage.submit()
             nextStep.assertHeadingContains("What is your full name?")
         }
