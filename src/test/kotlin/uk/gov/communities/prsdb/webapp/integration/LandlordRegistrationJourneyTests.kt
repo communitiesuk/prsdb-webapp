@@ -92,8 +92,10 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         inner class LandlordRegistrationStepPhoneNumberWithPreviousStepsFulfilled {
             @BeforeEach
             fun setUp() {
-                val formPage = navigator.goToLandlordRegistrationEmailFormPage()
-                formPage.fillEmail("test@example.com")
+                val formPage = navigator.goToLandlordRegistrationNameFormPage()
+                formPage.fillName("Arthur Dent")
+                val emailPage = formPage.submit()
+                emailPage.fillEmail("test@example.com")
                 formPage.submitWithoutLoadingPage()
             }
 
