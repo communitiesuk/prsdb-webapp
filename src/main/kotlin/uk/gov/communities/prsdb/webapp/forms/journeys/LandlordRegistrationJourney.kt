@@ -27,12 +27,13 @@ class LandlordRegistrationJourney(
                         Page(
                             formModel = EmailFormModel::class,
                             templateName = "forms/emailForm",
-                            contentKeys =
+                            content =
                                 mapOf(
                                     "title" to "registerAsALandlord.title",
                                     "fieldSetHeading" to "forms.email.fieldSetHeading",
                                     "fieldSetHint" to "forms.email.fieldSetHint",
                                     "label" to "forms.email.label",
+                                    "submitButtonText" to "forms.buttons.saveAndContinue",
                                     "backUrl" to "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}",
                                 ),
                         ),
@@ -44,7 +45,7 @@ class LandlordRegistrationJourney(
                         Page(
                             formModel = PhoneNumberFormModel::class,
                             templateName = "forms/phoneNumberForm",
-                            contentKeys =
+                            content =
                                 mapOf(
                                     "title" to "registerAsALandlord.title",
                                     "fieldSetHeading" to "forms.phoneNumber.fieldSetHeading",
