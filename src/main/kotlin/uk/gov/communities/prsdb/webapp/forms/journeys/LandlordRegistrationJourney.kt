@@ -28,7 +28,7 @@ class LandlordRegistrationJourney(
                         Page(
                             formModel = NameFormModel::class,
                             templateName = "forms/nameForm",
-                            contentKeys =
+                            content =
                                 mapOf(
                                     "title" to "registerAsALandlord.title",
                                     "fieldSetHeading" to "forms.name.fieldSetHeading",
@@ -38,7 +38,7 @@ class LandlordRegistrationJourney(
                                     "backUrl" to "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}",
                                 ),
                         ),
-                    nextAction = { _, subPageNumber: Int? -> Pair(LandlordRegistrationStepId.Email, null) },
+                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Email, null) },
                 ),
                 Step(
                     id = LandlordRegistrationStepId.Email,
@@ -55,7 +55,7 @@ class LandlordRegistrationJourney(
                                     "submitButtonText" to "forms.buttons.saveAndContinue",
                                 ),
                         ),
-                    nextAction = { _, _: Int? -> Pair(LandlordRegistrationStepId.PhoneNumber, null) },
+                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.PhoneNumber, null) },
                 ),
                 Step(
                     id = LandlordRegistrationStepId.PhoneNumber,
