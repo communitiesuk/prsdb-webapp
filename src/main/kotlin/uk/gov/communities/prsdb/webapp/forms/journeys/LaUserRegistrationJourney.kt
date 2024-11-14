@@ -27,7 +27,7 @@ class LaUserRegistrationJourney(
                         Page(
                             formModel = NameFormModel::class,
                             templateName = "forms/nameForm",
-                            contentKeys =
+                            content =
                                 mapOf(
                                     "title" to "registerLAUser.title",
                                     "fieldSetHeading" to "forms.name.fieldSetHeading",
@@ -45,7 +45,7 @@ class LaUserRegistrationJourney(
                         Page(
                             formModel = EmailFormModel::class,
                             templateName = "forms/emailForm",
-                            contentKeys =
+                            content =
                                 mapOf(
                                     "title" to "registerLAUser.title",
                                     "fieldSetHeading" to "registerLAUser.email.fieldSetHeading",
@@ -56,12 +56,12 @@ class LaUserRegistrationJourney(
                         ),
                     nextAction = { _, subPageNumber: Int? -> Pair(RegisterLaUserStepId.CheckAnswers, null) },
                 ),
-                /*TODO: PRSD-541 - check answers page
-                Step(
-                    id = RegisterLaUserStepId.CheckAnswers,
-                    page =
-                        Page(),
-                    nextAction = { _, subPageNumber: Int? -> Pair(RegisterLaUserStepId.CheckAnswers, null) },
-                ),*/
+        /*TODO: PRSD-541 - check answers page
+        Step(
+            id = RegisterLaUserStepId.CheckAnswers,
+            page =
+                Page(),
+            nextAction = { _, subPageNumber: Int? -> Pair(RegisterLaUserStepId.CheckAnswers, null) },
+        ),*/
             ),
     )
