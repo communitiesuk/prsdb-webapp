@@ -10,7 +10,7 @@ abstract class BasePage(
     val page: Page,
 ) {
     companion object {
-        fun <T : BasePage> createValid(
+        fun <T : BasePage> createAndValidate(
             page: Page,
             targetClass: KClass<T>,
         ): T {
@@ -32,11 +32,7 @@ abstract class BasePage(
 
     protected val header = page.locator("main header h1")
 
-    protected val fieldSetHeading = page.locator(".govuk-fieldset__heading")
-
     abstract fun validate()
-
-    protected fun fieldsetInput(fieldName: String) = TextInput(page.locator(".govuk-fieldset:has(input[name=\"$fieldName\"])"))
 
     protected fun inputFormGroup(fieldName: String) = TextInput(page.locator(".govuk-form-group:has(>input[name=\"$fieldName\"])"))
 }

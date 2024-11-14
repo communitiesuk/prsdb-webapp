@@ -2,32 +2,33 @@ package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.TextInput
 
-abstract class EmailFormBasePage(
+abstract class FormBasePage(
     page: Page,
     val pageHeading: String,
+    val inputLabel: String,
 ) : BasePage(page) {
-    private val emailInputFormGroup = fieldsetInput("emailAddress")
+    val inputFormGroup = fieldsetInput(inputLabel)
     val submitButton = page.locator("button[type=\"submit\"]")
 
     override fun validate() {
         assertThat(fieldSetHeading).containsText(pageHeading)
     }
 
-    abstract fun submit(): BasePage
-
-    fun fillEmail(text: String) = emailInputFormGroup.input.fill(text)
+    fun fillInput(text: String) = inputFormGroup.input.fill(text)
 
     fun submitUnsuccessfully() {
         submitButton.click()
         page.waitForLoadState()
     }
 
-    fun submitWithoutLoadingPage() {
+    fun submit(): Page {
         submitButton.click()
+        return page
     }
 
-    fun assertEmailFormErrorContains(error: String) {
-        emailInputFormGroup.assertErrorMessageContains(error)
-    }
+    val fieldSetHeading = page.locator(".govuk-fieldset__heading")
+
+    protected fun fieldsetInput(fieldName: String) = TextInput(page.locator(".govuk-fieldset:has(input[name=\"$fieldName\"])"))
 }

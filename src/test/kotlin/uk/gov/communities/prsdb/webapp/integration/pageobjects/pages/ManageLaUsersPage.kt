@@ -31,7 +31,7 @@ class ManageLaUsersPage(
 
     fun inviteNewUser(): InviteNewLaUserPage {
         inviteAnotherButton.click()
-        return createValid(page, InviteNewLaUserPage::class)
+        return createAndValidate(page, InviteNewLaUserPage::class)
     }
 
     class UsersTable(
@@ -55,7 +55,7 @@ class ManageLaUsersPage(
 
         fun editUser(): EditLaUserPage {
             changeLink.click()
-            return createValid(locator.page(), EditLaUserPage::class)
+            return createAndValidate(locator.page(), EditLaUserPage::class)
         }
 
         fun assertHasNoEditLink() {

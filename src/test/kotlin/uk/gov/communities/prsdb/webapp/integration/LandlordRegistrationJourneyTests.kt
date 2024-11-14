@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 
 class LandlordRegistrationJourneyTests : IntegrationTest() {
     final val journeyUrl = "register-as-a-landlord"
@@ -58,8 +60,9 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             @Test
             fun `Submitting a valid email address redirects to the next step`() {
                 val formPage = navigator.goToLandlordRegistrationEmailFormPage()
-                formPage.fillEmail("test@example.com")
-                formPage.submit()
+                formPage.fillInput("test@example.com")
+                val nextPage = formPage.submit()
+                BasePage.createAndValidate(nextPage, PhoneNumberFormPageLandlordRegistration::class)
             }
 
             @Test

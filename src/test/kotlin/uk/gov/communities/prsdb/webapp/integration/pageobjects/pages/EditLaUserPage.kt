@@ -38,12 +38,12 @@ class EditLaUserPage(
 
     fun submit(): ManageLaUsersPage {
         submitButton.click()
-        return createValid(page, ManageLaUsersPage::class)
+        return createAndValidate(page, ManageLaUsersPage::class)
     }
 
     fun deleteUser(): ConfirmDeleteLaUserPage {
         deleteButton.click()
-        return createValid(page, ConfirmDeleteLaUserPage::class)
+        return createAndValidate(page, ConfirmDeleteLaUserPage::class)
     }
 
     enum class AccessLevelSelection {
