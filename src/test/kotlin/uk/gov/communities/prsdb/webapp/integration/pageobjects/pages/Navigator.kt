@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.Response
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
@@ -57,7 +58,5 @@ class Navigator(
         return BasePage.createValid(page, NameFormPageLaUserRegistration::class)
     }
 
-    private fun navigate(path: String) {
-        page.navigate("http://localhost:$port/$path")
-    }
+    fun navigate(path: String): Response? = page.navigate("http://localhost:$port/$path")
 }

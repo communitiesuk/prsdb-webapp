@@ -3,11 +3,11 @@ package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 
-abstract class EmailFormBasePage(
+abstract class PhoneNumberBasePage(
     page: Page,
     val pageHeading: String,
 ) : BasePage(page) {
-    private val emailInputFormGroup = fieldsetInput("emailAddress")
+    private val phoneNumberFormGroup = fieldsetInput("phoneNumber")
     val submitButton = page.locator("button[type=\"submit\"]")
 
     override fun validate() {
@@ -16,18 +16,14 @@ abstract class EmailFormBasePage(
 
     abstract fun submit(): BasePage
 
-    fun fillEmail(text: String) = emailInputFormGroup.input.fill(text)
+    fun fillPhoneNumber(text: String) = phoneNumberFormGroup.input.fill(text)
 
     fun submitUnsuccessfully() {
         submitButton.click()
         page.waitForLoadState()
     }
 
-    fun submitWithoutLoadingPage() {
-        submitButton.click()
-    }
-
-    fun assertEmailFormErrorContains(error: String) {
-        emailInputFormGroup.assertErrorMessageContains(error)
+    fun assertPhoneNumberFormErrorContains(error: String) {
+        phoneNumberFormGroup.assertErrorMessageContains(error)
     }
 }

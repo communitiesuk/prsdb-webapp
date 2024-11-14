@@ -37,7 +37,7 @@ class LandlordRegistrationJourney(
                                     "backUrl" to "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}",
                                 ),
                         ),
-                    nextAction = { _, subPageNumber: Int? -> Pair(LandlordRegistrationStepId.PhoneNumber, null) },
+                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.PhoneNumber, null) },
                 ),
                 Step(
                     id = LandlordRegistrationStepId.PhoneNumber,
@@ -54,7 +54,8 @@ class LandlordRegistrationJourney(
                                     "hint" to "forms.phoneNumber.hint",
                                 ),
                         ),
-                    nextAction = { _, subPageNumber: Int? -> Pair(LandlordRegistrationStepId.Email, 0) },
+                    // TODO PRSD-371 the next action should be updated to the `Select Country` step
+                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Email, null) },
                 ),
             ),
     )
