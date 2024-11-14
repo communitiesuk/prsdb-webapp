@@ -2,14 +2,15 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.microsoft.playwright.Response
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.assertj.core.api.AssertionsForClassTypes.assertThat
 import org.junit.jupiter.api.BeforeEach
-import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 
 class LandlordRegistrationJourneyTests : IntegrationTest() {
@@ -20,18 +21,21 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     @Nested
     inner class LandlordRegistrationStepName {
         @Test
-        fun `Submitting a valid name to the next step`() {
+        fun `Submitting a valid name redirects to the next step`() {
             val formPage = navigator.goToLandlordRegistrationNameFormPage()
-            formPage.fillName("Arthur Dent")
-            formPage.submit()
+            formPage.fillInput("Arthur Dent")
+            val nextStep = BasePage.createValid(formPage.submit(), EmailFormPageLandlordRegistration::class)
+            assertThat(nextStep.fieldSetHeading).containsText("What is your email address?")
         }
 
         @Test
         fun `Submitting an empty name returns an error`() {
             val formPage = navigator.goToLandlordRegistrationNameFormPage()
-            formPage.fillName("")
+            formPage.fillInput("")
             formPage.submitUnsuccessfully()
-            formPage.assertNameFormErrorContains("You must enter your full name")
+            assertThat(
+                formPage.inputFormErrorMessage,
+            ).containsText("You must enter your full name")
         }
     }
 
@@ -48,8 +52,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             @BeforeEach
             fun setUp() {
                 val formPage = navigator.goToLandlordRegistrationNameFormPage()
-                formPage.fillName("Arthur Dent")
-                formPage.submitWithoutLoadingPage()
+                formPage.fillInput("Arthur Dent")
+                formPage.submit()
             }
 
             @Test
@@ -101,10 +105,10 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             @BeforeEach
             fun setUp() {
                 val formPage = navigator.goToLandlordRegistrationNameFormPage()
-                formPage.fillName("Arthur Dent")
-                val emailPage = formPage.submit()
-                emailPage.fillEmail("test@example.com")
-                formPage.submitWithoutLoadingPage()
+                formPage.fillInput("Arthur Dent")
+                val nextStep = BasePage.createValid(formPage.submit(), EmailFormPageLandlordRegistration::class)
+                nextStep.fillInput("test@example.com")
+                nextStep.submit()
             }
 
             @Test
@@ -117,8 +121,9 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             fun `Submitting correct UK numbers without a country code redirects to the next step`() {
                 val formPage = navigator.goToLandlordRegistrationPhoneNumberFormPage()
                 val number = phoneNumberUtil.getExampleNumber("GB")
-                formPage.fillPhoneNumber("${number.countryCode}${number.nationalNumber}")
-                formPage.submit()
+                formPage.fillInput("${number.countryCode}${number.nationalNumber}")
+                val nextStep = BasePage.createValid(formPage.submit(), EmailFormPageLandlordRegistration::class)
+                assertThat(nextStep.fieldSetHeading).containsText("What is your email address?")
             }
 
             @ParameterizedTest
@@ -128,40 +133,49 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             fun `Submitting correct UK and international numbers with country codes redirects to the next step`(regionCode: String) {
                 val formPage = navigator.goToLandlordRegistrationPhoneNumberFormPage()
                 val number = phoneNumberUtil.getExampleNumber(regionCode)
-                formPage.fillPhoneNumber("+${number.countryCode}${number.nationalNumber}")
-                formPage.submit()
+                formPage.fillInput("+${number.countryCode}${number.nationalNumber}")
+                val nextStep = BasePage.createValid(formPage.submit(), EmailFormPageLandlordRegistration::class)
+                assertThat(nextStep.fieldSetHeading).containsText("What is your email address?")
             }
 
             @Test
             fun `Submitting an empty phone number returns an error`() {
                 val formPage = navigator.goToLandlordRegistrationPhoneNumberFormPage()
-                formPage.fillPhoneNumber("")
+                formPage.fillInput("")
                 formPage.submitUnsuccessfully()
-                formPage.assertPhoneNumberFormErrorContains("Enter a phone number")
+                assertThat(
+                    formPage.inputFormErrorMessage,
+                ).containsText("Enter a phone number")
             }
 
             @Test
             fun `Submitting an invalid phone number returns an error`() {
                 val formPage = navigator.goToLandlordRegistrationPhoneNumberFormPage()
-                formPage.fillPhoneNumber("notAPhoneNumber")
+                formPage.fillInput("notAPhoneNumber")
                 formPage.submitUnsuccessfully()
-                formPage.assertPhoneNumberFormErrorContains("Enter a phone number including the country code for international numbers")
+                assertThat(
+                    formPage.inputFormErrorMessage,
+                ).containsText("Enter a phone number including the country code for international numbers")
             }
 
             @Test
             fun `Submitting incorrect number returns an error`() {
                 val formPage = navigator.goToLandlordRegistrationPhoneNumberFormPage()
-                formPage.fillPhoneNumber("0")
+                formPage.fillInput("0")
                 formPage.submitUnsuccessfully()
-                formPage.assertPhoneNumberFormErrorContains("Enter a phone number including the country code for international numbers")
+                assertThat(
+                    formPage.inputFormErrorMessage,
+                ).containsText("Enter a phone number including the country code for international numbers")
             }
 
             @Test
             fun `Submitting an international phone number without a country code returns an error`() {
                 val formPage = navigator.goToLandlordRegistrationPhoneNumberFormPage()
-                formPage.fillPhoneNumber("0355501234")
+                formPage.fillInput("0355501234")
                 formPage.submitUnsuccessfully()
-                formPage.assertPhoneNumberFormErrorContains("Enter a phone number including the country code for international numbers")
+                assertThat(
+                    formPage.inputFormErrorMessage,
+                ).containsText("Enter a phone number including the country code for international numbers")
             }
         }
     }
