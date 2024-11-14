@@ -79,7 +79,7 @@ class RegisterLAUserController(
         val journeyData = journeyDataService.getJourneyDataFromSession()
 
         val emailStep = laUserRegistrationJourney.steps.singleOrNull { step -> step.id == RegisterLaUserStepId.Email }
-        val formData = mutableMapOf<String, String?>("emailAddress" to invitationService.getEmailAddressForToken(token)) as PageData
+        val formData = mutableMapOf<String, Any?>("emailAddress" to invitationService.getEmailAddressForToken(token))
         emailStep?.updateJourneyData(journeyData, formData, null)
 
         journeyDataService.setJourneyData(journeyData)
