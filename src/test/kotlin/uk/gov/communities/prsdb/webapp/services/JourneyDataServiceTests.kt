@@ -6,9 +6,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.Mock
-import org.mockito.Mockito.mock
+import org.mockito.internal.matchers.apachecommons.ReflectionEquals
+import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.spy
@@ -23,8 +25,11 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import java.security.Principal
 import java.util.Optional
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
+@ExtendWith(MockitoExtension::class)
 class JourneyDataServiceTests {
     @Mock
     private lateinit var mockHttpSession: HttpSession
@@ -35,11 +40,17 @@ class JourneyDataServiceTests {
     @Mock
     private lateinit var mockOneLoginUserRepository: OneLoginUserRepository
 
+    private lateinit var journeyDataService: JourneyDataService
+
     @BeforeEach
     fun setup() {
-        mockHttpSession = mock()
-        mockFormContextRepository = mock()
-        mockOneLoginUserRepository = mock()
+        journeyDataService =
+            JourneyDataService(
+                mockHttpSession,
+                mockFormContextRepository,
+                mockOneLoginUserRepository,
+                ObjectMapper(),
+            )
     }
 
     @Nested
@@ -54,13 +65,6 @@ class JourneyDataServiceTests {
                 mutableMapOf(
                     pageName to mutableMapOf(key to value),
                 )
-            val journeyDataService =
-                JourneyDataService(
-                    mockHttpSession,
-                    mockFormContextRepository,
-                    mockOneLoginUserRepository,
-                    ObjectMapper(),
-                )
 
             // Act
             val pageData = journeyDataService.getPageData(journeyData, pageName, null)
@@ -74,13 +78,6 @@ class JourneyDataServiceTests {
             // Arrange
             val pageName = "testPage"
             val journeyData: JourneyData = mutableMapOf()
-            val journeyDataService =
-                JourneyDataService(
-                    mockHttpSession,
-                    mockFormContextRepository,
-                    mockOneLoginUserRepository,
-                    ObjectMapper(),
-                )
 
             // Act
             val pageData = journeyDataService.getPageData(journeyData, pageName, null)
@@ -100,13 +97,6 @@ class JourneyDataServiceTests {
                 mutableMapOf(
                     pageName to mutableMapOf(subPageNumber.toString() to mutableMapOf(key to value)),
                 )
-            val journeyDataService =
-                JourneyDataService(
-                    mockHttpSession,
-                    mockFormContextRepository,
-                    mockOneLoginUserRepository,
-                    ObjectMapper(),
-                )
 
             // Act
             val subPageData = journeyDataService.getPageData(journeyData, pageName, subPageNumber)
@@ -121,13 +111,6 @@ class JourneyDataServiceTests {
             val pageName = "testPage"
             val subPageNumber = 12
             val journeyData: JourneyData = mutableMapOf(pageName to mutableMapOf<String, Any>())
-            val journeyDataService =
-                JourneyDataService(
-                    mockHttpSession,
-                    mockFormContextRepository,
-                    mockOneLoginUserRepository,
-                    ObjectMapper(),
-                )
 
             // Act
             val subPageData = journeyDataService.getPageData(journeyData, pageName, subPageNumber)
@@ -168,15 +151,6 @@ class JourneyDataServiceTests {
             val spiedOnFormContext = spy(FormContext())
             whenever(spiedOnFormContext.id).thenReturn(contextId)
             whenever(mockFormContextRepository.save(any())).thenReturn(spiedOnFormContext)
-
-            // Service under test
-            val journeyDataService =
-                JourneyDataService(
-                    mockHttpSession,
-                    mockFormContextRepository,
-                    mockOneLoginUserRepository,
-                    ObjectMapper(),
-                )
 
             // Act
             val result = journeyDataService.saveJourneyData(null, journeyData, journeyType, principal)
@@ -220,9 +194,6 @@ class JourneyDataServiceTests {
 
             // OneLoginUser
             val oneLoginUser = OneLoginUser()
-            whenever(mockOneLoginUserRepository.getReferenceById(principalId)).thenReturn(
-                oneLoginUser,
-            )
 
             // FormContext
             val contextId: Long = 123
@@ -231,15 +202,6 @@ class JourneyDataServiceTests {
             whenever(mockFormContextRepository.save(any())).thenReturn(spiedOnFormContext)
             val originalFormContext = FormContext(journeyType, serializedJourneyData, oneLoginUser)
             whenever(mockFormContextRepository.findById(contextId)).thenReturn(Optional.ofNullable(originalFormContext))
-
-            // Service under test
-            val journeyDataService =
-                JourneyDataService(
-                    mockHttpSession,
-                    mockFormContextRepository,
-                    mockOneLoginUserRepository,
-                    ObjectMapper(),
-                )
 
             // Act
             val result = journeyDataService.saveJourneyData(contextId, newJourneyData, journeyType, principal)
@@ -265,15 +227,6 @@ class JourneyDataServiceTests {
             val contextId: Long = 123
             whenever(mockFormContextRepository.findById(contextId)).thenReturn(Optional.ofNullable(null))
 
-            // Service under test
-            val journeyDataService =
-                JourneyDataService(
-                    mockHttpSession,
-                    mockFormContextRepository,
-                    mockOneLoginUserRepository,
-                    ObjectMapper(),
-                )
-
             // Act and Assert
             assertThrows<IllegalStateException> {
                 journeyDataService.saveJourneyData(
@@ -293,7 +246,6 @@ class JourneyDataServiceTests {
             // Function Args
             val journeyType = JourneyType.LANDLORD_REGISTRATION
             val principalId = "testPrincipleSub"
-            val principal = Principal { principalId }
 
             // JourneyData
             val pageName = "testPage"
@@ -307,23 +259,11 @@ class JourneyDataServiceTests {
 
             // OneLoginUser
             val oneLoginUser = OneLoginUser()
-            whenever(mockOneLoginUserRepository.getReferenceById(principalId)).thenReturn(
-                oneLoginUser,
-            )
 
             // FormContext
             val contextId: Long = 123
             val formContext = FormContext(journeyType, serializedJourneyData, oneLoginUser)
             whenever(mockFormContextRepository.findById(contextId)).thenReturn(Optional.ofNullable(formContext))
-
-            // Service under test
-            val journeyDataService =
-                JourneyDataService(
-                    mockHttpSession,
-                    mockFormContextRepository,
-                    mockOneLoginUserRepository,
-                    ObjectMapper(),
-                )
 
             // Act
             journeyDataService.loadJourneyDataIntoSession(contextId)
@@ -343,19 +283,32 @@ class JourneyDataServiceTests {
             val contextId: Long = 123
             whenever(mockFormContextRepository.findById(contextId)).thenReturn(Optional.ofNullable(null))
 
-            // Service under test
-            val journeyDataService =
-                JourneyDataService(
-                    mockHttpSession,
-                    mockFormContextRepository,
-                    mockOneLoginUserRepository,
-                    ObjectMapper(),
-                )
-
             // Act and Assert
             assertThrows<IllegalStateException> {
                 journeyDataService.loadJourneyDataIntoSession(contextId)
             }
+        }
+
+        inner class ParentDummy(
+            val child: ChildDummy,
+        )
+
+        inner class ChildDummy(
+            val prop: String,
+        )
+
+        @Test
+        fun `reflectionEquals does deep matching`() {
+            val child1 = ChildDummy("Hello")
+            val child2 = ChildDummy("Hello")
+            val parent1 = ParentDummy(child1)
+            val parent2 = ParentDummy(child2)
+
+            val childResult = ReflectionEquals(child1).matches(child2)
+            val parentResult = ReflectionEquals(parent1).matches(parent2)
+
+            assertTrue(childResult)
+            assertFalse(parentResult)
         }
     }
 }
