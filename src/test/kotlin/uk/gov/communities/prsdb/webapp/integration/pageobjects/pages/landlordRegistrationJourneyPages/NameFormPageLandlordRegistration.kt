@@ -5,4 +5,4 @@ import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.F
 
 class NameFormPageLandlordRegistration(
     page: Page,
-) : FormBasePage(page, pageHeading = "What is your full name?", inputLabel = "name")
+) : FormBasePage(page, urlSegment = "/register-as-a-landlord/name", pageHeading = "What is your full name?", inputLabel = "name")

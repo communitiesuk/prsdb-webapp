@@ -4,7 +4,7 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.PageNotFoundPage
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.assertIsPage
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
 
 class LaUserRegistrationJourneyTests : IntegrationTest() {
@@ -14,8 +14,9 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
         fun `Submitting a valid name redirects to the next step`() {
             val formPage = navigator.goToLaUserRegistrationNameFormPage()
             formPage.fillInput("Test User")
-            val nextStep = BasePage.createValid(formPage.submit(), EmailFormPageLaUserRegistration::class)
-            assertThat(nextStep.fieldSetHeading).containsText("What is your work email address?")
+            val nextPage = formPage.submit()
+            val emailPage = assertIsPage(nextPage, EmailFormPageLaUserRegistration::class)
+            assertThat(emailPage.fieldSetHeading).containsText("What is your work email address?")
         }
 
         @Test
@@ -42,8 +43,9 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
             val formPage = navigator.goToLaUserRegistrationEmailFormPage()
             formPage.fillInput("test@example.com")
             // This will need to change when the "check answers" page is implemented
-            val nextStep = BasePage.createValid(formPage.submit(), PageNotFoundPage::class)
-            assertThat(nextStep.heading).containsText("Page not found")
+            val nextPage = formPage.submit()
+            val notFoundPage = assertIsPage(nextPage, PageNotFoundPage::class)
+            assertThat(notFoundPage.heading).containsText("Page not found")
         }
 
         @Test

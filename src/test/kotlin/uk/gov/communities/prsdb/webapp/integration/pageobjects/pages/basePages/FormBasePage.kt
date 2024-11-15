@@ -1,20 +1,16 @@
 package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages
 
 import com.microsoft.playwright.Page
-import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.TextInput
 
 abstract class FormBasePage(
     page: Page,
+    urlSegment: String,
     val pageHeading: String,
     val inputLabel: String,
-) : BasePage(page) {
+) : BasePage(page, urlSegment) {
     val inputFormGroup = fieldsetInput(inputLabel)
     val submitButton = page.locator("button[type=\"submit\"]")
-
-    override fun validate() {
-        assertThat(fieldSetHeading).containsText(pageHeading)
-    }
 
     fun fillInput(text: String) = inputFormGroup.input.fill(text)
 

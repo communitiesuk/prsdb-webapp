@@ -5,4 +5,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.F
 
 class EmailFormPageLandlordRegistration(
     page: Page,
-) : FormBasePage(page, pageHeading = "What is your email address?", inputLabel = "emailAddress")
+) : FormBasePage(
+        page,
+        urlSegment = "/register-as-a-landlord/email",
+        pageHeading = "What is your email address?",
+        inputLabel = "emailAddress",
+    )

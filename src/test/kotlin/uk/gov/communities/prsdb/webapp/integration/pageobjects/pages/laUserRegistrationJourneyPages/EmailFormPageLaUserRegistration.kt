@@ -5,4 +5,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.F
 
 class EmailFormPageLaUserRegistration(
     page: Page,
-) : FormBasePage(page, pageHeading = "What is your work email address?", inputLabel = "emailAddress")
+) : FormBasePage(
+        page,
+        urlSegment = "/register-local-authority-user/email",
+        pageHeading = "What is your work email address?",
+        inputLabel = "emailAddress",
+    )
