@@ -50,7 +50,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     inner class LandlordRegistrationStepEmail {
         @Test
         fun `Redirects to the first step in the journey if session data is not valid for step`() {
-            val formResponse: Response? = navigator.navigate("/$journeyUrlSegment/$emailUrlSegment")
+            val formResponse: Response? = navigator.navigate("$journeyUrlSegment/$emailUrlSegment")
             assertThat(formResponse?.url()).contains("/$journeyUrlSegment/$initialStepUrl")
         }
 
@@ -105,7 +105,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     inner class LandlordRegistrationStepPhoneNumber {
         @Test
         fun `Redirects to the first step in the journey if session data is not valid for step`() {
-            val formResponse: Response? = navigator.navigate("/$journeyUrlSegment/$phoneNumberUrlSegment")
+            val formResponse: Response? = navigator.navigate("$journeyUrlSegment/$phoneNumberUrlSegment")
             assertThat(formResponse?.url()).contains("/$journeyUrlSegment/$initialStepUrl")
         }
 
