@@ -53,8 +53,8 @@ class Navigator(
 
     private fun completeLaUserRegistrationNameStep(): EmailFormPageLaUserRegistration {
         val namePage = goToLaUserRegistrationNameFormPage()
-        namePage.fillName("Test user")
-        return namePage.submit()
+        namePage.fillInput("Test user")
+        return BasePage.createValid(namePage.submit(), EmailFormPageLaUserRegistration::class)
     }
 
     fun goToLaUserRegistrationEmailFormPage(): EmailFormPageLaUserRegistration = completeLaUserRegistrationNameStep()
