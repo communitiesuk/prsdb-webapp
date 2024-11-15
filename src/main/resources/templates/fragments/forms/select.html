@@ -1,0 +1,10 @@
+<th:block id="select-content" th:fragment="select(label, fieldName, hint, options)"
+          th:replace="~{fragments/forms/inputGroup :: inputGroup(${label}, ${fieldName}, ~{::#select-content/content()}, ${hint})}">
+    <select th:field="*{__${fieldName}__}" class="govuk-select"
+            th:attr="aria-describedby=${hint != null} ? ${fieldName} + '-hint'">
+        <option th:each="option: ${options}" th:value="${option.value}"
+                th:text="${option.labelMsgKey != null ? #messages.msg(option.labelMsgKey) : option.value}">
+            Option Label
+        </option>
+    </select>
+</th:block>
