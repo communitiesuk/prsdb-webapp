@@ -9,7 +9,6 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.Mock
-import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -25,9 +24,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import java.security.Principal
 import java.util.Optional
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 @ExtendWith(MockitoExtension::class)
 class JourneyDataServiceTests {
@@ -287,28 +284,6 @@ class JourneyDataServiceTests {
             assertThrows<IllegalStateException> {
                 journeyDataService.loadJourneyDataIntoSession(contextId)
             }
-        }
-
-        inner class ParentDummy(
-            val child: ChildDummy,
-        )
-
-        inner class ChildDummy(
-            val prop: String,
-        )
-
-        @Test
-        fun `reflectionEquals does deep matching`() {
-            val child1 = ChildDummy("Hello")
-            val child2 = ChildDummy("Hello")
-            val parent1 = ParentDummy(child1)
-            val parent2 = ParentDummy(child2)
-
-            val childResult = ReflectionEquals(child1).matches(child2)
-            val parentResult = ReflectionEquals(parent1).matches(parent2)
-
-            assertTrue(childResult)
-            assertFalse(parentResult)
         }
     }
 }
