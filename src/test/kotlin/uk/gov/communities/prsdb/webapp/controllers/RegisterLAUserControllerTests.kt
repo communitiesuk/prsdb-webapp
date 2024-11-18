@@ -42,7 +42,7 @@ class RegisterLAUserControllerTests(
     @Test
     @WithMockUser
     fun `acceptInvitation endpoint checks token and stores in session if valid`() {
-        mvc.get("/register-local-authority-user/?token=token123").andExpect {
+        mvc.get("/register-local-authority-user?token=token123").andExpect {
             status { is3xxRedirection() }
         }
 
@@ -53,7 +53,7 @@ class RegisterLAUserControllerTests(
     @Test
     @WithMockUser
     fun `acceptInvitation endpoint rejects invalid token`() {
-        mvc.get("/register-local-authority-user/?token=invalid-token").andExpect {
+        mvc.get("/register-local-authority-user?token=invalid-token").andExpect {
             status { is3xxRedirection() }
         }
 
@@ -79,7 +79,7 @@ class RegisterLAUserControllerTests(
         )
         whenever(invitationService.getEmailAddressForToken("token123")).thenReturn("invite@example.com")
 
-        mvc.get("/register-local-authority-user/?token=token123").andExpect {
+        mvc.get("/register-local-authority-user?token=token123").andExpect {
             status { is3xxRedirection() }
         }
 

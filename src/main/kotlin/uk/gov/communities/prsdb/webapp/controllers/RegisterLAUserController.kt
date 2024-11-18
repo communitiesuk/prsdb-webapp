@@ -22,7 +22,7 @@ class RegisterLAUserController(
     var invitationService: LocalAuthorityInvitationService,
     var journeyDataService: JourneyDataService,
 ) {
-    @GetMapping("/")
+    @GetMapping
     fun acceptInvitation(
         @RequestParam(value = "token", required = true) token: String,
     ): CharSequence {
@@ -32,10 +32,10 @@ class RegisterLAUserController(
         if (invitationService.tokenIsValid(token)) {
             invitationService.storeTokenInSession(token)
             prePopulateJourneyData(token)
-            return "redirect:${laUserRegistrationJourney.initialStepId.urlPathSegment}"
+            return "redirect:${REGISTER_LA_USER_JOURNEY_URL}/${laUserRegistrationJourney.initialStepId.urlPathSegment}"
         }
 
-        return "redirect:invalid-link"
+        return "redirect:${REGISTER_LA_USER_JOURNEY_URL}/invalid-link"
     }
 
     @GetMapping("/{stepName}")
