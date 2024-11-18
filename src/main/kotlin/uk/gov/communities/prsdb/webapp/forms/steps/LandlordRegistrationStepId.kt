@@ -5,4 +5,5 @@ enum class LandlordRegistrationStepId(
 ) : StepId {
     Email("email"),
     PhoneNumber("phone-number"),
+    CountryOfResidence("country-of-residence"),
 }

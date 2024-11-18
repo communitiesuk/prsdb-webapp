@@ -2,12 +2,16 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.PLACE_NAMES
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.models.formModels.CountryOfResidenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PhoneNumberFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 @Component
@@ -37,7 +41,7 @@ class LandlordRegistrationJourney(
                                     "backUrl" to "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}",
                                 ),
                         ),
-                    nextAction = { _, subPageNumber: Int? -> Pair(LandlordRegistrationStepId.PhoneNumber, null) },
+                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.PhoneNumber, null) },
                 ),
                 Step(
                     id = LandlordRegistrationStepId.PhoneNumber,
@@ -54,7 +58,36 @@ class LandlordRegistrationJourney(
                                     "hint" to "forms.phoneNumber.hint",
                                 ),
                         ),
-                    nextAction = { _, subPageNumber: Int? -> Pair(LandlordRegistrationStepId.Email, 0) },
+                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CountryOfResidence, null) },
+                ),
+                Step(
+                    id = LandlordRegistrationStepId.CountryOfResidence,
+                    page =
+                        Page(
+                            formModel = CountryOfResidenceFormModel::class,
+                            templateName = "forms/countryOfResidenceForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerAsALandlord.title",
+                                    "fieldSetHeading" to "forms.countryOfResidence.fieldSetHeading",
+                                    "selectOptions" to PLACE_NAMES.map { SelectViewModel(it) },
+                                    "radioOptions" to
+                                        listOf(
+                                            RadiosViewModel(true, "forms.countryOfResidence.radios.option.yes.label"),
+                                            RadiosViewModel(
+                                                value = false,
+                                                labelMsgKey = "forms.countryOfResidence.radios.option.no.label",
+                                                conditionalFragCall =
+                                                    "fragments/forms/select :: select(" +
+                                                        "#{forms.countryOfResidence.radios.option.no.select.label}, " +
+                                                        "'countryOfResidence', null, \${selectOptions})",
+                                            ),
+                                        ),
+                                ),
+                        ),
+                    // TODO PRSD-561: Set nextAction to InternationalAddress step
+                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Email, 0) },
+                    saveAfterSubmit = false,
                 ),
             ),
     )
