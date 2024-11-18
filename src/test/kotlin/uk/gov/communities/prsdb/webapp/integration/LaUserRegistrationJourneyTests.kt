@@ -1,10 +1,13 @@
 package uk.gov.communities.prsdb.webapp.integration
 
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.MockBean
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.PageNotFoundPage
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 
 class LaUserRegistrationJourneyTests : IntegrationTest() {
@@ -25,7 +28,7 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
             val formPage = navigator.goToLaUserRegistrationLandingPage()
             formPage.assertHeadingContains("Registering as a local authority user")
             val nextStep = formPage.submit()
-            nextStep.assertHeadingContains("What is your full name?")
+            assertThat(nextStep.fieldSetHeading).containsText("What is your full name?")
         }
     }
 
@@ -34,23 +37,26 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Navigating directly to this step redirects to the first step`() {
             val firstStep = navigator.skipToLaUserRegistrationNameFormPage()
-            firstStep.assertHeadingContains("Registering as a local authority user")
+            assertThat(firstStep.heading).containsText("Registering as a local authority user")
         }
 
         @Test
         fun `Submitting a valid name redirects to the next step`() {
             val formPage = navigator.goToLaUserRegistrationNameFormPage()
-            formPage.fillName("Test User")
-            val nextStep = formPage.submit()
-            nextStep.assertHeadingContains("What is your work email address?")
+            formPage.fillInput("Test User")
+            val nextPage = formPage.submit()
+            val emailPage = assertIsPage(nextPage, EmailFormPageLaUserRegistration::class)
+            assertThat(emailPage.fieldSetHeading).containsText("What is your work email address?")
         }
 
         @Test
         fun `Submitting an empty name returns an error`() {
             val formPage = navigator.goToLaUserRegistrationNameFormPage()
-            formPage.fillName("")
+            formPage.fillInput("")
             formPage.submitUnsuccessfully()
-            formPage.assertNameFormErrorContains("You must enter your full name")
+            assertThat(
+                formPage.inputFormErrorMessage,
+            ).containsText("You must enter your full name")
         }
     }
 
@@ -59,32 +65,39 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Navigating directly to this step redirects to the first step`() {
             val firstStep = navigator.skipToLaUserRegistrationEmailFormPage()
-            firstStep.assertHeadingContains("Registering as a local authority user")
+            assertThat(firstStep.heading).containsText("Registering as a local authority user")
         }
 
         @Test
         fun `Submitting a valid email redirects to the next step`() {
             val formPage = navigator.goToLaUserRegistrationEmailFormPage()
-            formPage.fillEmail("test@example.com")
-            val nextStep = formPage.submit()
+            formPage.fillInput("test@example.com")
             // This will need to change when the "check answers" page is implemented
-            nextStep.assertHeadingContains("Page not found")
+            val nextPage = formPage.submit()
+            val notFoundPage = assertIsPage(nextPage, PageNotFoundPage::class)
+            assertThat(notFoundPage.heading).containsText("Page not found")
         }
 
         @Test
         fun `Submitting an empty e-mail address returns an error`() {
             val formPage = navigator.goToLaUserRegistrationEmailFormPage()
-            formPage.fillEmail("")
+            formPage.fillInput("")
             formPage.submitUnsuccessfully()
-            formPage.assertEmailFormErrorContains("Enter a valid email address to continue. An email is required for contact purposes.")
+            assertThat(
+                formPage.inputFormErrorMessage,
+            ).containsText(
+                "Enter a valid email address to continue. An email is required for contact purposes.",
+            )
         }
 
         @Test
         fun `Submitting an invalid e-mail address returns an error`() {
             val formPage = navigator.goToLaUserRegistrationEmailFormPage()
-            formPage.fillEmail("notAnEmail")
+            formPage.fillInput("notAnEmail")
             formPage.submitUnsuccessfully()
-            formPage.assertEmailFormErrorContains("Enter an email address in the right format")
+            assertThat(
+                formPage.inputFormErrorMessage,
+            ).containsText("Enter an email address in the right format")
         }
     }
 }
