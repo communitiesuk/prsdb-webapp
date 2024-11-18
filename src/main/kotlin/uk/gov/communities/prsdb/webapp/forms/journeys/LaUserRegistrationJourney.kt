@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.models.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LandingPageFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
@@ -69,6 +70,20 @@ class LaUserRegistrationJourney(
                                 ),
                         ),
                     nextAction = { _, _ -> Pair(RegisterLaUserStepId.CheckAnswers, null) },
+                ),
+                Step(
+                    id = RegisterLaUserStepId.CheckAnswers,
+                    page =
+                        Page(
+                            formModel = CheckAnswersFormModel::class,
+                            templateName = "forms/checkAnswersForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerLAUser.title",
+                                    "summaryName" to "registerLaUser.checkAnswers.summaryName",
+                                    "submitButtonText" to "forms.buttons.confirm",
+                                ),
+                        ),
                 ),
         /*TODO: PRSD-541 - check answers page
         Step(
