@@ -8,10 +8,14 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
+import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 
@@ -36,6 +40,7 @@ class RegisterLAUserControllerTests(
     }
 
     @Test
+    @WithMockUser
     fun `acceptInvitation endpoint checks token and stores in session if valid`() {
         mvc.get("/register-local-authority-user/?token=token123").andExpect {
             status { is3xxRedirection() }
@@ -46,6 +51,7 @@ class RegisterLAUserControllerTests(
     }
 
     @Test
+    @WithMockUser
     fun `acceptInvitation endpoint rejects invalid token`() {
         mvc.get("/register-local-authority-user/?token=invalid-token").andExpect {
             status { is3xxRedirection() }
@@ -56,10 +62,24 @@ class RegisterLAUserControllerTests(
     }
 
     @Test
+    @WithMockUser
     fun `acceptInvitation prepopulates the email address in journeyData`() {
+        whenever(laUserRegistrationJourney.steps).thenReturn(
+            listOf(
+                Step(
+                    id = RegisterLaUserStepId.Email,
+                    page =
+                        Page(
+                            EmailFormModel::class,
+                            "forms/emailForm",
+                            mutableMapOf("testKey" to "testValue"),
+                        ),
+                ),
+            ),
+        )
         whenever(invitationService.getEmailAddressForToken("token123")).thenReturn("invite@example.com")
 
-        mvc.get("/register-local-authority-user/?token=invalid-token").andExpect {
+        mvc.get("/register-local-authority-user/?token=token123").andExpect {
             status { is3xxRedirection() }
         }
 
