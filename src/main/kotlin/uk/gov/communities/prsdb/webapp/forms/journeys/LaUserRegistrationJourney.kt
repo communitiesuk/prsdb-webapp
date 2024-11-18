@@ -33,7 +33,7 @@ class LaUserRegistrationJourney(
                                     "title" to "registerLAUser.title",
                                 ),
                         ),
-                    nextAction = { _, subPageNumber: Int? -> Pair(RegisterLaUserStepId.Name, null) },
+                    nextAction = { _, _ -> Pair(RegisterLaUserStepId.Name, null) },
                 ),
                 Step(
                     id = RegisterLaUserStepId.Name,
@@ -51,7 +51,7 @@ class LaUserRegistrationJourney(
                                     "backUrl" to "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/",
                                 ),
                         ),
-                    nextAction = { _, subPageNumber: Int? -> Pair(RegisterLaUserStepId.Email, null) },
+                    nextAction = { _, _ -> Pair(RegisterLaUserStepId.Email, null) },
                 ),
                 Step(
                     id = RegisterLaUserStepId.Email,
@@ -68,7 +68,7 @@ class LaUserRegistrationJourney(
                                     "submitButtonText" to "forms.buttons.continue",
                                 ),
                         ),
-                    nextAction = { _, subPageNumber: Int? -> Pair(RegisterLaUserStepId.CheckAnswers, null) },
+                    nextAction = { _, _ -> Pair(RegisterLaUserStepId.CheckAnswers, null) },
                 ),
         /*TODO: PRSD-541 - check answers page
         Step(
