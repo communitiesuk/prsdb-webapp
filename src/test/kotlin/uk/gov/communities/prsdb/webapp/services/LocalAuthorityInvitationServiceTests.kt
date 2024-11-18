@@ -15,6 +15,7 @@ import org.springframework.mock.web.MockHttpSession
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
+import uk.gov.communities.prsdb.webapp.exceptions.InvalidTokenException
 import java.util.UUID
 
 class LocalAuthorityInvitationServiceTests {
@@ -86,7 +87,7 @@ class LocalAuthorityInvitationServiceTests {
         val testUuid = UUID.randomUUID()
         whenever(mockLaInviteRepository.findByToken(testUuid)).thenReturn(null)
 
-        val thrown = assertThrows(Exception::class.java) { inviteService.getInvitationFromToken(testUuid.toString()) }
+        val thrown = assertThrows(InvalidTokenException::class.java) { inviteService.getInvitationFromToken(testUuid.toString()) }
         assertEquals("Token not found in database", thrown.message)
     }
 

@@ -74,7 +74,7 @@ class RegisterLAUserController(
         )
 
     @GetMapping("/invalid-link")
-    fun invalidToken(model: Model): String = "invalidLink"
+    fun invalidToken(model: Model): String = "invalidLaInvitationLink"
 
     fun prePopulateJourneyData(token: String) {
         val journeyData = journeyDataService.getJourneyDataFromSession()

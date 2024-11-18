@@ -4,10 +4,12 @@ import jakarta.servlet.http.HttpSession
 import org.springframework.stereotype.Service
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.on
+import uk.gov.communities.prsdb.webapp.constants.LA_USER_INVITATION_TOKEN
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
+import uk.gov.communities.prsdb.webapp.exceptions.InvalidTokenException
 import java.net.URI
 import java.util.UUID
 
@@ -31,7 +33,7 @@ class LocalAuthorityInvitationService(
 
     fun getInvitationFromToken(token: String): LocalAuthorityInvitation {
         val tokenUuid = UUID.fromString(token)
-        val invitation = invitationRepository.findByToken(tokenUuid) ?: throw Exception("Token not found in database")
+        val invitation = invitationRepository.findByToken(tokenUuid) ?: throw InvalidTokenException("Token not found in database")
 
         return invitation
     }
@@ -39,7 +41,7 @@ class LocalAuthorityInvitationService(
     fun tokenIsValid(token: String): Boolean {
         try {
             getInvitationFromToken(token)
-        } catch (e: Exception) {
+        } catch (e: InvalidTokenException) {
             return false
         }
 
@@ -53,12 +55,12 @@ class LocalAuthorityInvitationService(
             .toUri()
 
     fun storeTokenInSession(token: String) {
-        session.setAttribute("token", token)
+        session.setAttribute(LA_USER_INVITATION_TOKEN, token)
     }
 
-    fun getTokenFromSession(): String? = session.getAttribute("token") as String?
+    fun getTokenFromSession(): String? = session.getAttribute(LA_USER_INVITATION_TOKEN) as String?
 
     fun clearTokenFromSession() {
-        session.setAttribute("token", "")
+        session.setAttribute(LA_USER_INVITATION_TOKEN, "")
     }
 }

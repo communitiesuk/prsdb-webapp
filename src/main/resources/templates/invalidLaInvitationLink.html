@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{invalidLink.title}, ~{::main}, false)}">
+<html th:replace="~{fragments/layout :: layout(#{registerLAUser.invalidLink.title}, ~{::main}, false)}">
 <main class="govuk-main-wrapper">
     <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
         <div id="page-content">
             <header>
-                <h1 class="govuk-heading-l" th:text="#{invalidLink.heading}">
+                <h1 class="govuk-heading-l" th:text="#{registerLAUser.invalidLink.heading}">
                     invalidLink.heading
                 </h1>
             </header>
             <section>
-                <p class="govuk-body" th:text="#{invalidLink.description}">
+                <p class="govuk-body" th:text="#{registerLAUser.invalidLink.description}">
                     invalidLink.description
                 </p>
             </section>
