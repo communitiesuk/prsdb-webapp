@@ -46,7 +46,7 @@ class RegisterLAUserController(
     ): String {
         val token = invitationService.getTokenFromSession()
         if (token == null || !invitationService.tokenIsValid(token)) {
-            if (token != null) invitationService.clearTokenFromSession()
+            invitationService.clearTokenFromSession()
             return "redirect:invalid-link"
         }
 

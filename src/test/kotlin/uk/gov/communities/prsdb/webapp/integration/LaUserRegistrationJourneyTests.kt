@@ -9,6 +9,7 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.PageNotFoundPage
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.assertIsPage
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 
 class LaUserRegistrationJourneyTests : IntegrationTest() {
@@ -27,9 +28,12 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Click submit redirects to the name step`() {
             val formPage = navigator.goToLaUserRegistrationLandingPage()
-            formPage.assertHeadingContains("Registering as a local authority user")
-            val nextStep = formPage.submit()
-            assertThat(nextStep.fieldSetHeading).containsText("What is your full name?")
+            assertThat(formPage.headingCaption).containsText("Before you register")
+            assertThat(formPage.heading).containsText("Registering as a local authority user")
+
+            val nextPage = formPage.submit()
+            val namePage = assertIsPage(nextPage, NameFormPageLaUserRegistration::class)
+            assertThat(namePage.fieldSetHeading).containsText("What is your full name?")
         }
     }
 

@@ -61,6 +61,6 @@ class LocalAuthorityInvitationService(
     fun getTokenFromSession(): String? = session.getAttribute(LA_USER_INVITATION_TOKEN) as String?
 
     fun clearTokenFromSession() {
-        session.setAttribute(LA_USER_INVITATION_TOKEN, "")
+        session.setAttribute(LA_USER_INVITATION_TOKEN, null)
     }
 }
