@@ -27,8 +27,7 @@ class CountryOfResidenceFormModel : FormModel {
             ),
         ],
     )
-    var countryOfResidence: String? = null
+    var countryOfResidence: String = ""
 
-    fun isCountryOfResidenceValid(): Boolean =
-        livesInUk != false && countryOfResidence == null || livesInUk == false && countryOfResidence != null
+    fun isCountryOfResidenceValid(): Boolean = livesInUk != false || countryOfResidence.isNotBlank()
 }
