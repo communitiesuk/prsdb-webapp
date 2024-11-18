@@ -13,7 +13,7 @@
             deleteLAUserSuccess.whatHappensNext.para2
         </p>
         <div class="govuk-button-group">
-            <a th:replace="~{fragments/primaryButtonLink :: primaryButtonLink(@{/local-authority/{id}/manage-users(id=${localAuthority.id})}, #{deleteLAUserSuccess.returnToManageUsers})}">
+            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/local-authority/{id}/manage-users(id=${localAuthority.id})}, #{deleteLAUserSuccess.returnToManageUsers})}">
                 deleteLAUserSuccess.returnToManageUsers
             </a>
         </div>

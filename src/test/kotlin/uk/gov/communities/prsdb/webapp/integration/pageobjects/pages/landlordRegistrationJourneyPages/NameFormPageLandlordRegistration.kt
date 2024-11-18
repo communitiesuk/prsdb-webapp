@@ -3,11 +3,6 @@ package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRe
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.FormBasePage
 
-class PhoneNumberFormPageLandlordRegistration(
+class NameFormPageLandlordRegistration(
     page: Page,
-) : FormBasePage(
-        page,
-        urlSegment = "/register-as-a-landlord/phone-number",
-        pageHeading = "What is your phone number?",
-        inputLabel = "phoneNumber",
-    )
+) : FormBasePage(page, urlSegment = "/register-as-a-landlord/name", pageHeading = "What is your full name?", inputLabel = "name")

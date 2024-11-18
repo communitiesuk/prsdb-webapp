@@ -13,10 +13,10 @@
             addLAUserSuccess.whatHappensNext.para2
         </p>
         <div class="govuk-button-group">
-            <a th:replace="~{fragments/primaryButtonLink :: primaryButtonLink(@{/local-authority/{id}/invite-new-user(id=${localAuthority.id})}, #{addLAUserSuccess.inviteAnother})}">
+            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/local-authority/{id}/invite-new-user(id=${localAuthority.id})}, #{addLAUserSuccess.inviteAnother})}">
                 addLAUserSuccess.inviteAnother
             </a>
-            <a th:replace="~{fragments/secondaryButtonLink :: secondaryButtonLink('#', #{addLAUserSuccess.returnToDashboard})}">
+            <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink('#', #{addLAUserSuccess.returnToDashboard})}">
                 addLAUserSuccess.returnToDashboard
             </a>
         </div>
