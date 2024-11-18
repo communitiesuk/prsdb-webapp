@@ -107,7 +107,7 @@ class LandlordRegistrationJourney(
                                 ),
                         ),
                     // TODO PRSD-561: Set nextAction to InternationalAddress step
-                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Email, 0) },
+                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CheckAnswers, 0) },
                     saveAfterSubmit = false,
                 ),
             ),
