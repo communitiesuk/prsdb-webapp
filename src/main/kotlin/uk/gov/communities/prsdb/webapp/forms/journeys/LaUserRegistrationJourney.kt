@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.forms.pages.LaUserRegistrationSummaryPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
@@ -11,11 +12,13 @@ import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LandingPageFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 
 @Component
 class LaUserRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
+    invitationService: LocalAuthorityInvitationService,
 ) : Journey<RegisterLaUserStepId>(
         journeyType = JourneyType.LA_USER_REGISTRATION,
         initialStepId = RegisterLaUserStepId.LandingPage,
@@ -74,7 +77,7 @@ class LaUserRegistrationJourney(
                 Step(
                     id = RegisterLaUserStepId.CheckAnswers,
                     page =
-                        Page(
+                        LaUserRegistrationSummaryPage(
                             formModel = CheckAnswersFormModel::class,
                             templateName = "forms/checkAnswersForm",
                             content =
@@ -83,14 +86,10 @@ class LaUserRegistrationJourney(
                                     "summaryName" to "registerLaUser.checkAnswers.summaryName",
                                     "submitButtonText" to "forms.buttons.confirm",
                                 ),
+                            journeyDataService,
+                            invitationService,
                         ),
+                    handleSubmitAndRedirect = { _, _ -> "/submitForm" },
                 ),
-        /*TODO: PRSD-541 - check answers page
-        Step(
-            id = RegisterLaUserStepId.CheckAnswers,
-            page =
-                Page(),
-            nextAction = { _, subPageNumber: Int? -> Pair(RegisterLaUserStepId.CheckAnswers, null) },
-        ),*/
             ),
     )
