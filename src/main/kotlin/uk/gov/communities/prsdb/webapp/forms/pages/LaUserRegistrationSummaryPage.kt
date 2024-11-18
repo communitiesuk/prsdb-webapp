@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.FormSummaryDataModel
@@ -11,9 +12,9 @@ import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import kotlin.reflect.KClass
 
 class LaUserRegistrationSummaryPage(
-    private val formModel: KClass<out FormModel>,
-    private val templateName: String,
-    private val content: Map<String, Any>,
+    formModel: KClass<out FormModel>,
+    templateName: String,
+    content: Map<String, Any>,
     private val journeyDataService: JourneyDataService,
     private val invitationService: LocalAuthorityInvitationService,
 ) : Page(formModel, templateName, content) {
@@ -45,14 +46,14 @@ class LaUserRegistrationSummaryPage(
             FormSummaryDataModel(
                 "registerLaUser.checkAnswers.rowHeading.name",
                 (journeyData["name"] as PageData)["name"],
-                "/${RegisterLaUserStepId.Name.urlPathSegment}",
+                "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Name.urlPathSegment}",
             ),
         )
         formData.add(
             FormSummaryDataModel(
                 "registerLaUser.checkAnswers.rowHeading.email",
                 (journeyData["email"] as PageData)["emailAddress"],
-                "/${RegisterLaUserStepId.Email.urlPathSegment}",
+                "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Email.urlPathSegment}",
             ),
         )
         model.addAttribute("formData", formData)

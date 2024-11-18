@@ -1,10 +1,15 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="formData" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{${title}}, ~{::main}, false)}">
+<html>
     <th:block id="main-content"
               th:replace="~{fragments/layout :: layout(${title}, ~{::#main-content/content()},false)}">
-        <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back
-            link</a>
+        <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
         <main class="govuk-main-wrapper">
+
             <div id="page-content"
                  th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
                 <header>
@@ -13,7 +18,7 @@
                 </header>
 
                 <form th:action="@{''}" method="post" novalidate th:object="${formModel}">
-
+                    <dl th:replace="~{fragments/summaryList :: summaryList(${formData})}"></dl>
                     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
                 </form>
             </div>
