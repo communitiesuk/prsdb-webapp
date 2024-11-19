@@ -1,21 +1,16 @@
 package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages
 
 import com.deque.html.axecore.playwright.AxeBuilder
+import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.TextInput
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.BasePage.Companion.createValid
 import kotlin.reflect.KClass
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
-fun <T : BasePage> assertIsPage(
-    page: Page,
-    targetClass: KClass<T>,
-): T = createValid(page, targetClass)
-
 abstract class BasePage(
     val page: Page,
-    val urlSegment: String? = null,
+    private val urlSegment: String? = null,
 ) {
     companion object {
         fun <T : BasePage> createValid(
@@ -30,15 +25,20 @@ abstract class BasePage(
                     .withTags(listOf("wcag2a", "wcag2aa", "wcag21a", "wcag21aa"))
                     .analyze()
             assertEquals(
-                listOf(),
+                emptyList(),
                 axeResults.violations,
                 "There were Axe violations after creating and validating a ${targetClass.simpleName}",
             )
             return pageInstance
         }
+
+        fun <T : BasePage> assertIsPage(
+            page: Page,
+            targetClass: KClass<T>,
+        ): T = createValid(page, targetClass)
     }
 
-    protected val header = page.locator("main header h1")
+    protected val header: Locator = page.locator("main header h1")
 
     open fun validate() {
         if (urlSegment != null) {
