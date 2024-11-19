@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUserOrInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_1L_USER_NAME
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_ID
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_USER_ID
@@ -43,6 +44,9 @@ class LocalAuthorityDataServiceTests {
 
     @Mock
     private lateinit var localAuthorityUserOrInvitationRepository: LocalAuthorityUserOrInvitationRepository
+
+    @Mock
+    private lateinit var oneLoginUserRepository: OneLoginUserRepository
 
     @InjectMocks
     private lateinit var localAuthorityDataService: LocalAuthorityDataService
