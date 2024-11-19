@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.formModels.CountryOfResidenceFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.DateOfBirthFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.InternationalAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LookupAddressFormModel
@@ -48,6 +49,23 @@ class LandlordRegistrationJourney(
                                     "label" to "forms.name.label",
                                     "submitButtonText" to "forms.buttons.continue",
                                     "backUrl" to "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}",
+                                ),
+                        ),
+                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.DateOfBirth, null) },
+                    saveAfterSubmit = false,
+                ),
+                Step(
+                    id = LandlordRegistrationStepId.DateOfBirth,
+                    page =
+                        Page(
+                            formModel = DateOfBirthFormModel::class,
+                            templateName = "forms/dateForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerAsALandlord.title",
+                                    "fieldSetHeading" to "forms.dateOfBirth.fieldSetHeading",
+                                    "fieldSetHint" to "forms.dateOfBirth.fieldSetHint",
+                                    "submitButtonText" to "forms.buttons.continue",
                                 ),
                         ),
                     nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Email, null) },

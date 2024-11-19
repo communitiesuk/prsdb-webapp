@@ -4,7 +4,7 @@
             <h2 class="govuk-error-summary__title" th:text="#{forms.errorSummary.heading}"></h2>
             <div class="govuk-error-summary__body">
                 <ul class="govuk-list govuk-error-summary__list">
-                    <li th:each="error: ${#fields.detailedErrors()}" th:if="${#fields.hasErrors(error.fieldName)}">
+                    <li th:each="error: ${#fields.detailedErrors()}" th:if="${#fields.hasErrors(error.fieldName) && error.message != '_'}">
                         <a th:href="'#' + __${error.fieldName}__" th:text="#{${error.message}}"></a>
                     </li>
                 </ul>
