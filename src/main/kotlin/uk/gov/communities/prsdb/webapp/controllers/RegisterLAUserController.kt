@@ -85,4 +85,13 @@ class RegisterLAUserController(
 
         journeyDataService.setJourneyData(journeyData)
     }
+
+    @GetMapping("/success")
+    fun submitRegistration(model: Model): String {
+        val journeyData = journeyDataService.getJourneyDataFromSession()
+
+        model.addAttribute("localAuthority", "HARDCODED LA")
+
+        return "registerLAUserSuccess"
+    }
 }

@@ -89,7 +89,7 @@ class LaUserRegistrationJourney(
                             journeyDataService,
                             invitationService,
                         ),
-                    handleSubmitAndRedirect = { _, _ -> "/submitForm" },
+                    handleSubmitAndRedirect = { _, _ -> "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/success" },
                 ),
             ),
     )
