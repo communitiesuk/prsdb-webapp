@@ -38,6 +38,10 @@ class LocalAuthorityInvitationService(
         return invitation
     }
 
+    fun deleteInvitation(invitation: LocalAuthorityInvitation) {
+        invitationRepository.delete(invitation)
+    }
+
     fun tokenIsValid(token: String): Boolean {
         try {
             getInvitationFromToken(token)

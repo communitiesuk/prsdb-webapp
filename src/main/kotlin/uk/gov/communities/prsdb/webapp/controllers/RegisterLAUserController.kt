@@ -101,8 +101,13 @@ class RegisterLAUserController(
         val localAuthority = invitationService.getAuthorityForToken(token)
 
         val journeyData = journeyDataService.getJourneyDataFromSession()
+        val name = (journeyData["name"] as PageData)["name"].toString()
+        val email = (journeyData["email"] as PageData)["emailAddress"].toString()
 
-        localAuthorityDataService.registerNewUser(principal.name, localAuthority, "Hardcoded name", "hardcoded@email.com")
+        localAuthorityDataService.registerNewUser(principal.name, localAuthority, name, email)
+
+        val invitation = invitationService.getInvitationFromToken(token)
+        invitationService.deleteInvitation(invitation)
 
         model.addAttribute("localAuthority", localAuthority.name)
 
