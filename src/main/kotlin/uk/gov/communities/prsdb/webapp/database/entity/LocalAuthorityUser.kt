@@ -23,14 +23,23 @@ class LocalAuthorityUser(
     @Column(nullable = false)
     var isManager: Boolean = false
 
+    @Column(nullable = false)
+    var name: String = ""
+
+    @Column(nullable = false)
+    var email: String = ""
+
     @OneToOne(optional = false)
     @JoinColumn(name = "local_authority_id", nullable = false, foreignKey = ForeignKey(name = "FK_LA_USER_LA"))
     lateinit var localAuthority: LocalAuthority
         private set
 
-    constructor(id: Long, baseUser: OneLoginUser, isManager: Boolean, localAuthority: LocalAuthority) : this(id) {
+    constructor(id: Long, baseUser: OneLoginUser, isManager: Boolean, localAuthority: LocalAuthority, name: String, email: String) :
+        this(id) {
         this.baseUser = baseUser
         this.isManager = isManager
         this.localAuthority = localAuthority
+        this.name = name
+        this.email = email
     }
 }
