@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import java.security.Principal
 
@@ -21,6 +22,7 @@ class RegisterLAUserController(
     var laUserRegistrationJourney: LaUserRegistrationJourney,
     var invitationService: LocalAuthorityInvitationService,
     var journeyDataService: JourneyDataService,
+    var localAuthorityDataService: LocalAuthorityDataService,
 ) {
     @GetMapping
     fun acceptInvitation(
@@ -87,10 +89,22 @@ class RegisterLAUserController(
     }
 
     @GetMapping("/success")
-    fun submitRegistration(model: Model): String {
+    fun submitRegistration(
+        model: Model,
+        principal: Principal,
+    ): String {
+        val token = invitationService.getTokenFromSession()
+        if (token == null || !invitationService.tokenIsValid(token)) {
+            invitationService.clearTokenFromSession()
+            return "redirect:invalid-link"
+        }
+        val localAuthority = invitationService.getAuthorityForToken(token)
+
         val journeyData = journeyDataService.getJourneyDataFromSession()
 
-        model.addAttribute("localAuthority", "HARDCODED LA")
+        localAuthorityDataService.registerNewUser(principal.name, localAuthority, "Hardcoded name", "hardcoded@email.com")
+
+        model.addAttribute("localAuthority", localAuthority.name)
 
         return "registerLAUserSuccess"
     }

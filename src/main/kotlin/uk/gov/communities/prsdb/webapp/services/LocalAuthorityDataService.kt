@@ -10,8 +10,10 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_TABLE_PAGE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 
@@ -19,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataM
 class LocalAuthorityDataService(
     val localAuthorityUserRepository: LocalAuthorityUserRepository,
     val localAuthorityUserOrInvitationRepository: LocalAuthorityUserOrInvitationRepository,
+    val oneLoginUserRepository: OneLoginUserRepository,
 ) {
     fun getUserAndLocalAuthorityIfAuthorizedUser(
         localAuthorityId: Int,
@@ -100,5 +103,24 @@ class LocalAuthorityDataService(
 
     fun deleteUser(localAuthorityUserId: Long) {
         localAuthorityUserRepository.deleteById(localAuthorityUserId)
+    }
+
+    fun registerNewUser(
+        baseUserId: String,
+        localAuthority: LocalAuthority,
+        name: String,
+        email: String,
+    ) {
+        val oneLoginUser = oneLoginUserRepository.getReferenceById(baseUserId)
+
+        localAuthorityUserRepository.save(
+            LocalAuthorityUser(
+                baseUser = oneLoginUser,
+                isManager = false,
+                localAuthority = localAuthority,
+                name = name,
+                email = email,
+            ),
+        )
     }
 }

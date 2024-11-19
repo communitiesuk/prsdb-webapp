@@ -34,8 +34,14 @@ class LocalAuthorityUser(
     lateinit var localAuthority: LocalAuthority
         private set
 
-    constructor(id: Long, baseUser: OneLoginUser, isManager: Boolean, localAuthority: LocalAuthority, name: String, email: String) :
+    constructor(id: Long, baseUser: OneLoginUser, isManager: Boolean, localAuthority: LocalAuthority) :
         this(id) {
+        this.baseUser = baseUser
+        this.isManager = isManager
+        this.localAuthority = localAuthority
+    }
+
+    constructor(baseUser: OneLoginUser, isManager: Boolean, localAuthority: LocalAuthority, name: String, email: String) : this() {
         this.baseUser = baseUser
         this.isManager = isManager
         this.localAuthority = localAuthority
