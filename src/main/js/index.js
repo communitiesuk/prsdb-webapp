@@ -1,16 +1,7 @@
 import {initAll} from 'govuk-frontend'
-import {enhanceSelectElement} from 'accessible-autocomplete'
+import {initSelectAutocomplete} from "./autocomplete";
 
 initAll()
 
-window.onload = addAccessibleAutocompleteToSelectElements
+initSelectAutocomplete()
 
-function addAccessibleAutocompleteToSelectElements() {
-    document.querySelectorAll('.govuk-select')
-        .forEach((selectElement) => enhanceSelectElement({
-            selectElement: selectElement,
-            showAllValues: true,
-            inputClasses: 'govuk-label',
-            menuClasses: 'govuk-label',
-        }))
-}
