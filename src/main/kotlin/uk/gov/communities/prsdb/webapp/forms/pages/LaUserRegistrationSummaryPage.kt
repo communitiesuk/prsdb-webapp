@@ -3,7 +3,8 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
-import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.FormSummaryDataModel
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
@@ -32,7 +33,7 @@ class LaUserRegistrationSummaryPage(
             if (sessionToken != null) {
                 invitationService.getAuthorityForToken(sessionToken)
             } else {
-                null
+                throw PrsdbWebException("Local authority not found for this invitation token")
             }
 
         formData.addAll(
@@ -44,12 +45,12 @@ class LaUserRegistrationSummaryPage(
                 ),
                 FormSummaryDataModel(
                     "registerLaUser.checkAnswers.rowHeading.name",
-                    (journeyData["name"] as PageData)["name"],
+                    objectToStringKeyedMap(journeyData["name"])?.get("name"),
                     "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Name.urlPathSegment}",
                 ),
                 FormSummaryDataModel(
                     "registerLaUser.checkAnswers.rowHeading.email",
-                    (journeyData["email"] as PageData)["emailAddress"],
+                    objectToStringKeyedMap(journeyData["email"])?.get("emailAddress"),
                     "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Email.urlPathSegment}",
                 ),
             ),

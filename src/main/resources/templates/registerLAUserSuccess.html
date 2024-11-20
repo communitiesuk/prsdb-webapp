@@ -23,8 +23,7 @@
             </li>
         </ul>
         <div class="govuk-button-group">
-            <!--TODO: Where should this link go? -->
-            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/local-authority/{id}/}, #{registerLaUser.success.goToDashboardButtonText})}">
+            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/}, #{registerLaUser.success.goToDashboardButtonText})}">
                 registerLaUser.success.goToDashboardButtonText
             </a>
         </div>

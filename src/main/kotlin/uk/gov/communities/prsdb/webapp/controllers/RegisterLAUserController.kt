@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
+import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
@@ -101,8 +102,8 @@ class RegisterLAUserController(
         val localAuthority = invitationService.getAuthorityForToken(token)
 
         val journeyData = journeyDataService.getJourneyDataFromSession()
-        val name = (journeyData["name"] as PageData)["name"].toString()
-        val email = (journeyData["email"] as PageData)["emailAddress"].toString()
+        val name = objectToStringKeyedMap(journeyData["name"])?.get("name").toString()
+        val email = objectToStringKeyedMap(journeyData["email"])?.get("emailAddress").toString()
 
         localAuthorityDataService.registerNewUser(principal.name, localAuthority, name, email)
 
