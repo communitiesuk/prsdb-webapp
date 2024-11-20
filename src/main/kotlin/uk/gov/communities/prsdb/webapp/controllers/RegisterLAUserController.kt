@@ -108,6 +108,8 @@ class RegisterLAUserController(
 
         val invitation = invitationService.getInvitationFromToken(token)
         invitationService.deleteInvitation(invitation)
+        invitationService.clearTokenFromSession()
+        journeyDataService.clearJourneyDataFromSession()
 
         model.addAttribute("localAuthority", localAuthority.name)
 
