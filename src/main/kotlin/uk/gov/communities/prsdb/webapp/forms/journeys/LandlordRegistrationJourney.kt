@@ -98,10 +98,7 @@ class LandlordRegistrationJourney(
                                             RadiosViewModel(
                                                 value = false,
                                                 labelMsgKey = "forms.countryOfResidence.radios.option.no.label",
-                                                conditionalFragCall =
-                                                    "fragments/forms/select :: select(" +
-                                                        "#{forms.countryOfResidence.radios.option.no.select.label}, " +
-                                                        "'countryOfResidence', null, \${selectOptions})",
+                                                conditionalFragment = "countryOfResidenceSelect",
                                             ),
                                         ),
                                 ),
