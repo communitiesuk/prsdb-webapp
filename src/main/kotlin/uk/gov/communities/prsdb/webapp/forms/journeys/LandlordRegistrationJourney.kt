@@ -107,7 +107,7 @@ class LandlordRegistrationJourney(
                                         ),
                                 ),
                         ),
-                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.InternationalAddress, null) },
+                    nextAction = { journeyData, _ -> countryOfResidenceNextAction(journeyData) },
                     saveAfterSubmit = false,
                 ),
                 Step(
@@ -131,4 +131,22 @@ class LandlordRegistrationJourney(
                     saveAfterSubmit = false,
                 ),
             ),
-    )
+    ) {
+    companion object {
+        private fun countryOfResidenceNextAction(journeyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
+            when (
+                val livesInUK =
+                    objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.CountryOfResidence.urlPathSegment])
+                        ?.get("livesInUK")
+                        .toString()
+            ) {
+                // TODO PRSD-562: return AddressLookup step
+                "true" -> Pair(LandlordRegistrationStepId.CheckAnswers, null)
+                "false" -> Pair(LandlordRegistrationStepId.InternationalAddress, null)
+                else -> throw IllegalArgumentException(
+                    "Invalid value for journeyData[\"${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}\"][\"livesInUK\"]:" +
+                        livesInUK,
+                )
+            }
+    }
+}
