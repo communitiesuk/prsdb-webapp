@@ -35,27 +35,26 @@ class LaUserRegistrationSummaryPage(
                 null
             }
 
-        formData.add(
-            FormSummaryDataModel(
-                "registerLaUser.checkAnswers.rowHeading.localAuthority",
-                localAuthority?.name,
-                null,
+        formData.addAll(
+            listOf(
+                FormSummaryDataModel(
+                    "registerLaUser.checkAnswers.rowHeading.localAuthority",
+                    localAuthority?.name,
+                    null,
+                ),
+                FormSummaryDataModel(
+                    "registerLaUser.checkAnswers.rowHeading.name",
+                    (journeyData["name"] as PageData)["name"],
+                    "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Name.urlPathSegment}",
+                ),
+                FormSummaryDataModel(
+                    "registerLaUser.checkAnswers.rowHeading.email",
+                    (journeyData["email"] as PageData)["emailAddress"],
+                    "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Email.urlPathSegment}",
+                ),
             ),
         )
-        formData.add(
-            FormSummaryDataModel(
-                "registerLaUser.checkAnswers.rowHeading.name",
-                (journeyData["name"] as PageData)["name"],
-                "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Name.urlPathSegment}",
-            ),
-        )
-        formData.add(
-            FormSummaryDataModel(
-                "registerLaUser.checkAnswers.rowHeading.email",
-                (journeyData["email"] as PageData)["emailAddress"],
-                "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Email.urlPathSegment}",
-            ),
-        )
+
         model.addAttribute("formData", formData)
         return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)
     }
