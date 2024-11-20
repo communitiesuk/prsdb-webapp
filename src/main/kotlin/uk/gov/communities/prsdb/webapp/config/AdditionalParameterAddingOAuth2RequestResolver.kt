@@ -6,16 +6,17 @@ import org.springframework.security.oauth2.client.web.DefaultOAuth2Authorization
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest
 
-class AdditionalParameterAddingRequestResolver(
+class AdditionalParameterAddingOAuth2RequestResolver(
     clientRegistrationRepository: ClientRegistrationRepository,
-    baseUri: String,
+    authorizationRequestBaseUri: String,
+    private val additionalParameters: Map<String, Any>,
 ) : OAuth2AuthorizationRequestResolver {
     private val innerResolver =
-        DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, baseUri)
+        DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, authorizationRequestBaseUri)
 
     override fun resolve(request: HttpServletRequest?): OAuth2AuthorizationRequest? {
         val authRequest = innerResolver.resolve(request) ?: return null
-        return resolveAuthRequest(authRequest)
+        return authRequestWithAdditionalParameters(authRequest)
     }
 
     override fun resolve(
@@ -23,21 +24,9 @@ class AdditionalParameterAddingRequestResolver(
         clientRegistrationId: String?,
     ): OAuth2AuthorizationRequest? {
         val authRequest = innerResolver.resolve(request, clientRegistrationId) ?: return null
-        return resolveAuthRequest(authRequest)
+        return authRequestWithAdditionalParameters(authRequest)
     }
 
-    private fun resolveAuthRequest(authRequest: OAuth2AuthorizationRequest): OAuth2AuthorizationRequest? {
-        val claimsRequest =
-            """{"userinfo": {
-                |"https://vocab.account.gov.uk/v1/coreIdentityJWT":null, 
-                |"https://vocab.account.gov.uk/v1/returnCode":null, 
-                |"https://vocab.account.gov.uk/v1/address":null}}
-            """.trimMargin()
-        val additionalParams =
-            LinkedHashMap(authRequest.additionalParameters).apply {
-                put("vtr", "[\"Cl.Cm.P2\"]")
-                put("claims", claimsRequest)
-            }
-        return OAuth2AuthorizationRequest.from(authRequest).additionalParameters(additionalParams).build()
-    }
+    private fun authRequestWithAdditionalParameters(authRequest: OAuth2AuthorizationRequest): OAuth2AuthorizationRequest? =
+        OAuth2AuthorizationRequest.from(authRequest).additionalParameters(additionalParameters).build()
 }
