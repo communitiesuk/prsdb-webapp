@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.MockBean
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.PageNotFoundPage
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.assertIsPage
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.SummaryPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 
 class LaUserRegistrationJourneyTests : IntegrationTest() {
@@ -79,8 +79,8 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
             formPage.fillInput("test@example.com")
             // This will need to change when the "check answers" page is implemented
             val nextPage = formPage.submit()
-            val notFoundPage = assertIsPage(nextPage, PageNotFoundPage::class)
-            assertThat(notFoundPage.heading).containsText("Page not found")
+            val summaryPage = assertIsPage(nextPage, SummaryPageLaUserRegistration::class)
+            assertThat(summaryPage.bannerHeading).containsText("Check your answers")
         }
 
         @Test

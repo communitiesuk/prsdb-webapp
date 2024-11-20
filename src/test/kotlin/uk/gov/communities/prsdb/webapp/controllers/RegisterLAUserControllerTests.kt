@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 
 @WebMvcTest(RegisterLAUserController::class)
@@ -31,6 +32,9 @@ class RegisterLAUserControllerTests(
 
     @MockBean
     lateinit var journeyDataService: JourneyDataService
+
+    @MockBean
+    lateinit var localAuthorityDataService: LocalAuthorityDataService
 
     @BeforeEach
     fun setupMocks() {

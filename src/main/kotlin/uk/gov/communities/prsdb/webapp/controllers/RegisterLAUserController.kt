@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
+import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import java.security.Principal
 
@@ -21,6 +23,7 @@ class RegisterLAUserController(
     var laUserRegistrationJourney: LaUserRegistrationJourney,
     var invitationService: LocalAuthorityInvitationService,
     var journeyDataService: JourneyDataService,
+    var localAuthorityDataService: LocalAuthorityDataService,
 ) {
     @GetMapping
     fun acceptInvitation(
@@ -84,5 +87,33 @@ class RegisterLAUserController(
         emailStep?.updateJourneyData(journeyData, formData, null)
 
         journeyDataService.setJourneyData(journeyData)
+    }
+
+    @GetMapping("/success")
+    fun submitRegistration(
+        model: Model,
+        principal: Principal,
+    ): String {
+        val token = invitationService.getTokenFromSession()
+        if (token == null || !invitationService.tokenIsValid(token)) {
+            invitationService.clearTokenFromSession()
+            return "redirect:invalid-link"
+        }
+        val localAuthority = invitationService.getAuthorityForToken(token)
+
+        val journeyData = journeyDataService.getJourneyDataFromSession()
+        val name = objectToStringKeyedMap(journeyData["name"])?.get("name").toString()
+        val email = objectToStringKeyedMap(journeyData["email"])?.get("emailAddress").toString()
+
+        localAuthorityDataService.registerNewUser(principal.name, localAuthority, name, email)
+
+        val invitation = invitationService.getInvitationFromToken(token)
+        invitationService.deleteInvitation(invitation)
+        invitationService.clearTokenFromSession()
+        journeyDataService.clearJourneyDataFromSession()
+
+        model.addAttribute("localAuthority", localAuthority.name)
+
+        return "registerLAUserSuccess"
     }
 }
