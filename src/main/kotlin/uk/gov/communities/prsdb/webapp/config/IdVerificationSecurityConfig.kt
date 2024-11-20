@@ -12,6 +12,8 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.context.SecurityContextHolderFilter
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 
 @Profile("!local | local-auth")
 @Configuration
@@ -23,8 +25,10 @@ class IdVerificationSecurityConfig(
     @Order(1)
     fun idVerificationFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
-            .securityMatcher("/register-as-a-landlord/verify-identity", "/id-verification/**")
-            .authorizeHttpRequests { requests ->
+            .securityMatcher(
+                "/$REGISTER_LANDLORD_JOURNEY_URL/${RegisterLandlordController.IDENTITY_VERIFICATION_PATH_SEGMENT}",
+                "/id-verification/**",
+            ).authorizeHttpRequests { requests ->
                 requests
                     .anyRequest()
                     .authenticated()
