@@ -43,6 +43,12 @@ class IdVerificationSecurityConfig(
         return http.build()
     }
 
+    /**
+     * Sets the authorization base uri to the specified route and adds claims requests and vector of trust parameters to authorization requests made at that route.
+     *
+     * @param authorizationRequestBaseUri The authorization endpoint used for this filter chain. This **must** be matched by the security matchers for the filter to
+     * ensure that the parameters are added to authorization requests
+     */
     private fun OAuth2LoginConfigurer<HttpSecurity>.AuthorizationEndpointConfig.addIdVerificationParametersToAuthorizationWithBaseUri(
         authorizationRequestBaseUri: String,
     ): OAuth2LoginConfigurer<HttpSecurity>.AuthorizationEndpointConfig =
@@ -56,6 +62,10 @@ class IdVerificationSecurityConfig(
                 ),
             )
 
+    /**
+     * Additional parameters that must be added to authorization requests to one-login for the id verification journey.
+     * [One Login Documentation Reference](https://docs.sign-in.service.gov.uk/integrate-with-integration-environment/authenticate-your-user/#make-a-request-for-authentication)
+     */
     private fun oneLoginIdVerificationParameters(): Map<String, String> {
         val claimsRequest =
             """{"userinfo": {
@@ -66,6 +76,10 @@ class IdVerificationSecurityConfig(
         return mapOf("vtr" to "[\"Cl.Cm.P2\"]", "claims" to claimsRequest)
     }
 
+    /**
+     * Returns true if the authentication token contains an OidcUser with any claim issued by One Login's Id Verification service.
+     * [One Login Documentation Reference](https://docs.sign-in.service.gov.uk/integrate-with-integration-environment/prove-users-identity/)
+     */
     private fun doesTokenContainAnyIdVerificationClaims(authenticationToken: OAuth2AuthenticationToken): Boolean {
         val user = authenticationToken.principal
         return user is OidcUser &&
