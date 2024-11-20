@@ -33,7 +33,7 @@ class LocalAuthorityDataService(
         val userModel =
             LocalAuthorityUserDataModel(
                 localAuthorityUser.id!!,
-                localAuthorityUser.baseUser.name,
+                localAuthorityUser.name,
                 localAuthorityUser.localAuthority.name,
                 localAuthorityUser.isManager,
             )
@@ -61,7 +61,7 @@ class LocalAuthorityDataService(
 
         return LocalAuthorityUserDataModel(
             localAuthorityUserId,
-            localAuthorityUser.baseUser.name,
+            localAuthorityUser.name,
             localAuthorityUser.localAuthority.name,
             localAuthorityUser.isManager,
         )

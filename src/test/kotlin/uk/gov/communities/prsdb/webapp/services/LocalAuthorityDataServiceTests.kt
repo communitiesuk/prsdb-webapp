@@ -68,7 +68,7 @@ class LocalAuthorityDataServiceTests {
         Assertions.assertEquals(
             LocalAuthorityUserDataModel(
                 localAuthorityUser.id!!,
-                baseUser.name,
+                baseUser.name + "_LA",
                 localAuthority.name,
                 localAuthorityUser.isManager,
             ),
@@ -119,7 +119,7 @@ class LocalAuthorityDataServiceTests {
         val expectedLocalAuthorityUserDataModel =
             LocalAuthorityUserDataModel(
                 DEFAULT_LA_USER_ID,
-                baseUser.name,
+                baseUser.name + "_LA",
                 localAuthority.name,
                 localAuthorityUser.isManager,
             )

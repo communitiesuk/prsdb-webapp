@@ -25,7 +25,7 @@ class MockLocalAuthorityData {
             localAuthority: LocalAuthority,
             id: Long = DEFAULT_LA_USER_ID,
             isManager: Boolean = true,
-        ): LocalAuthorityUser = LocalAuthorityUser(id, baseUser, isManager, localAuthority)
+        ): LocalAuthorityUser = LocalAuthorityUser(id, baseUser, isManager, localAuthority, baseUser.name + "_LA", baseUser.email)
 
         const val DEFAULT_LOGGED_IN_LA_USER_ID = 789L
 
