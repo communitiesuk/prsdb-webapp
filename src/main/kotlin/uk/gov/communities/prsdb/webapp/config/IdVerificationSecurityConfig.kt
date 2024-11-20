@@ -30,7 +30,7 @@ class IdVerificationSecurityConfig(
                     .authenticated()
             }.oauth2Login { oauth ->
                 oauth.authorizationEndpoint { authorization ->
-                    authorization.configureOAuthAuthorizationToAddVerificationParameters("/id-verification/oauth2/authorize")
+                    authorization.addIdVerificationParametersToAuthorizationWithBaseUri("/id-verification/oauth2/authorize")
                 }
             }.csrf { }
             .addFilterAfter(
@@ -43,21 +43,18 @@ class IdVerificationSecurityConfig(
         return http.build()
     }
 
-    private fun OAuth2LoginConfigurer<HttpSecurity>.AuthorizationEndpointConfig.configureOAuthAuthorizationToAddVerificationParameters(
+    private fun OAuth2LoginConfigurer<HttpSecurity>.AuthorizationEndpointConfig.addIdVerificationParametersToAuthorizationWithBaseUri(
         authorizationRequestBaseUri: String,
-    ): OAuth2LoginConfigurer<HttpSecurity>.AuthorizationEndpointConfig {
-        val idVerificationParameters = oneLoginIdVerificationParameters()
-
-        return this
+    ): OAuth2LoginConfigurer<HttpSecurity>.AuthorizationEndpointConfig =
+        this
             .baseUri(authorizationRequestBaseUri)
             .authorizationRequestResolver(
                 AdditionalParameterAddingOAuth2RequestResolver(
                     clientRegistrationRepository,
                     authorizationRequestBaseUri,
-                    idVerificationParameters,
+                    oneLoginIdVerificationParameters(),
                 ),
             )
-    }
 
     private fun oneLoginIdVerificationParameters(): Map<String, String> {
         val claimsRequest =
