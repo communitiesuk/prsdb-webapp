@@ -2,14 +2,13 @@ package uk.gov.communities.prsdb.webapp.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.configurers.oauth2.client.OAuth2LoginConfigurer
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler
@@ -19,7 +18,6 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
-import org.springframework.security.web.context.SecurityContextHolderFilter
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @Configuration
@@ -28,54 +26,8 @@ class CustomSecurityConfig(
     val clientRegistrationRepository: ClientRegistrationRepository,
 ) {
     @Bean
-    @Order(1)
-    fun idVerificationFilterChain(http: HttpSecurity): SecurityFilterChain {
-        http
-            .securityMatcher("/register-as-a-landlord/verify-identity", "/id-verification/**")
-            .authorizeHttpRequests { requests ->
-                requests
-                    .anyRequest()
-                    .authenticated()
-            }.oauth2Login { oauth ->
-                oauth.authorizationEndpoint { authorization ->
-                    authorization.configureOAuthAuthorizationToAddVerificationParameters("/id-verification/oauth2/authorize")
-                }
-            }.logout { logout ->
-                logout.logoutSuccessHandler(oidcLogoutSuccessHandler())
-            }.csrf { requests ->
-                requests.ignoringRequestMatchers("/local/**")
-            }.addFilterAfter(
-                OauthTokenSecondaryValidatingFilter(::doesTokenContainIdVerificationClaims),
-                SecurityContextHolderFilter::class.java,
-            )
-
-        return http.build()
-    }
-
-    private fun OAuth2LoginConfigurer<HttpSecurity>.AuthorizationEndpointConfig.configureOAuthAuthorizationToAddVerificationParameters(
-        authorizationRequestBaseUri: String,
-    ): OAuth2LoginConfigurer<HttpSecurity>.AuthorizationEndpointConfig =
-        this
-            .baseUri(authorizationRequestBaseUri)
-            .authorizationRequestResolver(
-                AdditionalParameterAddingRequestResolver(
-                    clientRegistrationRepository,
-                    authorizationRequestBaseUri,
-                ),
-            )
-
-    private fun doesTokenContainIdVerificationClaims(authenticationToken: OAuth2AuthenticationToken): Boolean {
-        val user = authenticationToken.principal
-        return user is OidcUser &&
-            (
-                user.userInfo.claims.containsKey("https://vocab.account.gov.uk/v1/coreIdentityJWT") ||
-                    user.userInfo.claims.containsKey("https://vocab.account.gov.uk/v1/returnCode")
-            )
-    }
-
-    @Bean
-    @Order(2)
-    fun filterChain(http: HttpSecurity): SecurityFilterChain {
+    @Order(Ordered.LOWEST_PRECEDENCE)
+    fun defaultSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .authorizeHttpRequests { requests ->
                 requests
