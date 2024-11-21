@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import org.junit.jupiter.api.Test
+import org.springframework.test.context.jdbc.Sql
 
+@Sql("/data-local.sql")
 class InviteLaUsersTests : IntegrationTest() {
     @Test
     fun `inviting a new LA user ends with a success page`() {

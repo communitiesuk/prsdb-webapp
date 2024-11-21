@@ -4,9 +4,11 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.EditLaUserPage
 import kotlin.test.assertEquals
 
+@Sql("/data-local.sql")
 class EditLAUserTests : IntegrationTest() {
     @Test
     fun `a user's access level can be updated`() {

@@ -3,6 +3,8 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.junit.UsePlaywright
 import org.flywaydb.core.Flyway
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,8 +13,6 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Import
-import org.springframework.core.io.ClassPathResource
-import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.test.context.ActiveProfiles
@@ -22,7 +22,6 @@ import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OSPlacesConfig
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.Navigator
 import uk.gov.service.notify.NotificationClient
-import javax.sql.DataSource
 
 @Import(TestcontainersConfiguration::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = ["spring.flyway.clean-disabled=false"])
@@ -89,17 +88,22 @@ abstract class IntegrationTest {
         navigator = Navigator(page, port)
     }
 
-    @BeforeEach
+    @AfterEach
     fun resetDatabase(
         @Autowired flyway: Flyway,
-        @Autowired dataSource: DataSource,
     ) {
         flyway.clean()
         flyway.migrate()
+    }
 
-        // TODO: Remove this once tests set up their own data, rather than relying on data-local.sql
-        val dataLocalSql = ClassPathResource("data-local.sql")
-        val databasePopulator = ResourceDatabasePopulator(dataLocalSql)
-        databasePopulator.execute(dataSource)
+    companion object {
+        @JvmStatic
+        @BeforeAll
+        fun resetDatabaseBeforeAll(
+            @Autowired flyway: Flyway,
+        ) {
+            flyway.clean()
+            flyway.migrate()
+        }
     }
 }

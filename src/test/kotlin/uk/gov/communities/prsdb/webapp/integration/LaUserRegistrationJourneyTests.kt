@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.assertIsPage
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
@@ -14,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegis
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.SummaryPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 
+@Sql("/data-local.sql")
 class LaUserRegistrationJourneyTests : IntegrationTest() {
     @MockBean
     lateinit var invitationService: LocalAuthorityInvitationService

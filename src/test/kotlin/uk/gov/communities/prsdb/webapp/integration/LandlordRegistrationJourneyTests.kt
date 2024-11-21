@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.BasePage
@@ -16,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.a
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 
+@Sql("/data-local.sql")
 class LandlordRegistrationJourneyTests : IntegrationTest() {
     final val journeyUrlSegment = REGISTER_LANDLORD_JOURNEY_URL
     final val nameUrlSegment = LandlordRegistrationStepId.Name.urlPathSegment
