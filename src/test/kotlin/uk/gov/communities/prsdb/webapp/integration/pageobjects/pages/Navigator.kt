@@ -88,6 +88,11 @@ class Navigator(
         return BasePage.createValid(page, LandingPageLaUserRegistration::class)
     }
 
+    fun skipToLaUserRegistrationSuccessPage(): SuccessPageLaUserRegistration {
+        navigate("register-local-authority-user/success")
+        return BasePage.createValid(page, SuccessPageLaUserRegistration::class)
+    }
+
     private fun completeLaUserRegistrationNameStep(): EmailFormPageLaUserRegistration {
         val namePage = goToLaUserRegistrationNameFormPage()
         namePage.fillInput("Test user")

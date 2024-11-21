@@ -171,9 +171,10 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
             assertThat(successPage.bodyHeading).containsText("What happens next")
         }
 
-        // TODO: PRSD-541 - we need the page to render successfully when it should before checking this to make sure it is failing for the correct reason
         @Test
         fun `Navigating directly to here with an incomplete form returns a 500 error page`() {
+            val successPage = navigator.skipToLaUserRegistrationSuccessPage()
+            assertThat(successPage.errorHeading).containsText("Sorry, there is a problem with the service")
         }
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
+import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -38,6 +39,9 @@ class RegisterLAUserControllerTests(
 
     @MockBean
     lateinit var localAuthorityDataService: LocalAuthorityDataService
+
+    @MockBean
+    lateinit var localAuthorityUserRepository: LocalAuthorityUserRepository
 
     @BeforeEach
     fun setupMocks() {
@@ -111,7 +115,7 @@ class RegisterLAUserControllerTests(
         val localAuthority = LocalAuthority(1, "Local Authority 1")
         whenever(invitationService.getAuthorityForToken("token123")).thenReturn(localAuthority)
 
-        // Arrange
+        // Act
         mvc.get("/register-local-authority-user/success").andExpect {
             status { isOk() }
         }
@@ -142,7 +146,7 @@ class RegisterLAUserControllerTests(
         val invitation = LocalAuthorityInvitation()
         whenever(invitationService.getInvitationFromToken("token123")).thenReturn(invitation)
 
-        // Arrange
+        // Act
         mvc.get("/register-local-authority-user/success").andExpect {
             status { isOk() }
         }

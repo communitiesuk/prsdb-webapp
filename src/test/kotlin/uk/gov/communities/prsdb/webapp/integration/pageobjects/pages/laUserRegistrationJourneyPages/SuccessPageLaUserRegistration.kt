@@ -9,4 +9,6 @@ class SuccessPageLaUserRegistration(
     val bannerHeading = page.locator(".govuk-panel__title")
 
     val bodyHeading = page.locator(".govuk-heading-m")
+
+    val errorHeading = page.locator(".govuk-heading-l")
 }

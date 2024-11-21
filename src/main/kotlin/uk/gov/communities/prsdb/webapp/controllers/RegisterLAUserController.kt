@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
@@ -104,6 +105,10 @@ class RegisterLAUserController(
         val journeyData = journeyDataService.getJourneyDataFromSession()
         val name = objectToStringKeyedMap(journeyData["name"])?.get("name").toString()
         val email = objectToStringKeyedMap(journeyData["email"])?.get("emailAddress").toString()
+
+        if (name == "null" || email == "null") {
+            throw(PrsdbWebException("The form has not been fully completed"))
+        }
 
         localAuthorityDataService.registerNewUser(principal.name, localAuthority, name, email)
 
