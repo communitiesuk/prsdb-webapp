@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegis
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.SummaryPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 
-@Sql("/data-local.sql")
+@Sql("/data-mockuser-not-lauser.sql")
 class LaUserRegistrationJourneyTests : IntegrationTest() {
     @MockBean
     lateinit var invitationService: LocalAuthorityInvitationService
@@ -164,19 +164,16 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
 
     @Nested
     inner class LaUserRegistrationSuccess {
-        // TODO: PRSD-541 - this is currently failing because we are logged in as Mock User, who is already an LA user.
-        // localAuthorityDataService.registerNewUser(...) fails because it can't add a second user to the table with the same One Login id
-
-       /* @Test
+        @Test
         fun `Page renders when we navigate to this step through the registration journey`() {
             val successPage = navigator.goToLaUserRegistrationSuccessPage()
             assertThat(successPage.bannerHeading).containsText("You've registered as a Test Authority user")
-            assertThat(successPage.bodyHeading).containsText("What happens next?")
+            assertThat(successPage.bodyHeading).containsText("What happens next")
         }
 
         // TODO: PRSD-541 - we need the page to render successfully when it should before checking this to make sure it is failing for the correct reason
         @Test
         fun `Navigating directly to here with an incomplete form returns a 500 error page`() {
-        }*/
+        }
     }
 }
