@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.config
+package uk.gov.communities.prsdb.webapp.config.resolvers
 
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository

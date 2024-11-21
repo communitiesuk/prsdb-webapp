@@ -1,15 +1,11 @@
-package uk.gov.communities.prsdb.webapp.config
+package uk.gov.communities.prsdb.webapp.config.filters
 
 import jakarta.servlet.Filter
 import jakarta.servlet.FilterChain
 import jakarta.servlet.ServletRequest
 import jakarta.servlet.ServletResponse
-import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
-import org.springframework.security.web.SecurityFilterChain
-import org.springframework.security.web.context.SecurityContextHolderFilter
-import org.springframework.security.web.context.SecurityContextRepository
 
 /**
  * This is a [SecurityFilterChain] [Filter] which conditionally clears the [SecurityContextHolder] depending on the [OAuth2AuthenticationToken] stored.
@@ -28,7 +24,7 @@ class OauthTokenSecondaryValidatingFilter(
     override fun doFilter(
         request: ServletRequest?,
         response: ServletResponse?,
-        chain: FilterChain?,
+        chain: FilterChain,
     ) {
         val securityContext = SecurityContextHolder.getContext()
         val auth = securityContext.authentication
@@ -38,6 +34,6 @@ class OauthTokenSecondaryValidatingFilter(
             }
         }
 
-        chain!!.doFilter(request, response)
+        chain.doFilter(request, response)
     }
 }
