@@ -95,10 +95,19 @@ class IsValidPrioritisedValidator : ConstraintValidator<IsValidPrioritised, Any>
         context: ConstraintValidatorContext?,
         property: KProperty1<out Any, *>,
     ): Boolean {
-        val validator =
-            constraint.validatorType.constructors
-                .first()
-                .call(*constraint.validatorArgs) as PropertyConstraintValidator
+        val validator: PropertyConstraintValidator
+        try {
+            validator =
+                constraint.validatorType.constructors
+                    .first()
+                    .call(*constraint.validatorArgs) as PropertyConstraintValidator
+        } catch (exception: IllegalArgumentException) {
+            throw IllegalArgumentException(
+                "${constraint.validatorType.simpleName} expects ${constraint.validatorType.constructors.first().valueParameters.size}" +
+                    " validatorArgs, but ${constraint.validatorArgs.size} were provided",
+            )
+        }
+
         val propertyValue = property.getter.call(instance)
 
         return if (!validator.isValid(propertyValue)) {
