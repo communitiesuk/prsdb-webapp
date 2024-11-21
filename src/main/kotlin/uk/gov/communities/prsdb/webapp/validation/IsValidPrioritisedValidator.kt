@@ -4,7 +4,6 @@ import jakarta.validation.ConstraintValidator
 import jakarta.validation.ConstraintValidatorContext
 import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty1
-import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberFunctions
@@ -96,7 +95,10 @@ class IsValidPrioritisedValidator : ConstraintValidator<IsValidPrioritised, Any>
         context: ConstraintValidatorContext?,
         property: KProperty1<out Any, *>,
     ): Boolean {
-        val validator = constraint.validatorType.createInstance() as PropertyConstraintValidator
+        val validator =
+            constraint.validatorType.constructors
+                .first()
+                .call(*constraint.validatorArgs) as PropertyConstraintValidator
         val propertyValue = property.getter.call(instance)
 
         return if (!validator.isValid(propertyValue)) {
