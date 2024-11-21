@@ -6,6 +6,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.LandingPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.SuccessPageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.SummaryPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
@@ -60,6 +62,17 @@ class Navigator(
 
     fun goToLaUserRegistrationEmailFormPage(): EmailFormPageLaUserRegistration = completeLaUserRegistrationNameStep()
 
+    fun goToLaUserRegistrationCheckAnswersPage(): SummaryPageLaUserRegistration {
+        val emailPage = completeLaUserRegistrationNameStep()
+        return completeLaUserRegistrationEmailStep(emailPage)
+    }
+
+    fun goToLaUserRegistrationSuccessPage(): SuccessPageLaUserRegistration {
+        val emailPage = completeLaUserRegistrationNameStep()
+        val summaryPage = completeLaUserRegistrationEmailStep(emailPage)
+        return completeLaUserRegistrationCheckAnswersPage(summaryPage)
+    }
+
     fun skipToLaUserRegistrationNameFormPage(): LandingPageLaUserRegistration {
         navigate("register-local-authority-user/name")
         return BasePage.createValid(page, LandingPageLaUserRegistration::class)
@@ -70,11 +83,24 @@ class Navigator(
         return BasePage.createValid(page, LandingPageLaUserRegistration::class)
     }
 
+    fun skipToLaUserRegistrationCheckAnswersFormPage(): LandingPageLaUserRegistration {
+        navigate("register-local-authority-user/check-answers")
+        return BasePage.createValid(page, LandingPageLaUserRegistration::class)
+    }
+
     private fun completeLaUserRegistrationNameStep(): EmailFormPageLaUserRegistration {
         val namePage = goToLaUserRegistrationNameFormPage()
         namePage.fillInput("Test user")
         return BasePage.createValid(namePage.submit(), EmailFormPageLaUserRegistration::class)
     }
+
+    private fun completeLaUserRegistrationEmailStep(emailPage: EmailFormPageLaUserRegistration): SummaryPageLaUserRegistration {
+        emailPage.fillInput("test.user@example.com")
+        return BasePage.createValid(emailPage.submit(), SummaryPageLaUserRegistration::class)
+    }
+
+    private fun completeLaUserRegistrationCheckAnswersPage(checkAnswersPage: SummaryPageLaUserRegistration): SuccessPageLaUserRegistration =
+        BasePage.createValid(checkAnswersPage.submit(), SuccessPageLaUserRegistration::class)
 
     fun navigate(path: String): Response? = page.navigate("http://localhost:$port/$path")
 }
