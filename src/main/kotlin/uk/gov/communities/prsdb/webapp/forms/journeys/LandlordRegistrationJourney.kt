@@ -99,7 +99,7 @@ class LandlordRegistrationJourney(
                                             RadiosViewModel(
                                                 value = false,
                                                 labelMsgKey = "forms.countryOfResidence.radios.option.no.label",
-                                                conditionalFragCall = "countryOfResidenceSelect",
+                                                conditionalFragment = "countryOfResidenceSelect",
                                             ),
                                         ),
                                 ),
