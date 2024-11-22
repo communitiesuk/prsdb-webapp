@@ -1,0 +1,32 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="formData" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html>
+<th:block id="main-content"
+          th:replace="~{fragments/layout :: layout(#{forms.confirmDetails.title}, ~{::#main-content/content()},false)}">
+    <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+    <main class="govuk-main-wrapper">
+        <div id="page-content"
+             th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
+            <header>
+                <h1 class="govuk-heading-l" th:text="#{forms.confirmDetails.heading}">forms.checkAnswers.heading</h1>
+                <p  class="govuk-body" th:text="#{forms.confirmDetails.summary}"></p>
+            </header>
+            <form th:action="@{''}" method="post" novalidate th:object="${formModel}">
+                <dl th:replace="~{fragments/summaryList :: summaryList(${formData})}"></dl>
+                <details  id="details" th:replace="~{fragments/details :: details(#{forms.confirmDetails.details.summary}, ~{::#details/content()})}" >
+                    <th:block>
+                        <span th:text="#{forms.confirmDetails.details.text.one}"></span>
+                        <a th:href="#{forms.confirmDetails.details.oneLoginUrl}" th:text="#{forms.confirmDetails.details.text.link}">
+                        </a><span th:text="#{forms.confirmDetails.details.text.two}"></span>
+                    </th:block>
+                </details>
+                <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.confirmAndContinue})}"></button>
+            </form>
+        </div>
+    </main>
+</th:block>
+</html>

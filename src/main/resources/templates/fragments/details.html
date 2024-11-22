@@ -1,0 +1,10 @@
+<details th:fragment="details(summary, detailText)" class="govuk-details">
+    <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text" th:text="${summary}">
+            forms.confirmDetails.details.summary
+        </span>
+    </summary>
+    <div class="govuk-details__text" >
+        <div th:replace="${detailText}"></div>
+    </div>
+</details>
