@@ -23,6 +23,8 @@ spring:
       port: ${ELASTICACHE_PORT}
       password: ${ELASTICACHE_PASSWORD}
 
+  mvc.format.date: "d MMMM yyyy"
+
 one-login:
   jwt:
     public.key: ${ONE_LOGIN_PUBLIC_KEY}
