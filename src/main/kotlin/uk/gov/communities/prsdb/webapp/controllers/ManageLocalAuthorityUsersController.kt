@@ -17,8 +17,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ConfirmedEmailDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
-import uk.gov.communities.prsdb.webapp.models.formModels.RadioButtonDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
@@ -68,7 +68,11 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         model: Model,
     ): String {
-        val (currentUser, _) = localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        val (currentUser, _) =
+            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+                localAuthorityId,
+                principal.name,
+            )
         if (currentUser.id == localAuthorityUserId) {
             throw AccessDeniedException("Local authority users cannot edit their own accounts; another admin must do so")
         }
@@ -81,12 +85,12 @@ class ManageLocalAuthorityUsersController(
         model.addAttribute(
             "options",
             listOf(
-                RadioButtonDataModel(
+                RadiosViewModel(
                     false,
                     "editLAUserAccess.radios.option.basic.label",
                     "editLAUserAccess.radios.option.basic.hint",
                 ),
-                RadioButtonDataModel(
+                RadiosViewModel(
                     true,
                     "editLAUserAccess.radios.option.admin.label",
                     "editLAUserAccess.radios.option.admin.hint",
@@ -104,7 +108,11 @@ class ManageLocalAuthorityUsersController(
         @ModelAttribute localAuthorityUserAccessLevel: LocalAuthorityUserAccessLevelDataModel,
         principal: Principal,
     ): String {
-        val (currentUser, _) = localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        val (currentUser, _) =
+            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+                localAuthorityId,
+                principal.name,
+            )
         if (currentUser.id == localAuthorityUserId) {
             throw AccessDeniedException("Local authority users cannot edit their own accounts; another admin must do so")
         }
@@ -121,11 +129,16 @@ class ManageLocalAuthorityUsersController(
         model: Model,
         principal: Principal,
     ): String {
-        val (currentUser, _) = localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        val (currentUser, _) =
+            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+                localAuthorityId,
+                principal.name,
+            )
         if (currentUser.id == localAuthorityUserId) {
             throw AccessDeniedException("Local authority users cannot delete their own accounts; another admin must do so")
         }
-        val userToDelete = localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
+        val userToDelete =
+            localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
         model.addAttribute("user", userToDelete)
         model.addAttribute("backLinkPath", "../edit-user/$localAuthorityUserId")
         return "deleteLAUser"
@@ -138,7 +151,11 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         redirectAttributes: RedirectAttributes,
     ): String {
-        val (currentUser, _) = localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        val (currentUser, _) =
+            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+                localAuthorityId,
+                principal.name,
+            )
         if (currentUser.id == localAuthorityUserId) {
             throw AccessDeniedException("Local authority users cannot delete their own accounts; another admin must do so")
         }
@@ -156,7 +173,11 @@ class ManageLocalAuthorityUsersController(
         model: Model,
         principal: Principal,
     ): String {
-        val (_, authority) = localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        val (_, authority) =
+            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+                localAuthorityId,
+                principal.name,
+            )
         model.addAttribute("localAuthority", authority)
         return "deleteLAUserSuccess"
     }
@@ -167,7 +188,11 @@ class ManageLocalAuthorityUsersController(
         model: Model,
         principal: Principal,
     ): String {
-        val (_, currentAuthority) = localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        val (_, currentAuthority) =
+            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+                localAuthorityId,
+                principal.name,
+            )
         model.addAttribute("councilName", currentAuthority.name)
         model.addAttribute("confirmedEmailDataModel", ConfirmedEmailDataModel())
 
@@ -185,7 +210,11 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         redirectAttributes: RedirectAttributes,
     ): String {
-        val (_, currentAuthority) = localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        val (_, currentAuthority) =
+            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+                localAuthorityId,
+                principal.name,
+            )
         model.addAttribute("councilName", currentAuthority.name)
 
         if (bindingResult.hasErrors()) {
@@ -214,7 +243,11 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         model: Model,
     ): String {
-        val (_, currentAuthority) = localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        val (_, currentAuthority) =
+            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+                localAuthorityId,
+                principal.name,
+            )
         model.addAttribute("localAuthority", currentAuthority)
         return "inviteLAUserSuccess"
     }

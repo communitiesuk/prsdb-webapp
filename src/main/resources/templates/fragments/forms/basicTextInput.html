@@ -1,5 +1,6 @@
-<th:block th:fragment="textInput(label, fieldName)"
-          th:replace="~{fragments/forms/inputGroup :: inputGroup(${label}, ${fieldName}, ~{::input}, null)}">
+<th:block th:fragment="textInput(label, fieldName, hint)"
+          th:replace="~{fragments/forms/inputGroup :: inputGroup(${label}, ${fieldName}, ~{::input}, ${hint})}">
     <input class="govuk-input" th:classappend='${#fields.hasErrors(fieldName) ? "govuk-input--error" : ""}' type="text"
-           th:field="*{__${fieldName}__}">
+           th:field="*{__${fieldName}__}"
+           th:attrappend="aria-describedby=${hint != null} ? ${fieldName}+'-details-hint'">
 </th:block>

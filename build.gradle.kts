@@ -4,7 +4,7 @@ plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
     kotlin("plugin.serialization") version "2.0.20"
-    id("org.springframework.boot") version "3.3.3"
+    id("org.springframework.boot") version "3.3.5"
     id("io.spring.dependency-management") version "1.1.6"
     kotlin("plugin.jpa") version "1.9.25"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
@@ -78,6 +78,9 @@ dependencies {
 
     // Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+
+    // PhoneNumbers
+    implementation("com.googlecode.libphonenumber:libphonenumber:8.13.49")
 }
 
 kotlin {
@@ -117,5 +120,6 @@ buildscript {
     dependencies {
         classpath("org.postgresql:postgresql:42.7.4")
         classpath("org.flywaydb:flyway-database-postgresql:10.18.0")
+//        classpath("com.googlecode.libphonenumber:libphonenumber:8.13.49")
     }
 }

@@ -29,14 +29,18 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', '07712345678', '01/01/00', '09/13/24', '09/
 INSERT INTO local_authority (name, created_date, last_modified_date)
 VALUES ('Betelgeuse', '09/13/24', '09/13/24');
 
-INSERT INTO local_authority_user (subject_identifier, is_manager, local_authority_id, created_date, last_modified_date)
-VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 1, '10/07/24', '10/07/24'),
-       ('urn:fdc:gov.uk:2022:UVWXY', true, 1, '10/14/24', '10/14/24'),
-       ('urn:fdc:gov.uk:2022:PQRST', false, 1, '10/09/24', '10/09/24'),
-       ('urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', true, 1, '10/09/24', '10/09/24'),
-       ('urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', true, 1, '10/02/24', '10/02/24'),
-       ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', true, 1, '10/15/24', '10/15/24'),
-       ('urn:fdc:gov.uk:2022:cgVX2oJWKHMwzm8Gzx25CSoVXixVS0rw32Sar4Om8vQ', false, 1, '10/15/24', '10/15/24');
+INSERT INTO local_authority_user (subject_identifier, is_manager, local_authority_id, created_date, last_modified_date, name, email)
+VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 1, '10/07/24', '10/07/24', 'Ford Prefect', 'Ford.Prefect@la.com'),
+       ('urn:fdc:gov.uk:2022:UVWXY', true, 1, '10/14/24', '10/14/24','Mock User', 'test@la.com'),
+       ('urn:fdc:gov.uk:2022:PQRST', false, 1, '10/09/24', '10/09/24','Arthur Dent', 'Arthur.Dent@la.com'),
+       ('urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', true, 1, '10/09/24', '10/09/24', 'Jasmin Conterio',
+        'jasmin.conterio@softwire.com'),
+       ('urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', true, 1, '10/02/24', '10/02/24', 'Isobel Ibironke',
+        'isobel.ibironke@softwire.com'),
+       ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', true, 1, '10/15/24', '10/15/24', 'PRSDB LA Admin',
+        'Team-PRSDB+laadmin@softwire.com'),
+       ('urn:fdc:gov.uk:2022:cgVX2oJWKHMwzm8Gzx25CSoVXixVS0rw32Sar4Om8vQ', false, 1, '10/15/24', '10/15/24', 'PRSDB La User',
+        'Team-PRSDB+lauser@softwire.com');
 
 INSERT INTO local_authority_invitation (invited_email, inviting_authority_id, token)
 VALUES ('invited.user@example.com', 1, gen_random_uuid()),

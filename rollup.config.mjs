@@ -43,6 +43,10 @@ export default {
                         src: 'node_modules/govuk-one-login-service-header/dist/styles/service-header.css',
                         dest: 'dist/css',
                     },
+                    {
+                        src: 'node_modules/accessible-autocomplete/dist/accessible-autocomplete.min.css',
+                        dest: 'dist/css'
+                    }
                 ],
             }
         )

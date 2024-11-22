@@ -1,8 +1,13 @@
 package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.Response
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.LandingPageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 
 class Navigator(
@@ -27,6 +32,11 @@ class Navigator(
         return BasePage.createValid(page, EditLaUserPage::class)
     }
 
+    fun goToLandlordRegistrationNameFormPage(): NameFormPageLandlordRegistration {
+        navigate("register-as-a-landlord/name")
+        return BasePage.createValid(page, NameFormPageLandlordRegistration::class)
+    }
+
     fun goToLandlordRegistrationEmailFormPage(): EmailFormPageLandlordRegistration {
         navigate("register-as-a-landlord/email")
         return BasePage.createValid(page, EmailFormPageLandlordRegistration::class)
@@ -37,7 +47,34 @@ class Navigator(
         return BasePage.createValid(page, PhoneNumberFormPageLandlordRegistration::class)
     }
 
-    private fun navigate(path: String) {
-        page.navigate("http://localhost:$port/$path")
+    fun goToLaUserRegistrationLandingPage(): LandingPageLaUserRegistration {
+        navigate("register-local-authority-user/landing-page")
+        return BasePage.createValid(page, LandingPageLaUserRegistration::class)
     }
+
+    fun goToLaUserRegistrationNameFormPage(): NameFormPageLaUserRegistration {
+        val landingPage = goToLaUserRegistrationLandingPage()
+        landingPage.submit()
+        return BasePage.createValid(page, NameFormPageLaUserRegistration::class)
+    }
+
+    fun goToLaUserRegistrationEmailFormPage(): EmailFormPageLaUserRegistration = completeLaUserRegistrationNameStep()
+
+    fun skipToLaUserRegistrationNameFormPage(): LandingPageLaUserRegistration {
+        navigate("register-local-authority-user/name")
+        return BasePage.createValid(page, LandingPageLaUserRegistration::class)
+    }
+
+    fun skipToLaUserRegistrationEmailFormPage(): LandingPageLaUserRegistration {
+        navigate("register-local-authority-user/email")
+        return BasePage.createValid(page, LandingPageLaUserRegistration::class)
+    }
+
+    private fun completeLaUserRegistrationNameStep(): EmailFormPageLaUserRegistration {
+        val namePage = goToLaUserRegistrationNameFormPage()
+        namePage.fillInput("Test user")
+        return BasePage.createValid(namePage.submit(), EmailFormPageLaUserRegistration::class)
+    }
+
+    fun navigate(path: String): Response? = page.navigate("http://localhost:$port/$path")
 }

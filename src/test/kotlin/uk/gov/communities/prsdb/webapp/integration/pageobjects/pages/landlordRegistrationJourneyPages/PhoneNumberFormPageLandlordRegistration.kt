@@ -1,13 +1,13 @@
 package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages
 
 import com.microsoft.playwright.Page
-import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.FormBasePage
 
 class PhoneNumberFormPageLandlordRegistration(
     page: Page,
-) : BasePage(page) {
-    override fun validate() {
-        assertThat(fieldSetHeading).containsText("What is your phone number?")
-    }
-}
+) : FormBasePage(
+        page,
+        urlSegment = "/register-as-a-landlord/phone-number",
+        pageHeading = "What is your phone number?",
+        inputLabel = "phoneNumber",
+    )
