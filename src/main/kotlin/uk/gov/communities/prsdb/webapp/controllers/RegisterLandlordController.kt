@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
+import uk.gov.communities.prsdb.webapp.models.dataModels.FormSummaryDataModel
 import java.security.Principal
+import java.time.LocalDate
 
 @Controller
 @RequestMapping("/${REGISTER_LANDLORD_JOURNEY_URL}")
@@ -30,7 +32,34 @@ class RegisterLandlordController(
     fun getStart(): String = "redirect:${IDENTITY_VERIFICATION_PATH_SEGMENT}"
 
     @GetMapping("/${IDENTITY_VERIFICATION_PATH_SEGMENT}")
-    fun getVerifyIdentity(): String = "redirect:${landlordRegistrationJourney.initialStepId.urlPathSegment}"
+    fun getVerifyIdentity(): String = "redirect:confirm-name-and-dob"
+
+    @GetMapping("/confirm-name-and-dob")
+    fun getConfirmDetailsStep(model: Model): String {
+        val confirmationData =
+            listOf(
+                FormSummaryDataModel(
+                    "forms.confirmDetails.rowHeading.name",
+                    "Test User",
+                    null,
+                ),
+                FormSummaryDataModel(
+                    "forms.confirmDetails.rowHeading.dob",
+                    LocalDate.parse("2001-02-03"),
+                    null,
+                ),
+            )
+        model.addAttribute("formData", confirmationData)
+        return "confirmDetails"
+    }
+
+    @PostMapping("/confirm-name-and-dob")
+    fun postConfirmDetailsData(
+        @RequestParam(value = "subpage", required = false) subpage: Int?,
+        @RequestParam formData: PageData,
+        model: Model,
+        principal: Principal,
+    ): String = "redirect:${landlordRegistrationJourney.initialStepId.urlPathSegment}"
 
     @GetMapping("/{stepName}")
     fun getJourneyStep(
