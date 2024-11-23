@@ -4,7 +4,6 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import com.microsoft.playwright.options.AriaRole
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
 import java.net.URI
@@ -17,7 +16,6 @@ class RegisterLandlordPageTests : IntegrationTest() {
         assertThat(page.locator("h1")).containsText("Private Rented Sector Database") // h1 instead
     }
 
-    @Disabled
     @Test
     fun `the 'Start Now' button directs a user to the landlord registration email page`(page: Page) {
         page.navigate("http://localhost:$port/register-as-a-landlord")
