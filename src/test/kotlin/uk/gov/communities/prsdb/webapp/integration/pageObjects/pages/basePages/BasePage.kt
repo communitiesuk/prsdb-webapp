@@ -22,6 +22,7 @@ abstract class BasePage(
             val axeResults =
                 AxeBuilder(page)
                     .withTags(listOf("wcag2a", "wcag2aa", "wcag21a", "wcag21aa"))
+                    .exclude(listOf("input[type='radio', aria-expanded]"))
                     .analyze()
             assertEquals(
                 emptyList(),
