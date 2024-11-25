@@ -1,40 +1,26 @@
 package uk.gov.communities.prsdb.webapp.integration.pageobjects.components
 
 import com.microsoft.playwright.Locator
-import com.microsoft.playwright.Locator.FilterOptions
-import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.BasePage
 import kotlin.reflect.KClass
 
 class Pagination<TPage : BasePage>(
-    locator: Locator,
+    private val page: Page,
     private val pageClass: KClass<TPage>,
+    locator: Locator = page.locator(".govuk-pagination"),
 ) : BaseComponent(locator) {
-    fun assertNextIsVisible() {
-        assertThat(linkWithText("Next")).isVisible()
-    }
+    fun getPreviousLink() = getLinkWithText("Previous")
 
-    fun assertPreviousIsVisible() {
-        assertThat(linkWithText("Previous")).isVisible()
-    }
+    fun getCurrentPageNumberLinkText(): String =
+        getChildComponent("a[aria-current='page']")
+            .innerText()
 
-    fun assertPageNumberIsVisible(pageNum: Int) {
-        assertThat(linkWithText(pageNum.toString())).isVisible()
-    }
+    fun getPageNumberLink(pageNumber: Int) = getLinkWithText(pageNumber.toString())
 
-    fun assertPageNumberIsCurrent(pageNum: Int) {
-        assertThat(linkWithText(pageNum.toString()).locator("..")).hasClass("govuk-pagination__item govuk-pagination__item--current")
-    }
+    fun getNextLink() = getLinkWithText("Next")
 
-    fun clickLink(pageNum: Int): TPage {
-        linkWithText(pageNum.toString()).click()
-        return BasePage.createValid(locator.page(), pageClass)
-    }
+    fun clickLinkAndAssertNextPage(linkLocator: Locator): TPage = clickChildElementAndAssertNextPage(linkLocator, page, pageClass)
 
-    private fun linkWithText(text: String): Locator =
-        locator.locator("a.govuk-pagination__link").filter(
-            FilterOptions().apply {
-                hasText = text
-            },
-        )
+    private fun getLinkWithText(text: String) = getChildComponent(".govuk-pagination__link", Locator.LocatorOptions().setHasText(text))
 }

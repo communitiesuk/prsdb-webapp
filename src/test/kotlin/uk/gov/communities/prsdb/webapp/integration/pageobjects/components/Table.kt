@@ -1,23 +1,20 @@
 package uk.gov.communities.prsdb.webapp.integration.pageobjects.components
 
 import com.microsoft.playwright.Locator
-import com.microsoft.playwright.Locator.FilterOptions
+import com.microsoft.playwright.Page
 
-open class Table(
-    locator: Locator,
+class Table(
+    page: Page,
+    locator: Locator = page.locator(".govuk-table"),
 ) : BaseComponent(locator) {
-    fun assertHasHeaderCellWithText(text: String) {
-        locator.locator("thead th").filter(FilterOptions().apply { hasText = text })
-    }
+    fun getHeaderCell(colIndex: Int) = Companion.getChildComponent(getHeaderRow(), "th", index = colIndex)
 
-    fun getCellText(
+    fun getCell(
         rowIndex: Int,
         colIndex: Int,
-    ): String =
-        locator
-            .locator("tbody tr")
-            .nth(rowIndex)
-            .locator("td")
-            .nth(colIndex)
-            .textContent()
+    ) = Companion.getChildComponent(getRow(rowIndex), "td", index = colIndex)
+
+    private fun getHeaderRow() = getChildComponent("thead tr")
+
+    private fun getRow(index: Int) = getChildComponent("tbody tr", index = index)
 }
