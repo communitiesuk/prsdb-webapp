@@ -1,8 +1,8 @@
-package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.Form
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
 class InviteNewLaUserPage(
     page: Page,

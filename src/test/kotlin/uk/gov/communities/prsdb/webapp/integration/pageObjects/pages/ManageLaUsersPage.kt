@@ -1,12 +1,12 @@
-package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.BaseComponent.Companion.getButton
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.BaseComponent.Companion.getChildComponent
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.Pagination
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.Table
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.getButton
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.getChildComponent
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Pagination
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Table
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
 class ManageLaUsersPage(
     page: Page,

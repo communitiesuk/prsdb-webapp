@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.integration.pageobjects.components
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.components
 
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page

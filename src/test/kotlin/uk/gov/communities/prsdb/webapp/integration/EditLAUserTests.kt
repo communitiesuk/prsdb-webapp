@@ -2,8 +2,8 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.ManageLaUsersPage.Companion.ACCESS_LEVEL_COL_INDEX
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.ManageLaUsersPage.Companion.USERNAME_COL_INDEX
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.ACCESS_LEVEL_COL_INDEX
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.USERNAME_COL_INDEX
 import kotlin.test.assertEquals
 
 class EditLAUserTests : IntegrationTest() {

@@ -2,10 +2,10 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.ManageLaUsersPage.Companion.ACCESS_LEVEL_COL_INDEX
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.ManageLaUsersPage.Companion.ACCOUNT_STATUS_COL_INDEX
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.ManageLaUsersPage.Companion.ACTIONS_COL_INDEX
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.ManageLaUsersPage.Companion.USERNAME_COL_INDEX
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.ACCESS_LEVEL_COL_INDEX
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.ACCOUNT_STATUS_COL_INDEX
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.ACTIONS_COL_INDEX
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.USERNAME_COL_INDEX
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

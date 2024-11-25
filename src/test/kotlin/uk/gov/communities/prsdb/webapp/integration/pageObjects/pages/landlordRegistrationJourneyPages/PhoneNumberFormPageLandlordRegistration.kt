@@ -1,9 +1,9 @@
-package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.FormBasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.FormBasePage
 
 class PhoneNumberFormPageLandlordRegistration(
     page: Page,

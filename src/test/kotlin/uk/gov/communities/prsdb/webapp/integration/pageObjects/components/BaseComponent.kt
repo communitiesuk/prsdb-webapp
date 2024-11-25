@@ -1,11 +1,11 @@
-package uk.gov.communities.prsdb.webapp.integration.pageobjects.components
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.components
 
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.Page.LocatorOptions
 import org.junit.jupiter.api.Assertions.assertEquals
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.BasePage.Companion.createValidPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
 import kotlin.reflect.KClass
 
 abstract class BaseComponent(

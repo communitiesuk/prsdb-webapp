@@ -1,9 +1,9 @@
-package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.deque.html.axecore.playwright.AxeBuilder
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.Form
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
 import kotlin.reflect.KClass
 import kotlin.test.assertEquals
 

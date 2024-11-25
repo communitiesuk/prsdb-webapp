@@ -1,7 +1,7 @@
-package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.Form
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
 import kotlin.test.assertContains
 
 abstract class FormBasePage(
