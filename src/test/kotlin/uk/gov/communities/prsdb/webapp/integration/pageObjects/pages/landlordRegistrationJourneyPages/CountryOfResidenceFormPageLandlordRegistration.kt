@@ -5,11 +5,9 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.FormBasePage
 
-class PhoneNumberFormPageLandlordRegistration(
+class CountryOfResidenceFormPageLandlordRegistration(
     page: Page,
-) : FormBasePage(page, "/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.PhoneNumber.urlPathSegment}") {
-    val phoneNumberInput = form.getTextInput("phoneNumber")
-
-    fun submitFormAndAssertNextPage(): CountryOfResidenceFormPageLandlordRegistration =
-        clickElementAndAssertNextPage(form.getSubmitButton())
-}
+) : FormBasePage(
+        page,
+        "/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}",
+    )
