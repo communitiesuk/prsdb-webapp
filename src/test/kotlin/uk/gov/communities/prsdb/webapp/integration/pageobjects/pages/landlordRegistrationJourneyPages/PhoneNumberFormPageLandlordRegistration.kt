@@ -1,13 +1,14 @@
 package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.landlordRegistrationJourneyPages
 
 import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.FormBasePage
 
 class PhoneNumberFormPageLandlordRegistration(
     page: Page,
-) : FormBasePage(
-        page,
-        urlSegment = "/register-as-a-landlord/phone-number",
-        pageHeading = "What is your phone number?",
-        inputLabel = "phoneNumber",
-    )
+) : FormBasePage(page, "/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.PhoneNumber.urlPathSegment}") {
+    val phoneNumberInput = form.getTextInput("phoneNumber")
+
+    fun submitFormAndAssertNextPage(): EmailFormPageLandlordRegistration = clickElementAndAssertNextPage(form.getSubmitButton())
+}

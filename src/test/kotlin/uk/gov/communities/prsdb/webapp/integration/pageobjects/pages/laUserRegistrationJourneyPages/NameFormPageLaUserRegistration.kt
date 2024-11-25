@@ -1,8 +1,14 @@
 package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.laUserRegistrationJourneyPages
 
 import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages.FormBasePage
 
 class NameFormPageLaUserRegistration(
     page: Page,
-) : FormBasePage(page, urlSegment = "/register-local-authority-user/name", pageHeading = "What is your full name?", inputLabel = "name")
+) : FormBasePage(page, "/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.Name.urlPathSegment}") {
+    val nameInput = form.getTextInput("name")
+
+    fun submitFormAndAssertNextPage(): EmailFormPageLaUserRegistration = clickElementAndAssertNextPage(form.getSubmitButton())
+}
