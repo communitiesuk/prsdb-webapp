@@ -21,10 +21,16 @@ class RegisterLandlordController(
     fun index(model: Model): String {
         model.addAttribute(
             "registerAsALandlordInitialStep",
-            "/${REGISTER_LANDLORD_JOURNEY_URL}/${landlordRegistrationJourney.initialStepId.urlPathSegment}",
+            "/${REGISTER_LANDLORD_JOURNEY_URL}/${START_PAGE_PATH_SEGMENT}",
         )
         return "registerAsALandlord"
     }
+
+    @GetMapping("/${START_PAGE_PATH_SEGMENT}")
+    fun getStart(): String = "redirect:${IDENTITY_VERIFICATION_PATH_SEGMENT}"
+
+    @GetMapping("/${IDENTITY_VERIFICATION_PATH_SEGMENT}")
+    fun getVerifyIdentity(): String = "redirect:${landlordRegistrationJourney.initialStepId.urlPathSegment}"
 
     @GetMapping("/{stepName}")
     fun getJourneyStep(
@@ -53,4 +59,9 @@ class RegisterLandlordController(
             subpage,
             principal,
         )
+
+    companion object {
+        const val START_PAGE_PATH_SEGMENT = "start"
+        const val IDENTITY_VERIFICATION_PATH_SEGMENT = "verify-identity"
+    }
 }
