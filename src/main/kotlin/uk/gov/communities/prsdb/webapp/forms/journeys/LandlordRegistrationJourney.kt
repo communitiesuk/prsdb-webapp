@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_ADDRESS_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.PLACE_NAMES
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -9,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.formModels.CountryOfResidenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.InternationalAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosViewModel
@@ -103,9 +105,46 @@ class LandlordRegistrationJourney(
                                         ),
                                 ),
                         ),
-                    // TODO PRSD-561: Set nextAction to InternationalAddress step
-                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CheckAnswers, 0) },
+                    nextAction = { journeyData, _ -> countryOfResidenceNextAction(journeyData) },
+                    saveAfterSubmit = false,
+                ),
+                Step(
+                    id = LandlordRegistrationStepId.InternationalAddress,
+                    page =
+                        Page(
+                            formModel = InternationalAddressFormModel::class,
+                            templateName = "forms/internationalAddressForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerAsALandlord.title",
+                                    "fieldSetHeading" to "forms.internationalAddress.fieldSetHeading",
+                                    "fieldSetHint" to "forms.internationalAddress.fieldSetHint",
+                                    "label" to "forms.internationalAddress.label",
+                                    "limit" to INTERNATIONAL_ADDRESS_MAX_LENGTH,
+                                    "submitButtonText" to "forms.buttons.continue",
+                                ),
+                        ),
+                    // TODO: Set nextAction to next journey step
+                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CheckAnswers, null) },
                     saveAfterSubmit = false,
                 ),
             ),
-    )
+    ) {
+    companion object {
+        private fun countryOfResidenceNextAction(journeyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
+            when (
+                val livesInUK =
+                    objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.CountryOfResidence.urlPathSegment])
+                        ?.get("livesInUK")
+                        .toString()
+            ) {
+                // TODO PRSD-562: return AddressLookup step
+                "true" -> Pair(LandlordRegistrationStepId.CheckAnswers, null)
+                "false" -> Pair(LandlordRegistrationStepId.InternationalAddress, null)
+                else -> throw IllegalArgumentException(
+                    "Invalid value for journeyData[\"${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}\"][\"livesInUK\"]:" +
+                        livesInUK,
+                )
+            }
+    }
+}
