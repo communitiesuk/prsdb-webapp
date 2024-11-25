@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_ADDRESS_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.PLACE_NAMES
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -119,7 +120,7 @@ class LandlordRegistrationJourney(
                                     "fieldSetHeading" to "forms.internationalAddress.fieldSetHeading",
                                     "fieldSetHint" to "forms.internationalAddress.fieldSetHint",
                                     "label" to "forms.internationalAddress.label",
-                                    "limit" to 1000,
+                                    "limit" to INTERNATIONAL_ADDRESS_MAX_LENGTH,
                                     "submitButtonText" to "forms.buttons.continue",
                                 ),
                         ),
