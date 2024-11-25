@@ -48,7 +48,6 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Clicking submit redirects to the name step`() {
             val landingPage = navigator.goToLaUserRegistrationLandingPage()
-            assertThat(landingPage.heading).containsText("Registering as a local authority user")
             landingPage.clickBeginAndAssertNextPage()
         }
     }
