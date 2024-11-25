@@ -3,17 +3,16 @@ package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages
 import com.deque.html.axecore.playwright.AxeBuilder
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.TextInput
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.Form
 import kotlin.reflect.KClass
-import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
 abstract class BasePage(
     val page: Page,
-    private val urlSegment: String? = null,
+    private val title: String? = null,
 ) {
     companion object {
-        fun <T : BasePage> createValid(
+        fun <T : BasePage> createValidPage(
             page: Page,
             targetClass: KClass<T>,
         ): T {
@@ -31,20 +30,17 @@ abstract class BasePage(
             )
             return pageInstance
         }
-
-        fun <T : BasePage> assertIsPage(
-            page: Page,
-            targetClass: KClass<T>,
-        ): T = createValid(page, targetClass)
     }
 
-    protected val header: Locator = page.locator("main header h1")
+    protected open fun validate() = assertEquals(title, page.title())
 
-    open fun validate() {
-        if (urlSegment != null) {
-            assertContains(page.url(), urlSegment)
-        }
+    protected inline fun <reified T : BasePage> clickElementAndAssertNextPage(locator: Locator): T {
+        locator.click()
+        return createValidPage(page, T::class)
     }
 
-    protected fun inputFormGroup(fieldName: String) = TextInput(page.locator(".govuk-form-group:has(>input[name=\"$fieldName\"])"))
+    protected fun submitInvalidForm(form: Form) {
+        form.getSubmitButton().click()
+        page.waitForLoadState()
+    }
 }

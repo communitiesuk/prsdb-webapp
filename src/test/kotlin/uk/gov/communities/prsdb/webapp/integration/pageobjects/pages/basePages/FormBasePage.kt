@@ -1,32 +1,19 @@
 package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.basePages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.TextInput
+import uk.gov.communities.prsdb.webapp.integration.pageobjects.components.Form
+import kotlin.test.assertContains
 
 abstract class FormBasePage(
     page: Page,
-    urlSegment: String,
-    val pageHeading: String,
-    val inputLabel: String,
-) : BasePage(page, urlSegment) {
-    val inputFormGroup = fieldsetInput(inputLabel)
-    val submitButton = page.locator("button[type=\"submit\"]")
+    private val urlSegment: String,
+) : BasePage(page) {
+    val form = Form(page)
 
-    fun fillInput(text: String) = inputFormGroup.input.fill(text)
+    override fun validate() = assertContains(page.url(), urlSegment)
 
-    fun submitUnsuccessfully() {
-        submitButton.click()
+    fun submitInvalidForm() {
+        form.getSubmitButton().click()
         page.waitForLoadState()
     }
-
-    fun submit(): Page {
-        submitButton.click()
-        return page
-    }
-
-    val fieldSetHeading = page.locator(".govuk-fieldset__heading")
-
-    val inputFormErrorMessage = page.locator(".govuk-error-message")
-
-    protected fun fieldsetInput(fieldName: String) = TextInput(page.locator(".govuk-fieldset:has(input[name=\"$fieldName\"])"))
 }
