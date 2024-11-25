@@ -10,12 +10,12 @@ import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
-class Page(
+open class Page(
     private val formModel: KClass<out FormModel>,
     private val templateName: String,
     private val content: Map<String, Any>,
 ) {
-    fun populateModelAndGetTemplateName(
+    open fun populateModelAndGetTemplateName(
         validator: Validator,
         model: Model,
         pageData: Map<String, Any?>?,

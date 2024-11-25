@@ -84,4 +84,8 @@ class JourneyDataService(
         setJourneyData(loadedJourneyData)
         setContextId(contextId)
     }
+
+    fun clearJourneyDataFromSession() {
+        session.setAttribute("journeyData", null)
+    }
 }

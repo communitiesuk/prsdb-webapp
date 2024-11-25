@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -24,7 +26,8 @@ class CustomSecurityConfig(
     val clientRegistrationRepository: ClientRegistrationRepository,
 ) {
     @Bean
-    fun filterChain(http: HttpSecurity): SecurityFilterChain {
+    @Order(Ordered.LOWEST_PRECEDENCE)
+    fun defaultSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .authorizeHttpRequests { requests ->
                 requests
