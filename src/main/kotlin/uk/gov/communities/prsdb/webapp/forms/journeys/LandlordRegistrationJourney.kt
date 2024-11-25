@@ -101,9 +101,8 @@ class LandlordRegistrationJourney(
                             templateName = "forms/confirmIdentityForm",
                             content =
                                 mapOf(
-                                    "title" to "registerLAUser.title",
-                                    "summaryName" to "registerLaUser.checkAnswers.summaryName",
-                                    "submitButtonText" to "forms.buttons.confirm",
+                                    "title" to "registerAsALandlord.title",
+                                    "submitButtonText" to "forms.buttons.confirmAndContinue",
                                 ),
                         ) {
                             val journeyData = journeyDataService.getJourneyDataFromSession()
