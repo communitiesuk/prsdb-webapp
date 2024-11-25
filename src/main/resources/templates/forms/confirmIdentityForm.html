@@ -6,7 +6,7 @@
 <!DOCTYPE html>
 <html>
 <th:block id="main-content"
-          th:replace="~{fragments/layout :: layout(${title}, ~{::#main-content/content()},false)}">
+          th:replace="~{fragments/layout :: layout(#{${title}}, ~{::#main-content/content()},false)}">
     <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
     <main class="govuk-main-wrapper">
         <div id="page-content"
@@ -24,7 +24,7 @@
                         </a><span th:text="#{forms.confirmDetails.details.text.two}"></span>
                     </th:block>
                 </details>
-                <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.confirmAndContinue})}"></button>
+                <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
             </form>
         </div>
     </main>
