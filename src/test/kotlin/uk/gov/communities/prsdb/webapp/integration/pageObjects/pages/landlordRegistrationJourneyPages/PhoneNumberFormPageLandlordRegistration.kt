@@ -9,7 +9,4 @@ class PhoneNumberFormPageLandlordRegistration(
     page: Page,
 ) : FormBasePage(page, "/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.PhoneNumber.urlPathSegment}") {
     val phoneNumberInput = form.getTextInput("phoneNumber")
-
-    fun submitFormAndAssertNextPage(): CountryOfResidenceFormPageLandlordRegistration =
-        clickElementAndAssertNextPage(form.getSubmitButton())
 }

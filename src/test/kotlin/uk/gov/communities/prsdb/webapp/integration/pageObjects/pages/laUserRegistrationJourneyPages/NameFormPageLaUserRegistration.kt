@@ -9,6 +9,4 @@ class NameFormPageLaUserRegistration(
     page: Page,
 ) : FormBasePage(page, "/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.Name.urlPathSegment}") {
     val nameInput = form.getTextInput("name")
-
-    fun submitFormAndAssertNextPage(): EmailFormPageLaUserRegistration = clickElementAndAssertNextPage(form.getSubmitButton())
 }

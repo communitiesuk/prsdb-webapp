@@ -1,14 +1,18 @@
 package uk.gov.communities.prsdb.webapp.integration
 
+import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserSuccessPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 
 class InviteLaUsersTests : IntegrationTest() {
     @Test
-    fun `inviting a new LA user ends with a success page`() {
+    fun `inviting a new LA user ends with a success page`(page: Page) {
         val invitePage = navigator.goToInviteNewLaUser(1)
         invitePage.fillBothEmailFields("test@example.com")
-        val successPage = invitePage.submitFormAndAssertNextPage()
+        invitePage.form.submit()
+        val successPage = assertPageIs(page, InviteNewLaUserSuccessPage::class)
         assertThat(successPage.confirmationBanner).containsText("You've sent test@example.com an invite to the database")
     }
 
@@ -17,7 +21,7 @@ class InviteLaUsersTests : IntegrationTest() {
         val invitePage = navigator.goToInviteNewLaUser(1)
         invitePage.emailInput.fill("test@example.com")
         invitePage.confirmEmailInput.fill("different@example.com")
-        invitePage.submitInvalidForm()
+        invitePage.form.submit()
         assertThat(invitePage.form.getErrorMessage()).containsText("Both email address should match")
     }
 }

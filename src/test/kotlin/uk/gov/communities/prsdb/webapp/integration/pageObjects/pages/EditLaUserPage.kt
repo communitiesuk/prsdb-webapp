@@ -12,11 +12,7 @@ class EditLaUserPage(
 ) : BasePage(page, "/edit-user/") {
     val name = getHeading(page)
     val email = getSubHeading(page)
-    private val form = Form(page)
+    val form = Form(page)
     val isManagerRadios = form.getRadios()
-    private val removeAccountButton = getButton(page, "Remove this account")
-
-    fun submitFormAndAssertNextPage(): ManageLaUsersPage = clickElementAndAssertNextPage(form.getSubmitButton())
-
-    fun clickRemoveAccountButtonAndAssertNextPage(): ConfirmDeleteLaUserPage = clickElementAndAssertNextPage(removeAccountButton)
+    val removeAccountButton = getButton(page, "Remove this account")
 }

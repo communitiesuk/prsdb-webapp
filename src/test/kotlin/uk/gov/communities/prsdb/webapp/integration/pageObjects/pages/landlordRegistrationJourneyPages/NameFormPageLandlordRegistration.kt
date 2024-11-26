@@ -9,6 +9,4 @@ class NameFormPageLandlordRegistration(
     page: Page,
 ) : FormBasePage(page, "/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.Name.urlPathSegment}") {
     val nameInput = form.getTextInput("name")
-
-    fun submitFormAndAssertNextPage(): EmailFormPageLandlordRegistration = clickElementAndAssertNextPage(form.getSubmitButton())
 }

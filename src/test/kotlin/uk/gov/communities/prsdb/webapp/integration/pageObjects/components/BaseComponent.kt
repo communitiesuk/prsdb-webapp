@@ -4,12 +4,9 @@ import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.Page.LocatorOptions
 import org.junit.jupiter.api.Assertions.assertEquals
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
-import kotlin.reflect.KClass
 
 abstract class BaseComponent(
-    protected val locator: Locator,
+    private val locator: Locator,
 ) {
     companion object {
         private fun assertLocatorIsValid(locator: Locator) {
@@ -53,8 +50,6 @@ abstract class BaseComponent(
             page: Page,
             text: String? = null,
         ) = getComponent(page, ".govuk-button", if (text == null) null else LocatorOptions().setHasText(text))
-
-        fun getSubmitButton(page: Page) = getComponent(page, "button[type='submit']")
     }
 
     init {
@@ -66,13 +61,4 @@ abstract class BaseComponent(
         locatorOptions: Locator.LocatorOptions? = null,
         index: Int = 0,
     ): Locator = Companion.getChildComponent(locator, locatorStr, locatorOptions, index)
-
-    protected fun <T : BasePage> clickChildElementAndAssertNextPage(
-        locator: Locator,
-        page: Page,
-        nextPageClass: KClass<T>,
-    ): T {
-        locator.click()
-        return createValidPage(page, nextPageClass)
-    }
 }

@@ -12,8 +12,8 @@ class ManageLaUsersPage(
     page: Page,
 ) : BasePage(page, "/manage-users") {
     val table = Table(page)
-    val pagination by lazy { Pagination(page, this::class) }
-    private val inviteAnotherUserButton = getButton(page, "Invite another user")
+    val pagination = Pagination(page)
+    val inviteAnotherUserButton = getButton(page, "Invite another user")
     val returnToDashboardButton: Locator = getButton(page, "Return to dashboard")
 
     companion object {
@@ -23,10 +23,5 @@ class ManageLaUsersPage(
         const val ACTIONS_COL_INDEX: Int = 3
     }
 
-    fun clickChangeLinkAndAssertNextPage(rowIndex: Int): EditLaUserPage {
-        val changeLink = getChildComponent(table.getCell(rowIndex, ACTIONS_COL_INDEX), "a")
-        return clickElementAndAssertNextPage(changeLink)
-    }
-
-    fun clickInviteAnotherUserAndAssertNextPage(): InviteNewLaUserPage = clickElementAndAssertNextPage(inviteAnotherUserButton)
+    fun getChangeLink(rowIndex: Int) = getChildComponent(table.getCell(rowIndex, ACTIONS_COL_INDEX), "a")
 }

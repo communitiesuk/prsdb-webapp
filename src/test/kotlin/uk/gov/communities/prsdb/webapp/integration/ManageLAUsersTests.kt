@@ -2,10 +2,13 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.ACCESS_LEVEL_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.ACCOUNT_STATUS_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.ACTIONS_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.USERNAME_COL_INDEX
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -13,7 +16,7 @@ class ManageLAUsersTests : IntegrationTest() {
     val localAuthorityId = 1
 
     @Test
-    fun `table of users renders`(page: Page) {
+    fun `table of users renders`() {
         val managePage = navigator.goToManageLaUsers(localAuthorityId)
 
         // Header
@@ -34,9 +37,10 @@ class ManageLAUsersTests : IntegrationTest() {
     }
 
     @Test
-    fun `invite button goes to invite new user page`() {
+    fun `invite button goes to invite new user page`(page: Page) {
         val managePage = navigator.goToManageLaUsers(localAuthorityId)
-        managePage.clickInviteAnotherUserAndAssertNextPage()
+        managePage.inviteAnotherUserButton.click()
+        assertPageIs(page, InviteNewLaUserPage::class)
     }
 
     @Test
@@ -52,7 +56,8 @@ class ManageLAUsersTests : IntegrationTest() {
         assertEquals("1", managePage.pagination.getCurrentPageNumberLinkText())
         assertThat(managePage.pagination.getPageNumberLink(2)).isVisible()
 
-        managePage = managePage.pagination.clickLinkAndAssertNextPage(managePage.pagination.getPageNumberLink(2))
+        managePage.pagination.getPageNumberLink(2).click()
+        managePage = assertPageIs(page, ManageLaUsersPage::class)
 
         assertThat(managePage.pagination.getPreviousLink()).isVisible()
         assertThat(managePage.pagination.getPageNumberLink(1)).isVisible()

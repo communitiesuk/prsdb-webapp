@@ -13,5 +13,10 @@ class Form(
 
     fun getRadios() = Radios(page)
 
-    fun getSubmitButton() = getChildComponent("button[type='submit']")
+    fun submit() {
+        getSubmitButton().click()
+        page.waitForLoadState()
+    }
+
+    private fun getSubmitButton() = getChildComponent("button[type='submit']")
 }

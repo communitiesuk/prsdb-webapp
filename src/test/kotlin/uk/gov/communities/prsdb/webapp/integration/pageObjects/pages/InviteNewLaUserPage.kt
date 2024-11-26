@@ -15,8 +15,4 @@ class InviteNewLaUserPage(
         emailInput.fill(text)
         confirmEmailInput.fill(text)
     }
-
-    fun submitFormAndAssertNextPage(): InviteNewLaUserSuccessPage = clickElementAndAssertNextPage(form.getSubmitButton())
-
-    fun submitInvalidForm() = submitInvalidForm(form)
 }

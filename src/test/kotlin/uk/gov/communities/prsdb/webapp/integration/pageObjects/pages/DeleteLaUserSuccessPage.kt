@@ -9,7 +9,5 @@ class DeleteLaUserSuccessPage(
     page: Page,
 ) : BasePage(page, "/delete-user/success") {
     val confirmationBanner = getConfirmationPageBanner(page)
-    private val returnButton = getButton(page)
-
-    fun clickReturnButtonAndAssertNextPage(): ManageLaUsersPage = clickElementAndAssertNextPage(returnButton)
+    val returnButton = getButton(page)
 }
