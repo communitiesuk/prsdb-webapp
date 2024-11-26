@@ -40,7 +40,7 @@ open class Page(
         return !bindingResult.hasErrors()
     }
 
-    private fun bindDataToFormModel(
+    protected fun bindDataToFormModel(
         validator: Validator,
         formData: Map<String, Any?>?,
     ): BindingResult {
