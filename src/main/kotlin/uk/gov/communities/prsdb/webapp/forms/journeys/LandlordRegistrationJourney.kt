@@ -82,6 +82,7 @@ class LandlordRegistrationJourney(
                                 ),
                         ),
                     nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CountryOfResidence, null) },
+                    saveAfterSubmit = false,
                 ),
                 Step(
                     id = LandlordRegistrationStepId.CountryOfResidence,
