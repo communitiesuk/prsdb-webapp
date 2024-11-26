@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <th:block id="main-content"
-          th:replace="~{fragments/layout :: layout(${title}, ~{::#main-content/content()},false)}">
+          th:replace="~{fragments/layout :: layout(#{registerProperty.title}, ~{::#main-content/content()},false)}">
         <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
         <main class="govuk-main-wrapper">
             <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
