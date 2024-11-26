@@ -10,9 +10,9 @@ class OSPlacesAddressLookupService(
     val osPlacesClient: OSPlacesClient,
 ) : AddressLookupService {
     override fun search(
-        buildingNameOrNumber: String,
+        houseNameOrNumber: String,
         postcode: String,
-    ): List<AddressDataModel> = responseToAddressList(osPlacesClient.search(buildingNameOrNumber, postcode))
+    ): List<AddressDataModel> = responseToAddressList(osPlacesClient.search(houseNameOrNumber, postcode))
 
     private fun responseToAddressList(response: String): List<AddressDataModel> {
         val jsonResponse = JSONObject(response)

@@ -4,7 +4,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
 interface AddressLookupService {
     fun search(
-        buildingNameOrNumber: String,
+        houseNameOrNumber: String,
         postcode: String,
     ): List<AddressDataModel>
 }

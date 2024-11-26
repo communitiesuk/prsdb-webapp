@@ -16,10 +16,10 @@ class OSPlacesClient(
     private val apiKey: String,
 ) {
     fun search(
-        buildingNameOrNumber: String,
+        houseNameOrNumber: String,
         postcode: String,
     ): String {
-        val query = URLEncoder.encode("$buildingNameOrNumber $postcode", "UTF-8")
+        val query = URLEncoder.encode("$houseNameOrNumber $postcode", "UTF-8")
         return getResponse("/find?minmatch=0.4&maxresults=10&query=$query")
     }
 

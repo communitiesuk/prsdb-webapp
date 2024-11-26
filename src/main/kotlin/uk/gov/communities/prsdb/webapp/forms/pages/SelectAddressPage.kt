@@ -23,11 +23,11 @@ class SelectAddressPage(
         prevStepUrl: String?,
     ): String {
         val journeyData = journeyDataService.getJourneyDataFromSession()
-        val buildingNameOrNumber =
-            objectToStringKeyedMap(journeyData["lookup-address"])?.get("buildingNameOrNumber").toString()
+        val houseNameOrNumber =
+            objectToStringKeyedMap(journeyData["lookup-address"])?.get("houseNameOrNumber").toString()
         val postcode = objectToStringKeyedMap(journeyData["lookup-address"])?.get("postcode").toString()
 
-        val addressLookupResults = addressLookupService.search(buildingNameOrNumber, postcode)
+        val addressLookupResults = addressLookupService.search(houseNameOrNumber, postcode)
         model.addAttribute("options", addressLookupResults.map { RadiosViewModel(it.address) })
 
         return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)

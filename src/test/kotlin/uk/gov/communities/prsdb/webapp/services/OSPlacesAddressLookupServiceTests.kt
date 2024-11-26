@@ -33,7 +33,7 @@ class OSPlacesAddressLookupServiceTests {
         val expectedAddresses =
             listOf(
                 AddressDataModel("1, Example Road, EG", "EG", 1),
-                AddressDataModel("Main Building, Example Road, EG", "EG", buildingName = "Main Building"),
+                AddressDataModel("Main Building, Example Road, EG", "EG", houseName = "Main Building"),
                 AddressDataModel("PO1, Example Road, EG", "EG", poBoxNumber = "PO1"),
             )
 
