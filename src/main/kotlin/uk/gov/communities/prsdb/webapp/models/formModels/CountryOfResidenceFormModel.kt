@@ -16,7 +16,7 @@ class CountryOfResidenceFormModel : FormModel {
             ),
         ],
     )
-    var livesInUk: Boolean? = null
+    var livesInUK: Boolean? = null
 
     @ValidatedBy(
         constraints = [
@@ -29,5 +29,5 @@ class CountryOfResidenceFormModel : FormModel {
     )
     var countryOfResidence: String = ""
 
-    fun isCountryOfResidenceValid(): Boolean = livesInUk != false || countryOfResidence.isNotBlank()
+    fun isCountryOfResidenceValid(): Boolean = livesInUK != false || countryOfResidence.isNotBlank()
 }
