@@ -40,6 +40,6 @@ class RegisterLandlordPageTests : IntegrationTest() {
 
         page.navigate("http://localhost:$port/register-as-a-landlord")
         page.getByRole(AriaRole.BUTTON, Page.GetByRoleOptions().setName("Start Now")).click()
-        assertEquals("/register-as-a-landlord/name", URI(page.url()).path)
+        assertEquals("/register-as-a-landlord/confirm-identity", URI(page.url()).path)
     }
 }
