@@ -9,8 +9,8 @@
                        th:id="${radioItemID}"
                        th:attr="aria-describedby=${option.hintMsgKey != null} ? ${hintID}, data-aria-controls=${option.conditionalFragment != null} ? ${conditionalFragmentID}">
                 <label class="govuk-label govuk-radios__label" th:for="${radioItemID}"
-                       th:text="#{${option.labelMsgKey}}">
-                    Option Label Message Key
+                       th:text="${option.labelMsgKey != null ? #messages.msg(option.labelMsgKey) : option.value}">
+                    Option Label
                 </label>
                 <div class="govuk-hint govuk-radios__hint" th:if="${option.hintMsgKey != null}"
                      th:id="${hintID}" th:text="#{${option.hintMsgKey}}">
