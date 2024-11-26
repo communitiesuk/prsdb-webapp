@@ -13,6 +13,8 @@ class Form(
 
     fun getRadios() = Radios(page)
 
+    fun getFieldsetHeading() = getChildComponent(".govuk-fieldset__heading")
+
     fun submit() {
         getSubmitButton().click()
         page.waitForLoadState()

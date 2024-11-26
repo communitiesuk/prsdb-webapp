@@ -12,6 +12,8 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.SuccessPageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.SummaryPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 
 @Sql("/data-mockuser-not-lauser.sql")
@@ -30,12 +32,12 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
 
     @Nested
     inner class LaUserRegistrationLandingPage {
-/*        @Test
+        @Test
         fun `Page renders when we navigate to it`() {
-            val formPage = navigator.goToLaUserRegistrationLandingPage()
-            assertThat(formPage.headingCaption).containsText("Before you register")
-            assertThat(formPage.heading).containsText("Registering as a local authority user")
-        }*/
+            val landingPage = navigator.goToLaUserRegistrationLandingPage()
+            assertThat(landingPage.headingCaption).containsText("Before you register")
+            assertThat(landingPage.heading).containsText("Registering as a local authority user")
+        }
 
         @Test
         fun `Clicking submit redirects to the name step`(page: Page) {
@@ -47,13 +49,11 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
 
     @Nested
     inner class LaUserRegistrationStepName {
-/*
         @Test
         fun `Page renders when we navigate to this step through the registration journey`() {
-            val formPage = navigator.goToLaUserRegistrationNameFormPage()
-            assertThat(formPage.fieldSetHeading).containsText("What is your full name?")
+            val namePage = navigator.goToLaUserRegistrationNameFormPage()
+            assertThat(namePage.form.getFieldsetHeading()).containsText("What is your full name?")
         }
-*/
 
         @Test
         fun `Submitting a valid name redirects to the next step`(page: Page) {
@@ -74,10 +74,10 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
 
     @Nested
     inner class LaUserRegistrationStepEmail {
-/*        @Test
+        @Test
         fun `Page renders when we navigate to this step through the registration journey`() {
-            val formPage = navigator.goToLaUserRegistrationEmailFormPage()
-            assertThat(formPage.fieldSetHeading).containsText("What is your work email address?")
+            val emailPage = navigator.goToLaUserRegistrationEmailFormPage()
+            assertThat(emailPage.form.getFieldsetHeading()).containsText("What is your work email address?")
         }
 
         @Test
@@ -86,7 +86,7 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
             emailPage.emailInput.fill("test@example.com")
             emailPage.form.submit()
             assertPageIs(page, SummaryPageLaUserRegistration::class)
-        }*/
+        }
 
         @Test
         fun `Submitting an empty e-mail address returns an error`() {
@@ -111,7 +111,7 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
         }
     }
 
-    /*@Nested
+    @Nested
     inner class LaUserRegistrationCheckAnswers {
         @Test
         fun `Page renders when we navigate to this step through the registration journey`() {
@@ -120,23 +120,17 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
         }
 
         @Test
-        fun `Navigating directly to this step redirects to the first step`() {
-            val renderedPage = navigator.skipToLaUserRegistrationCheckAnswersFormPage()
-            assertThat(renderedPage.heading).containsText("Registering as a local authority user")
-        }
-
-        @Test
         fun `Change Name link navigates to the name step`() {
             val formPage = navigator.goToLaUserRegistrationCheckAnswersPage()
             val linkedPage = formPage.changeName()
-            assertIsPage(linkedPage, NameFormPageLaUserRegistration::class)
+            assertPageIs(linkedPage, NameFormPageLaUserRegistration::class)
         }
 
         @Test
         fun `Change Email link navigates to the email step`() {
             val formPage = navigator.goToLaUserRegistrationCheckAnswersPage()
             val linkedPage = formPage.changeEmail()
-            assertIsPage(linkedPage, EmailFormPageLaUserRegistration::class)
+            assertPageIs(linkedPage, EmailFormPageLaUserRegistration::class)
         }
 
         @Test
@@ -144,7 +138,7 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
             val formPage = navigator.goToLaUserRegistrationCheckAnswersPage()
             assertThat(formPage.heading).containsText("Check your answers")
             val nextPage = formPage.submit()
-            assertIsPage(nextPage, SuccessPageLaUserRegistration::class)
+            assertPageIs(nextPage, SuccessPageLaUserRegistration::class)
         }
     }
 
@@ -162,5 +156,5 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
             val successPage = navigator.skipToLaUserRegistrationSuccessPage()
             assertThat(successPage.errorHeading).containsText("Sorry, there is a problem with the service")
         }
-    }*/
+    }
 }

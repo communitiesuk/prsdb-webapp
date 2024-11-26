@@ -8,6 +8,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.LandingPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.SuccessPageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.SummaryPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
@@ -65,6 +67,26 @@ class Navigator(
         namePage.form.submit()
         val emailPage = createValidPage(page, EmailFormPageLaUserRegistration::class)
         return emailPage
+    }
+
+    fun goToLaUserRegistrationCheckAnswersPage(): SummaryPageLaUserRegistration {
+        val emailPage = goToLaUserRegistrationEmailFormPage()
+        emailPage.emailInput.fill("test.user@example.com")
+        emailPage.form.submit()
+        val checkAnswersPage = createValidPage(page, SummaryPageLaUserRegistration::class)
+        return checkAnswersPage
+    }
+
+    fun goToLaUserRegistrationSuccessPage(): SuccessPageLaUserRegistration {
+        val checkAnswersPage = goToLaUserRegistrationCheckAnswersPage()
+        checkAnswersPage.submit()
+        val successPage = createValidPage(page, SuccessPageLaUserRegistration::class)
+        return successPage
+    }
+
+    fun skipToLaUserRegistrationSuccessPage(): SuccessPageLaUserRegistration {
+        navigate("register-local-authority-user/success")
+        return createValidPage(page, SuccessPageLaUserRegistration::class)
     }
 
     private fun navigate(path: String): Response? = page.navigate("http://localhost:$port/$path")
