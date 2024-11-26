@@ -19,7 +19,7 @@ import java.security.Principal
 @RequestMapping("/${REGISTER_LANDLORD_JOURNEY_URL}")
 class RegisterLandlordController(
     var landlordRegistrationJourney: LandlordRegistrationJourney,
-    val myService: IdentityService,
+    val identityService: IdentityService,
 ) {
     @GetMapping
     fun index(model: Model): String {
@@ -39,7 +39,7 @@ class RegisterLandlordController(
         principal: Principal,
         @AuthenticationPrincipal oidcUser: OidcUser,
     ): String {
-        var identity = myService.getVerifiedIdentityData(oidcUser)
+        var identity = identityService.getVerifiedIdentityData(oidcUser)
 
         if (identity != null) {
             identity["verifiedIdentity"] = true
