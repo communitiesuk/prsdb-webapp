@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -10,13 +12,14 @@ import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
+import uk.gov.communities.prsdb.webapp.services.IdentityService
 import java.security.Principal
-import java.time.LocalDate
 
 @Controller
 @RequestMapping("/${REGISTER_LANDLORD_JOURNEY_URL}")
 class RegisterLandlordController(
     var landlordRegistrationJourney: LandlordRegistrationJourney,
+    val myService: IdentityService,
 ) {
     @GetMapping
     fun index(model: Model): String {
@@ -34,14 +37,15 @@ class RegisterLandlordController(
     fun getVerifyIdentity(
         model: Model,
         principal: Principal,
-        @RequestParam verified: Boolean = false,
+        @AuthenticationPrincipal oidcUser: OidcUser,
     ): String {
-        val identity =
-            if (verified) {
-                getVerifiedIdentity()
-            } else {
-                mutableMapOf<String, Any?>("verifiedIdentity" to false)
-            }
+        var identity = myService.getVerifiedIdentityData(oidcUser)
+
+        if (identity != null) {
+            identity["verifiedIdentity"] = true
+        } else {
+            identity = mutableMapOf("verifiedIdentity" to false)
+        }
 
         return landlordRegistrationJourney.updateJourneyDataAndGetViewNameOrRedirect(
             landlordRegistrationJourney.getStepId(IDENTITY_VERIFICATION_PATH_SEGMENT),
@@ -51,13 +55,6 @@ class RegisterLandlordController(
             principal,
         )
     }
-
-    private fun getVerifiedIdentity(): MutableMap<String, Any?> =
-        mutableMapOf(
-            "name" to "Test User",
-            "birthDate" to LocalDate.parse("2001-02-03"),
-            "verifiedIdentity" to true,
-        )
 
     @GetMapping("/{stepName}")
     fun getJourneyStep(
