@@ -20,12 +20,15 @@ import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OSPlacesConfig
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.Navigator
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.Navigator
 import uk.gov.service.notify.NotificationClient
 import javax.sql.DataSource
 
 @Import(TestcontainersConfiguration::class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = ["spring.flyway.clean-disabled=false"])
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = ["spring.flyway.clean-disabled=false"],
+)
 @UsePlaywright
 @ActiveProfiles(profiles = ["local", "local-no-auth"])
 abstract class IntegrationTest {
