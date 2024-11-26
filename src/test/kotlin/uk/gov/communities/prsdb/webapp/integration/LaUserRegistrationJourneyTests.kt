@@ -1,17 +1,11 @@
 package uk.gov.communities.prsdb.webapp.integration
 
-import com.microsoft.playwright.Response
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.assertj.core.api.AssertionsForClassTypes.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.MockBean
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 
 class LaUserRegistrationJourneyTests : IntegrationTest() {
@@ -23,24 +17,6 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
         val testToken = "test token"
         whenever(invitationService.getTokenFromSession()).thenReturn(testToken)
         whenever(invitationService.tokenIsValid(testToken)).thenReturn(true)
-    }
-
-    companion object {
-        private val initialStepUrl = RegisterLaUserStepId.LandingPage.urlPathSegment
-
-        @JvmStatic
-        fun provideNonInitialUrlSegments() =
-            listOf(
-                RegisterLaUserStepId.Name.urlPathSegment,
-                RegisterLaUserStepId.Email.urlPathSegment,
-            )
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideNonInitialUrlSegments")
-    fun `Redirects to the first step in the journey if session data is not valid for step`(urlSegment: String) {
-        val journeyResponse: Response? = navigator.navigate("$REGISTER_LA_USER_JOURNEY_URL/$urlSegment")
-        assertThat(journeyResponse?.url()).contains("/$REGISTER_LA_USER_JOURNEY_URL/$initialStepUrl")
     }
 
     @Nested

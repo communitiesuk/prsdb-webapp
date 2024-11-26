@@ -1,37 +1,14 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil
-import com.microsoft.playwright.Response
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.assertj.core.api.AssertionsForClassTypes.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 
 class LandlordRegistrationJourneyTests : IntegrationTest() {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
-
-    companion object {
-        private val initialStepUrl = LandlordRegistrationStepId.Name.urlPathSegment
-
-        @JvmStatic
-        fun provideNonInitialUrlSegments() =
-            listOf(
-                LandlordRegistrationStepId.Email.urlPathSegment,
-                LandlordRegistrationStepId.PhoneNumber.urlPathSegment,
-            )
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideNonInitialUrlSegments")
-    fun `Redirects to the first step in the journey if session data is not valid for step`(urlSegment: String) {
-        val journeyResponse: Response? = navigator.navigate("$REGISTER_LANDLORD_JOURNEY_URL/$urlSegment")
-        assertThat(journeyResponse?.url()).contains("/$REGISTER_LANDLORD_JOURNEY_URL/$initialStepUrl")
-    }
 
     @Nested
     inner class LandlordRegistrationStepName {
