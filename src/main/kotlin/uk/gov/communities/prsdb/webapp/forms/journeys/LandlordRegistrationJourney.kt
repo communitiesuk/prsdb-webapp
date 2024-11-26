@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.PLACE_NAMES
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.pages.ConfirmIdentityPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
+import uk.gov.communities.prsdb.webapp.forms.pages.VerifyIdentityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.formModels.CheckAnswersFormModel
@@ -15,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.InternationalAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PhoneNumberFormModel
-import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -34,11 +34,7 @@ class LandlordRegistrationJourney(
                 Step(
                     id = LandlordRegistrationStepId.VerifyIdentity,
                     page =
-                        Page(
-                            formModel = VerifiedIdentityModel::class,
-                            templateName = "redirect:${LandlordRegistrationStepId.VerifyIdentity.urlPathSegment}",
-                            content = mapOf(),
-                        ),
+                        VerifyIdentityPage(),
                     nextAction = { journeyData, _ ->
                         if (doesJourneyDataContainVerifiedIdentity(journeyData)) {
                             Pair(LandlordRegistrationStepId.ConfirmIdentity, null)
