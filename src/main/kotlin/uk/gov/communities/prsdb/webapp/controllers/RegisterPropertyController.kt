@@ -25,6 +25,8 @@ class RegisterPropertyController(
             "registerPropertyInitialStep",
             "/$REGISTER_PROPERTY_JOURNEY_URL/${propertyRegistrationJourney.initialStepId.urlPathSegment}",
         )
+        model.addAttribute("backUrl", "/")
+
         return "registerPropertyStartPage"
     }
 
