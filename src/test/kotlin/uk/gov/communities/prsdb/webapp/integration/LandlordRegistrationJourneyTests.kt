@@ -3,10 +3,13 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
@@ -16,6 +19,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 @Sql("/data-local.sql")
 class LandlordRegistrationJourneyTests : IntegrationTest() {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
+
+    @BeforeEach
+    fun setup() {
+        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
+    }
 
     @Nested
     inner class LandlordRegistrationStepName {
