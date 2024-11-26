@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.formModels.CountryOfResidenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.InternationalAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosViewModel
@@ -110,6 +111,27 @@ class LandlordRegistrationJourney(
                     saveAfterSubmit = false,
                 ),
                 Step(
+                    id = LandlordRegistrationStepId.LookupAddress,
+                    page =
+                        Page(
+                            formModel = LookupAddressFormModel::class,
+                            templateName = "forms/lookupAddressForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerAsALandlord.title",
+                                    "fieldSetHeading" to "forms.lookupAddress.fieldSetHeading",
+                                    "fieldSetHint" to "forms.lookupAddress.fieldSetHint",
+                                    "postcodeLabel" to "forms.lookupAddress.postcode.label",
+                                    "postcodeHint" to "forms.lookupAddress.postcode.hint",
+                                    "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
+                                    "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
+                                    "submitButtonText" to "forms.buttons.continue",
+                                ),
+                        ),
+                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.SelectAddress, null) },
+                    saveAfterSubmit = false,
+                ),
+                Step(
                     id = LandlordRegistrationStepId.InternationalAddress,
                     page =
                         Page(
@@ -139,8 +161,7 @@ class LandlordRegistrationJourney(
                         ?.get("livesInUK")
                         .toString()
             ) {
-                // TODO PRSD-562: return AddressLookup step
-                "true" -> Pair(LandlordRegistrationStepId.CheckAnswers, null)
+                "true" -> Pair(LandlordRegistrationStepId.LookupAddress, null)
                 "false" -> Pair(LandlordRegistrationStepId.InternationalAddress, null)
                 else -> throw IllegalArgumentException(
                     "Invalid value for journeyData[\"${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}\"][\"livesInUK\"]:" +

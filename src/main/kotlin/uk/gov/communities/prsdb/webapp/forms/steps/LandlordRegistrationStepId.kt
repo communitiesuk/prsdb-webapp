@@ -7,6 +7,8 @@ enum class LandlordRegistrationStepId(
     Email("email"),
     PhoneNumber("phone-number"),
     CountryOfResidence("country-of-residence"),
+    LookupAddress("lookup-address"),
+    SelectAddress("select-address"),
     InternationalAddress("international-address"),
     CheckAnswers("check-answers"),
 }
