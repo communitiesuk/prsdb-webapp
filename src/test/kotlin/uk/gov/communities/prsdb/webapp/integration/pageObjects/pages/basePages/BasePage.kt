@@ -11,7 +11,7 @@ abstract class BasePage(
     private val urlSegment: String,
 ) {
     companion object {
-        fun <T : BasePage> assertPageIs(
+        fun <T : BasePage> createValidPage(
             page: Page,
             expectedPageClass: KClass<T>,
         ): T {
@@ -25,6 +25,11 @@ abstract class BasePage(
             )
             return pageInstance
         }
+
+        fun <T : BasePage> assertPageIs(
+            page: Page,
+            expectedPageClass: KClass<T>,
+        ) = createValidPage(page, expectedPageClass)
     }
 
     private fun validate() = assertContains(page.url(), urlSegment)

@@ -4,7 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.Response
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.LandingPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
@@ -18,24 +18,24 @@ class Navigator(
 ) {
     fun goToManageLaUsers(authorityId: Int): ManageLaUsersPage {
         navigate("local-authority/$authorityId/manage-users")?.url()
-        return assertPageIs(page, ManageLaUsersPage::class)
+        return createValidPage(page, ManageLaUsersPage::class)
     }
 
     fun goToInviteNewLaUser(authorityId: Int): InviteNewLaUserPage {
         navigate("local-authority/$authorityId/invite-new-user")
-        return assertPageIs(page, InviteNewLaUserPage::class)
+        return createValidPage(page, InviteNewLaUserPage::class)
     }
 
     fun goToLandlordRegistrationNameFormPage(): NameFormPageLandlordRegistration {
         navigate("register-as-a-landlord/name")
-        return assertPageIs(page, NameFormPageLandlordRegistration::class)
+        return createValidPage(page, NameFormPageLandlordRegistration::class)
     }
 
     fun goToLandlordRegistrationEmailFormPage(): EmailFormPageLandlordRegistration {
         val nameFormPage = goToLandlordRegistrationNameFormPage()
         nameFormPage.nameInput.fill("Arthur Dent")
         nameFormPage.form.submit()
-        val emailFormPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
+        val emailFormPage = createValidPage(page, EmailFormPageLandlordRegistration::class)
         return emailFormPage
     }
 
@@ -43,19 +43,19 @@ class Navigator(
         val emailFormPage = goToLandlordRegistrationEmailFormPage()
         emailFormPage.emailInput.fill("test@example.com")
         emailFormPage.form.submit()
-        val phoneNumberPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
+        val phoneNumberPage = createValidPage(page, PhoneNumberFormPageLandlordRegistration::class)
         return phoneNumberPage
     }
 
     fun goToLaUserRegistrationLandingPage(): LandingPageLaUserRegistration {
         navigate("register-local-authority-user/landing-page")
-        return assertPageIs(page, LandingPageLaUserRegistration::class)
+        return createValidPage(page, LandingPageLaUserRegistration::class)
     }
 
     fun goToLaUserRegistrationNameFormPage(): NameFormPageLaUserRegistration {
         val landingPage = goToLaUserRegistrationLandingPage()
         landingPage.clickBeginButton()
-        val namePage = assertPageIs(page, NameFormPageLaUserRegistration::class)
+        val namePage = createValidPage(page, NameFormPageLaUserRegistration::class)
         return namePage
     }
 
@@ -63,7 +63,7 @@ class Navigator(
         val namePage = goToLaUserRegistrationNameFormPage()
         namePage.nameInput.fill("Test user")
         namePage.form.submit()
-        val emailPage = assertPageIs(page, EmailFormPageLaUserRegistration::class)
+        val emailPage = createValidPage(page, EmailFormPageLaUserRegistration::class)
         return emailPage
     }
 
