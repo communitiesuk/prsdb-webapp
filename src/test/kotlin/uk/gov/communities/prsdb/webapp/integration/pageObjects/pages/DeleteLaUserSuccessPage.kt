@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class DeleteLaUserSuccessPage(
     page: Page,
-) : BasePage(page, "User removed") {
+) : BasePage(page, "/delete-user/success") {
     val confirmationBanner = getConfirmationPageBanner(page)
     private val returnButton = getButton(page)
 

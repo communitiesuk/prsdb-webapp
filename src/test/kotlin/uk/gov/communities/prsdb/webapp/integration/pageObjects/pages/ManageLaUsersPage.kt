@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class ManageLaUsersPage(
     page: Page,
-) : BasePage(page, "Manage Local Authority Users") {
+) : BasePage(page, "/manage-users") {
     val table = Table(page)
     val pagination by lazy { Pagination(page, this::class) }
     private val inviteAnotherUserButton = getButton(page, "Invite another user")

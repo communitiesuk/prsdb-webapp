@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class ConfirmDeleteLaUserPage(
     page: Page,
-) : BasePage(page, "Remove a user") {
+) : BasePage(page, "/delete-user/") {
     val userDetailsSection = getSection(page)
     private val deleteAccountButton = getSubmitButton(page)
 

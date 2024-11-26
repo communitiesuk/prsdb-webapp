@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class InviteNewLaUserPage(
     page: Page,
-) : BasePage(page, "Invite a new user") {
+) : BasePage(page, "/invite-new-user") {
     val form = Form(page)
     val emailInput = form.getTextInput("email")
     val confirmEmailInput = form.getTextInput("confirmEmail")

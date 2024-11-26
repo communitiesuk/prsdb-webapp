@@ -5,4 +5,4 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class PageNotFoundPage(
     page: Page,
-) : BasePage(page, "Page not found - Private Rented Sector Database - GOV.UK")
+) : BasePage(page, "/error")

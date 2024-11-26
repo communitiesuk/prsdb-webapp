@@ -6,6 +6,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class InviteNewLaUserSuccessPage(
     page: Page,
-) : BasePage(page, "Invite sent") {
+) : BasePage(page, "/invite-new-user/success") {
     val confirmationBanner = getConfirmationPageBanner(page)
 }

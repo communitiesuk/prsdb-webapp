@@ -5,11 +5,12 @@ import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
 import kotlin.reflect.KClass
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
 abstract class BasePage(
     val page: Page,
-    private val title: String? = null,
+    private val urlSegment: String,
 ) {
     companion object {
         fun <T : BasePage> createValidPage(
@@ -33,7 +34,7 @@ abstract class BasePage(
         }
     }
 
-    protected open fun validate() = assertEquals(title, page.title())
+    private fun validate() = assertContains(page.url(), urlSegment)
 
     protected inline fun <reified T : BasePage> clickElementAndAssertNextPage(locator: Locator): T {
         locator.click()

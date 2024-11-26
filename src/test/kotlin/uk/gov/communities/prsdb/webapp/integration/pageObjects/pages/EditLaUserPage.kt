@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class EditLaUserPage(
     page: Page,
-) : BasePage(page, "Manage Local Authority Users") {
+) : BasePage(page, "/edit-user/") {
     val name = getHeading(page)
     val email = getSubHeading(page)
     private val form = Form(page)
