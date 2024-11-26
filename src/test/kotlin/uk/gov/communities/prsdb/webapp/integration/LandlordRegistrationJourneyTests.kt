@@ -46,7 +46,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         fun `Submitting an empty name returns an error`() {
             val namePage = navigator.goToLandlordRegistrationNameFormPage()
             namePage.nameInput.fill("")
-            namePage.submitInvalidForm()
+            namePage.submitForm()
             assertThat(namePage.form.getErrorMessage()).containsText("You must enter your full name")
         }
     }
@@ -64,7 +64,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         fun `Submitting an empty e-mail address returns an error`() {
             val emailPage = navigator.goToLandlordRegistrationEmailFormPage()
             emailPage.emailInput.fill("")
-            emailPage.submitInvalidForm()
+            emailPage.submitForm()
             assertThat(
                 emailPage.form.getErrorMessage(),
             ).containsText("Enter a valid email address to continue. An email is required for contact purposes.")
@@ -74,7 +74,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         fun `Submitting an invalid e-mail address returns an error`() {
             val emailPage = navigator.goToLandlordRegistrationEmailFormPage()
             emailPage.emailInput.fill("")
-            emailPage.submitInvalidForm()
+            emailPage.submitForm()
             assertThat(
                 emailPage.form.getErrorMessage(),
             ).containsText("Enter a valid email address to continue. An email is required for contact purposes.")
@@ -106,7 +106,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         fun `Submitting an empty phone number returns an error`() {
             val phoneNumPage = navigator.goToLandlordRegistrationPhoneNumberFormPage()
             phoneNumPage.phoneNumberInput.fill("")
-            phoneNumPage.submitInvalidForm()
+            phoneNumPage.submitForm()
             assertThat(phoneNumPage.form.getErrorMessage()).containsText("Enter a phone number")
         }
 
@@ -122,7 +122,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         fun `Submitting an invalid phone number returns an error`(invalidPhoneNumber: String) {
             val phoneNumPage = navigator.goToLandlordRegistrationPhoneNumberFormPage()
             phoneNumPage.phoneNumberInput.fill(invalidPhoneNumber)
-            phoneNumPage.submitInvalidForm()
+            phoneNumPage.submitForm()
             assertThat(
                 phoneNumPage.form.getErrorMessage(),
             ).containsText("Enter a phone number including the country code for international numbers")

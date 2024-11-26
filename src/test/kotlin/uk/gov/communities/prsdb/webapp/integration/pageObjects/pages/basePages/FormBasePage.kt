@@ -9,7 +9,7 @@ abstract class FormBasePage(
 ) : BasePage(page, urlSegment) {
     val form = Form(page)
 
-    fun submitInvalidForm() {
+    fun submitForm() {
         form.getSubmitButton().click()
         page.waitForLoadState()
     }
