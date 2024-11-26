@@ -65,11 +65,7 @@ abstract class BaseComponent(
         locatorStr: String,
         locatorOptions: Locator.LocatorOptions? = null,
         index: Int = 0,
-    ): Locator {
-        val component = locator.locator(locatorStr, locatorOptions).nth(index)
-        assertLocatorIsValid(component)
-        return component
-    }
+    ): Locator = Companion.getChildComponent(locator, locatorStr, locatorOptions, index)
 
     protected fun <T : BasePage> clickChildElementAndAssertNextPage(
         locator: Locator,
