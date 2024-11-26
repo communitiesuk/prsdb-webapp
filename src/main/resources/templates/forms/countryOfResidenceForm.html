@@ -7,7 +7,7 @@
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl})}">
 <th:block id="form-content">
     <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'livesInUK', #{${fieldSetHeading}}, null)}">
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'countryOfResidence', #{${fieldSetHeading}}, null)}">
         <th:block th:replace="~{fragments/forms/radios :: radios(null,'livesInUK',null, ${radioOptions})}"></th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
