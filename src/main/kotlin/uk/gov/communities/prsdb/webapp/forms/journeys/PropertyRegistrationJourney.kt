@@ -3,10 +3,13 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.formModels.LandingPageFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.PropertyTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 @Component
@@ -15,11 +18,54 @@ class PropertyRegistrationJourney(
     journeyDataService: JourneyDataService,
 ) : Journey<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
-        initialStepId = RegisterPropertyStepId.PlaceholderPage,
+        initialStepId = RegisterPropertyStepId.PropertyType,
         validator = validator,
         journeyDataService = journeyDataService,
         steps =
             listOf(
+                Step(
+                    id = RegisterPropertyStepId.PropertyType,
+                    page =
+                        Page(
+                            formModel = PropertyTypeFormModel::class,
+                            templateName = "forms/propertyTypeForm.html",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.propertyType.fieldSetHeading",
+                                    "radioOptions" to
+                                        listOf(
+                                            RadiosViewModel(
+                                                PropertyType.DETACHED_HOUSE,
+                                                "forms.propertyType.radios.option.detachedHouse.label",
+                                                "forms.propertyType.radios.option.detachedHouse.hint",
+                                            ),
+                                            RadiosViewModel(
+                                                PropertyType.SEMI_DETACHED_HOUSE,
+                                                "forms.propertyType.radios.option.semiDetachedHouse.label",
+                                                "forms.propertyType.radios.option.semiDetachedHouse.hint",
+                                            ),
+                                            RadiosViewModel(
+                                                PropertyType.TERRACED_HOUSE,
+                                                "forms.propertyType.radios.option.terracedHouse.label",
+                                                "forms.propertyType.radios.option.terracedHouse.hint",
+                                            ),
+                                            RadiosViewModel(
+                                                PropertyType.FLAT,
+                                                "forms.propertyType.radios.option.flat.label",
+                                                "forms.propertyType.radios.option.flat.hint",
+                                            ),
+                                            RadiosViewModel(
+                                                PropertyType.OTHER,
+                                                "forms.propertyType.radios.option.other.label",
+                                                "forms.propertyType.radios.option.other.hint",
+                                                "customPropertyTypeInput",
+                                            ),
+                                        ),
+                                ),
+                        ),
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
+                ),
                 Step(
                     id = RegisterPropertyStepId.PlaceholderPage,
                     page =
