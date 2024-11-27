@@ -36,7 +36,7 @@ class CredentialSubject(
         birthDateList.singleOrNull()?.value ?: throw InvalidVerifiedCredentialsException("Not exactly one date of birth")
 
     fun getCurrentName(): String {
-        val currentName = name.singleOrNull { it.validTo == null }
+        val currentName = name.singleOrNull { it.validUntil == null }
         if (currentName == null) {
             throw InvalidVerifiedCredentialsException("Not exactly one current name")
         } else {
@@ -67,12 +67,12 @@ class BirthDate(
 class TemporalName(
     val nameParts: List<SingleName>,
     val validFrom: LocalDate? = null,
-    val validTo: LocalDate? = null,
+    val validUntil: LocalDate? = null,
 ) {
     companion object {
         fun fromJsonMap(jsonMap: Map<String, Any>): TemporalName {
             val validFromString = jsonMap["validFrom"] as? String
-            val validToString = jsonMap["validTo"] as? String
+            val validToString = jsonMap["validUntil"] as? String
             val nameParts = getListOfMaps(jsonMap, "nameParts").map { SingleName.fromJsonMap(it) }
 
             return TemporalName(
