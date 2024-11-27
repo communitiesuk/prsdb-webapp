@@ -15,7 +15,7 @@ class OSPlacesAPIStubController {
         @RequestParam query: String,
     ): String {
         try {
-            val addressListSize = query.split(" ")[0].toInt()
+            val addressListSize = query.split(",")[0].toInt()
             return if (addressListSize < 1) {
                 "{}"
             } else {

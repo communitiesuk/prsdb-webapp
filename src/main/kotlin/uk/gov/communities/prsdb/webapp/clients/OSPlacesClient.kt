@@ -20,7 +20,7 @@ class OSPlacesClient(
         houseNameOrNumber: String,
         postcode: String,
     ): String {
-        val query = URLEncoder.encode("$houseNameOrNumber $postcode", "UTF-8")
+        val query = URLEncoder.encode("$houseNameOrNumber, $postcode", "UTF-8")
         return getResponse("/find?minmatch=0.4&maxresults=$MAX_ADDRESSES&query=$query")
     }
 
