@@ -9,8 +9,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedCredentialModel
 @Service
 class OneLoginIdentityService(
     private val decoderFactory: JwtDecoderFactory<Unit>,
-) : IdentityService {
-    override fun getVerifiedIdentityData(user: OidcUser): MutableMap<String, Any?>? {
+) {
+    fun getVerifiedIdentityData(user: OidcUser): MutableMap<String, Any?>? {
         val idClaimString = user.claims[OneLoginClaimKeys.CORE_IDENTITY] as? String
         if (idClaimString != null) {
             val decoder = decoderFactory.createDecoder(Unit)
@@ -27,8 +27,4 @@ class OneLoginIdentityService(
 
         return null
     }
-}
-
-interface IdentityService {
-    fun getVerifiedIdentityData(user: OidcUser): MutableMap<String, Any?>?
 }
