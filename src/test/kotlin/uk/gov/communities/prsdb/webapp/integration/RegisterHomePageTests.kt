@@ -3,7 +3,9 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.test.context.jdbc.Sql
 
+@Sql("/data-local.sql")
 class RegisterHomePageTests : IntegrationTest() {
     @Test
     fun `register a home to rent page renders`(page: Page) {

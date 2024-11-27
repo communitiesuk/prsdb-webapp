@@ -5,8 +5,10 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import com.microsoft.playwright.options.AriaRole
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.springframework.test.context.jdbc.Sql
 import java.net.URI
 
+@Sql("/data-local.sql")
 class RegisterLandlordPageTests : IntegrationTest() {
     @Test
     fun `registerAsALandlord page renders`(page: Page) {

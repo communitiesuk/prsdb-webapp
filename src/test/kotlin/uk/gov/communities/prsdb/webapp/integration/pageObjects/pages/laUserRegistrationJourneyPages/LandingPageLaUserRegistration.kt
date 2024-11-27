@@ -10,4 +10,7 @@ class LandingPageLaUserRegistration(
     page: Page,
 ) : BasePage(page, "/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.LandingPage.urlPathSegment}") {
     fun clickBeginButton() = Form(page).submit()
+
+    val headingCaption = page.locator(".govuk-caption-l")
+    val heading = page.locator(".govuk-heading-l")
 }
