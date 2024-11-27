@@ -153,7 +153,8 @@ class LandlordRegistrationJourney(
                                     "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
                                     "submitButtonText" to "forms.buttons.useThisAddress",
                                     "searchAgainUrl" to
-                                        "/${REGISTER_LANDLORD_JOURNEY_URL}/${LandlordRegistrationStepId.LookupAddress.urlPathSegment}",
+                                        "/${REGISTER_LANDLORD_JOURNEY_URL}/" +
+                                        LandlordRegistrationStepId.LookupAddress.urlPathSegment,
                                 ),
                             journeyDataService = journeyDataService,
                             addressLookupService = addressLookupService,
@@ -177,6 +178,48 @@ class LandlordRegistrationJourney(
                                     "limit" to INTERNATIONAL_ADDRESS_MAX_LENGTH,
                                     "submitButtonText" to "forms.buttons.continue",
                                 ),
+                        ),
+                    // TODO: Set nextAction to next journey step
+                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.LookupContactAddress, null) },
+                    saveAfterSubmit = false,
+                ),
+                Step(
+                    id = LandlordRegistrationStepId.LookupContactAddress,
+                    page =
+                        Page(
+                            formModel = LookupAddressFormModel::class,
+                            templateName = "forms/lookupAddressForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerAsALandlord.title",
+                                    "fieldSetHeading" to "forms.lookupContactAddress.fieldSetHeading",
+                                    "postcodeLabel" to "forms.lookupAddress.postcode.label",
+                                    "postcodeHint" to "forms.lookupAddress.postcode.hint",
+                                    "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
+                                    "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
+                                    "submitButtonText" to "forms.buttons.continue",
+                                ),
+                        ),
+                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.SelectContactAddress, null) },
+                    saveAfterSubmit = false,
+                ),
+                Step(
+                    id = LandlordRegistrationStepId.SelectContactAddress,
+                    page =
+                        SelectAddressPage(
+                            formModel = SelectAddressFormModel::class,
+                            templateName = "forms/selectAddressForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerAsALandlord.title",
+                                    "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
+                                    "submitButtonText" to "forms.buttons.useThisAddress",
+                                    "searchAgainUrl" to
+                                        "/${REGISTER_LANDLORD_JOURNEY_URL}/" +
+                                        LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
+                                ),
+                            journeyDataService = journeyDataService,
+                            addressLookupService = addressLookupService,
                         ),
                     // TODO: Set nextAction to next journey step
                     nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CheckAnswers, null) },
