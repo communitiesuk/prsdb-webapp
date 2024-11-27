@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
-import uk.gov.communities.prsdb.webapp.services.IdentityService
+import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import java.security.Principal
 
 @Controller
 @RequestMapping("/${REGISTER_LANDLORD_JOURNEY_URL}")
 class RegisterLandlordController(
     var landlordRegistrationJourney: LandlordRegistrationJourney,
-    val identityService: IdentityService,
+    val identityService: OneLoginIdentityService,
 ) {
     @GetMapping
     fun index(model: Model): String {
