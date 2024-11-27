@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.clients
 import org.apache.http.HttpException
 import org.json.JSONException
 import org.json.JSONObject
+import uk.gov.communities.prsdb.webapp.constants.MAX_ADDRESSES
 import uk.gov.communities.prsdb.webapp.exceptions.RateLimitExceededException
 import java.net.URI
 import java.net.URLEncoder
@@ -20,7 +21,7 @@ class OSPlacesClient(
         postcode: String,
     ): String {
         val query = URLEncoder.encode("$houseNameOrNumber $postcode", "UTF-8")
-        return getResponse("/find?minmatch=0.4&maxresults=10&query=$query")
+        return getResponse("/find?minmatch=0.4&maxresults=$MAX_ADDRESSES&query=$query")
     }
 
     private fun getResponse(endpoint: String): String {

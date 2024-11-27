@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.constants.MAX_ADDRESSES_SHOWN
 import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosViewModel
@@ -30,19 +29,12 @@ class SelectAddressPage(
         val postcode = objectToStringKeyedMap(journeyData[urlPathSegment])?.get("postcode").toString()
 
         val addressLookupResults = addressLookupService.search(houseNameOrNumber, postcode)
-        val limitedAddressLookupResults =
-            if (addressLookupResults.size <= MAX_ADDRESSES_SHOWN) {
-                addressLookupResults
-            } else {
-                addressLookupResults.subList(0, MAX_ADDRESSES_SHOWN)
-            }
-
-        model.addAttribute("addressCount", limitedAddressLookupResults.size)
+        model.addAttribute("addressCount", addressLookupResults.size)
         model.addAttribute("postcode", postcode)
         model.addAttribute("houseNameOrNumber", houseNameOrNumber)
         model.addAttribute(
             "options",
-            limitedAddressLookupResults.mapIndexed { index, address ->
+            addressLookupResults.mapIndexed { index, address ->
                 RadiosViewModel(value = address.address, valueStr = (index + 1).toString())
             },
         )
