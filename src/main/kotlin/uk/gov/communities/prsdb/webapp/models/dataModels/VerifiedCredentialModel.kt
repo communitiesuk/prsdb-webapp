@@ -99,7 +99,7 @@ class SingleName(
     }
 }
 
-fun getListOfMaps(
+private fun getListOfMaps(
     map: Map<String, Any>,
     key: String,
 ): List<Map<String, Any>> = map[key] as List<Map<String, Any>>

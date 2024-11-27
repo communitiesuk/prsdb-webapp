@@ -44,8 +44,7 @@ class LandlordRegistrationJourney(
             listOf(
                 Step(
                     id = LandlordRegistrationStepId.VerifyIdentity,
-                    page =
-                        VerifyIdentityPage(),
+                    page = VerifyIdentityPage(),
                     nextAction = { journeyData, _ ->
                         if (doesJourneyDataContainVerifiedIdentity(journeyData)) {
                             Pair(LandlordRegistrationStepId.ConfirmIdentity, null)
