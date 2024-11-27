@@ -18,7 +18,9 @@
         </div>
         <th:block th:replace="~{fragments/forms/radios :: radios(null,'address',null, ${options})}"></th:block>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+    <th:block th:if="${#lists.size(options) > 0}">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+    </th:block>
     <p class="govuk-body">
         <a class="govuk-link" href="#" th:text="#{forms.selectAddress.addAddressManually}">forms.selectAddress.addAddressManually</a>
     </p>
