@@ -5,6 +5,7 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.models.dataModels.FormSummaryDataModel
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
 import kotlin.reflect.KClass
 
 class ConfirmIdentityPage(
@@ -24,12 +25,12 @@ class ConfirmIdentityPage(
             mutableListOf(
                 FormSummaryDataModel(
                     "forms.confirmDetails.rowHeading.name",
-                    identityData?.get("name"),
+                    identityData?.get(VerifiedIdentityModel.NAME_KEY),
                     null,
                 ),
                 FormSummaryDataModel(
                     "forms.confirmDetails.rowHeading.dob",
-                    identityData?.get("birthDate"),
+                    identityData?.get(VerifiedIdentityModel.BIRTH_DATE_KEY),
                     null,
                 ),
             )
