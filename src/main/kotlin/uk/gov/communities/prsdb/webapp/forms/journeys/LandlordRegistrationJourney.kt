@@ -16,9 +16,11 @@ import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.InternationalAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PhoneNumberFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import java.time.LocalDate
 
 @Component
 class LandlordRegistrationJourney(
@@ -186,7 +188,8 @@ class LandlordRegistrationJourney(
 
         private fun doesJourneyDataContainVerifiedIdentity(journeyData: JourneyData): Boolean {
             val pageData = objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment]) ?: mapOf()
-            return pageData["verifiedIdentity"] as? Boolean == true
+            return pageData[VerifiedIdentityModel.NAME_KEY] is String &&
+                pageData[VerifiedIdentityModel.BIRTH_DATE_KEY] is LocalDate
         }
     }
 }
