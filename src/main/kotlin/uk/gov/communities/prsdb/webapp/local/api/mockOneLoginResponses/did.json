@@ -1,0 +1,14 @@
+{
+  "assertionMethod" : [ {
+    "id" : "keyId",
+    "publicKeyJwk" :
+    {
+      "kty": "EC",
+      "use": "sig",
+      "crv": "P-256",
+      "x": "publicJWK_x",
+      "y": "publicJWK_y",
+      "alg": "ES256"
+    }
+  } ]
+}

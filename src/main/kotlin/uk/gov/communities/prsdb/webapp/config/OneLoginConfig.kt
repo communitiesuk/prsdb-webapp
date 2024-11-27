@@ -35,7 +35,8 @@ class OneLoginConfig {
     @Value("\${one-login.jwt.private.key}")
     lateinit var privateKey: RSAPrivateKey
 
-    val didUri = "https://identity.integration.account.gov.uk/.well-known/did.json"
+    @Value("\${one-login.did.uri}")
+    lateinit var didUri: String
 
     @Bean
     fun oneLoginIdTokenDecoderFactory(): JwtDecoderFactory<Unit> =

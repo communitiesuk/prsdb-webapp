@@ -43,6 +43,7 @@ one-login:
     public.key: ${ONE_LOGIN_PUBLIC_KEY:classpath:public_key.pem}
     private.key: ${ONE_LOGIN_PRIVATE_KEY:classpath:private_key.pem}
 
+
 notify:
   api-key: ${EMAILNOTIFICATIONS_APIKEY}
 
@@ -79,6 +80,7 @@ spring:
             jwk-set-uri: http://localhost:8080/local/one-login/.well-known/jwks.json
             user-info-uri: http://localhost:8080/local/one-login/userinfo
             userNameAttribute: "sub"
+one-login.did.uri: http://localhost:8080/local/one-login/.well-known/did.json
 
 ---
 
