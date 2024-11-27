@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import uk.gov.communities.prsdb.webapp.constants.MAX_ADDRESSES
+import kotlin.math.min
 
 @Profile("local-mock-os-places")
 @RestController
@@ -19,7 +21,7 @@ class OSPlacesAPIStubController {
             return if (addressListSize < 1) {
                 "{}"
             } else {
-                (1..addressListSize).joinToString(
+                (1..min(addressListSize, MAX_ADDRESSES)).joinToString(
                     ",",
                     "{'results':[",
                     "]}",
