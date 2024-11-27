@@ -1,0 +1,28 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="options" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl})}">
+<th:block id="form-content">
+    <th:block id="fieldset-content"
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'address', #{${fieldSetHeading}}, null)}">
+        <div id="address-hint" class="govuk-hint">
+            <span th:remove="tag"
+                  th:utext="#{forms.selectAddress.fieldSetHint.beforeLink(${addressCount},${postcode},${houseNameOrNumber})}">
+                forms.selectAddress.fieldSetHint.beforeLink
+            </span>
+            <a class=govuk-link th:href="@{${searchAgainUrl}}" th:text="#{forms.selectAddress.fieldSetHint.link}"></a>
+        </div>
+        <th:block th:replace="~{fragments/forms/radios :: radios(null,'address',null, ${options})}"></th:block>
+    </th:block>
+    <th:block th:if="${#lists.size(options) > 0}">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+    </th:block>
+    <p class="govuk-body">
+        <a class="govuk-link" href="#" th:text="#{forms.selectAddress.addAddressManually}">forms.selectAddress.addAddressManually</a>
+    </p>
+</th:block>
+</html>

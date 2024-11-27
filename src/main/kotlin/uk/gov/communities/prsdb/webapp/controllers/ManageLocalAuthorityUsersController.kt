@@ -87,11 +87,13 @@ class ManageLocalAuthorityUsersController(
             listOf(
                 RadiosViewModel(
                     false,
+                    "basic",
                     "editLAUserAccess.radios.option.basic.label",
                     "editLAUserAccess.radios.option.basic.hint",
                 ),
                 RadiosViewModel(
                     true,
+                    "admin",
                     "editLAUserAccess.radios.option.admin.label",
                     "editLAUserAccess.radios.option.admin.hint",
                 ),
