@@ -26,8 +26,8 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', '07712345678', '01/01/00', '09/13/24', '09/
        ('urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', '01223456789', '03/05/00', '10/15/24',
         '10/09/24');
 
-INSERT INTO local_authority (name, created_date, last_modified_date)
-VALUES ('Betelgeuse', '09/13/24', '09/13/24');
+INSERT INTO local_authority (id, name, created_date, last_modified_date)
+VALUES (1, 'Betelgeuse', '09/13/24', '09/13/24');
 
 INSERT INTO local_authority_user (subject_identifier, is_manager, local_authority_id, created_date, last_modified_date, name, email)
 VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 1, '10/07/24', '10/07/24', 'Ford Prefect', 'Ford.Prefect@la.com'),

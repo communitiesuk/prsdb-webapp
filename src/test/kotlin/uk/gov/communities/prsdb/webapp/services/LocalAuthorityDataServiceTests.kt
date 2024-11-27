@@ -309,4 +309,22 @@ class LocalAuthorityDataServiceTests {
             }
         Assertions.assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
     }
+
+    @Test
+    fun `registerNewUser adds a new user to local_authority_user`() {
+        // Arrange
+        val baseUser = createOneLoginUser(DEFAULT_1L_USER_NAME)
+        val baseUserId = get1LID(DEFAULT_1L_USER_NAME)
+        val localAuthority = createLocalAuthority()
+        val expectedNewUser = LocalAuthorityUser(baseUser, false, localAuthority, "Sample Name", "sample.name@example.com")
+        whenever(oneLoginUserRepository.getReferenceById(baseUserId)).thenReturn(baseUser)
+
+        // Act
+        localAuthorityDataService.registerNewUser(baseUserId, localAuthority, "Sample Name", "sample.name@example.com")
+
+        // Assert
+        val localAuthorityUserCaptor = captor<LocalAuthorityUser>()
+        verify(localAuthorityUserRepository).save(localAuthorityUserCaptor.capture())
+        assertTrue(ReflectionEquals(expectedNewUser).matches(localAuthorityUserCaptor.value))
+    }
 }

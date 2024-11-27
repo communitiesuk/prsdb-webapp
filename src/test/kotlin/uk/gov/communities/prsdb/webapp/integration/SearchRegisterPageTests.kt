@@ -3,7 +3,9 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.test.context.jdbc.Sql
 
+@Sql("/data-local.sql")
 class SearchRegisterPageTests : IntegrationTest() {
     @Test
     fun `search for private rented sector information page renders`(page: Page) {

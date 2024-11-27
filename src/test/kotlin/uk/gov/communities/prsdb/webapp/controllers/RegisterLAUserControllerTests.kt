@@ -11,6 +11,10 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
+import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
+import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
@@ -36,11 +40,15 @@ class RegisterLAUserControllerTests(
     @MockBean
     lateinit var localAuthorityDataService: LocalAuthorityDataService
 
+    @MockBean
+    lateinit var localAuthorityUserRepository: LocalAuthorityUserRepository
+
     @BeforeEach
     fun setupMocks() {
         whenever(laUserRegistrationJourney.initialStepId).thenReturn(RegisterLaUserStepId.LandingPage)
         whenever(invitationService.tokenIsValid("token123")).thenReturn(true)
         whenever(invitationService.tokenIsValid("invalid-token")).thenReturn(false)
+        whenever(invitationService.getTokenFromSession()).thenReturn("token123")
     }
 
     @Test
@@ -91,5 +99,61 @@ class RegisterLAUserControllerTests(
         val journeyData = mutableMapOf<String, Any?>("email" to formData)
 
         verify(journeyDataService).setJourneyData(journeyData)
+    }
+
+    @Test
+    @WithMockUser
+    fun `submitRegistration calls registerNewUser with journeyData values from the session`() {
+        // Arrange
+        val journeyData: JourneyData =
+            mutableMapOf(
+                "name" to mutableMapOf("name" to "Test Username"),
+                "email" to mutableMapOf("emailAddress" to "test@example.com"),
+            )
+        whenever(journeyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
+
+        val localAuthority = LocalAuthority(1, "Local Authority 1")
+        whenever(invitationService.getAuthorityForToken("token123")).thenReturn(localAuthority)
+
+        // Act
+        mvc.get("/register-local-authority-user/success").andExpect {
+            status { isOk() }
+        }
+
+        // Assert
+        verify(localAuthorityDataService).registerNewUser(
+            "user",
+            localAuthority,
+            "Test Username",
+            "test@example.com",
+        )
+    }
+
+    @Test
+    @WithMockUser
+    fun `submitRegistration calls deleteInvitation and clears data from the session`() {
+        // Arrange
+        val journeyData: JourneyData =
+            mutableMapOf(
+                "name" to mutableMapOf("name" to "Test Username"),
+                "email" to mutableMapOf("emailAddress" to "test@example.com"),
+            )
+        whenever(journeyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
+
+        val localAuthority = LocalAuthority(1, "Local Authority 1")
+        whenever(invitationService.getAuthorityForToken("token123")).thenReturn(localAuthority)
+
+        val invitation = LocalAuthorityInvitation()
+        whenever(invitationService.getInvitationFromToken("token123")).thenReturn(invitation)
+
+        // Act
+        mvc.get("/register-local-authority-user/success").andExpect {
+            status { isOk() }
+        }
+
+        // Assert
+        verify(invitationService).deleteInvitation(invitation)
+        verify(invitationService).clearTokenFromSession()
+        verify(journeyDataService).clearJourneyDataFromSession()
     }
 }
