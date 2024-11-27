@@ -1,0 +1,8 @@
+{
+  "sub": "userId",
+  "email": "userEmail",
+  "email_verified": true,
+  "phone_number": "userNumber",
+  "phone_number_verified": true,
+  "https://vocab.account.gov.uk/v1/coreIdentityJWT": "coreIdentityJwt"
+}

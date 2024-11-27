@@ -9,8 +9,10 @@ import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.KeyUse
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator
+import com.nimbusds.jwt.JWT
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
+import org.json.JSONObject
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -45,6 +47,23 @@ class MockOneLoginController {
 
             return ecKey
         }
+
+        val coreIdentityJwt = generateCoreIdentityJwt()
+
+        private fun generateCoreIdentityJwt(): JWT {
+            val verifiableCredentialString =
+                File(
+                    "src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/mockOneLoginResponses/verifiableCredential.json",
+                ).readText(Charsets.UTF_8).trim()
+            val verifiableCredential = JSONObject(verifiableCredentialString).toMap()
+            val claimsSet = JWTClaimsSet.Builder().claim("vc", verifiableCredential).build()
+            val header = JWSHeader.Builder(JWSAlgorithm.ES256).keyID(keyId).build()
+            val signedJWT = SignedJWT(header, claimsSet)
+            signedJWT.sign(ECDSASigner(ecKey))
+            return signedJWT
+        }
+
+        var userInfoFile = "src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/mockOneLoginResponses/userInfo.json"
     }
 
     private val userId = "urn:fdc:gov.uk:2022:UVWXY"
@@ -79,6 +98,25 @@ class MockOneLoginController {
                     .toString(),
             )
 
+    @GetMapping("/.well-known/did.json")
+    fun didsJson(): String =
+        File("src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/mockOneLoginResponses/did.json")
+            .readText(Charsets.UTF_8)
+            .replace("keyId", keyId)
+            .replace(
+                "publicJWK_x",
+                ecKey
+                    .toPublicJWK()
+                    .x
+                    .toString(),
+            ).replace(
+                "publicJWK_y",
+                ecKey
+                    .toPublicJWK()
+                    .y
+                    .toString(),
+            )
+
     @GetMapping("/authorize")
     fun authorize(
         @RequestParam response_type: String,
@@ -87,6 +125,7 @@ class MockOneLoginController {
         @RequestParam state: String,
         @RequestParam redirect_uri: String,
         @RequestParam nonce: String,
+        @RequestParam vtr: String?,
     ): ResponseEntity<Unit> {
         lastReceivedNonce = nonce
         val locationURI: URI =
@@ -97,6 +136,14 @@ class MockOneLoginController {
                 .queryParam("state", state)
                 .build()
                 .toUri()
+
+        userInfoFile =
+            if (vtr != null) {
+                "src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/mockOneLoginResponses/verifiedUserInfo.json"
+                // "src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/mockOneLoginResponses/unverifiedUserInfo.json"
+            } else {
+                "src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/mockOneLoginResponses/userInfo.json"
+            }
 
         return ResponseEntity.status(302).location(locationURI).build()
     }
@@ -122,11 +169,12 @@ class MockOneLoginController {
     @GetMapping("/userinfo")
     fun userInfo(): ResponseEntity<String> {
         val responseBody =
-            File("src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/mockOneLoginResponses/userInfo.json")
+            File(userInfoFile)
                 .readText(Charsets.UTF_8)
                 .replace("userId", userId)
                 .replace("userEmail", userEmail)
                 .replace("userNumber", userNumber)
+                .replace("coreIdentityJwt", coreIdentityJwt.serialize())
 
         val responseBuild = ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(responseBody)
 

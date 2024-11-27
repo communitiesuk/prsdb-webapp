@@ -29,6 +29,7 @@ one-login:
   jwt:
     public.key: ${ONE_LOGIN_PUBLIC_KEY}
     private.key: ${ONE_LOGIN_PRIVATE_KEY}
+  did.uri: https://identity.integration.account.gov.uk/.well-known/did.json
 
 notify:
   api-key: ${EMAILNOTIFICATIONS_APIKEY}
