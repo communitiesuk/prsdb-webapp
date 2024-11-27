@@ -4,8 +4,10 @@ import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_ADDRESS_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.PLACE_NAMES
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
+import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.formModels.CountryOfResidenceFormModel
@@ -14,14 +16,17 @@ import uk.gov.communities.prsdb.webapp.models.formModels.InternationalAddressFor
 import uk.gov.communities.prsdb.webapp.models.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PhoneNumberFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
+import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 @Component
 class LandlordRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
+    addressLookupService: AddressLookupService,
 ) : Journey<LandlordRegistrationStepId>(
         journeyType = JourneyType.LANDLORD_REGISTRATION,
         initialStepId = LandlordRegistrationStepId.Name,
@@ -129,6 +134,27 @@ class LandlordRegistrationJourney(
                                 ),
                         ),
                     nextAction = { _, _ -> Pair(LandlordRegistrationStepId.SelectAddress, null) },
+                    saveAfterSubmit = false,
+                ),
+                Step(
+                    id = LandlordRegistrationStepId.SelectAddress,
+                    page =
+                        SelectAddressPage(
+                            formModel = SelectAddressFormModel::class,
+                            templateName = "forms/selectAddressForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerAsALandlord.title",
+                                    "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
+                                    "submitButtonText" to "forms.buttons.useThisAddress",
+                                    "searchAgainUrl" to
+                                        "/${REGISTER_LANDLORD_JOURNEY_URL}/${LandlordRegistrationStepId.LookupAddress.urlPathSegment}",
+                                ),
+                            journeyDataService = journeyDataService,
+                            addressLookupService = addressLookupService,
+                        ),
+                    // TODO: Set nextAction to next journey step
+                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CheckAnswers, null) },
                     saveAfterSubmit = false,
                 ),
                 Step(
