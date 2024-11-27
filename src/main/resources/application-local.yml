@@ -87,6 +87,16 @@ one-login.did.uri: http://localhost:8080/local/one-login/.well-known/did.json
 spring:
   config:
     activate:
+      on-profile: local-no-auth-unverified
+
+local:
+  id-verification-user-info-file: src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/mockOneLoginResponses/unverifiedUserInfo.json
+
+---
+
+spring:
+  config:
+    activate:
       on-profile: local-auth
 
   security:

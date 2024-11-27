@@ -13,6 +13,7 @@ import com.nimbusds.jwt.JWT
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import org.json.JSONObject
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -64,7 +65,12 @@ class MockOneLoginController {
         }
 
         var userInfoFile = "src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/mockOneLoginResponses/userInfo.json"
+        const val VERIFIED_USER_FILE =
+            "src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/mockOneLoginResponses/verifiedUserInfo.json"
     }
+
+    @Value("\${local.id-verification-user-info-file:${VERIFIED_USER_FILE}}")
+    lateinit var postVerificationUserInfoFile: String
 
     private val userId = "urn:fdc:gov.uk:2022:UVWXY"
 
@@ -137,13 +143,9 @@ class MockOneLoginController {
                 .build()
                 .toUri()
 
-        userInfoFile =
-            if (vtr != null) {
-                "src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/mockOneLoginResponses/verifiedUserInfo.json"
-                // "src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/mockOneLoginResponses/unverifiedUserInfo.json"
-            } else {
-                "src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/mockOneLoginResponses/userInfo.json"
-            }
+        if (vtr != null) {
+            userInfoFile = postVerificationUserInfoFile
+        }
 
         return ResponseEntity.status(302).location(locationURI).build()
     }
