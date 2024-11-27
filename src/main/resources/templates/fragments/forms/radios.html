@@ -2,7 +2,7 @@
           th:replace="~{fragments/forms/inputGroup :: inputGroup(${label}, ${fieldName}, ~{::#radios-content/content()}, ${hint})}">
     <div class="govuk-radios" data-module="govuk-radios">
         <th:block th:each="option: ${options}"
-                  th:with="radioItemID=|${fieldName}-${option.value}|,  hintID=|${fieldName}-${option.value}-hint|, conditionalFragmentID=|${fieldName}-${option.value}-conditional|">
+                  th:with="radioItemID=|${fieldName}-${option.valueStr}|,  hintID=|${fieldName}-${option.valueStr}-hint|, conditionalFragmentID=|${fieldName}-${option.valueStr}-conditional|">
             <div class="govuk-radios__item">
                 <input class="govuk-radios__input" type="radio" th:field="*{__${fieldName}__}"
                        th:value="${option.value}"

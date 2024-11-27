@@ -39,7 +39,12 @@ class SelectAddressPage(
         model.addAttribute("addressCount", limitedAddressLookupResults.size)
         model.addAttribute("postcode", postcode)
         model.addAttribute("houseNameOrNumber", houseNameOrNumber)
-        model.addAttribute("options", limitedAddressLookupResults.map { RadiosViewModel(it.address) })
+        model.addAttribute(
+            "options",
+            limitedAddressLookupResults.mapIndexed { index, address ->
+                RadiosViewModel(value = address.address, valueStr = (index + 1).toString())
+            },
+        )
 
         return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)
     }

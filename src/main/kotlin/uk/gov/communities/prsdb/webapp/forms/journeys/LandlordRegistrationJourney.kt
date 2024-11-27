@@ -103,9 +103,14 @@ class LandlordRegistrationJourney(
                                     "selectOptions" to PLACE_NAMES.map { SelectViewModel(it) },
                                     "radioOptions" to
                                         listOf(
-                                            RadiosViewModel(true, "forms.countryOfResidence.radios.option.yes.label"),
+                                            RadiosViewModel(
+                                                value = true,
+                                                valueStr = "yes",
+                                                labelMsgKey = "forms.countryOfResidence.radios.option.yes.label",
+                                            ),
                                             RadiosViewModel(
                                                 value = false,
+                                                valueStr = "no",
                                                 labelMsgKey = "forms.countryOfResidence.radios.option.no.label",
                                                 conditionalFragment = "countryOfResidenceSelect",
                                             ),
