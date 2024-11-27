@@ -39,13 +39,7 @@ class RegisterLandlordController(
         principal: Principal,
         @AuthenticationPrincipal oidcUser: OidcUser,
     ): String {
-        var identity = identityService.getVerifiedIdentityData(oidcUser)
-
-        if (identity != null) {
-            identity["verifiedIdentity"] = true
-        } else {
-            identity = mutableMapOf("verifiedIdentity" to false)
-        }
+        var identity = identityService.getVerifiedIdentityData(oidcUser) ?: mutableMapOf()
 
         return landlordRegistrationJourney.updateJourneyDataAndGetViewNameOrRedirect(
             landlordRegistrationJourney.getStepId(IDENTITY_VERIFICATION_PATH_SEGMENT),
