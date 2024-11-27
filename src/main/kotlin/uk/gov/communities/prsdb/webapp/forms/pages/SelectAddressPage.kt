@@ -14,6 +14,7 @@ class SelectAddressPage(
     formModel: KClass<out FormModel>,
     templateName: String,
     content: Map<String, Any>,
+    private val urlPathSegment: String,
     private val journeyDataService: JourneyDataService,
     private val addressLookupService: AddressLookupService,
 ) : Page(formModel, templateName, content) {
@@ -25,8 +26,8 @@ class SelectAddressPage(
     ): String {
         val journeyData = journeyDataService.getJourneyDataFromSession()
         val houseNameOrNumber =
-            objectToStringKeyedMap(journeyData["lookup-address"])?.get("houseNameOrNumber").toString()
-        val postcode = objectToStringKeyedMap(journeyData["lookup-address"])?.get("postcode").toString()
+            objectToStringKeyedMap(journeyData[urlPathSegment])?.get("houseNameOrNumber").toString()
+        val postcode = objectToStringKeyedMap(journeyData[urlPathSegment])?.get("postcode").toString()
 
         val addressLookupResults = addressLookupService.search(houseNameOrNumber, postcode)
         val limitedAddressLookupResults =

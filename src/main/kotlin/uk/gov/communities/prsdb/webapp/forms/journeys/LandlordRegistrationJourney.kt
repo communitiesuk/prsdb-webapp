@@ -156,6 +156,7 @@ class LandlordRegistrationJourney(
                                         "/${REGISTER_LANDLORD_JOURNEY_URL}/" +
                                         LandlordRegistrationStepId.LookupAddress.urlPathSegment,
                                 ),
+                            urlPathSegment = LandlordRegistrationStepId.LookupAddress.urlPathSegment,
                             journeyDataService = journeyDataService,
                             addressLookupService = addressLookupService,
                         ),
@@ -218,6 +219,7 @@ class LandlordRegistrationJourney(
                                         "/${REGISTER_LANDLORD_JOURNEY_URL}/" +
                                         LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
                                 ),
+                            urlPathSegment = LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
                             journeyDataService = journeyDataService,
                             addressLookupService = addressLookupService,
                         ),
