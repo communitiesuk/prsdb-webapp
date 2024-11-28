@@ -14,7 +14,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 
 class Navigator(
     private val page: Page,
@@ -104,6 +105,11 @@ class Navigator(
     fun goToPropertyRegistrationStartPage(): RegisterPropertyStartPage {
         navigate("register-property")
         return createValidPage(page, RegisterPropertyStartPage::class)
+    }
+
+    fun goToPropertyRegistrationPropertyTypePage(): PropertyTypeFormPagePropertyRegistration {
+        navigate("register-property/property-type")
+        return createValidPage(page, PropertyTypeFormPagePropertyRegistration::class)
     }
 
     private fun navigate(path: String): Response? = page.navigate("http://localhost:$port/$path")
