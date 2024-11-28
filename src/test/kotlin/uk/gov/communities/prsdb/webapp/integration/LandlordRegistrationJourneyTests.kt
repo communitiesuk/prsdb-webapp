@@ -14,11 +14,11 @@ import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.integration.pageObjectsTemp.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjectsTemp.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjectsTemp.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjectsTemp.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjectsTemp.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 
 @Sql("/data-local.sql")
 class LandlordRegistrationJourneyTests : IntegrationTest() {

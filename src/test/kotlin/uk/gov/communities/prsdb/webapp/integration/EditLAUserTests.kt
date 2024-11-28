@@ -4,13 +4,13 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
-import uk.gov.communities.prsdb.webapp.integration.pageObjectsTemp.pages.ConfirmDeleteLaUserPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjectsTemp.pages.DeleteLaUserSuccessPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjectsTemp.pages.EditLaUserPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjectsTemp.pages.ManageLaUsersPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjectsTemp.pages.ManageLaUsersPage.Companion.ACCESS_LEVEL_COL_INDEX
-import uk.gov.communities.prsdb.webapp.integration.pageObjectsTemp.pages.ManageLaUsersPage.Companion.USERNAME_COL_INDEX
-import uk.gov.communities.prsdb.webapp.integration.pageObjectsTemp.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ConfirmDeleteLaUserPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLaUserSuccessPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLaUserPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.ACCESS_LEVEL_COL_INDEX
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.USERNAME_COL_INDEX
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import kotlin.test.assertEquals
 
 @Sql("/data-local.sql")

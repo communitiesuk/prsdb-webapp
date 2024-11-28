@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OSPlacesConfig
-import uk.gov.communities.prsdb.webapp.integration.pageObjectsTemp.Navigator
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.Navigator
 import uk.gov.service.notify.NotificationClient
 
 @Import(TestcontainersConfiguration::class)
