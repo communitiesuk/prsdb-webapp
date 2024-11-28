@@ -6,7 +6,6 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl})}">
 <th:block id="form-content">
-    <div class="govuk-hint" th:utext="#{forms.propertyType.section.hint}">forms.propertyType.section.hint</div>
     <th:block id="fieldset-content"
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'propertyType', #{${fieldSetHeading}}, null)}">
         <th:block th:replace="~{fragments/forms/radios :: radios(null,'propertyType',null, ${radioOptions})}"></th:block>
