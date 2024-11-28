@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.validation
 import kotlin.reflect.KClass
 
 annotation class ConstraintDescriptor(
+    // If the validator should fail without an error message set the message key to "_"
     val messageKey: String,
     val validatorType: KClass<out PrioritisedConstraintValidator>,
     // Validator constructor arguments are passed as strings due to limitations on annotation member types

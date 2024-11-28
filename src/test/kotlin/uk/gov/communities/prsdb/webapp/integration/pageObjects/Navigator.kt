@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegis
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.SuccessPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.SummaryPageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
@@ -35,9 +36,11 @@ class Navigator(
     }
 
     fun goToLandlordRegistrationEmailFormPage(): EmailFormPageLandlordRegistration {
-        val nameFormPage = goToLandlordRegistrationNameFormPage()
-        nameFormPage.nameInput.fill("Arthur Dent")
-        nameFormPage.form.submit()
+        val dateOfBirthFormPage = goToLandlordRegistrationDateOfBirthFormPage()
+        dateOfBirthFormPage.dayInput.fill("8")
+        dateOfBirthFormPage.monthInput.fill("6")
+        dateOfBirthFormPage.yearInput.fill("2000")
+        dateOfBirthFormPage.form.submit()
         val emailFormPage = createValidPage(page, EmailFormPageLandlordRegistration::class)
         return emailFormPage
     }
@@ -48,6 +51,14 @@ class Navigator(
         emailFormPage.form.submit()
         val phoneNumberPage = createValidPage(page, PhoneNumberFormPageLandlordRegistration::class)
         return phoneNumberPage
+    }
+
+    fun goToLandlordRegistrationDateOfBirthFormPage(): DateOfBirthFormPageLandlordRegistration {
+        val nameFormPage = goToLandlordRegistrationNameFormPage()
+        nameFormPage.nameInput.fill("Arthur Dent")
+        nameFormPage.form.submit()
+        val dateOfBirthFormPage = createValidPage(page, DateOfBirthFormPageLandlordRegistration::class)
+        return dateOfBirthFormPage
     }
 
     fun goToLaUserRegistrationLandingPage(): LandingPageLaUserRegistration {
