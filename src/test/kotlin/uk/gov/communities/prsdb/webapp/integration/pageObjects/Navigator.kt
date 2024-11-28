@@ -10,10 +10,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegis
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.SuccessPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.SummaryPageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmIdentityFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 
 class Navigator(
     private val page: Page,
@@ -32,6 +33,11 @@ class Navigator(
     fun goToLandlordRegistrationNameFormPage(): NameFormPageLandlordRegistration {
         navigate("register-as-a-landlord/name")
         return createValidPage(page, NameFormPageLandlordRegistration::class)
+    }
+
+    fun goToLandlordRegistrationConfirmIdentityFormPage(): ConfirmIdentityFormPageLandlordRegistration {
+        navigate("register-as-a-landlord/confirm-identity")
+        return createValidPage(page, ConfirmIdentityFormPageLandlordRegistration::class)
     }
 
     fun goToLandlordRegistrationEmailFormPage(): EmailFormPageLandlordRegistration {
