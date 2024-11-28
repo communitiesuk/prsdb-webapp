@@ -10,4 +10,9 @@ class Radios(
     fun getRadio(value: String) = getChildComponent("input[value='$value']")
 
     fun getSelectedValue(): String = getChildComponent("input:checked").getAttribute("value")
+
+    fun <E : Enum<E>> selectValue(value: E) {
+        val radio = getRadio(value.name)
+        radio.check()
+    }
 }
