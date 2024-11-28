@@ -88,16 +88,16 @@ class OneLoginConfig {
 
     private fun extractKeysFromJson(didJson: JSONObject): List<ECKey> {
         val keyArray = didJson.getJSONArray("assertionMethod")
+
         val publicKeysSequence =
-            sequence {
-                for (index in 0 until keyArray.length()) {
-                    yield(keyArray.getJSONObject(index))
+            keyArray
+                .map {
+                    val keyWrapper = it as JSONObject
+                    val jsonKey = keyWrapper.getJSONObject("publicKeyJwk")
+                    val keyId = keyWrapper.getString("id")
+                    jsonKey.put("kid", keyId)
+                    ECKey.parse(jsonKey.toString())
                 }
-            }.map {
-                val jsonKey = it.getJSONObject("publicKeyJwk")
-                jsonKey.put("kid", it.getString("id"))
-                ECKey.parse(jsonKey.toString())
-            }
         return publicKeysSequence.toList()
     }
 
