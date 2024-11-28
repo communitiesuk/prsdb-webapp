@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.integration.pageobjects.pages.propertyRegistrationJourneyPages
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages
 
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
