@@ -15,4 +15,8 @@ class Radios(
         val radio = getRadio(value.name)
         radio.check()
     }
+
+    fun selectValue(value: String) {
+        getRadio(value).check()
+    }
 }
