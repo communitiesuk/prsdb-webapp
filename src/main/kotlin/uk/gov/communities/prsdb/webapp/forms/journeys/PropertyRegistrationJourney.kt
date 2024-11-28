@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.formModels.LandingPageFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
@@ -89,6 +90,33 @@ class PropertyRegistrationJourney(
                                                 value = OwnershipType.LEASEHOLD,
                                                 labelMsgKey = "forms.ownershipType.radios.option.leasehold.label",
                                                 hintMsgKey = "forms.ownershipType.radios.option.leasehold.hint",
+                                            ),
+                                        ),
+                                ),
+                        ),
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
+                ),
+                Step(
+                    id = RegisterPropertyStepId.Occupancy,
+                    page =
+                        Page(
+                            formModel = OccupancyFormModel::class,
+                            templateName = "forms/propertyOccupancyForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.occupancy.fieldSetHeading",
+                                    "radioOptions" to
+                                        listOf(
+                                            RadiosButtonViewModel(
+                                                value = true,
+                                                labelMsgKey = "forms.occupancy.radios.option.yes.label",
+                                                hintMsgKey = "forms.occupancy.radios.option.yes.hint",
+                                            ),
+                                            RadiosButtonViewModel(
+                                                value = false,
+                                                labelMsgKey = "forms.occupancy.radios.option.no.label",
+                                                hintMsgKey = "forms.occupancy.radios.option.no.hint",
                                             ),
                                         ),
                                 ),
