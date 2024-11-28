@@ -5,4 +5,5 @@ enum class RegisterPropertyStepId(
 ) : StepId {
     PlaceholderPage("placeholder"),
     PropertyType("property-type"),
+    OwnershipType("ownership-type"),
 }
