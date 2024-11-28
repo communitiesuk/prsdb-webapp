@@ -22,6 +22,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
+import java.time.LocalDate
 
 @Sql("/data-local.sql")
 class LandlordRegistrationJourneyTests : IntegrationTest() {
@@ -30,6 +32,31 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     @BeforeEach
     fun setup() {
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
+    }
+
+    @Nested
+    inner class LandlordRegistrationStepConfirmIdentity {
+        @BeforeEach
+        fun setup() {
+        }
+
+        @Test
+        fun `Submitting a valid name redirects to the next step`(page: Page) {
+            // Arrange
+            val verifiedIdentityMap =
+                mutableMapOf<String, Any?>(
+                    VerifiedIdentityModel.NAME_KEY to "name",
+                    VerifiedIdentityModel.BIRTH_DATE_KEY to LocalDate.now(),
+                )
+            whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentityMap)
+
+            // Act
+            val confirmIdentityPage = navigator.goToLandlordRegistrationConfirmIdentityFormPage()
+            confirmIdentityPage.form.submit()
+
+            // Assert
+            assertPageIs(page, EmailFormPageLandlordRegistration::class)
+        }
     }
 
     @Nested
