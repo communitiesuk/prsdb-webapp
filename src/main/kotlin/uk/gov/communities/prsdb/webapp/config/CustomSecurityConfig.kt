@@ -18,6 +18,8 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository
+import org.springframework.security.web.context.SecurityContextRepository
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @Configuration
@@ -76,6 +78,9 @@ class CustomSecurityConfig(
             DefaultOidcUser(mappedAuthorities, oidcUser.idToken, oidcUser.userInfo)
         }
     }
+
+    @Bean
+    fun securityContextRepository(): SecurityContextRepository = HttpSessionSecurityContextRepository()
 
     private fun oidcLogoutSuccessHandler(): LogoutSuccessHandler {
         val oidcLogoutSuccessHandler = OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository)

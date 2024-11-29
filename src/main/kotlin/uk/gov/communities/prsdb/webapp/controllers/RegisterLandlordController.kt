@@ -22,7 +22,7 @@ class RegisterLandlordController(
     val identityService: OneLoginIdentityService,
 ) {
     @GetMapping
-    fun index(model: Model): String {
+    fun index(model: Model): CharSequence {
         model.addAttribute(
             "registerAsALandlordInitialStep",
             "/${REGISTER_LANDLORD_JOURNEY_URL}/${START_PAGE_PATH_SEGMENT}",
