@@ -1,9 +1,18 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels
 
-data class RadiosViewModel<T>(
+abstract class RadiosViewModel(
+    open val labelMsgKey: String? = null,
+    val isDivider: Boolean = false,
+)
+
+data class RadiosButtonViewModel<T>(
     val value: T,
     val valueStr: String = value.toString(),
-    val labelMsgKey: String? = null,
+    override val labelMsgKey: String? = null,
     val hintMsgKey: String? = null,
     val conditionalFragment: String? = null,
-)
+) : RadiosViewModel(labelMsgKey)
+
+data class RadiosDividerViewModel(
+    override val labelMsgKey: String?,
+) : RadiosViewModel(labelMsgKey, true)
