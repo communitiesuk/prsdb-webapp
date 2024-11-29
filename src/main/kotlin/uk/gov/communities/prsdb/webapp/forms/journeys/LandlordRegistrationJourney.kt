@@ -14,10 +14,11 @@ import uk.gov.communities.prsdb.webapp.models.formModels.CountryOfResidenceFormM
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.InternationalAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LookupAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -103,12 +104,12 @@ class LandlordRegistrationJourney(
                                     "selectOptions" to PLACE_NAMES.map { SelectViewModel(it) },
                                     "radioOptions" to
                                         listOf(
-                                            RadiosViewModel(
+                                            RadiosButtonViewModel(
                                                 value = true,
                                                 valueStr = "yes",
                                                 labelMsgKey = "forms.countryOfResidence.radios.option.yes.label",
                                             ),
-                                            RadiosViewModel(
+                                            RadiosButtonViewModel(
                                                 value = false,
                                                 valueStr = "no",
                                                 labelMsgKey = "forms.countryOfResidence.radios.option.no.label",
@@ -151,7 +152,7 @@ class LandlordRegistrationJourney(
                                 mapOf(
                                     "title" to "registerAsALandlord.title",
                                     "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
-                                    "submitButtonText" to "forms.buttons.useThisAddress",
+                                    "submitButtonText" to "forms.buttons.continue",
                                     "searchAgainUrl" to
                                         "/${REGISTER_LANDLORD_JOURNEY_URL}/" +
                                         LandlordRegistrationStepId.LookupAddress.urlPathSegment,
@@ -159,6 +160,29 @@ class LandlordRegistrationJourney(
                             urlPathSegment = LandlordRegistrationStepId.LookupAddress.urlPathSegment,
                             journeyDataService = journeyDataService,
                             addressLookupService = addressLookupService,
+                        ),
+                    // TODO: Set nextAction to next journey step
+                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CheckAnswers, null) },
+                    saveAfterSubmit = false,
+                ),
+                Step(
+                    id = LandlordRegistrationStepId.ManualAddress,
+                    page =
+                        Page(
+                            formModel = ManualAddressFormModel::class,
+                            templateName = "forms/manualAddressForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerAsALandlord.title",
+                                    "fieldSetHeading" to "forms.manualAddress.fieldSetHeading",
+                                    "fieldSetHint" to "forms.manualAddress.fieldSetHint",
+                                    "addressLineOneLabel" to "forms.manualAddress.addressLineOne.label",
+                                    "addressLineOneLabel" to "forms.manualAddress.addressLineTwo.label",
+                                    "townOrCityLabel" to "forms.manualAddress.townOrCity.label",
+                                    "countyLabel" to "forms.manualAddress.county.label",
+                                    "postcodeLabel" to "forms.lookupAddress.postcode.label",
+                                    "submitButtonText" to "forms.buttons.continue",
+                                ),
                         ),
                     // TODO: Set nextAction to next journey step
                     nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CheckAnswers, null) },
@@ -214,7 +238,7 @@ class LandlordRegistrationJourney(
                                 mapOf(
                                     "title" to "registerAsALandlord.title",
                                     "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
-                                    "submitButtonText" to "forms.buttons.useThisAddress",
+                                    "submitButtonText" to "forms.buttons.continue",
                                     "searchAgainUrl" to
                                         "/${REGISTER_LANDLORD_JOURNEY_URL}/" +
                                         LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
