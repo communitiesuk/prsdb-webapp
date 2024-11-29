@@ -4,8 +4,10 @@ import jakarta.servlet.http.HttpSession
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.JwtDecoderFactory
+import org.springframework.security.oauth2.jwt.JwtException
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys
+import uk.gov.communities.prsdb.webapp.exceptions.InvalidCoreIdentityException
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedCredentialModel
 
 private const val VERIFIED_IDENTITY_CACHE_KEY = "verified-identity-cache"
@@ -48,7 +50,11 @@ class OneLoginIdentityService(
 
     private fun decodeCoreIdentityJwt(idClaimString: String): Jwt {
         val decoder = decoderFactory.createDecoder(Unit)
-        return decoder.decode(idClaimString)
+        try {
+            return decoder.decode(idClaimString)
+        } catch (innerException: JwtException) {
+            throw InvalidCoreIdentityException(innerException)
+        }
     }
 
     private fun retrieveCachedVerifiedIdentity(): MutableMap<String, Any?>? {
