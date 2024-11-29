@@ -1,0 +1,26 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="fieldSetHint" type="java.lang.String"*/-->
+<!--/*@thymesVar id="addressLineOneLabel" type="java.lang.String"*/-->
+<!--/*@thymesVar id="addressLineTwoLabel" type="java.lang.String"*/-->
+<!--/*@thymesVar id="townOrCityLabel" type="java.lang.String"*/-->
+<!--/*@thymesVar id="countyLabel" type="java.lang.String"*/-->
+<!--/*@thymesVar id="postcodeLabel" type="java.lang.String"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl})}">
+<th:block id="form-content">
+    <th:block id="fieldset-content"
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'manualAddress',
+                            #{${fieldSetHeading}}, ${fieldSetHint != null ? #messages.msg(fieldSetHint) : null})}">
+        <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${addressLineOneLabel}}, 'addressLineOne', null)}"></div>
+        <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${addressLineTwoLabel}}, 'addressLineTwo', null)}"></div>
+        <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${townOrCityLabel}}, 'townOrCity', null)}"></div>
+        <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${countyLabel}}, 'county', null)}"></div>
+        <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${postcodeLabel}}, 'postcode', null)}"></div>
+    </th:block>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+</th:block>
+</html>

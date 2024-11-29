@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_ADDRESS_MAX_LENGTH
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.PLACE_NAMES
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
@@ -161,8 +162,7 @@ class LandlordRegistrationJourney(
                             journeyDataService = journeyDataService,
                             addressLookupService = addressLookupService,
                         ),
-                    // TODO: Set nextAction to next journey step
-                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CheckAnswers, null) },
+                    nextAction = { journeyData, _ -> selectAddressNextAction(journeyData) },
                     saveAfterSubmit = false,
                 ),
                 Step(
@@ -177,7 +177,7 @@ class LandlordRegistrationJourney(
                                     "fieldSetHeading" to "forms.manualAddress.fieldSetHeading",
                                     "fieldSetHint" to "forms.manualAddress.fieldSetHint",
                                     "addressLineOneLabel" to "forms.manualAddress.addressLineOne.label",
-                                    "addressLineOneLabel" to "forms.manualAddress.addressLineTwo.label",
+                                    "addressLineTwoLabel" to "forms.manualAddress.addressLineTwo.label",
                                     "townOrCityLabel" to "forms.manualAddress.townOrCity.label",
                                     "countyLabel" to "forms.manualAddress.county.label",
                                     "postcodeLabel" to "forms.lookupAddress.postcode.label",
@@ -268,5 +268,22 @@ class LandlordRegistrationJourney(
                         livesInUK,
                 )
             }
+
+        private fun selectAddressNextAction(journeyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
+            if (getSelectedAddress(
+                    journeyData,
+                    LandlordRegistrationStepId.SelectAddress.urlPathSegment,
+                ) == MANUAL_ADDRESS_CHOSEN
+            ) {
+                Pair(LandlordRegistrationStepId.ManualAddress, null)
+            } else {
+                // TODO: Set nextAction to next journey step
+                Pair(LandlordRegistrationStepId.CheckAnswers, null)
+            }
+
+        private fun getSelectedAddress(
+            journeyData: JourneyData,
+            urlPathSegment: String,
+        ): String = objectToStringKeyedMap(journeyData[urlPathSegment])?.get("address").toString()
     }
 }
