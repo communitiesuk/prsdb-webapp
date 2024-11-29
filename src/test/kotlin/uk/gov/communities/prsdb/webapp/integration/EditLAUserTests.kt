@@ -31,7 +31,7 @@ class EditLAUserTests : IntegrationTest() {
         assertEquals("false", editUserPage.isManagerRadios.getSelectedValue())
 
         // Update the user's access level to admin
-        editUserPage.isManagerRadios.getRadio("true").click()
+        editUserPage.isManagerRadios.selectValue("true")
         editUserPage.form.submit()
         manageUsersPage = assertPageIs(page, ManageLaUsersPage::class)
 

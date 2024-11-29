@@ -3,11 +3,13 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.formModels.LandingPageFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -60,6 +62,33 @@ class PropertyRegistrationJourney(
                                                 labelMsgKey = "forms.propertyType.radios.option.other.label",
                                                 hintMsgKey = "forms.propertyType.radios.option.other.hint",
                                                 conditionalFragment = "customPropertyTypeInput",
+                                            ),
+                                        ),
+                                ),
+                        ),
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.OwnershipType, null) },
+                ),
+                Step(
+                    id = RegisterPropertyStepId.OwnershipType,
+                    page =
+                        Page(
+                            formModel = OwnershipTypeFormModel::class,
+                            templateName = "forms/ownershipTypeForm.html",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.ownershipType.fieldSetHeading",
+                                    "radioOptions" to
+                                        listOf(
+                                            RadiosViewModel(
+                                                value = OwnershipType.FREEHOLD,
+                                                labelMsgKey = "forms.ownershipType.radios.option.freehold.label",
+                                                hintMsgKey = "forms.ownershipType.radios.option.freehold.hint",
+                                            ),
+                                            RadiosViewModel(
+                                                value = OwnershipType.LEASEHOLD,
+                                                labelMsgKey = "forms.ownershipType.radios.option.leasehold.label",
+                                                hintMsgKey = "forms.ownershipType.radios.option.leasehold.hint",
                                             ),
                                         ),
                                 ),
