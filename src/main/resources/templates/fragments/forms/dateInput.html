@@ -1,0 +1,48 @@
+<div th:fragment="dateInput(fieldName, dayField, monthField, yearField, fieldSetHeading, fieldSetHint)" class="govuk-form-group" th:classappend="${#fields.hasAnyErrors()} ? 'govuk-form-group--error'">
+        <fieldset class="govuk-fieldset" role="group" th:attrappend="aria-describedby=${#fields.hasAnyErrors() && fieldSetHint != null} ? ${fieldName} + '-hint ' + ${fieldName} + '-error' : ${fieldName} + '-hint'">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+                <h1 class="govuk-fieldset__heading" th:text="${fieldSetHeading}">
+                    Heading for set of form fields
+                </h1>
+            </legend>
+            <div id="field-hint" th:if="${fieldSetHint != null}" th:id="${fieldName}+'-hint'" class="govuk-hint"
+                 th:text="${fieldSetHint}">
+                Hint for the set of form fields
+            </div>
+            <p th:if="${#fields.hasErrors(dayField) && #fields.errors(dayField)[0] != '_'}" th:id="__${fieldName}__+'-error'" class="govuk-error-message">
+                <span th:text="#{${#fields.errors(dayField)[0]}}"></span>
+            </p>
+            <p th:if="${#fields.hasErrors(monthField) && #fields.errors(monthField)[0] != '_'}" th:id="__${fieldName}__+'-error'" class="govuk-error-message">
+                <span th:text="#{${#fields.errors(monthField)[0]}}"></span>
+            </p>
+            <p th:if="${#fields.hasErrors(yearField) && #fields.errors(yearField)[0] != '_'}" th:id="__${fieldName}__+'-error'" class="govuk-error-message">
+                <span th:text="#{${#fields.errors(yearField)[0]}}"></span>
+            </p>
+            <div class="govuk-date-input" th:id="${fieldName}">
+                <div class="govuk-date-input__item">
+                    <div class="govuk-form-group">
+                        <label class="govuk-label govuk-date-input__label" th:for="${dayField}">
+                            Day
+                        </label>
+                        <input class="govuk-input govuk-date-input__input govuk-input--width-2" th:classappend='${#fields.hasErrors(dayField) ? "govuk-input--error" : ""}' th:id="${dayField}" th:name="${dayField}" type="text" inputmode="numeric" th:field="*{__${dayField}__}">
+                    </div>
+                </div>
+                <div class="govuk-date-input__item">
+                    <div class="govuk-form-group">
+                        <label class="govuk-label govuk-date-input__label" th:for="${monthField}">
+                            Month
+                        </label>
+                        <input class="govuk-input govuk-date-input__input govuk-input--width-2" th:classappend='${#fields.hasErrors(monthField) ? "govuk-input--error" : ""}' th:id="${monthField}" th:name="${monthField}" type="text" inputmode="numeric" th:field="*{__${monthField}__}">
+                    </div>
+                </div>
+                <div class="govuk-date-input__item">
+                    <div class="govuk-form-group">
+                        <label class="govuk-label govuk-date-input__label" th:for="${yearField}">
+                            Year
+                        </label>
+                        <input class="govuk-input govuk-date-input__input govuk-input--width-4" th:classappend='${#fields.hasErrors(yearField) ? "govuk-input--error" : ""}' th:id="${yearField}" th:name="${yearField}" type="text" inputmode="numeric" th:field="*{__${yearField}__}">
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+   </div>

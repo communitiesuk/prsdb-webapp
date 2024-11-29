@@ -4,4 +4,6 @@ enum class RegisterPropertyStepId(
     override val urlPathSegment: String,
 ) : StepId {
     PlaceholderPage("placeholder"),
+    PropertyType("property-type"),
+    OwnershipType("ownership-type"),
 }

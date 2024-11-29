@@ -15,4 +15,5 @@ enum class LandlordRegistrationStepId(
     SelectContactAddress("select-contact-address"),
     ManualContactAddress("manual-contact-address"),
     CheckAnswers("check-answers"),
+    DateOfBirth("date-of-birth"),
 }
