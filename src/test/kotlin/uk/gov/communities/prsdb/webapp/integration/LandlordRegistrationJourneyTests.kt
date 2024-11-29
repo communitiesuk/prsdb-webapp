@@ -36,10 +36,6 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
     @Nested
     inner class LandlordRegistrationStepConfirmIdentity {
-        @BeforeEach
-        fun setup() {
-        }
-
         @Test
         fun `Submitting a valid name redirects to the next step`(page: Page) {
             // Arrange
