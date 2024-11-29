@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.kotlin.whenever
@@ -11,6 +12,7 @@ import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.JwtDecoderFactory
 import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys
+import uk.gov.communities.prsdb.webapp.exceptions.VerifiedCredentialParsingException
 import java.time.LocalDate
 
 class OneLoginIdentityServiceTests {
@@ -62,6 +64,18 @@ class OneLoginIdentityServiceTests {
         // Assert
         assertEquals(birthDate, verifiedIdentityData?.get("birthDate"))
         assertEquals(name, verifiedIdentityData?.get("name"))
+    }
+
+    @Test
+    fun `getVerifiedIdentityData throws an exception if decoded the core identity claim is malformed`() {
+        // Arrange
+        whenever(user.claims).thenReturn(mapOf(OneLoginClaimKeys.CORE_IDENTITY to mockIdentityJwt))
+
+        val verifiedCredentialMap = mapOf("key" to "value")
+        whenever(jwt.claims).thenReturn(mapOf("vc" to verifiedCredentialMap))
+
+        // Act & Assert
+        assertThrows<VerifiedCredentialParsingException> { identityService.getVerifiedIdentityData(user) }
     }
 
     private fun buildVcMap(
