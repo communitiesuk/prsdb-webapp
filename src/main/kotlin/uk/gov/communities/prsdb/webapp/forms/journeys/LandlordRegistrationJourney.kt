@@ -247,6 +247,27 @@ class LandlordRegistrationJourney(
                             journeyDataService = journeyDataService,
                             addressLookupService = addressLookupService,
                         ),
+                    nextAction = { journeyData, _ -> selectContactAddressNextAction(journeyData) },
+                    saveAfterSubmit = false,
+                ),
+                Step(
+                    id = LandlordRegistrationStepId.ManualContactAddress,
+                    page =
+                        Page(
+                            formModel = ManualAddressFormModel::class,
+                            templateName = "forms/manualAddressForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerAsALandlord.title",
+                                    "fieldSetHeading" to "forms.manualContactAddress.fieldSetHeading",
+                                    "addressLineOneLabel" to "forms.manualAddress.addressLineOne.label",
+                                    "addressLineTwoLabel" to "forms.manualAddress.addressLineTwo.label",
+                                    "townOrCityLabel" to "forms.manualAddress.townOrCity.label",
+                                    "countyLabel" to "forms.manualAddress.county.label",
+                                    "postcodeLabel" to "forms.lookupAddress.postcode.label",
+                                    "submitButtonText" to "forms.buttons.continue",
+                                ),
+                        ),
                     // TODO: Set nextAction to next journey step
                     nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CheckAnswers, null) },
                     saveAfterSubmit = false,
@@ -276,6 +297,18 @@ class LandlordRegistrationJourney(
                 ) == MANUAL_ADDRESS_CHOSEN
             ) {
                 Pair(LandlordRegistrationStepId.ManualAddress, null)
+            } else {
+                // TODO: Set nextAction to next journey step
+                Pair(LandlordRegistrationStepId.CheckAnswers, null)
+            }
+
+        private fun selectContactAddressNextAction(journeyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
+            if (getSelectedAddress(
+                    journeyData,
+                    LandlordRegistrationStepId.SelectContactAddress.urlPathSegment,
+                ) == MANUAL_ADDRESS_CHOSEN
+            ) {
+                Pair(LandlordRegistrationStepId.ManualContactAddress, null)
             } else {
                 // TODO: Set nextAction to next journey step
                 Pair(LandlordRegistrationStepId.CheckAnswers, null)

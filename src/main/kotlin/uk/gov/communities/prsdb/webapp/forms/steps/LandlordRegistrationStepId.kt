@@ -13,5 +13,6 @@ enum class LandlordRegistrationStepId(
     InternationalAddress("international-address"),
     LookupContactAddress("lookup-contact-address"),
     SelectContactAddress("select-contact-address"),
+    ManualContactAddress("manual-contact-address"),
     CheckAnswers("check-answers"),
 }
