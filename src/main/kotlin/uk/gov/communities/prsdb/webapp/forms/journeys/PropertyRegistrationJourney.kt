@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.formModels.LandingPageFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PropertyTypeFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 @Component
@@ -37,27 +37,27 @@ class PropertyRegistrationJourney(
                                     "fieldSetHeading" to "forms.propertyType.fieldSetHeading",
                                     "radioOptions" to
                                         listOf(
-                                            RadiosViewModel(
+                                            RadiosButtonViewModel(
                                                 value = PropertyType.DETACHED_HOUSE,
                                                 labelMsgKey = "forms.propertyType.radios.option.detachedHouse.label",
                                                 hintMsgKey = "forms.propertyType.radios.option.detachedHouse.hint",
                                             ),
-                                            RadiosViewModel(
+                                            RadiosButtonViewModel(
                                                 value = PropertyType.SEMI_DETACHED_HOUSE,
                                                 labelMsgKey = "forms.propertyType.radios.option.semiDetachedHouse.label",
                                                 hintMsgKey = "forms.propertyType.radios.option.semiDetachedHouse.hint",
                                             ),
-                                            RadiosViewModel(
+                                            RadiosButtonViewModel(
                                                 value = PropertyType.TERRACED_HOUSE,
                                                 labelMsgKey = "forms.propertyType.radios.option.terracedHouse.label",
                                                 hintMsgKey = "forms.propertyType.radios.option.terracedHouse.hint",
                                             ),
-                                            RadiosViewModel(
+                                            RadiosButtonViewModel(
                                                 value = PropertyType.FLAT,
                                                 labelMsgKey = "forms.propertyType.radios.option.flat.label",
                                                 hintMsgKey = "forms.propertyType.radios.option.flat.hint",
                                             ),
-                                            RadiosViewModel(
+                                            RadiosButtonViewModel(
                                                 value = PropertyType.OTHER,
                                                 labelMsgKey = "forms.propertyType.radios.option.other.label",
                                                 hintMsgKey = "forms.propertyType.radios.option.other.hint",
@@ -80,12 +80,12 @@ class PropertyRegistrationJourney(
                                     "fieldSetHeading" to "forms.ownershipType.fieldSetHeading",
                                     "radioOptions" to
                                         listOf(
-                                            RadiosViewModel(
+                                            RadiosButtonViewModel(
                                                 value = OwnershipType.FREEHOLD,
                                                 labelMsgKey = "forms.ownershipType.radios.option.freehold.label",
                                                 hintMsgKey = "forms.ownershipType.radios.option.freehold.hint",
                                             ),
-                                            RadiosViewModel(
+                                            RadiosButtonViewModel(
                                                 value = OwnershipType.LEASEHOLD,
                                                 labelMsgKey = "forms.ownershipType.radios.option.leasehold.label",
                                                 hintMsgKey = "forms.ownershipType.radios.option.leasehold.hint",
