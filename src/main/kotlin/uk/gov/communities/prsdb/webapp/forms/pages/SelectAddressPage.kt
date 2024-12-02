@@ -33,15 +33,14 @@ class SelectAddressPage(
 
         val addressLookupResults = addressLookupService.search(houseNameOrNumber, postcode)
 
-        val addressRadiosViewModel = mutableListOf<RadiosViewModel>()
-        addressLookupResults.forEachIndexed { index, address ->
-            addressRadiosViewModel.add(
+        var addressRadiosViewModel: List<RadiosViewModel> =
+            addressLookupResults.mapIndexed { index, address ->
                 RadiosButtonViewModel(
                     value = address.address,
                     valueStr = (index + 1).toString(),
-                ),
-            )
-        }
+                )
+            }
+        addressRadiosViewModel = addressRadiosViewModel.toMutableList()
         addressRadiosViewModel.addAll(
             listOf(
                 RadiosDividerViewModel("forms.radios.dividerText"),
