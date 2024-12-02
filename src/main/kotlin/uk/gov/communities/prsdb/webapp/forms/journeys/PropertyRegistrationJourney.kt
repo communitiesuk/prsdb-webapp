@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.formModels.LandingPageFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PropertyTypeFormModel
@@ -121,6 +122,22 @@ class PropertyRegistrationJourney(
                                         ),
                                 ),
                         ),
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.NumberOfHouseholds, null) },
+                ),
+                Step(
+                    id = RegisterPropertyStepId.NumberOfHouseholds,
+                    page =
+                        Page(
+                            formModel = NumberOfHouseholdsFormModel::class,
+                            templateName = "forms/numberOfHouseholdsForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.numberOfHouseholds.fieldSetHeading",
+                                    "fieldSetHint" to "forms.numberOfHouseholds.label",
+                                    "label" to "forms.numberOfHouseholds.label",
+                                ),
+                        ),
                     nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
                 ),
                 Step(
@@ -132,6 +149,7 @@ class PropertyRegistrationJourney(
                             content =
                                 mapOf(
                                     "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.numberOfHouseholds.fieldSetHeading",
                                 ),
                         ),
                 ),
