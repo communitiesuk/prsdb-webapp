@@ -165,7 +165,6 @@ class PropertyRegistrationJourney(
                             content =
                                 mapOf(
                                     "title" to "registerProperty.title",
-                                    "fieldSetHeading" to "forms.numberOfHouseholds.fieldSetHeading",
                                 ),
                         ),
                 ),

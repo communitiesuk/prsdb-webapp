@@ -9,7 +9,10 @@ import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HouseholdsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import java.net.URI
 
@@ -38,6 +41,27 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         // fill in and submit
         ownershipTypePage.form.getRadios().selectValue(OwnershipType.FREEHOLD)
         propertyTypePage.form.submit()
+        val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
+
+        // Occupancy - render page
+        assertThat(occupancyPage.form.getFieldsetHeading()).containsText("Is your property occupied by tenants?")
+        // fill in "yes" and submit
+        occupancyPage.form.getRadios().selectValue("true")
+        occupancyPage.form.submit()
+        val householdsPage = assertPageIs(page, HouseholdsFormPagePropertyRegistration::class)
+
+        // Number of Households - render page
+        assertThat(householdsPage.form.getFieldsetHeading()).containsText("How many households live in your property?")
+        // fill in and submit
+        householdsPage.householdsInput.fill("2")
+        householdsPage.form.submit()
+        val peoplePage = assertPageIs(page, PeopleFormPagePropertyRegistration::class)
+
+        // Number of people - render page
+        assertThat(peoplePage.form.getFieldsetHeading()).containsText("How many people live in your property?")
+        // fill in and submit
+        peoplePage.peopleInput.fill("2")
+        peoplePage.form.submit()
         assertEquals("/register-property/placeholder", URI(page.url()).path)
     }
 
@@ -75,6 +99,92 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val ownershipTypePage = navigator.goToPropertyRegistrationOwnershipTypePage()
             ownershipTypePage.form.submit()
             assertThat(ownershipTypePage.form.getErrorMessage()).containsText("Select the ownership type")
+        }
+    }
+
+    @Nested
+    inner class OccupancyStep {
+        @Test
+        fun `Submitting with the not occupied option selected skips to the next step`(page: Page) {
+            val occupancyPage = navigator.goToPropertyRegistrationOccupancyPage()
+            occupancyPage.form.getRadios().selectValue("false")
+            occupancyPage.form.submit()
+            assertEquals("/register-property/placeholder", URI(page.url()).path)
+        }
+
+        @Test
+        fun `Submitting with no occupancy option selected returns an error`(page: Page) {
+            val occupancyPage = navigator.goToPropertyRegistrationOccupancyPage()
+            occupancyPage.form.submit()
+            assertThat(occupancyPage.form.getErrorMessage()).containsText("Select whether the property is occupied")
+        }
+    }
+
+    @Nested
+    inner class NumberOfHouseholdsStep {
+        @Test
+        fun `Submitting with a blank numberOfHouseholds field returns an error`(page: Page) {
+            val householdsPage = navigator.goToPropertyRegistrationHouseholdsPage()
+            householdsPage.form.submit()
+            assertThat(householdsPage.form.getErrorMessage()).containsText("Enter the number of households living in your property")
+        }
+
+        @Test
+        fun `Submitting with a non-numerical value in the numberOfHouseholds field returns an error`(page: Page) {
+            val householdsPage = navigator.goToPropertyRegistrationHouseholdsPage()
+            householdsPage.householdsInput.fill("not-a-number")
+            householdsPage.form.submit()
+            assertThat(householdsPage.form.getErrorMessage()).containsText("Number of households in your property must be a number, like 3")
+        }
+
+        @Test
+        fun `Submitting with a non-integer number in the numberOfHouseholds field returns an error`(page: Page) {
+            val householdsPage = navigator.goToPropertyRegistrationHouseholdsPage()
+            householdsPage.householdsInput.fill("2.3")
+            householdsPage.form.submit()
+            assertThat(householdsPage.form.getErrorMessage()).containsText("Number of households in your property must be a number, like 3")
+        }
+
+        @Test
+        fun `Submitting with a negative integer in the numberOfHouseholds field returns an error`(page: Page) {
+            val householdsPage = navigator.goToPropertyRegistrationHouseholdsPage()
+            householdsPage.householdsInput.fill("-2")
+            householdsPage.form.submit()
+            assertThat(householdsPage.form.getErrorMessage()).containsText("Number of households in your property must be a number, like 3")
+        }
+    }
+
+    @Nested
+    inner class NumberOfPeopleStep {
+        @Test
+        fun `Submitting with a blank numberOfPeople field returns an error`(page: Page) {
+            val peoplePage = navigator.goToPropertyRegistrationPeoplePage()
+            peoplePage.form.submit()
+            assertThat(peoplePage.form.getErrorMessage()).containsText("Enter the number of people living in your property")
+        }
+
+        @Test
+        fun `Submitting with a non-numerical value in the numberOfPeople field returns an error`(page: Page) {
+            val peoplePage = navigator.goToPropertyRegistrationPeoplePage()
+            peoplePage.peopleInput.fill("not-a-number")
+            peoplePage.form.submit()
+            assertThat(peoplePage.form.getErrorMessage()).containsText("Number of people in your property must be a number, like 3")
+        }
+
+        @Test
+        fun `Submitting with a non-integer number in the numberOfPeople field returns an error`(page: Page) {
+            val peoplePage = navigator.goToPropertyRegistrationPeoplePage()
+            peoplePage.peopleInput.fill("2.3")
+            peoplePage.form.submit()
+            assertThat(peoplePage.form.getErrorMessage()).containsText("Number of people in your property must be a number, like 3")
+        }
+
+        @Test
+        fun `Submitting with a negative integer in the numberOfPeople field returns an error`(page: Page) {
+            val peoplePage = navigator.goToPropertyRegistrationPeoplePage()
+            peoplePage.peopleInput.fill("-2")
+            peoplePage.form.submit()
+            assertThat(peoplePage.form.getErrorMessage()).containsText("Number of people in your property must be a number, like 3")
         }
     }
 }
