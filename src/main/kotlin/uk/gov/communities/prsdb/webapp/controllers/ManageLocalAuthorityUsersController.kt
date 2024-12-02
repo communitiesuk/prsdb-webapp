@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ConfirmedEmailDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationEmail
-import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
@@ -85,13 +85,13 @@ class ManageLocalAuthorityUsersController(
         model.addAttribute(
             "options",
             listOf(
-                RadiosViewModel(
+                RadiosButtonViewModel(
                     false,
                     "basic",
                     "editLAUserAccess.radios.option.basic.label",
                     "editLAUserAccess.radios.option.basic.hint",
                 ),
-                RadiosViewModel(
+                RadiosButtonViewModel(
                     true,
                     "admin",
                     "editLAUserAccess.radios.option.admin.label",

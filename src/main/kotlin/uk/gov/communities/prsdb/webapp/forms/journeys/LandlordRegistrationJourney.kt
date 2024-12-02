@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_ADDRESS_MAX_LENGTH
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.PLACE_NAMES
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
@@ -15,10 +16,11 @@ import uk.gov.communities.prsdb.webapp.models.formModels.DateOfBirthFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.InternationalAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LookupAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -121,12 +123,12 @@ class LandlordRegistrationJourney(
                                     "selectOptions" to PLACE_NAMES.map { SelectViewModel(it) },
                                     "radioOptions" to
                                         listOf(
-                                            RadiosViewModel(
+                                            RadiosButtonViewModel(
                                                 value = true,
                                                 valueStr = "yes",
                                                 labelMsgKey = "forms.countryOfResidence.radios.option.yes.label",
                                             ),
-                                            RadiosViewModel(
+                                            RadiosButtonViewModel(
                                                 value = false,
                                                 valueStr = "no",
                                                 labelMsgKey = "forms.countryOfResidence.radios.option.no.label",
@@ -169,7 +171,7 @@ class LandlordRegistrationJourney(
                                 mapOf(
                                     "title" to "registerAsALandlord.title",
                                     "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
-                                    "submitButtonText" to "forms.buttons.useThisAddress",
+                                    "submitButtonText" to "forms.buttons.continue",
                                     "searchAgainUrl" to
                                         "/${REGISTER_LANDLORD_JOURNEY_URL}/" +
                                         LandlordRegistrationStepId.LookupAddress.urlPathSegment,
@@ -177,6 +179,28 @@ class LandlordRegistrationJourney(
                             urlPathSegment = LandlordRegistrationStepId.LookupAddress.urlPathSegment,
                             journeyDataService = journeyDataService,
                             addressLookupService = addressLookupService,
+                        ),
+                    nextAction = { journeyData, _ -> selectAddressNextAction(journeyData) },
+                    saveAfterSubmit = false,
+                ),
+                Step(
+                    id = LandlordRegistrationStepId.ManualAddress,
+                    page =
+                        Page(
+                            formModel = ManualAddressFormModel::class,
+                            templateName = "forms/manualAddressForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerAsALandlord.title",
+                                    "fieldSetHeading" to "forms.manualAddress.fieldSetHeading",
+                                    "fieldSetHint" to "forms.manualAddress.fieldSetHint",
+                                    "addressLineOneLabel" to "forms.manualAddress.addressLineOne.label",
+                                    "addressLineTwoLabel" to "forms.manualAddress.addressLineTwo.label",
+                                    "townOrCityLabel" to "forms.manualAddress.townOrCity.label",
+                                    "countyLabel" to "forms.manualAddress.county.label",
+                                    "postcodeLabel" to "forms.lookupAddress.postcode.label",
+                                    "submitButtonText" to "forms.buttons.continue",
+                                ),
                         ),
                     // TODO: Set nextAction to next journey step
                     nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CheckAnswers, null) },
@@ -232,7 +256,7 @@ class LandlordRegistrationJourney(
                                 mapOf(
                                     "title" to "registerAsALandlord.title",
                                     "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
-                                    "submitButtonText" to "forms.buttons.useThisAddress",
+                                    "submitButtonText" to "forms.buttons.continue",
                                     "searchAgainUrl" to
                                         "/${REGISTER_LANDLORD_JOURNEY_URL}/" +
                                         LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
@@ -240,6 +264,27 @@ class LandlordRegistrationJourney(
                             urlPathSegment = LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
                             journeyDataService = journeyDataService,
                             addressLookupService = addressLookupService,
+                        ),
+                    nextAction = { journeyData, _ -> selectContactAddressNextAction(journeyData) },
+                    saveAfterSubmit = false,
+                ),
+                Step(
+                    id = LandlordRegistrationStepId.ManualContactAddress,
+                    page =
+                        Page(
+                            formModel = ManualAddressFormModel::class,
+                            templateName = "forms/manualAddressForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerAsALandlord.title",
+                                    "fieldSetHeading" to "forms.manualContactAddress.fieldSetHeading",
+                                    "addressLineOneLabel" to "forms.manualAddress.addressLineOne.label",
+                                    "addressLineTwoLabel" to "forms.manualAddress.addressLineTwo.label",
+                                    "townOrCityLabel" to "forms.manualAddress.townOrCity.label",
+                                    "countyLabel" to "forms.manualAddress.county.label",
+                                    "postcodeLabel" to "forms.lookupAddress.postcode.label",
+                                    "submitButtonText" to "forms.buttons.continue",
+                                ),
                         ),
                     // TODO: Set nextAction to next journey step
                     nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CheckAnswers, null) },
@@ -262,5 +307,34 @@ class LandlordRegistrationJourney(
                         livesInUK,
                 )
             }
+
+        private fun selectAddressNextAction(journeyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
+            if (getSelectedAddress(
+                    journeyData,
+                    LandlordRegistrationStepId.SelectAddress.urlPathSegment,
+                ) == MANUAL_ADDRESS_CHOSEN
+            ) {
+                Pair(LandlordRegistrationStepId.ManualAddress, null)
+            } else {
+                // TODO: Set nextAction to next journey step
+                Pair(LandlordRegistrationStepId.CheckAnswers, null)
+            }
+
+        private fun selectContactAddressNextAction(journeyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
+            if (getSelectedAddress(
+                    journeyData,
+                    LandlordRegistrationStepId.SelectContactAddress.urlPathSegment,
+                ) == MANUAL_ADDRESS_CHOSEN
+            ) {
+                Pair(LandlordRegistrationStepId.ManualContactAddress, null)
+            } else {
+                // TODO: Set nextAction to next journey step
+                Pair(LandlordRegistrationStepId.CheckAnswers, null)
+            }
+
+        private fun getSelectedAddress(
+            journeyData: JourneyData,
+            urlPathSegment: String,
+        ): String = objectToStringKeyedMap(journeyData[urlPathSegment])?.get("address").toString()
     }
 }
