@@ -7,6 +7,6 @@ enum class RegisterPropertyStepId(
     PropertyType("property-type"),
     OwnershipType("ownership-type"),
     Occupancy("occupancy"),
-    NumberOfHouseholds("households"),
-    NumberOfPeople("people"),
+    NumberOfHouseholds("number-of-households"),
+    NumberOfPeople("number-of-people"),
 }
