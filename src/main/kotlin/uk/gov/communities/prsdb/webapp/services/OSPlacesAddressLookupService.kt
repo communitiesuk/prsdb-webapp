@@ -27,11 +27,22 @@ class OSPlacesAddressLookupService(
             val dataset = results.getJSONObject(i).getJSONObject("DPA")
             addresses.add(
                 AddressDataModel(
-                    dataset.getString("ADDRESS"),
-                    dataset.getString("POSTCODE"),
-                    if (dataset.has("BUILDING_NUMBER")) dataset.getInt("BUILDING_NUMBER") else null,
-                    dataset.optString("BUILDING_NAME", null),
-                    dataset.optString("PO_BOX_NUMBER", null),
+                    singleLineAddress = dataset.getString("ADDRESS"),
+                    custodianCode = dataset.getInt("LOCAL_CUSTODIAN_CODE").toString(),
+                    uprn = if (dataset.getString("UPRN").isEmpty()) null else dataset.getString("UPRN").toInt(),
+                    organisation = dataset.optString("ORGANISATION_NAME", null),
+                    subBuilding = dataset.optString("SUB_BUILDING_NAME", null),
+                    buildingName = dataset.optString("BUILDING_NAME", null),
+                    buildingNumber =
+                        if (dataset.has("BUILDING_NUMBER")) {
+                            dataset.getInt("BUILDING_NUMBER").toString()
+                        } else {
+                            null
+                        },
+                    streetName = dataset.optString("THOROUGHFARE_NAME", null),
+                    locality = dataset.optString("DEPENDENT_LOCALITY", null),
+                    townName = dataset.optString("POST_TOWN", null),
+                    postcode = dataset.optString("POSTCODE", null),
                 ),
             )
         }
