@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.formModels.LandingPageFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NumberOfHouseholdsFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PropertyTypeFormModel
@@ -134,8 +135,23 @@ class PropertyRegistrationJourney(
                                 mapOf(
                                     "title" to "registerProperty.title",
                                     "fieldSetHeading" to "forms.numberOfHouseholds.fieldSetHeading",
-                                    "fieldSetHint" to "forms.numberOfHouseholds.label",
                                     "label" to "forms.numberOfHouseholds.label",
+                                ),
+                        ),
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.NumberOfPeople, null) },
+                ),
+                Step(
+                    id = RegisterPropertyStepId.NumberOfPeople,
+                    page =
+                        Page(
+                            formModel = NumberOfPeopleFormModel::class,
+                            templateName = "forms/numberOfPeopleForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.numberOfPeople.fieldSetHeading",
+                                    "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
+                                    "label" to "forms.numberOfPeople.label",
                                 ),
                         ),
                     nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
