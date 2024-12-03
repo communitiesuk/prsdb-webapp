@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.Response
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage
@@ -12,10 +13,18 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegis
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.SuccessPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.SummaryPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmIdentityFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.InternationalAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupContactAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
@@ -37,6 +46,14 @@ class Navigator(
     fun goToLandlordRegistrationNameFormPage(): NameFormPageLandlordRegistration {
         navigate("register-as-a-landlord/name")
         return createValidPage(page, NameFormPageLandlordRegistration::class)
+    }
+
+    fun goToLandlordRegistrationDateOfBirthFormPage(): DateOfBirthFormPageLandlordRegistration {
+        val nameFormPage = goToLandlordRegistrationNameFormPage()
+        nameFormPage.nameInput.fill("Arthur Dent")
+        nameFormPage.form.submit()
+        val dateOfBirthFormPage = createValidPage(page, DateOfBirthFormPageLandlordRegistration::class)
+        return dateOfBirthFormPage
     }
 
     fun goToLandlordRegistrationConfirmIdentityFormPage(): ConfirmIdentityFormPageLandlordRegistration {
@@ -62,12 +79,64 @@ class Navigator(
         return phoneNumberPage
     }
 
-    fun goToLandlordRegistrationDateOfBirthFormPage(): DateOfBirthFormPageLandlordRegistration {
-        val nameFormPage = goToLandlordRegistrationNameFormPage()
-        nameFormPage.nameInput.fill("Arthur Dent")
-        nameFormPage.form.submit()
-        val dateOfBirthFormPage = createValidPage(page, DateOfBirthFormPageLandlordRegistration::class)
-        return dateOfBirthFormPage
+    fun goToLandlordRegistrationCountryOfResidencePage(): CountryOfResidenceFormPageLandlordRegistration {
+        val phoneNumberPage = goToLandlordRegistrationPhoneNumberFormPage()
+        phoneNumberPage.phoneNumberInput.fill("07456097576")
+        phoneNumberPage.form.submit()
+        return createValidPage(page, CountryOfResidenceFormPageLandlordRegistration::class)
+    }
+
+    fun goToLandlordRegistrationLookupAddressPage(): LookupAddressFormPageLandlordRegistration {
+        val countryOfResidencePage = goToLandlordRegistrationCountryOfResidencePage()
+        countryOfResidencePage.radios.selectValue("true")
+        countryOfResidencePage.form.submit()
+        return createValidPage(page, LookupAddressFormPageLandlordRegistration::class)
+    }
+
+    fun goToLandlordRegistrationSelectAddressPage(): SelectAddressFormPageLandlordRegistration {
+        val lookupAddressPage = goToLandlordRegistrationLookupAddressPage()
+        lookupAddressPage.postcodeInput.fill("EG")
+        lookupAddressPage.houseNameOrNumberInput.fill("5")
+        lookupAddressPage.form.submit()
+        return createValidPage(page, SelectAddressFormPageLandlordRegistration::class)
+    }
+
+    fun goToLandlordRegistrationManualAddressPage(): ManualAddressFormPageLandlordRegistration {
+        val selectAddressPage = goToLandlordRegistrationSelectAddressPage()
+        selectAddressPage.radios.selectValue(MANUAL_ADDRESS_CHOSEN)
+        selectAddressPage.form.submit()
+        return createValidPage(page, ManualAddressFormPageLandlordRegistration::class)
+    }
+
+    fun goToLandlordRegistrationInternationalAddressPage(): InternationalAddressFormPageLandlordRegistration {
+        val countryOfResidencePage = goToLandlordRegistrationCountryOfResidencePage()
+        countryOfResidencePage.radios.selectValue("false")
+        countryOfResidencePage.select.autocompleteInput.fill("France")
+        countryOfResidencePage.select.selectValue("France")
+        countryOfResidencePage.form.submit()
+        return createValidPage(page, InternationalAddressFormPageLandlordRegistration::class)
+    }
+
+    fun goToLandlordRegistrationLookupContactAddressPage(): LookupContactAddressFormPageLandlordRegistration {
+        val internationalAddressPage = goToLandlordRegistrationInternationalAddressPage()
+        internationalAddressPage.textAreaInput.fill("address")
+        internationalAddressPage.form.submit()
+        return createValidPage(page, LookupContactAddressFormPageLandlordRegistration::class)
+    }
+
+    fun goToLandlordRegistrationSelectContactAddressPage(): SelectContactAddressFormPageLandlordRegistration {
+        val lookupContactAddressPage = goToLandlordRegistrationLookupContactAddressPage()
+        lookupContactAddressPage.postcodeInput.fill("EG")
+        lookupContactAddressPage.houseNameOrNumberInput.fill("5")
+        lookupContactAddressPage.form.submit()
+        return createValidPage(page, SelectContactAddressFormPageLandlordRegistration::class)
+    }
+
+    fun goToLandlordRegistrationManualContactAddressPage(): ManualContactAddressFormPageLandlordRegistration {
+        val selectAddressPage = goToLandlordRegistrationSelectContactAddressPage()
+        selectAddressPage.radios.selectValue(MANUAL_ADDRESS_CHOSEN)
+        selectAddressPage.form.submit()
+        return createValidPage(page, ManualContactAddressFormPageLandlordRegistration::class)
     }
 
     fun goToLaUserRegistrationLandingPage(): LandingPageLaUserRegistration {

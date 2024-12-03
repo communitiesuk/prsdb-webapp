@@ -7,13 +7,17 @@ class Form(
     private val page: Page,
     locator: Locator = page.locator("form"),
 ) : BaseComponent(locator) {
-    fun getErrorMessage() = getChildComponent(".govuk-error-message")
+    fun getErrorMessage(index: Int = 0) = getChildComponent(".govuk-error-message", index = index)
 
     fun getTextInput(fieldName: String? = null): Locator = getChildComponent("input${if (fieldName == null) "" else "[name='$fieldName']"}")
 
     fun getRadios() = Radios(page)
 
     fun getFieldsetHeading() = getChildComponent(".govuk-fieldset__heading")
+
+    fun getSelect() = Select(page)
+
+    fun getTextArea() = getChildComponent("textarea")
 
     fun submit() {
         getSubmitButton().click()

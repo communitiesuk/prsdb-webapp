@@ -16,12 +16,21 @@ import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.jdbc.Sql
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.InternationalAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupContactAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SummaryPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
 import java.time.LocalDate
 
@@ -32,6 +41,52 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     @BeforeEach
     fun setup() {
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
+        whenever(
+            osPlacesClient.search(any(), any()),
+        ).thenReturn("{'results':[{'DPA':{'ADDRESS':'1, Example Road, EG','POSTCODE':'EG','BUILDING_NUMBER':1}}]}")
+    }
+
+    // TODO: Add the steps before and after the address section of the journey
+    @Test
+    fun `User can navigate the whole journey if pages are correctly filled in`(page: Page) {
+        val countryOfResidencePage = navigator.goToLandlordRegistrationCountryOfResidencePage()
+        countryOfResidencePage.radios.selectValue("true")
+        countryOfResidencePage.form.submit()
+
+        val lookupAddressPage = assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
+        lookupAddressPage.postcodeInput.fill("EG")
+        lookupAddressPage.houseNameOrNumberInput.fill("5")
+        lookupAddressPage.form.submit()
+
+        val selectAddressPage = assertPageIs(page, SelectAddressFormPageLandlordRegistration::class)
+        selectAddressPage.radios.selectValue("1, Example Road, EG")
+        selectAddressPage.form.submit()
+
+        assertPageIs(page, SummaryPageLandlordRegistration::class)
+    }
+
+    @Test
+    fun `User can navigate the international landlord address journey if pages are correctly filled in`(page: Page) {
+        val countryOfResidencePage = navigator.goToLandlordRegistrationCountryOfResidencePage()
+        countryOfResidencePage.radios.selectValue("false")
+        countryOfResidencePage.select.autocompleteInput.fill("Fr")
+        countryOfResidencePage.select.selectValue("France")
+        countryOfResidencePage.form.submit()
+
+        val internationalAddressPage = assertPageIs(page, InternationalAddressFormPageLandlordRegistration::class)
+        internationalAddressPage.textAreaInput.fill("a")
+        internationalAddressPage.form.submit()
+
+        val lookupContactAddressPage = assertPageIs(page, LookupContactAddressFormPageLandlordRegistration::class)
+        lookupContactAddressPage.postcodeInput.fill("EG")
+        lookupContactAddressPage.houseNameOrNumberInput.fill("5")
+        lookupContactAddressPage.form.submit()
+
+        val selectContactAddressPage = assertPageIs(page, SelectContactAddressFormPageLandlordRegistration::class)
+        selectContactAddressPage.radios.selectValue("1, Example Road, EG")
+        selectContactAddressPage.form.submit()
+
+        assertPageIs(page, SummaryPageLandlordRegistration::class)
     }
 
     @Nested
@@ -291,6 +346,165 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             assertThat(
                 phoneNumPage.form.getErrorMessage(),
             ).containsText("Enter a phone number including the country code for international numbers")
+        }
+    }
+
+    @Nested
+    inner class LandlordRegistrationStepCountryOfResidence {
+        @Test
+        fun `Submitting with no option selected returns an error`(page: Page) {
+            val countryOfResidencePage = navigator.goToLandlordRegistrationCountryOfResidencePage()
+            countryOfResidencePage.form.submit()
+            assertThat(countryOfResidencePage.form.getErrorMessage()).containsText("Select an option")
+        }
+
+        @Test
+        fun `Submitting the no radio with no country selected returns an error`(page: Page) {
+            val countryOfResidencePage = navigator.goToLandlordRegistrationCountryOfResidencePage()
+            countryOfResidencePage.radios.selectValue("false")
+            countryOfResidencePage.form.submit()
+            assertThat(countryOfResidencePage.form.getErrorMessage())
+                .containsText("Select the country or territory you are currently living in")
+        }
+    }
+
+    @Nested
+    inner class LandlordRegistrationStepLookupAddress {
+        @Test
+        fun `Submitting with empty data fields returns an error`(page: Page) {
+            val lookupAddressPage = navigator.goToLandlordRegistrationLookupAddressPage()
+            lookupAddressPage.form.submit()
+            assertThat(lookupAddressPage.getPostcodeError()).containsText("Enter a postcode")
+            assertThat(lookupAddressPage.getHouseNameOrNumberError()).containsText("Enter a house name or number")
+        }
+    }
+
+    @Nested
+    inner class LandlordRegistrationStepSelectAddress {
+        @Test
+        fun `Submitting with no option selected returns an error`(page: Page) {
+            val selectAddressPage = navigator.goToLandlordRegistrationSelectAddressPage()
+            selectAddressPage.form.submit()
+            assertThat(selectAddressPage.form.getErrorMessage()).containsText("Select an address")
+        }
+
+        @Test
+        fun `Clicking Search Again navigates to the previous step`(page: Page) {
+            val selectAddressPage = navigator.goToLandlordRegistrationSelectAddressPage()
+            selectAddressPage.searchAgain.click()
+            assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
+        }
+
+        @Test
+        fun `Selecting the manual option navigates to the ManualAddress step`(page: Page) {
+            val selectAddressPage = navigator.goToLandlordRegistrationSelectAddressPage()
+            selectAddressPage.radios.selectValue(MANUAL_ADDRESS_CHOSEN)
+            selectAddressPage.form.submit()
+            assertPageIs(page, ManualAddressFormPageLandlordRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class LandlordRegistrationStepManualAddress {
+        @Test
+        fun `Submitting valid data redirects to the next step`(page: Page) {
+            val manualAddressPage = navigator.goToLandlordRegistrationManualAddressPage()
+            manualAddressPage.addressLineOneInput.fill("a")
+            manualAddressPage.addressLineTwoInput.fill("b")
+            manualAddressPage.townOrCityInput.fill("c")
+            manualAddressPage.countyInput.fill("d")
+            manualAddressPage.postcodeInput.fill("e")
+            manualAddressPage.form.submit()
+            assertPageIs(page, SummaryPageLandlordRegistration::class)
+        }
+
+        @Test
+        fun `Submitting empty data fields returns errors`(page: Page) {
+            val manualAddressPage = navigator.goToLandlordRegistrationManualAddressPage()
+            manualAddressPage.form.submit()
+            assertThat(manualAddressPage.getAddressLineOneError())
+                .containsText("Enter the first line of an address, typically the building and street")
+            assertThat(manualAddressPage.getTownOrCityError()).containsText("Enter town or city")
+            assertThat(manualAddressPage.getPostcodeError()).containsText("Enter postcode")
+        }
+    }
+
+    @Nested
+    inner class LandlordRegistrationStepInternationalAddress {
+        @Test
+        fun `Submitting with no address returns an error`(page: Page) {
+            val internationalAddressPage = navigator.goToLandlordRegistrationInternationalAddressPage()
+            internationalAddressPage.form.submit()
+            assertThat(internationalAddressPage.form.getErrorMessage()).containsText("You must include an address")
+        }
+
+        @Test
+        fun `Submitting with a too long address returns an error`(page: Page) {
+            val internationalAddressPage = navigator.goToLandlordRegistrationInternationalAddressPage()
+            internationalAddressPage.textAreaInput.fill("a".repeat(1001))
+            internationalAddressPage.form.submit()
+            assertThat(internationalAddressPage.form.getErrorMessage()).containsText("Address must be 1000 characters or fewer")
+        }
+    }
+
+    @Nested
+    inner class LandlordRegistrationStepLookupContactAddress {
+        @Test
+        fun `Submitting with empty data fields returns an error`(page: Page) {
+            val lookupContactAddressPage = navigator.goToLandlordRegistrationLookupContactAddressPage()
+            lookupContactAddressPage.form.submit()
+            assertThat(lookupContactAddressPage.getPostcodeError()).containsText("Enter a postcode")
+            assertThat(lookupContactAddressPage.getHouseNameOrNumberError()).containsText("Enter a house name or number")
+        }
+    }
+
+    @Nested
+    inner class LandlordRegistrationStepSelectContactAddress {
+        @Test
+        fun `Submitting with no option selected returns an error`(page: Page) {
+            val selectContactAddressPage = navigator.goToLandlordRegistrationSelectContactAddressPage()
+            selectContactAddressPage.form.submit()
+            assertThat(selectContactAddressPage.form.getErrorMessage()).containsText("Select an address")
+        }
+
+        @Test
+        fun `Clicking Search Again navigates to the previous step`(page: Page) {
+            val selectContactAddressPage = navigator.goToLandlordRegistrationSelectContactAddressPage()
+            selectContactAddressPage.searchAgain.click()
+            assertPageIs(page, LookupContactAddressFormPageLandlordRegistration::class)
+        }
+
+        @Test
+        fun `Selecting the manual option navigates to the ManualContactAddress step`(page: Page) {
+            val selectContactAddressPage = navigator.goToLandlordRegistrationSelectContactAddressPage()
+            selectContactAddressPage.radios.selectValue(MANUAL_ADDRESS_CHOSEN)
+            selectContactAddressPage.form.submit()
+            assertPageIs(page, ManualContactAddressFormPageLandlordRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class LandlordRegistrationStepManualContactAddress {
+        @Test
+        fun `Submitting valid data redirects to the next step`(page: Page) {
+            val manualContactAddressPage = navigator.goToLandlordRegistrationManualContactAddressPage()
+            manualContactAddressPage.addressLineOneInput.fill("a")
+            manualContactAddressPage.addressLineTwoInput.fill("b")
+            manualContactAddressPage.townOrCityInput.fill("c")
+            manualContactAddressPage.countyInput.fill("d")
+            manualContactAddressPage.postcodeInput.fill("e")
+            manualContactAddressPage.form.submit()
+            assertPageIs(page, SummaryPageLandlordRegistration::class)
+        }
+
+        @Test
+        fun `Submitting empty data fields returns errors`(page: Page) {
+            val manualContactAddressPage = navigator.goToLandlordRegistrationManualContactAddressPage()
+            manualContactAddressPage.form.submit()
+            assertThat(manualContactAddressPage.getAddressLineOneError())
+                .containsText("Enter the first line of an address, typically the building and street")
+            assertThat(manualContactAddressPage.getTownOrCityError()).containsText("Enter town or city")
+            assertThat(manualContactAddressPage.getPostcodeError()).containsText("Enter postcode")
         }
     }
 }
