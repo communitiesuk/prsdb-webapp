@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
+import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import java.time.LocalDate
@@ -35,6 +36,7 @@ class LandlordRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     addressLookupService: AddressLookupService,
+    addressDataService: AddressDataService,
 ) : Journey<LandlordRegistrationStepId>(
         journeyType = JourneyType.LANDLORD_REGISTRATION,
         initialStepId = LandlordRegistrationStepId.VerifyIdentity,
@@ -217,7 +219,9 @@ class LandlordRegistrationJourney(
                             urlPathSegment = LandlordRegistrationStepId.LookupAddress.urlPathSegment,
                             journeyDataService = journeyDataService,
                             addressLookupService = addressLookupService,
+                            addressDataService = addressDataService,
                         ),
+                    isSatisfied = { _, pageData -> isSelectAddressSatisfied(pageData, addressDataService) },
                     nextAction = { journeyData, _ -> selectAddressNextAction(journeyData) },
                     saveAfterSubmit = false,
                 ),
@@ -302,7 +306,9 @@ class LandlordRegistrationJourney(
                             urlPathSegment = LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
                             journeyDataService = journeyDataService,
                             addressLookupService = addressLookupService,
+                            addressDataService = addressDataService,
                         ),
+                    isSatisfied = { _, pageData -> isSelectAddressSatisfied(pageData, addressDataService) },
                     nextAction = { journeyData, _ -> selectContactAddressNextAction(journeyData) },
                     saveAfterSubmit = false,
                 ),
@@ -369,6 +375,14 @@ class LandlordRegistrationJourney(
                 // TODO: Set nextAction to next journey step
                 Pair(LandlordRegistrationStepId.CheckAnswers, null)
             }
+
+        private fun isSelectAddressSatisfied(
+            pageData: PageData,
+            addressDataService: AddressDataService,
+        ): Boolean {
+            val selectedAddress = pageData["address"].toString()
+            return selectedAddress == MANUAL_ADDRESS_CHOSEN || addressDataService.getAddressData(selectedAddress) != null
+        }
 
         private fun getSelectedAddress(
             journeyData: JourneyData,
