@@ -23,23 +23,22 @@ class LandlordRegistrationSummaryPage(
         journeyData: JourneyData?,
     ): String {
         val formData = mutableListOf<FormSummaryDataModel>()
-        git statusz
-            // TODO PRSD-372 update the formData below
+        // TODO PRSD-372 update the formData below
 
-            formData.addAll(
-                listOf(
-                    FormSummaryDataModel(
-                        "registerLaUser.checkAnswers.rowHeading.name",
-                        objectToStringKeyedMap(journeyData?.get("name"))?.get("name"),
-                        "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Name.urlPathSegment}",
-                    ),
-                    FormSummaryDataModel(
-                        "registerLaUser.checkAnswers.rowHeading.email",
-                        objectToStringKeyedMap(journeyData?.get("email"))?.get("emailAddress"),
-                        "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Email.urlPathSegment}",
-                    ),
+        formData.addAll(
+            listOf(
+                FormSummaryDataModel(
+                    "registerLaUser.checkAnswers.rowHeading.name",
+                    objectToStringKeyedMap(journeyData?.get("name"))?.get("name"),
+                    "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Name.urlPathSegment}",
                 ),
-            )
+                FormSummaryDataModel(
+                    "registerLaUser.checkAnswers.rowHeading.email",
+                    objectToStringKeyedMap(journeyData?.get("email"))?.get("emailAddress"),
+                    "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Email.urlPathSegment}",
+                ),
+            ),
+        )
 
         model.addAttribute("formData", formData)
         return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData)
