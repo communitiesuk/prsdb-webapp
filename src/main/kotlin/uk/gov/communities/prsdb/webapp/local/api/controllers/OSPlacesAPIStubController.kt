@@ -27,13 +27,13 @@ class OSPlacesAPIStubController {
                     "]}",
                 ) {
                     "{'DPA':{'ADDRESS':'$it, Example Road, EG'," +
-                        "'LOCAL_CUSTODIAN_CODE':${it}00,'UPRN':'','BUILDING_NUMBER':$it,'POSTCODE':'EG'}}"
+                        "'LOCAL_CUSTODIAN_CODE':${it}00,'UPRN':'${it}123456','BUILDING_NUMBER':$it,'POSTCODE':'EG'}}"
                 }
             }
         } catch (exception: Exception) {
             println(exception.message)
             return "{'results':[{'DPA':{'ADDRESS':'1, Example Road, EG'," +
-                "'LOCAL_CUSTODIAN_CODE':100,'UPRN':'','BUILDING_NUMBER':1,'POSTCODE':'EG'}}]}"
+                "'LOCAL_CUSTODIAN_CODE':100,'UPRN':'0123456','BUILDING_NUMBER':1,'POSTCODE':'EG'}}]}"
         }
     }
 }

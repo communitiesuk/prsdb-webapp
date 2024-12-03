@@ -16,6 +16,9 @@ class LocalAuthority(
     lateinit var name: String
         private set
 
+    @Column(nullable = false)
+    var custodianCode: String = ""
+
     constructor(id: Int, name: String) : this(id) {
         this.name = name
     }
