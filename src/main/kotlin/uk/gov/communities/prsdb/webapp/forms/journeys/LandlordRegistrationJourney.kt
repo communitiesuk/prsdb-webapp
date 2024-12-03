@@ -336,7 +336,6 @@ class LandlordRegistrationJourney(
                     saveAfterSubmit = false,
                 ),
                 Step(
-                    // TODO PRSD-372 update message value(s)
                     id = LandlordRegistrationStepId.CheckAnswers,
                     page =
                         LandlordRegistrationSummaryPage(
@@ -345,7 +344,7 @@ class LandlordRegistrationJourney(
                             content =
                                 mapOf(
                                     "title" to "registerAsALandlord.title",
-                                    "summaryName" to "registerAsALandlord.title",
+                                    "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
                                     "submitButtonText" to "forms.buttons.confirmAndContinue",
                                 ),
                         ),
