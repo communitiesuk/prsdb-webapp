@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosViewModel
+import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import kotlin.reflect.KClass
@@ -19,6 +20,7 @@ class SelectAddressPage(
     private val urlPathSegment: String,
     private val journeyDataService: JourneyDataService,
     private val addressLookupService: AddressLookupService,
+    private val addressDataService: AddressDataService,
 ) : Page(formModel, templateName, content) {
     override fun populateModelAndGetTemplateName(
         validator: Validator,
@@ -32,11 +34,12 @@ class SelectAddressPage(
         val postcode = objectToStringKeyedMap(journeyData[urlPathSegment])?.get("postcode").toString()
 
         val addressLookupResults = addressLookupService.search(houseNameOrNumber, postcode)
+        addressDataService.setAddressData(addressLookupResults)
 
         var addressRadiosViewModel: List<RadiosViewModel> =
             addressLookupResults.mapIndexed { index, address ->
                 RadiosButtonViewModel(
-                    value = address.address,
+                    value = address.singleLineAddress,
                     valueStr = (index + 1).toString(),
                 )
             }

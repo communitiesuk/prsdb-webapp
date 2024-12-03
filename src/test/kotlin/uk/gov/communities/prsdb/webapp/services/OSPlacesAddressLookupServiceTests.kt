@@ -26,22 +26,22 @@ class OSPlacesAddressLookupServiceTests {
     fun `searchByPostcode returns a corresponding list of addresses given a valid postcode`() {
         val addressesJSON =
             "{'results':[" +
-                "{'DPA':{'ADDRESS':'1, Example Road, EG','POSTCODE':'EG','BUILDING_NUMBER':1}}," +
-                "{'DPA':{'ADDRESS':'Main Building, Example Road, EG','POSTCODE':'EG','BUILDING_NAME':'Main Building'}}," +
-                "{'DPA':{'ADDRESS':'PO1, Example Road, EG','POSTCODE':'EG','PO_BOX_NUMBER':'PO1'}}," +
+                "{'DPA':{'ADDRESS':'1, Example Road, EG','LOCAL_CUSTODIAN_CODE':100,'UPRN':'1234','BUILDING_NUMBER':1,'POSTCODE':'EG'}}," +
+                "{'DPA':{'ADDRESS':'2, Example Road, EG','LOCAL_CUSTODIAN_CODE':101,'UPRN':'','BUILDING_NUMBER':2,'POSTCODE':'EG'}}," +
+                "{'DPA':{'ADDRESS':'Main, Example Road, EG','LOCAL_CUSTODIAN_CODE':102,'UPRN':'','BUILDING_NAME':'Main','POSTCODE':'EG'}}" +
                 "]}"
         val expectedAddresses =
             listOf(
-                AddressDataModel("1, Example Road, EG", "EG", 1),
-                AddressDataModel("Main Building, Example Road, EG", "EG", houseName = "Main Building"),
-                AddressDataModel("PO1, Example Road, EG", "EG", poBoxNumber = "PO1"),
+                AddressDataModel("1, Example Road, EG", "100", 1234, buildingNumber = "1", postcode = "EG"),
+                AddressDataModel("2, Example Road, EG", "101", buildingNumber = "2", postcode = "EG"),
+                AddressDataModel("Main, Example Road, EG", "102", buildingName = "Main", postcode = "EG"),
             )
 
         whenever(
             mockOSPlacesClient.search(anyString(), anyString()),
         ).thenReturn(addressesJSON)
 
-        val addresses = addressLookupService.search("", "EG")
+        val addresses = addressLookupService.search("", "")
 
         assertEquals(expectedAddresses, addresses)
     }

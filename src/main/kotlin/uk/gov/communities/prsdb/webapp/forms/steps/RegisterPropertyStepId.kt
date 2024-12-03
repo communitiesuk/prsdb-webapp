@@ -6,4 +6,7 @@ enum class RegisterPropertyStepId(
     PlaceholderPage("placeholder"),
     PropertyType("property-type"),
     OwnershipType("ownership-type"),
+    Occupancy("occupancy"),
+    NumberOfHouseholds("number-of-households"),
+    NumberOfPeople("number-of-people"),
 }
