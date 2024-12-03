@@ -55,6 +55,7 @@ abstract class Journey<T : StepId>(
             model,
             pageData,
             prevStepUrl,
+            prevStepDetails?.filteredJourneyData,
         )
     }
 
@@ -120,6 +121,7 @@ abstract class Journey<T : StepId>(
         var prevStep: Step<T>? = null
         var prevSubPageNumber: Int? = null
         var currentSubPageNumber: Int? = null
+        var filteredJourneyData: JourneyData? = null
         while (!(currentStep.id == targetStep.id && currentSubPageNumber == targetSubPageNumber)) {
             val pageData = journeyDataService.getPageData(journeyData, currentStep.name, currentSubPageNumber)
             if (pageData == null || !currentStep.isSatisfied(validator, pageData)) return null
@@ -130,8 +132,13 @@ abstract class Journey<T : StepId>(
             prevSubPageNumber = currentSubPageNumber
             currentStep = nextStep
             currentSubPageNumber = nextSubPageNumber
+            if (filteredJourneyData == null) {
+                filteredJourneyData = pageData
+            } else {
+                filteredJourneyData.plus(pageData)
+            }
         }
-        return StepDetails(prevStep, prevSubPageNumber)
+        return StepDetails(prevStep, prevSubPageNumber, filteredJourneyData)
     }
 
     private fun getPrevStepUrl(
