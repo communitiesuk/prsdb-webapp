@@ -134,7 +134,8 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val householdsPage = navigator.goToPropertyRegistrationHouseholdsPage()
             householdsPage.householdsInput.fill("not-a-number")
             householdsPage.form.submit()
-            assertThat(householdsPage.form.getErrorMessage()).containsText("Number of households in your property must be a number, like 3")
+            assertThat(householdsPage.form.getErrorMessage())
+                .containsText("Number of households in your property must be a positive, whole number, like 3")
         }
 
         @Test
@@ -142,7 +143,8 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val householdsPage = navigator.goToPropertyRegistrationHouseholdsPage()
             householdsPage.householdsInput.fill("2.3")
             householdsPage.form.submit()
-            assertThat(householdsPage.form.getErrorMessage()).containsText("Number of households in your property must be a number, like 3")
+            assertThat(householdsPage.form.getErrorMessage())
+                .containsText("Number of households in your property must be a positive, whole number, like 3")
         }
 
         @Test
@@ -150,7 +152,8 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val householdsPage = navigator.goToPropertyRegistrationHouseholdsPage()
             householdsPage.householdsInput.fill("-2")
             householdsPage.form.submit()
-            assertThat(householdsPage.form.getErrorMessage()).containsText("Number of households in your property must be a number, like 3")
+            assertThat(householdsPage.form.getErrorMessage())
+                .containsText("Number of households in your property must be a positive, whole number, like 3")
         }
     }
 
@@ -168,7 +171,8 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val peoplePage = navigator.goToPropertyRegistrationPeoplePage()
             peoplePage.peopleInput.fill("not-a-number")
             peoplePage.form.submit()
-            assertThat(peoplePage.form.getErrorMessage()).containsText("Number of people in your property must be a number, like 3")
+            assertThat(peoplePage.form.getErrorMessage())
+                .containsText("Number of people in your property must be a positive, whole number, like 3")
         }
 
         @Test
@@ -176,7 +180,8 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val peoplePage = navigator.goToPropertyRegistrationPeoplePage()
             peoplePage.peopleInput.fill("2.3")
             peoplePage.form.submit()
-            assertThat(peoplePage.form.getErrorMessage()).containsText("Number of people in your property must be a number, like 3")
+            assertThat(peoplePage.form.getErrorMessage())
+                .containsText("Number of people in your property must be a positive, whole number, like 3")
         }
 
         @Test
@@ -184,7 +189,8 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val peoplePage = navigator.goToPropertyRegistrationPeoplePage()
             peoplePage.peopleInput.fill("-2")
             peoplePage.form.submit()
-            assertThat(peoplePage.form.getErrorMessage()).containsText("Number of people in your property must be a number, like 3")
+            assertThat(peoplePage.form.getErrorMessage())
+                .containsText("Number of people in your property must be a positive, whole number, like 3")
         }
     }
 }
