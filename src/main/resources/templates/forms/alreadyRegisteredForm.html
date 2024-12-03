@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<th:block id="main-content"
+          th:replace="~{fragments/layout :: layout(#{registerProperty.title}, ~{::#main-content/content()},false)}">
+    <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+    <main class="govuk-main-wrapper">
+        <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
+            <div id="page-content">
+                <header>
+                    <h1 class="govuk-heading-l" th:text="#{forms.alreadyRegistered.heading}">forms.alreadyRegistered.heading</h1>
+                </header>
+                <section>
+                    <p class="govuk-body" th:text="#{forms.alreadyRegistered.paragraph.one(${singleLineAddress})}">forms.alreadyRegistered.paragraph.one</p>
+                    <p class="govuk-body" >
+                        <span th:text="#{forms.alreadyRegistered.paragraph.two.beforeLink}">forms.alreadyRegistered.paragraph.two.beforeLink</span>
+                        <a th:href="@{${searchAgainUrl}}" th:text="#{forms.alreadyRegistered.paragraph.two.link.text}">
+                            forms.alreadyRegistered.paragraph.two.link.text
+                        </a>
+                    </p>
+                </section>
+                <details id="details-content" th:replace="~{fragments/details :: details(#{'forms.alreadyRegistered.details.summary.text'},~{::#details-content/content()})}">
+                    <div class="govuk-details__text">
+                        <p  th:text="#{'forms.alreadyRegistered.details.paragraph.one'}">
+                            forms.alreadyRegistered.details.paragraph.one
+                        </p>
+                        <p th:utext="#{'forms.alreadyRegistered.details.paragraph.two'}">
+                            forms.alreadyRegistered.details.paragraph.two
+                        </p>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </main>
+</th:block>
+</html>

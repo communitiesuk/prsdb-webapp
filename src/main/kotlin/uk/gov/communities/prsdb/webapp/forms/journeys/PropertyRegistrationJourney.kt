@@ -7,13 +7,13 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.forms.pages.AlreadyRegisteredPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
-import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.models.formModels.LandingPageFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LookupAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.OccupancyFormModel
@@ -73,13 +73,30 @@ class PropertyRegistrationJourney(
                                         "/$REGISTER_PROPERTY_JOURNEY_URL/" +
                                         RegisterPropertyStepId.LookupAddress.urlPathSegment,
                                 ),
-                            urlPathSegment = LandlordRegistrationStepId.LookupAddress.urlPathSegment,
+                            urlPathSegment = RegisterPropertyStepId.LookupAddress.urlPathSegment,
                             journeyDataService = journeyDataService,
                             addressLookupService = addressLookupService,
                             addressDataService = addressDataService,
                         ),
                     isSatisfied = { _, pageData -> addressDataService.isSelectAddressSatisfied(pageData) },
                     nextAction = { journeyData, _ -> selectAddressNextAction(journeyData, journeyDataService) },
+                ),
+                Step(
+                    id = RegisterPropertyStepId.AlreadyRegistered,
+                    page =
+                        AlreadyRegisteredPage(
+                            formModel = NoInputFormModel::class,
+                            templateName = "forms/alreadyRegisteredForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerAsALandlord.title",
+                                    "searchAgainUrl" to
+                                        "/$REGISTER_PROPERTY_JOURNEY_URL/" +
+                                        RegisterPropertyStepId.LookupAddress.urlPathSegment,
+                                ),
+                            journeyDataService = journeyDataService,
+                            urlPathSegment = RegisterPropertyStepId.SelectAddress.urlPathSegment,
+                        ),
                 ),
                 Step(
                     id = RegisterPropertyStepId.PropertyType,
@@ -213,7 +230,7 @@ class PropertyRegistrationJourney(
                     id = RegisterPropertyStepId.PlaceholderPage,
                     page =
                         Page(
-                            formModel = LandingPageFormModel::class,
+                            formModel = NoInputFormModel::class,
                             templateName = "placeholder",
                             content =
                                 mapOf(
@@ -253,7 +270,13 @@ class PropertyRegistrationJourney(
             } else {
                 // TODO: Check if the selected address is already registered (is the uprn in the address table).
                 // If it is, redirect to the already registered page
-                Pair(RegisterPropertyStepId.PropertyType, null)
+                if (addressAlreadyRegistered()) {
+                    Pair(RegisterPropertyStepId.AlreadyRegistered, null)
+                } else {
+                    Pair(RegisterPropertyStepId.PropertyType, null)
+                }
             }
+
+        private fun addressAlreadyRegistered(): Boolean = true
     }
 }
