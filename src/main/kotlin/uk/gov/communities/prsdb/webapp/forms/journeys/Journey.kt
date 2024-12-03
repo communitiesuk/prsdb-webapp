@@ -138,6 +138,11 @@ abstract class Journey<T : StepId>(
             prevSubPageNumber = currentSubPageNumber
             currentStep = nextStep
             currentSubPageNumber = nextSubPageNumber
+            if (filteredJourneyData == null) {
+                filteredJourneyData = pageData
+            } else {
+                filteredJourneyData.plus(pageData)
+            }
         }
         return StepDetails(prevStep, prevSubPageNumber, filteredJourneyData)
     }
