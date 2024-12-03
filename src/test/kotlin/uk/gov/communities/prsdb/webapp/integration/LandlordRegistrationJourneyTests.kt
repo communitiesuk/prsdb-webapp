@@ -43,7 +43,10 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
         whenever(
             osPlacesClient.search(any(), any()),
-        ).thenReturn("{'results':[{'DPA':{'ADDRESS':'1, Example Road, EG','POSTCODE':'EG','BUILDING_NUMBER':1}}]}")
+        ).thenReturn(
+            "{'results':[{'DPA':{'ADDRESS':'1, Example Road, EG'," +
+                "'LOCAL_CUSTODIAN_CODE':100,'UPRN':'1','BUILDING_NUMBER':1,'POSTCODE':'EG'}}]}",
+        )
     }
 
     // TODO: Add the steps before and after the address section of the journey
