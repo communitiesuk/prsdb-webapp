@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
 import org.springframework.core.annotation.Order
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -12,16 +11,19 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.context.SecurityContextHolderFilter
+import org.springframework.security.web.context.SecurityContextRepository
+import uk.gov.communities.prsdb.webapp.config.filters.InvalidCoreIdentityFilter
 import uk.gov.communities.prsdb.webapp.config.filters.OauthTokenSecondaryValidatingFilter
 import uk.gov.communities.prsdb.webapp.config.resolvers.AdditionalParameterAddingOAuth2RequestResolver
+import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 
-@Profile("!local | local-auth")
 @Configuration
 @EnableMethodSecurity
 class IdVerificationSecurityConfig(
     val clientRegistrationRepository: ClientRegistrationRepository,
+    val securityContextRepository: SecurityContextRepository,
 ) {
     @Bean
     @Order(1)
@@ -44,7 +46,7 @@ class IdVerificationSecurityConfig(
                     ::doesTokenContainAnyIdVerificationClaims,
                 ),
                 SecurityContextHolderFilter::class.java,
-            )
+            ).addFilterAfter(InvalidCoreIdentityFilter(securityContextRepository), OauthTokenSecondaryValidatingFilter::class.java)
 
         return http.build()
     }
@@ -75,9 +77,9 @@ class IdVerificationSecurityConfig(
     private fun oneLoginIdVerificationParameters(): Map<String, String> {
         val claimsRequest =
             """{"userinfo": {
-                        |"https://vocab.account.gov.uk/v1/coreIdentityJWT":null,
-                        |"https://vocab.account.gov.uk/v1/returnCode":null,
-                        |"https://vocab.account.gov.uk/v1/address":null}}
+                        |"${OneLoginClaimKeys.CORE_IDENTITY}":null,
+                        |"${OneLoginClaimKeys.ADDRESS}":null,
+                        |"${OneLoginClaimKeys.RETURN_CODE}":null}}
             """.trimMargin()
         return mapOf("vtr" to "[\"Cl.Cm.P2\"]", "claims" to claimsRequest)
     }
@@ -91,7 +93,7 @@ class IdVerificationSecurityConfig(
         return user is OidcUser &&
             (
                 user.userInfo.claims.keys
-                    .any { it.contains("https://vocab.account.gov.uk") }
+                    .any { it.contains(OneLoginClaimKeys.DOMAIN) }
             )
     }
 }

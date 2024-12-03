@@ -7,11 +7,14 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.minus
 import kotlinx.datetime.number
 import kotlinx.datetime.plus
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -19,10 +22,38 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
+import java.time.LocalDate
 
 @Sql("/data-local.sql")
 class LandlordRegistrationJourneyTests : IntegrationTest() {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
+
+    @BeforeEach
+    fun setup() {
+        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
+    }
+
+    @Nested
+    inner class LandlordRegistrationStepConfirmIdentity {
+        @Test
+        fun `Submitting a valid name redirects to the next step`(page: Page) {
+            // Arrange
+            val verifiedIdentityMap =
+                mutableMapOf<String, Any?>(
+                    VerifiedIdentityModel.NAME_KEY to "name",
+                    VerifiedIdentityModel.BIRTH_DATE_KEY to LocalDate.now(),
+                )
+            whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentityMap)
+
+            // Act
+            val confirmIdentityPage = navigator.goToLandlordRegistrationConfirmIdentityFormPage()
+            confirmIdentityPage.form.submit()
+
+            // Assert
+            assertPageIs(page, EmailFormPageLandlordRegistration::class)
+        }
+    }
 
     @Nested
     inner class LandlordRegistrationStepName {

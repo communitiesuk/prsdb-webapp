@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OSPlacesConfig
 import uk.gov.communities.prsdb.webapp.config.OneLoginConfig
+import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.service.notify.NotificationClient
 
 @Import(TestcontainersConfiguration::class)
@@ -44,4 +45,7 @@ class PrsdbWebappApplicationTests {
 
     @MockBean
     lateinit var osPlacesClient: OSPlacesClient
+
+    @MockBean
+    lateinit var identityService: OneLoginIdentityService
 }

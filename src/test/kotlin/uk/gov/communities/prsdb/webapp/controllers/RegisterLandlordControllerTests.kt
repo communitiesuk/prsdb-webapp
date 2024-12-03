@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
+import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 
 @WebMvcTest(RegisterLandlordController::class)
 class RegisterLandlordControllerTests(
@@ -17,6 +18,9 @@ class RegisterLandlordControllerTests(
 ) : ControllerTest(webContext) {
     @MockBean
     lateinit var mockLandlordRegistrationJourney: LandlordRegistrationJourney
+
+    @MockBean
+    lateinit var identityService: OneLoginIdentityService
 
     @BeforeEach
     fun steup() {

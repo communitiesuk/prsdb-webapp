@@ -5,8 +5,12 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import com.microsoft.playwright.options.AriaRole
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.springframework.test.context.jdbc.Sql
+import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
 import java.net.URI
+import java.time.LocalDate
 
 @Sql("/data-local.sql")
 class RegisterLandlordPageTests : IntegrationTest() {
@@ -17,9 +21,25 @@ class RegisterLandlordPageTests : IntegrationTest() {
     }
 
     @Test
-    fun `the 'Start Now' button directs a user to the landlord registration email page`(page: Page) {
+    fun `the 'Start Now' button directs an unverified user to the landlord registration email page`(page: Page) {
+        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
+
         page.navigate("http://localhost:$port/register-as-a-landlord")
         page.getByRole(AriaRole.BUTTON, Page.GetByRoleOptions().setName("Start Now")).click()
         assertEquals("/register-as-a-landlord/name", URI(page.url()).path)
+    }
+
+    @Test
+    fun `the 'Start Now' button directs a verified user to the identity confirmation page`(page: Page) {
+        val verifiedIdentityMap =
+            mutableMapOf<String, Any?>(
+                VerifiedIdentityModel.NAME_KEY to "name",
+                VerifiedIdentityModel.BIRTH_DATE_KEY to LocalDate.now(),
+            )
+        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentityMap)
+
+        page.navigate("http://localhost:$port/register-as-a-landlord")
+        page.getByRole(AriaRole.BUTTON, Page.GetByRoleOptions().setName("Start Now")).click()
+        assertEquals("/register-as-a-landlord/confirm-identity", URI(page.url()).path)
     }
 }

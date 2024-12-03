@@ -28,7 +28,7 @@ class JourneyDataService(
     fun getPageData(
         journeyData: JourneyData,
         pageName: String,
-        subPageNumber: Int?,
+        subPageNumber: Int? = null,
     ): PageData? {
         var pageData = objectToStringKeyedMap(journeyData[pageName])
         if (subPageNumber != null && pageData != null) {

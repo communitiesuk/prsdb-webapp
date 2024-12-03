@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -10,15 +12,17 @@ import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
+import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import java.security.Principal
 
 @Controller
 @RequestMapping("/${REGISTER_LANDLORD_JOURNEY_URL}")
 class RegisterLandlordController(
     var landlordRegistrationJourney: LandlordRegistrationJourney,
+    val identityService: OneLoginIdentityService,
 ) {
     @GetMapping
-    fun index(model: Model): String {
+    fun index(model: Model): CharSequence {
         model.addAttribute(
             "registerAsALandlordInitialStep",
             "/${REGISTER_LANDLORD_JOURNEY_URL}/${START_PAGE_PATH_SEGMENT}",
@@ -30,7 +34,21 @@ class RegisterLandlordController(
     fun getStart(): String = "redirect:${IDENTITY_VERIFICATION_PATH_SEGMENT}"
 
     @GetMapping("/${IDENTITY_VERIFICATION_PATH_SEGMENT}")
-    fun getVerifyIdentity(): String = "redirect:${landlordRegistrationJourney.initialStepId.urlPathSegment}"
+    fun getVerifyIdentity(
+        model: Model,
+        principal: Principal,
+        @AuthenticationPrincipal oidcUser: OidcUser,
+    ): String {
+        var identity = identityService.getVerifiedIdentityData(oidcUser) ?: mutableMapOf()
+
+        return landlordRegistrationJourney.updateJourneyDataAndGetViewNameOrRedirect(
+            landlordRegistrationJourney.getStepId(IDENTITY_VERIFICATION_PATH_SEGMENT),
+            identity,
+            model,
+            null,
+            principal,
+        )
+    }
 
     @GetMapping("/{stepName}")
     fun getJourneyStep(
