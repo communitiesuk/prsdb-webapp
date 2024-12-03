@@ -88,4 +88,10 @@ class JourneyDataService(
     fun clearJourneyDataFromSession() {
         session.setAttribute("journeyData", null)
     }
+
+    fun getFieldValue(
+        journeyData: JourneyData,
+        urlPathSegment: String,
+        fieldName: String,
+    ): String = objectToStringKeyedMap(journeyData[urlPathSegment])?.get(fieldName).toString()
 }

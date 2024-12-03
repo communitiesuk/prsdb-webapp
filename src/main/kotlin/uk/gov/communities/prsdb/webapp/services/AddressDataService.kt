@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Service
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
 @Service
@@ -24,4 +26,9 @@ class AddressDataService(
             "addressData",
             Json.encodeToString(addressDataList.associateBy { it.singleLineAddress }),
         )
+
+    fun isSelectAddressSatisfied(pageData: PageData): Boolean {
+        val selectedAddress = pageData["address"].toString()
+        return selectedAddress == MANUAL_ADDRESS_CHOSEN || getAddressData(selectedAddress) != null
+    }
 }
