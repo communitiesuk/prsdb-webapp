@@ -29,7 +29,7 @@ class OSPlacesAddressLookupService(
                 AddressDataModel(
                     singleLineAddress = dataset.getString("ADDRESS"),
                     custodianCode = dataset.getInt("LOCAL_CUSTODIAN_CODE").toString(),
-                    uprn = if (dataset.getString("UPRN").isEmpty()) null else dataset.getString("UPRN").toInt(),
+                    uprn = if (dataset.getString("UPRN").isEmpty()) null else dataset.getString("UPRN").toLong(),
                     organisation = dataset.optString("ORGANISATION_NAME", null),
                     subBuilding = dataset.optString("SUB_BUILDING_NAME", null),
                     buildingName = dataset.optString("BUILDING_NAME", null),
