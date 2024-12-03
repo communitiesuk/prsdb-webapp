@@ -121,10 +121,14 @@ abstract class Journey<T : StepId>(
         var prevStep: Step<T>? = null
         var prevSubPageNumber: Int? = null
         var currentSubPageNumber: Int? = null
-        var filteredJourneyData: JourneyData? = null
+        var filteredJourneyData: JourneyData = mutableMapOf()
         while (!(currentStep.id == targetStep.id && currentSubPageNumber == targetSubPageNumber)) {
             val pageData = journeyDataService.getPageData(journeyData, currentStep.name, currentSubPageNumber)
             if (pageData == null || !currentStep.isSatisfied(validator, pageData)) return null
+            val stepData = journeyDataService.getPageData(journeyData, currentStep.name, null)
+            if (stepData != null && currentStep.isSatisfied(validator, stepData)) {
+                filteredJourneyData[currentStep.name] = stepData
+            }
             val (nextStepId, nextSubPageNumber) =
                 currentStep.nextAction(journeyData, currentSubPageNumber)
             val nextStep = steps.singleOrNull { step -> step.id == nextStepId } ?: return null
@@ -132,11 +136,6 @@ abstract class Journey<T : StepId>(
             prevSubPageNumber = currentSubPageNumber
             currentStep = nextStep
             currentSubPageNumber = nextSubPageNumber
-            if (filteredJourneyData == null) {
-                filteredJourneyData = pageData
-            } else {
-                filteredJourneyData.plus(pageData)
-            }
         }
         return StepDetails(prevStep, prevSubPageNumber, filteredJourneyData)
     }
