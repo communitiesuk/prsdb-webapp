@@ -123,7 +123,7 @@ class PropertyRegistrationJourney(
                                         ),
                                 ),
                         ),
-                    nextAction = { journeyData, subpage -> occupancyNextAction(journeyData, subpage) },
+                    nextAction = { journeyData, _ -> occupancyNextAction(journeyData) },
                 ),
                 Step(
                     id = RegisterPropertyStepId.NumberOfHouseholds,
@@ -171,17 +171,14 @@ class PropertyRegistrationJourney(
             ),
     ) {
     companion object {
-        private fun occupancyNextAction(
-            journeyData: JourneyData,
-            subPage: Int?,
-        ): Pair<RegisterPropertyStepId, Int?> =
+        private fun occupancyNextAction(journeyData: JourneyData): Pair<RegisterPropertyStepId, Int?> =
             when (
                 val propertyIsOccupied =
                     objectToStringKeyedMap(journeyData[RegisterPropertyStepId.Occupancy.urlPathSegment])
                         ?.get("occupied")
                         .toString()
             ) {
-                "true" -> Pair(RegisterPropertyStepId.NumberOfHouseholds, subPage)
+                "true" -> Pair(RegisterPropertyStepId.NumberOfHouseholds, null)
                 "false" -> Pair(RegisterPropertyStepId.PlaceholderPage, null)
                 else -> throw IllegalArgumentException(
                     "Invalid value for journeyData[\"${RegisterPropertyStepId.Occupancy.urlPathSegment}\"][\"occupied\"]:" +
