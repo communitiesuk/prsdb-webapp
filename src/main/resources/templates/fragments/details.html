@@ -1,10 +1,10 @@
-<details th:fragment="details(summaryText, detailsText)" class="govuk-details">
+<details th:fragment="details(summaryText, content)" class="govuk-details">
     <summary class="govuk-details__summary">
         <span class="govuk-details__summary-text" th:text="${summaryText}">
             summaryText
         </span>
     </summary>
-    <div class="govuk-details__text" th:text="${detailsText}">
-        detailsText
+    <div class="govuk-details__text" th:replace="${content}">
+        content
     </div>
 </details>

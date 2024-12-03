@@ -9,6 +9,9 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.formModels.LandingPageFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.NumberOfHouseholdsFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.NumberOfPeopleFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
@@ -93,6 +96,64 @@ class PropertyRegistrationJourney(
                                         ),
                                 ),
                         ),
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
+                ),
+                Step(
+                    id = RegisterPropertyStepId.Occupancy,
+                    page =
+                        Page(
+                            formModel = OccupancyFormModel::class,
+                            templateName = "forms/propertyOccupancyForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.occupancy.fieldSetHeading",
+                                    "radioOptions" to
+                                        listOf(
+                                            RadiosButtonViewModel(
+                                                value = true,
+                                                labelMsgKey = "forms.occupancy.radios.option.yes.label",
+                                                hintMsgKey = "forms.occupancy.radios.option.yes.hint",
+                                            ),
+                                            RadiosButtonViewModel(
+                                                value = false,
+                                                labelMsgKey = "forms.occupancy.radios.option.no.label",
+                                                hintMsgKey = "forms.occupancy.radios.option.no.hint",
+                                            ),
+                                        ),
+                                ),
+                        ),
+                    nextAction = { journeyData, _ -> occupancyNextAction(journeyData) },
+                ),
+                Step(
+                    id = RegisterPropertyStepId.NumberOfHouseholds,
+                    page =
+                        Page(
+                            formModel = NumberOfHouseholdsFormModel::class,
+                            templateName = "forms/numberOfHouseholdsForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.numberOfHouseholds.fieldSetHeading",
+                                    "label" to "forms.numberOfHouseholds.label",
+                                ),
+                        ),
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.NumberOfPeople, null) },
+                ),
+                Step(
+                    id = RegisterPropertyStepId.NumberOfPeople,
+                    page =
+                        Page(
+                            formModel = NumberOfPeopleFormModel::class,
+                            templateName = "forms/numberOfPeopleForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.numberOfPeople.fieldSetHeading",
+                                    "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
+                                    "label" to "forms.numberOfPeople.label",
+                                ),
+                        ),
                     nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
                 ),
                 Step(
@@ -108,4 +169,21 @@ class PropertyRegistrationJourney(
                         ),
                 ),
             ),
-    )
+    ) {
+    companion object {
+        private fun occupancyNextAction(journeyData: JourneyData): Pair<RegisterPropertyStepId, Int?> =
+            when (
+                val propertyIsOccupied =
+                    objectToStringKeyedMap(journeyData[RegisterPropertyStepId.Occupancy.urlPathSegment])
+                        ?.get("occupied")
+                        .toString()
+            ) {
+                "true" -> Pair(RegisterPropertyStepId.NumberOfHouseholds, null)
+                "false" -> Pair(RegisterPropertyStepId.PlaceholderPage, null)
+                else -> throw IllegalArgumentException(
+                    "Invalid value for journeyData[\"${RegisterPropertyStepId.Occupancy.urlPathSegment}\"][\"occupied\"]:" +
+                        propertyIsOccupied,
+                )
+            }
+    }
+}

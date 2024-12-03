@@ -10,8 +10,9 @@
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'ownershipType', #{${fieldSetHeading}}, null)}">
         <th:block th:replace="~{fragments/forms/radios :: radios(null,'ownershipType',null, ${radioOptions})}"></th:block>
     </th:block>
-    <details
-            th:replace="~{fragments/details :: details(#{forms.ownershipType.details.summary.text}, #{forms.ownershipType.details.text})}"></details>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
+    <details id="details-content" th:replace="~{fragments/details :: details(#{'forms.ownershipType.details.summary.text'},~{::#details-content/content()})}">
+        <div class="govuk-details__text" th:text="#{'forms.ownershipType.details.text'}">detailsText</div>
+    </details>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
 </th:block>
 </html>
