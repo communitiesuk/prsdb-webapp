@@ -125,10 +125,14 @@ abstract class Journey<T : StepId>(
         while (!(currentStep.id == targetStep.id && currentSubPageNumber == targetSubPageNumber)) {
             val pageData = journeyDataService.getPageData(journeyData, currentStep.name, currentSubPageNumber)
             if (pageData == null || !currentStep.isSatisfied(validator, pageData)) return null
+
+            // This stores journeyData for only the journey path the user is on
+            // and excludes user data for pages in the journey that belong to a different path
             val stepData = journeyDataService.getPageData(journeyData, currentStep.name, null)
             if (stepData != null && currentStep.isSatisfied(validator, stepData)) {
                 filteredJourneyData[currentStep.name] = stepData
             }
+
             val (nextStepId, nextSubPageNumber) =
                 currentStep.nextAction(journeyData, currentSubPageNumber)
             val nextStep = steps.singleOrNull { step -> step.id == nextStepId } ?: return null
