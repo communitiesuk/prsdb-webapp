@@ -364,6 +364,7 @@ class JourneyTests {
 
         @Test
         fun `calls populateModelAndGetTemplateName() from page with filteredJourneyData as a parameter when is present`() {
+            // Arrange
             val page =
                 Page(
                     TestFormModel::class,
@@ -371,7 +372,7 @@ class JourneyTests {
                     mutableMapOf("testKey" to "testValue"),
                 )
             val spiedOnPage = spy(page)
-            // Arrange
+
             val testJourney =
                 TestJourney(
                     JourneyType.LANDLORD_REGISTRATION,
@@ -416,11 +417,10 @@ class JourneyTests {
                         ),
                 )
             val model = BindingAwareModelMap()
-            val pageDataStepOne: PageData = mutableMapOf("testPropertyStepOne" to "testPropertyValueStepOne")
-            val pageDataStepTwo: PageData = mutableMapOf("testPropertyTwo" to "testPropertyValueTwo")
-            val pageDataStepThree: PageData = mutableMapOf("testPropertyThree" to "testPropertyValueThree")
-            val pageDataStepFour: PageData = mutableMapOf("testPropertyFour" to "testPropertyValueFour")
-            val stepFour: Step<TestStepId> = testJourney.steps.singleOrNull { step -> step.id == TestStepId.StepFour }!!
+            val pageDataStepOne: PageData = mutableMapOf("testProperty" to "testProperty")
+            val pageDataStepTwo: PageData = mutableMapOf("testPropertyTwo" to "testProperty")
+            val pageDataStepThree: PageData = mutableMapOf("testProperty" to "testProperty")
+            val pageDataStepFour: PageData = mutableMapOf("testProperty" to "testProperty")
             val journeyData: JourneyData =
                 mutableMapOf(
                     TestStepId.StepOne.urlPathSegment to pageDataStepOne,
