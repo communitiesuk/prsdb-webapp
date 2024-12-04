@@ -9,18 +9,8 @@ class ManualAddressFormPageLandlordRegistration(
     page: Page,
 ) : FormBasePage(page, "/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.ManualAddress.urlPathSegment}") {
     val addressLineOneInput = form.getTextInput("addressLineOne")
-
-    fun getAddressLineOneError() = form.getErrorMessage(0)
-
     val addressLineTwoInput = form.getTextInput("addressLineTwo")
-
     val townOrCityInput = form.getTextInput("townOrCity")
-
-    fun getTownOrCityError() = form.getErrorMessage(1)
-
     val countyInput = form.getTextInput("county")
-
     val postcodeInput = form.getTextInput("postcode")
-
-    fun getPostcodeError() = form.getErrorMessage(2)
 }

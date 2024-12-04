@@ -377,8 +377,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         fun `Submitting with empty data fields returns an error`(page: Page) {
             val lookupAddressPage = navigator.goToLandlordRegistrationLookupAddressPage()
             lookupAddressPage.form.submit()
-            assertThat(lookupAddressPage.getPostcodeError()).containsText("Enter a postcode")
-            assertThat(lookupAddressPage.getHouseNameOrNumberError()).containsText("Enter a house name or number")
+            assertThat(lookupAddressPage.form.getErrorMessage("postcode")).containsText("Enter a postcode")
+            assertThat(lookupAddressPage.form.getErrorMessage("houseNameOrNumber")).containsText("Enter a house name or number")
         }
     }
 
@@ -425,10 +425,10 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         fun `Submitting empty data fields returns errors`(page: Page) {
             val manualAddressPage = navigator.goToLandlordRegistrationManualAddressPage()
             manualAddressPage.form.submit()
-            assertThat(manualAddressPage.getAddressLineOneError())
+            assertThat(manualAddressPage.form.getErrorMessage("addressLineOne"))
                 .containsText("Enter the first line of an address, typically the building and street")
-            assertThat(manualAddressPage.getTownOrCityError()).containsText("Enter town or city")
-            assertThat(manualAddressPage.getPostcodeError()).containsText("Enter postcode")
+            assertThat(manualAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
+            assertThat(manualAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
         }
     }
 
@@ -456,8 +456,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         fun `Submitting with empty data fields returns an error`(page: Page) {
             val lookupContactAddressPage = navigator.goToLandlordRegistrationLookupContactAddressPage()
             lookupContactAddressPage.form.submit()
-            assertThat(lookupContactAddressPage.getPostcodeError()).containsText("Enter a postcode")
-            assertThat(lookupContactAddressPage.getHouseNameOrNumberError()).containsText("Enter a house name or number")
+            assertThat(lookupContactAddressPage.form.getErrorMessage("postcode")).containsText("Enter a postcode")
+            assertThat(lookupContactAddressPage.form.getErrorMessage("houseNameOrNumber")).containsText("Enter a house name or number")
         }
     }
 
@@ -504,10 +504,10 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         fun `Submitting empty data fields returns errors`(page: Page) {
             val manualContactAddressPage = navigator.goToLandlordRegistrationManualContactAddressPage()
             manualContactAddressPage.form.submit()
-            assertThat(manualContactAddressPage.getAddressLineOneError())
+            assertThat(manualContactAddressPage.form.getErrorMessage("addressLineOne"))
                 .containsText("Enter the first line of an address, typically the building and street")
-            assertThat(manualContactAddressPage.getTownOrCityError()).containsText("Enter town or city")
-            assertThat(manualContactAddressPage.getPostcodeError()).containsText("Enter postcode")
+            assertThat(manualContactAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
+            assertThat(manualContactAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
         }
     }
 }

@@ -7,7 +7,8 @@ class Form(
     private val page: Page,
     locator: Locator = page.locator("form"),
 ) : BaseComponent(locator) {
-    fun getErrorMessage(index: Int = 0) = getChildComponent(".govuk-error-message", index = index)
+    fun getErrorMessage(fieldName: String? = null) =
+        getChildComponent(if (fieldName == null) ".govuk-error-message" else "p[id='$fieldName-error']")
 
     fun getTextInput(fieldName: String? = null): Locator = getChildComponent("input${if (fieldName == null) "" else "[name='$fieldName']"}")
 

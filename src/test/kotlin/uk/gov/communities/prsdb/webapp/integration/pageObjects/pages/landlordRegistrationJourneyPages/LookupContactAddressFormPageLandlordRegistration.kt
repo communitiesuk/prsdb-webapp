@@ -12,10 +12,5 @@ class LookupContactAddressFormPageLandlordRegistration(
         "/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.LookupContactAddress.urlPathSegment}",
     ) {
     val postcodeInput = form.getTextInput("postcode")
-
-    fun getPostcodeError() = form.getErrorMessage(0)
-
     val houseNameOrNumberInput = form.getTextInput("houseNameOrNumber")
-
-    fun getHouseNameOrNumberError() = form.getErrorMessage(1)
 }
