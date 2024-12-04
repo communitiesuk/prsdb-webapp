@@ -137,12 +137,14 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         @Test
         fun `Selecting and already-registered address navigates to the AlreadyRegistered step`(page: Page) {
+            // TODO: PRSD-637 - update this to another mocked service call when we query the database to check if the address is already registered
             whenever(
                 osPlacesClient.search("1", "EG1 2AB"),
             ).thenReturn(
                 "{'results':[{'DPA':{'ADDRESS':'1, Example Road, EG1 2AB'," +
                     "'LOCAL_CUSTODIAN_CODE':100,'UPRN':'1123456','BUILDING_NUMBER':1,'POSTCODE':'EG1 2AB'}}]}",
             )
+
             val selectAddressPage = navigator.goToPropertyRegistrationSelectAddressPage()
             selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
             selectAddressPage.form.submit()

@@ -66,7 +66,7 @@ class PropertyRegistrationJourney(
                             templateName = "forms/selectAddressForm",
                             content =
                                 mapOf(
-                                    "title" to "registerAsALandlord.title",
+                                    "title" to "registerProperty.title",
                                     "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
                                     "submitButtonText" to "forms.buttons.continue",
                                     "searchAgainUrl" to
@@ -91,7 +91,7 @@ class PropertyRegistrationJourney(
                             templateName = "forms/alreadyRegisteredForm",
                             content =
                                 mapOf(
-                                    "title" to "registerAsALandlord.title",
+                                    "title" to "registerProperty.title",
                                     "searchAgainUrl" to
                                         "/$REGISTER_PROPERTY_JOURNEY_URL/" +
                                         RegisterPropertyStepId.LookupAddress.urlPathSegment,
