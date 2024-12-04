@@ -1,0 +1,14 @@
+<th:block id="checkboxes-content" th:fragment="checkboxes(label, fieldName, hint, options)"
+          th:replace="~{fragments/forms/inputGroup :: inputGroup(${label}, ${fieldName}, ~{::#checkboxes-content/content()}, ${hint})}">
+    <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+        <div class="govuk-checkboxes__item" th:each="option: ${options}"
+             th:with="checkboxInputID=|${fieldName}-${option.valueStr}|">
+            <input class="govuk-checkboxes__input" type="checkbox"
+                   th:field="*{__${fieldName}__}" th:value="${option.value}" th:id="${checkboxInputID}">
+            <label class="govuk-label govuk-checkboxes__label" th:for="${checkboxInputID}"
+                   th:text="${option.labelMsgKey != null ? #messages.msg(option.labelMsgKey) : option.value}">
+                Option Label
+            </label>
+        </div>
+    </div>
+</th:block>
