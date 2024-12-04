@@ -16,7 +16,6 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
@@ -52,7 +51,6 @@ class JourneyTests {
         StepOne("step1"),
         StepTwo("step2"),
         StepThree("step3"),
-        StepFour("step4"),
     }
 
     class TestJourney(
