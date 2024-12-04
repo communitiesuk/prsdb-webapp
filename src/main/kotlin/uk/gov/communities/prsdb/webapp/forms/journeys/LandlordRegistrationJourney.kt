@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.PLACE_NAMES
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.pages.ConfirmIdentityPage
+import uk.gov.communities.prsdb.webapp.forms.pages.LandlordRegistrationSummaryPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.VerifyIdentityPage
@@ -332,6 +333,23 @@ class LandlordRegistrationJourney(
                         ),
                     // TODO: Set nextAction to next journey step
                     nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CheckAnswers, null) },
+                    saveAfterSubmit = false,
+                ),
+                Step(
+                    // TODO PRSD-372 update message value(s)
+                    id = LandlordRegistrationStepId.CheckAnswers,
+                    page =
+                        LandlordRegistrationSummaryPage(
+                            formModel = CheckAnswersFormModel::class,
+                            templateName = "forms/checkAnswersForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerAsALandlord.title",
+                                    "summaryName" to "registerAsALandlord.title",
+                                    "submitButtonText" to "forms.buttons.confirmAndContinue",
+                                ),
+                        ),
+                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Declaration, null) },
                     saveAfterSubmit = false,
                 ),
             ),
