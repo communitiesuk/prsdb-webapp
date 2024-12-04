@@ -3,14 +3,11 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRe
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.FormBasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.ManualAddressFormPage
 
 class ManualAddressFormPageLandlordRegistration(
     page: Page,
-) : FormBasePage(page, "/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.ManualAddress.urlPathSegment}") {
-    val addressLineOneInput = form.getTextInput("addressLineOne")
-    val addressLineTwoInput = form.getTextInput("addressLineTwo")
-    val townOrCityInput = form.getTextInput("townOrCity")
-    val countyInput = form.getTextInput("county")
-    val postcodeInput = form.getTextInput("postcode")
-}
+) : ManualAddressFormPage(
+        page,
+        "/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.ManualAddress.urlPathSegment}",
+    )
