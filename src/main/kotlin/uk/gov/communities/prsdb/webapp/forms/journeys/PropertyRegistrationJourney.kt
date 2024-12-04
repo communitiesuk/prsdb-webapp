@@ -47,7 +47,7 @@ class PropertyRegistrationJourney(
                             content =
                                 mapOf(
                                     "title" to "registerProperty.title",
-                                    "fieldSetHeading" to "forms.lookupAddress.fieldSetHeading",
+                                    "fieldSetHeading" to "forms.lookupAddress.propertyRegistration.fieldSetHeading",
                                     "fieldSetHint" to "forms.lookupAddress.fieldSetHint",
                                     "postcodeLabel" to "forms.lookupAddress.postcode.label",
                                     "postcodeHint" to "forms.lookupAddress.postcode.hint",
@@ -78,8 +78,10 @@ class PropertyRegistrationJourney(
                             addressLookupService = addressLookupService,
                             addressDataService = addressDataService,
                         ),
-                    isSatisfied = { _, pageData -> addressDataService.isSelectAddressSatisfied(pageData) },
-                    nextAction = { journeyData, _ -> selectAddressNextAction(journeyData, journeyDataService) },
+                    isSatisfied = { _, pageData ->
+                        isSelectAddressSatisfied(pageData, addressDataService)
+                    },
+                    nextAction = { journeyData, _ -> selectAddressNextAction(journeyData, journeyDataService, addressDataService) },
                 ),
                 Step(
                     id = RegisterPropertyStepId.AlreadyRegistered,
@@ -256,27 +258,34 @@ class PropertyRegistrationJourney(
                 )
             }
 
+        private fun isSelectAddressSatisfied(
+            pageData: PageData,
+            addressDataService: AddressDataService,
+        ): Boolean {
+            val selectedAddress = pageData["address"].toString()
+            return selectedAddress == MANUAL_ADDRESS_CHOSEN || addressDataService.getAddressData(selectedAddress) != null
+        }
+
         private fun selectAddressNextAction(
             journeyData: JourneyData,
             journeyDataService: JourneyDataService,
-        ): Pair<RegisterPropertyStepId, Int?> =
-            if (journeyDataService.getFieldValue(
-                    journeyData,
-                    RegisterPropertyStepId.SelectAddress.urlPathSegment,
-                    "address",
-                ) == MANUAL_ADDRESS_CHOSEN
-            ) {
-                Pair(RegisterPropertyStepId.ManualAddress, null)
+            addressDataService: AddressDataService,
+        ): Pair<RegisterPropertyStepId, Int?> {
+            val singleLineAddress =
+                journeyDataService
+                    .getFieldValue(journeyData, RegisterPropertyStepId.SelectAddress.urlPathSegment, "address")
+            if (singleLineAddress == MANUAL_ADDRESS_CHOSEN) {
+                return Pair(RegisterPropertyStepId.ManualAddress, null)
             } else {
-                // TODO: Check if the selected address is already registered (is the uprn in the address table).
-                // If it is, redirect to the already registered page
-                if (addressAlreadyRegistered()) {
-                    Pair(RegisterPropertyStepId.AlreadyRegistered, null)
-                } else {
-                    Pair(RegisterPropertyStepId.PropertyType, null)
+                val addressData = addressDataService.getAddressData(singleLineAddress)
+                if (addressData?.uprn != null && addressAlreadyRegistered(addressData.uprn)) {
+                    return Pair(RegisterPropertyStepId.AlreadyRegistered, null)
                 }
+                return Pair(RegisterPropertyStepId.PropertyType, null)
             }
+        }
 
-        private fun addressAlreadyRegistered(): Boolean = true
+        // TODO PRSD-637: Check the database to see if this property is registered.
+        private fun addressAlreadyRegistered(uprn: Long): Boolean = uprn == 1123456.toLong()
     }
 }

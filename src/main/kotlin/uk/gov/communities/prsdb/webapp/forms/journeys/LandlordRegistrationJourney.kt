@@ -221,7 +221,7 @@ class LandlordRegistrationJourney(
                             addressLookupService = addressLookupService,
                             addressDataService = addressDataService,
                         ),
-                    isSatisfied = { _, pageData -> addressDataService.isSelectAddressSatisfied(pageData) },
+                    isSatisfied = { _, pageData -> isSelectAddressSatisfied(pageData, addressDataService) },
                     nextAction = { journeyData, _ -> selectAddressNextAction(journeyData, journeyDataService) },
                     saveAfterSubmit = false,
                 ),
@@ -308,7 +308,7 @@ class LandlordRegistrationJourney(
                             addressLookupService = addressLookupService,
                             addressDataService = addressDataService,
                         ),
-                    isSatisfied = { _, pageData -> addressDataService.isSelectAddressSatisfied(pageData) },
+                    isSatisfied = { _, pageData -> isSelectAddressSatisfied(pageData, addressDataService) },
                     nextAction = { journeyData, _ -> selectContactAddressNextAction(journeyData, journeyDataService) },
                     saveAfterSubmit = false,
                 ),
@@ -383,6 +383,14 @@ class LandlordRegistrationJourney(
                 // TODO: Set nextAction to next journey step
                 Pair(LandlordRegistrationStepId.CheckAnswers, null)
             }
+
+        private fun isSelectAddressSatisfied(
+            pageData: PageData,
+            addressDataService: AddressDataService,
+        ): Boolean {
+            val selectedAddress = pageData["address"].toString()
+            return selectedAddress == MANUAL_ADDRESS_CHOSEN || addressDataService.getAddressData(selectedAddress) != null
+        }
 
         private fun doesJourneyDataContainVerifiedIdentity(journeyData: JourneyData): Boolean {
             val pageData = objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment]) ?: mapOf()
