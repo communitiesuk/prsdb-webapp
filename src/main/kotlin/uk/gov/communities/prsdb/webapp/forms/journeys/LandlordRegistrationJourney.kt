@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.CountryOfResidenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.DateOfBirthFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.DeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.InternationalAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LookupAddressFormModel
@@ -24,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
@@ -334,6 +336,28 @@ class LandlordRegistrationJourney(
                     nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CheckAnswers, null) },
                     saveAfterSubmit = false,
                 ),
+                Step(
+                    id = LandlordRegistrationStepId.Declaration,
+                    page =
+                        Page(
+                            formModel = DeclarationFormModel::class,
+                            templateName = "forms/declarationForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerAsALandlord.title",
+                                    "options" to
+                                        listOf(
+                                            CheckboxViewModel(
+                                                value = "true",
+                                                labelMsgKey = "forms.declaration.checkbox.label",
+                                            ),
+                                        ),
+                                    "submitButtonText" to "forms.buttons.confirmAndCompleteRegistration",
+                                ),
+                        ),
+                    nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Confirmation, null) },
+                    saveAfterSubmit = false,
+                ),
             ),
     ) {
     companion object {
@@ -390,7 +414,8 @@ class LandlordRegistrationJourney(
         ): String = objectToStringKeyedMap(journeyData[urlPathSegment])?.get("address").toString()
 
         private fun doesJourneyDataContainVerifiedIdentity(journeyData: JourneyData): Boolean {
-            val pageData = objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment]) ?: mapOf()
+            val pageData =
+                objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment]) ?: mapOf()
             return pageData[VerifiedIdentityModel.NAME_KEY] is String &&
                 pageData[VerifiedIdentityModel.BIRTH_DATE_KEY] is LocalDate
         }
