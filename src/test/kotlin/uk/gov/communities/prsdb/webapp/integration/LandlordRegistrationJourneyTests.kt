@@ -44,12 +44,12 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         whenever(
             osPlacesClient.search(any(), any()),
         ).thenReturn(
-            "{'results':[{'DPA':{'ADDRESS':'1, Example Road, EG'," +
-                "'LOCAL_CUSTODIAN_CODE':100,'UPRN':'1','BUILDING_NUMBER':1,'POSTCODE':'EG'}}]}",
+            "{'results':[{'DPA':{'ADDRESS':'1, Example Road, EG1 2AB'," +
+                "'LOCAL_CUSTODIAN_CODE':100,'UPRN':'1','BUILDING_NUMBER':1,'POSTCODE':'EG1 2AB'}}]}",
         )
     }
 
-    // TODO: Add the steps before and after the address section of the journey
+    // TODO PRSD-622: Add the steps before and after the address section of the journey
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in`(page: Page) {
         val countryOfResidencePage = navigator.goToLandlordRegistrationCountryOfResidencePage()
@@ -57,12 +57,12 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         countryOfResidencePage.form.submit()
 
         val lookupAddressPage = assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
-        lookupAddressPage.postcodeInput.fill("EG")
-        lookupAddressPage.houseNameOrNumberInput.fill("5")
+        lookupAddressPage.postcodeInput.fill("EG1 2AB")
+        lookupAddressPage.houseNameOrNumberInput.fill("1")
         lookupAddressPage.form.submit()
 
         val selectAddressPage = assertPageIs(page, SelectAddressFormPageLandlordRegistration::class)
-        selectAddressPage.radios.selectValue("1, Example Road, EG")
+        selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
         selectAddressPage.form.submit()
 
         assertPageIs(page, SummaryPageLandlordRegistration::class)
@@ -77,16 +77,16 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         countryOfResidencePage.form.submit()
 
         val internationalAddressPage = assertPageIs(page, InternationalAddressFormPageLandlordRegistration::class)
-        internationalAddressPage.textAreaInput.fill("a")
+        internationalAddressPage.textAreaInput.fill("international address")
         internationalAddressPage.form.submit()
 
         val lookupContactAddressPage = assertPageIs(page, LookupContactAddressFormPageLandlordRegistration::class)
-        lookupContactAddressPage.postcodeInput.fill("EG")
-        lookupContactAddressPage.houseNameOrNumberInput.fill("5")
+        lookupContactAddressPage.postcodeInput.fill("EG1 2AB")
+        lookupContactAddressPage.houseNameOrNumberInput.fill("1")
         lookupContactAddressPage.form.submit()
 
         val selectContactAddressPage = assertPageIs(page, SelectContactAddressFormPageLandlordRegistration::class)
-        selectContactAddressPage.radios.selectValue("1, Example Road, EG")
+        selectContactAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
         selectContactAddressPage.form.submit()
 
         assertPageIs(page, SummaryPageLandlordRegistration::class)
@@ -412,11 +412,11 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Submitting valid data redirects to the next step`(page: Page) {
             val manualAddressPage = navigator.goToLandlordRegistrationManualAddressPage()
-            manualAddressPage.addressLineOneInput.fill("a")
-            manualAddressPage.addressLineTwoInput.fill("b")
-            manualAddressPage.townOrCityInput.fill("c")
-            manualAddressPage.countyInput.fill("d")
-            manualAddressPage.postcodeInput.fill("e")
+            manualAddressPage.addressLineOneInput.fill("address line one")
+            manualAddressPage.addressLineTwoInput.fill("address line two")
+            manualAddressPage.townOrCityInput.fill("town")
+            manualAddressPage.countyInput.fill("county")
+            manualAddressPage.postcodeInput.fill("EG1 2AB")
             manualAddressPage.form.submit()
             assertPageIs(page, SummaryPageLandlordRegistration::class)
         }
@@ -444,7 +444,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Submitting with a too long address returns an error`(page: Page) {
             val internationalAddressPage = navigator.goToLandlordRegistrationInternationalAddressPage()
-            internationalAddressPage.textAreaInput.fill("a".repeat(1001))
+            internationalAddressPage.textAreaInput.fill("too long address".repeat(1001))
             internationalAddressPage.form.submit()
             assertThat(internationalAddressPage.form.getErrorMessage()).containsText("Address must be 1000 characters or fewer")
         }
@@ -491,11 +491,11 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Submitting valid data redirects to the next step`(page: Page) {
             val manualContactAddressPage = navigator.goToLandlordRegistrationManualContactAddressPage()
-            manualContactAddressPage.addressLineOneInput.fill("a")
-            manualContactAddressPage.addressLineTwoInput.fill("b")
-            manualContactAddressPage.townOrCityInput.fill("c")
-            manualContactAddressPage.countyInput.fill("d")
-            manualContactAddressPage.postcodeInput.fill("e")
+            manualContactAddressPage.addressLineOneInput.fill("address line one")
+            manualContactAddressPage.addressLineTwoInput.fill("address line two")
+            manualContactAddressPage.townOrCityInput.fill("town")
+            manualContactAddressPage.countyInput.fill("county")
+            manualContactAddressPage.postcodeInput.fill("EG1 2AB")
             manualContactAddressPage.form.submit()
             assertPageIs(page, SummaryPageLandlordRegistration::class)
         }
