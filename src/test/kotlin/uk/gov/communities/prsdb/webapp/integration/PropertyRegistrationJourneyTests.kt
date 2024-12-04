@@ -3,21 +3,38 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.springframework.test.context.jdbc.Sql
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AlreadyRegisteredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HouseholdsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
 import java.net.URI
 
 @Sql("/data-local.sql")
 class PropertyRegistrationJourneyTests : IntegrationTest() {
+    @BeforeEach
+    fun setup() {
+        whenever(
+            osPlacesClient.search(any(), any()),
+        ).thenReturn(
+            "{'results':[{'DPA':{'ADDRESS':'1, Example Road, EG1 2AB'," +
+                "'LOCAL_CUSTODIAN_CODE':100,'UPRN':'1','BUILDING_NUMBER':1,'POSTCODE':'EG1 2AB'}}]}",
+        )
+    }
+
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in`(page: Page) {
         // TODO: this can be added to as more steps are added to the journey
@@ -26,6 +43,22 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
         assertThat(registerPropertyStartPage.heading).containsText("Enter your property details")
         registerPropertyStartPage.startButton.click()
+        val addressLookupPage = assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
+
+        // Address lookup step - render page
+        assertThat(addressLookupPage.form.getFieldsetHeading()).containsText("What is the property address?")
+        // fill in and submit
+        addressLookupPage.postcodeInput.fill("EG1 2AB")
+        addressLookupPage.houseNameOrNumberInput.fill("1")
+        addressLookupPage.form.submit()
+        // goes to the next page
+        val selectAddressPage = assertPageIs(page, SelectAddressFormPagePropertyRegistration::class)
+
+        // Select address step - render page
+        assertThat(selectAddressPage.form.getFieldsetHeading()).containsText("Select an address")
+        // fill in and submit
+        selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
+        selectAddressPage.form.submit()
         val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
 
         // Property type selection step - render page
@@ -63,6 +96,58 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         peoplePage.peopleInput.fill("2")
         peoplePage.form.submit()
         assertEquals("/register-property/placeholder", URI(page.url()).path)
+    }
+
+    @Nested
+    inner class LookupAddressStep {
+        @Test
+        fun `Submitting with empty data fields returns an error`(page: Page) {
+            val lookupAddressPage = navigator.goToPropertyRegistrationLookupAddressPage()
+            lookupAddressPage.form.submit()
+            assertThat(lookupAddressPage.form.getErrorMessage("postcode")).containsText("Enter a postcode")
+            assertThat(lookupAddressPage.form.getErrorMessage("houseNameOrNumber")).containsText("Enter a house name or number")
+        }
+    }
+
+    @Nested
+    inner class SelectAddressStep {
+        @Test
+        fun `Submitting with no option selected returns an error`(page: Page) {
+            val selectAddressPage = navigator.goToPropertyRegistrationSelectAddressPage()
+            selectAddressPage.form.submit()
+            assertThat(selectAddressPage.form.getErrorMessage()).containsText("Select an address")
+        }
+
+        @Test
+        fun `Clicking Search Again navigates to the previous step`(page: Page) {
+            val selectAddressPage = navigator.goToPropertyRegistrationSelectAddressPage()
+            selectAddressPage.searchAgain.click()
+            assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Selecting the manual option navigates to the ManualAddress step`(page: Page) {
+            val selectAddressPage = navigator.goToPropertyRegistrationSelectAddressPage()
+            selectAddressPage.radios.selectValue(MANUAL_ADDRESS_CHOSEN)
+            selectAddressPage.form.submit()
+            // TODO: PRSD-491 - check the actual page here rather than just the url once it is added
+            assertEquals("/register-property/manual-address", URI(page.url()).path)
+            // assertPageIs(page, ManualAddressFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Selecting and already-registered address navigates to the AlreadyRegistered step`(page: Page) {
+            whenever(
+                osPlacesClient.search("1", "EG1 2AB"),
+            ).thenReturn(
+                "{'results':[{'DPA':{'ADDRESS':'1, Example Road, EG1 2AB'," +
+                    "'LOCAL_CUSTODIAN_CODE':100,'UPRN':'1123456','BUILDING_NUMBER':1,'POSTCODE':'EG1 2AB'}}]}",
+            )
+            val selectAddressPage = navigator.goToPropertyRegistrationSelectAddressPage()
+            selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
+            selectAddressPage.form.submit()
+            assertPageIs(page, AlreadyRegisteredFormPagePropertyRegistration::class)
+        }
     }
 
     @Nested

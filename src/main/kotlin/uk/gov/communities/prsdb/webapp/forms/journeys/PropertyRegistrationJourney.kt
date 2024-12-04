@@ -286,6 +286,9 @@ class PropertyRegistrationJourney(
         }
 
         // TODO PRSD-637: Check the database to see if this property is registered.
-        private fun addressAlreadyRegistered(uprn: Long): Boolean = uprn == 1123456.toLong()
+        private fun addressAlreadyRegistered(uprn: Long): Boolean {
+            val testValue = 1
+            return uprn == 1123456.toLong()
+        }
     }
 }
