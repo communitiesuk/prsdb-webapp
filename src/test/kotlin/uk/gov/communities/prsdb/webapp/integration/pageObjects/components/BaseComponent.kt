@@ -50,6 +50,11 @@ abstract class BaseComponent(
             page: Page,
             text: String? = null,
         ) = getComponent(page, ".govuk-button", if (text == null) null else LocatorOptions().setHasText(text))
+
+        fun getLink(
+            page: Page,
+            text: String,
+        ) = getComponent(page, ".govuk-link", LocatorOptions().setHasText(text))
     }
 
     init {
