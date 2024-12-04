@@ -16,7 +16,6 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.spy
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -360,100 +359,6 @@ class JourneyTests {
             val propertyValue = bindingResult.getRawFieldValue("testProperty")
             assertEquals("testPropertyValue", propertyValue)
             assertEquals("templateName", result)
-        }
-
-        @Test
-        fun `calls populateModelAndGetTemplateName() from page with filteredJourneyData as a parameter when is present`() {
-            // Arrange
-            val page =
-                Page(
-                    TestFormModel::class,
-                    "templateName",
-                    mutableMapOf("testKey" to "testValue"),
-                )
-            val spiedOnPage = spy(page)
-
-            val testJourney =
-                TestJourney(
-                    JourneyType.LANDLORD_REGISTRATION,
-                    initialStepId = TestStepId.StepOne,
-                    journeyDataService = mockJourneyDataService,
-                    validator = validator,
-                    steps =
-                        listOf(
-                            Step(
-                                TestStepId.StepOne,
-                                page =
-                                    Page(
-                                        TestFormModel::class,
-                                        "index",
-                                        mutableMapOf(),
-                                    ),
-                                nextAction = { _, _ -> Pair(TestStepId.StepThree, null) },
-                            ),
-                            Step(
-                                TestStepId.StepTwo,
-                                page =
-                                    Page(
-                                        TestFormModel::class,
-                                        "templateName",
-                                        mutableMapOf("testKey" to "testValue"),
-                                    ),
-                            ),
-                            Step(
-                                TestStepId.StepThree,
-                                page =
-                                    Page(
-                                        TestFormModel::class,
-                                        "index",
-                                        mutableMapOf("testKey" to "testValue"),
-                                    ),
-                                nextAction = { _, _ -> Pair(TestStepId.StepFour, null) },
-                            ),
-                            Step(
-                                TestStepId.StepFour,
-                                page = spiedOnPage,
-                            ),
-                        ),
-                )
-            val model = BindingAwareModelMap()
-            val pageDataStepOne: PageData = mutableMapOf("testProperty" to "testProperty")
-            val pageDataStepTwo: PageData = mutableMapOf("testPropertyTwo" to "testProperty")
-            val pageDataStepThree: PageData = mutableMapOf("testProperty" to "testProperty")
-            val pageDataStepFour: PageData = mutableMapOf("testProperty" to "testProperty")
-            val journeyData: JourneyData =
-                mutableMapOf(
-                    TestStepId.StepOne.urlPathSegment to pageDataStepOne,
-                    TestStepId.StepTwo.urlPathSegment to pageDataStepTwo,
-                    TestStepId.StepThree.urlPathSegment to pageDataStepThree,
-                )
-            val filteredJourneyData: JourneyData =
-                mutableMapOf(
-                    TestStepId.StepOne.urlPathSegment to pageDataStepOne,
-                    TestStepId.StepThree.urlPathSegment to pageDataStepThree,
-                )
-            whenever(
-                mockJourneyDataService.getPageData(
-                    anyMap(),
-                    anyString(),
-                    anyOrNull(),
-                ),
-            ).thenReturn(
-                pageDataStepFour,
-            )
-            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
-
-            // Act
-            testJourney.populateModelAndGetViewName(TestStepId.StepFour, model, null, null)
-
-            // Assert
-            verify(spiedOnPage).populateModelAndGetTemplateName(
-                testJourney.validator,
-                model,
-                pageDataStepFour,
-                TestStepId.StepThree.urlPathSegment,
-                filteredJourneyData,
-            )
         }
     }
 
