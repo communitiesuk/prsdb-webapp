@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
@@ -13,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.formModels.LookupAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NumberOfPeopleFormModel
@@ -20,7 +22,9 @@ import uk.gov.communities.prsdb.webapp.models.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.SelectLocalAuthorityFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -98,6 +102,43 @@ class PropertyRegistrationJourney(
                                 ),
                             journeyDataService = journeyDataService,
                             urlPathSegment = RegisterPropertyStepId.SelectAddress.urlPathSegment,
+                        ),
+                ),
+                Step(
+                    id = RegisterPropertyStepId.ManualAddress,
+                    page =
+                        Page(
+                            formModel = ManualAddressFormModel::class,
+                            templateName = "forms/manualAddressForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.manualAddress.propertyRegistration.fieldSetHeading",
+                                    "fieldSetHint" to "forms.manualAddress.fieldSetHint",
+                                    "addressLineOneLabel" to "forms.manualAddress.addressLineOne.label",
+                                    "addressLineTwoLabel" to "forms.manualAddress.addressLineTwo.label",
+                                    "townOrCityLabel" to "forms.manualAddress.townOrCity.label",
+                                    "countyLabel" to "forms.manualAddress.county.label",
+                                    "postcodeLabel" to "forms.manualAddress.postcode.label",
+                                    "submitButtonText" to "forms.buttons.saveAndContinue",
+                                ),
+                        ),
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.SelectLocalAuthority, null) },
+                ),
+                Step(
+                    id = RegisterPropertyStepId.SelectLocalAuthority,
+                    page =
+                        Page(
+                            formModel = SelectLocalAuthorityFormModel::class,
+                            templateName = "forms/selectLocalAuthorityForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.selectLocalAuthority.fieldSetHeading",
+                                    "fieldSetHint" to "forms.selectLocalAuthority.fieldSetHint",
+                                    "selectLabel" to "forms.selectLocalAuthority.select.label",
+                                    "selectOptions" to LOCAL_AUTHORITIES.map { SelectViewModel(it.uprn, it.displayName) },
+                                ),
                         ),
                 ),
                 Step(
