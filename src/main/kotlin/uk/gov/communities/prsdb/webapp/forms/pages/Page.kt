@@ -6,6 +6,7 @@ import org.springframework.validation.BindingResult
 import org.springframework.validation.Validator
 import org.springframework.web.bind.WebDataBinder
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -31,6 +32,14 @@ open class Page(
         }
         return templateName
     }
+
+    open fun populateModelAndGetTemplateName(
+        validator: Validator,
+        model: Model,
+        pageData: Map<String, Any?>?,
+        prevStepUrl: String?,
+        journeyData: JourneyData?,
+    ): String = populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)
 
     fun isSatisfied(
         validator: Validator,
