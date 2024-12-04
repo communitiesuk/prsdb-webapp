@@ -11,7 +11,14 @@ data class RegistrationNumberDataModel(
     val number: Long,
 ) {
     companion object {
-        fun parseRegNum(regNumString: String): RegistrationNumberDataModel {
+        fun parseOrNull(regNumString: String): RegistrationNumberDataModel? =
+            try {
+                parse(regNumString)
+            } catch (_: Exception) {
+                null
+            }
+
+        fun parse(regNumString: String): RegistrationNumberDataModel {
             val baseRegNumString = getBaseRegNumString(regNumString)
 
             validateBaseRegNumString(baseRegNumString)
@@ -53,4 +60,6 @@ data class RegistrationNumberDataModel(
             "-" +
             regNumString.substring(REG_NUM_SEG_LENGTH)
     }
+
+    fun isType(type: RegistrationNumberType) = this.type == type
 }

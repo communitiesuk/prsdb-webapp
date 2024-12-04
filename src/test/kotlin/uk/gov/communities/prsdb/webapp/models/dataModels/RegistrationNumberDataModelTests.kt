@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.MAX_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.MIN_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import kotlin.test.assertNull
 
 class RegistrationNumberDataModelTests {
     companion object {
@@ -51,17 +52,17 @@ class RegistrationNumberDataModelTests {
 
     @ParameterizedTest
     @MethodSource("provideParseableStringsAndRegNums")
-    fun `stringToRegNum returns a corresponding registration number data model`(
+    fun `parse returns a corresponding registration number data model`(
         parseableString: String,
         expectedRegNum: RegistrationNumberDataModel,
     ) {
-        assertEquals(RegistrationNumberDataModel.parseRegNum(parseableString), expectedRegNum)
+        assertEquals(RegistrationNumberDataModel.parse(parseableString), expectedRegNum)
     }
 
     @ParameterizedTest
     @MethodSource("provideNonParseableRegNumStrings")
-    fun `stringToRegNum throws an illegal argument exception when given an invalid registration number`(nonParseableString: String) {
-        assertThrows<IllegalArgumentException> { RegistrationNumberDataModel.parseRegNum(nonParseableString) }
+    fun `parse throws an illegal argument exception when given an invalid registration number`(nonParseableString: String) {
+        assertThrows<IllegalArgumentException> { RegistrationNumberDataModel.parse(nonParseableString) }
     }
 
     @ParameterizedTest
@@ -71,5 +72,20 @@ class RegistrationNumberDataModelTests {
         expectedString: String,
     ) {
         assertEquals(regNum.toString(), expectedString)
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideParseableStringsAndRegNums")
+    fun `parseOrNull returns a corresponding registration number data model`(
+        parseableString: String,
+        expectedRegNum: RegistrationNumberDataModel,
+    ) {
+        assertEquals(RegistrationNumberDataModel.parseOrNull(parseableString), expectedRegNum)
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideNonParseableRegNumStrings")
+    fun `parseOrNull returns null when given an invalid registration number`(nonParseableString: String) {
+        assertNull(RegistrationNumberDataModel.parseOrNull(nonParseableString))
     }
 }
