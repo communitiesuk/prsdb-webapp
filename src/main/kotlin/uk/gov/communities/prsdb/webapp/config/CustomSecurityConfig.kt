@@ -47,6 +47,8 @@ class CustomSecurityConfig(
                     .permitAll()
                     .requestMatchers("/local/**")
                     .permitAll()
+                    .requestMatchers("/example-search/**")
+                    .permitAll()
                     .anyRequest()
                     .authenticated()
             }.oauth2Login(Customizer.withDefaults())
@@ -54,6 +56,7 @@ class CustomSecurityConfig(
                 logout.logoutSuccessHandler(oidcLogoutSuccessHandler())
             }.csrf { requests ->
                 requests.ignoringRequestMatchers("/local/**")
+                requests.ignoringRequestMatchers("/example-search/**")
             }
 
         return http.build()
