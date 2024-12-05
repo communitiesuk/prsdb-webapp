@@ -262,8 +262,8 @@ class PropertyRegistrationJourney(
         ): Pair<RegisterPropertyStepId, Int?> {
             val singleLineAddress =
                 journeyDataService
-                    .getFieldValue(journeyData, RegisterPropertyStepId.SelectAddress.urlPathSegment, "address")
-            if (singleLineAddress == MANUAL_ADDRESS_CHOSEN) {
+                    .getFieldStringValue(journeyData, RegisterPropertyStepId.SelectAddress.urlPathSegment, "address")
+            if (singleLineAddress == MANUAL_ADDRESS_CHOSEN || singleLineAddress == null) {
                 return Pair(RegisterPropertyStepId.ManualAddress, null)
             } else {
                 val addressData = addressDataService.getAddressData(singleLineAddress)
@@ -275,9 +275,6 @@ class PropertyRegistrationJourney(
         }
 
         // TODO PRSD-637: Check the database to see if this property is registered.
-        private fun addressAlreadyRegistered(uprn: Long): Boolean {
-            val testValue = 1
-            return uprn == 1123456.toLong()
-        }
+        private fun addressAlreadyRegistered(uprn: Long): Boolean = uprn == 1123456.toLong()
     }
 }

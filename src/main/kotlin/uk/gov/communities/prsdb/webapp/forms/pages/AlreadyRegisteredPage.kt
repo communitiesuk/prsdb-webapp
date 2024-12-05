@@ -20,7 +20,7 @@ class AlreadyRegisteredPage(
         prevStepUrl: String?,
     ): String {
         val journeyData = journeyDataService.getJourneyDataFromSession()
-        model.addAttribute("singleLineAddress", journeyDataService.getFieldValue(journeyData, urlPathSegment, "address"))
+        model.addAttribute("singleLineAddress", journeyDataService.getFieldStringValue(journeyData, urlPathSegment, "address"))
 
         return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)
     }

@@ -372,7 +372,7 @@ class LandlordRegistrationJourney(
             journeyData: JourneyData,
             journeyDataService: JourneyDataService,
         ): Pair<LandlordRegistrationStepId, Int?> =
-            if (journeyDataService.getFieldValue(
+            if (journeyDataService.getFieldStringValue(
                     journeyData,
                     LandlordRegistrationStepId.SelectAddress.urlPathSegment,
                     "address",
@@ -388,7 +388,7 @@ class LandlordRegistrationJourney(
             journeyData: JourneyData,
             journeyDataService: JourneyDataService,
         ): Pair<LandlordRegistrationStepId, Int?> =
-            if (journeyDataService.getFieldValue(
+            if (journeyDataService.getFieldStringValue(
                     journeyData,
                     LandlordRegistrationStepId.SelectContactAddress.urlPathSegment,
                     "address",
