@@ -134,7 +134,13 @@ class PropertyRegistrationJourney(
                                     "fieldSetHeading" to "forms.selectLocalAuthority.fieldSetHeading",
                                     "fieldSetHint" to "forms.selectLocalAuthority.fieldSetHint",
                                     "selectLabel" to "forms.selectLocalAuthority.select.label",
-                                    "selectOptions" to LOCAL_AUTHORITIES.map { SelectViewModel(it.uprn, it.displayName) },
+                                    "selectOptions" to
+                                        LOCAL_AUTHORITIES.map {
+                                            SelectViewModel(
+                                                value = it.uprn,
+                                                label = it.displayName,
+                                            )
+                                        },
                                 ),
                         ),
                 ),
