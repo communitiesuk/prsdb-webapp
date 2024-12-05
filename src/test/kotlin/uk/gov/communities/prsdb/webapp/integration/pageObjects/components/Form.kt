@@ -20,6 +20,8 @@ class Form(
 
     fun getTextArea() = getChildComponent("textarea")
 
+    fun getCheckboxes() = Checkboxes(page)
+
     fun submit() {
         getSubmitButton().click()
         page.waitForLoadState()
