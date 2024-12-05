@@ -9,8 +9,8 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
-import uk.gov.communities.prsdb.webapp.models.formModels.LandingPageFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 
@@ -30,7 +30,7 @@ class LaUserRegistrationJourney(
                     id = RegisterLaUserStepId.LandingPage,
                     page =
                         Page(
-                            formModel = LandingPageFormModel::class,
+                            formModel = NoInputFormModel::class,
                             templateName = "registerLaUser",
                             content =
                                 mapOf(

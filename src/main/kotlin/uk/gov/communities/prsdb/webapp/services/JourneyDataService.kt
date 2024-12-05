@@ -88,4 +88,14 @@ class JourneyDataService(
     fun clearJourneyDataFromSession() {
         session.setAttribute("journeyData", null)
     }
+
+    fun getFieldStringValue(
+        journeyData: JourneyData,
+        urlPathSegment: String,
+        fieldName: String,
+        subPageNumber: Int? = null,
+    ): String? {
+        val pageData = getPageData(journeyData, urlPathSegment, subPageNumber)
+        return pageData?.get(fieldName)?.toString()
+    }
 }

@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class AddressDataModel(
     val singleLineAddress: String,
     val custodianCode: String,
-    val uprn: Int? = null,
+    val uprn: Long? = null,
     val organisation: String? = null,
     val subBuilding: String? = null,
     val buildingName: String? = null,

@@ -41,7 +41,7 @@ open class Page(
         journeyData: JourneyData?,
     ): String = populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)
 
-    fun isSatisfied(
+    open fun isSatisfied(
         validator: Validator,
         formData: Map<String, Any?>,
     ): Boolean {

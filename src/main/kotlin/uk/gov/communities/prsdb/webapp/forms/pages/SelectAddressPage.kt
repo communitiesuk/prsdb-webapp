@@ -58,4 +58,12 @@ class SelectAddressPage(
 
         return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)
     }
+
+    override fun isSatisfied(
+        validator: Validator,
+        formData: Map<String, Any?>,
+    ): Boolean {
+        val selectedAddress = formData["address"].toString()
+        return selectedAddress == MANUAL_ADDRESS_CHOSEN || addressDataService.getAddressData(selectedAddress) != null
+    }
 }

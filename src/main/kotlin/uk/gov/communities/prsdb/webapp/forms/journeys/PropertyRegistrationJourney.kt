@@ -2,32 +2,101 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.forms.pages.AlreadyRegisteredPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
+import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.models.formModels.LandingPageFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.LookupAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PropertyTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.services.AddressDataService
+import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 @Component
 class PropertyRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
+    addressLookupService: AddressLookupService,
+    addressDataService: AddressDataService,
 ) : Journey<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
-        initialStepId = RegisterPropertyStepId.PropertyType,
+        initialStepId = RegisterPropertyStepId.LookupAddress,
         validator = validator,
         journeyDataService = journeyDataService,
         steps =
             listOf(
+                Step(
+                    id = RegisterPropertyStepId.LookupAddress,
+                    page =
+                        Page(
+                            formModel = LookupAddressFormModel::class,
+                            templateName = "forms/lookupAddressForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.lookupAddress.propertyRegistration.fieldSetHeading",
+                                    "fieldSetHint" to "forms.lookupAddress.fieldSetHint",
+                                    "postcodeLabel" to "forms.lookupAddress.postcode.label",
+                                    "postcodeHint" to "forms.lookupAddress.postcode.hint",
+                                    "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
+                                    "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
+                                    "submitButtonText" to "forms.buttons.saveAndContinue",
+                                ),
+                        ),
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.SelectAddress, null) },
+                ),
+                Step(
+                    id = RegisterPropertyStepId.SelectAddress,
+                    page =
+                        SelectAddressPage(
+                            formModel = SelectAddressFormModel::class,
+                            templateName = "forms/selectAddressForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
+                                    "submitButtonText" to "forms.buttons.saveAndContinue",
+                                    "searchAgainUrl" to
+                                        "/$REGISTER_PROPERTY_JOURNEY_URL/" +
+                                        RegisterPropertyStepId.LookupAddress.urlPathSegment,
+                                ),
+                            urlPathSegment = RegisterPropertyStepId.LookupAddress.urlPathSegment,
+                            journeyDataService = journeyDataService,
+                            addressLookupService = addressLookupService,
+                            addressDataService = addressDataService,
+                        ),
+                    nextAction = { journeyData, _ -> selectAddressNextAction(journeyData, journeyDataService, addressDataService) },
+                ),
+                Step(
+                    id = RegisterPropertyStepId.AlreadyRegistered,
+                    page =
+                        AlreadyRegisteredPage(
+                            formModel = NoInputFormModel::class,
+                            templateName = "alreadyRegisteredPropertyPage",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "searchAgainUrl" to
+                                        "/$REGISTER_PROPERTY_JOURNEY_URL/" +
+                                        RegisterPropertyStepId.LookupAddress.urlPathSegment,
+                                ),
+                            journeyDataService = journeyDataService,
+                            urlPathSegment = RegisterPropertyStepId.SelectAddress.urlPathSegment,
+                        ),
+                ),
                 Step(
                     id = RegisterPropertyStepId.PropertyType,
                     page =
@@ -160,7 +229,7 @@ class PropertyRegistrationJourney(
                     id = RegisterPropertyStepId.PlaceholderPage,
                     page =
                         Page(
-                            formModel = LandingPageFormModel::class,
+                            formModel = NoInputFormModel::class,
                             templateName = "placeholder",
                             content =
                                 mapOf(
@@ -185,5 +254,27 @@ class PropertyRegistrationJourney(
                         propertyIsOccupied,
                 )
             }
+
+        private fun selectAddressNextAction(
+            journeyData: JourneyData,
+            journeyDataService: JourneyDataService,
+            addressDataService: AddressDataService,
+        ): Pair<RegisterPropertyStepId, Int?> {
+            val singleLineAddress =
+                journeyDataService
+                    .getFieldStringValue(journeyData, RegisterPropertyStepId.SelectAddress.urlPathSegment, "address")
+            if (singleLineAddress == MANUAL_ADDRESS_CHOSEN || singleLineAddress == null) {
+                return Pair(RegisterPropertyStepId.ManualAddress, null)
+            } else {
+                val addressData = addressDataService.getAddressData(singleLineAddress)
+                if (addressData?.uprn != null && addressAlreadyRegistered(addressData.uprn)) {
+                    return Pair(RegisterPropertyStepId.AlreadyRegistered, null)
+                }
+                return Pair(RegisterPropertyStepId.PropertyType, null)
+            }
+        }
+
+        // TODO PRSD-637: Check the database to see if this property is registered.
+        private fun addressAlreadyRegistered(uprn: Long): Boolean = uprn == 1123456.toLong()
     }
 }
