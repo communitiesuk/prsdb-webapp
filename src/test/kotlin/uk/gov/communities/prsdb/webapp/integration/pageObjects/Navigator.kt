@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegis
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmIdentityFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DeclarationFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.InternationalAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
@@ -26,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SummaryPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HouseholdsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
@@ -143,6 +145,19 @@ class Navigator(
         selectAddressPage.radios.selectValue(MANUAL_ADDRESS_CHOSEN)
         selectAddressPage.form.submit()
         return createValidPage(page, ManualContactAddressFormPageLandlordRegistration::class)
+    }
+
+    fun goToLandlordRegistrationSummaryPage(): SummaryPageLandlordRegistration {
+        val selectAddressPage = goToLandlordRegistrationSelectContactAddressPage()
+        selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
+        selectAddressPage.form.submit()
+        return createValidPage(page, SummaryPageLandlordRegistration::class)
+    }
+
+    fun goToLandlordRegistrationDeclarationPage(): DeclarationFormPageLandlordRegistration {
+        val summaryPage = goToLandlordRegistrationSummaryPage()
+        summaryPage.submitButton.click()
+        return createValidPage(page, DeclarationFormPageLandlordRegistration::class)
     }
 
     fun goToLaUserRegistrationLandingPage(): LandingPageLaUserRegistration {

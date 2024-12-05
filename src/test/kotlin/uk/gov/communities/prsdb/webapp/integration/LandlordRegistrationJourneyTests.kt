@@ -19,8 +19,10 @@ import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmationPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DeclarationFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.InternationalAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
@@ -65,7 +67,14 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
         selectAddressPage.form.submit()
 
-        assertPageIs(page, SummaryPageLandlordRegistration::class)
+        val summaryPage = assertPageIs(page, SummaryPageLandlordRegistration::class)
+        summaryPage.submitButton.click()
+
+        val declarationPage = assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
+        declarationPage.checkbox.check()
+        declarationPage.form.submit()
+
+        assertPageIs(page, ConfirmationPageLandlordRegistration::class)
     }
 
     @Test
@@ -508,6 +517,16 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
                 .containsText("Enter the first line of an address, typically the building and street")
             assertThat(manualContactAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
             assertThat(manualContactAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
+        }
+    }
+
+    @Nested
+    inner class LandlordRegistrationStepDeclaration {
+        @Test
+        fun `Submitting without checking the checkbox returns an error`(page: Page) {
+            val declarationPage = navigator.goToLandlordRegistrationDeclarationPage()
+            declarationPage.form.submit()
+            assertThat(declarationPage.form.getErrorMessage()).containsText("You must agree to the declaration to continue")
         }
     }
 }

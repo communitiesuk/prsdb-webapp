@@ -25,6 +25,9 @@ spring:
 
   mvc.format.date: "d MMMM yyyy"
 
+  thymeleaf:
+    render-hidden-markers-before-checkboxes: true
+
 one-login:
   jwt:
     public.key: ${ONE_LOGIN_PUBLIC_KEY}

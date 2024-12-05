@@ -7,6 +7,7 @@ enum class LandlordRegistrationStepId(
 ) : StepId {
     VerifyIdentity(RegisterLandlordController.IDENTITY_VERIFICATION_PATH_SEGMENT),
     Name("name"),
+    DateOfBirth("date-of-birth"),
     ConfirmIdentity("confirm-identity"),
     Email("email"),
     PhoneNumber("phone-number"),
@@ -19,6 +20,6 @@ enum class LandlordRegistrationStepId(
     SelectContactAddress("select-contact-address"),
     ManualContactAddress("manual-contact-address"),
     CheckAnswers("check-answers"),
-    DateOfBirth("date-of-birth"),
     Declaration("declaration"),
+    Confirmation("confirmation"),
 }
