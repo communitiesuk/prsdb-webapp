@@ -15,5 +15,5 @@ class DeclarationFormModel : FormModel {
             ),
         ],
     )
-    var agreesToDeclaration: Boolean? = false
+    var agreesToDeclaration: Boolean = false
 }
