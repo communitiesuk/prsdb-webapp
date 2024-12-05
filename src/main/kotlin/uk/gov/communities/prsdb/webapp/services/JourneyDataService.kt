@@ -89,9 +89,13 @@ class JourneyDataService(
         session.setAttribute("journeyData", null)
     }
 
-    fun getFieldValue(
+    fun getFieldStringValue(
         journeyData: JourneyData,
         urlPathSegment: String,
         fieldName: String,
-    ): String = objectToStringKeyedMap(journeyData[urlPathSegment])?.get(fieldName).toString()
+        subPageNumber: Int? = null,
+    ): String? {
+        val pageData = getPageData(journeyData, urlPathSegment, subPageNumber)
+        return pageData?.get(fieldName)?.toString()
+    }
 }

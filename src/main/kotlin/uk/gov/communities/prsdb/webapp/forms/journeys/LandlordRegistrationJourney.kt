@@ -190,7 +190,7 @@ class LandlordRegistrationJourney(
                             content =
                                 mapOf(
                                     "title" to "registerAsALandlord.title",
-                                    "fieldSetHeading" to "forms.lookupAddress.fieldSetHeading",
+                                    "fieldSetHeading" to "forms.lookupAddress.landlordRegistration.fieldSetHeading",
                                     "fieldSetHint" to "forms.lookupAddress.fieldSetHint",
                                     "postcodeLabel" to "forms.lookupAddress.postcode.label",
                                     "postcodeHint" to "forms.lookupAddress.postcode.hint",
@@ -222,7 +222,6 @@ class LandlordRegistrationJourney(
                             addressLookupService = addressLookupService,
                             addressDataService = addressDataService,
                         ),
-                    isSatisfied = { _, pageData -> isSelectAddressSatisfied(pageData, addressDataService) },
                     nextAction = { journeyData, _ -> selectAddressNextAction(journeyData, journeyDataService) },
                     saveAfterSubmit = false,
                 ),
@@ -309,7 +308,6 @@ class LandlordRegistrationJourney(
                             addressLookupService = addressLookupService,
                             addressDataService = addressDataService,
                         ),
-                    isSatisfied = { _, pageData -> isSelectAddressSatisfied(pageData, addressDataService) },
                     nextAction = { journeyData, _ -> selectContactAddressNextAction(journeyData, journeyDataService) },
                     saveAfterSubmit = false,
                 ),
@@ -374,7 +372,7 @@ class LandlordRegistrationJourney(
             journeyData: JourneyData,
             journeyDataService: JourneyDataService,
         ): Pair<LandlordRegistrationStepId, Int?> =
-            if (journeyDataService.getFieldValue(
+            if (journeyDataService.getFieldStringValue(
                     journeyData,
                     LandlordRegistrationStepId.SelectAddress.urlPathSegment,
                     "address",
@@ -390,7 +388,7 @@ class LandlordRegistrationJourney(
             journeyData: JourneyData,
             journeyDataService: JourneyDataService,
         ): Pair<LandlordRegistrationStepId, Int?> =
-            if (journeyDataService.getFieldValue(
+            if (journeyDataService.getFieldStringValue(
                     journeyData,
                     LandlordRegistrationStepId.SelectContactAddress.urlPathSegment,
                     "address",
@@ -401,14 +399,6 @@ class LandlordRegistrationJourney(
                 // TODO: Set nextAction to next journey step
                 Pair(LandlordRegistrationStepId.CheckAnswers, null)
             }
-
-        private fun isSelectAddressSatisfied(
-            pageData: PageData,
-            addressDataService: AddressDataService,
-        ): Boolean {
-            val selectedAddress = pageData["address"].toString()
-            return selectedAddress == MANUAL_ADDRESS_CHOSEN || addressDataService.getAddressData(selectedAddress) != null
-        }
 
         private fun doesJourneyDataContainVerifiedIdentity(journeyData: JourneyData): Boolean {
             val pageData = objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment]) ?: mapOf()
