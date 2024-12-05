@@ -512,6 +512,10 @@ class LandlordRegistrationJourney(
             journeyDataService.clearJourneyDataFromSession()
 
             return "/$REGISTER_LANDLORD_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT"
+        fun doesJourneyDataContainVerifiedIdentity(journeyData: JourneyData): Boolean {
+            val pageData = objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment]) ?: mapOf()
+            return pageData[VerifiedIdentityModel.NAME_KEY] is String &&
+                pageData[VerifiedIdentityModel.BIRTH_DATE_KEY] is LocalDate
         }
     }
 }
