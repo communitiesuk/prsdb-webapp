@@ -423,9 +423,8 @@ class LandlordRegistrationJourney(
                 Pair(LandlordRegistrationStepId.CheckAnswers, null)
             }
 
-        private fun doesJourneyDataContainVerifiedIdentity(journeyData: JourneyData): Boolean {
-            val pageData =
-                objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment]) ?: mapOf()
+        fun doesJourneyDataContainVerifiedIdentity(journeyData: JourneyData): Boolean {
+            val pageData = objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment]) ?: mapOf()
             return pageData[VerifiedIdentityModel.NAME_KEY] is String &&
                 pageData[VerifiedIdentityModel.BIRTH_DATE_KEY] is LocalDate
         }
