@@ -13,9 +13,7 @@ class RegistrationNumberService(
     val regNumRepository: RegistrationNumberRepository,
 ) {
     @Transactional
-    fun createRegistrationNumber(type: RegistrationNumberType) {
-        regNumRepository.save(RegistrationNumber(type, generateUniqueRegNum()))
-    }
+    fun createRegistrationNumber(type: RegistrationNumberType) = regNumRepository.save(RegistrationNumber(type, generateUniqueRegNum()))
 
     private fun generateUniqueRegNum(): Long {
         var registrationNumber: Long
