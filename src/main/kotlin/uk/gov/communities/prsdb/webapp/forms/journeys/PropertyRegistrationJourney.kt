@@ -68,7 +68,7 @@ class PropertyRegistrationJourney(
                                 mapOf(
                                     "title" to "registerProperty.title",
                                     "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
-                                    "submitButtonText" to "forms.buttons.continue",
+                                    "submitButtonText" to "forms.buttons.saveAndContinue",
                                     "searchAgainUrl" to
                                         "/$REGISTER_PROPERTY_JOURNEY_URL/" +
                                         RegisterPropertyStepId.LookupAddress.urlPathSegment,
@@ -78,9 +78,6 @@ class PropertyRegistrationJourney(
                             addressLookupService = addressLookupService,
                             addressDataService = addressDataService,
                         ),
-                    isSatisfied = { _, pageData ->
-                        isSelectAddressSatisfied(pageData, addressDataService)
-                    },
                     nextAction = { journeyData, _ -> selectAddressNextAction(journeyData, journeyDataService, addressDataService) },
                 ),
                 Step(
@@ -88,7 +85,7 @@ class PropertyRegistrationJourney(
                     page =
                         AlreadyRegisteredPage(
                             formModel = NoInputFormModel::class,
-                            templateName = "forms/alreadyRegisteredForm",
+                            templateName = "alreadyRegisteredPropertyPage",
                             content =
                                 mapOf(
                                     "title" to "registerProperty.title",
@@ -257,14 +254,6 @@ class PropertyRegistrationJourney(
                         propertyIsOccupied,
                 )
             }
-
-        private fun isSelectAddressSatisfied(
-            pageData: PageData,
-            addressDataService: AddressDataService,
-        ): Boolean {
-            val selectedAddress = pageData["address"].toString()
-            return selectedAddress == MANUAL_ADDRESS_CHOSEN || addressDataService.getAddressData(selectedAddress) != null
-        }
 
         private fun selectAddressNextAction(
             journeyData: JourneyData,

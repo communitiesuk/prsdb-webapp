@@ -13,7 +13,7 @@
                     <p class="govuk-body" th:text="#{forms.alreadyRegistered.paragraph.one(${singleLineAddress})}">forms.alreadyRegistered.paragraph.one</p>
                     <p class="govuk-body" >
                         <span th:text="#{forms.alreadyRegistered.paragraph.two.beforeLink}">forms.alreadyRegistered.paragraph.two.beforeLink</span>
-                        <a th:href="@{${searchAgainUrl}}" th:text="#{forms.alreadyRegistered.paragraph.two.link.text}">
+                        <a class="govuk-link" th:href="@{${searchAgainUrl}}" th:text="#{forms.alreadyRegistered.paragraph.two.link.text}">
                             forms.alreadyRegistered.paragraph.two.link.text
                         </a>
                     </p>
@@ -23,8 +23,14 @@
                         <p  th:text="#{'forms.alreadyRegistered.details.paragraph.one'}">
                             forms.alreadyRegistered.details.paragraph.one
                         </p>
-                        <p th:utext="#{'forms.alreadyRegistered.details.paragraph.two'}">
-                            forms.alreadyRegistered.details.paragraph.two
+                        <p>
+                            <span th:text="#{'forms.alreadyRegistered.details.paragraph.two.beforeEmailLink'}">forms.alreadyRegistered.details.paragraph.two.beforeEmailLink</span>
+                            <a class="govuk-link"
+                               th:href="@{'mailto:'+#{forms.alreadyRegistered.details.paragraph.two.email}}"
+                                th:text="#{forms.alreadyRegistered.details.paragraph.two.email}">
+                                forms.alreadyRegistered.details.paragraph.two.email
+                            </a>
+                            <span th:text="#{'forms.alreadyRegistered.details.paragraph.two.afterEmailLink'}">forms.alreadyRegistered.details.paragraph.two.afterEmailLink</span>
                         </p>
                     </div>
                 </details>
