@@ -12,7 +12,16 @@ fun readLocalAuthoritiesCsv(fileName: String): List<LocalAuthorityDataModel> {
     val localAuthorities = mutableListOf<LocalAuthorityDataModel>()
     reader.forEachLine { line ->
         val uprn = line.split(",")[0]
-        val displayName = line.split(",")[1]
+        val name = line.split(",")[1]
+
+        val displayName =
+            name
+                .lowercase()
+                .split(' ')
+                .joinToString(" ") {
+                    it.replaceFirstChar { char -> char.uppercaseChar() }
+                }
+
         localAuthorities.add(LocalAuthorityDataModel(uprn, displayName))
     }
     return localAuthorities
