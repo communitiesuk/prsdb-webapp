@@ -16,9 +16,16 @@ class Landlord : ModifiableAuditableEntity() {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Long? = null
 
-    @OneToOne(optional = false)
-    @JoinColumn(name = "subject_identifier", nullable = false, foreignKey = ForeignKey(name = "FK_LANDLORD_1L_USER"))
-    lateinit var baseUser: OneLoginUser
+    @Column(nullable = false)
+    lateinit var subjectIdentifierId: String
+        private set
+
+    @Column(nullable = false)
+    lateinit var name: String
+        private set
+
+    @Column(nullable = false)
+    lateinit var email: String
         private set
 
     @Column(nullable = false)
