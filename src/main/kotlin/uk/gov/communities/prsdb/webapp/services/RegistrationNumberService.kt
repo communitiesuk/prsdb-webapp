@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.RegistrationNumberRep
 
 @Service
 class RegistrationNumberService(
-    val regNumRepository: RegistrationNumberRepository,
+    private val regNumRepository: RegistrationNumberRepository,
 ) {
     @Transactional
     fun createRegistrationNumber(type: RegistrationNumberType) = regNumRepository.save(RegistrationNumber(type, generateUniqueRegNum()))
