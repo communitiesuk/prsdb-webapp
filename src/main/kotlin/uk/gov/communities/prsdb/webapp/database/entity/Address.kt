@@ -12,6 +12,7 @@ class Address : ModifiableAuditableEntity() {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Long? = null
 
+    @Column(unique = true)
     var uprn: Long? = null
         private set
 
