@@ -12,7 +12,7 @@ import jakarta.persistence.OneToOne
 import java.util.Date
 
 @Entity
-class Landlord : ModifiableAuditableEntity() {
+class Landlord() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Long? = null
@@ -61,4 +61,25 @@ class Landlord : ModifiableAuditableEntity() {
     @Column(nullable = false)
     var isActive: Boolean? = null
         private set
+
+    constructor(
+        baseUser: OneLoginUser,
+        name: String,
+        email: String,
+        phoneNumber: String,
+        address: Address,
+        registrationNumber: RegistrationNumber,
+        internationalAddress: String?,
+        dateOfBirth: Date?,
+    ) : this() {
+        this.baseUser = baseUser
+        this.name = name
+        this.email = email
+        this.phoneNumber = phoneNumber
+        this.address = address
+        this.registrationNumber = registrationNumber
+        this.isActive = true
+        if (internationalAddress != null) this.internationalAddress = internationalAddress
+        if (dateOfBirth != null) this.dateOfBirth = dateOfBirth
+    }
 }
