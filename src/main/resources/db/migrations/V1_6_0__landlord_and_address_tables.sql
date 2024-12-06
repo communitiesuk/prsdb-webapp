@@ -4,7 +4,7 @@ CREATE TABLE address
     last_modified_date  TIMESTAMPTZ(6),
     created_date        TIMESTAMPTZ(6),
     uprn                BIGINT,
-    single_line_address VARCHAR(255)                            NOT NULL,
+    single_line_address VARCHAR(472)                            NOT NULL,
     organisation        VARCHAR(255),
     sub_building        VARCHAR(255),
     building_name       VARCHAR(255),
@@ -24,10 +24,13 @@ ALTER TABLE landlord
     ADD created_date TIMESTAMPTZ(6);
 
 ALTER TABLE landlord
-    ADD date_of_birth TIMESTAMPTZ(6);
+    ADD date_of_birth TIMESTAMP(6);
 
 ALTER TABLE landlord
-    ADD international_address VARCHAR(255);
+    ADD email VARCHAR(255);
+
+ALTER TABLE landlord
+    ADD international_address VARCHAR(1000);
 
 ALTER TABLE landlord
     ADD is_active BOOLEAN;
@@ -36,31 +39,37 @@ ALTER TABLE landlord
     ADD last_modified_date TIMESTAMPTZ(6);
 
 ALTER TABLE landlord
+    ADD name VARCHAR(255);
+
+ALTER TABLE landlord
     ADD phone_number VARCHAR(255);
 
 ALTER TABLE landlord
-    ADD subject_identifier VARCHAR(255);
+    ADD subject_identifier_id VARCHAR(255);
 
 ALTER TABLE landlord
     ALTER COLUMN address_id SET NOT NULL;
 
 ALTER TABLE landlord
+    ALTER COLUMN email SET NOT NULL;
+
+ALTER TABLE landlord
     ALTER COLUMN is_active SET NOT NULL;
+
+ALTER TABLE landlord
+    ALTER COLUMN name SET NOT NULL;
 
 ALTER TABLE landlord
     ALTER COLUMN phone_number SET NOT NULL;
 
 ALTER TABLE landlord
-    ALTER COLUMN subject_identifier SET NOT NULL;
+    ALTER COLUMN subject_identifier_id SET NOT NULL;
 
 ALTER TABLE landlord
     ADD CONSTRAINT uc_landlord_address UNIQUE (address_id);
 
 ALTER TABLE landlord
-    ADD CONSTRAINT uc_landlord_subject_identifier UNIQUE (subject_identifier);
-
-ALTER TABLE landlord
-    ADD CONSTRAINT FK_LANDLORD_1L_USER FOREIGN KEY (subject_identifier) REFERENCES one_login_user (id);
+    ADD CONSTRAINT uc_landlord_subject_identifier_id UNIQUE (subject_identifier_id);
 
 ALTER TABLE landlord
     ADD CONSTRAINT FK_LANDLORD_ADDRESS FOREIGN KEY (address_id) REFERENCES address (id);
