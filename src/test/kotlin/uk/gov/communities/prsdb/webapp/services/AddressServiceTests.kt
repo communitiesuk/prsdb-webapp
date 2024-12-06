@@ -25,12 +25,12 @@ class AddressServiceTests {
     private val mockAddress = Address()
 
     @Test
-    fun `createAddress creates an address when given an AddressDataModel with no UPRN`() {
+    fun `findOrCreateAddress creates an address when given an AddressDataModel with no UPRN`() {
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
 
         whenever(mockAddressRepository.save(any(Address::class.java))).thenReturn(mockAddress)
 
-        addressService.createAddress(addressDataModel)
+        addressService.findOrCreateAddress(addressDataModel)
 
         val addressCaptor = captor<Address>()
         verify(mockAddressRepository).save(addressCaptor.capture())
@@ -38,27 +38,27 @@ class AddressServiceTests {
     }
 
     @Test
-    fun `createAddress returns the corresponding address when given an AddressDataModel with an already existing UPRN`() {
+    fun `findOrCreateAddress returns the corresponding address when given an AddressDataModel with an already existing UPRN`() {
         val uprn = 123456L
         val addressDataModel = AddressDataModel(singleLineAddress = "1 Example Road, EG1 2AB", uprn = uprn)
         val address = Address(addressDataModel)
 
         whenever(mockAddressRepository.findByUprn(uprn)).thenReturn(address)
 
-        val createdAddress = addressService.createAddress(addressDataModel)
+        val createdAddress = addressService.findOrCreateAddress(addressDataModel)
 
         assertEquals(address, createdAddress)
     }
 
     @Test
-    fun `createAddress creates an address when given an AddressDataModel with a new UPRN`() {
+    fun `findOrCreateAddress creates an address when given an AddressDataModel with a new UPRN`() {
         val uprn = 123456L
         val addressDataModel = AddressDataModel(singleLineAddress = "1 Example Road, EG1 2AB", uprn = uprn)
 
         whenever(mockAddressRepository.findByUprn(uprn)).thenReturn(null)
         whenever(mockAddressRepository.save(any(Address::class.java))).thenReturn(mockAddress)
 
-        addressService.createAddress(addressDataModel)
+        addressService.findOrCreateAddress(addressDataModel)
 
         verify(mockAddressRepository).findByUprn(uprn)
         val addressCaptor = captor<Address>()

@@ -11,7 +11,7 @@ class AddressService(
     private val addressRepository: AddressRepository,
 ) {
     @Transactional
-    fun createAddress(addressDataModel: AddressDataModel): Address {
+    fun findOrCreateAddress(addressDataModel: AddressDataModel): Address {
         if (addressDataModel.uprn != null) {
             val alreadyExistingAddress = addressRepository.findByUprn(addressDataModel.uprn)
             if (alreadyExistingAddress != null) return alreadyExistingAddress
