@@ -11,10 +11,10 @@ import java.util.Date
 
 @Service
 class LandlordService(
-    val landlordRepository: LandlordRepository,
-    val oneLoginUserRepository: OneLoginUserRepository,
-    val addressService: AddressService,
-    val registrationNumberService: RegistrationNumberService,
+    private val landlordRepository: LandlordRepository,
+    private val oneLoginUserRepository: OneLoginUserRepository,
+    private val addressService: AddressService,
+    private val registrationNumberService: RegistrationNumberService,
 ) {
     fun retrieveLandlordByRegNum(regNum: RegistrationNumberDataModel): Landlord? {
         if (regNum.type != RegistrationNumberType.LANDLORD) {
