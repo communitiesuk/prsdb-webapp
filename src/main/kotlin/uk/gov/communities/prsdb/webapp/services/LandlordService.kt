@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
@@ -23,6 +24,7 @@ class LandlordService(
         return landlordRepository.findByRegistrationNumber_Number(regNum.number)
     }
 
+    @Transactional
     fun createLandlordAndReturnRegistrationNumber(
         baseUserId: String,
         name: String,
