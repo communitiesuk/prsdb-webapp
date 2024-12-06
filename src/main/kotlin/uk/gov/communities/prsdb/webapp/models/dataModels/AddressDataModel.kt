@@ -26,10 +26,18 @@ data class AddressDataModel(
         ): AddressDataModel =
             AddressDataModel(
                 singleLineAddress =
-                    listOfNotNull(addressLineOne, addressLineTwo, townOrCity, postcode, county)
-                        .joinToString(", "),
+                    parseSingleLineAddress(addressLineOne, townOrCity, postcode, addressLineTwo, county),
                 townName = townOrCity,
                 postcode = postcode,
             )
+
+        fun parseSingleLineAddress(
+            addressLineOne: String,
+            townOrCity: String,
+            postcode: String,
+            addressLineTwo: String? = null,
+            county: String? = null,
+        ) = listOfNotNull(addressLineOne, addressLineTwo, townOrCity, postcode, county)
+            .joinToString(", ")
     }
 }
