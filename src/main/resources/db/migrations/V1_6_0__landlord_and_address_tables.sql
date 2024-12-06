@@ -45,7 +45,7 @@ ALTER TABLE landlord
     ADD phone_number VARCHAR(255);
 
 ALTER TABLE landlord
-    ADD subject_identifier_id VARCHAR(255);
+    ADD subject_identifier VARCHAR(255);
 
 ALTER TABLE landlord
     ALTER COLUMN address_id SET NOT NULL;
@@ -63,13 +63,13 @@ ALTER TABLE landlord
     ALTER COLUMN phone_number SET NOT NULL;
 
 ALTER TABLE landlord
-    ALTER COLUMN subject_identifier_id SET NOT NULL;
+    ALTER COLUMN subject_identifier SET NOT NULL;
 
 ALTER TABLE landlord
-    ADD CONSTRAINT uc_landlord_address UNIQUE (address_id);
+    ADD CONSTRAINT uc_landlord_subject_identifier UNIQUE (subject_identifier);
 
 ALTER TABLE landlord
-    ADD CONSTRAINT uc_landlord_subject_identifier_id UNIQUE (subject_identifier_id);
+    ADD CONSTRAINT FK_LANDLORD_1L_USER FOREIGN KEY (subject_identifier) REFERENCES one_login_user (id);
 
 ALTER TABLE landlord
     ADD CONSTRAINT FK_LANDLORD_ADDRESS FOREIGN KEY (address_id) REFERENCES address (id);

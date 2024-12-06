@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
 import java.util.Date
 
@@ -16,8 +17,9 @@ class Landlord : ModifiableAuditableEntity() {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Long? = null
 
-    @Column(nullable = false)
-    lateinit var subjectIdentifierId: String
+    @OneToOne(optional = false)
+    @JoinColumn(name = "subject_identifier", nullable = false, foreignKey = ForeignKey(name = "FK_LANDLORD_1L_USER"))
+    lateinit var baseUser: OneLoginUser
         private set
 
     @Column(nullable = false)
@@ -32,7 +34,7 @@ class Landlord : ModifiableAuditableEntity() {
     lateinit var phoneNumber: String
         private set
 
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(
         name = "address_id",
         nullable = false,
