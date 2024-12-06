@@ -19,23 +19,4 @@ class AddressService(
 
         return addressRepository.save(Address(addressDataModel))
     }
-
-    fun createAddress(
-        addressLineOne: String,
-        townOrCity: String,
-        postcode: String,
-        addressLineTwo: String? = null,
-        county: String? = null,
-    ): Address {
-        val addressDataModel =
-            AddressDataModel(
-                singleLineAddress =
-                    listOfNotNull(addressLineOne, addressLineTwo, townOrCity, postcode, county)
-                        .joinToString(", "),
-                townName = townOrCity,
-                postcode = postcode,
-            )
-
-        return addressRepository.save(Address(addressDataModel))
-    }
 }

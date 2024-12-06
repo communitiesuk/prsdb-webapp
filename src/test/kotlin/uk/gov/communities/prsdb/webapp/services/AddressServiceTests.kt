@@ -54,7 +54,6 @@ class AddressServiceTests {
     fun `createAddress creates an address when given an AddressDataModel with a new UPRN`() {
         val uprn = 123456L
         val addressDataModel = AddressDataModel(singleLineAddress = "1 Example Road, EG1 2AB", uprn = uprn)
-        val address = Address(addressDataModel)
 
         whenever(mockAddressRepository.findByUprn(uprn)).thenReturn(null)
         whenever(mockAddressRepository.save(any(Address::class.java))).thenReturn(mockAddress)
@@ -65,30 +64,5 @@ class AddressServiceTests {
         val addressCaptor = captor<Address>()
         verify(mockAddressRepository).save(addressCaptor.capture())
         assertEquals(addressDataModel.singleLineAddress, addressCaptor.value.singleLineAddress)
-    }
-
-    @Test
-    fun `createAddress creates an address when given manual address fields`() {
-        val expectedAddressDataModel =
-            AddressDataModel(
-                singleLineAddress = "1 Example Road, Townville, EG1 2AB, Countyshire",
-                townName = "Townville",
-                postcode = "EG1 2AB",
-            )
-
-        whenever(mockAddressRepository.save(any(Address::class.java))).thenReturn(Address())
-
-        addressService.createAddress(
-            addressLineOne = "1 Example Road",
-            townOrCity = "Townville",
-            postcode = "EG1 2AB",
-            county = "Countyshire",
-        )
-
-        val addressCaptor = captor<Address>()
-        verify(mockAddressRepository).save(addressCaptor.capture())
-        assertEquals(expectedAddressDataModel.singleLineAddress, addressCaptor.value.singleLineAddress)
-        assertEquals(expectedAddressDataModel.townName, addressCaptor.value.townName)
-        assertEquals(expectedAddressDataModel.postcode, addressCaptor.value.postcode)
     }
 }

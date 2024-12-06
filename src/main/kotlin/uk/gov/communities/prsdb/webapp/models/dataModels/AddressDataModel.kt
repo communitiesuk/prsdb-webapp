@@ -15,4 +15,21 @@ data class AddressDataModel(
     val locality: String? = null,
     val townName: String? = null,
     val postcode: String? = null,
-)
+) {
+    companion object {
+        fun parseAddressDataModel(
+            addressLineOne: String,
+            townOrCity: String,
+            postcode: String,
+            addressLineTwo: String? = null,
+            county: String? = null,
+        ): AddressDataModel =
+            AddressDataModel(
+                singleLineAddress =
+                    listOfNotNull(addressLineOne, addressLineTwo, townOrCity, postcode, county)
+                        .joinToString(", "),
+                townName = townOrCity,
+                postcode = postcode,
+            )
+    }
+}
