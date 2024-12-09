@@ -15,4 +15,29 @@ data class AddressDataModel(
     val locality: String? = null,
     val townName: String? = null,
     val postcode: String? = null,
-)
+) {
+    companion object {
+        fun fromManualAddressData(
+            addressLineOne: String,
+            townOrCity: String,
+            postcode: String,
+            addressLineTwo: String? = null,
+            county: String? = null,
+        ): AddressDataModel =
+            AddressDataModel(
+                singleLineAddress =
+                    manualAddressDataToSingleLineAddress(addressLineOne, townOrCity, postcode, addressLineTwo, county),
+                townName = townOrCity,
+                postcode = postcode,
+            )
+
+        fun manualAddressDataToSingleLineAddress(
+            addressLineOne: String,
+            townOrCity: String,
+            postcode: String,
+            addressLineTwo: String? = null,
+            county: String? = null,
+        ) = listOfNotNull(addressLineOne, addressLineTwo, townOrCity, postcode, county)
+            .joinToString(", ")
+    }
+}

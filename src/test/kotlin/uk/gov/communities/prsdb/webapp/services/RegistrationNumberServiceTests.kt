@@ -17,6 +17,8 @@ class RegistrationNumberServiceTests {
     private lateinit var mockRegNumRepository: RegistrationNumberRepository
     private lateinit var regNumService: RegistrationNumberService
 
+    private val mockRegistrationNumber = RegistrationNumber()
+
     @BeforeEach
     fun setup() {
         mockRegNumRepository = mock()
@@ -26,6 +28,7 @@ class RegistrationNumberServiceTests {
     @Test
     fun `createRegistrationNumber creates a registration number for the given entity type`() {
         whenever(mockRegNumRepository.existsByNumber(any(Long::class.java))).thenReturn(false)
+        whenever(mockRegNumRepository.save(any(RegistrationNumber::class.java))).thenReturn(mockRegistrationNumber)
 
         regNumService.createRegistrationNumber(RegistrationNumberType.LANDLORD)
 
@@ -37,6 +40,7 @@ class RegistrationNumberServiceTests {
     @Test
     fun `createRegistrationNumber creates a unique registration number`() {
         whenever(mockRegNumRepository.existsByNumber(any(Long::class.java))).thenReturn(true, false)
+        whenever(mockRegNumRepository.save(any(RegistrationNumber::class.java))).thenReturn(mockRegistrationNumber)
 
         regNumService.createRegistrationNumber(RegistrationNumberType.LANDLORD)
 

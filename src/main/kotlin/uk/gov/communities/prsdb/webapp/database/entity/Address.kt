@@ -5,13 +5,15 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
 @Entity
-class Address : ModifiableAuditableEntity() {
+class Address() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Long? = null
 
+    @Column(unique = true)
     var uprn: Long? = null
         private set
 
@@ -19,30 +21,46 @@ class Address : ModifiableAuditableEntity() {
     lateinit var singleLineAddress: String
         private set
 
-    lateinit var organisation: String
+    var organisation: String? = null
         private set
 
-    lateinit var subBuilding: String
+    var subBuilding: String? = null
         private set
 
-    lateinit var buildingName: String
+    var buildingName: String? = null
         private set
 
-    lateinit var buildingNumber: String
+    var buildingNumber: String? = null
         private set
 
-    lateinit var streetName: String
+    var streetName: String? = null
         private set
 
-    lateinit var locality: String
+    var locality: String? = null
         private set
 
-    lateinit var townName: String
+    var townName: String? = null
         private set
 
-    lateinit var postcode: String
+    var postcode: String? = null
         private set
 
-    lateinit var custodianCode: String
+    var custodianCode: String? = null
         private set
+
+    constructor(addressDataModel: AddressDataModel) : this() {
+        this.uprn = addressDataModel.uprn
+        this.singleLineAddress = addressDataModel.singleLineAddress
+        this.organisation = addressDataModel.organisation
+        this.subBuilding = addressDataModel.subBuilding
+        this.buildingName = addressDataModel.buildingName
+        this.buildingNumber = addressDataModel.buildingNumber
+        this.streetName = addressDataModel.streetName
+        this.locality = addressDataModel.locality
+        this.townName = addressDataModel.townName
+        this.postcode = addressDataModel.postcode
+        this.townName = addressDataModel.townName
+        this.postcode = addressDataModel.postcode
+        this.custodianCode = addressDataModel.custodianCode
+    }
 }
