@@ -21,46 +21,46 @@ class Address() : ModifiableAuditableEntity() {
     lateinit var singleLineAddress: String
         private set
 
-    lateinit var organisation: String
+    var organisation: String? = null
         private set
 
-    lateinit var subBuilding: String
+    var subBuilding: String? = null
         private set
 
-    lateinit var buildingName: String
+    var buildingName: String? = null
         private set
 
-    lateinit var buildingNumber: String
+    var buildingNumber: String? = null
         private set
 
-    lateinit var streetName: String
+    var streetName: String? = null
         private set
 
-    lateinit var locality: String
+    var locality: String? = null
         private set
 
-    lateinit var townName: String
+    var townName: String? = null
         private set
 
-    lateinit var postcode: String
+    var postcode: String? = null
         private set
 
-    lateinit var custodianCode: String
+    var custodianCode: String? = null
         private set
 
     constructor(addressDataModel: AddressDataModel) : this() {
         this.uprn = addressDataModel.uprn
         this.singleLineAddress = addressDataModel.singleLineAddress
-        if (addressDataModel.organisation != null) this.organisation = addressDataModel.organisation
-        if (addressDataModel.subBuilding != null) this.subBuilding = addressDataModel.subBuilding
-        if (addressDataModel.buildingName != null) this.buildingName = addressDataModel.buildingName
-        if (addressDataModel.buildingNumber != null) this.buildingNumber = addressDataModel.buildingNumber
-        if (addressDataModel.streetName != null) this.streetName = addressDataModel.streetName
-        if (addressDataModel.locality != null) this.locality = addressDataModel.locality
-        if (addressDataModel.townName != null) this.townName = addressDataModel.townName
-        if (addressDataModel.postcode != null) this.postcode = addressDataModel.postcode
-        if (addressDataModel.townName != null) this.townName = addressDataModel.townName
-        if (addressDataModel.postcode != null) this.postcode = addressDataModel.postcode
-        if (addressDataModel.custodianCode != null) this.custodianCode = addressDataModel.custodianCode
+        this.organisation = addressDataModel.organisation
+        this.subBuilding = addressDataModel.subBuilding
+        this.buildingName = addressDataModel.buildingName
+        this.buildingNumber = addressDataModel.buildingNumber
+        this.streetName = addressDataModel.streetName
+        this.locality = addressDataModel.locality
+        this.townName = addressDataModel.townName
+        this.postcode = addressDataModel.postcode
+        this.townName = addressDataModel.townName
+        this.postcode = addressDataModel.postcode
+        this.custodianCode = addressDataModel.custodianCode
     }
 }
