@@ -7,6 +7,8 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
+import jakarta.persistence.JoinTable
+import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
 import java.util.Date
@@ -60,5 +62,14 @@ class Landlord : ModifiableAuditableEntity() {
 
     @Column(nullable = false)
     var isActive: Boolean? = null
+        private set
+
+    @ManyToMany
+    @JoinTable(
+        name = "landlord_property_ownership",
+        joinColumns = [JoinColumn(name = "landlord_id")],
+        inverseJoinColumns = [JoinColumn(name = "property_ownership_id")],
+    )
+    lateinit var propertyOwnerships: MutableSet<PropertyOwnership>
         private set
 }
