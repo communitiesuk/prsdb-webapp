@@ -47,6 +47,8 @@ class CustomSecurityConfig(
                     .permitAll()
                     .requestMatchers("/local/**")
                     .permitAll()
+                    .requestMatchers("/example-search/**")
+                    .permitAll()
                     .anyRequest()
                     .authenticated()
             }.oauth2Login(Customizer.withDefaults())
