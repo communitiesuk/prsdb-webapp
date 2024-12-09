@@ -19,6 +19,7 @@ import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmationPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
@@ -33,7 +34,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SummaryPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
 import java.time.LocalDate
 import kotlin.test.assertFalse
@@ -70,8 +70,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
         selectAddressPage.form.submit()
 
-        val summaryPage = assertPageIs(page, SummaryPageLandlordRegistration::class)
-        summaryPage.submitButton.click()
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
+        checkAnswersPage.submitButton.click()
 
         val declarationPage = assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
         declarationPage.checkbox.check()
@@ -101,7 +101,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         selectContactAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
         selectContactAddressPage.form.submit()
 
-        assertPageIs(page, SummaryPageLandlordRegistration::class)
+        assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
     }
 
     @Nested
@@ -430,7 +430,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             manualAddressPage.countyInput.fill("county")
             manualAddressPage.postcodeInput.fill("EG1 2AB")
             manualAddressPage.form.submit()
-            assertPageIs(page, SummaryPageLandlordRegistration::class)
+            assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
         }
 
         @Test
@@ -509,7 +509,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             manualContactAddressPage.countyInput.fill("county")
             manualContactAddressPage.postcodeInput.fill("EG1 2AB")
             manualContactAddressPage.form.submit()
-            assertPageIs(page, SummaryPageLandlordRegistration::class)
+            assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
         }
 
         @Test
@@ -527,7 +527,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     inner class LandlordRegistrationStepCheckAnswers {
         @Test
         fun `Clicking Confirm and continue goes redirects to the declaration page`(page: Page) {
-            val checkAnswersPage = navigator.goToLandlordRegistrationSummaryPageInternationalLandlord()
+            val checkAnswersPage = navigator.goToLandlordRegistrationCheckAnswersPageInternationalLandlord()
             checkAnswersPage.submit()
             assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
         }
@@ -538,11 +538,11 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
         @Nested
         inner class LandlordIsUKResident {
-            private lateinit var checkAnswersPage: SummaryPageLandlordRegistration
+            private lateinit var checkAnswersPage: CheckAnswersPageLandlordRegistration
 
             @BeforeEach
             fun setup() {
-                checkAnswersPage = navigator.goToLandlordRegistrationSummaryPageUKResidentLandlord()
+                checkAnswersPage = navigator.goToLandlordRegistrationCheckAnswersPageUKResidentLandlord()
             }
 
             @Test
@@ -623,11 +623,11 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
         @Nested
         inner class LandlordIsNotUKResident {
-            private lateinit var checkAnswersPage: SummaryPageLandlordRegistration
+            private lateinit var checkAnswersPage: CheckAnswersPageLandlordRegistration
 
             @BeforeEach
             fun setup() {
-                checkAnswersPage = navigator.goToLandlordRegistrationSummaryPageInternationalLandlord()
+                checkAnswersPage = navigator.goToLandlordRegistrationCheckAnswersPageInternationalLandlord()
             }
 
             @Test
