@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import kotlin.reflect.KClass
 
-class LaUserRegistrationSummaryPage(
+class LaUserRegistrationCheckAnswersPage(
     formModel: KClass<out FormModel>,
     templateName: String,
     content: Map<String, Any>,

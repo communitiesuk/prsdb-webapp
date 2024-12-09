@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.pages.ConfirmIdentityPage
-import uk.gov.communities.prsdb.webapp.forms.pages.LandlordRegistrationSummaryPage
+import uk.gov.communities.prsdb.webapp.forms.pages.LandlordRegistrationCheckAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.VerifyIdentityPage

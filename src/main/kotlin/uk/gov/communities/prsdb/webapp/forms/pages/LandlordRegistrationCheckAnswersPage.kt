@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.FormSummaryDataModel
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
 import kotlin.reflect.KClass
 
-class LandlordRegistrationSummaryPage(
+class LandlordRegistrationCheckAnswersPage(
     formModel: KClass<out FormModel>,
     templateName: String,
     content: Map<String, Any>,
@@ -25,7 +25,6 @@ class LandlordRegistrationSummaryPage(
         prevStepUrl: String?,
         journeyData: JourneyData?,
     ): String {
-        // TODO handle JourneyData is null case? it should never happen, but
         val livesInUK = getLivesInUk(journeyData!!)
         val formData = mutableListOf<FormSummaryDataModel>()
 
@@ -108,8 +107,6 @@ class LandlordRegistrationSummaryPage(
         journeyData: JourneyData,
         livesInUK: Boolean,
     ): List<FormSummaryDataModel> {
-        // TODO all address change links should go to the lookup url for their subsection (the first opportunity to input address info) this will be straight after country of residence for each example
-        // TODO for manual inputs of Contact address and UK Contact address will need extra steps to get that data AND in pr for 641 there is a method to get them in one string
         val addressFormData = mutableListOf<FormSummaryDataModel>()
         if (!livesInUK) {
             addressFormData.add(getCountryOfResidenceRow(journeyData))
@@ -154,7 +151,7 @@ class LandlordRegistrationSummaryPage(
         )
     }
 
-    fun getContactAddressRow(journeyData: JourneyData): FormSummaryDataModel {
+    private fun getContactAddressRow(journeyData: JourneyData): FormSummaryDataModel {
         var addressValue =
             objectToStringKeyedMap(
                 journeyData[LandlordRegistrationStepId.SelectAddress.urlPathSegment],
