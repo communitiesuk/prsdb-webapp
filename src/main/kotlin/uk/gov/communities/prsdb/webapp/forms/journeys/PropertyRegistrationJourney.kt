@@ -143,6 +143,7 @@ class PropertyRegistrationJourney(
                                         },
                                 ),
                         ),
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.PropertyType, null) },
                 ),
                 Step(
                     id = RegisterPropertyStepId.PropertyType,
