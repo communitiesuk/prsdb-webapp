@@ -2,9 +2,9 @@
 
 ## Status
 
-Proposed
+Accepted
 
-Date of decision: Pending
+Date of decision: 06/11/24
 
 ## Context and Problem Statement
 
