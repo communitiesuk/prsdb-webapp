@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 import kotlinx.datetime.LocalDate
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourney
@@ -107,6 +108,8 @@ class LandlordRegistrationSummaryPage(
         journeyData: JourneyData,
         livesInUK: Boolean,
     ): List<FormSummaryDataModel> {
+        // TODO all address change links should go to the lookup url for their subsection (the first opportunity to input address info) this will be straight after country of residence for each example
+        // TODO for manual inputs of Contact address and UK Contact address will need extra steps to get that data AND in pr for 641 there is a method to get them in one string
         val addressFormData = mutableListOf<FormSummaryDataModel>()
         if (!livesInUK) {
             addressFormData.add(getCountryOfResidenceRow(journeyData))
@@ -135,19 +138,46 @@ class LandlordRegistrationSummaryPage(
             "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}/${LandlordRegistrationStepId.InternationalAddress.urlPathSegment}",
         )
 
-    private fun getUKContactAddressOutsideUK(journeyData: JourneyData): FormSummaryDataModel =
-        FormSummaryDataModel(
-            "registerAsALandlord.checkAnswers.rowHeading.ukContactAddress",
-            objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.SelectContactAddress.urlPathSegment])?.get("address"),
-            "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}/${LandlordRegistrationStepId.SelectContactAddress.urlPathSegment}",
-        )
+    private fun getUKContactAddressOutsideUK(journeyData: JourneyData): FormSummaryDataModel {
+        var addressValue =
+            objectToStringKeyedMap(
+                journeyData[LandlordRegistrationStepId.SelectContactAddress.urlPathSegment],
+            )?.get("address")
+        if (addressValue == MANUAL_ADDRESS_CHOSEN) {
+            addressValue = getManualAddressValue(journeyData[LandlordRegistrationStepId.ManualContactAddress.urlPathSegment])
+        }
 
-    private fun getContactAddressRow(journeyData: JourneyData): FormSummaryDataModel =
-        FormSummaryDataModel(
-            "registerAsALandlord.checkAnswers.rowHeading.contactAddress",
-            objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.SelectAddress.urlPathSegment])?.get("address"),
-            "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}/${LandlordRegistrationStepId.SelectAddress.urlPathSegment}",
+        return FormSummaryDataModel(
+            "registerAsALandlord.checkAnswers.rowHeading.ukContactAddress",
+            addressValue,
+            "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}/${LandlordRegistrationStepId.LookupContactAddress.urlPathSegment}",
         )
+    }
+
+    fun getContactAddressRow(journeyData: JourneyData): FormSummaryDataModel {
+        var addressValue =
+            objectToStringKeyedMap(
+                journeyData[LandlordRegistrationStepId.SelectAddress.urlPathSegment],
+            )?.get("address")
+        if (addressValue == MANUAL_ADDRESS_CHOSEN) {
+            addressValue = getManualAddressValue(journeyData[LandlordRegistrationStepId.ManualAddress.urlPathSegment])
+        }
+        return FormSummaryDataModel(
+            "registerAsALandlord.checkAnswers.rowHeading.contactAddress",
+            addressValue,
+            "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}/${LandlordRegistrationStepId.LookupAddress.urlPathSegment}",
+        )
+    }
+
+    private fun getManualAddressValue(key: Any?): String {
+        val addressLineOne = objectToStringKeyedMap(key)?.get("addressLineOne")
+        val addressLineTwo = objectToStringKeyedMap(key)?.get("addressLineTwo")
+        val townOrCity = objectToStringKeyedMap(key)?.get("townOrCity")
+        val county = objectToStringKeyedMap(key)?.get("county")
+        val postcode = objectToStringKeyedMap(key)?.get("postcode")
+        return listOfNotNull(addressLineOne, addressLineTwo, townOrCity, county, postcode)
+            .joinToString(", ")
+    }
 
     private fun getLivesInUk(journeyData: JourneyData): Boolean =
         objectToStringKeyedMap(

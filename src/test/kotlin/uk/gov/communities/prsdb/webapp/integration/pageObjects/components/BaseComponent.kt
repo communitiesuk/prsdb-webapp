@@ -24,6 +24,12 @@ abstract class BaseComponent(
             return component
         }
 
+        private fun getAllComponents(
+            page: Page,
+            locatorStr: String,
+            locatorOptions: LocatorOptions? = null,
+        ): MutableList<Locator>? = page.locator(locatorStr, locatorOptions).all()
+
         fun getChildComponent(
             parentLocator: Locator,
             locatorStr: String,
@@ -55,6 +61,11 @@ abstract class BaseComponent(
             page: Page,
             text: String,
         ) = getComponent(page, ".govuk-link", LocatorOptions().setHasText(text))
+
+        fun getAllLinks(
+            page: Page,
+            text: String,
+        ) = getAllComponents(page, ".govuk-link", LocatorOptions().setHasText(text))
     }
 
     init {
