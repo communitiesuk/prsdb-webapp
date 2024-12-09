@@ -104,7 +104,7 @@ class Navigator(
     fun goToLandlordRegistrationSelectAddressPage(): SelectAddressFormPageLandlordRegistration {
         val lookupAddressPage = goToLandlordRegistrationLookupAddressPage()
         lookupAddressPage.postcodeInput.fill("EG")
-        lookupAddressPage.houseNameOrNumberInput.fill("5")
+        lookupAddressPage.houseNameOrNumberInput.fill("1")
         lookupAddressPage.form.submit()
         return createValidPage(page, SelectAddressFormPageLandlordRegistration::class)
     }
@@ -147,15 +147,48 @@ class Navigator(
         return createValidPage(page, ManualContactAddressFormPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationSummaryPage(): SummaryPageLandlordRegistration {
+    fun goToLandlordRegistrationSummaryPageInternationalLandlord(): SummaryPageLandlordRegistration {
         val selectAddressPage = goToLandlordRegistrationSelectContactAddressPage()
         selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
         selectAddressPage.form.submit()
         return createValidPage(page, SummaryPageLandlordRegistration::class)
     }
 
+    fun goToLandlordRegistrationSummaryPageUKResidentLandlord(): SummaryPageLandlordRegistration {
+        val manualAddressPage = goToLandlordRegistrationManualAddressPage()
+        manualAddressPage.addressLineOneInput.fill("address line one")
+        manualAddressPage.addressLineTwoInput.fill("address line two")
+        manualAddressPage.townOrCityInput.fill("town")
+        manualAddressPage.countyInput.fill("county")
+        manualAddressPage.postcodeInput.fill("EG1 2AB")
+        manualAddressPage.form.submit()
+        return createValidPage(page, SummaryPageLandlordRegistration::class)
+    }
+
+    fun goToLandlordRegistrationSummaryPageVerifiedIdentityLandlord(): SummaryPageLandlordRegistration {
+        val confirmIdentityPage = goToLandlordRegistrationConfirmIdentityFormPage()
+        confirmIdentityPage.form.submit()
+        val emailPage = createValidPage(page, EmailFormPageLandlordRegistration::class)
+        emailPage.emailInput.fill("test@example.com")
+        emailPage.form.submit()
+        val phoneNumberPage = createValidPage(page, PhoneNumberFormPageLandlordRegistration::class)
+        phoneNumberPage.phoneNumberInput.fill("07456097576")
+        phoneNumberPage.form.submit()
+        val countryOfResidencePage = createValidPage(page, CountryOfResidenceFormPageLandlordRegistration::class)
+        countryOfResidencePage.radios.selectValue("true")
+        countryOfResidencePage.form.submit()
+        val lookupAddressPage = createValidPage(page, LookupAddressFormPageLandlordRegistration::class)
+        lookupAddressPage.postcodeInput.fill("EG")
+        lookupAddressPage.houseNameOrNumberInput.fill("5")
+        lookupAddressPage.form.submit()
+        val selectAddressPage = createValidPage(page, SelectAddressFormPageLandlordRegistration::class)
+        selectAddressPage.radios.selectValue("5, Example Road, EG")
+        selectAddressPage.form.submit()
+        return createValidPage(page, SummaryPageLandlordRegistration::class)
+    }
+
     fun goToLandlordRegistrationDeclarationPage(): DeclarationFormPageLandlordRegistration {
-        val summaryPage = goToLandlordRegistrationSummaryPage()
+        val summaryPage = goToLandlordRegistrationSummaryPageInternationalLandlord()
         summaryPage.submitButton.click()
         return createValidPage(page, DeclarationFormPageLandlordRegistration::class)
     }
