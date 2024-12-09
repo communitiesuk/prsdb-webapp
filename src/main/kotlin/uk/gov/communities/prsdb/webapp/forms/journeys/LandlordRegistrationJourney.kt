@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.PLACE_NAMES
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.pages.ConfirmIdentityPage
-import uk.gov.communities.prsdb.webapp.forms.pages.LandlordRegistrationSummaryPage
+import uk.gov.communities.prsdb.webapp.forms.pages.LandlordRegistrationCheckAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.VerifyIdentityPage
@@ -336,16 +336,15 @@ class LandlordRegistrationJourney(
                     saveAfterSubmit = false,
                 ),
                 Step(
-                    // TODO PRSD-372 update message value(s)
                     id = LandlordRegistrationStepId.CheckAnswers,
                     page =
-                        LandlordRegistrationSummaryPage(
+                        LandlordRegistrationCheckAnswersPage(
                             formModel = CheckAnswersFormModel::class,
                             templateName = "forms/checkAnswersForm",
                             content =
                                 mapOf(
                                     "title" to "registerAsALandlord.title",
-                                    "summaryName" to "registerAsALandlord.title",
+                                    "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
                                     "submitButtonText" to "forms.buttons.confirmAndContinue",
                                 ),
                         ),
@@ -424,9 +423,8 @@ class LandlordRegistrationJourney(
                 Pair(LandlordRegistrationStepId.CheckAnswers, null)
             }
 
-        private fun doesJourneyDataContainVerifiedIdentity(journeyData: JourneyData): Boolean {
-            val pageData =
-                objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment]) ?: mapOf()
+        fun doesJourneyDataContainVerifiedIdentity(journeyData: JourneyData): Boolean {
+            val pageData = objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment]) ?: mapOf()
             return pageData[VerifiedIdentityModel.NAME_KEY] is String &&
                 pageData[VerifiedIdentityModel.BIRTH_DATE_KEY] is LocalDate
         }
