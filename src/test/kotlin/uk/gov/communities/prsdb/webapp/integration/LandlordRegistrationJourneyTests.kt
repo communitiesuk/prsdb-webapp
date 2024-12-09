@@ -21,6 +21,7 @@ import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmationPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
@@ -611,10 +612,6 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
         }
 
-        // TODO for these tests
-        // change `summary` references to check answers?
-        // make `birthDate` and `dateOfBirth` consistent
-
         @Nested
         inner class LandlordIsUKResident {
             private lateinit var checkAnswersPage: CheckAnswersPageLandlordRegistration
@@ -639,7 +636,6 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
             @Test
             fun `Check row values populate correctly`(page: Page) {
-                // TODO debug here and check dob
                 assertTrue { checkAnswersPage.getByTextExactly("Arthur Dent").isVisible }
                 assertTrue { checkAnswersPage.getByTextExactly("2000-06-08").isVisible }
                 assertTrue { checkAnswersPage.getByTextExactly("test@example.com").isVisible }
@@ -797,6 +793,60 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
                     checkAnswersPage.getLinks("lookup-contact-address")
                 changeUKContactAddressLink.click()
                 assertPageIs(page, LookupContactAddressFormPageLandlordRegistration::class)
+            }
+        }
+
+        @Nested
+        inner class IdentityVerifiedWithOneLogin {
+            private lateinit var checkAnswersPage: CheckAnswersPageLandlordRegistration
+
+            @BeforeEach
+            fun setUp(page: Page) {
+                val verifiedIdentityMap =
+                    mutableMapOf<String, Any?>(
+                        VerifiedIdentityModel.NAME_KEY to "Arthur Dent",
+                        VerifiedIdentityModel.BIRTH_DATE_KEY to LocalDate.of(2000, 6, 8),
+                    )
+                whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentityMap)
+
+                val confirmIdentityPage = navigator.goToLandlordRegistrationConfirmIdentityFormPage()
+                println(confirmIdentityPage.page.content())
+                confirmIdentityPage.form.submit()
+
+                val emailPage = createValidPage(page, EmailFormPageLandlordRegistration::class)
+                emailPage.emailInput.fill("test@example.com")
+                emailPage.form.submit()
+
+                val phoneNumberPage = createValidPage(page, PhoneNumberFormPageLandlordRegistration::class)
+                phoneNumberPage.phoneNumberInput.fill("07456097576")
+                phoneNumberPage.form.submit()
+
+                val countryOfResidencePage = createValidPage(page, CountryOfResidenceFormPageLandlordRegistration::class)
+                countryOfResidencePage.radios.selectValue("true")
+                countryOfResidencePage.form.submit()
+
+                val lookupAddressPage = createValidPage(page, LookupAddressFormPageLandlordRegistration::class)
+                lookupAddressPage.postcodeInput.fill("EG")
+                lookupAddressPage.houseNameOrNumberInput.fill("1")
+                lookupAddressPage.form.submit()
+
+                val selectAddressPage = createValidPage(page, SelectAddressFormPageLandlordRegistration::class)
+                selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
+                selectAddressPage.form.submit()
+
+                checkAnswersPage = createValidPage(page, CheckAnswersPageLandlordRegistration::class)
+            }
+
+            @Test
+            fun `Check row titles for Name and Date of birth populate correctly`(page: Page) {
+                assertTrue { checkAnswersPage.getByTextExactly("Name").isVisible }
+                assertTrue { checkAnswersPage.getByTextExactly("Date of birth").isVisible }
+            }
+
+            @Test
+            fun `Check row values Name and Date of birth populate correctly`(page: Page) {
+                assertTrue { checkAnswersPage.getByTextExactly("Arthur Dent").isVisible }
+                assertTrue { checkAnswersPage.getByTextExactly("08/06/2000").isVisible }
             }
         }
     }
