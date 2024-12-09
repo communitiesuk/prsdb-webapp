@@ -10,7 +10,8 @@ fun readPlaceNamesCsv(fileName: String): List<String> {
 
     val placeNames = mutableListOf<String>()
     reader.forEachLine { line ->
-        val placeName = line.split(",")[1].replace("\"", "")
+        val nameInQuotationMarks = line.split("\"")
+        val placeName = if (nameInQuotationMarks.size > 1) nameInQuotationMarks[1] else line.split(",")[1].replace("\"", "")
         placeNames.add(placeName)
     }
     return placeNames

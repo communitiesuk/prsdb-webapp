@@ -30,12 +30,14 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SummaryPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HouseholdsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalAuthorityFormPagePropertyRegistration
 
 class Navigator(
     private val page: Page,
@@ -216,6 +218,22 @@ class Navigator(
         addressLookupPage.houseNameOrNumberInput.fill("1")
         addressLookupPage.form.submit()
         return createValidPage(page, SelectAddressFormPagePropertyRegistration::class)
+    }
+
+    fun goToPropertyRegistrationManualAddressPage(): ManualAddressFormPagePropertyRegistration {
+        val addressSelectPage = goToPropertyRegistrationSelectAddressPage()
+        addressSelectPage.radios.selectValue(MANUAL_ADDRESS_CHOSEN)
+        addressSelectPage.form.submit()
+        return createValidPage(page, ManualAddressFormPagePropertyRegistration::class)
+    }
+
+    fun goToPropertyRegistrationSelectLocalAuthorityPage(): SelectLocalAuthorityFormPagePropertyRegistration {
+        val manualAddressPage = goToPropertyRegistrationManualAddressPage()
+        manualAddressPage.addressLineOneInput.fill("Test address line 1")
+        manualAddressPage.townOrCityInput.fill("Testville")
+        manualAddressPage.postcodeInput.fill("EG1 2AB")
+        manualAddressPage.form.submit()
+        return createValidPage(page, SelectLocalAuthorityFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationPropertyTypePage(): PropertyTypeFormPagePropertyRegistration {
