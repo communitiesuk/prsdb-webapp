@@ -47,3 +47,24 @@ VALUES ('invited.user@example.com', 1, gen_random_uuid()),
        ('user.invited@example.com', 1, gen_random_uuid()),
        ('further.user@example.com', 1, gen_random_uuid()),
        ('another.user@example.com', 1, gen_random_uuid());
+
+INSERT INTO registration_number (id, created_date, number, type)
+VALUES (1,  '09/13/24', 2001001001, 1),
+       (2, '09/13/24', 3002001002, 1),
+       (3, '10/07/24', 4003001003, 1),
+       (4, '10/14/24', 5004001004, 1),
+       (5, '10/09/24', 6005001005, 1);
+
+INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address)
+VALUES (1,  '09/13/24', '09/13/24', 1, '1 Fictional Road'),
+       (2,  '09/13/24', '09/13/24', 2, '2 Fake Way'),
+       (3,  '09/13/24', '09/13/24', 3, '3 Imaginary Street'),
+       (4,  '09/13/24', '09/13/24', 4, '4 Pretend Crescent'),
+       (5,  '09/13/24', '09/13/24', 5, '5 Mythical Place');
+
+INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth, is_active, phone_number, subject_identifier, name, email)
+VALUES (1,  '09/13/24', '09/13/24', 1, 1,'09/13/2000', true, 07111111111, 'urn:fdc:gov.uk:2022:KLMNO', 'Alexander Smith', 'alex.surname@example.com'),
+       (2,  '09/13/24', '09/13/24', 2, 2,'08/13/2001', true, 07111111111, 'urn:fdc:gov.uk:2022:UVWXY', 'Alexandra Davies', 'alexandra.q.davies@example.com'),
+       (3,  '09/13/24', '09/13/24', 3, 3,'07/13/1997', true, 07111111111, 'urn:fdc:gov.uk:2022:PQRST', 'Evan Alexandrescu', 'unrelatedemail@completelydifferentdomain.com'),
+       (4,  '09/13/24', '09/13/24', 4, 4,'06/13/1989', true, 07111111111, 'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', 'Tobias Evans', 'tobyevans@importantco.com'),
+       (5,  '09/13/24', '09/13/24', 5, 5,'05/13/1950', true, 07111111111, 'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', 'Margaret Mary Smith', 'mm.smith@importantco.com');
