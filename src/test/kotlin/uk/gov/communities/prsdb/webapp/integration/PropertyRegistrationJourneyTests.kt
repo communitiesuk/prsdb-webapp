@@ -16,11 +16,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AlreadyRegisteredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HouseholdsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalAuthorityFormPagePropertyRegistration
 import java.net.URI
 
 @Sql("/data-local.sql")
@@ -130,9 +132,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val selectAddressPage = navigator.goToPropertyRegistrationSelectAddressPage()
             selectAddressPage.radios.selectValue(MANUAL_ADDRESS_CHOSEN)
             selectAddressPage.form.submit()
-            // TODO: PRSD-491 - check the actual page here rather than just the url once it is added
-            assertEquals("/register-property/manual-address", URI(page.url()).path)
-            // assertPageIs(page, ManualAddressFormPagePropertyRegistration::class)
+            assertPageIs(page, ManualAddressFormPagePropertyRegistration::class)
         }
 
         @Test
@@ -149,6 +149,52 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
             selectAddressPage.form.submit()
             assertPageIs(page, AlreadyRegisteredFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class ManualAddressEntryStep {
+        @Test
+        fun `Submitting valid data redirects to the SelectLocalAuthority step`(page: Page) {
+            val manualAddressPage = navigator.goToPropertyRegistrationManualAddressPage()
+            manualAddressPage.addressLineOneInput.fill("Test address line 1")
+            manualAddressPage.townOrCityInput.fill("Testville")
+            manualAddressPage.postcodeInput.fill("EG1 2AB")
+            manualAddressPage.form.submit()
+            assertPageIs(page, SelectLocalAuthorityFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Submitting empty data fields returns errors`(page: Page) {
+            val manualAddressPage = navigator.goToPropertyRegistrationManualAddressPage()
+            manualAddressPage.form.submit()
+            assertThat(manualAddressPage.form.getErrorMessage("addressLineOne"))
+                .containsText("Enter the first line of an address, typically the building and street")
+            assertThat(manualAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
+            assertThat(manualAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
+        }
+    }
+
+    @Nested
+    inner class SelectLocalAuthorityStep {
+        @Test
+        fun `Submitting a local authority redirects to the next step`(page: Page) {
+            val selectLocalAuthorityPage = navigator.goToPropertyRegistrationSelectLocalAuthorityPage()
+            selectLocalAuthorityPage.form
+                .getSelect()
+                .autocompleteInput
+                .fill("Cambridge")
+            selectLocalAuthorityPage.form.getSelect().selectValue("CAMBRIDGE CITY COUNCIL")
+            selectLocalAuthorityPage.form.submit()
+            assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Submitting without selecting an LA return an error`(page: Page) {
+            val selectLocalAuthorityPage = navigator.goToPropertyRegistrationSelectLocalAuthorityPage()
+            selectLocalAuthorityPage.form.submit()
+            assertThat(selectLocalAuthorityPage.form.getErrorMessage("localAuthorityCustodianCode"))
+                .containsText("Select a local authority to continue")
         }
     }
 
