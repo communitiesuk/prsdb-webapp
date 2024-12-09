@@ -53,4 +53,13 @@ class LandlordService(
 
         return registrationNumber.toString()
     }
+
+    fun searchForLandlords(
+        searchTerm: String,
+        limit: Int = DEFAULT_LANDLORD_SEARCH_LIMIT,
+    ): List<Landlord> = landlordRepository.searchMatching(searchTerm, limit)
+
+    companion object {
+        private const val DEFAULT_LANDLORD_SEARCH_LIMIT = 3
+    }
 }
