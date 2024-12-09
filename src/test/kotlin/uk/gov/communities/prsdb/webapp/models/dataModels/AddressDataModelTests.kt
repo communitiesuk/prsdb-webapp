@@ -23,7 +23,13 @@ class AddressDataModelTests {
     ) {
         assertEquals(
             expectedAddressString,
-            AddressDataModel.parseSingleLineAddress(addressLineOne, townOrCity, postcode, addressLineTwo, county),
+            AddressDataModel.manualAddressDataToSingleLineAddress(
+                addressLineOne,
+                townOrCity,
+                postcode,
+                addressLineTwo,
+                county,
+            ),
         )
     }
 
@@ -37,7 +43,7 @@ class AddressDataModelTests {
             )
 
         val addressDataModel =
-            AddressDataModel.parseAddressDataModel(
+            AddressDataModel.fromManualAddressData(
                 "Flat 10",
                 "Townville",
                 "EG1 2AB",

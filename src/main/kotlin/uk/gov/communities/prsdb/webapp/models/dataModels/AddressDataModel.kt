@@ -17,7 +17,7 @@ data class AddressDataModel(
     val postcode: String? = null,
 ) {
     companion object {
-        fun parseAddressDataModel(
+        fun fromManualAddressData(
             addressLineOne: String,
             townOrCity: String,
             postcode: String,
@@ -26,12 +26,12 @@ data class AddressDataModel(
         ): AddressDataModel =
             AddressDataModel(
                 singleLineAddress =
-                    parseSingleLineAddress(addressLineOne, townOrCity, postcode, addressLineTwo, county),
+                    manualAddressDataToSingleLineAddress(addressLineOne, townOrCity, postcode, addressLineTwo, county),
                 townName = townOrCity,
                 postcode = postcode,
             )
 
-        fun parseSingleLineAddress(
+        fun manualAddressDataToSingleLineAddress(
             addressLineOne: String,
             townOrCity: String,
             postcode: String,
