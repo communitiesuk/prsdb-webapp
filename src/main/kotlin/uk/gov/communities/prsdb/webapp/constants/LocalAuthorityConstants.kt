@@ -13,15 +13,7 @@ fun readLocalAuthoritiesCsv(fileName: String): List<LocalAuthorityDataModel> {
     reader.forEachLine { line ->
         val uprn = line.split(",")[0]
         val nameInQuotationMarks = line.split("\"")
-        val name = if (nameInQuotationMarks.size > 1) nameInQuotationMarks[1] else line.split(",")[1]
-
-        val displayName =
-            name
-                .lowercase()
-                .split(' ')
-                .joinToString(" ") {
-                    it.replaceFirstChar { char -> char.uppercaseChar() }
-                }
+        val displayName = if (nameInQuotationMarks.size > 1) nameInQuotationMarks[1] else line.split(",")[1]
 
         localAuthorities.add(LocalAuthorityDataModel(uprn, displayName))
     }
