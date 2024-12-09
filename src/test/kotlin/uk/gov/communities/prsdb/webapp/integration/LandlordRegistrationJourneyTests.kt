@@ -682,7 +682,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             @Test
             fun `Change UK Resident link navigates to the correct step`(page: Page) {
                 val changeUKResidentLink =
-                    checkAnswersPage.getLinks("country-of-residence")
+                    checkAnswersPage.getLink("country-of-residence")
                 changeUKResidentLink.click()
                 assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
             }
@@ -690,7 +690,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             @Test
             fun `Change Contact address link navigates to the correct step`(page: Page) {
                 val changeContactAddressLink =
-                    checkAnswersPage.getLinks("lookup-address")
+                    checkAnswersPage.getLink("lookup-address")
                 changeContactAddressLink.click()
                 assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
             }
@@ -782,7 +782,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             @Test
             fun `Change Contact address (outside UK) link navigates to the correct step`(page: Page) {
                 val changeContactAddressOutsideUKLink =
-                    checkAnswersPage.getLinks("international-address")
+                    checkAnswersPage.getLink("international-address")
                 changeContactAddressOutsideUKLink.click()
                 assertPageIs(page, InternationalAddressFormPageLandlordRegistration::class)
             }
@@ -790,7 +790,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             @Test
             fun `Change UK contact address link navigates to the correct step`(page: Page) {
                 val changeUKContactAddressLink =
-                    checkAnswersPage.getLinks("lookup-contact-address")
+                    checkAnswersPage.getLink("lookup-contact-address")
                 changeUKContactAddressLink.click()
                 assertPageIs(page, LookupContactAddressFormPageLandlordRegistration::class)
             }
@@ -810,7 +810,6 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
                 whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentityMap)
 
                 val confirmIdentityPage = navigator.goToLandlordRegistrationConfirmIdentityFormPage()
-                println(confirmIdentityPage.page.content())
                 confirmIdentityPage.form.submit()
 
                 val emailPage = createValidPage(page, EmailFormPageLandlordRegistration::class)
@@ -847,6 +846,16 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             fun `Check row values Name and Date of birth populate correctly`(page: Page) {
                 assertTrue { checkAnswersPage.getByTextExactly("Arthur Dent").isVisible }
                 assertTrue { checkAnswersPage.getByTextExactly("08/06/2000").isVisible }
+            }
+
+            @Test
+            fun `Change links do not appear for Name and Date of birth fields`(page: Page) {
+                val changeLinks = checkAnswersPage.getAllChangeLinks()
+                assertTrue { changeLinks!!.count() == 4 }
+                assertTrue { checkAnswersPage.getLink("email").count() == 1 }
+                assertTrue { checkAnswersPage.getLink("phone-number").count() == 1 }
+                assertTrue { checkAnswersPage.getLink("country-of-residence").count() == 1 }
+                assertTrue { checkAnswersPage.getLink("lookup-address").count() == 1 }
             }
         }
     }
