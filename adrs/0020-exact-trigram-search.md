@@ -58,6 +58,11 @@ dataset to measure performance on.
 Interim decision of Concatenate data values, word similarity over threshold & N results with the highest word similarity
 without any index, because it will allow ongoing feature development.
 
+Recommendations for changes depending on requirements/experience:
+* When the search starts being slow we should add an index to speed it up. With the current set up this will need to be a GiST index.
+* If users want to search for unrelated data simultaneously (e.g. email username and name in search as two words) we may want to switch similarity over word similarity and separately query columns
+  * Word similarity only matches to a single substring in the concatenated search column
+
 ## Pros and Cons of the major Options
 
 ### Concatenate data values, N results with the highest word similarity, GiST index
