@@ -10,6 +10,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -97,6 +98,13 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         // fill in and submit
         peoplePage.peopleInput.fill("2")
         peoplePage.form.submit()
+
+        // Licensing type - render page
+        assertThat(propertyTypePage.form.getFieldsetHeading()).containsText("Select the type of licensing you have for your property")
+        // fill in and submit
+        propertyTypePage.form.getRadios().selectValue(LicensingType.HMO_ADDITIONAL_LICENCE)
+        propertyTypePage.form.submit()
+
         assertEquals("/register-property/placeholder", URI(page.url()).path)
     }
 
@@ -324,6 +332,16 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             peoplePage.form.submit()
             assertThat(peoplePage.form.getErrorMessage())
                 .containsText("Number of people in your property must be a positive, whole number, like 3")
+        }
+    }
+
+    @Nested
+    inner class LicensingTypeStep {
+        @Test
+        fun `Submitting with no propertyType selected returns an error`(page: Page) {
+            val propertyTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
+            propertyTypePage.form.submit()
+            assertThat(propertyTypePage.form.getErrorMessage()).containsText("Select the type of licensing for the property")
         }
     }
 }
