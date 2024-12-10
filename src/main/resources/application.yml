@@ -7,6 +7,9 @@ spring:
     username: ${RDS_USERNAME}
     password: ${RDS_PASSWORD}
 
+    hikari:
+      connection-init-sql: SET pg_trgm.word_similarity_threshold = 0.2
+
   jpa:
     hibernate:
       ddl-auto: validate
