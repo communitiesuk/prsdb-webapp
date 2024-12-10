@@ -236,7 +236,7 @@ class LandlordRegistrationJourney(
                             content =
                                 mapOf(
                                     "title" to "registerAsALandlord.title",
-                                    "fieldSetHeading" to "forms.manualAddress.fieldSetHeading",
+                                    "fieldSetHeading" to "forms.manualAddress.landlordRegistration.fieldSetHeading",
                                     "fieldSetHint" to "forms.manualAddress.fieldSetHint",
                                     "addressLineOneLabel" to "forms.manualAddress.addressLineOne.label",
                                     "addressLineTwoLabel" to "forms.manualAddress.addressLineTwo.label",
