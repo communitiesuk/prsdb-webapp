@@ -6,15 +6,15 @@
 <!--/*@thymesVar id="selectLabel" type="java.lang.Object"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl})}">
-<div id="form-content">
-    <div id="fieldset-content"
+<th:block id="form-content">
+    <fieldset id="fieldset-content"
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'localAuthorityCustodianCode', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
         <p class="govuk-body">
             <span th:text="#{forms.selectLocalAuthority.paragraph.one.beforeLink}">forms.selectLocalAuthority.paragraph.one.beforeLink</span>
             <a class="govuk-link" href="#" th:text="#{forms.selectLocalAuthority.paragraph.one.linkText}">forms.selectLocalAuthority.paragraph.one.linkText</a>
         </p>
-        <th:block th:replace="~{fragments/forms/select :: select(#{${selectLabel}},'localAuthorityCustodianCode',null, ${selectOptions})}"></th:block>
-    </div>
+        <select th:replace="~{fragments/forms/select :: select(#{${selectLabel}},'localAuthorityCustodianCode',null, ${selectOptions})}"></select>
+    </fieldset>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
-</div>
+</th:block>
 </html>
