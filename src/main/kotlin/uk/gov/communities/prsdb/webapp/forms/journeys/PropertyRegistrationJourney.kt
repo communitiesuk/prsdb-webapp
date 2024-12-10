@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.pages.AlreadyRegisteredPage
@@ -13,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.models.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NoInputFormModel
@@ -24,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.models.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectLocalAuthorityFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
@@ -269,6 +272,43 @@ class PropertyRegistrationJourney(
                                     "fieldSetHeading" to "forms.numberOfPeople.fieldSetHeading",
                                     "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
                                     "label" to "forms.numberOfPeople.label",
+                                ),
+                        ),
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.LicensingType, null) },
+                ),
+                Step(
+                    id = RegisterPropertyStepId.LicensingType,
+                    page =
+                        Page(
+                            formModel = LicensingTypeFormModel::class,
+                            templateName = "forms/licensingTypeForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.licensingType.fieldSetHeading",
+                                    "radioOptions" to
+                                        listOf(
+                                            RadiosButtonViewModel(
+                                                value = LicensingType.SELECTIVE_LICENCE,
+                                                labelMsgKey = "forms.licensingType.radios.option.selectiveLicence.label",
+                                                hintMsgKey = "forms.licensingType.radios.option.selectiveLicence.hint",
+                                            ),
+                                            RadiosButtonViewModel(
+                                                value = LicensingType.HMO_MANDATORY_LICENCE,
+                                                labelMsgKey = "forms.licensingType.radios.option.hmoMandatory.label",
+                                                hintMsgKey = "forms.licensingType.radios.option.hmoMandatory.hint",
+                                            ),
+                                            RadiosButtonViewModel(
+                                                value = LicensingType.HMO_ADDITIONAL_LICENCE,
+                                                labelMsgKey = "forms.licensingType.radios.option.hmoAdditional.label",
+                                                hintMsgKey = "forms.licensingType.radios.option.hmoAdditional.hint",
+                                            ),
+                                            RadiosDividerViewModel("forms.radios.dividerText"),
+                                            RadiosButtonViewModel(
+                                                value = LicensingType.NO_LICENSING,
+                                                labelMsgKey = "forms.licensingType.radios.option.noLicensing.label",
+                                            ),
+                                        ),
                                 ),
                         ),
                     nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
