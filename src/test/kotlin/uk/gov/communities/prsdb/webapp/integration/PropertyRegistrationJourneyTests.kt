@@ -393,10 +393,13 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val selectiveLicencePage = navigator.goToPropertyRegistrationSelectiveLicencePage()
             val aVeryLongString =
                 "This string is very long, so long that it is not feasible that it is a real licence number " +
-                    "- therefore if it is submitted there will in fact be an error rather than a successful submission"
+                    "- therefore if it is submitted there will in fact be an error rather than a successful submission." +
+                    " It is actually quite difficult for a string to be long enough to trigger this error, because the" +
+                    " maximum length has been selected to be permissive of id numbers we do not expect while still having " +
+                    "a cap reachable with a little effort."
             selectiveLicencePage.licenceNumberInput.fill(aVeryLongString)
             selectiveLicencePage.form.submit()
-            assertThat(selectiveLicencePage.form.getErrorMessage()).containsText("forms.selectiveLicence.error.invalid")
+            assertThat(selectiveLicencePage.form.getErrorMessage()).containsText("The licensing number is too long")
         }
     }
 }
