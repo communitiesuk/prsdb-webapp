@@ -72,10 +72,10 @@ VALUES (1,  '09/13/24', '09/13/24', 1, 1,'09/13/2000', true, 07111111111, 'urn:f
        (5,  '09/13/24', '09/13/24', 5, 5,'05/13/1950', true, 07111111111, 'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', 'Margaret Mary Smith', 'mm.smith@importantco.com');
 
 INSERT INTO property (id, is_active, address_id)
-VALUES (1, true, 5);
+VALUES (1, true, 6);
 
 INSERT INTO payment (id, payment_amount)
     VALUES (1, 10.00);
 
-INSERT INTO property_ownership (is_active, registration_number_id, property_id, payment_id, current_num_households)
-VALUES (true, 6, 1, 1, 0);
+INSERT INTO property_ownership (is_active, registration_number_id, property_id, payment_id, current_num_households, primary_landlord_id)
+VALUES (true, 6, 1, 1, 0, 1);

@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Temporal
@@ -16,11 +15,11 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import java.time.OffsetDateTime
 
 @Entity
-class PropertyOwnership : ModifiableAuditableEntity() {
+class PropertyOwnership(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long? = null
-
+    val id: Long? = null,
+) : ModifiableAuditableEntity() {
     var isActive: Boolean = false
 
     @Temporal(TemporalType.TIMESTAMP)
@@ -45,8 +44,9 @@ class PropertyOwnership : ModifiableAuditableEntity() {
     lateinit var registrationNumber: RegistrationNumber
         private set
 
-    @ManyToMany(mappedBy = "propertyOwnerships")
-    lateinit var landlords: MutableSet<Landlord>
+    @OneToOne
+    @JoinColumn(name = "primary_landlord_id", nullable = false, foreignKey = ForeignKey(name = "FK_PROPERTY_OWNERSHIP_PRIMARY_LANDLORD"))
+    lateinit var primaryLandlord: Landlord
         private set
 
     @OneToOne(optional = false)

@@ -10,11 +10,11 @@ import jakarta.persistence.TemporalType
 import java.time.OffsetDateTime
 
 @Entity
-class Payment : AuditableEntity() {
+class Payment(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long? = null
-
+    val id: Long? = null,
+) : AuditableEntity() {
     @Temporal(TemporalType.TIMESTAMP)
     lateinit var paymentDateTime: OffsetDateTime
         private set

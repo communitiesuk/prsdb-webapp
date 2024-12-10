@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
 @Component
 class PropertyRegistrationJourney(
@@ -31,6 +32,7 @@ class PropertyRegistrationJourney(
     journeyDataService: JourneyDataService,
     addressLookupService: AddressLookupService,
     addressDataService: AddressDataService,
+    propertyRegistrationService: PropertyRegistrationService,
 ) : Journey<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
         initialStepId = RegisterPropertyStepId.LookupAddress,
@@ -78,7 +80,14 @@ class PropertyRegistrationJourney(
                             addressLookupService = addressLookupService,
                             addressDataService = addressDataService,
                         ),
-                    nextAction = { journeyData, _ -> selectAddressNextAction(journeyData, journeyDataService, addressDataService) },
+                    nextAction = { journeyData, _ ->
+                        selectAddressNextAction(
+                            journeyData,
+                            journeyDataService,
+                            addressDataService,
+                            propertyRegistrationService,
+                        )
+                    },
                 ),
                 Step(
                     id = RegisterPropertyStepId.AlreadyRegistered,
@@ -259,6 +268,7 @@ class PropertyRegistrationJourney(
             journeyData: JourneyData,
             journeyDataService: JourneyDataService,
             addressDataService: AddressDataService,
+            propertyRegistrationService: PropertyRegistrationService,
         ): Pair<RegisterPropertyStepId, Int?> {
             val singleLineAddress =
                 journeyDataService
@@ -267,14 +277,16 @@ class PropertyRegistrationJourney(
                 return Pair(RegisterPropertyStepId.ManualAddress, null)
             } else {
                 val addressData = addressDataService.getAddressData(singleLineAddress)
-                if (addressData?.uprn != null && addressAlreadyRegistered(addressData.uprn)) {
+                if (addressData?.uprn != null && addressAlreadyRegistered(addressData.uprn, propertyRegistrationService)) {
                     return Pair(RegisterPropertyStepId.AlreadyRegistered, null)
                 }
                 return Pair(RegisterPropertyStepId.PropertyType, null)
             }
         }
 
-        // TODO PRSD-637: Check the database to see if this property is registered.
-        private fun addressAlreadyRegistered(uprn: Long): Boolean = uprn == 1123456.toLong()
+        private fun addressAlreadyRegistered(
+            uprn: Long,
+            propertyRegistrationService: PropertyRegistrationService,
+        ): Boolean = propertyRegistrationService.getIsAddressRegistered(uprn)
     }
 }

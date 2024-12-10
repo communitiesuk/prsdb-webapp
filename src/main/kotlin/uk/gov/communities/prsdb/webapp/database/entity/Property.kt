@@ -11,11 +11,11 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.Status
 
 @Entity
-class Property : ModifiableAuditableEntity() {
+class Property(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long? = null
-
+    val id: Long? = null,
+) : ModifiableAuditableEntity() {
     lateinit var status: Status
         private set
 

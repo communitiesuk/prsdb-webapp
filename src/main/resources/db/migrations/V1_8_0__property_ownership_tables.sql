@@ -24,6 +24,7 @@ CREATE TABLE property_ownership
     registration_number_id BIGINT                                  NOT NULL,
     property_id            BIGINT                                  NOT NULL,
     payment_id             BIGINT                                  NOT NULL,
+    primary_landlord_id    BIGINT                                  NOT NULL,
     CONSTRAINT pk_propertyownership PRIMARY KEY (id)
 );
 
@@ -34,14 +35,6 @@ CREATE TABLE payment
     payment_date_time TIMESTAMP WITHOUT TIME ZONE,
     payment_amount    DOUBLE PRECISION                        NOT NULL,
     CONSTRAINT pk_payment PRIMARY KEY (id)
-);
-
-
-CREATE TABLE landlord_property_ownership
-(
-    landlord_id           BIGINT NOT NULL,
-    property_ownership_id BIGINT NOT NULL,
-    CONSTRAINT pk_landlord_property_ownership PRIMARY KEY (landlord_id, property_ownership_id)
 );
 
 ALTER TABLE property
@@ -65,8 +58,5 @@ ALTER TABLE property_ownership
 ALTER TABLE property_ownership
     ADD CONSTRAINT FK_PROPERTY_OWNERSHIP_REGISTRATION_NUMBER FOREIGN KEY (registration_number_id) REFERENCES registration_number (id);
 
-ALTER TABLE landlord_property_ownership
-    ADD CONSTRAINT fk_lanproown_on_landlord FOREIGN KEY (landlord_id) REFERENCES landlord (id);
-
-ALTER TABLE landlord_property_ownership
-    ADD CONSTRAINT fk_lanproown_on_property_ownership FOREIGN KEY (property_ownership_id) REFERENCES property_ownership (id);
+ALTER TABLE property_ownership
+    ADD CONSTRAINT FK_PROPERTY_OWNERSHIP_PRIMARY_LANDLORD FOREIGN KEY (primary_landlord_id) REFERENCES landlord (id);
