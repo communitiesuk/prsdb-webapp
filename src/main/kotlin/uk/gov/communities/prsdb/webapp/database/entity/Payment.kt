@@ -1,12 +1,10 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
 import jakarta.persistence.Entity
-import jakarta.persistence.ForeignKey
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.OneToOne
+import jakarta.persistence.OneToMany
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
 import java.time.OffsetDateTime
@@ -23,8 +21,7 @@ class Payment : AuditableEntity() {
 
     var paymentAmount: Double = 0.00
 
-    @OneToOne(optional = false)
-    @JoinColumn(name = "property_ownership_id", nullable = false, foreignKey = ForeignKey(name = "FK_PAYMENT_PROPERTY_OWNERSHIP"))
-    lateinit var propertyOwnership: PropertyOwnership
+    @OneToMany(mappedBy = "payment")
+    lateinit var propertyOwnerships: MutableSet<PropertyOwnership>
         private set
 }

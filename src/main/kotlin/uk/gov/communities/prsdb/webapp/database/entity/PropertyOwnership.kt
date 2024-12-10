@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToMany
+import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
@@ -53,8 +54,8 @@ class PropertyOwnership : ModifiableAuditableEntity() {
     lateinit var property: Property
         private set
 
-    @OneToOne(optional = false)
-    @JoinColumn(name = "payment_id", nullable = false, foreignKey = ForeignKey(name = "FK_PROPERTY_OWNERSHIP_PAYMENT"))
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "payment_id", nullable = false)
     lateinit var payment: Payment
         private set
 }
