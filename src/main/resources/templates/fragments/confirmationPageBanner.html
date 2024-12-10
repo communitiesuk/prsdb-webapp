@@ -1,6 +1,6 @@
-<div th:fragment="confirmationPageBanner(title, body)" class="govuk-panel govuk-panel--confirmation">
-    <h1 class="govuk-panel__title" th:text="${title}">
-        title
+<div th:fragment="confirmationPageBanner(heading, body)" class="govuk-panel govuk-panel--confirmation">
+    <h1 class="govuk-panel__title" th:text="${heading}">
+        Heading
     </h1>
     <div class="govuk-panel__body" th:insert="${body}">
         Body text that goes in the banner
