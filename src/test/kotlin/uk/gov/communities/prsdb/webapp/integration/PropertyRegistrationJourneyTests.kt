@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalAuthorityFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import java.net.URI
 
 @Sql("/data-local.sql")
@@ -104,8 +105,15 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         // Licensing type - render page
         assertThat(licensingTypePage.form.getFieldsetHeading()).containsText("Select the type of licensing you have for your property")
         // fill in and submit
-        licensingTypePage.form.getRadios().selectValue(LicensingType.HMO_ADDITIONAL_LICENCE)
+        licensingTypePage.form.getRadios().selectValue(LicensingType.SELECTIVE_LICENCE)
         licensingTypePage.form.submit()
+        val selectiveLicencePage = assertPageIs(page, SelectiveLicenceFormPagePropertyRegistration::class)
+
+        // Selective licence - render page
+        assertThat(selectiveLicencePage.form.getFieldsetHeading()).containsText("What is your selective licence number?")
+        // fill in and submit
+        selectiveLicencePage.licenceNumberInput.fill("licence number")
+        selectiveLicencePage.form.submit()
 
         assertEquals("/register-property/placeholder", URI(page.url()).path)
     }
@@ -344,6 +352,51 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val licensingTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
             licensingTypePage.form.submit()
             assertThat(licensingTypePage.form.getErrorMessage()).containsText("Select the type of licensing for the property")
+        }
+
+        @Test
+        fun `Submitting with no licensing for property redirects to the next step`(page: Page) {
+            val licensingTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
+            licensingTypePage.form.getRadios().selectValue(LicensingType.NO_LICENSING)
+            licensingTypePage.form.submit()
+            assertEquals("/register-property/placeholder", URI(page.url()).path)
+        }
+
+        @Test
+        fun `Submitting with an HMO mandatory licence redirects to the next step`(page: Page) {
+            val licensingTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
+            licensingTypePage.form.getRadios().selectValue(LicensingType.HMO_MANDATORY_LICENCE)
+            licensingTypePage.form.submit()
+            assertEquals("/register-property/placeholder", URI(page.url()).path)
+        }
+
+        @Test
+        fun `Submitting with an HMO additional licence redirects to the next step`(page: Page) {
+            val licensingTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
+            licensingTypePage.form.getRadios().selectValue(LicensingType.HMO_ADDITIONAL_LICENCE)
+            licensingTypePage.form.submit()
+            assertEquals("/register-property/placeholder", URI(page.url()).path)
+        }
+    }
+
+    @Nested
+    inner class SelectiveLicenceStep {
+        @Test
+        fun `Submitting with no licence number returns an error`(page: Page) {
+            val selectiveLicencePage = navigator.goToPropertyRegistrationSelectiveLicencePage()
+            selectiveLicencePage.form.submit()
+            assertThat(selectiveLicencePage.form.getErrorMessage()).containsText("Enter the selective licence number")
+        }
+
+        @Test
+        fun `Submitting with a very long licence number returns an error`(page: Page) {
+            val selectiveLicencePage = navigator.goToPropertyRegistrationSelectiveLicencePage()
+            val aVeryLongString =
+                "This string is very long, so long that it is not feasible that it is a real licence number " +
+                    "- therefore if it is submitted there will in fact be an error rather than a successful submission"
+            selectiveLicencePage.licenceNumberInput.fill(aVeryLongString)
+            selectiveLicencePage.form.submit()
+            assertThat(selectiveLicencePage.form.getErrorMessage()).containsText("forms.selectiveLicence.error.invalid")
         }
     }
 }

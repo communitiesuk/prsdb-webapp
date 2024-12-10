@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.Response
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
@@ -39,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalAuthorityFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 
 class Navigator(
     private val page: Page,
@@ -277,6 +279,13 @@ class Navigator(
         peoplePage.peopleInput.fill("4")
         peoplePage.form.submit()
         return createValidPage(page, LicensingTypeFormPagePropertyRegistration::class)
+    }
+
+    fun goToPropertyRegistrationSelectiveLicencePage(): SelectiveLicenceFormPagePropertyRegistration {
+        val licensingTypePage = goToPropertyRegistrationLicensingTypePage()
+        licensingTypePage.form.getRadios().selectValue(LicensingType.SELECTIVE_LICENCE)
+        licensingTypePage.form.submit()
+        return createValidPage(page, SelectiveLicenceFormPagePropertyRegistration::class)
     }
 
     private fun navigate(path: String): Response? = page.navigate("http://localhost:$port/$path")
