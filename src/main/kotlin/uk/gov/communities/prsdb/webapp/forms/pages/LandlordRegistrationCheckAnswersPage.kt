@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
-import kotlinx.datetime.LocalDate
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
@@ -11,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.FormSummaryDataModel
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.services.DateFormatterService
 import kotlin.reflect.KClass
 
 class LandlordRegistrationCheckAnswersPage(
@@ -59,7 +59,7 @@ class LandlordRegistrationCheckAnswersPage(
         )
 
     private fun getManuallyEnteredIdentifyRows(journeyData: JourneyData): List<FormSummaryDataModel> {
-        val formattedDate = getFormattedDate(journeyData)
+        val formattedDate = getFormattedDateOfBirth(journeyData)
         return listOf(
             FormSummaryDataModel(
                 "registerAsALandlord.checkAnswers.rowHeading.name",
@@ -74,12 +74,9 @@ class LandlordRegistrationCheckAnswersPage(
         )
     }
 
-    private fun getFormattedDate(journeyData: JourneyData): String {
+    private fun getFormattedDateOfBirth(journeyData: JourneyData): String {
         val formData = objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.DateOfBirth.urlPathSegment])!!
-        val year = formData["year"].toString().toInt()
-        val month = formData["month"].toString().toInt()
-        val day = formData["day"].toString().toInt()
-        return LocalDate(year, month, day).toString()
+        return DateFormatterService.getFormattedDate(formData["day"].toString(), formData["month"].toString(), formData["year"].toString())
     }
 
     private fun getEmailAndPhoneFormData(journeyData: JourneyData): List<FormSummaryDataModel> =
