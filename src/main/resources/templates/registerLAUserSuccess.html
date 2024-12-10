@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/layout :: layout(#{registerLAUser.title}, ~{::main}, false)}">
 <main class="govuk-main-wrapper" id="main-content">
-    <div id="page-contents" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
-        <div id="confirmation-banner" th:replace="~{fragments/confirmationPageBanner :: confirmationPageBanner(#{registerLaUser.success.banner.title(${localAuthority})}, ~{::#confirmation-banner/content()})}">
+    <div id="page-contents"
+         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <div id="confirmation-banner"
+             th:replace="~{fragments/confirmationPageBanner :: confirmationPageBanner(#{registerLaUser.success.banner.title(${localAuthority})}, ~{::#confirmation-banner/content()})}">
         </div>
         <h2 class="govuk-heading-m" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h2>
         <p class="govuk-body" th:text="#{registerLaUser.success.whatHappensNext.paragraph.one}">
@@ -23,7 +25,7 @@
             </li>
         </ul>
         <div class="govuk-button-group">
-            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/}, #{registerLaUser.success.goToDashboardButtonText})}">
+            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/}, #{common.confirmationPage.goToDashboard})}">
                 registerLaUser.success.goToDashboardButtonText
             </a>
         </div>
