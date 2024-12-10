@@ -17,7 +17,7 @@ class SelectiveLicenceFormModel : FormModel {
             ConstraintDescriptor(
                 messageKey = "forms.selectiveLicence.error.invalid",
                 validatorType = LengthConstraintValidator::class,
-                validatorArgs = arrayOf("0", "50"),
+                validatorArgs = arrayOf("0", "20"),
             ),
         ],
     )
