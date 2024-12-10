@@ -10,11 +10,13 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AlreadyRegisteredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HouseholdsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
@@ -75,7 +77,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         assertThat(ownershipTypePage.form.getFieldsetHeading()).containsText("Select the ownership type for your property")
         // fill in and submit
         ownershipTypePage.form.getRadios().selectValue(OwnershipType.FREEHOLD)
-        propertyTypePage.form.submit()
+        ownershipTypePage.form.submit()
         val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
 
         // Occupancy - render page
@@ -97,6 +99,14 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         // fill in and submit
         peoplePage.peopleInput.fill("2")
         peoplePage.form.submit()
+        val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
+
+        // Licensing type - render page
+        assertThat(licensingTypePage.form.getFieldsetHeading()).containsText("Select the type of licensing you have for your property")
+        // fill in and submit
+        licensingTypePage.form.getRadios().selectValue(LicensingType.HMO_ADDITIONAL_LICENCE)
+        licensingTypePage.form.submit()
+
         assertEquals("/register-property/placeholder", URI(page.url()).path)
     }
 
@@ -324,6 +334,16 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             peoplePage.form.submit()
             assertThat(peoplePage.form.getErrorMessage())
                 .containsText("Number of people in your property must be a positive, whole number, like 3")
+        }
+    }
+
+    @Nested
+    inner class LicensingTypeStep {
+        @Test
+        fun `Submitting with no licensingType selected returns an error`(page: Page) {
+            val licensingTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
+            licensingTypePage.form.submit()
+            assertThat(licensingTypePage.form.getErrorMessage()).containsText("Select the type of licensing for the property")
         }
     }
 }
