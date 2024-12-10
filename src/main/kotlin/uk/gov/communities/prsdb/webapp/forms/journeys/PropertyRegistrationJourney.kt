@@ -120,10 +120,10 @@ class PropertyRegistrationJourney(
                                     "submitButtonText" to "forms.buttons.saveAndContinue",
                                 ),
                         ),
-                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.SelectLocalAuthority, null) },
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.LocalAuthority, null) },
                 ),
                 Step(
-                    id = RegisterPropertyStepId.SelectLocalAuthority,
+                    id = RegisterPropertyStepId.LocalAuthority,
                     page =
                         Page(
                             formModel = SelectLocalAuthorityFormModel::class,

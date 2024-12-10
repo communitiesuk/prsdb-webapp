@@ -9,5 +9,5 @@ class SelectLocalAuthorityFormPagePropertyRegistration(
     page: Page,
 ) : FormBasePage(
         page,
-        "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.SelectLocalAuthority.urlPathSegment}",
+        "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.LocalAuthority.urlPathSegment}",
     )

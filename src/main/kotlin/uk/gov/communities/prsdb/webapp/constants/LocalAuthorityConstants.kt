@@ -12,6 +12,7 @@ fun readLocalAuthoritiesCsv(fileName: String): List<LocalAuthorityDataModel> {
     val localAuthorities = mutableListOf<LocalAuthorityDataModel>()
     reader.forEachLine { line ->
         val uprn = line.split(",")[0]
+        // Local authorities with commas in their names have the name enclosed in quotation marks
         val nameInQuotationMarks = line.split("\"")
         val displayName = if (nameInQuotationMarks.size > 1) nameInQuotationMarks[1] else line.split(",")[1]
 

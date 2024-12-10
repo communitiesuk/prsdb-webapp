@@ -10,6 +10,7 @@ fun readPlaceNamesCsv(fileName: String): List<String> {
 
     val placeNames = mutableListOf<String>()
     reader.forEachLine { line ->
+        // Countries with commas in their names have the name enclosed in quotation marks
         val nameInQuotationMarks = line.split("\"")
         val placeName = if (nameInQuotationMarks.size > 1) nameInQuotationMarks[1] else line.split(",")[1].replace("\"", "")
         placeNames.add(placeName)
