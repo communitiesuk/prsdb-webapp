@@ -18,11 +18,11 @@
             <form th:action="@{''}" method="post" novalidate th:object="${formModel}">
                 <dl th:replace="~{fragments/summaryList :: summaryList(${formData})}"></dl>
                 <details  id="details" th:replace="~{fragments/details :: details(#{forms.confirmDetails.details.summary}, ~{::#details/content()})}" >
-                    <th:block>
+                    <div class="govuk-details__text">
                         <span th:text="#{forms.confirmDetails.details.text.one}"></span>
                         <a th:href="#{forms.confirmDetails.details.oneLoginUrl}" th:text="#{forms.confirmDetails.details.text.link}">
                         </a><span th:text="#{forms.confirmDetails.details.text.two}"></span>
-                    </th:block>
+                    </div>
                 </details>
                 <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
             </form>
