@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.models.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectLocalAuthorityFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.SelectiveLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
@@ -312,6 +313,21 @@ class PropertyRegistrationJourney(
                                         ),
                                 ),
                         ),
+                    nextAction = { journeyData, _ -> licensingTypeNextAction(journeyData) },
+                ),
+                Step(
+                    id = RegisterPropertyStepId.SelectiveLicence,
+                    page =
+                        Page(
+                            formModel = SelectiveLicenceFormModel::class,
+                            templateName = "forms/selectiveLicenceForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.selectiveLicence.fieldSetHeading",
+                                    "label" to "forms.selectiveLicence.label",
+                                ),
+                        ),
                     nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
                 ),
                 Step(
@@ -362,6 +378,20 @@ class PropertyRegistrationJourney(
                 return Pair(RegisterPropertyStepId.PropertyType, null)
             }
         }
+
+        private fun licensingTypeNextAction(journeyData: JourneyData): Pair<RegisterPropertyStepId, Int?> =
+            when (
+                LicensingType.valueOf(
+                    objectToStringKeyedMap(journeyData[RegisterPropertyStepId.LicensingType.urlPathSegment])
+                        ?.get("licensingType")
+                        .toString(),
+                )
+            ) {
+                LicensingType.SELECTIVE_LICENCE -> Pair(RegisterPropertyStepId.SelectiveLicence, null)
+                LicensingType.HMO_MANDATORY_LICENCE -> Pair(RegisterPropertyStepId.PlaceholderPage, null)
+                LicensingType.HMO_ADDITIONAL_LICENCE -> Pair(RegisterPropertyStepId.PlaceholderPage, null)
+                LicensingType.NO_LICENSING -> Pair(RegisterPropertyStepId.PlaceholderPage, null)
+            }
 
         // TODO PRSD-637: Check the database to see if this property is registered.
         private fun addressAlreadyRegistered(uprn: Long): Boolean = uprn == 1123456.toLong()
