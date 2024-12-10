@@ -5,6 +5,8 @@
 <!--/*@thymesVar id="radioOptions" type="java.lang.Object"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl})}">
+<!-- The `questionPage` fragment places this content in a `form` element inside an `html` element;
+using a `form` element with `th:remove="tag" instead of a `th:block` means this page is a form as a prototype -->
 <form id="form-content" th:remove="tag">
     <fieldset id="fieldset-content"
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'licensingType', #{${fieldSetHeading}}, null)}">
