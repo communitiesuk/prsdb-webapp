@@ -15,4 +15,5 @@ enum class RegisterPropertyStepId(
     NumberOfHouseholds("number-of-households"),
     NumberOfPeople("number-of-people"),
     LicensingType("licensing-type"),
+    SelectiveLicence("selective-licence"),
 }
