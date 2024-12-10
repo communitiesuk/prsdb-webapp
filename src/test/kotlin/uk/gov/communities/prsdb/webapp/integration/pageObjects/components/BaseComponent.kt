@@ -24,6 +24,12 @@ abstract class BaseComponent(
             return component
         }
 
+        private fun getAllComponents(
+            page: Page,
+            locatorStr: String,
+            locatorOptions: LocatorOptions? = null,
+        ): Locator = page.locator(locatorStr, locatorOptions)
+
         fun getChildComponent(
             parentLocator: Locator,
             locatorStr: String,
@@ -55,6 +61,21 @@ abstract class BaseComponent(
             page: Page,
             text: String,
         ) = getComponent(page, ".govuk-link", LocatorOptions().setHasText(text))
+
+        fun getLinkByUrl(
+            page: Page,
+            url: String,
+        ) = getComponent(page, url)
+
+        fun getLinksByUrl(
+            page: Page,
+            url: String,
+        ) = getAllComponents(page, url)
+
+        fun getAllLinks(
+            page: Page,
+            text: String,
+        ) = getAllComponents(page, ".govuk-link", LocatorOptions().setHasText(text))
     }
 
     init {
