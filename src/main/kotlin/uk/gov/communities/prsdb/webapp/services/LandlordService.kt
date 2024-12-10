@@ -24,8 +24,10 @@ class LandlordService(
         return landlordRepository.findByRegistrationNumber_Number(regNum.number)
     }
 
+    fun retrieveLandlordByBaseUserId(baseUserId: String): Landlord? = landlordRepository.findByBaseUser_Id(baseUserId)
+
     @Transactional
-    fun findOrCreateLandlordAndReturnRegistrationNumber(
+    fun createLandlord(
         baseUserId: String,
         name: String,
         email: String,
@@ -33,12 +35,7 @@ class LandlordService(
         addressDataModel: AddressDataModel,
         internationalAddress: String? = null,
         dateOfBirth: Date? = null,
-    ): String {
-        val existingLandlord = landlordRepository.findByBaseUser_Id(baseUserId)
-        if (existingLandlord != null) {
-            return RegistrationNumberDataModel.toString(existingLandlord.registrationNumber)
-        }
-
+    ) {
         val baseUser = oneLoginUserRepository.getReferenceById(baseUserId)
         val address = addressService.findOrCreateAddress(addressDataModel)
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD)
@@ -55,8 +52,6 @@ class LandlordService(
                 dateOfBirth,
             ),
         )
-
-        return RegistrationNumberDataModel.toString(registrationNumber)
     }
 
     fun searchForLandlords(

@@ -21,5 +21,4 @@ enum class LandlordRegistrationStepId(
     ManualContactAddress("manual-contact-address"),
     CheckAnswers("check-answers"),
     Declaration("declaration"),
-    Confirmation("confirmation"),
 }

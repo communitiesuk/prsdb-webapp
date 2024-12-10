@@ -73,7 +73,28 @@ class LandlordServiceTests {
     }
 
     @Test
-    fun `findOrCreateLandlordAndReturnRegistrationNumber creates a landlord and returns its reg number given an unused baseUserId`() {
+    fun `retrieveLandlordByBaseUserId returns a landlord given its base user ID`() {
+        val baseUserId = "baseUserId"
+        val expectedLandlord = Landlord()
+
+        whenever(mockLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(expectedLandlord)
+
+        val landlord = landlordService.retrieveLandlordByBaseUserId(baseUserId)
+
+        assertEquals(expectedLandlord, landlord)
+    }
+
+    @Test
+    fun `retrieveLandlordByBaseUserId returns a null given an unregistered base user ID`() {
+        assertNull(
+            landlordService.retrieveLandlordByBaseUserId(
+                "unregisteredBaseUserId",
+            ),
+        )
+    }
+
+    @Test
+    fun `createLandlord creates a landlord`() {
         val baseUserId = "baseUserId"
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
 
@@ -93,60 +114,22 @@ class LandlordServiceTests {
                 null,
             )
 
-        whenever(mockLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
         whenever(mockOneLoginUserRepository.getReferenceById(baseUserId)).thenReturn(baseUser)
         whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
         whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD)).thenReturn(
             registrationNumber,
         )
 
-        val registrationNumberString =
-            landlordService.findOrCreateLandlordAndReturnRegistrationNumber(
-                baseUserId,
-                "name",
-                "example@email.com",
-                "07123456789",
-                addressDataModel,
-            )
+        landlordService.createLandlord(
+            baseUserId,
+            "name",
+            "example@email.com",
+            "07123456789",
+            addressDataModel,
+        )
 
         val landlordCaptor = captor<Landlord>()
         verify(mockLandlordRepository).save(landlordCaptor.capture())
         assertTrue(ReflectionEquals(expectedLandlord, "id").matches(landlordCaptor.value))
-        assertEquals(RegistrationNumberDataModel.toString(registrationNumber), registrationNumberString)
-    }
-
-    @Test
-    fun `findOrCreateLandlordAndReturnRegistrationNumber returns the corresponding registration number given a used baseUserId`() {
-        val baseUserId = "baseUserId"
-        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
-
-        val baseUser = OneLoginUser(baseUserId)
-        val address = Address(addressDataModel)
-        val registrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 1233456)
-
-        val existingLandlord =
-            Landlord(
-                baseUser,
-                "name",
-                "example@email.com",
-                "07123456789",
-                address,
-                registrationNumber,
-                null,
-                null,
-            )
-
-        whenever(mockLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(existingLandlord)
-
-        val registrationNumberString =
-            landlordService.findOrCreateLandlordAndReturnRegistrationNumber(
-                baseUserId,
-                "name",
-                "example@email.com",
-                "07123456789",
-                addressDataModel,
-            )
-
-        assertEquals(RegistrationNumberDataModel.toString(registrationNumber), registrationNumberString)
     }
 }

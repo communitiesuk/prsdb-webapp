@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_ADDRESS_MAX_LENGTH
@@ -7,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.PLACE_NAMES
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.pages.ConfirmIdentityPage
 import uk.gov.communities.prsdb.webapp.forms.pages.LandlordRegistrationSummaryPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -14,6 +16,8 @@ import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.VerifyIdentityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.localDateToDate
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.CountryOfResidenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.DateOfBirthFormModel
@@ -32,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.time.LocalDate
 
 @Component
@@ -40,6 +45,7 @@ class LandlordRegistrationJourney(
     journeyDataService: JourneyDataService,
     addressLookupService: AddressLookupService,
     addressDataService: AddressDataService,
+    landlordService: LandlordService,
 ) : Journey<LandlordRegistrationStepId>(
         journeyType = JourneyType.LANDLORD_REGISTRATION,
         initialStepId = LandlordRegistrationStepId.VerifyIdentity,
@@ -437,7 +443,14 @@ class LandlordRegistrationJourney(
                                 "submitButtonText" to "forms.buttons.confirmAndCompleteRegistration",
                             ),
                     ),
-                nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Confirmation, null) },
+                handleSubmitAndRedirect = { journeyData, _ ->
+                    declarationHandleSubmitAndRedirect(
+                        journeyData,
+                        journeyDataService,
+                        landlordService,
+                        addressDataService,
+                    )
+                },
                 saveAfterSubmit = false,
             )
 
@@ -493,6 +506,102 @@ class LandlordRegistrationJourney(
                 objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment]) ?: mapOf()
             return pageData[VerifiedIdentityModel.NAME_KEY] is String &&
                 pageData[VerifiedIdentityModel.BIRTH_DATE_KEY] is LocalDate
+        }
+
+        fun declarationHandleSubmitAndRedirect(
+            journeyData: JourneyData,
+            journeyDataService: JourneyDataService,
+            landlordService: LandlordService,
+            addressDataService: AddressDataService,
+        ): String {
+            landlordService.createLandlord(
+                baseUserId = SecurityContextHolder.getContext().authentication.name,
+                name =
+                    journeyDataService.getFieldStringValue(
+                        journeyData,
+                        LandlordRegistrationStepId.VerifyIdentity.urlPathSegment,
+                        "name",
+                    ) ?: journeyDataService.getFieldStringValue(
+                        journeyData,
+                        LandlordRegistrationStepId.Name.urlPathSegment,
+                        "name",
+                    )!!,
+                email =
+                    journeyDataService.getFieldStringValue(
+                        journeyData,
+                        LandlordRegistrationStepId.Email.urlPathSegment,
+                        "emailAddress",
+                    )!!,
+                phoneNumber =
+                    journeyDataService.getFieldStringValue(
+                        journeyData,
+                        LandlordRegistrationStepId.PhoneNumber.urlPathSegment,
+                        "phoneNumber",
+                    )!!,
+                addressDataModel = getAddress(journeyData, journeyDataService, addressDataService),
+                internationalAddress =
+                    journeyDataService.getFieldStringValue(
+                        journeyData,
+                        LandlordRegistrationStepId.InternationalAddress.urlPathSegment,
+                        "internationalAddress",
+                    ),
+                dateOfBirth =
+                    localDateToDate(
+                        journeyDataService.getFieldDateValue(
+                            journeyData,
+                            LandlordRegistrationStepId.VerifyIdentity.urlPathSegment,
+                            "birthDate",
+                        ) ?: journeyDataService.getDate(
+                            journeyData,
+                            LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
+                        )!!,
+                    ),
+            )
+
+            journeyDataService.clearJourneyDataFromSession()
+
+            return "/$REGISTER_LANDLORD_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT"
+        }
+
+        private fun getAddress(
+            journeyData: JourneyData,
+            journeyDataService: JourneyDataService,
+            addressDataService: AddressDataService,
+        ): AddressDataModel {
+            if (journeyDataService.getFieldStringValue(
+                    journeyData,
+                    LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
+                    "livesInUK",
+                ) == "true"
+            ) {
+                val addressChosen =
+                    journeyDataService.getFieldStringValue(
+                        journeyData,
+                        LandlordRegistrationStepId.SelectAddress.urlPathSegment,
+                        "address",
+                    )!!
+                if (addressChosen == MANUAL_ADDRESS_CHOSEN) {
+                    return journeyDataService.getManualAddress(
+                        journeyData,
+                        LandlordRegistrationStepId.ManualAddress.urlPathSegment,
+                    )!!
+                }
+                return addressDataService.getAddressData(addressChosen)!!
+            }
+
+            val contactAddressChosen =
+                journeyDataService.getFieldStringValue(
+                    journeyData,
+                    LandlordRegistrationStepId.SelectContactAddress.urlPathSegment,
+                    "address",
+                )!!
+            if (contactAddressChosen == MANUAL_ADDRESS_CHOSEN) {
+                return journeyDataService.getManualAddress(
+                    journeyData,
+                    LandlordRegistrationStepId.ManualContactAddress.urlPathSegment,
+                )!!
+            }
+            return addressDataService.getAddressData(contactAddressChosen)!!
         }
     }
 }
