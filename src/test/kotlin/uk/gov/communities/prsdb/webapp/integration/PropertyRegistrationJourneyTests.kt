@@ -341,9 +341,9 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     inner class LicensingTypeStep {
         @Test
         fun `Submitting with no licensingType selected returns an error`(page: Page) {
-            val propertyTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
-            propertyTypePage.form.submit()
-            assertThat(propertyTypePage.form.getErrorMessage()).containsText("Select the type of licensing for the property")
+            val licensingTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
+            licensingTypePage.form.submit()
+            assertThat(licensingTypePage.form.getErrorMessage()).containsText("Select the type of licensing for the property")
         }
     }
 }
