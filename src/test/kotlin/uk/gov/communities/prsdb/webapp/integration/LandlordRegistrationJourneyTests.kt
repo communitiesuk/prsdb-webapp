@@ -797,43 +797,12 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         }
 
         @Nested
-        inner class IdentityVerifiedWithOneLogin {
+        inner class IdentityVerifiedByOneLogin {
             private lateinit var checkAnswersPage: CheckAnswersPageLandlordRegistration
 
             @BeforeEach
             fun setUp(page: Page) {
-                val verifiedIdentityMap =
-                    mutableMapOf<String, Any?>(
-                        VerifiedIdentityModel.NAME_KEY to "Arthur Dent",
-                        VerifiedIdentityModel.BIRTH_DATE_KEY to LocalDate.of(2000, 6, 8),
-                    )
-                whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentityMap)
-
-                val confirmIdentityPage = navigator.goToLandlordRegistrationConfirmIdentityFormPage()
-                confirmIdentityPage.form.submit()
-
-                val emailPage = createValidPage(page, EmailFormPageLandlordRegistration::class)
-                emailPage.emailInput.fill("test@example.com")
-                emailPage.form.submit()
-
-                val phoneNumberPage = createValidPage(page, PhoneNumberFormPageLandlordRegistration::class)
-                phoneNumberPage.phoneNumberInput.fill("07456097576")
-                phoneNumberPage.form.submit()
-
-                val countryOfResidencePage = createValidPage(page, CountryOfResidenceFormPageLandlordRegistration::class)
-                countryOfResidencePage.radios.selectValue("true")
-                countryOfResidencePage.form.submit()
-
-                val lookupAddressPage = createValidPage(page, LookupAddressFormPageLandlordRegistration::class)
-                lookupAddressPage.postcodeInput.fill("EG")
-                lookupAddressPage.houseNameOrNumberInput.fill("1")
-                lookupAddressPage.form.submit()
-
-                val selectAddressPage = createValidPage(page, SelectAddressFormPageLandlordRegistration::class)
-                selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
-                selectAddressPage.form.submit()
-
-                checkAnswersPage = createValidPage(page, CheckAnswersPageLandlordRegistration::class)
+                checkAnswersPage = getCheckAnswersPageWithIdentityVerifiedByOneLogin(page)
             }
 
             @Test
