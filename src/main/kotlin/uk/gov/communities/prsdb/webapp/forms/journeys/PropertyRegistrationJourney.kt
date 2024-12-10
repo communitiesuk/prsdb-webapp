@@ -286,6 +286,7 @@ class PropertyRegistrationJourney(
                                 mapOf(
                                     "title" to "registerProperty.title",
                                     "fieldSetHeading" to "forms.licensingType.fieldSetHeading",
+                                    "fieldSetHint" to "forms.licensingType.fieldSetHint",
                                     "radioOptions" to
                                         listOf(
                                             RadiosButtonViewModel(
