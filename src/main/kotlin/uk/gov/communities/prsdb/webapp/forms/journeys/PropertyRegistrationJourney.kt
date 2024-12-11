@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.models.formModels.HmoMandatoryLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.ManualAddressFormModel
@@ -320,12 +321,37 @@ class PropertyRegistrationJourney(
                     page =
                         Page(
                             formModel = SelectiveLicenceFormModel::class,
-                            templateName = "forms/selectiveLicenceForm",
+                            templateName = "forms/licenceNumberForm",
                             content =
                                 mapOf(
                                     "title" to "registerProperty.title",
                                     "fieldSetHeading" to "forms.selectiveLicence.fieldSetHeading",
                                     "label" to "forms.selectiveLicence.label",
+                                    "detailSummary" to "forms.selectiveLicence.detail.summary",
+                                    "detailMainText" to "forms.selectiveLicence.detail.text",
+                                ),
+                        ),
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
+                ),
+                Step(
+                    id = RegisterPropertyStepId.HmoMandatoryLicence,
+                    page =
+                        Page(
+                            formModel = HmoMandatoryLicenceFormModel::class,
+                            templateName = "forms/licenceNumberForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.hmoMandatoryLicence.fieldSetHeading",
+                                    "label" to "forms.hmoMandatoryLicence.label",
+                                    "detailSummary" to "forms.hmoMandatoryLicence.detail.summary",
+                                    "detailMainText" to "forms.hmoMandatoryLicence.detail.paragraph.one",
+                                    "detailAdditionalContent" to
+                                        mapOf(
+                                            "bulletOne" to "forms.hmoMandatoryLicence.detail.bullet.one",
+                                            "bulletTwo" to "forms.hmoMandatoryLicence.detail.bullet.two",
+                                            "text" to "forms.hmoMandatoryLicence.detail.paragraph.two",
+                                        ),
                                 ),
                         ),
                     nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
@@ -385,7 +411,7 @@ class PropertyRegistrationJourney(
 
             return when (licensingType) {
                 LicensingType.SELECTIVE_LICENCE -> Pair(RegisterPropertyStepId.SelectiveLicence, null)
-                LicensingType.HMO_MANDATORY_LICENCE -> Pair(RegisterPropertyStepId.PlaceholderPage, null)
+                LicensingType.HMO_MANDATORY_LICENCE -> Pair(RegisterPropertyStepId.HmoMandatoryLicence, null)
                 LicensingType.HMO_ADDITIONAL_LICENCE -> Pair(RegisterPropertyStepId.PlaceholderPage, null)
                 LicensingType.NO_LICENSING -> Pair(RegisterPropertyStepId.PlaceholderPage, null)
             }

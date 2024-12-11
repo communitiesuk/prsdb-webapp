@@ -16,4 +16,5 @@ enum class RegisterPropertyStepId(
     NumberOfPeople("number-of-people"),
     LicensingType("licensing-type"),
     SelectiveLicence("selective-licence"),
+    HmoMandatoryLicence("hmo-mandatory-licence"),
 }
