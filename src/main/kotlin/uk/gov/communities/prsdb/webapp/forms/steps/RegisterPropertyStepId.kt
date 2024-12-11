@@ -8,9 +8,12 @@ enum class RegisterPropertyStepId(
     SelectAddress("select-address"),
     ManualAddress("manual-address"),
     AlreadyRegistered("already-registered"),
+    LocalAuthority("local-authority"),
     PropertyType("property-type"),
     OwnershipType("ownership-type"),
     Occupancy("occupancy"),
     NumberOfHouseholds("number-of-households"),
     NumberOfPeople("number-of-people"),
+    LicensingType("licensing-type"),
+    SelectiveLicence("selective-licence"),
 }

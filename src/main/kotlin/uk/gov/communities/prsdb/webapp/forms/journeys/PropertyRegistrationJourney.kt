@@ -2,9 +2,11 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.pages.AlreadyRegisteredPage
@@ -12,7 +14,9 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.models.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LookupAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NumberOfPeopleFormModel
@@ -20,7 +24,11 @@ import uk.gov.communities.prsdb.webapp.models.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.SelectLocalAuthorityFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.SelectiveLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosDividerViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -105,6 +113,50 @@ class PropertyRegistrationJourney(
                             journeyDataService = journeyDataService,
                             urlPathSegment = RegisterPropertyStepId.SelectAddress.urlPathSegment,
                         ),
+                ),
+                Step(
+                    id = RegisterPropertyStepId.ManualAddress,
+                    page =
+                        Page(
+                            formModel = ManualAddressFormModel::class,
+                            templateName = "forms/manualAddressForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.manualAddress.propertyRegistration.fieldSetHeading",
+                                    "fieldSetHint" to "forms.manualAddress.fieldSetHint",
+                                    "addressLineOneLabel" to "forms.manualAddress.addressLineOne.label",
+                                    "addressLineTwoLabel" to "forms.manualAddress.addressLineTwo.label",
+                                    "townOrCityLabel" to "forms.manualAddress.townOrCity.label",
+                                    "countyLabel" to "forms.manualAddress.county.label",
+                                    "postcodeLabel" to "forms.manualAddress.postcode.label",
+                                    "submitButtonText" to "forms.buttons.saveAndContinue",
+                                ),
+                        ),
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.LocalAuthority, null) },
+                ),
+                Step(
+                    id = RegisterPropertyStepId.LocalAuthority,
+                    page =
+                        Page(
+                            formModel = SelectLocalAuthorityFormModel::class,
+                            templateName = "forms/selectLocalAuthorityForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.selectLocalAuthority.fieldSetHeading",
+                                    "fieldSetHint" to "forms.selectLocalAuthority.fieldSetHint",
+                                    "selectLabel" to "forms.selectLocalAuthority.select.label",
+                                    "selectOptions" to
+                                        LOCAL_AUTHORITIES.map {
+                                            SelectViewModel(
+                                                value = it.uprn,
+                                                label = it.displayName,
+                                            )
+                                        },
+                                ),
+                        ),
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.PropertyType, null) },
                 ),
                 Step(
                     id = RegisterPropertyStepId.PropertyType,
@@ -232,6 +284,59 @@ class PropertyRegistrationJourney(
                                     "label" to "forms.numberOfPeople.label",
                                 ),
                         ),
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.LicensingType, null) },
+                ),
+                Step(
+                    id = RegisterPropertyStepId.LicensingType,
+                    page =
+                        Page(
+                            formModel = LicensingTypeFormModel::class,
+                            templateName = "forms/licensingTypeForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.licensingType.fieldSetHeading",
+                                    "fieldSetHint" to "forms.licensingType.fieldSetHint",
+                                    "radioOptions" to
+                                        listOf(
+                                            RadiosButtonViewModel(
+                                                value = LicensingType.SELECTIVE_LICENCE,
+                                                labelMsgKey = "forms.licensingType.radios.option.selectiveLicence.label",
+                                                hintMsgKey = "forms.licensingType.radios.option.selectiveLicence.hint",
+                                            ),
+                                            RadiosButtonViewModel(
+                                                value = LicensingType.HMO_MANDATORY_LICENCE,
+                                                labelMsgKey = "forms.licensingType.radios.option.hmoMandatory.label",
+                                                hintMsgKey = "forms.licensingType.radios.option.hmoMandatory.hint",
+                                            ),
+                                            RadiosButtonViewModel(
+                                                value = LicensingType.HMO_ADDITIONAL_LICENCE,
+                                                labelMsgKey = "forms.licensingType.radios.option.hmoAdditional.label",
+                                                hintMsgKey = "forms.licensingType.radios.option.hmoAdditional.hint",
+                                            ),
+                                            RadiosDividerViewModel("forms.radios.dividerText"),
+                                            RadiosButtonViewModel(
+                                                value = LicensingType.NO_LICENSING,
+                                                labelMsgKey = "forms.licensingType.radios.option.noLicensing.label",
+                                            ),
+                                        ),
+                                ),
+                        ),
+                    nextAction = { journeyData, _ -> licensingTypeNextAction(journeyData) },
+                ),
+                Step(
+                    id = RegisterPropertyStepId.SelectiveLicence,
+                    page =
+                        Page(
+                            formModel = SelectiveLicenceFormModel::class,
+                            templateName = "forms/selectiveLicenceForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.selectiveLicence.fieldSetHeading",
+                                    "label" to "forms.selectiveLicence.label",
+                                ),
+                        ),
                     nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
                 ),
                 Step(
@@ -281,6 +386,18 @@ class PropertyRegistrationJourney(
                     return Pair(RegisterPropertyStepId.AlreadyRegistered, null)
                 }
                 return Pair(RegisterPropertyStepId.PropertyType, null)
+            }
+        }
+
+        private fun licensingTypeNextAction(journeyData: JourneyData): Pair<RegisterPropertyStepId, Int?> {
+            val licensingTypePageData = objectToStringKeyedMap(journeyData[RegisterPropertyStepId.LicensingType.urlPathSegment])
+            val licensingType = LicensingType.valueOf(licensingTypePageData?.get("licensingType") as String)
+
+            return when (licensingType) {
+                LicensingType.SELECTIVE_LICENCE -> Pair(RegisterPropertyStepId.SelectiveLicence, null)
+                LicensingType.HMO_MANDATORY_LICENCE -> Pair(RegisterPropertyStepId.PlaceholderPage, null)
+                LicensingType.HMO_ADDITIONAL_LICENCE -> Pair(RegisterPropertyStepId.PlaceholderPage, null)
+                LicensingType.NO_LICENSING -> Pair(RegisterPropertyStepId.PlaceholderPage, null)
             }
         }
 

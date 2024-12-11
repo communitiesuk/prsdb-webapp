@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.Response
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
@@ -29,13 +30,17 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SummaryPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HouseholdsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalAuthorityFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 
 class Navigator(
     private val page: Page,
@@ -218,6 +223,22 @@ class Navigator(
         return createValidPage(page, SelectAddressFormPagePropertyRegistration::class)
     }
 
+    fun goToPropertyRegistrationManualAddressPage(): ManualAddressFormPagePropertyRegistration {
+        val addressSelectPage = goToPropertyRegistrationSelectAddressPage()
+        addressSelectPage.radios.selectValue(MANUAL_ADDRESS_CHOSEN)
+        addressSelectPage.form.submit()
+        return createValidPage(page, ManualAddressFormPagePropertyRegistration::class)
+    }
+
+    fun goToPropertyRegistrationSelectLocalAuthorityPage(): SelectLocalAuthorityFormPagePropertyRegistration {
+        val manualAddressPage = goToPropertyRegistrationManualAddressPage()
+        manualAddressPage.addressLineOneInput.fill("Test address line 1")
+        manualAddressPage.townOrCityInput.fill("Testville")
+        manualAddressPage.postcodeInput.fill("EG1 2AB")
+        manualAddressPage.form.submit()
+        return createValidPage(page, SelectLocalAuthorityFormPagePropertyRegistration::class)
+    }
+
     fun goToPropertyRegistrationPropertyTypePage(): PropertyTypeFormPagePropertyRegistration {
         val selectAddressPage = goToPropertyRegistrationSelectAddressPage()
         selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
@@ -251,6 +272,20 @@ class Navigator(
         householdsPage.householdsInput.fill("2")
         householdsPage.form.submit()
         return createValidPage(page, PeopleFormPagePropertyRegistration::class)
+    }
+
+    fun goToPropertyRegistrationLicensingTypePage(): LicensingTypeFormPagePropertyRegistration {
+        val peoplePage = goToPropertyRegistrationPeoplePage()
+        peoplePage.peopleInput.fill("4")
+        peoplePage.form.submit()
+        return createValidPage(page, LicensingTypeFormPagePropertyRegistration::class)
+    }
+
+    fun goToPropertyRegistrationSelectiveLicencePage(): SelectiveLicenceFormPagePropertyRegistration {
+        val licensingTypePage = goToPropertyRegistrationLicensingTypePage()
+        licensingTypePage.form.getRadios().selectValue(LicensingType.SELECTIVE_LICENCE)
+        licensingTypePage.form.submit()
+        return createValidPage(page, SelectiveLicenceFormPagePropertyRegistration::class)
     }
 
     private fun navigate(path: String): Response? = page.navigate("http://localhost:$port/$path")

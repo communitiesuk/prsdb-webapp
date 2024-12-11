@@ -4,7 +4,7 @@
             th:attr="aria-describedby=${hint != null} ? ${fieldName} + '-hint'">
         <option value=""></option>
         <option th:each="option: ${options}" th:value="${option.value}"
-                th:text="${option.labelMsgKey != null ? #messages.msg(option.labelMsgKey) : option.value}">
+                th:text="${(option.label != null ? option.label : option.value)}">
             Option Label
         </option>
     </select>
