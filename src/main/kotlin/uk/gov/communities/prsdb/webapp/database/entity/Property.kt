@@ -30,4 +30,9 @@ class Property(
     @JoinColumn(name = "address_id", nullable = false, foreignKey = ForeignKey(name = "FK_PROPERTY_ADDRESS"))
     lateinit var address: Address
         private set
+
+    constructor(id: Long, address: Address, isActive: Boolean) : this(id) {
+        this.address = address
+        this.isActive = isActive
+    }
 }

@@ -58,4 +58,8 @@ class PropertyOwnership(
     @JoinColumn(name = "payment_id", nullable = false)
     lateinit var payment: Payment
         private set
+
+    constructor(id: Long, isActive: Boolean) : this(id) {
+        this.isActive = isActive
+    }
 }
