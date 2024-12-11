@@ -13,6 +13,6 @@
     <details id="details-content" th:replace="~{fragments/details :: details(#{'forms.selectiveLicence.detail.summary'},~{::#details-content/content()})}">
         <div class="govuk-details__text" th:text="#{'forms.selectiveLicence.detail.text'}">detailsText</div>
     </details>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{'forms.buttons.continue'})}"></button>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{'forms.buttons.saveAndContinue'})}"></button>
 </form>
 </html>
