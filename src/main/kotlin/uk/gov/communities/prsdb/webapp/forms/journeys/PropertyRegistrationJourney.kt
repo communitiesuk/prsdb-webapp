@@ -72,7 +72,7 @@ class PropertyRegistrationJourney(
                                 mapOf(
                                     "title" to "registerProperty.title",
                                     "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
-                                    "submitButtonText" to "forms.buttons.saveAndContinue",
+                                    "submitButtonText" to "forms.buttons.useThisAddress",
                                     "searchAgainUrl" to
                                         "/$REGISTER_PROPERTY_JOURNEY_URL/" +
                                         RegisterPropertyStepId.LookupAddress.urlPathSegment,

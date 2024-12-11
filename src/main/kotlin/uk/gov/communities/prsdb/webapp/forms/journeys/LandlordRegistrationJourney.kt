@@ -214,7 +214,7 @@ class LandlordRegistrationJourney(
                                 mapOf(
                                     "title" to "registerAsALandlord.title",
                                     "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
-                                    "submitButtonText" to "forms.buttons.continue",
+                                    "submitButtonText" to "forms.buttons.useThisAddress",
                                     "searchAgainUrl" to
                                         "/${REGISTER_LANDLORD_JOURNEY_URL}/" +
                                         LandlordRegistrationStepId.LookupAddress.urlPathSegment,
