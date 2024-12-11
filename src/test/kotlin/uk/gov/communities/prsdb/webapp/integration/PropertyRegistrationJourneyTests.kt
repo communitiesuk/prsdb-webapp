@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AlreadyRegisteredFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HouseholdsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
@@ -367,7 +368,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val licensingTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
             licensingTypePage.form.getRadios().selectValue(LicensingType.HMO_MANDATORY_LICENCE)
             licensingTypePage.form.submit()
-            assertEquals("/register-property/placeholder", URI(page.url()).path)
+            assertPageIs(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
         }
 
         @Test
@@ -400,6 +401,38 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             selectiveLicencePage.licenceNumberInput.fill(aVeryLongString)
             selectiveLicencePage.form.submit()
             assertThat(selectiveLicencePage.form.getErrorMessage()).containsText("The licensing number is too long")
+        }
+    }
+
+    @Nested
+    inner class HmoMandatoryLicenceStep {
+        @Test
+        fun `Submitting with a licence number redirects to the next step`(page: Page) {
+            val hmoMandatoryLicencePage = navigator.goToPropertyRegistrationHmoMandatoryLicencePage()
+            hmoMandatoryLicencePage.licenceNumberInput.fill("licence number")
+            hmoMandatoryLicencePage.form.submit()
+            assertEquals("/register-property/placeholder", URI(page.url()).path)
+        }
+
+        @Test
+        fun `Submitting with no licence number returns an error`(page: Page) {
+            val hmoMandatoryLicencePage = navigator.goToPropertyRegistrationHmoMandatoryLicencePage()
+            hmoMandatoryLicencePage.form.submit()
+            assertThat(hmoMandatoryLicencePage.form.getErrorMessage()).containsText("Enter the HMO Mandatory licence number")
+        }
+
+        @Test
+        fun `Submitting with a very long licence number returns an error`(page: Page) {
+            val hmoMandatoryLicencePage = navigator.goToPropertyRegistrationHmoMandatoryLicencePage()
+            val aVeryLongString =
+                "This string is very long, so long that it is not feasible that it is a real licence number " +
+                    "- therefore if it is submitted there will in fact be an error rather than a successful submission." +
+                    " It is actually quite difficult for a string to be long enough to trigger this error, because the" +
+                    " maximum length has been selected to be permissive of id numbers we do not expect while still having " +
+                    "a cap reachable with a little effort."
+            hmoMandatoryLicencePage.licenceNumberInput.fill(aVeryLongString)
+            hmoMandatoryLicencePage.form.submit()
+            assertThat(hmoMandatoryLicencePage.form.getErrorMessage()).containsText("The licensing number is too long")
         }
     }
 }

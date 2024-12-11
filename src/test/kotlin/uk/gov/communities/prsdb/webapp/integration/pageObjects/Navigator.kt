@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SummaryPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HouseholdsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
@@ -286,6 +287,13 @@ class Navigator(
         licensingTypePage.form.getRadios().selectValue(LicensingType.SELECTIVE_LICENCE)
         licensingTypePage.form.submit()
         return createValidPage(page, SelectiveLicenceFormPagePropertyRegistration::class)
+    }
+
+    fun goToPropertyRegistrationHmoMandatoryLicencePage(): HmoMandatoryLicenceFormPagePropertyRegistration {
+        val licensingTypePage = goToPropertyRegistrationLicensingTypePage()
+        licensingTypePage.form.getRadios().selectValue(LicensingType.HMO_MANDATORY_LICENCE)
+        licensingTypePage.form.submit()
+        return createValidPage(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
     }
 
     private fun navigate(path: String): Response? = page.navigate("http://localhost:$port/$path")
