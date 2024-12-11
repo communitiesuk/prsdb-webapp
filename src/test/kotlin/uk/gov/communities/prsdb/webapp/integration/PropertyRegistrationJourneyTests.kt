@@ -10,11 +10,13 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AlreadyRegisteredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HouseholdsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
@@ -23,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalAuthorityFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import java.net.URI
 
 @Sql("/data-local.sql")
@@ -75,7 +78,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         assertThat(ownershipTypePage.form.getFieldsetHeading()).containsText("Select the ownership type for your property")
         // fill in and submit
         ownershipTypePage.form.getRadios().selectValue(OwnershipType.FREEHOLD)
-        propertyTypePage.form.submit()
+        ownershipTypePage.form.submit()
         val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
 
         // Occupancy - render page
@@ -97,6 +100,21 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         // fill in and submit
         peoplePage.peopleInput.fill("2")
         peoplePage.form.submit()
+        val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
+
+        // Licensing type - render page
+        assertThat(licensingTypePage.form.getFieldsetHeading()).containsText("Select the type of licensing you have for your property")
+        // fill in and submit
+        licensingTypePage.form.getRadios().selectValue(LicensingType.SELECTIVE_LICENCE)
+        licensingTypePage.form.submit()
+        val selectiveLicencePage = assertPageIs(page, SelectiveLicenceFormPagePropertyRegistration::class)
+
+        // Selective licence - render page
+        assertThat(selectiveLicencePage.form.getFieldsetHeading()).containsText("What is your selective licence number?")
+        // fill in and submit
+        selectiveLicencePage.licenceNumberInput.fill("licence number")
+        selectiveLicencePage.form.submit()
+
         assertEquals("/register-property/placeholder", URI(page.url()).path)
     }
 
@@ -324,6 +342,64 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             peoplePage.form.submit()
             assertThat(peoplePage.form.getErrorMessage())
                 .containsText("Number of people in your property must be a positive, whole number, like 3")
+        }
+    }
+
+    @Nested
+    inner class LicensingTypeStep {
+        @Test
+        fun `Submitting with no licensingType selected returns an error`(page: Page) {
+            val licensingTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
+            licensingTypePage.form.submit()
+            assertThat(licensingTypePage.form.getErrorMessage()).containsText("Select the type of licensing for the property")
+        }
+
+        @Test
+        fun `Submitting with no licensing for property redirects to the next step`(page: Page) {
+            val licensingTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
+            licensingTypePage.form.getRadios().selectValue(LicensingType.NO_LICENSING)
+            licensingTypePage.form.submit()
+            assertEquals("/register-property/placeholder", URI(page.url()).path)
+        }
+
+        @Test
+        fun `Submitting with an HMO mandatory licence redirects to the next step`(page: Page) {
+            val licensingTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
+            licensingTypePage.form.getRadios().selectValue(LicensingType.HMO_MANDATORY_LICENCE)
+            licensingTypePage.form.submit()
+            assertEquals("/register-property/placeholder", URI(page.url()).path)
+        }
+
+        @Test
+        fun `Submitting with an HMO additional licence redirects to the next step`(page: Page) {
+            val licensingTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
+            licensingTypePage.form.getRadios().selectValue(LicensingType.HMO_ADDITIONAL_LICENCE)
+            licensingTypePage.form.submit()
+            assertEquals("/register-property/placeholder", URI(page.url()).path)
+        }
+    }
+
+    @Nested
+    inner class SelectiveLicenceStep {
+        @Test
+        fun `Submitting with no licence number returns an error`(page: Page) {
+            val selectiveLicencePage = navigator.goToPropertyRegistrationSelectiveLicencePage()
+            selectiveLicencePage.form.submit()
+            assertThat(selectiveLicencePage.form.getErrorMessage()).containsText("Enter the selective licence number")
+        }
+
+        @Test
+        fun `Submitting with a very long licence number returns an error`(page: Page) {
+            val selectiveLicencePage = navigator.goToPropertyRegistrationSelectiveLicencePage()
+            val aVeryLongString =
+                "This string is very long, so long that it is not feasible that it is a real licence number " +
+                    "- therefore if it is submitted there will in fact be an error rather than a successful submission." +
+                    " It is actually quite difficult for a string to be long enough to trigger this error, because the" +
+                    " maximum length has been selected to be permissive of id numbers we do not expect while still having " +
+                    "a cap reachable with a little effort."
+            selectiveLicencePage.licenceNumberInput.fill(aVeryLongString)
+            selectiveLicencePage.form.submit()
+            assertThat(selectiveLicencePage.form.getErrorMessage()).containsText("The licensing number is too long")
         }
     }
 }

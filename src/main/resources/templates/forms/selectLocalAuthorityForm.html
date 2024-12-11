@@ -11,7 +11,7 @@
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'localAuthorityCustodianCode', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
         <p class="govuk-body">
             <span th:text="#{forms.selectLocalAuthority.paragraph.one.beforeLink}">forms.selectLocalAuthority.paragraph.one.beforeLink</span>
-            <a class="govuk-link" href="#" th:text="#{forms.selectLocalAuthority.paragraph.one.linkText}">forms.selectLocalAuthority.paragraph.one.linkText</a>
+            <a class="govuk-link" target="_blank" th:href="#{forms.selectLocalAuthority.paragraph.one.linkUrl}" th:text="#{forms.selectLocalAuthority.paragraph.one.linkText}">forms.selectLocalAuthority.paragraph.one.linkText</a>
         </p>
         <select th:replace="~{fragments/forms/select :: select(#{${selectLabel}},'localAuthorityCustodianCode',null, ${selectOptions})}"></select>
     </fieldset>
