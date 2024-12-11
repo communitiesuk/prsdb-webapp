@@ -11,6 +11,6 @@
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'licensingType', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
         <input th:replace="~{fragments/forms/radios :: radios(null,'licensingType',null, ${radioOptions})}">
     </fieldset>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
 </th:block>
 </html>
