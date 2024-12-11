@@ -3,13 +3,11 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.FormBasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.LicenceNumberFormPage
 
 class SelectiveLicenceFormPagePropertyRegistration(
     page: Page,
-) : FormBasePage(
+) : LicenceNumberFormPage(
         page,
         "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.SelectiveLicence.urlPathSegment}",
-    ) {
-    val licenceNumberInput = form.getTextInput("licenceNumber")
-}
+    )
