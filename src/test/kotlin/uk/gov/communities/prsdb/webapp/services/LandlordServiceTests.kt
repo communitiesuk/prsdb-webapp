@@ -42,13 +42,16 @@ class LandlordServiceTests {
 
     @Test
     fun `retrieveLandlordByRegNum returns a landlord given its registration number`() {
-        val regNum = 0L
+        val regNumDataModel = RegistrationNumberDataModel(RegistrationNumberType.LANDLORD, 0L)
+        val expectedLandlord = Landlord()
 
-        landlordService.retrieveLandlordByRegNum(RegistrationNumberDataModel(RegistrationNumberType.LANDLORD, regNum))
+        whenever(mockLandlordRepository.findByRegistrationNumber_Number(regNumDataModel.number)).thenReturn(
+            expectedLandlord,
+        )
 
-        val regNumCaptor = captor<Long>()
-        verify(mockLandlordRepository).findByRegistrationNumber_Number(regNumCaptor.capture())
-        assertEquals(regNum, regNumCaptor.value)
+        val landlord = landlordService.retrieveLandlordByRegNum(regNumDataModel)
+
+        assertEquals(expectedLandlord, landlord)
     }
 
     @Test
