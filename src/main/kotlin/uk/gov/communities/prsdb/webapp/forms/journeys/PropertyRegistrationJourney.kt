@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.models.formModels.HmoAdditionalLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoMandatoryLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LookupAddressFormModel
@@ -357,6 +358,23 @@ class PropertyRegistrationJourney(
                     nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
                 ),
                 Step(
+                    id = RegisterPropertyStepId.HmoAdditionalLicence,
+                    page =
+                        Page(
+                            formModel = HmoAdditionalLicenceFormModel::class,
+                            templateName = "forms/licenceNumberForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "fieldSetHeading" to "forms.hmoAdditionalLicence.fieldSetHeading",
+                                    "label" to "forms.hmoAdditionalLicence.label",
+                                    "detailSummary" to "forms.hmoAdditionalLicence.detail.summary",
+                                    "detailMainText" to "forms.hmoAdditionalLicence.detail.text",
+                                ),
+                        ),
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
+                ),
+                Step(
                     id = RegisterPropertyStepId.PlaceholderPage,
                     page =
                         Page(
@@ -412,7 +430,7 @@ class PropertyRegistrationJourney(
             return when (licensingType) {
                 LicensingType.SELECTIVE_LICENCE -> Pair(RegisterPropertyStepId.SelectiveLicence, null)
                 LicensingType.HMO_MANDATORY_LICENCE -> Pair(RegisterPropertyStepId.HmoMandatoryLicence, null)
-                LicensingType.HMO_ADDITIONAL_LICENCE -> Pair(RegisterPropertyStepId.PlaceholderPage, null)
+                LicensingType.HMO_ADDITIONAL_LICENCE -> Pair(RegisterPropertyStepId.HmoAdditionalLicence, null)
                 LicensingType.NO_LICENSING -> Pair(RegisterPropertyStepId.PlaceholderPage, null)
             }
         }
