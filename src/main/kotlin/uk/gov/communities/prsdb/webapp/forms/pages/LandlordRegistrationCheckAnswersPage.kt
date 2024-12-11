@@ -34,7 +34,7 @@ class LandlordRegistrationCheckAnswersPage(
         formData.addAll(getAddressFormData(journeyData, livesInUK))
 
         model.addAttribute("formData", formData)
-        return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData)
+        return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)
     }
 
     private fun getIdFormData(journeyData: JourneyData): List<FormSummaryDataModel> =
@@ -96,7 +96,7 @@ class LandlordRegistrationCheckAnswersPage(
     private fun getUKResidentRow(livesInUK: Boolean): FormSummaryDataModel =
         FormSummaryDataModel(
             "registerAsALandlord.checkAnswers.rowHeading.ukResident",
-            if (livesInUK) "Yes" else "No",
+            if (livesInUK) "#{text.yes}" else "#{text.no}",
             "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}/${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}",
         )
 
