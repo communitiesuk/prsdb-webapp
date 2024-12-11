@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.deque.html.axecore.playwright.AxeBuilder
+import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import kotlin.reflect.KClass
 import kotlin.test.assertContains
@@ -30,6 +31,11 @@ abstract class BasePage(
             page: Page,
             expectedPageClass: KClass<T>,
         ) = createValidPage(page, expectedPageClass)
+    }
+
+    fun clickButton(locator: Locator) {
+        locator.click()
+        page.waitForLoadState()
     }
 
     private fun validate() = assertContains(page.url(), urlSegment)
