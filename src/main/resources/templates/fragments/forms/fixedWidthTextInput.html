@@ -1,0 +1,5 @@
+<!--The fieldWidth input can be 2, 3, 4, 5, 10, 20, 30-->
+<th:block th:fragment="fixedWidthTextInput(label, fieldName, hint, fieldWidth)"
+          th:assert="${fieldWidth == 2 || fieldWidth == 3 || fieldWidth == 4 || fieldWidth ==  5 || fieldWidth ==  10 || fieldWidth ==  20 || fieldWidth ==  30}">
+    <th:block th:replace="~{fragments/forms/innerTextInput :: innerTextInput(${label}, ${fieldName}, ${hint}, ${fieldWidth})}"></th:block>
+</th:block>

@@ -1,0 +1,13 @@
+<!--The fieldWidth input can be 2, 3, 4, 5, 10, 20, 30-->
+<!--Do not call directly, use basicTextInput or fixedWidthInput-->
+<th:block th:fragment="innerTextInput(label, fieldName, hint, fieldWidth)"
+          th:replace="~{fragments/forms/inputGroup :: inputGroup(${label}, ${fieldName}, ~{:: input}, ${hint})}">
+
+    <input class="govuk-input"
+           th:with='widthClass=${fieldWidth != null ? " govuk-input--width-"+fieldWidth : ""}'
+           th:classappend='${#fields.hasErrors(fieldName) ? "govuk-input--error" : ""} + ${widthClass}'
+           type="text"
+           th:field="*{__${fieldName}__}"
+           th:attrappend="aria-describedby=${hint != null} ? ${fieldName}+'-details-hint'">
+
+</th:block>
