@@ -1,4 +1,4 @@
-# ADR-0019: vpc configuration
+# ADR-0021: vpc configuration
 
 ## Status
 

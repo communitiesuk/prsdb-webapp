@@ -1,4 +1,4 @@
-# ADR-0020: Disaster recovery
+# ADR-0022: Disaster recovery
 
 ## Status
 
@@ -12,8 +12,9 @@ A catastrophic infrastructure failure can make the application unavailable, and 
 strategy will determine how long that downtime is likely to be in different scenarios, and how much data would be lost.
 This is roughly equivalent to our Recovery Time Objective (RTO) and Recovery Point Objective (RPO) respectively.
 
-Our underlying assumption is that the application can tolerate a reasonable amount of downtime, as it is not critical
-infrastructure, but that data loss is more critical given the legal requirement on landlords to register their data.
+Our underlying assumption is that the application can tolerate a small amount of downtime, as it is not critical
+infrastructure, but this should be avoided if possible, and that data loss is more critical given the legal requirement
+on landlords to register their data.
 
 ## Considered Options
 
@@ -26,9 +27,13 @@ infrastructure, but that data loss is more critical given the legal requirement 
 
 ## Decision Outcome
 
-Single availablity zone deployment for application, data backed up to a different availability zone and also a different
-region (and AWS account) - this represents the equal best RPO of the various options, and on RTA it represents a good
-balance of cost vs. the tolerance for service unavailability.
+Multi-availability zone deployment for application, data backed up to a different availability zone and also a different
+region (and AWS account) - this option:
+
+- is AWS best practice (indeed, AWS makes it difficult to not deploy to multiple AZs if a load balancer is present)
+- represents the equal best RPO and RTO of the various options,
+- does not cost significantly more than replicating data-only across multiple AZs, which is required for an acceptable
+  RPO
 
 ## Pros and Cons of the Options
 
