@@ -10,7 +10,7 @@
 <!--/*/ <th:block id="form-content"> /*/-->
 <!--/*/    <th:block id="fieldset-content"
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'name', #{${fieldSetHeading}}, #{${fieldSetHint}})}"> /*/-->
-        <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${label}}, 'name', null)}">
+        <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${label}}, 'name', null, null)}">
         </div>
 <!--/*/    </th:block> /*/-->
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>

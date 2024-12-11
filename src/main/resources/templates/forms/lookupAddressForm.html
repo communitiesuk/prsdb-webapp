@@ -14,8 +14,8 @@
     <th:block id="fieldset-content"
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'lookupAddress',
                             #{${fieldSetHeading}}, ${fieldSetHint != null ? #messages.msg(fieldSetHint) : null})}">
-        <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${postcodeLabel}}, 'postcode', #{${postcodeHint}})}"></div>
-        <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${houseNameOrNumberLabel}}, 'houseNameOrNumber', #{${houseNameOrNumberHint}})}"></div>
+        <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${postcodeLabel}}, 'postcode', #{${postcodeHint}}, null)}"></div>
+        <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${houseNameOrNumberLabel}}, 'houseNameOrNumber', #{${houseNameOrNumberHint}}, null)}"></div>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </th:block>
