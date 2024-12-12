@@ -9,7 +9,7 @@ import kotlin.test.assertEquals
 
 abstract class BasePage(
     val page: Page,
-    private val urlSegment: String,
+    private val urlSegment: String? = null,
 ) {
     companion object {
         fun <T : BasePage> createValidPage(
@@ -38,7 +38,9 @@ abstract class BasePage(
         page.waitForLoadState()
     }
 
-    private fun validate() = assertContains(page.url(), urlSegment)
+    private fun validate() {
+        if (urlSegment != null) assertContains(page.url(), urlSegment)
+    }
 
     private fun getAxeViolations() =
         AxeBuilder(page)
