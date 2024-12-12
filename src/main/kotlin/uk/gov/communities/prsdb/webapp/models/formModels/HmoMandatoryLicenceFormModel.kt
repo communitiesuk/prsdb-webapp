@@ -7,11 +7,11 @@ import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class SelectiveLicenceFormModel : FormModel {
+class HmoMandatoryLicenceFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.selectiveLicence.error.missing",
+                messageKey = "forms.hmoMandatoryLicence.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(
