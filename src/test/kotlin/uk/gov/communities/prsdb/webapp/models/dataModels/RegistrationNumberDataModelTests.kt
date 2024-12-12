@@ -67,7 +67,7 @@ class RegistrationNumberDataModelTests {
 
     @ParameterizedTest
     @MethodSource("provideRegNumsAndStrings")
-    fun `regNumToString returns a correctly formatted registration number string`(
+    fun `toString returns a correctly formatted registration number string`(
         regNum: RegistrationNumberDataModel,
         expectedString: String,
     ) {
