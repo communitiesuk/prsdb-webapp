@@ -2,11 +2,17 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.Response
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
@@ -45,10 +51,14 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalAuthorityFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
+import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
+import java.time.LocalDate
 
 class Navigator(
     private val page: Page,
     private val port: Int,
+    private val identityService: OneLoginIdentityService,
 ) {
     fun goToManageLaUsers(authorityId: Int): ManageLaUsersPage {
         navigate("local-authority/$authorityId/manage-users")?.url()
@@ -60,8 +70,22 @@ class Navigator(
         return createValidPage(page, InviteNewLaUserPage::class)
     }
 
+    fun goToLandlordRegistrationConfirmIdentityFormPage(): ConfirmIdentityFormPageLandlordRegistration {
+        val verifiedIdentityMap =
+            mutableMapOf<String, Any?>(
+                VerifiedIdentityModel.NAME_KEY to "Arthur Dent",
+                VerifiedIdentityModel.BIRTH_DATE_KEY to LocalDate.of(2000, 6, 8),
+            )
+        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentityMap)
+
+        navigate("$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.VerifyIdentity.urlPathSegment}")
+        return createValidPage(page, ConfirmIdentityFormPageLandlordRegistration::class)
+    }
+
     fun goToLandlordRegistrationNameFormPage(): NameFormPageLandlordRegistration {
-        navigate("register-as-a-landlord/name")
+        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
+
+        navigate("$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.Name.urlPathSegment}")
         return createValidPage(page, NameFormPageLandlordRegistration::class)
     }
 
@@ -71,11 +95,6 @@ class Navigator(
         nameFormPage.form.submit()
         val dateOfBirthFormPage = createValidPage(page, DateOfBirthFormPageLandlordRegistration::class)
         return dateOfBirthFormPage
-    }
-
-    fun goToLandlordRegistrationConfirmIdentityFormPage(): ConfirmIdentityFormPageLandlordRegistration {
-        navigate("register-as-a-landlord/confirm-identity")
-        return createValidPage(page, ConfirmIdentityFormPageLandlordRegistration::class)
     }
 
     fun goToLandlordRegistrationEmailFormPage(): EmailFormPageLandlordRegistration {
@@ -167,6 +186,11 @@ class Navigator(
         val summaryPage = goToLandlordRegistrationSummaryPage()
         summaryPage.submitButton.click()
         return createValidPage(page, DeclarationFormPageLandlordRegistration::class)
+    }
+
+    fun skipToLandlordRegistrationConfirmationPage(): ErrorPage {
+        navigate("$REGISTER_LANDLORD_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT")
+        return createValidPage(page, ErrorPage::class)
     }
 
     fun goToLaUserRegistrationLandingPage(): LandingPageLaUserRegistration {
