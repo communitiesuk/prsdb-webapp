@@ -97,8 +97,9 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
         val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
-        val createdLandlordRegNum = RegistrationNumberDataModel.toString(createdLandlord.registrationNumber)
-        assertEquals(createdLandlordRegNum, confirmationPage.registrationNumberText)
+        val createdLandlordRegNum =
+            RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
+        assertEquals(createdLandlordRegNum.toString(), confirmationPage.registrationNumberText)
         confirmationPage.clickGoToDashboard()
 
         // TODO: Replace with dashboard page
@@ -150,8 +151,9 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
         val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
-        val createdLandlordRegNum = RegistrationNumberDataModel.toString(createdLandlord.registrationNumber)
-        assertEquals(createdLandlordRegNum, confirmationPage.registrationNumberText)
+        val createdLandlordRegNum =
+            RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
+        assertEquals(createdLandlordRegNum.toString(), confirmationPage.registrationNumberText)
         confirmationPage.clickGoToDashboard()
 
         // TODO: Replace with dashboard page
@@ -208,8 +210,9 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
         val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
-        val createdLandlordRegNum = RegistrationNumberDataModel.toString(createdLandlord.registrationNumber)
-        assertEquals(createdLandlordRegNum, confirmationPage.registrationNumberText)
+        val createdLandlordRegNum =
+            RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
+        assertEquals(createdLandlordRegNum.toString(), confirmationPage.registrationNumberText)
         confirmationPage.clickGoToDashboard()
 
         // TODO: Replace with dashboard page
@@ -274,8 +277,9 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
         val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
-        val createdLandlordRegNum = RegistrationNumberDataModel.toString(createdLandlord.registrationNumber)
-        assertEquals(createdLandlordRegNum, confirmationPage.registrationNumberText)
+        val createdLandlordRegNum =
+            RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
+        assertEquals(createdLandlordRegNum.toString(), confirmationPage.registrationNumberText)
         confirmationPage.clickGoToDashboard()
 
         // TODO: Replace with dashboard page

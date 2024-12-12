@@ -88,4 +88,14 @@ class RegistrationNumberDataModelTests {
     fun `parseOrNull returns null when given an invalid registration number`(nonParseableString: String) {
         assertNull(RegistrationNumberDataModel.parseOrNull(nonParseableString))
     }
+
+    @Test
+    fun `fromRegistrationNumber returns an equivalent data model`() {
+        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, MAX_REG_NUM)
+        val expectedRegNumDataModel = RegistrationNumberDataModel(registrationNumber.type, registrationNumber.number!!)
+
+        val registrationNumberDataModel = RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber)
+
+        assertEquals(expectedRegNumDataModel, registrationNumberDataModel)
+    }
 }

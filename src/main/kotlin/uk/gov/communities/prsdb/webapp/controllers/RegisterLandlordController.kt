@@ -91,7 +91,10 @@ class RegisterLandlordController(
             landlordService.retrieveLandlordByBaseUserId(principal.name)
                 ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
 
-        model.addAttribute("registrationNumber", RegistrationNumberDataModel.toString(landlord.registrationNumber))
+        model.addAttribute(
+            "registrationNumber",
+            RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
+        )
 
         return "registerAsALandlordConfirmation"
     }

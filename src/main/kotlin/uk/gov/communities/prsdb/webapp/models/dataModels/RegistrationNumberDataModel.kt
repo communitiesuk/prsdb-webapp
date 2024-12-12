@@ -33,6 +33,8 @@ data class RegistrationNumberDataModel(
             return RegistrationNumberDataModel(regNumType, regNumNumber)
         }
 
+        fun fromRegistrationNumber(regNum: RegistrationNumber) = RegistrationNumberDataModel(regNum.type, regNum.number!!)
+
         private fun getBaseRegNumString(regNumString: String): String = regNumString.filter { it.isLetterOrDigit() }.uppercase()
 
         private fun validateBaseRegNumString(baseRegNumString: String) {
