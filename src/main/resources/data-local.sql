@@ -29,6 +29,10 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', '07712345678', '01/01/00', '09/13/24', '09/
 INSERT INTO local_authority (id, name, created_date, last_modified_date)
 VALUES (1, 'Betelgeuse', '09/13/24', '09/13/24');
 
+SELECT setval(pg_get_serial_sequence('local_authority', 'id'), (SELECT MAX(id) FROM local_authority));
+
+INSERT INTO local_authority_user (subject_identifier, is_manager, local_authority_id, created_date, last_modified_date,
+                                  name, email)
 INSERT INTO local_authority_user (subject_identifier, is_manager, local_authority_id, created_date, last_modified_date, name, email)
 VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 1, '10/07/24', '10/07/24', 'Ford Prefect', 'Ford.Prefect@la.com'),
        ('urn:fdc:gov.uk:2022:UVWXY', true, 1, '10/14/24', '10/14/24','Mock User', 'test@la.com'),
@@ -56,6 +60,8 @@ VALUES (1,  '09/13/24', 2001001001, 1),
        (5, '10/09/24', 6005001005, 1),
        (6, '12/10/24', 7006001006, 0);
 
+SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
+
 INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address)
 VALUES (1,  '09/13/24', '09/13/24', 1, '1 Fictional Road'),
        (2,  '09/13/24', '09/13/24', 2, '2 Fake Way'),
@@ -64,17 +70,23 @@ VALUES (1,  '09/13/24', '09/13/24', 1, '1 Fictional Road'),
        (5,  '09/13/24', '09/13/24', 5, '5 Mythical Place'),
        (6, '12/10/2024', '12/10/2024', 1123456, '1, Example Road, EG');
 
+SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
+
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth, is_active, phone_number, subject_identifier, name, email)
 VALUES (1,  '09/13/24', '09/13/24', 1, 1,'09/13/2000', true, 07111111111, 'urn:fdc:gov.uk:2022:KLMNO', 'Alexander Smith', 'alex.surname@example.com'),
-       (2,  '09/13/24', '09/13/24', 2, 2,'08/13/2001', true, 07111111111, 'urn:fdc:gov.uk:2022:UVWXY', 'Alexandra Davies', 'alexandra.q.davies@example.com'),
+       (2,  '09/13/24', '09/13/24', 2, 2,'08/13/2001', true, 07111111111, 'urn:fdc:gov.uk:2022:ABCDE', 'Alexandra Davies', 'alexandra.q.davies@example.com'),
        (3,  '09/13/24', '09/13/24', 3, 3,'07/13/1997', true, 07111111111, 'urn:fdc:gov.uk:2022:PQRST', 'Evan Alexandrescu', 'unrelatedemail@completelydifferentdomain.com'),
        (4,  '09/13/24', '09/13/24', 4, 4,'06/13/1989', true, 07111111111, 'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', 'Tobias Evans', 'tobyevans@importantco.com'),
        (5,  '09/13/24', '09/13/24', 5, 5,'05/13/1950', true, 07111111111, 'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', 'Margaret Mary Smith', 'mm.smith@importantco.com');
 
+SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
+
 INSERT INTO property (id, status,is_active, property_build_type, has_gas_supply, address_id)
 VALUES (1, 1,true, 1,true,6);
+
 SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
 
 INSERT INTO property_ownership (id,is_active, occupancy_type, landlord_type, current_num_households,  registration_number_id, primary_landlord_id, property_id)
 VALUES (1,true, 0,0,1,6, 1, 1);
+
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
