@@ -16,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.VerifyIdentityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.localDateToDate
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.CountryOfResidenceFormModel
@@ -569,7 +568,7 @@ class LandlordRegistrationJourney(
                 phoneNumber = phoneNumber,
                 addressDataModel = getAddress(journeyData, journeyDataService, addressDataService),
                 internationalAddress = internationalAddress,
-                dateOfBirth = localDateToDate(verifiedDOB ?: fallbackDOB!!),
+                dateOfBirth = verifiedDOB ?: fallbackDOB!!,
             )
 
             journeyDataService.clearJourneyDataFromSession()

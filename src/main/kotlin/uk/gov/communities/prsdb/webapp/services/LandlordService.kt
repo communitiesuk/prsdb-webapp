@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import java.util.Date
+import java.time.LocalDate
 
 @Service
 class LandlordService(
@@ -34,7 +34,7 @@ class LandlordService(
         phoneNumber: String,
         addressDataModel: AddressDataModel,
         internationalAddress: String? = null,
-        dateOfBirth: Date? = null,
+        dateOfBirth: LocalDate? = null,
     ) {
         val baseUser = oneLoginUserRepository.getReferenceById(baseUserId)
         val address = addressService.findOrCreateAddress(addressDataModel)
