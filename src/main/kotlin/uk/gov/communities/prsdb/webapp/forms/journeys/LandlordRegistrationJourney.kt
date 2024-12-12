@@ -514,48 +514,62 @@ class LandlordRegistrationJourney(
             landlordService: LandlordService,
             addressDataService: AddressDataService,
         ): String {
+            val verifiedName =
+                journeyDataService.getFieldStringValue(
+                    journeyData,
+                    LandlordRegistrationStepId.VerifyIdentity.urlPathSegment,
+                    "name",
+                )
+
+            val fallbackName =
+                verifiedName ?: journeyDataService.getFieldStringValue(
+                    journeyData,
+                    LandlordRegistrationStepId.Name.urlPathSegment,
+                    "name",
+                )
+
+            val email =
+                journeyDataService.getFieldStringValue(
+                    journeyData,
+                    LandlordRegistrationStepId.Email.urlPathSegment,
+                    "emailAddress",
+                )!!
+
+            val phoneNumber =
+                journeyDataService.getFieldStringValue(
+                    journeyData,
+                    LandlordRegistrationStepId.PhoneNumber.urlPathSegment,
+                    "phoneNumber",
+                )!!
+
+            val internationalAddress =
+                journeyDataService.getFieldStringValue(
+                    journeyData,
+                    LandlordRegistrationStepId.InternationalAddress.urlPathSegment,
+                    "internationalAddress",
+                )
+
+            val verifiedDOB =
+                journeyDataService.getFieldDateValue(
+                    journeyData,
+                    LandlordRegistrationStepId.VerifyIdentity.urlPathSegment,
+                    "birthDate",
+                )
+
+            val fallbackDOB =
+                journeyDataService.getDate(
+                    journeyData,
+                    LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
+                )
+
             landlordService.createLandlord(
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
-                name =
-                    journeyDataService.getFieldStringValue(
-                        journeyData,
-                        LandlordRegistrationStepId.VerifyIdentity.urlPathSegment,
-                        "name",
-                    ) ?: journeyDataService.getFieldStringValue(
-                        journeyData,
-                        LandlordRegistrationStepId.Name.urlPathSegment,
-                        "name",
-                    )!!,
-                email =
-                    journeyDataService.getFieldStringValue(
-                        journeyData,
-                        LandlordRegistrationStepId.Email.urlPathSegment,
-                        "emailAddress",
-                    )!!,
-                phoneNumber =
-                    journeyDataService.getFieldStringValue(
-                        journeyData,
-                        LandlordRegistrationStepId.PhoneNumber.urlPathSegment,
-                        "phoneNumber",
-                    )!!,
+                name = verifiedName ?: fallbackName!!,
+                email = email,
+                phoneNumber = phoneNumber,
                 addressDataModel = getAddress(journeyData, journeyDataService, addressDataService),
-                internationalAddress =
-                    journeyDataService.getFieldStringValue(
-                        journeyData,
-                        LandlordRegistrationStepId.InternationalAddress.urlPathSegment,
-                        "internationalAddress",
-                    ),
-                dateOfBirth =
-                    localDateToDate(
-                        journeyDataService.getFieldDateValue(
-                            journeyData,
-                            LandlordRegistrationStepId.VerifyIdentity.urlPathSegment,
-                            "birthDate",
-                        ) ?: journeyDataService.getDate(
-                            journeyData,
-                            LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
-                        )!!,
-                    ),
+                internationalAddress = internationalAddress,
+                dateOfBirth = localDateToDate(verifiedDOB ?: fallbackDOB!!),
             )
 
             journeyDataService.clearJourneyDataFromSession()
@@ -568,12 +582,14 @@ class LandlordRegistrationJourney(
             journeyDataService: JourneyDataService,
             addressDataService: AddressDataService,
         ): AddressDataModel {
-            if (journeyDataService.getFieldStringValue(
+            val livesInUK =
+                journeyDataService.getFieldStringValue(
                     journeyData,
                     LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
                     "livesInUK",
-                ) == "true"
-            ) {
+                )
+
+            if (livesInUK == "true") {
                 val addressChosen =
                     journeyDataService.getFieldStringValue(
                         journeyData,
