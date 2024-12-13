@@ -333,7 +333,7 @@ class PropertyRegistrationJourney(
                                     "detailMainText" to "forms.selectiveLicence.detail.text",
                                 ),
                         ),
-                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
                 ),
                 Step(
                     id = RegisterPropertyStepId.HmoMandatoryLicence,
@@ -356,7 +356,7 @@ class PropertyRegistrationJourney(
                                         ),
                                 ),
                         ),
-                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
                 ),
                 Step(
                     id = RegisterPropertyStepId.HmoAdditionalLicence,
@@ -373,7 +373,7 @@ class PropertyRegistrationJourney(
                                     "detailMainText" to "forms.hmoAdditionalLicence.detail.text",
                                 ),
                         ),
-                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
                 ),
                 Step(
                     id = RegisterPropertyStepId.CheckAnswers,
