@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.ForeignKey
 import jakarta.persistence.GeneratedValue
@@ -16,14 +17,18 @@ class Property(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 ) : ModifiableAuditableEntity() {
+    @Column(nullable = false)
     lateinit var status: RegistrationStatus
         private set
 
+    @Column(nullable = false)
     var isActive: Boolean = false
 
+    @Column(nullable = false)
     lateinit var propertyBuildType: PropertyType
         private set
 
+    @Column(nullable = false)
     var hasGasSupply: Boolean? = null
 
     @OneToOne(optional = false)

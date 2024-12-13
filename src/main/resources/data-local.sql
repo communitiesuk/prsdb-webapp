@@ -71,11 +71,14 @@ VALUES (1,  '09/13/24', '09/13/24', 1, 1,'09/13/2000', true, 07111111111, 'urn:f
        (4,  '09/13/24', '09/13/24', 4, 4,'06/13/1989', true, 07111111111, 'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', 'Tobias Evans', 'tobyevans@importantco.com'),
        (5,  '09/13/24', '09/13/24', 5, 5,'05/13/1950', true, 07111111111, 'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', 'Margaret Mary Smith', 'mm.smith@importantco.com');
 
-INSERT INTO property (id, is_active, address_id)
-VALUES (1, true, 6);
+INSERT INTO property (id, status,is_active, property_build_type, has_gas_supply, address_id)
+VALUES (1, 1,true, 1,true,6);
+SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
 
-INSERT INTO payment (id, payment_amount)
-    VALUES (1, 10.00);
+INSERT INTO payment (id, payment_date_time,payment_amount)
+    VALUES (1, '09/13/24',10.00);
+SELECT setval(pg_get_serial_sequence('payment', 'id'), (SELECT MAX(id) FROM payment));
 
-INSERT INTO property_ownership (is_active, registration_number_id, property_id, payment_id, current_num_households, primary_landlord_id)
-VALUES (true, 6, 1, 1, 0, 1);
+INSERT INTO property_ownership (id,is_active, occupancy_type, landlord_type, current_num_households,  registration_number_id, primary_landlord_id, property_id, payment_id)
+VALUES (1,true, 0,0,1,6, 1, 1, 1);
+SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));

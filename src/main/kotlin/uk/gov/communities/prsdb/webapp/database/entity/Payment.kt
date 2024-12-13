@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -16,9 +17,11 @@ class Payment(
     val id: Long? = null,
 ) : AuditableEntity() {
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(nullable = false)
     lateinit var paymentDateTime: OffsetDateTime
         private set
 
+    @Column(nullable = false)
     var paymentAmount: Double = 0.00
 
     @OneToMany(mappedBy = "payment")
