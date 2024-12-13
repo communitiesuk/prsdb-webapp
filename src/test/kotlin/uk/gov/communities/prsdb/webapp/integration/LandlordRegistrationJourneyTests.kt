@@ -102,7 +102,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         assertEquals(createdLandlordRegNum.toString(), confirmationPage.registrationNumberText)
         confirmationPage.clickGoToDashboard()
 
-        // TODO: Replace with dashboard page
+        // TODO PRSD-670: Replace with dashboard page
         assertEquals("/", URI(page.url()).path)
     }
 
@@ -156,7 +156,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         assertEquals(createdLandlordRegNum.toString(), confirmationPage.registrationNumberText)
         confirmationPage.clickGoToDashboard()
 
-        // TODO: Replace with dashboard page
+        // TODO PRSD-670: Replace with dashboard page
         assertEquals("/", URI(page.url()).path)
     }
 
@@ -215,7 +215,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         assertEquals(createdLandlordRegNum.toString(), confirmationPage.registrationNumberText)
         confirmationPage.clickGoToDashboard()
 
-        // TODO: Replace with dashboard page
+        // TODO PRSD-670: Replace with dashboard page
         assertEquals("/", URI(page.url()).path)
     }
 
@@ -282,7 +282,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         assertEquals(createdLandlordRegNum.toString(), confirmationPage.registrationNumberText)
         confirmationPage.clickGoToDashboard()
 
-        // TODO: Replace with dashboard page
+        // TODO PRSD-670: Replace with dashboard page
         assertEquals("/", URI(page.url()).path)
     }
 
