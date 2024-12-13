@@ -5,7 +5,7 @@
     <form th:action="@{''}" class="form" id="example-landlord-search" method="post" th:object="${searchWrapper}"
           novalidate>
         <div class="govuk-form-group">
-            <div th:replace="~{fragments/forms/basicTextInput :: textInput('Search for a landlord', 'searchTerm', null, null)}"></div>
+            <div th:replace="~{fragments/forms/basicTextInput :: textInput('Search for a landlord', 'searchTerm', null)}"></div>
             <button type="submit" class="govuk-button" data-module="govuk-button">
                 Submit
             </button>
