@@ -5,9 +5,9 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.LicenceNumberFormPage
 
-class SelectiveLicenceFormPagePropertyRegistration(
+class HmoMandatoryLicenceFormPagePropertyRegistration(
     page: Page,
 ) : LicenceNumberFormPage(
         page,
-        "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.SelectiveLicence.urlPathSegment}",
+        "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment}",
     )
