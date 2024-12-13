@@ -382,7 +382,7 @@ class PropertyRegistrationJourney(
                 return Pair(RegisterPropertyStepId.ManualAddress, null)
             } else {
                 val addressData = addressDataService.getAddressData(singleLineAddress)
-                if (addressData?.uprn != null && addressAlreadyRegistered(addressData.uprn, propertyRegistrationService)) {
+                if (addressData?.uprn != null && propertyRegistrationService.getIsAddressRegistered(addressData.uprn)) {
                     return Pair(RegisterPropertyStepId.AlreadyRegistered, null)
                 }
                 return Pair(RegisterPropertyStepId.PropertyType, null)
@@ -400,10 +400,5 @@ class PropertyRegistrationJourney(
                 LicensingType.NO_LICENSING -> Pair(RegisterPropertyStepId.PlaceholderPage, null)
             }
         }
-
-        private fun addressAlreadyRegistered(
-            uprn: Long,
-            propertyRegistrationService: PropertyRegistrationService,
-        ): Boolean = propertyRegistrationService.getIsAddressRegistered(uprn)
     }
 }

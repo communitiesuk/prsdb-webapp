@@ -8,7 +8,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
-import uk.gov.communities.prsdb.webapp.constants.enums.Status
+import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
 
 @Entity
 class Property(
@@ -16,7 +16,7 @@ class Property(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 ) : ModifiableAuditableEntity() {
-    lateinit var status: Status
+    lateinit var status: RegistrationStatus
         private set
 
     var isActive: Boolean = false
