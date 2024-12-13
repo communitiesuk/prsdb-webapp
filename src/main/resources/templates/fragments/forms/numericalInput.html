@@ -1,11 +1,13 @@
 <!--The width input should be 2, 3, 4, 5, 10, 20, 30-->
+<!--See https://design-system.service.gov.uk/components/text-input/#fixed-width-inputs -->
 <th:block th:fragment="numericalInput(label, fieldName, hint, fieldWidth)"
-          th:replace="~{fragments/forms/inputGroup :: inputGroup(${label}, ${fieldName}, ~{::input}, ${hint})}">
-    <input class="govuk-input"
-           th:with="width=${fieldWidth ?: 10} "
+          th:assert="${fieldWidth == 2 || fieldWidth == 3 || fieldWidth == 4 || fieldWidth ==  5 || fieldWidth ==  10 || fieldWidth ==  20 || fieldWidth ==  30}">
+    <th:block th:replace="~{fragments/forms/inputGroup :: inputGroup(${label}, ${fieldName}, ~{::input}, ${hint})}">
+        <input class="govuk-input"
            th:classappend='${#fields.hasErrors(fieldName) ? "govuk-input--error" : ""} + ${" govuk-input--width-"+width}'
            type="text"
            inputmode="numeric"
            th:field="*{__${fieldName}__}"
            th:attrappend="aria-describedby=${hint != null} ? ${fieldName}+'-details-hint'">
+    </th:block>
 </th:block>

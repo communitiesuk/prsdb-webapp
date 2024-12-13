@@ -17,9 +17,9 @@
                             #{${fieldSetHeading}}, ${fieldSetHint != null ? #messages.msg(fieldSetHint) : null})}">
         <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${addressLineOneLabel}}, 'addressLineOne', null)}"></div>
         <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${addressLineTwoLabel}}, 'addressLineTwo', null)}"></div>
-        <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${townOrCityLabel}}, 'townOrCity', null)}"></div>
-        <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${countyLabel}}, 'county', null)}"></div>
-        <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${postcodeLabel}}, 'postcode', null)}"></div>
+        <div th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{${townOrCityLabel}}, 'townOrCity', null, 20)}"></div>
+        <div th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{${countyLabel}}, 'county', null, 20)}"></div>
+        <div th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{${postcodeLabel}}, 'postcode', null, 10)}"></div>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </th:block>
