@@ -143,7 +143,7 @@ class PropertyRegistrationJourney(
                                     "selectOptions" to
                                         LOCAL_AUTHORITIES.map {
                                             SelectViewModel(
-                                                value = it.uprn,
+                                                value = it.custodianCode,
                                                 label = it.displayName,
                                             )
                                         },
