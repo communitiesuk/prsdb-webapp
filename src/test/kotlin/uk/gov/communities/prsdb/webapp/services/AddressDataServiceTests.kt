@@ -4,6 +4,8 @@ import jakarta.servlet.http.HttpSession
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -82,5 +84,39 @@ class AddressDataServiceTests {
         val addressDataStringCaptor = captor<String>()
         verify(mockHttpSession).setAttribute(eq("addressData"), addressDataStringCaptor.capture())
         Assertions.assertEquals(expectedAddressDataString, addressDataStringCaptor.value)
+    }
+
+    @Test
+    fun `getCachedAddressRegisteredResult returns null if no matching result is cached`() {
+        val uprn = 1234.toLong()
+        whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(null)
+        assertNull(addressDataService.getCachedAddressRegisteredResult(uprn))
+
+        whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(mutableMapOf(5678.toString() to true))
+        assertNull(addressDataService.getCachedAddressRegisteredResult(uprn))
+    }
+
+    @Test
+    fun `getCachedAddressRegisteredResult returns the cached result if found`() {
+        val uprn = 1234.toLong()
+        whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(mutableMapOf(uprn.toString() to true))
+        assertTrue(addressDataService.getCachedAddressRegisteredResult(uprn) ?: false)
+
+        whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(mutableMapOf(uprn.toString() to false))
+        assertFalse(addressDataService.getCachedAddressRegisteredResult(uprn) ?: true)
+    }
+
+    @Test
+    fun `setCachedAddressRegisteredResult adds the result keyed by the uprn to the existing results cache`() {
+        whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(mutableMapOf(5678.toString() to true))
+
+        val uprn = 1234.toLong()
+
+        val expectedNewCache = mutableMapOf(5678.toString() to true, uprn.toString() to false)
+
+        addressDataService.setCachedAddressRegisteredResult(uprn, false)
+        val addressRegisteredResultCaptor = captor<MutableMap<String, Boolean>>()
+        verify(mockHttpSession).setAttribute(eq("addressRegisteredResults"), addressRegisteredResultCaptor.capture())
+        Assertions.assertEquals(expectedNewCache, addressRegisteredResultCaptor.value)
     }
 }
