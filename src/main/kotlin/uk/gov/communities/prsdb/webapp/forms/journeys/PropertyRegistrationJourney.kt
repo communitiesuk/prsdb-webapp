@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -17,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.dataModels.FormSummaryDataModel
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoAdditionalLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoMandatoryLicenceFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.LandlordTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.ManualAddressFormModel
@@ -63,6 +65,7 @@ class PropertyRegistrationJourney(
                 selectiveLicenceStep(),
                 hmoMandatoryLicenceStep(),
                 hmoAdditionalLicenceStep(),
+                landlordTypeStep(),
                 Step(
                     id = RegisterPropertyStepId.CheckAnswers,
                     page =
@@ -378,6 +381,36 @@ class PropertyRegistrationJourney(
                                 "label" to "forms.numberOfPeople.label",
                             ),
                     ),
+                nextAction = { _, _ -> Pair(RegisterPropertyStepId.LandlordType, null) },
+            )
+
+        private fun landlordTypeStep() =
+            Step(
+                id = RegisterPropertyStepId.LandlordType,
+                page =
+                    Page(
+                        formModel = LandlordTypeFormModel::class,
+                        templateName = "forms/landlordTypeForm",
+                        content =
+                            mapOf(
+                                "title" to "registerProperty.title",
+                                "fieldSetHeading" to "forms.landlordType.fieldSetHeading",
+                                "fieldSetHint" to "forms.landlordType.fieldSetHint",
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = LandlordType.SOLE,
+                                            labelMsgKey = "forms.landlordType.radios.option.individual.label",
+                                            hintMsgKey = "forms.landlordType.radios.option.individual.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = LandlordType.JOINT,
+                                            labelMsgKey = "forms.landlordType.radios.option.joint.label",
+                                            hintMsgKey = "forms.landlordType.radios.option.joint.hint",
+                                        ),
+                                    ),
+                            ),
+                    ),
                 nextAction = { _, _ -> Pair(RegisterPropertyStepId.LicensingType, null) },
             )
 
@@ -492,7 +525,7 @@ class PropertyRegistrationJourney(
                         .toString()
             ) {
                 "true" -> Pair(RegisterPropertyStepId.NumberOfHouseholds, null)
-                "false" -> Pair(RegisterPropertyStepId.PlaceholderPage, null)
+                "false" -> Pair(RegisterPropertyStepId.LandlordType, null)
                 else -> throw IllegalArgumentException(
                     "Invalid value for journeyData[\"${RegisterPropertyStepId.Occupancy.urlPathSegment}\"][\"occupied\"]:" +
                         propertyIsOccupied,

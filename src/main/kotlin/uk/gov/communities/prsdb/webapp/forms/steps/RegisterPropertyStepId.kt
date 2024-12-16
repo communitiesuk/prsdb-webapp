@@ -18,5 +18,6 @@ enum class RegisterPropertyStepId(
     SelectiveLicence("selective-licence"),
     HmoMandatoryLicence("hmo-mandatory-licence"),
     HmoAdditionalLicence("hmo-additional-licence"),
+    LandlordType("landlord-type"),
     CheckAnswers("check-answers"),
 }
