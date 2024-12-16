@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import java.security.Principal
+import java.time.LocalDate
 
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -97,5 +98,35 @@ class JourneyDataService(
     ): String? {
         val pageData = getPageData(journeyData, urlPathSegment, subPageNumber)
         return pageData?.get(fieldName)?.toString()
+    }
+
+    fun getFieldIntegerValue(
+        journeyData: JourneyData,
+        urlPathSegment: String,
+        fieldName: String,
+        subPageNumber: Int? = null,
+    ): Int? {
+        val fieldAsString = getFieldStringValue(journeyData, urlPathSegment, fieldName, subPageNumber) ?: return null
+        return fieldAsString.toInt()
+    }
+
+    fun getFieldLocalDateValue(
+        journeyData: JourneyData,
+        urlPathSegment: String,
+        fieldName: String,
+        subPageNumber: Int? = null,
+    ): LocalDate? {
+        val fieldAsString = getFieldStringValue(journeyData, urlPathSegment, fieldName, subPageNumber) ?: return null
+        return fieldAsString.let { LocalDate.parse(fieldAsString) }
+    }
+
+    fun getFieldBooleanValue(
+        journeyData: JourneyData,
+        urlPathSegment: String,
+        fieldName: String,
+        subPageNumber: Int? = null,
+    ): Boolean? {
+        val fieldAsString = getFieldStringValue(journeyData, urlPathSegment, fieldName, subPageNumber) ?: return null
+        return fieldAsString == "true"
     }
 }
