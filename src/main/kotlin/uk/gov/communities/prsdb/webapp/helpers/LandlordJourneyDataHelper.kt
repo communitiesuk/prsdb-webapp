@@ -183,14 +183,14 @@ class LandlordJourneyDataHelper {
                     journeyData,
                     manualAddressPathSegment,
                     "addressLineTwo",
-                ) ?: return null
+                )
 
             val county =
                 journeyDataService.getFieldStringValue(
                     journeyData,
                     manualAddressPathSegment,
                     "county",
-                ) ?: return null
+                )
 
             return AddressDataModel.fromManualAddressData(
                 addressLineOne,
