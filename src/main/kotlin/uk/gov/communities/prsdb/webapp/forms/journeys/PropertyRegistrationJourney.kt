@@ -48,333 +48,21 @@ class PropertyRegistrationJourney(
         validator = validator,
         journeyDataService = journeyDataService,
         steps =
-            listOf(
-                Step(
-                    id = RegisterPropertyStepId.LookupAddress,
-                    page =
-                        Page(
-                            formModel = LookupAddressFormModel::class,
-                            templateName = "forms/lookupAddressForm",
-                            content =
-                                mapOf(
-                                    "title" to "registerProperty.title",
-                                    "fieldSetHeading" to "forms.lookupAddress.propertyRegistration.fieldSetHeading",
-                                    "fieldSetHint" to "forms.lookupAddress.fieldSetHint",
-                                    "postcodeLabel" to "forms.lookupAddress.postcode.label",
-                                    "postcodeHint" to "forms.lookupAddress.postcode.hint",
-                                    "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
-                                    "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
-                                    "submitButtonText" to "forms.buttons.saveAndContinue",
-                                ),
-                        ),
-                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.SelectAddress, null) },
-                ),
-                Step(
-                    id = RegisterPropertyStepId.SelectAddress,
-                    page =
-                        SelectAddressPage(
-                            formModel = SelectAddressFormModel::class,
-                            templateName = "forms/selectAddressForm",
-                            content =
-                                mapOf(
-                                    "title" to "registerProperty.title",
-                                    "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
-                                    "submitButtonText" to "forms.buttons.useThisAddress",
-                                    "searchAgainUrl" to
-                                        "/$REGISTER_PROPERTY_JOURNEY_URL/" +
-                                        RegisterPropertyStepId.LookupAddress.urlPathSegment,
-                                ),
-                            urlPathSegment = RegisterPropertyStepId.LookupAddress.urlPathSegment,
-                            journeyDataService = journeyDataService,
-                            addressLookupService = addressLookupService,
-                            addressDataService = addressDataService,
-                        ),
-                    nextAction = { journeyData, _ -> selectAddressNextAction(journeyData, journeyDataService, addressDataService) },
-                ),
-                Step(
-                    id = RegisterPropertyStepId.AlreadyRegistered,
-                    page =
-                        AlreadyRegisteredPage(
-                            formModel = NoInputFormModel::class,
-                            templateName = "alreadyRegisteredPropertyPage",
-                            content =
-                                mapOf(
-                                    "title" to "registerProperty.title",
-                                    "searchAgainUrl" to
-                                        "/$REGISTER_PROPERTY_JOURNEY_URL/" +
-                                        RegisterPropertyStepId.LookupAddress.urlPathSegment,
-                                ),
-                            journeyDataService = journeyDataService,
-                            urlPathSegment = RegisterPropertyStepId.SelectAddress.urlPathSegment,
-                        ),
-                ),
-                Step(
-                    id = RegisterPropertyStepId.ManualAddress,
-                    page =
-                        Page(
-                            formModel = ManualAddressFormModel::class,
-                            templateName = "forms/manualAddressForm",
-                            content =
-                                mapOf(
-                                    "title" to "registerProperty.title",
-                                    "fieldSetHeading" to "forms.manualAddress.propertyRegistration.fieldSetHeading",
-                                    "fieldSetHint" to "forms.manualAddress.fieldSetHint",
-                                    "addressLineOneLabel" to "forms.manualAddress.addressLineOne.label",
-                                    "addressLineTwoLabel" to "forms.manualAddress.addressLineTwo.label",
-                                    "townOrCityLabel" to "forms.manualAddress.townOrCity.label",
-                                    "countyLabel" to "forms.manualAddress.county.label",
-                                    "postcodeLabel" to "forms.manualAddress.postcode.label",
-                                    "submitButtonText" to "forms.buttons.saveAndContinue",
-                                ),
-                        ),
-                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.LocalAuthority, null) },
-                ),
-                Step(
-                    id = RegisterPropertyStepId.LocalAuthority,
-                    page =
-                        Page(
-                            formModel = SelectLocalAuthorityFormModel::class,
-                            templateName = "forms/selectLocalAuthorityForm",
-                            content =
-                                mapOf(
-                                    "title" to "registerProperty.title",
-                                    "fieldSetHeading" to "forms.selectLocalAuthority.fieldSetHeading",
-                                    "fieldSetHint" to "forms.selectLocalAuthority.fieldSetHint",
-                                    "selectLabel" to "forms.selectLocalAuthority.select.label",
-                                    "selectOptions" to
-                                        LOCAL_AUTHORITIES.map {
-                                            SelectViewModel(
-                                                value = it.custodianCode,
-                                                label = it.displayName,
-                                            )
-                                        },
-                                ),
-                        ),
-                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.PropertyType, null) },
-                ),
-                Step(
-                    id = RegisterPropertyStepId.PropertyType,
-                    page =
-                        Page(
-                            formModel = PropertyTypeFormModel::class,
-                            templateName = "forms/propertyTypeForm.html",
-                            content =
-                                mapOf(
-                                    "title" to "registerProperty.title",
-                                    "fieldSetHeading" to "forms.propertyType.fieldSetHeading",
-                                    "radioOptions" to
-                                        listOf(
-                                            RadiosButtonViewModel(
-                                                value = PropertyType.DETACHED_HOUSE,
-                                                labelMsgKey = "forms.propertyType.radios.option.detachedHouse.label",
-                                                hintMsgKey = "forms.propertyType.radios.option.detachedHouse.hint",
-                                            ),
-                                            RadiosButtonViewModel(
-                                                value = PropertyType.SEMI_DETACHED_HOUSE,
-                                                labelMsgKey = "forms.propertyType.radios.option.semiDetachedHouse.label",
-                                                hintMsgKey = "forms.propertyType.radios.option.semiDetachedHouse.hint",
-                                            ),
-                                            RadiosButtonViewModel(
-                                                value = PropertyType.TERRACED_HOUSE,
-                                                labelMsgKey = "forms.propertyType.radios.option.terracedHouse.label",
-                                                hintMsgKey = "forms.propertyType.radios.option.terracedHouse.hint",
-                                            ),
-                                            RadiosButtonViewModel(
-                                                value = PropertyType.FLAT,
-                                                labelMsgKey = "forms.propertyType.radios.option.flat.label",
-                                                hintMsgKey = "forms.propertyType.radios.option.flat.hint",
-                                            ),
-                                            RadiosButtonViewModel(
-                                                value = PropertyType.OTHER,
-                                                labelMsgKey = "forms.propertyType.radios.option.other.label",
-                                                hintMsgKey = "forms.propertyType.radios.option.other.hint",
-                                                conditionalFragment = "customPropertyTypeInput",
-                                            ),
-                                        ),
-                                ),
-                        ),
-                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.OwnershipType, null) },
-                ),
-                Step(
-                    id = RegisterPropertyStepId.OwnershipType,
-                    page =
-                        Page(
-                            formModel = OwnershipTypeFormModel::class,
-                            templateName = "forms/ownershipTypeForm.html",
-                            content =
-                                mapOf(
-                                    "title" to "registerProperty.title",
-                                    "fieldSetHeading" to "forms.ownershipType.fieldSetHeading",
-                                    "radioOptions" to
-                                        listOf(
-                                            RadiosButtonViewModel(
-                                                value = OwnershipType.FREEHOLD,
-                                                labelMsgKey = "forms.ownershipType.radios.option.freehold.label",
-                                                hintMsgKey = "forms.ownershipType.radios.option.freehold.hint",
-                                            ),
-                                            RadiosButtonViewModel(
-                                                value = OwnershipType.LEASEHOLD,
-                                                labelMsgKey = "forms.ownershipType.radios.option.leasehold.label",
-                                                hintMsgKey = "forms.ownershipType.radios.option.leasehold.hint",
-                                            ),
-                                        ),
-                                ),
-                        ),
-                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
-                ),
-                Step(
-                    id = RegisterPropertyStepId.Occupancy,
-                    page =
-                        Page(
-                            formModel = OccupancyFormModel::class,
-                            templateName = "forms/propertyOccupancyForm",
-                            content =
-                                mapOf(
-                                    "title" to "registerProperty.title",
-                                    "fieldSetHeading" to "forms.occupancy.fieldSetHeading",
-                                    "radioOptions" to
-                                        listOf(
-                                            RadiosButtonViewModel(
-                                                value = true,
-                                                labelMsgKey = "forms.occupancy.radios.option.yes.label",
-                                                hintMsgKey = "forms.occupancy.radios.option.yes.hint",
-                                            ),
-                                            RadiosButtonViewModel(
-                                                value = false,
-                                                labelMsgKey = "forms.occupancy.radios.option.no.label",
-                                                hintMsgKey = "forms.occupancy.radios.option.no.hint",
-                                            ),
-                                        ),
-                                ),
-                        ),
-                    nextAction = { journeyData, _ -> occupancyNextAction(journeyData) },
-                ),
-                Step(
-                    id = RegisterPropertyStepId.NumberOfHouseholds,
-                    page =
-                        Page(
-                            formModel = NumberOfHouseholdsFormModel::class,
-                            templateName = "forms/numberOfHouseholdsForm",
-                            content =
-                                mapOf(
-                                    "title" to "registerProperty.title",
-                                    "fieldSetHeading" to "forms.numberOfHouseholds.fieldSetHeading",
-                                    "label" to "forms.numberOfHouseholds.label",
-                                ),
-                        ),
-                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.NumberOfPeople, null) },
-                ),
-                Step(
-                    id = RegisterPropertyStepId.NumberOfPeople,
-                    page =
-                        Page(
-                            formModel = NumberOfPeopleFormModel::class,
-                            templateName = "forms/numberOfPeopleForm",
-                            content =
-                                mapOf(
-                                    "title" to "registerProperty.title",
-                                    "fieldSetHeading" to "forms.numberOfPeople.fieldSetHeading",
-                                    "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
-                                    "label" to "forms.numberOfPeople.label",
-                                ),
-                        ),
-                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.LicensingType, null) },
-                ),
-                Step(
-                    id = RegisterPropertyStepId.LicensingType,
-                    page =
-                        Page(
-                            formModel = LicensingTypeFormModel::class,
-                            templateName = "forms/licensingTypeForm",
-                            content =
-                                mapOf(
-                                    "title" to "registerProperty.title",
-                                    "fieldSetHeading" to "forms.licensingType.fieldSetHeading",
-                                    "fieldSetHint" to "forms.licensingType.fieldSetHint",
-                                    "radioOptions" to
-                                        listOf(
-                                            RadiosButtonViewModel(
-                                                value = LicensingType.SELECTIVE_LICENCE,
-                                                labelMsgKey = "forms.licensingType.radios.option.selectiveLicence.label",
-                                                hintMsgKey = "forms.licensingType.radios.option.selectiveLicence.hint",
-                                            ),
-                                            RadiosButtonViewModel(
-                                                value = LicensingType.HMO_MANDATORY_LICENCE,
-                                                labelMsgKey = "forms.licensingType.radios.option.hmoMandatory.label",
-                                                hintMsgKey = "forms.licensingType.radios.option.hmoMandatory.hint",
-                                            ),
-                                            RadiosButtonViewModel(
-                                                value = LicensingType.HMO_ADDITIONAL_LICENCE,
-                                                labelMsgKey = "forms.licensingType.radios.option.hmoAdditional.label",
-                                                hintMsgKey = "forms.licensingType.radios.option.hmoAdditional.hint",
-                                            ),
-                                            RadiosDividerViewModel("forms.radios.dividerText"),
-                                            RadiosButtonViewModel(
-                                                value = LicensingType.NO_LICENSING,
-                                                labelMsgKey = "forms.licensingType.radios.option.noLicensing.label",
-                                            ),
-                                        ),
-                                ),
-                        ),
-                    nextAction = { journeyData, _ -> licensingTypeNextAction(journeyData) },
-                ),
-                Step(
-                    id = RegisterPropertyStepId.SelectiveLicence,
-                    page =
-                        Page(
-                            formModel = SelectiveLicenceFormModel::class,
-                            templateName = "forms/licenceNumberForm",
-                            content =
-                                mapOf(
-                                    "title" to "registerProperty.title",
-                                    "fieldSetHeading" to "forms.selectiveLicence.fieldSetHeading",
-                                    "label" to "forms.selectiveLicence.label",
-                                    "detailSummary" to "forms.selectiveLicence.detail.summary",
-                                    "detailMainText" to "forms.selectiveLicence.detail.text",
-                                ),
-                        ),
-                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
-                ),
-                Step(
-                    id = RegisterPropertyStepId.HmoMandatoryLicence,
-                    page =
-                        Page(
-                            formModel = HmoMandatoryLicenceFormModel::class,
-                            templateName = "forms/licenceNumberForm",
-                            content =
-                                mapOf(
-                                    "title" to "registerProperty.title",
-                                    "fieldSetHeading" to "forms.hmoMandatoryLicence.fieldSetHeading",
-                                    "label" to "forms.hmoMandatoryLicence.label",
-                                    "detailSummary" to "forms.hmoMandatoryLicence.detail.summary",
-                                    "detailMainText" to "forms.hmoMandatoryLicence.detail.paragraph.one",
-                                    "detailAdditionalContent" to
-                                        mapOf(
-                                            "bulletOne" to "forms.hmoMandatoryLicence.detail.bullet.one",
-                                            "bulletTwo" to "forms.hmoMandatoryLicence.detail.bullet.two",
-                                            "text" to "forms.hmoMandatoryLicence.detail.paragraph.two",
-                                        ),
-                                ),
-                        ),
-                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
-                ),
-                Step(
-                    id = RegisterPropertyStepId.HmoAdditionalLicence,
-                    page =
-                        Page(
-                            formModel = HmoAdditionalLicenceFormModel::class,
-                            templateName = "forms/licenceNumberForm",
-                            content =
-                                mapOf(
-                                    "title" to "registerProperty.title",
-                                    "fieldSetHeading" to "forms.hmoAdditionalLicence.fieldSetHeading",
-                                    "label" to "forms.hmoAdditionalLicence.label",
-                                    "detailSummary" to "forms.hmoAdditionalLicence.detail.summary",
-                                    "detailMainText" to "forms.hmoAdditionalLicence.detail.text",
-                                ),
-                        ),
-                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
-                ),
+            setOf(
+                lookupAddressStep(),
+                selectAddressStep(journeyDataService, addressLookupService, addressDataService),
+                alreadyRegisteredStep(journeyDataService),
+                manualAddressStep(),
+                localAuthorityStep(),
+                propertyTypeStep(),
+                ownershipTypeStep(),
+                occupancyStep(),
+                numberOfHouseholdsStep(),
+                numberOfPeopleStep(),
+                licensingTypeStep(),
+                selectiveLicenceStep(),
+                hmoMandatoryLicenceStep(),
+                hmoAdditionalLicenceStep(),
                 Step(
                     id = RegisterPropertyStepId.CheckAnswers,
                     page =
@@ -433,6 +121,369 @@ class PropertyRegistrationJourney(
             ),
     ) {
     companion object {
+        private fun lookupAddressStep() =
+            Step(
+                id = RegisterPropertyStepId.LookupAddress,
+                page =
+                    Page(
+                        formModel = LookupAddressFormModel::class,
+                        templateName = "forms/lookupAddressForm",
+                        content =
+                            mapOf(
+                                "title" to "registerProperty.title",
+                                "fieldSetHeading" to "forms.lookupAddress.propertyRegistration.fieldSetHeading",
+                                "fieldSetHint" to "forms.lookupAddress.fieldSetHint",
+                                "postcodeLabel" to "forms.lookupAddress.postcode.label",
+                                "postcodeHint" to "forms.lookupAddress.postcode.hint",
+                                "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
+                                "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
+                                "submitButtonText" to "forms.buttons.saveAndContinue",
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(RegisterPropertyStepId.SelectAddress, null) },
+            )
+
+        private fun selectAddressStep(
+            journeyDataService: JourneyDataService,
+            addressLookupService: AddressLookupService,
+            addressDataService: AddressDataService,
+        ) = Step(
+            id = RegisterPropertyStepId.SelectAddress,
+            page =
+                SelectAddressPage(
+                    formModel = SelectAddressFormModel::class,
+                    templateName = "forms/selectAddressForm",
+                    content =
+                        mapOf(
+                            "title" to "registerProperty.title",
+                            "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
+                            "submitButtonText" to "forms.buttons.useThisAddress",
+                            "searchAgainUrl" to
+                                "/$REGISTER_PROPERTY_JOURNEY_URL/" +
+                                RegisterPropertyStepId.LookupAddress.urlPathSegment,
+                        ),
+                    urlPathSegment = RegisterPropertyStepId.LookupAddress.urlPathSegment,
+                    journeyDataService = journeyDataService,
+                    addressLookupService = addressLookupService,
+                    addressDataService = addressDataService,
+                ),
+            nextAction = { journeyData, _ ->
+                selectAddressNextAction(
+                    journeyData,
+                    journeyDataService,
+                    addressDataService,
+                )
+            },
+        )
+
+        private fun alreadyRegisteredStep(journeyDataService: JourneyDataService) =
+            Step(
+                id = RegisterPropertyStepId.AlreadyRegistered,
+                page =
+                    AlreadyRegisteredPage(
+                        formModel = NoInputFormModel::class,
+                        templateName = "alreadyRegisteredPropertyPage",
+                        content =
+                            mapOf(
+                                "title" to "registerProperty.title",
+                                "searchAgainUrl" to
+                                    "/$REGISTER_PROPERTY_JOURNEY_URL/" +
+                                    RegisterPropertyStepId.LookupAddress.urlPathSegment,
+                            ),
+                        journeyDataService = journeyDataService,
+                        urlPathSegment = RegisterPropertyStepId.SelectAddress.urlPathSegment,
+                    ),
+            )
+
+        private fun manualAddressStep() =
+            Step(
+                id = RegisterPropertyStepId.ManualAddress,
+                page =
+                    Page(
+                        formModel = ManualAddressFormModel::class,
+                        templateName = "forms/manualAddressForm",
+                        content =
+                            mapOf(
+                                "title" to "registerProperty.title",
+                                "fieldSetHeading" to "forms.manualAddress.propertyRegistration.fieldSetHeading",
+                                "fieldSetHint" to "forms.manualAddress.fieldSetHint",
+                                "addressLineOneLabel" to "forms.manualAddress.addressLineOne.label",
+                                "addressLineTwoLabel" to "forms.manualAddress.addressLineTwo.label",
+                                "townOrCityLabel" to "forms.manualAddress.townOrCity.label",
+                                "countyLabel" to "forms.manualAddress.county.label",
+                                "postcodeLabel" to "forms.manualAddress.postcode.label",
+                                "submitButtonText" to "forms.buttons.saveAndContinue",
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(RegisterPropertyStepId.LocalAuthority, null) },
+            )
+
+        private fun localAuthorityStep() =
+            Step(
+                id = RegisterPropertyStepId.LocalAuthority,
+                page =
+                    Page(
+                        formModel = SelectLocalAuthorityFormModel::class,
+                        templateName = "forms/selectLocalAuthorityForm",
+                        content =
+                            mapOf(
+                                "title" to "registerProperty.title",
+                                "fieldSetHeading" to "forms.selectLocalAuthority.fieldSetHeading",
+                                "fieldSetHint" to "forms.selectLocalAuthority.fieldSetHint",
+                                "selectLabel" to "forms.selectLocalAuthority.select.label",
+                                "selectOptions" to
+                                    LOCAL_AUTHORITIES.map {
+                                        SelectViewModel(
+                                            value = it.custodianCode,
+                                            label = it.displayName,
+                                        )
+                                    },
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(RegisterPropertyStepId.PropertyType, null) },
+            )
+
+        private fun propertyTypeStep() =
+            Step(
+                id = RegisterPropertyStepId.PropertyType,
+                page =
+                    Page(
+                        formModel = PropertyTypeFormModel::class,
+                        templateName = "forms/propertyTypeForm.html",
+                        content =
+                            mapOf(
+                                "title" to "registerProperty.title",
+                                "fieldSetHeading" to "forms.propertyType.fieldSetHeading",
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = PropertyType.DETACHED_HOUSE,
+                                            labelMsgKey = "forms.propertyType.radios.option.detachedHouse.label",
+                                            hintMsgKey = "forms.propertyType.radios.option.detachedHouse.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = PropertyType.SEMI_DETACHED_HOUSE,
+                                            labelMsgKey = "forms.propertyType.radios.option.semiDetachedHouse.label",
+                                            hintMsgKey = "forms.propertyType.radios.option.semiDetachedHouse.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = PropertyType.TERRACED_HOUSE,
+                                            labelMsgKey = "forms.propertyType.radios.option.terracedHouse.label",
+                                            hintMsgKey = "forms.propertyType.radios.option.terracedHouse.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = PropertyType.FLAT,
+                                            labelMsgKey = "forms.propertyType.radios.option.flat.label",
+                                            hintMsgKey = "forms.propertyType.radios.option.flat.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = PropertyType.OTHER,
+                                            labelMsgKey = "forms.propertyType.radios.option.other.label",
+                                            hintMsgKey = "forms.propertyType.radios.option.other.hint",
+                                            conditionalFragment = "customPropertyTypeInput",
+                                        ),
+                                    ),
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(RegisterPropertyStepId.OwnershipType, null) },
+            )
+
+        private fun ownershipTypeStep() =
+            Step(
+                id = RegisterPropertyStepId.OwnershipType,
+                page =
+                    Page(
+                        formModel = OwnershipTypeFormModel::class,
+                        templateName = "forms/ownershipTypeForm.html",
+                        content =
+                            mapOf(
+                                "title" to "registerProperty.title",
+                                "fieldSetHeading" to "forms.ownershipType.fieldSetHeading",
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = OwnershipType.FREEHOLD,
+                                            labelMsgKey = "forms.ownershipType.radios.option.freehold.label",
+                                            hintMsgKey = "forms.ownershipType.radios.option.freehold.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = OwnershipType.LEASEHOLD,
+                                            labelMsgKey = "forms.ownershipType.radios.option.leasehold.label",
+                                            hintMsgKey = "forms.ownershipType.radios.option.leasehold.hint",
+                                        ),
+                                    ),
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
+            )
+
+        private fun occupancyStep() =
+            Step(
+                id = RegisterPropertyStepId.Occupancy,
+                page =
+                    Page(
+                        formModel = OccupancyFormModel::class,
+                        templateName = "forms/propertyOccupancyForm",
+                        content =
+                            mapOf(
+                                "title" to "registerProperty.title",
+                                "fieldSetHeading" to "forms.occupancy.fieldSetHeading",
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = true,
+                                            labelMsgKey = "forms.occupancy.radios.option.yes.label",
+                                            hintMsgKey = "forms.occupancy.radios.option.yes.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = false,
+                                            labelMsgKey = "forms.occupancy.radios.option.no.label",
+                                            hintMsgKey = "forms.occupancy.radios.option.no.hint",
+                                        ),
+                                    ),
+                            ),
+                    ),
+                nextAction = { journeyData, _ -> occupancyNextAction(journeyData) },
+            )
+
+        private fun numberOfHouseholdsStep() =
+            Step(
+                id = RegisterPropertyStepId.NumberOfHouseholds,
+                page =
+                    Page(
+                        formModel = NumberOfHouseholdsFormModel::class,
+                        templateName = "forms/numberOfHouseholdsForm",
+                        content =
+                            mapOf(
+                                "title" to "registerProperty.title",
+                                "fieldSetHeading" to "forms.numberOfHouseholds.fieldSetHeading",
+                                "label" to "forms.numberOfHouseholds.label",
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(RegisterPropertyStepId.NumberOfPeople, null) },
+            )
+
+        private fun numberOfPeopleStep() =
+            Step(
+                id = RegisterPropertyStepId.NumberOfPeople,
+                page =
+                    Page(
+                        formModel = NumberOfPeopleFormModel::class,
+                        templateName = "forms/numberOfPeopleForm",
+                        content =
+                            mapOf(
+                                "title" to "registerProperty.title",
+                                "fieldSetHeading" to "forms.numberOfPeople.fieldSetHeading",
+                                "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
+                                "label" to "forms.numberOfPeople.label",
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(RegisterPropertyStepId.LicensingType, null) },
+            )
+
+        private fun licensingTypeStep() =
+            Step(
+                id = RegisterPropertyStepId.LicensingType,
+                page =
+                    Page(
+                        formModel = LicensingTypeFormModel::class,
+                        templateName = "forms/licensingTypeForm",
+                        content =
+                            mapOf(
+                                "title" to "registerProperty.title",
+                                "fieldSetHeading" to "forms.licensingType.fieldSetHeading",
+                                "fieldSetHint" to "forms.licensingType.fieldSetHint",
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = LicensingType.SELECTIVE_LICENCE,
+                                            labelMsgKey = "forms.licensingType.radios.option.selectiveLicence.label",
+                                            hintMsgKey = "forms.licensingType.radios.option.selectiveLicence.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = LicensingType.HMO_MANDATORY_LICENCE,
+                                            labelMsgKey = "forms.licensingType.radios.option.hmoMandatory.label",
+                                            hintMsgKey = "forms.licensingType.radios.option.hmoMandatory.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = LicensingType.HMO_ADDITIONAL_LICENCE,
+                                            labelMsgKey = "forms.licensingType.radios.option.hmoAdditional.label",
+                                            hintMsgKey = "forms.licensingType.radios.option.hmoAdditional.hint",
+                                        ),
+                                        RadiosDividerViewModel("forms.radios.dividerText"),
+                                        RadiosButtonViewModel(
+                                            value = LicensingType.NO_LICENSING,
+                                            labelMsgKey = "forms.licensingType.radios.option.noLicensing.label",
+                                        ),
+                                    ),
+                            ),
+                    ),
+                nextAction = { journeyData, _ -> licensingTypeNextAction(journeyData) },
+            )
+
+        private fun selectiveLicenceStep() =
+            Step(
+                id = RegisterPropertyStepId.SelectiveLicence,
+                page =
+                    Page(
+                        formModel = SelectiveLicenceFormModel::class,
+                        templateName = "forms/licenceNumberForm",
+                        content =
+                            mapOf(
+                                "title" to "registerProperty.title",
+                                "fieldSetHeading" to "forms.selectiveLicence.fieldSetHeading",
+                                "label" to "forms.selectiveLicence.label",
+                                "detailSummary" to "forms.selectiveLicence.detail.summary",
+                                "detailMainText" to "forms.selectiveLicence.detail.text",
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
+            )
+
+        private fun hmoMandatoryLicenceStep() =
+            Step(
+                id = RegisterPropertyStepId.HmoMandatoryLicence,
+                page =
+                    Page(
+                        formModel = HmoMandatoryLicenceFormModel::class,
+                        templateName = "forms/licenceNumberForm",
+                        content =
+                            mapOf(
+                                "title" to "registerProperty.title",
+                                "fieldSetHeading" to "forms.hmoMandatoryLicence.fieldSetHeading",
+                                "label" to "forms.hmoMandatoryLicence.label",
+                                "detailSummary" to "forms.hmoMandatoryLicence.detail.summary",
+                                "detailMainText" to "forms.hmoMandatoryLicence.detail.paragraph.one",
+                                "detailAdditionalContent" to
+                                    mapOf(
+                                        "bulletOne" to "forms.hmoMandatoryLicence.detail.bullet.one",
+                                        "bulletTwo" to "forms.hmoMandatoryLicence.detail.bullet.two",
+                                        "text" to "forms.hmoMandatoryLicence.detail.paragraph.two",
+                                    ),
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
+            )
+
+        private fun hmoAdditionalLicenceStep() =
+            Step(
+                id = RegisterPropertyStepId.HmoAdditionalLicence,
+                page =
+                    Page(
+                        formModel = HmoAdditionalLicenceFormModel::class,
+                        templateName = "forms/licenceNumberForm",
+                        content =
+                            mapOf(
+                                "title" to "registerProperty.title",
+                                "fieldSetHeading" to "forms.hmoAdditionalLicence.fieldSetHeading",
+                                "label" to "forms.hmoAdditionalLicence.label",
+                                "detailSummary" to "forms.hmoAdditionalLicence.detail.summary",
+                                "detailMainText" to "forms.hmoAdditionalLicence.detail.text",
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
+            )
+
         private fun occupancyNextAction(journeyData: JourneyData): Pair<RegisterPropertyStepId, Int?> =
             when (
                 val propertyIsOccupied =
