@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
 import uk.gov.communities.prsdb.webapp.constants.MAX_ADDRESSES
 import kotlin.math.min
 
@@ -27,7 +28,7 @@ class OSPlacesAPIStubController {
                     "]}",
                 ) {
                     "{'DPA':{'ADDRESS':'$it, Example Road, EG'," +
-                        "'LOCAL_CUSTODIAN_CODE':${it}00,'UPRN':'${it}123456','BUILDING_NUMBER':$it,'POSTCODE':'EG'}}"
+                        "'LOCAL_CUSTODIAN_CODE':${getCustodianCode(it)},'UPRN':'${it}123456','BUILDING_NUMBER':$it,'POSTCODE':'EG'}}"
                 }
             }
         } catch (exception: Exception) {
@@ -36,4 +37,6 @@ class OSPlacesAPIStubController {
                 "'LOCAL_CUSTODIAN_CODE':100,'UPRN':'0123456','BUILDING_NUMBER':1,'POSTCODE':'EG'}}]}"
         }
     }
+
+    private fun getCustodianCode(index: Int) = LOCAL_AUTHORITIES[index % LOCAL_AUTHORITIES.size].custodianCode
 }
