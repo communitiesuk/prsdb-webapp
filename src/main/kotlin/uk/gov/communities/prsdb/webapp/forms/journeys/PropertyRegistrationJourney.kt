@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.models.dataModels.FormSummaryDataModel
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoAdditionalLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoMandatoryLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LicensingTypeFormModel
@@ -370,6 +371,49 @@ class PropertyRegistrationJourney(
                                     "label" to "forms.hmoAdditionalLicence.label",
                                     "detailSummary" to "forms.hmoAdditionalLicence.detail.summary",
                                     "detailMainText" to "forms.hmoAdditionalLicence.detail.text",
+                                ),
+                        ),
+                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
+                ),
+                Step(
+                    id = RegisterPropertyStepId.CheckAnswers,
+                    page =
+                        Page(
+                            formModel = NoInputFormModel::class,
+                            templateName = "forms/propertyRegistrationCheckAnswersForm",
+                            content =
+                                mapOf(
+                                    "title" to "registerProperty.title",
+                                    "propertyName" to "1 example road EX4 PL3",
+                                    "submitButtonText" to "forms.buttons.saveAndContinue",
+                                    "propertyDetails" to
+                                        listOf(
+                                            FormSummaryDataModel(
+                                                "forms.checkPropertyAnswers.propertyDetails.address",
+                                                "1 example road EX4 PL3",
+                                                null,
+                                            ),
+                                            FormSummaryDataModel(
+                                                "forms.checkPropertyAnswers.propertyDetails.uprn",
+                                                "100023584755",
+                                                null,
+                                            ),
+                                            FormSummaryDataModel(
+                                                "forms.checkPropertyAnswers.propertyDetails.type",
+                                                "Flat",
+                                                null,
+                                            ),
+                                            FormSummaryDataModel(
+                                                "forms.checkPropertyAnswers.propertyDetails.ownership",
+                                                "Freehold",
+                                                null,
+                                            ),
+                                            FormSummaryDataModel(
+                                                "forms.checkPropertyAnswers.propertyDetails.landlordType",
+                                                "Individual",
+                                                null,
+                                            ),
+                                        ),
                                 ),
                         ),
                     nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },

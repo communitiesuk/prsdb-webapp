@@ -1,0 +1,5 @@
+<li th:fragment="tabsListItem(sectiondId, headingText)"  class="govuk-tabs__list-item">
+    <a class="govuk-tabs__tab" th:href="'#'+${sectiondId}" th:text="${headingText}">
+        headingText
+    </a>
+</li>
