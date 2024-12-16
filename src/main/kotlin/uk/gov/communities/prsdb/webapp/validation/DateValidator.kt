@@ -66,7 +66,7 @@ class DateValidator {
         // This means spring will allow us to properly mock .getNowAsLocalDate() in our tests
         val dateTimeHelper = DateTimeHelper()
         val dateOfBirth = LocalDate.parse(getFullDateString(day, month, year))
-        return dateOfBirth.yearsUntil(dateTimeHelper.getNowAsLocalDate())
+        return dateOfBirth.yearsUntil(dateTimeHelper.getCurrentDateInUK())
     }
 
     private fun isNotBlank(value: Any): Boolean = NotBlankValidator().isValid(value as CharSequence?, null)

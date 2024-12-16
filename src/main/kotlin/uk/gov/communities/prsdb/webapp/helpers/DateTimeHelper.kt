@@ -9,8 +9,8 @@ import java.time.Clock
 class DateTimeHelper(
     private val clock: Clock = Clock.systemUTC(),
 ) {
-    fun getNowAsLocalDate(): LocalDate {
-        val instant = clock.instant().toKotlinInstant().toLocalDateTime(TimeZone.of("Europe/London"))
-        return LocalDate(instant.year, instant.month.value, instant.dayOfMonth)
+    fun getCurrentDateInUK(): LocalDate {
+        val dateTimeInUK = clock.instant().toKotlinInstant().toLocalDateTime(TimeZone.of("Europe/London"))
+        return LocalDate(dateTimeInUK.year, dateTimeInUK.month.value, dateTimeInUK.dayOfMonth)
     }
 }

@@ -24,7 +24,7 @@ class DateTimeHelperTests {
         // Summer evening
         "2023,6,1,23,59,59",
     )
-    fun `getNowAsLocalDate returns the correct local date`(
+    fun `getCurrentDateInUK returns the correct local date`(
         year: Int,
         month: Int,
         dayOfMonth: Int,
@@ -43,6 +43,6 @@ class DateTimeHelperTests {
                 ),
             )
 
-        assertEquals(expectedDate, dateTimeHelper.getNowAsLocalDate())
+        assertEquals(expectedDate, dateTimeHelper.getCurrentDateInUK())
     }
 }

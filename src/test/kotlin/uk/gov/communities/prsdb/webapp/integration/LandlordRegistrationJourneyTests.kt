@@ -225,7 +225,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         inner class AgeValidation {
             val dateTimeHelper = DateTimeHelper()
 
-            val currentDate = dateTimeHelper.getNowAsLocalDate()
+            val currentDate = dateTimeHelper.getCurrentDateInUK()
 
             @Test
             fun `Submitting a valid date of birth for the minimum age redirects to the next page`(page: Page) {
