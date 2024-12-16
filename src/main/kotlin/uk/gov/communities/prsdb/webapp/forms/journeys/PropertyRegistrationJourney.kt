@@ -426,7 +426,9 @@ class PropertyRegistrationJourney(
                 return Pair(RegisterPropertyStepId.ManualAddress, null)
             } else {
                 val addressData = addressDataService.getAddressData(singleLineAddress)
-                if (addressData?.uprn != null && propertyRegistrationService.getIsAddressRegistered(addressData.uprn)) {
+                if (addressData?.uprn != null &&
+                    addressAlreadyRegistered(addressData.uprn, propertyRegistrationService, addressDataService)
+                ) {
                     return Pair(RegisterPropertyStepId.AlreadyRegistered, null)
                 }
                 return Pair(RegisterPropertyStepId.PropertyType, null)
@@ -442,6 +444,21 @@ class PropertyRegistrationJourney(
                 LicensingType.HMO_MANDATORY_LICENCE -> Pair(RegisterPropertyStepId.HmoMandatoryLicence, null)
                 LicensingType.HMO_ADDITIONAL_LICENCE -> Pair(RegisterPropertyStepId.HmoAdditionalLicence, null)
                 LicensingType.NO_LICENSING -> Pair(RegisterPropertyStepId.PlaceholderPage, null)
+            }
+        }
+
+        private fun addressAlreadyRegistered(
+            uprn: Long,
+            propertyRegistrationService: PropertyRegistrationService,
+            addressDataService: AddressDataService,
+        ): Boolean {
+            val cachedResult = addressDataService.getCachedAddressRegisteredResult(uprn)
+            if (cachedResult == null) {
+                val databaseResult = propertyRegistrationService.getIsAddressRegistered(uprn)
+                addressDataService.setCachedAddressRegisteredResult(uprn, databaseResult)
+                return databaseResult
+            } else {
+                return cachedResult
             }
         }
     }
