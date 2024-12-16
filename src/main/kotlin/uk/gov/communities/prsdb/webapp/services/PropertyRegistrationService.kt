@@ -12,7 +12,7 @@ class PropertyRegistrationService(
     fun getIsAddressRegistered(uprn: Long): Boolean {
         val property = propertyRepository.findByAddress_Uprn(uprn)
         if (property == null || !property.isActive || property.id == null) return false
-        val propertyOwnerships = propertyOwnershipRepository.findByProperty_Id(property.id)
-        return (propertyOwnerships.any({ it.isActive }))
+        val propertyOwnership = propertyOwnershipRepository.findByIsActiveTrueAndProperty_Id(property.id)
+        return (propertyOwnership != null)
     }
 }
