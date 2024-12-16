@@ -38,5 +38,5 @@ class OSPlacesAPIStubController {
         }
     }
 
-    private fun getCustodianCode(index: Int) = LOCAL_AUTHORITIES[index % LOCAL_AUTHORITIES.size]
+    private fun getCustodianCode(index: Int) = LOCAL_AUTHORITIES[index % LOCAL_AUTHORITIES.size].custodianCode
 }
