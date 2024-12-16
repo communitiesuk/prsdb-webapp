@@ -23,7 +23,6 @@ CREATE TABLE property_ownership
     current_num_households INTEGER                                 NOT NULL,
     registration_number_id BIGINT                                  NOT NULL,
     property_id            BIGINT                                  NOT NULL,
-    payment_id             BIGINT,
     primary_landlord_id    BIGINT                                  NOT NULL,
     CONSTRAINT pk_propertyownership PRIMARY KEY (id)
 );
