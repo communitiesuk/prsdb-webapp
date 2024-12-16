@@ -58,11 +58,6 @@ class PropertyOwnership(
     lateinit var property: Property
         private set
 
-    @ManyToOne(optional = true)
-    @JoinColumn(name = "payment_id", nullable = false, foreignKey = ForeignKey(name = "FK_PROPERTY_OWNERSHIP_PAYMENT"))
-    lateinit var payment: Payment
-        private set
-
     constructor(id: Long, isActive: Boolean) : this(id) {
         this.isActive = isActive
     }

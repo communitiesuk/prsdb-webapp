@@ -75,10 +75,6 @@ INSERT INTO property (id, status,is_active, property_build_type, has_gas_supply,
 VALUES (1, 1,true, 1,true,6);
 SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
 
-INSERT INTO payment (id, payment_date_time,payment_amount)
-    VALUES (1, '09/13/24',10.00);
-SELECT setval(pg_get_serial_sequence('payment', 'id'), (SELECT MAX(id) FROM payment));
-
-INSERT INTO property_ownership (id,is_active, occupancy_type, landlord_type, current_num_households,  registration_number_id, primary_landlord_id, property_id, payment_id)
-VALUES (1,true, 0,0,1,6, 1, 1, 1);
+INSERT INTO property_ownership (id,is_active, occupancy_type, landlord_type, current_num_households,  registration_number_id, primary_landlord_id, property_id)
+VALUES (1,true, 0,0,1,6, 1, 1);
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
