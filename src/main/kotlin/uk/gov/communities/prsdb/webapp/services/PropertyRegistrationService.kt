@@ -22,6 +22,6 @@ class PropertyRegistrationService(
         val propertyOwnership = propertyOwnershipRepository.findByIsActiveTrueAndProperty_Id(property.id)
         val databaseResult = propertyOwnership != null
         addressDataService.setCachedAddressRegisteredResult(uprn, databaseResult)
-        return (databaseResult)
+        return databaseResult
     }
 }

@@ -87,21 +87,29 @@ class AddressDataServiceTests {
     }
 
     @Test
-    fun `getCachedAddressRegisteredResult returns null if no matching result is cached`() {
+    fun `getCachedAddressRegisteredResult returns null if no results are cached`() {
         val uprn = 1234.toLong()
         whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(null)
         assertNull(addressDataService.getCachedAddressRegisteredResult(uprn))
+    }
 
+    @Test
+    fun `getCachedAddressRegisteredResult returns null if no matching result is cached`() {
+        val uprn = 1234.toLong()
         whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(mutableMapOf(5678.toString() to true))
         assertNull(addressDataService.getCachedAddressRegisteredResult(uprn))
     }
 
     @Test
-    fun `getCachedAddressRegisteredResult returns the cached result if found`() {
+    fun `getCachedAddressRegisteredResult returns true if the cached result is true`() {
         val uprn = 1234.toLong()
         whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(mutableMapOf(uprn.toString() to true))
         assertTrue(addressDataService.getCachedAddressRegisteredResult(uprn) ?: false)
+    }
 
+    @Test
+    fun `getCachedAddressRegisteredResult returns false if the cached result is false`() {
+        val uprn = 1234.toLong()
         whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(mutableMapOf(uprn.toString() to false))
         assertFalse(addressDataService.getCachedAddressRegisteredResult(uprn) ?: true)
     }
