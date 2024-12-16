@@ -125,7 +125,7 @@ class DateValidatorTest {
             mockedDateTimeHelper =
                 Mockito.mockConstruction(
                     DateTimeHelper::class.java,
-                ) { mock, _ -> whenever(mock.getNowAsLocalDate()).thenReturn(currentDate) }
+                ) { mock, _ -> whenever(mock.getCurrentDateInUK()).thenReturn(currentDate) }
         }
 
         @AfterEach
