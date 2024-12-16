@@ -93,7 +93,7 @@ class LaUserRegistrationJourney(
         ) = Step(
             id = RegisterLaUserStepId.CheckAnswers,
             page =
-                LaUserRegistrationSummaryPage(
+                LaUserRegistrationCheckAnswersPage(
                     formModel = CheckAnswersFormModel::class,
                     templateName = "forms/checkAnswersForm",
                     content =

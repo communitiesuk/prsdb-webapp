@@ -401,7 +401,7 @@ class LandlordRegistrationJourney(
             Step(
                 id = LandlordRegistrationStepId.CheckAnswers,
                 page =
-                    LandlordRegistrationSummaryPage(
+                    LandlordRegistrationCheckAnswersPage(
                         formModel = CheckAnswersFormModel::class,
                         templateName = "forms/checkAnswersForm",
                         content =
