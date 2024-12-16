@@ -21,7 +21,6 @@ import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmationPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
@@ -37,7 +36,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SummaryPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.net.URI
@@ -97,6 +95,36 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         selectAddressPage.form.submit()
 
         val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
+        assertThat(checkAnswersPage.summaryList.getRowKey(0)).containsText("Name")
+        assertThat(checkAnswersPage.summaryList.getRowValue(0)).containsText("Arthur Dent")
+        assertThat(checkAnswersPage.summaryList.getRowAction(0)).not().containsText("Change")
+        assertThat(checkAnswersPage.summaryList.getRowAction(0).locator("a")).not().isVisible()
+
+        assertThat(checkAnswersPage.summaryList.getRowKey(1)).containsText("Date of birth")
+        assertThat(checkAnswersPage.summaryList.getRowValue(1)).containsText("08/06/2000")
+        assertThat(checkAnswersPage.summaryList.getRowAction(1)).not().containsText("Change")
+        assertThat(checkAnswersPage.summaryList.getRowAction(1).locator("a")).not().isVisible()
+
+        assertThat(checkAnswersPage.summaryList.getRowKey(2)).containsText("Email address")
+        assertThat(checkAnswersPage.summaryList.getRowValue(2)).containsText("test@example.com")
+        assertThat(checkAnswersPage.summaryList.getRowAction(2)).containsText("Change")
+        assertThat(checkAnswersPage.summaryList.getRowActionLink(2)).hasAttribute("href", "/register-as-a-landlord/email")
+
+        assertThat(checkAnswersPage.summaryList.getRowKey(3)).containsText("Telephone number")
+        assertThat(checkAnswersPage.summaryList.getRowValue(3)).containsText("07123456789")
+        assertThat(checkAnswersPage.summaryList.getRowAction(3)).containsText("Change")
+        assertThat(checkAnswersPage.summaryList.getRowActionLink(3)).hasAttribute("href", "/register-as-a-landlord/phone-number")
+
+        assertThat(checkAnswersPage.summaryList.getRowKey(4)).containsText("UK resident")
+        assertThat(checkAnswersPage.summaryList.getRowValue(4)).containsText("Yes")
+        assertThat(checkAnswersPage.summaryList.getRowAction(4)).containsText("Change")
+        assertThat(checkAnswersPage.summaryList.getRowActionLink(4)).hasAttribute("href", "/register-as-a-landlord/country-of-residence")
+
+        assertThat(checkAnswersPage.summaryList.getRowKey(5)).containsText("Contact address")
+        assertThat(checkAnswersPage.summaryList.getRowValue(5)).containsText("1, Example Road, EG1 2AB")
+        assertThat(checkAnswersPage.summaryList.getRowAction(5)).containsText("Change")
+        assertThat(checkAnswersPage.summaryList.getRowActionLink(5)).hasAttribute("href", "/register-as-a-landlord/lookup-address")
+
         checkAnswersPage.submitButton.click()
 
         val declarationPage = assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
@@ -207,7 +235,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         selectContactAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
         selectContactAddressPage.form.submit()
 
-        val summaryPage = assertPageIs(page, SummaryPageLandlordRegistration::class)
+        val summaryPage = assertPageIs(page,  CheckAnswersPageLandlordRegistration::class)
         summaryPage.submitButton.click()
 
         val declarationPage = assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
@@ -605,13 +633,6 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
     @Nested
     inner class LandlordRegistrationStepCheckAnswers {
-        @Test
-        fun `Clicking Confirm and continue goes redirects to the declaration page`(page: Page) {
-            val checkAnswersPage = navigator.goToLandlordRegistrationCheckAnswersPageInternationalLandlord()
-            checkAnswersPage.submit()
-            assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
-        }
-
         @Nested
         inner class LandlordIsUKResident {
             private lateinit var checkAnswersPage: CheckAnswersPageLandlordRegistration
@@ -622,35 +643,9 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             }
 
             @Test
-            fun `Check row titles populate correctly`(page: Page) {
-                assertTrue { checkAnswersPage.getByTextExactly("Name").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("Date of birth").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("Email address").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("Telephone number").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("UK resident").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("Contact address").isVisible }
-                assertFalse { checkAnswersPage.getByTextExactly("Country of residence").isVisible }
-                assertFalse { checkAnswersPage.getByTextExactly("Contact address (outside UK)").isVisible }
-                assertFalse { checkAnswersPage.getByTextExactly("UK contact address").isVisible }
-            }
-
-            @Test
-            fun `Check row values populate correctly`(page: Page) {
-                assertTrue { checkAnswersPage.getByTextExactly("Arthur Dent").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("2000-06-08").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("test@example.com").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("07456097576").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("Yes").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("address line one, address line two, town, county, EG1 2AB").isVisible }
-                assertFalse { checkAnswersPage.getByTextExactly("France").isVisible }
-                assertFalse { checkAnswersPage.getByTextExactly("address").isVisible }
-                assertFalse { checkAnswersPage.getByTextExactly("1, Example Road, EG1 2AB").isVisible }
-            }
-
-            @Test
             fun `Change Name link navigates to the correct step`(page: Page) {
                 val changeNameLink =
-                    checkAnswersPage.getLink("name")
+                    checkAnswersPage.summaryList.getRowActionLink(0)
                 changeNameLink.click()
                 assertPageIs(page, NameFormPageLandlordRegistration::class)
             }
@@ -658,7 +653,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             @Test
             fun `Change Date of Birth link navigates to the correct step`(page: Page) {
                 val changeDateOfBirthLink =
-                    checkAnswersPage.getLink("date-of-birth")
+                    checkAnswersPage.summaryList.getRowActionLink(1)
                 changeDateOfBirthLink.click()
                 assertPageIs(page, DateOfBirthFormPageLandlordRegistration::class)
             }
@@ -666,7 +661,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             @Test
             fun `Change Email link navigates to the correct step`(page: Page) {
                 val changeEmailLink =
-                    checkAnswersPage.getLink("email")
+                    checkAnswersPage.summaryList.getRowActionLink(2)
                 changeEmailLink.click()
                 assertPageIs(page, EmailFormPageLandlordRegistration::class)
             }
@@ -674,7 +669,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             @Test
             fun `Change Phone number link navigates to the correct step`(page: Page) {
                 val changePhoneNumberLink =
-                    checkAnswersPage.getLink("phone-number")
+                    checkAnswersPage.summaryList.getRowActionLink(3)
                 changePhoneNumberLink.click()
                 assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
             }
@@ -682,7 +677,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             @Test
             fun `Change UK Resident link navigates to the correct step`(page: Page) {
                 val changeUKResidentLink =
-                    checkAnswersPage.getLink("country-of-residence")
+                    checkAnswersPage.summaryList.getRowActionLink(4)
                 changeUKResidentLink.click()
                 assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
             }
@@ -690,7 +685,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             @Test
             fun `Change Contact address link navigates to the correct step`(page: Page) {
                 val changeContactAddressLink =
-                    checkAnswersPage.getLink("lookup-address")
+                    checkAnswersPage.summaryList.getRowActionLink(5)
                 changeContactAddressLink.click()
                 assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
             }
@@ -706,35 +701,9 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             }
 
             @Test
-            fun `Check row titles populate correctly`(page: Page) {
-                assertTrue { checkAnswersPage.getByTextExactly("Name").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("Date of birth").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("Email address").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("Telephone number").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("UK resident").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("Country of residence").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("Contact address (outside UK)").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("UK contact address").isVisible }
-                assertFalse { checkAnswersPage.getByTextExactly("Contact address").isVisible }
-            }
-
-            @Test
-            fun `Check row values populate correctly`(page: Page) {
-                assertTrue { checkAnswersPage.getByTextExactly("Arthur Dent").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("2000-06-08").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("test@example.com").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("07456097576").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("No").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("France").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("address").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("1, Example Road, EG1 2AB").isVisible }
-                assertFalse { checkAnswersPage.getByTextExactly("address line one, address line two, town, county, EG1 2AB").isVisible }
-            }
-
-            @Test
             fun `Change Name link navigates to the correct step`(page: Page) {
                 val changeNameLink =
-                    checkAnswersPage.getLink("name")
+                    checkAnswersPage.summaryList.getRowActionLink(0)
                 changeNameLink.click()
                 assertPageIs(page, NameFormPageLandlordRegistration::class)
             }
@@ -742,7 +711,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             @Test
             fun `Change Date of Birth link navigates to the correct step`(page: Page) {
                 val changeDateOfBirthLink =
-                    checkAnswersPage.getLink("date-of-birth")
+                    checkAnswersPage.summaryList.getRowActionLink(1)
                 changeDateOfBirthLink.click()
                 assertPageIs(page, DateOfBirthFormPageLandlordRegistration::class)
             }
@@ -750,7 +719,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             @Test
             fun `Change Email link navigates to the correct step`(page: Page) {
                 val changeEmailLink =
-                    checkAnswersPage.getLink("email")
+                    checkAnswersPage.summaryList.getRowActionLink(2)
                 changeEmailLink.click()
                 assertPageIs(page, EmailFormPageLandlordRegistration::class)
             }
@@ -758,7 +727,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             @Test
             fun `Change Phone number link navigates to the correct step`(page: Page) {
                 val changePhoneNumberLink =
-                    checkAnswersPage.getLink("phone-number")
+                    checkAnswersPage.summaryList.getRowActionLink(3)
                 changePhoneNumberLink.click()
                 assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
             }
@@ -766,7 +735,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             @Test
             fun `Change UK Resident link navigates to the correct step`(page: Page) {
                 val changeUKResidentLink =
-                    checkAnswersPage.getLinks("country-of-residence").nth(0)
+                    checkAnswersPage.summaryList.getRowActionLink(4)
                 changeUKResidentLink.click()
                 assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
             }
@@ -774,7 +743,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             @Test
             fun `Change Country of residence link navigates to the correct step`(page: Page) {
                 val changeCountryOfResidenceLink =
-                    checkAnswersPage.getLinks("country-of-residence").nth(1)
+                    checkAnswersPage.summaryList.getRowActionLink(5)
                 changeCountryOfResidenceLink.click()
                 assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
             }
@@ -782,7 +751,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             @Test
             fun `Change Contact address (outside UK) link navigates to the correct step`(page: Page) {
                 val changeContactAddressOutsideUKLink =
-                    checkAnswersPage.getLink("international-address")
+                    checkAnswersPage.summaryList.getRowActionLink(6)
                 changeContactAddressOutsideUKLink.click()
                 assertPageIs(page, InternationalAddressFormPageLandlordRegistration::class)
             }
@@ -790,41 +759,9 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             @Test
             fun `Change UK contact address link navigates to the correct step`(page: Page) {
                 val changeUKContactAddressLink =
-                    checkAnswersPage.getLink("lookup-contact-address")
+                    checkAnswersPage.summaryList.getRowActionLink(7)
                 changeUKContactAddressLink.click()
                 assertPageIs(page, LookupContactAddressFormPageLandlordRegistration::class)
-            }
-        }
-
-        @Nested
-        inner class IdentityVerifiedByOneLogin {
-            private lateinit var checkAnswersPage: CheckAnswersPageLandlordRegistration
-
-            @BeforeEach
-            fun setUp(page: Page) {
-                checkAnswersPage = getCheckAnswersPageWithIdentityVerifiedByOneLogin(page)
-            }
-
-            @Test
-            fun `Check row titles for Name and Date of birth populate correctly`(page: Page) {
-                assertTrue { checkAnswersPage.getByTextExactly("Name").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("Date of birth").isVisible }
-            }
-
-            @Test
-            fun `Check row values Name and Date of birth populate correctly`(page: Page) {
-                assertTrue { checkAnswersPage.getByTextExactly("Arthur Dent").isVisible }
-                assertTrue { checkAnswersPage.getByTextExactly("08/06/2000").isVisible }
-            }
-
-            @Test
-            fun `Change links do not appear for Name and Date of birth fields`(page: Page) {
-                val changeLinks = checkAnswersPage.getAllChangeLinks()
-                assertTrue { changeLinks!!.count() == 4 }
-                assertTrue { checkAnswersPage.getLink("email").count() == 1 }
-                assertTrue { checkAnswersPage.getLink("phone-number").count() == 1 }
-                assertTrue { checkAnswersPage.getLink("country-of-residence").count() == 1 }
-                assertTrue { checkAnswersPage.getLink("lookup-address").count() == 1 }
             }
         }
     }

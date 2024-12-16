@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FormSummaryDataModel
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.services.DateFormatterService
@@ -96,7 +97,7 @@ class LandlordRegistrationCheckAnswersPage(
     private fun getUKResidentRow(livesInUK: Boolean): FormSummaryDataModel =
         FormSummaryDataModel(
             "registerAsALandlord.checkAnswers.rowHeading.ukResident",
-            if (livesInUK) "#{text.yes}" else "#{text.no}",
+            if (livesInUK) "commonText.yes" else "commonText.no",
             "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}/${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}",
         )
 
@@ -164,13 +165,12 @@ class LandlordRegistrationCheckAnswersPage(
     }
 
     private fun getManualAddressValue(key: Any?): String {
-        val addressLineOne = objectToStringKeyedMap(key)?.get("addressLineOne")
-        val addressLineTwo = objectToStringKeyedMap(key)?.get("addressLineTwo")
-        val townOrCity = objectToStringKeyedMap(key)?.get("townOrCity")
-        val county = objectToStringKeyedMap(key)?.get("county")
-        val postcode = objectToStringKeyedMap(key)?.get("postcode")
-        return listOfNotNull(addressLineOne, addressLineTwo, townOrCity, county, postcode)
-            .joinToString(", ")
+        val addressLineOne = objectToStringKeyedMap(key)?.get("addressLineOne").toString()
+        val addressLineTwo = objectToStringKeyedMap(key)?.get("addressLineTwo").toString()
+        val townOrCity = objectToStringKeyedMap(key)?.get("townOrCity").toString()
+        val county = objectToStringKeyedMap(key)?.get("county").toString()
+        val postcode = objectToStringKeyedMap(key)?.get("postcode").toString()
+        return AddressDataModel.manualAddressDataToSingleLineAddress(addressLineOne, townOrCity, postcode, addressLineTwo, county)
     }
 
     private fun getLivesInUk(journeyData: JourneyData): Boolean =
