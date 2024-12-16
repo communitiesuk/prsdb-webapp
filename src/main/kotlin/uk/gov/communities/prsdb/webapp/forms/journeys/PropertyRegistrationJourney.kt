@@ -35,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
 @Component
 class PropertyRegistrationJourney(
@@ -42,6 +43,7 @@ class PropertyRegistrationJourney(
     journeyDataService: JourneyDataService,
     addressLookupService: AddressLookupService,
     addressDataService: AddressDataService,
+    propertyRegistrationService: PropertyRegistrationService,
 ) : Journey<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
         initialStepId = RegisterPropertyStepId.LookupAddress,
@@ -50,7 +52,7 @@ class PropertyRegistrationJourney(
         steps =
             setOf(
                 lookupAddressStep(),
-                selectAddressStep(journeyDataService, addressLookupService, addressDataService),
+                selectAddressStep(journeyDataService, addressLookupService, addressDataService, propertyRegistrationService),
                 alreadyRegisteredStep(journeyDataService),
                 manualAddressStep(),
                 localAuthorityStep(),
@@ -147,6 +149,7 @@ class PropertyRegistrationJourney(
             journeyDataService: JourneyDataService,
             addressLookupService: AddressLookupService,
             addressDataService: AddressDataService,
+            propertyRegistrationService: PropertyRegistrationService,
         ) = Step(
             id = RegisterPropertyStepId.SelectAddress,
             page =
@@ -172,6 +175,7 @@ class PropertyRegistrationJourney(
                     journeyData,
                     journeyDataService,
                     addressDataService,
+                    propertyRegistrationService,
                 )
             },
         )
@@ -503,6 +507,7 @@ class PropertyRegistrationJourney(
             journeyData: JourneyData,
             journeyDataService: JourneyDataService,
             addressDataService: AddressDataService,
+            propertyRegistrationService: PropertyRegistrationService,
         ): Pair<RegisterPropertyStepId, Int?> {
             val singleLineAddress =
                 journeyDataService
@@ -511,7 +516,7 @@ class PropertyRegistrationJourney(
                 return Pair(RegisterPropertyStepId.ManualAddress, null)
             } else {
                 val addressData = addressDataService.getAddressData(singleLineAddress)
-                if (addressData?.uprn != null && addressAlreadyRegistered(addressData.uprn)) {
+                if (addressData?.uprn != null && propertyRegistrationService.getIsAddressRegistered(addressData.uprn)) {
                     return Pair(RegisterPropertyStepId.AlreadyRegistered, null)
                 }
                 return Pair(RegisterPropertyStepId.PropertyType, null)
@@ -529,8 +534,5 @@ class PropertyRegistrationJourney(
                 LicensingType.NO_LICENSING -> Pair(RegisterPropertyStepId.PlaceholderPage, null)
             }
         }
-
-        // TODO PRSD-637: Check the database to see if this property is registered.
-        private fun addressAlreadyRegistered(uprn: Long): Boolean = uprn == 1123456.toLong()
     }
 }
