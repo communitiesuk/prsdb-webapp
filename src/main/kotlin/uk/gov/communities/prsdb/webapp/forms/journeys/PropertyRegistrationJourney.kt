@@ -48,7 +48,7 @@ class PropertyRegistrationJourney(
         validator = validator,
         journeyDataService = journeyDataService,
         steps =
-            listOf(
+            setOf(
                 lookupAddressStep(),
                 selectAddressStep(journeyDataService, addressLookupService, addressDataService),
                 alreadyRegisteredStep(journeyDataService),

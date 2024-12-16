@@ -77,7 +77,7 @@ class RegisterLAUserControllerTests(
     @WithMockUser
     fun `acceptInvitation prepopulates the email address in journeyData`() {
         whenever(laUserRegistrationJourney.steps).thenReturn(
-            listOf(
+            setOf(
                 Step(
                     id = RegisterLaUserStepId.Email,
                     page =

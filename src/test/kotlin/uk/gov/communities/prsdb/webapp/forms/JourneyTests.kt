@@ -55,7 +55,7 @@ class JourneyTests {
 
     class TestJourney(
         journeyType: JourneyType,
-        steps: List<Step<TestStepId>>,
+        steps: Set<Step<TestStepId>>,
         initialStepId: TestStepId,
         validator: Validator,
         journeyDataService: JourneyDataService,
@@ -93,7 +93,7 @@ class JourneyTests {
                     journeyDataService = mockJourneyDataService,
                     validator = validator,
                     steps =
-                        listOf(
+                        setOf(
                             Step(
                                 TestStepId.StepOne,
                                 page =
@@ -123,7 +123,7 @@ class JourneyTests {
                     journeyDataService = mockJourneyDataService,
                     validator = validator,
                     steps =
-                        listOf(
+                        setOf(
                             Step(
                                 TestStepId.StepOne,
                                 page =
@@ -155,7 +155,7 @@ class JourneyTests {
                     journeyDataService = mockJourneyDataService,
                     validator = validator,
                     steps =
-                        listOf(
+                        setOf(
                             Step(
                                 TestStepId.StepOne,
                                 page =
@@ -191,7 +191,7 @@ class JourneyTests {
                     journeyDataService = mockJourneyDataService,
                     validator = validator,
                     steps =
-                        listOf(
+                        setOf(
                             Step(
                                 TestStepId.StepOne,
                                 page =
@@ -254,7 +254,7 @@ class JourneyTests {
                     journeyDataService = mockJourneyDataService,
                     validator = validator,
                     steps =
-                        listOf(
+                        setOf(
                             Step(
                                 TestStepId.StepOne,
                                 page =
@@ -307,7 +307,7 @@ class JourneyTests {
                     journeyDataService = mockJourneyDataService,
                     validator = validator,
                     steps =
-                        listOf(
+                        setOf(
                             Step(
                                 TestStepId.StepOne,
                                 page =
@@ -372,7 +372,7 @@ class JourneyTests {
                     journeyDataService = mockJourneyDataService,
                     validator = validator,
                     steps =
-                        listOf(
+                        setOf(
                             Step(
                                 TestStepId.StepOne,
                                 page =
@@ -412,7 +412,7 @@ class JourneyTests {
                     journeyDataService = mockJourneyDataService,
                     validator = validator,
                     steps =
-                        listOf(
+                        setOf(
                             Step(
                                 TestStepId.StepOne,
                                 page =
@@ -480,7 +480,7 @@ class JourneyTests {
                     journeyDataService = mockJourneyDataService,
                     validator = validator,
                     steps =
-                        listOf(
+                        setOf(
                             Step(
                                 TestStepId.StepOne,
                                 page =
@@ -546,7 +546,7 @@ class JourneyTests {
                     journeyDataService = mockJourneyDataService,
                     validator = validator,
                     steps =
-                        listOf(
+                        setOf(
                             Step(
                                 TestStepId.StepOne,
                                 page =
@@ -618,7 +618,7 @@ class JourneyTests {
                     journeyDataService = mockJourneyDataService,
                     validator = validator,
                     steps =
-                        listOf(
+                        setOf(
                             Step(
                                 TestStepId.StepOne,
                                 page =
@@ -679,7 +679,7 @@ class JourneyTests {
                     journeyDataService = mockJourneyDataService,
                     validator = validator,
                     steps =
-                        listOf(
+                        setOf(
                             Step(
                                 TestStepId.StepOne,
                                 page =

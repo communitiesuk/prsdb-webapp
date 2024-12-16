@@ -46,7 +46,7 @@ class LandlordRegistrationJourney(
         validator = validator,
         journeyDataService = journeyDataService,
         steps =
-            listOf(
+            setOf(
                 verifyIdentityStep(),
                 nameStep(),
                 dateOfBirthStep(),

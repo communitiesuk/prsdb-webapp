@@ -25,7 +25,7 @@ class LaUserRegistrationJourney(
         validator = validator,
         journeyDataService = journeyDataService,
         steps =
-            listOf(
+            setOf(
                 landingPageStep(),
                 registerUserStep(),
                 emailStep(),

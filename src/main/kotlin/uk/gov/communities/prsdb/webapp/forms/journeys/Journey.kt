@@ -15,7 +15,7 @@ import java.util.Optional
 
 abstract class Journey<T : StepId>(
     private val journeyType: JourneyType,
-    val steps: List<Step<T>>,
+    val steps: Set<Step<T>>,
     val initialStepId: T,
     val validator: Validator,
     val journeyDataService: JourneyDataService,
