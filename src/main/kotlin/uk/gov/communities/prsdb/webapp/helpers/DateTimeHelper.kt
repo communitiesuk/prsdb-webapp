@@ -7,7 +7,7 @@ import kotlinx.datetime.toLocalDateTime
 import java.time.Clock
 
 class DateTimeHelper(
-    private val clock: Clock = Clock.systemUTC(),
+    private val clock: Clock = Clock.systemDefaultZone(),
 ) {
     fun getCurrentDateInUK(): LocalDate {
         val dateTimeInUK = clock.instant().toKotlinInstant().toLocalDateTime(TimeZone.of("Europe/London"))
