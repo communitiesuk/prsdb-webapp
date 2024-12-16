@@ -15,43 +15,44 @@
             <span th:text="${propertyName}"></span>
         </h1>
     </legend>
-    <div class="govuk-tabs" data-module="govuk-tabs">
-        <ul class="govuk-tabs__list">
-            <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
-                <a class="govuk-tabs__tab" href="#property-details" th:text="#{forms.checkPropertyAnswers.propertyDetails.heading}">
-                    forms.checkPropertyAnswers.propertyDetails.heading
-                </a>
-            </li>
-            <li class="govuk-tabs__list-item">
-                <a class="govuk-tabs__tab" href="#additional-landlords" th:text="#{forms.checkPropertyAnswers.additionalLandlords.heading}">
-                    forms.checkPropertyAnswers.additionalLandlords.heading
-                </a>
-            </li>
-            <li class="govuk-tabs__list-item">
-                <a class="govuk-tabs__tab" href="#interested-parties" th:text="#{forms.checkPropertyAnswers.interestedParties.heading}">
-                    forms.checkPropertyAnswers.interestedParties.heading
-                </a>
-            </li>
-        </ul>
-        <div class="govuk-tabs__panel" id="property-details">
-            <div id="my-hint" class="govuk-hint" th:text="#{forms.checkPropertyAnswers.propertyDetails.hint}">
-                forms.checkPropertyAnswers.propertyDetails.hint
+    <div th:replace="~{fragments/tabs/tabs :: tabs(~{:: #tabs-content})}" >
+        <th:block id="tabs-content">
+            <ul th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{:: #tab-headings})}">
+                <th:block id="tab-headings">
+                    <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('property-details', #{forms.checkPropertyAnswers.propertyDetails.heading})}">
+                    </li>
+                    <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('additional-landlords', #{forms.checkPropertyAnswers.additionalLandlords.heading})}">
+                    </li>
+                    <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('interested-parties', #{forms.checkPropertyAnswers.interestedParties.heading})}">
+                    </li>
+                </th:block>
+            </ul>
+            <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('property-details', ~{:: #property-details-panel-content})}">
+                <th:block id="property-details-panel-content">
+                    <div class="govuk-hint" th:text="#{forms.checkPropertyAnswers.propertyDetails.hint}">
+                        forms.checkPropertyAnswers.propertyDetails.hint
+                    </div>
+                    <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
+                    <details id="details-content" th:replace="~{fragments/details :: details(#{forms.checkPropertyAnswers.propertyDetails.detail.summary},~{::#details-content/content()})}">
+                        <div class="govuk-details__text" th:text="#{forms.checkPropertyAnswers.propertyDetails.detail.text}">
+                            forms.checkPropertyAnswers.propertyDetails.detail.text
+                        </div>
+                    </details>
+                </th:block>
             </div>
-            <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
-            <details id="details-content" th:replace="~{fragments/details :: details(#{forms.checkPropertyAnswers.propertyDetails.detail.summary},~{::#details-content/content()})}">
-                <div class="govuk-details__text" th:text="#{forms.checkPropertyAnswers.propertyDetails.detail.text}">
-                    forms.checkPropertyAnswers.propertyDetails.detail.text
-                </div>
-            </details>
-        </div>
-        <div class="govuk-tabs__panel govuk-tabs__panel--hidden" id="additional-landlords">
-            <h2 class="govuk-heading-m">TODO: PRSD-584</h2>
-            <p class="govuk-body">This tab will show details of additional landlords, and will be implemented as part of PRSD-584</p>
-        </div>
-        <div class="govuk-tabs__panel govuk-tabs__panel--hidden" id="interested-parties">
-            <h2 class="govuk-heading-m">TODO: PRSD-585</h2>
-            <p class="govuk-body">This tab will show details of interested parties, and will be implemented as part of PRSD-585</p>
-        </div>
+            <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('additional-landlords', ~{:: #additional-landlords-panel-content})}">
+                <th:block id="additional-landlords-panel-content">
+                    <h2 class="govuk-heading-m">TODO: PRSD-584</h2>
+                    <p class="govuk-body">This tab will show details of additional landlords, and will be implemented as part of PRSD-584</p>
+                </th:block>
+            </div>
+            <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('interested-parties', ~{:: #interested-parties-panel-content})}">
+                <th:block id="interested-parties-panel-content">
+                    <h2 class="govuk-heading-m">TODO: PRSD-585</h2>
+                    <p class="govuk-body">This tab will show details of interested parties, and will be implemented as part of PRSD-585</p>
+                </th:block>
+            </div>
+        </th:block>
     </div>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </th:block>
