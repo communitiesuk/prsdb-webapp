@@ -53,26 +53,6 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `getAddressIsRegistered returns false if the active property has no ownerships`() {
-        val uprn = 123456.toLong()
-        val address =
-            Address(
-                AddressDataModel(
-                    singleLineAddress = "1 Street Name, City, AB1 2CD",
-                    uprn = uprn,
-                ),
-            )
-        val propertyId = 789.toLong()
-
-        val property = Property(id = propertyId, address = address, isActive = true)
-        whenever(propertyRepository.findByAddress_Uprn(uprn)).thenReturn(property)
-
-        whenever(propertyOwnershipRepository.findByProperty_Id(propertyId)).thenReturn(listOf())
-
-        assertFalse(propertyRegistrationService.getIsAddressRegistered(uprn))
-    }
-
-    @Test
     fun `getAddressIsRegistered returns false if the active property has no active ownerships`() {
         val uprn = 123456.toLong()
         val address =
@@ -87,8 +67,7 @@ class PropertyRegistrationServiceTests {
         val property = Property(id = propertyId, address = address, isActive = true)
         whenever(propertyRepository.findByAddress_Uprn(uprn)).thenReturn(property)
 
-        val inactiveOwnership = PropertyOwnership(id = 123.toLong(), isActive = false)
-        whenever(propertyOwnershipRepository.findByProperty_Id(propertyId)).thenReturn(listOf(inactiveOwnership))
+        whenever(propertyOwnershipRepository.findByIsActiveTrueAndProperty_Id(propertyId)).thenReturn(null)
 
         assertFalse(propertyRegistrationService.getIsAddressRegistered(uprn))
     }
@@ -109,32 +88,7 @@ class PropertyRegistrationServiceTests {
         whenever(propertyRepository.findByAddress_Uprn(uprn)).thenReturn(property)
 
         val activeOwnership = PropertyOwnership(id = 456.toLong(), isActive = true)
-        whenever(propertyOwnershipRepository.findByProperty_Id(propertyId)).thenReturn(listOf(activeOwnership))
-
-        assertTrue(propertyRegistrationService.getIsAddressRegistered(uprn))
-    }
-
-    @Test
-    fun `getAddressIsRegistered returns false if the active property has multiple active ownerships`() {
-        val uprn = 123456.toLong()
-        val address =
-            Address(
-                AddressDataModel(
-                    singleLineAddress = "1 Street Name, City, AB1 2CD",
-                    uprn = uprn,
-                ),
-            )
-        val propertyId = 789.toLong()
-
-        val property = Property(id = propertyId, address = address, isActive = true)
-        whenever(propertyRepository.findByAddress_Uprn(uprn)).thenReturn(property)
-
-        val inactiveOwnership = PropertyOwnership(id = 123.toLong(), isActive = false)
-        val activeOwnership1 = PropertyOwnership(id = 456.toLong(), isActive = true)
-        val activeOwnership2 = PropertyOwnership(id = 789.toLong(), isActive = true)
-        whenever(propertyOwnershipRepository.findByProperty_Id(propertyId)).thenReturn(
-            listOf(inactiveOwnership, activeOwnership1, activeOwnership2),
-        )
+        whenever(propertyOwnershipRepository.findByIsActiveTrueAndProperty_Id(propertyId)).thenReturn(activeOwnership)
 
         assertTrue(propertyRegistrationService.getIsAddressRegistered(uprn))
     }
