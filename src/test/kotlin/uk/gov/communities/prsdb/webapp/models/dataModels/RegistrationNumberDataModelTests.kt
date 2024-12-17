@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -8,6 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.MAX_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.MIN_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import kotlin.test.assertNull
 
 class RegistrationNumberDataModelTests {
