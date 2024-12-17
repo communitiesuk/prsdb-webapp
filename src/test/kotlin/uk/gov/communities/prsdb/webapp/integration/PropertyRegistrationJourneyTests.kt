@@ -11,6 +11,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -19,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HouseholdsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LandlordTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
@@ -107,6 +109,13 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         // fill in and submit
         peoplePage.peopleInput.fill("2")
         peoplePage.form.submit()
+        val landlordTypePage = assertPageIs(page, LandlordTypeFormPagePropertyRegistration::class)
+
+        // Landlord type - render page
+        assertThat(landlordTypePage.form.getFieldsetHeading()).containsText("How are you operating for this property?")
+        // fill in and submit
+        landlordTypePage.form.getRadios().selectValue(LandlordType.SOLE)
+        landlordTypePage.form.submit()
         val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
 
         // Licensing type - render page
@@ -261,7 +270,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val occupancyPage = navigator.goToPropertyRegistrationOccupancyPage()
             occupancyPage.form.getRadios().selectValue("false")
             occupancyPage.form.submit()
-            assertEquals("/register-property/placeholder", URI(page.url()).path)
+            assertPageIs(page, LandlordTypeFormPagePropertyRegistration::class)
         }
 
         @Test
@@ -343,6 +352,16 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             peoplePage.form.submit()
             assertThat(peoplePage.form.getErrorMessage())
                 .containsText("Number of people in your property must be a positive, whole number, like 3")
+        }
+    }
+
+    @Nested
+    inner class LandlordTypeStep {
+        @Test
+        fun `Submitting with a blank landlordType field returns an error`(page: Page) {
+            val landlordTypePage = navigator.goToPropertyRegistrationLandlordTypePage()
+            landlordTypePage.form.submit()
+            assertThat(landlordTypePage.form.getErrorMessage()).containsText("Select how you are operating this property")
         }
     }
 
