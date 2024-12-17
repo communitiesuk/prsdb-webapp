@@ -36,10 +36,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SummaryPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.net.URI
-import java.time.LocalDate
 import kotlin.test.assertNotNull
 
 @Sql("/data-local.sql")
@@ -75,7 +73,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         phoneNumPage.form.submit()
         assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
 
-        val countryOfResidencePage = assertPageIs(page,CountryOfResidenceFormPageLandlordRegistration::class)
+        val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
         countryOfResidencePage.radios.selectValue("true")
         countryOfResidencePage.form.submit()
 
@@ -121,7 +119,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         phoneNumPage.form.submit()
         assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
 
-        val countryOfResidencePage = navigator.goToLandlordRegistrationCountryOfResidencePage()
+        val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
         countryOfResidencePage.radios.selectValue("true")
         countryOfResidencePage.form.submit()
 
@@ -182,7 +180,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         phoneNumPage.form.submit()
         assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
 
-        val countryOfResidencePage = navigator.goToLandlordRegistrationCountryOfResidencePage()
+        val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
         countryOfResidencePage.radios.selectValue("false")
         countryOfResidencePage.select.autocompleteInput.fill("Fr")
         countryOfResidencePage.select.selectValue("France")
@@ -241,7 +239,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         phoneNumPage.form.submit()
         assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
 
-        val countryOfResidencePage = navigator.goToLandlordRegistrationCountryOfResidencePage()
+        val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
         countryOfResidencePage.radios.selectValue("false")
         countryOfResidencePage.select.autocompleteInput.fill("Fr")
         countryOfResidencePage.select.selectValue("France")
