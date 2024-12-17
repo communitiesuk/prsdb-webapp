@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
@@ -30,10 +31,14 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalAuthorityFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import java.net.URI
 
 @Sql("/data-local.sql")
 class PropertyRegistrationJourneyTests : IntegrationTest() {
+    @MockBean
+    lateinit var propertyRegistrationService: PropertyRegistrationService
+
     @BeforeEach
     fun setup() {
         whenever(
@@ -165,14 +170,8 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         }
 
         @Test
-        fun `Selecting and already-registered address navigates to the AlreadyRegistered step`(page: Page) {
-            // TODO: PRSD-637 - update this to another mocked service call when we query the database to check if the address is already registered
-            whenever(
-                osPlacesClient.search("1", "EG1 2AB"),
-            ).thenReturn(
-                "{'results':[{'DPA':{'ADDRESS':'1, Example Road, EG1 2AB'," +
-                    "'LOCAL_CUSTODIAN_CODE':100,'UPRN':'1123456','BUILDING_NUMBER':1,'POSTCODE':'EG1 2AB'}}]}",
-            )
+        fun `Selecting an already-registered address navigates to the AlreadyRegistered step`(page: Page) {
+            whenever(propertyRegistrationService.getIsAddressRegistered(any())).thenReturn(true)
 
             val selectAddressPage = navigator.goToPropertyRegistrationSelectAddressPage()
             selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")

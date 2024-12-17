@@ -11,7 +11,7 @@
 <form id="form-content" th:remove="tag">
     <fieldset id="fieldset-content"
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'licenceNumber', #{${fieldSetHeading}}, null)}">
-        <input th:replace="~{fragments/forms/basicTextInput :: textInput(#{${label}}, 'licenceNumber', null)}">
+        <input th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{${label}}, 'licenceNumber', null, 20)}">
     </fieldset>
     <details id="details-content" th:replace="~{fragments/details :: details(#{${detailSummary}},~{::#details-content/content()})}">
         <div class="govuk-details__text">
