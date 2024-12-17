@@ -57,4 +57,13 @@ class RegisterPropertyController(
             subpage,
             principal,
         )
+
+    @GetMapping("/confirmation")
+    fun getConfirmation(model: Model): String {
+        // TODO: PRSD-597: Retrieve single line address, maybe from the session?
+        model.addAttribute("singleLineAddress", "Flat 1, 11 Elm Drive, London, NW8 2DK")
+        model.addAttribute("prn", "P1234")
+
+        return "registerPropertyConfirmation"
+    }
 }
