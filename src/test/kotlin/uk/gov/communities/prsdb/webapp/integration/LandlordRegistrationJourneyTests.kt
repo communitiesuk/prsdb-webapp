@@ -71,7 +71,6 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         val phoneNumPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
         phoneNumPage.phoneNumberInput.fill("07123456789")
         phoneNumPage.form.submit()
-        assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
 
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
         countryOfResidencePage.radios.selectValue("true")
@@ -117,7 +116,6 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         val number = phoneNumberUtil.getExampleNumber("GB")
         phoneNumPage.phoneNumberInput.fill("${number.countryCode}${number.nationalNumber}")
         phoneNumPage.form.submit()
-        assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
 
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
         countryOfResidencePage.radios.selectValue("true")
@@ -178,7 +176,6 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         val number = phoneNumberUtil.getExampleNumber("GB")
         phoneNumPage.phoneNumberInput.fill("${number.countryCode}${number.nationalNumber}")
         phoneNumPage.form.submit()
-        assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
 
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
         countryOfResidencePage.radios.selectValue("false")
@@ -237,7 +234,6 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         val number = phoneNumberUtil.getExampleNumber("GB")
         phoneNumPage.phoneNumberInput.fill("${number.countryCode}${number.nationalNumber}")
         phoneNumPage.form.submit()
-        assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
 
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
         countryOfResidencePage.radios.selectValue("false")
