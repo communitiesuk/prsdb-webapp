@@ -13,7 +13,7 @@ abstract class BaseComponent(
             assertEquals(1, locator.count(), "Expected 1 instance of $locator, found ${locator.count()}")
         }
 
-        private fun getComponent(
+        fun getComponent(
             page: Page,
             locatorStr: String,
             locatorOptions: LocatorOptions? = null,

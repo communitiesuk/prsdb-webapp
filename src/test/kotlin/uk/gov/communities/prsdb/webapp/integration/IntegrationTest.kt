@@ -92,7 +92,7 @@ abstract class IntegrationTest {
 
     @BeforeEach
     fun setUp(page: Page) {
-        navigator = Navigator(page, port)
+        navigator = Navigator(page, port, identityService)
     }
 
     @AfterEach

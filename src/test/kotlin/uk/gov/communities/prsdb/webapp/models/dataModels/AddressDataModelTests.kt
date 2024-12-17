@@ -8,8 +8,8 @@ import kotlin.test.assertEquals
 class AddressDataModelTests {
     @ParameterizedTest
     @CsvSource(
-        "Flat 10,Townville,EG1 2AB,1 Example Road,Countyshire,'Flat 10, 1 Example Road, Townville, EG1 2AB, Countyshire'",
-        "1 Example Road,Townville,EG1 2AB,,Countyshire,'1 Example Road, Townville, EG1 2AB, Countyshire'",
+        "Flat 10,Townville,EG1 2AB,1 Example Road,Countyshire,'Flat 10, 1 Example Road, Townville, Countyshire, EG1 2AB'",
+        "1 Example Road,Townville,EG1 2AB,,Countyshire,'1 Example Road, Townville, Countyshire, EG1 2AB'",
         "Flat 10,Townville,EG1 2AB,1 Example Road,,'Flat 10, 1 Example Road, Townville, EG1 2AB'",
         "1 Example Road,Townville,EG1 2AB,,,'1 Example Road, Townville, EG1 2AB'",
     )
@@ -37,7 +37,7 @@ class AddressDataModelTests {
     fun `parseAddressDataModel returns a corresponding AddressDataModel`() {
         val expectedAddressDataModel =
             AddressDataModel(
-                singleLineAddress = "Flat 10, 1 Example Road, Townville, EG1 2AB, Countyshire",
+                singleLineAddress = "Flat 10, 1 Example Road, Townville, Countyshire, EG1 2AB",
                 townName = "Townville",
                 postcode = "EG1 2AB",
             )

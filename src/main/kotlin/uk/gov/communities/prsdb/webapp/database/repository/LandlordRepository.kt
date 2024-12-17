@@ -5,10 +5,12 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 
+// The underscore tells JPA to access fields relating to the referenced table
+@Suppress("ktlint:standard:function-naming")
 interface LandlordRepository : JpaRepository<Landlord?, Long?> {
-    // The underscore tells JPA to access fields relating to the referenced table
-    @Suppress("ktlint:standard:function-naming")
     fun findByRegistrationNumber_Number(registrationNumber: Long): Landlord?
+
+    fun findByBaseUser_Id(subjectId: String): Landlord?
 
     @Query(
         "SELECT l.* " +

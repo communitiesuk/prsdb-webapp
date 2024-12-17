@@ -37,7 +37,7 @@ data class AddressDataModel(
             postcode: String,
             addressLineTwo: String? = null,
             county: String? = null,
-        ) = listOfNotNull(addressLineOne, addressLineTwo, townOrCity, postcode, county)
+        ) = listOfNotNull(addressLineOne, addressLineTwo, townOrCity, county, postcode)
             .joinToString(", ")
     }
 }

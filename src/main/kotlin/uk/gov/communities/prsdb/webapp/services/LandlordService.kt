@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import java.util.Date
+import java.time.LocalDate
 
 @Service
 class LandlordService(
@@ -24,16 +24,18 @@ class LandlordService(
         return landlordRepository.findByRegistrationNumber_Number(regNum.number)
     }
 
+    fun retrieveLandlordByBaseUserId(baseUserId: String): Landlord? = landlordRepository.findByBaseUser_Id(baseUserId)
+
     @Transactional
-    fun createLandlordAndReturnRegistrationNumber(
+    fun createLandlord(
         baseUserId: String,
         name: String,
         email: String,
         phoneNumber: String,
         addressDataModel: AddressDataModel,
         internationalAddress: String? = null,
-        dateOfBirth: Date? = null,
-    ): String {
+        dateOfBirth: LocalDate? = null,
+    ) {
         val baseUser = oneLoginUserRepository.getReferenceById(baseUserId)
         val address = addressService.findOrCreateAddress(addressDataModel)
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD)
@@ -50,8 +52,6 @@ class LandlordService(
                 dateOfBirth,
             ),
         )
-
-        return registrationNumber.toString()
     }
 
     fun searchForLandlords(

@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.REG_NUM_CHARSET
 import uk.gov.communities.prsdb.webapp.constants.REG_NUM_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.REG_NUM_SEG_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 
 data class RegistrationNumberDataModel(
     val type: RegistrationNumberType,
@@ -32,6 +33,8 @@ data class RegistrationNumberDataModel(
 
             return RegistrationNumberDataModel(regNumType, regNumNumber)
         }
+
+        fun fromRegistrationNumber(regNum: RegistrationNumber) = RegistrationNumberDataModel(regNum.type, regNum.number!!)
 
         private fun getBaseRegNumString(regNumString: String): String = regNumString.filter { it.isLetterOrDigit() }.uppercase()
 

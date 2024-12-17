@@ -1,12 +1,13 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_ADDRESS_MAX_LENGTH
-import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.PLACE_NAMES
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.pages.ConfirmIdentityPage
 import uk.gov.communities.prsdb.webapp.forms.pages.LandlordRegistrationSummaryPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -14,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.VerifyIdentityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.helpers.LandlordJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.CountryOfResidenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.DateOfBirthFormModel
@@ -25,14 +27,13 @@ import uk.gov.communities.prsdb.webapp.models.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
-import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import java.time.LocalDate
+import uk.gov.communities.prsdb.webapp.services.LandlordService
 
 @Component
 class LandlordRegistrationJourney(
@@ -40,6 +41,7 @@ class LandlordRegistrationJourney(
     journeyDataService: JourneyDataService,
     addressLookupService: AddressLookupService,
     addressDataService: AddressDataService,
+    landlordService: LandlordService,
 ) : Journey<LandlordRegistrationStepId>(
         journeyType = JourneyType.LANDLORD_REGISTRATION,
         initialStepId = LandlordRegistrationStepId.VerifyIdentity,
@@ -47,13 +49,13 @@ class LandlordRegistrationJourney(
         journeyDataService = journeyDataService,
         steps =
             setOf(
-                verifyIdentityStep(),
+                verifyIdentityStep(journeyDataService),
                 nameStep(),
                 dateOfBirthStep(),
                 confirmIdentityStep(journeyDataService),
                 emailStep(),
                 phoneNumberStep(),
-                countryOfResidenceStep(),
+                countryOfResidenceStep(journeyDataService),
                 lookupAddressStep(),
                 selectAddressStep(journeyDataService, addressLookupService, addressDataService),
                 manualAddressStep(),
@@ -62,16 +64,16 @@ class LandlordRegistrationJourney(
                 selectContactAddressStep(journeyDataService, addressLookupService, addressDataService),
                 manualContactAddressStep(),
                 checkAnswersStep(),
-                declarationStep(),
+                declarationStep(journeyDataService, landlordService, addressDataService),
             ),
     ) {
     companion object {
-        private fun verifyIdentityStep() =
+        private fun verifyIdentityStep(journeyDataService: JourneyDataService) =
             Step(
                 id = LandlordRegistrationStepId.VerifyIdentity,
                 page = VerifyIdentityPage(),
                 nextAction = { journeyData, _ ->
-                    if (doesJourneyDataContainVerifiedIdentity(journeyData)) {
+                    if (LandlordJourneyDataHelper.isIdentityVerified(journeyDataService, journeyData)) {
                         Pair(LandlordRegistrationStepId.ConfirmIdentity, null)
                     } else {
                         Pair(LandlordRegistrationStepId.Name, null)
@@ -184,7 +186,7 @@ class LandlordRegistrationJourney(
                 saveAfterSubmit = false,
             )
 
-        private fun countryOfResidenceStep() =
+        private fun countryOfResidenceStep(journeyDataService: JourneyDataService) =
             Step(
                 id = LandlordRegistrationStepId.CountryOfResidence,
                 page =
@@ -212,7 +214,7 @@ class LandlordRegistrationJourney(
                                     ),
                             ),
                     ),
-                nextAction = { journeyData, _ -> countryOfResidenceNextAction(journeyData) },
+                nextAction = { journeyData, _ -> countryOfResidenceNextAction(journeyData, journeyDataService) },
                 saveAfterSubmit = false,
             )
 
@@ -292,7 +294,6 @@ class LandlordRegistrationJourney(
                                 "submitButtonText" to "forms.buttons.continue",
                             ),
                     ),
-                // TODO: Set nextAction to next journey step
                 nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CheckAnswers, null) },
                 saveAfterSubmit = false,
             )
@@ -314,7 +315,6 @@ class LandlordRegistrationJourney(
                                 "submitButtonText" to "forms.buttons.continue",
                             ),
                     ),
-                // TODO: Set nextAction to next journey step
                 nextAction = { _, _ -> Pair(LandlordRegistrationStepId.LookupContactAddress, null) },
                 saveAfterSubmit = false,
             )
@@ -393,7 +393,6 @@ class LandlordRegistrationJourney(
                                 "submitButtonText" to "forms.buttons.continue",
                             ),
                     ),
-                // TODO: Set nextAction to next journey step
                 nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CheckAnswers, null) },
                 saveAfterSubmit = false,
             )
@@ -417,58 +416,57 @@ class LandlordRegistrationJourney(
                 saveAfterSubmit = false,
             )
 
-        private fun declarationStep() =
-            Step(
-                id = LandlordRegistrationStepId.Declaration,
-                page =
-                    Page(
-                        formModel = DeclarationFormModel::class,
-                        templateName = "forms/declarationForm",
-                        content =
-                            mapOf(
-                                "title" to "registerAsALandlord.title",
-                                "options" to
-                                    listOf(
-                                        CheckboxViewModel(
-                                            value = "true",
-                                            labelMsgKey = "forms.declaration.checkbox.label",
-                                        ),
+        private fun declarationStep(
+            journeyDataService: JourneyDataService,
+            landlordService: LandlordService,
+            addressDataService: AddressDataService,
+        ) = Step(
+            id = LandlordRegistrationStepId.Declaration,
+            page =
+                Page(
+                    formModel = DeclarationFormModel::class,
+                    templateName = "forms/declarationForm",
+                    content =
+                        mapOf(
+                            "title" to "registerAsALandlord.title",
+                            "options" to
+                                listOf(
+                                    CheckboxViewModel(
+                                        value = "true",
+                                        labelMsgKey = "forms.declaration.checkbox.label",
                                     ),
-                                "submitButtonText" to "forms.buttons.confirmAndCompleteRegistration",
-                            ),
-                    ),
-                nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Confirmation, null) },
-                saveAfterSubmit = false,
-            )
-
-        private fun countryOfResidenceNextAction(journeyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
-            when (
-                val livesInUK =
-                    objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.CountryOfResidence.urlPathSegment])
-                        ?.get("livesInUK")
-                        .toString()
-            ) {
-                "true" -> Pair(LandlordRegistrationStepId.LookupAddress, null)
-                "false" -> Pair(LandlordRegistrationStepId.InternationalAddress, null)
-                else -> throw IllegalArgumentException(
-                    "Invalid value for journeyData[\"${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}\"][\"livesInUK\"]:" +
-                        livesInUK,
+                                ),
+                            "submitButtonText" to "forms.buttons.confirmAndCompleteRegistration",
+                        ),
+                ),
+            handleSubmitAndRedirect = { journeyData, _ ->
+                declarationHandleSubmitAndRedirect(
+                    journeyData,
+                    journeyDataService,
+                    landlordService,
+                    addressDataService,
                 )
+            },
+            saveAfterSubmit = false,
+        )
+
+        private fun countryOfResidenceNextAction(
+            journeyData: JourneyData,
+            journeyDataService: JourneyDataService,
+        ): Pair<LandlordRegistrationStepId, Int?> =
+            if (LandlordJourneyDataHelper.getLivesInUK(journeyDataService, journeyData)!!) {
+                Pair(LandlordRegistrationStepId.LookupAddress, null)
+            } else {
+                Pair(LandlordRegistrationStepId.InternationalAddress, null)
             }
 
         private fun selectAddressNextAction(
             journeyData: JourneyData,
             journeyDataService: JourneyDataService,
         ): Pair<LandlordRegistrationStepId, Int?> =
-            if (journeyDataService.getFieldStringValue(
-                    journeyData,
-                    LandlordRegistrationStepId.SelectAddress.urlPathSegment,
-                    "address",
-                ) == MANUAL_ADDRESS_CHOSEN
-            ) {
+            if (LandlordJourneyDataHelper.isManualAddressChosen(journeyDataService, journeyData)) {
                 Pair(LandlordRegistrationStepId.ManualAddress, null)
             } else {
-                // TODO: Set nextAction to next journey step
                 Pair(LandlordRegistrationStepId.CheckAnswers, null)
             }
 
@@ -476,23 +474,45 @@ class LandlordRegistrationJourney(
             journeyData: JourneyData,
             journeyDataService: JourneyDataService,
         ): Pair<LandlordRegistrationStepId, Int?> =
-            if (journeyDataService.getFieldStringValue(
+            if (LandlordJourneyDataHelper.isManualAddressChosen(
+                    journeyDataService,
                     journeyData,
-                    LandlordRegistrationStepId.SelectContactAddress.urlPathSegment,
-                    "address",
-                ) == MANUAL_ADDRESS_CHOSEN
+                    isContactAddress = true,
+                )
             ) {
                 Pair(LandlordRegistrationStepId.ManualContactAddress, null)
             } else {
-                // TODO: Set nextAction to next journey step
                 Pair(LandlordRegistrationStepId.CheckAnswers, null)
             }
 
-        private fun doesJourneyDataContainVerifiedIdentity(journeyData: JourneyData): Boolean {
-            val pageData =
-                objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment]) ?: mapOf()
-            return pageData[VerifiedIdentityModel.NAME_KEY] is String &&
-                pageData[VerifiedIdentityModel.BIRTH_DATE_KEY] is LocalDate
+        private fun declarationHandleSubmitAndRedirect(
+            journeyData: JourneyData,
+            journeyDataService: JourneyDataService,
+            landlordService: LandlordService,
+            addressDataService: AddressDataService,
+        ): String {
+            landlordService.createLandlord(
+                baseUserId = SecurityContextHolder.getContext().authentication.name,
+                name = LandlordJourneyDataHelper.getName(journeyDataService, journeyData)!!,
+                email = LandlordJourneyDataHelper.getEmail(journeyDataService, journeyData)!!,
+                phoneNumber = LandlordJourneyDataHelper.getPhoneNumber(journeyDataService, journeyData)!!,
+                addressDataModel =
+                    LandlordJourneyDataHelper.getAddress(
+                        journeyDataService,
+                        journeyData,
+                        addressDataService,
+                    )!!,
+                internationalAddress =
+                    LandlordJourneyDataHelper.getInternationalAddress(
+                        journeyDataService,
+                        journeyData,
+                    ),
+                dateOfBirth = LandlordJourneyDataHelper.getDOB(journeyDataService, journeyData)!!,
+            )
+
+            journeyDataService.clearJourneyDataFromSession()
+
+            return "/$REGISTER_LANDLORD_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT"
         }
     }
 }

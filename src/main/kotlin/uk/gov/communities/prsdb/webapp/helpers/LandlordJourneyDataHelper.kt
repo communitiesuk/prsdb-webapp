@@ -129,7 +129,7 @@ class LandlordJourneyDataHelper {
         private fun getSelectedAddress(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
-            isContactAddress: Boolean,
+            isContactAddress: Boolean = false,
         ): String? {
             val selectAddressPathSegment =
                 if (isContactAddress) {
@@ -148,7 +148,7 @@ class LandlordJourneyDataHelper {
         private fun getManualAddress(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
-            isContactAddress: Boolean,
+            isContactAddress: Boolean = false,
         ): AddressDataModel? {
             val manualAddressPathSegment =
                 if (isContactAddress) {
@@ -219,7 +219,7 @@ class LandlordJourneyDataHelper {
         fun isManualAddressChosen(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
-            isContactAddress: Boolean,
+            isContactAddress: Boolean = false,
         ) = getSelectedAddress(journeyDataService, journeyData, isContactAddress) == MANUAL_ADDRESS_CHOSEN
     }
 }

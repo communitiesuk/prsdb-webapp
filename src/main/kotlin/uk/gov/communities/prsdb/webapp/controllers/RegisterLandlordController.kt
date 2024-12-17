@@ -10,8 +10,11 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import java.security.Principal
 
@@ -20,6 +23,7 @@ import java.security.Principal
 class RegisterLandlordController(
     var landlordRegistrationJourney: LandlordRegistrationJourney,
     val identityService: OneLoginIdentityService,
+    val landlordService: LandlordService,
 ) {
     @GetMapping
     fun index(model: Model): CharSequence {
@@ -78,8 +82,26 @@ class RegisterLandlordController(
             principal,
         )
 
+    @GetMapping("/$CONFIRMATION_PAGE_PATH_SEGMENT")
+    fun getConfirmation(
+        model: Model,
+        principal: Principal,
+    ): String {
+        val landlord =
+            landlordService.retrieveLandlordByBaseUserId(principal.name)
+                ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
+
+        model.addAttribute(
+            "registrationNumber",
+            RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
+        )
+
+        return "registerAsALandlordConfirmation"
+    }
+
     companion object {
         const val START_PAGE_PATH_SEGMENT = "start"
         const val IDENTITY_VERIFICATION_PATH_SEGMENT = "verify-identity"
+        const val CONFIRMATION_PAGE_PATH_SEGMENT = "confirmation"
     }
 }

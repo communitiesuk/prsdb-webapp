@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{registerAsALandlord.title}, ~{::main}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div id="page-contents"
+         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <div id="confirmation-banner"
+             th:replace="~{fragments/confirmationPageBanner :: confirmationPageBanner(#{registerAsALandlord.confirmation.banner.heading}, ~{::#confirmation-banner/content()})}">
+            <span th:remove="tag"
+                  th:text="#{registerAsALandlord.confirmation.banner.body.beforeRegistrationNumber}">
+                registerAsALandlord.confirmation.banner.body.beforeRegistrationNumber
+            </span>
+            <br>
+            <strong th:text="${registrationNumber}"></strong>
+        </div>
+        <section>
+            <h1 class="govuk-heading-l" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h1>
+            <p class="govuk-body" th:utext="#{registerAsALandlord.confirmation.whatHappensNext.paragraph}">
+                registerAsALandlord.confirmation.whatHappensNext.paragraph
+            </p>
+            <p class="govuk-body" th:text="#{registerAsALandlord.confirmation.whatHappensNext.bullet.heading}">
+                registerAsALandlord.confirmation.whatHappensNext.bullet.heading
+            </p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{registerAsALandlord.confirmation.whatHappensNext.bullet.one}">
+                    registerAsALandlord.confirmation.whatHappensNext.bullet.one
+                </li>
+                <li th:text="#{registerAsALandlord.confirmation.whatHappensNext.bullet.two}">
+                    registerAsALandlord.confirmation.whatHappensNext.bullet.two
+                </li>
+                <li th:text="#{registerAsALandlord.confirmation.whatHappensNext.bullet.three}">
+                    registerAsALandlord.confirmation.whatHappensNext.bullet.three
+                </li>
+            </ul>
+        </section>
+        <section>
+            <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.confirmation.propertyRegistration.heading}">
+                registerAsALandlord.confirmation.propertyRegistration.heading</h2>
+            <p class="govuk-body" th:text="#{registerAsALandlord.confirmation.propertyRegistration.paragraph.one}">
+                registerAsALandlord.confirmation.propertyRegistration.paragraph.one
+            </p>
+            <p class="govuk-body" th:text="#{registerAsALandlord.confirmation.propertyRegistration.paragraph.two}">
+                registerAsALandlord.confirmation.propertyRegistration.paragraph.two
+            </p>
+        </section>
+        <!-- TODO PRSD-670: Replace with link to dashboard -->
+        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/}, #{common.confirmationPage.goToDashboard})}">
+            common.confirmationPage.goToDashboard
+        </a>
+    </div>
+</main>
+</html>

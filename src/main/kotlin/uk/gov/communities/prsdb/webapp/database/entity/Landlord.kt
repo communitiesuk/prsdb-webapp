@@ -9,7 +9,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
-import java.util.Date
+import java.time.LocalDate
 
 @Entity
 class Landlord() : ModifiableAuditableEntity() {
@@ -43,10 +43,10 @@ class Landlord() : ModifiableAuditableEntity() {
     lateinit var address: Address
         private set
 
-    lateinit var internationalAddress: String
+    var internationalAddress: String? = null
         private set
 
-    lateinit var dateOfBirth: Date
+    var dateOfBirth: LocalDate? = null
         private set
 
     @OneToOne(optional = false)
@@ -70,7 +70,7 @@ class Landlord() : ModifiableAuditableEntity() {
         address: Address,
         registrationNumber: RegistrationNumber,
         internationalAddress: String?,
-        dateOfBirth: Date?,
+        dateOfBirth: LocalDate?,
     ) : this() {
         this.baseUser = baseUser
         this.name = name
@@ -78,8 +78,8 @@ class Landlord() : ModifiableAuditableEntity() {
         this.phoneNumber = phoneNumber
         this.address = address
         this.registrationNumber = registrationNumber
+        this.internationalAddress = internationalAddress
+        this.dateOfBirth = dateOfBirth
         this.isActive = true
-        if (internationalAddress != null) this.internationalAddress = internationalAddress
-        if (dateOfBirth != null) this.dateOfBirth = dateOfBirth
     }
 }
