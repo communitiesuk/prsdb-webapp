@@ -119,7 +119,7 @@ class LandlordJourneyDataHelper {
             val livesInUK = getLivesInUK(journeyDataService, journeyData) ?: return null
 
             return if (isManualAddressChosen(journeyDataService, journeyData, !livesInUK)) {
-                getManualAddress(journeyDataService, journeyData, !livesInUK)
+                getManualAddress(journeyDataService, journeyData, !livesInUK, addressDataService)
             } else {
                 val selectedAddress = getSelectedAddress(journeyDataService, journeyData, !livesInUK) ?: return null
                 addressDataService.getAddressData(selectedAddress)
@@ -149,6 +149,7 @@ class LandlordJourneyDataHelper {
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
             isContactAddress: Boolean = false,
+            addressDataService: AddressDataService,
         ): AddressDataModel? {
             val manualAddressPathSegment =
                 if (isContactAddress) {
@@ -157,48 +158,7 @@ class LandlordJourneyDataHelper {
                     LandlordRegistrationStepId.ManualAddress.urlPathSegment
                 }
 
-            val addressLineOne =
-                journeyDataService.getFieldStringValue(
-                    journeyData,
-                    manualAddressPathSegment,
-                    "addressLineOne",
-                ) ?: return null
-
-            val townOrCity =
-                journeyDataService.getFieldStringValue(
-                    journeyData,
-                    manualAddressPathSegment,
-                    "townOrCity",
-                ) ?: return null
-
-            val postcode =
-                journeyDataService.getFieldStringValue(
-                    journeyData,
-                    manualAddressPathSegment,
-                    "postcode",
-                ) ?: return null
-
-            val addressLineTwo =
-                journeyDataService.getFieldStringValue(
-                    journeyData,
-                    manualAddressPathSegment,
-                    "addressLineTwo",
-                )
-
-            val county =
-                journeyDataService.getFieldStringValue(
-                    journeyData,
-                    manualAddressPathSegment,
-                    "county",
-                )
-
-            return AddressDataModel.fromManualAddressData(
-                addressLineOne,
-                townOrCity,
-                postcode,
-                addressLineTwo,
-                county,
-            )
+            return addressDataService.getManualAddress(journeyDataService, journeyData, manualAddressPathSegment)
         }
 
         fun getInternationalAddress(

@@ -86,6 +86,7 @@ class PropertyRegistrationJourney(
                                                 "1 example road EX4 PL3",
                                                 null,
                                             ),
+                                            // TODO: PRSD-495 - this field will be null if the address was manually entered, do we hide it in that case?
                                             FormSummaryDataModel(
                                                 "forms.checkPropertyAnswers.propertyDetails.uprn",
                                                 "100023584755",
@@ -109,7 +110,13 @@ class PropertyRegistrationJourney(
                                         ),
                                 ),
                         ),
-                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
+                    handleSubmitAndRedirect = { journeyData, _ ->
+                        checkAnswersHandleSubmitAndRedirect(
+                            journeyData,
+                            journeyDataService,
+                            addressDataService,
+                        )
+                    },
                 ),
                 Step(
                     id = RegisterPropertyStepId.PlaceholderPage,
@@ -567,5 +574,11 @@ class PropertyRegistrationJourney(
                 LicensingType.NO_LICENSING -> Pair(RegisterPropertyStepId.PlaceholderPage, null)
             }
         }
+
+        private fun checkAnswersHandleSubmitAndRedirect(
+            journeyData: JourneyData,
+            journeyDataService: JourneyDataService,
+            addressDataService: AddressDataService,
+        ): String = "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.PlaceholderPage.urlPathSegment}"
     }
 }
