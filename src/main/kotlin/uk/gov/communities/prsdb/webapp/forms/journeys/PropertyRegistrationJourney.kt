@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.pages.AlreadyRegisteredPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
+import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationCheckAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
@@ -30,7 +31,6 @@ import uk.gov.communities.prsdb.webapp.models.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectLocalAuthorityFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectiveLicenceFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
@@ -68,49 +68,7 @@ class PropertyRegistrationJourney(
                 hmoMandatoryLicenceStep(),
                 hmoAdditionalLicenceStep(),
                 landlordTypeStep(),
-                Step(
-                    id = RegisterPropertyStepId.CheckAnswers,
-                    page =
-                        Page(
-                            formModel = NoInputFormModel::class,
-                            templateName = "forms/propertyRegistrationCheckAnswersForm",
-                            content =
-                                mapOf(
-                                    "title" to "registerProperty.title",
-                                    "propertyName" to "1 example road EX4 PL3",
-                                    "submitButtonText" to "forms.buttons.saveAndContinue",
-                                    "propertyDetails" to
-                                        listOf(
-                                            FormSummaryViewModel(
-                                                "forms.checkPropertyAnswers.propertyDetails.address",
-                                                "1 example road EX4 PL3",
-                                                null,
-                                            ),
-                                            FormSummaryViewModel(
-                                                "forms.checkPropertyAnswers.propertyDetails.uprn",
-                                                "100023584755",
-                                                null,
-                                            ),
-                                            FormSummaryViewModel(
-                                                "forms.checkPropertyAnswers.propertyDetails.type",
-                                                "Flat",
-                                                null,
-                                            ),
-                                            FormSummaryViewModel(
-                                                "forms.checkPropertyAnswers.propertyDetails.ownership",
-                                                "Freehold",
-                                                null,
-                                            ),
-                                            FormSummaryViewModel(
-                                                "forms.checkPropertyAnswers.propertyDetails.landlordType",
-                                                "Individual",
-                                                null,
-                                            ),
-                                        ),
-                                ),
-                        ),
-                    nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
-                ),
+                checkAnswersStep(addressDataService),
                 Step(
                     id = RegisterPropertyStepId.PlaceholderPage,
                     page =
@@ -474,7 +432,7 @@ class PropertyRegistrationJourney(
                                 "detailMainText" to "forms.selectiveLicence.detail.text",
                             ),
                     ),
-                nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
+                nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
             )
 
         private fun hmoMandatoryLicenceStep() =
@@ -499,7 +457,7 @@ class PropertyRegistrationJourney(
                                     ),
                             ),
                     ),
-                nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
+                nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
             )
 
         private fun hmoAdditionalLicenceStep() =
@@ -518,6 +476,13 @@ class PropertyRegistrationJourney(
                                 "detailMainText" to "forms.hmoAdditionalLicence.detail.text",
                             ),
                     ),
+                nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
+            )
+
+        fun checkAnswersStep(addressDataService: AddressDataService) =
+            Step(
+                id = RegisterPropertyStepId.CheckAnswers,
+                page = PropertyRegistrationCheckAnswersPage(addressDataService),
                 nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
             )
 
@@ -565,7 +530,7 @@ class PropertyRegistrationJourney(
                 LicensingType.SELECTIVE_LICENCE -> Pair(RegisterPropertyStepId.SelectiveLicence, null)
                 LicensingType.HMO_MANDATORY_LICENCE -> Pair(RegisterPropertyStepId.HmoMandatoryLicence, null)
                 LicensingType.HMO_ADDITIONAL_LICENCE -> Pair(RegisterPropertyStepId.HmoAdditionalLicence, null)
-                LicensingType.NO_LICENSING -> Pair(RegisterPropertyStepId.PlaceholderPage, null)
+                LicensingType.NO_LICENSING -> Pair(RegisterPropertyStepId.CheckAnswers, null)
             }
         }
     }
