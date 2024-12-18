@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
@@ -26,18 +28,39 @@ class PropertyRegistrationJourneyDataHelper {
         fun getPropertyType(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
-        ): String? = journeyDataService.getFieldStringValue(journeyData, RegisterPropertyStepId.PropertyType.urlPathSegment, "propertyType")
+        ): PropertyType? {
+            val propertyTypeString =
+                journeyDataService.getFieldStringValue(journeyData, RegisterPropertyStepId.PropertyType.urlPathSegment, "propertyType")
+                    ?: return null
+            return PropertyType.valueOf(propertyTypeString)
+        }
+
+        fun getCustomPropertyType(
+            journeyDataService: JourneyDataService,
+            journeyData: JourneyData,
+        ): String? =
+            journeyDataService.getFieldStringValue(journeyData, RegisterPropertyStepId.PropertyType.urlPathSegment, "customPropertyType")
 
         fun getOwnershipType(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
-        ): String? =
-            journeyDataService.getFieldStringValue(journeyData, RegisterPropertyStepId.OwnershipType.urlPathSegment, "ownershipType")
+        ): OwnershipType? {
+            val ownershipTypeString =
+                journeyDataService.getFieldStringValue(journeyData, RegisterPropertyStepId.OwnershipType.urlPathSegment, "ownershipType")
+                    ?: return null
+            return OwnershipType.valueOf(ownershipTypeString)
+        }
 
         fun getLandlordType(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
-        ): String? = journeyDataService.getFieldStringValue(journeyData, RegisterPropertyStepId.LandlordType.urlPathSegment, "landlordType")
+        ): LandlordType? {
+            val landlordTypeString =
+                journeyDataService.getFieldStringValue(journeyData, RegisterPropertyStepId.LandlordType.urlPathSegment, "landlordType")
+                    ?: return null
+
+            return LandlordType.valueOf(landlordTypeString)
+        }
 
         private fun getSelectedAddress(
             journeyDataService: JourneyDataService,
