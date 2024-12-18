@@ -12,12 +12,14 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FormSummaryDataModel
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.services.DateFormatterService
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import kotlin.reflect.KClass
 
 class LandlordRegistrationCheckAnswersPage(
     formModel: KClass<out FormModel>,
     templateName: String,
     content: Map<String, Any>,
+    private val journeyDataService: JourneyDataService,
 ) : Page(formModel, templateName, content) {
     override fun populateModelAndGetTemplateName(
         validator: Validator,
@@ -49,7 +51,7 @@ class LandlordRegistrationCheckAnswersPage(
         listOf(
             FormSummaryDataModel(
                 "registerAsALandlord.checkAnswers.rowHeading.name",
-                objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment])?.get("name"),
+                journeyDataService.getFieldStringValue(journeyData, LandlordRegistrationStepId.VerifyIdentity.urlPathSegment, "name"),
                 null,
             ),
             FormSummaryDataModel(
@@ -64,7 +66,7 @@ class LandlordRegistrationCheckAnswersPage(
         return listOf(
             FormSummaryDataModel(
                 "registerAsALandlord.checkAnswers.rowHeading.name",
-                objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.Name.urlPathSegment])?.get("name"),
+                journeyDataService.getFieldStringValue(journeyData, LandlordRegistrationStepId.Name.urlPathSegment, "name"),
                 "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}/${LandlordRegistrationStepId.Name.urlPathSegment}",
             ),
             FormSummaryDataModel(
@@ -76,20 +78,22 @@ class LandlordRegistrationCheckAnswersPage(
     }
 
     private fun getFormattedDateOfBirth(journeyData: JourneyData): String {
-        val formData = objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.DateOfBirth.urlPathSegment])!!
-        return DateFormatterService.getFormattedDate(formData["day"].toString(), formData["month"].toString(), formData["year"].toString())
+        val day = journeyDataService.getFieldStringValue(journeyData, LandlordRegistrationStepId.DateOfBirth.urlPathSegment, "day")!!
+        val month = journeyDataService.getFieldStringValue(journeyData, LandlordRegistrationStepId.DateOfBirth.urlPathSegment, "month")!!
+        val year = journeyDataService.getFieldStringValue(journeyData, LandlordRegistrationStepId.DateOfBirth.urlPathSegment, "year")!!
+        return DateFormatterService.getFormattedDate(day, month, year)
     }
 
     private fun getEmailAndPhoneFormData(journeyData: JourneyData): List<FormSummaryDataModel> =
         listOf(
             FormSummaryDataModel(
                 "registerAsALandlord.checkAnswers.rowHeading.email",
-                objectToStringKeyedMap(journeyData?.get(LandlordRegistrationStepId.Email.urlPathSegment))?.get("emailAddress"),
+                journeyDataService.getFieldStringValue(journeyData, LandlordRegistrationStepId.Email.urlPathSegment, "emailAddress"),
                 "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}/${LandlordRegistrationStepId.Email.urlPathSegment}",
             ),
             FormSummaryDataModel(
                 "registerAsALandlord.checkAnswers.rowHeading.telephoneNumber",
-                objectToStringKeyedMap(journeyData?.get(LandlordRegistrationStepId.PhoneNumber.urlPathSegment))?.get("phoneNumber"),
+                journeyDataService.getFieldStringValue(journeyData, LandlordRegistrationStepId.PhoneNumber.urlPathSegment, "phoneNumber"),
                 "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}/${LandlordRegistrationStepId.PhoneNumber.urlPathSegment}",
             ),
         )
@@ -120,26 +124,30 @@ class LandlordRegistrationCheckAnswersPage(
     private fun getCountryOfResidenceRow(journeyData: JourneyData): FormSummaryDataModel =
         FormSummaryDataModel(
             "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence",
-            objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.CountryOfResidence.urlPathSegment])?.get("countryOfResidence"),
+            journeyDataService.getFieldStringValue(
+                journeyData,
+                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
+                "countryOfResidence",
+            ),
             "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}/${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}",
         )
 
     private fun getContactAddressOutsideUKRow(journeyData: JourneyData): FormSummaryDataModel =
         FormSummaryDataModel(
             "registerAsALandlord.checkAnswers.rowHeading.contactAddressOutsideUK",
-            objectToStringKeyedMap(
-                journeyData[LandlordRegistrationStepId.InternationalAddress.urlPathSegment],
-            )?.get("internationalAddress"),
+            journeyDataService.getFieldStringValue(
+                journeyData,
+                LandlordRegistrationStepId.InternationalAddress.urlPathSegment,
+                "internationalAddress",
+            ),
             "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}/${LandlordRegistrationStepId.InternationalAddress.urlPathSegment}",
         )
 
     private fun getUKContactAddressOutsideUK(journeyData: JourneyData): FormSummaryDataModel {
         var addressValue =
-            objectToStringKeyedMap(
-                journeyData[LandlordRegistrationStepId.SelectContactAddress.urlPathSegment],
-            )?.get("address")
+            journeyDataService.getFieldStringValue(journeyData, LandlordRegistrationStepId.SelectContactAddress.urlPathSegment, "address")
         if (addressValue == MANUAL_ADDRESS_CHOSEN) {
-            addressValue = getManualAddressValue(journeyData[LandlordRegistrationStepId.ManualContactAddress.urlPathSegment])
+            addressValue = getManualAddressValue(journeyData, LandlordRegistrationStepId.ManualContactAddress.urlPathSegment)
         }
 
         return FormSummaryDataModel(
@@ -151,11 +159,13 @@ class LandlordRegistrationCheckAnswersPage(
 
     private fun getContactAddressRow(journeyData: JourneyData): FormSummaryDataModel {
         var addressValue =
-            objectToStringKeyedMap(
-                journeyData[LandlordRegistrationStepId.SelectAddress.urlPathSegment],
-            )?.get("address")
+            journeyDataService.getFieldStringValue(
+                journeyData,
+                LandlordRegistrationStepId.SelectAddress.urlPathSegment,
+                "address",
+            )
         if (addressValue == MANUAL_ADDRESS_CHOSEN) {
-            addressValue = getManualAddressValue(journeyData[LandlordRegistrationStepId.ManualAddress.urlPathSegment])
+            addressValue = getManualAddressValue(journeyData, LandlordRegistrationStepId.ManualAddress.urlPathSegment)
         }
         return FormSummaryDataModel(
             "registerAsALandlord.checkAnswers.rowHeading.contactAddress",
@@ -164,17 +174,18 @@ class LandlordRegistrationCheckAnswersPage(
         )
     }
 
-    private fun getManualAddressValue(key: Any?): String {
-        val addressLineOne = objectToStringKeyedMap(key)?.get("addressLineOne").toString()
-        val addressLineTwo = objectToStringKeyedMap(key)?.get("addressLineTwo").toString()
-        val townOrCity = objectToStringKeyedMap(key)?.get("townOrCity").toString()
-        val county = objectToStringKeyedMap(key)?.get("county").toString()
-        val postcode = objectToStringKeyedMap(key)?.get("postcode").toString()
+    private fun getManualAddressValue(
+        journeyData: JourneyData,
+        urlPathSegment: String,
+    ): String {
+        val addressLineOne = journeyDataService.getFieldStringValue(journeyData, urlPathSegment, "addressLineOne")!!
+        val addressLineTwo = journeyDataService.getFieldStringValue(journeyData, urlPathSegment, "addressLineTwo")
+        val townOrCity = journeyDataService.getFieldStringValue(journeyData, urlPathSegment, "townOrCity")!!
+        val county = journeyDataService.getFieldStringValue(journeyData, urlPathSegment, "county")
+        val postcode = journeyDataService.getFieldStringValue(journeyData, urlPathSegment, "postcode")!!
         return AddressDataModel.manualAddressDataToSingleLineAddress(addressLineOne, townOrCity, postcode, addressLineTwo, county)
     }
 
     private fun getLivesInUk(journeyData: JourneyData): Boolean =
-        objectToStringKeyedMap(
-            journeyData[LandlordRegistrationStepId.CountryOfResidence.urlPathSegment],
-        )?.get("livesInUK").toString().toBoolean()
+        journeyDataService.getFieldBooleanValue(journeyData, LandlordRegistrationStepId.CountryOfResidence.urlPathSegment, "livesInUK")!!
 }

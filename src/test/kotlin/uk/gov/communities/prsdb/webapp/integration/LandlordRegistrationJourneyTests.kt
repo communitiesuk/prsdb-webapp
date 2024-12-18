@@ -97,13 +97,13 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
         assertThat(checkAnswersPage.summaryList.getRowKey(0)).containsText("Name")
         assertThat(checkAnswersPage.summaryList.getRowValue(0)).containsText("Arthur Dent")
-        assertThat(checkAnswersPage.summaryList.getRowAction(0)).not().containsText("Change")
-        assertThat(checkAnswersPage.summaryList.getRowAction(0).locator("a")).not().isVisible()
+        assertThat(checkAnswersPage.summaryList.getRowAction(0)).containsText("Change")
+        assertThat(checkAnswersPage.summaryList.getRowActionLink(0)).hasAttribute("href", "/register-as-a-landlord/name")
 
         assertThat(checkAnswersPage.summaryList.getRowKey(1)).containsText("Date of birth")
-        assertThat(checkAnswersPage.summaryList.getRowValue(1)).containsText("08/06/2000")
-        assertThat(checkAnswersPage.summaryList.getRowAction(1)).not().containsText("Change")
-        assertThat(checkAnswersPage.summaryList.getRowAction(1).locator("a")).not().isVisible()
+        assertThat(checkAnswersPage.summaryList.getRowValue(1)).containsText("2000-06-08")
+        assertThat(checkAnswersPage.summaryList.getRowAction(1)).containsText("Change")
+        assertThat(checkAnswersPage.summaryList.getRowActionLink(1)).hasAttribute("href", "/register-as-a-landlord/date-of-birth")
 
         assertThat(checkAnswersPage.summaryList.getRowKey(2)).containsText("Email address")
         assertThat(checkAnswersPage.summaryList.getRowValue(2)).containsText("test@example.com")
@@ -111,7 +111,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         assertThat(checkAnswersPage.summaryList.getRowActionLink(2)).hasAttribute("href", "/register-as-a-landlord/email")
 
         assertThat(checkAnswersPage.summaryList.getRowKey(3)).containsText("Telephone number")
-        assertThat(checkAnswersPage.summaryList.getRowValue(3)).containsText("07123456789")
+        assertThat(checkAnswersPage.summaryList.getRowValue(3)).containsText("07456097576")
         assertThat(checkAnswersPage.summaryList.getRowAction(3)).containsText("Change")
         assertThat(checkAnswersPage.summaryList.getRowActionLink(3)).hasAttribute("href", "/register-as-a-landlord/phone-number")
 
@@ -235,8 +235,48 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         selectContactAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
         selectContactAddressPage.form.submit()
 
-        val summaryPage = assertPageIs(page,  CheckAnswersPageLandlordRegistration::class)
-        summaryPage.submitButton.click()
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
+        assertThat(checkAnswersPage.summaryList.getRowKey(0)).containsText("Name")
+        assertThat(checkAnswersPage.summaryList.getRowValue(0)).containsText("Arthur Dent")
+        assertThat(checkAnswersPage.summaryList.getRowAction(0)).containsText("Change")
+        assertThat(checkAnswersPage.summaryList.getRowActionLink(0)).hasAttribute("href", "/register-as-a-landlord/name")
+
+        assertThat(checkAnswersPage.summaryList.getRowKey(1)).containsText("Date of birth")
+        assertThat(checkAnswersPage.summaryList.getRowValue(1)).containsText("2000-06-08")
+        assertThat(checkAnswersPage.summaryList.getRowAction(1)).containsText("Change")
+        assertThat(checkAnswersPage.summaryList.getRowActionLink(1)).hasAttribute("href", "/register-as-a-landlord/date-of-birth")
+
+        assertThat(checkAnswersPage.summaryList.getRowKey(2)).containsText("Email address")
+        assertThat(checkAnswersPage.summaryList.getRowValue(2)).containsText("test@example.com")
+        assertThat(checkAnswersPage.summaryList.getRowAction(2)).containsText("Change")
+        assertThat(checkAnswersPage.summaryList.getRowActionLink(2)).hasAttribute("href", "/register-as-a-landlord/email")
+
+        assertThat(checkAnswersPage.summaryList.getRowKey(3)).containsText("Telephone number")
+        assertThat(checkAnswersPage.summaryList.getRowValue(3)).containsText("07456097576")
+        assertThat(checkAnswersPage.summaryList.getRowAction(3)).containsText("Change")
+        assertThat(checkAnswersPage.summaryList.getRowActionLink(3)).hasAttribute("href", "/register-as-a-landlord/phone-number")
+
+        assertThat(checkAnswersPage.summaryList.getRowKey(4)).containsText("UK resident")
+        assertThat(checkAnswersPage.summaryList.getRowValue(4)).containsText("No")
+        assertThat(checkAnswersPage.summaryList.getRowAction(4)).containsText("Change")
+        assertThat(checkAnswersPage.summaryList.getRowActionLink(4)).hasAttribute("href", "/register-as-a-landlord/country-of-residence")
+
+        assertThat(checkAnswersPage.summaryList.getRowKey(5)).containsText("Country of residence")
+        assertThat(checkAnswersPage.summaryList.getRowValue(5)).containsText("France")
+        assertThat(checkAnswersPage.summaryList.getRowAction(5)).containsText("Change")
+        assertThat(checkAnswersPage.summaryList.getRowActionLink(5)).hasAttribute("href", "/register-as-a-landlord/country-of-residence")
+
+        assertThat(checkAnswersPage.summaryList.getRowKey(6)).containsText("Contact address (outside UK)")
+        assertThat(checkAnswersPage.summaryList.getRowValue(6)).containsText("international address")
+        assertThat(checkAnswersPage.summaryList.getRowAction(6)).containsText("Change")
+        assertThat(checkAnswersPage.summaryList.getRowActionLink(6)).hasAttribute("href", "/register-as-a-landlord/international-address")
+
+        assertThat(checkAnswersPage.summaryList.getRowKey(7)).containsText("UK contact address")
+        assertThat(checkAnswersPage.summaryList.getRowValue(7)).containsText("1, Example Road, EG1 2AB")
+        assertThat(checkAnswersPage.summaryList.getRowAction(7)).containsText("Change")
+        assertThat(checkAnswersPage.summaryList.getRowActionLink(7)).hasAttribute("href", "/register-as-a-landlord/lookup-contact-address")
+        
+        checkAnswersPage.submitButton.click()
 
         val declarationPage = assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
         declarationPage.checkbox.check()

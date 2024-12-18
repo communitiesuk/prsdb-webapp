@@ -63,7 +63,7 @@ class LandlordRegistrationJourney(
                 lookupContactAddressStep(),
                 selectContactAddressStep(journeyDataService, addressLookupService, addressDataService),
                 manualContactAddressStep(),
-                checkAnswersStep(),
+                checkAnswersStep(journeyDataService),
                 declarationStep(journeyDataService, landlordService, addressDataService),
             ),
     ) {
@@ -397,7 +397,7 @@ class LandlordRegistrationJourney(
                 saveAfterSubmit = false,
             )
 
-        private fun checkAnswersStep() =
+        private fun checkAnswersStep(journeyDataService: JourneyDataService) =
             Step(
                 id = LandlordRegistrationStepId.CheckAnswers,
                 page =
@@ -410,6 +410,7 @@ class LandlordRegistrationJourney(
                                 "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
                                 "submitButtonText" to "forms.buttons.confirmAndContinue",
                             ),
+                        journeyDataService = journeyDataService,
                     ),
                 nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Declaration, null) },
                 saveAfterSubmit = false,
