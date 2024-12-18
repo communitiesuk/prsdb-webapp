@@ -15,6 +15,7 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -23,6 +24,9 @@ import kotlin.test.assertNull
 class AddressDataServiceTests {
     @Mock
     private lateinit var mockHttpSession: HttpSession
+
+    @Mock
+    private lateinit var mockJourneyDataService: JourneyDataService
 
     private lateinit var addressDataService: AddressDataService
 
@@ -126,5 +130,43 @@ class AddressDataServiceTests {
         val addressRegisteredResultCaptor = captor<MutableMap<String, Boolean>>()
         verify(mockHttpSession).setAttribute(eq("addressRegisteredResults"), addressRegisteredResultCaptor.capture())
         Assertions.assertEquals(expectedNewCache, addressRegisteredResultCaptor.value)
+    }
+
+    @Test
+    fun `getManualAddress returns an address from journey data`() {
+        val addressLineOne = "1 Example Address"
+        val townOrCity = "Townville"
+        val postcode = "EG1 2AB"
+        val expectedAddressDataModel = AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode)
+        val manualAddressPathSegment = "manual-address"
+        val mockJourneyData: JourneyData = mutableMapOf()
+
+        whenever(
+            mockJourneyDataService.getFieldStringValue(
+                mockJourneyData,
+                manualAddressPathSegment,
+                "addressLineOne",
+            ),
+        ).thenReturn(addressLineOne)
+
+        whenever(
+            mockJourneyDataService.getFieldStringValue(
+                mockJourneyData,
+                manualAddressPathSegment,
+                "townOrCity",
+            ),
+        ).thenReturn(townOrCity)
+
+        whenever(
+            mockJourneyDataService.getFieldStringValue(
+                mockJourneyData,
+                manualAddressPathSegment,
+                "postcode",
+            ),
+        ).thenReturn(postcode)
+
+        val addressDataModel = addressDataService.getManualAddress(mockJourneyDataService, mockJourneyData, manualAddressPathSegment)
+
+        assertEquals(expectedAddressDataModel, addressDataModel)
     }
 }
