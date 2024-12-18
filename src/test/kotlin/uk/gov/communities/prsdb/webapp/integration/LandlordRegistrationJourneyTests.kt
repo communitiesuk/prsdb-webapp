@@ -40,14 +40,6 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.net.URI
 import kotlin.test.assertNotNull
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.services.LandlordService
-import java.net.URI
-import kotlin.test.assertNotNull
-import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
-import java.time.LocalDate
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 @Sql("/data-local.sql")
 class LandlordRegistrationJourneyTests : IntegrationTest() {
@@ -177,8 +169,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         manualAddressPage.postcodeInput.fill("EG1 2AB")
         manualAddressPage.form.submit()
 
-        val summaryPage = assertPageIs(page, SummaryPageLandlordRegistration::class)
-        summaryPage.submitButton.click()
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
+        checkAnswersPage.submitButton.click()
 
         val declarationPage = assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
         declarationPage.checkbox.check()
@@ -275,7 +267,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         assertThat(checkAnswersPage.summaryList.getRowValue(7)).containsText("1, Example Road, EG1 2AB")
         assertThat(checkAnswersPage.summaryList.getRowAction(7)).containsText("Change")
         assertThat(checkAnswersPage.summaryList.getRowActionLink(7)).hasAttribute("href", "/register-as-a-landlord/lookup-contact-address")
-        
+
         checkAnswersPage.submitButton.click()
 
         val declarationPage = assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
@@ -341,8 +333,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         manualContactAddressPage.postcodeInput.fill("EG1 2AB")
         manualContactAddressPage.form.submit()
 
-        val summaryPage = assertPageIs(page, SummaryPageLandlordRegistration::class)
-        summaryPage.submitButton.click()
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
+        checkAnswersPage.submitButton.click()
 
         val declarationPage = assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
         declarationPage.checkbox.check()
