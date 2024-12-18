@@ -4,7 +4,10 @@ import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
@@ -65,10 +68,12 @@ class PropertyRegistrationCheckAnswersPage(
 
     private fun getPropertyTypeDetails(journeyData: JourneyData): FormSummaryViewModel {
         val propertyType =
-            objectToStringKeyedMap(
-                journeyData[RegisterPropertyStepId.PropertyType.urlPathSegment],
-            )?.get("propertyType") as String
-        return if (propertyType != "OTHER") {
+            PropertyType.valueOf(
+                objectToStringKeyedMap(
+                    journeyData[RegisterPropertyStepId.PropertyType.urlPathSegment],
+                )?.get("propertyType") as String,
+            )
+        return if (propertyType != PropertyType.OTHER) {
             FormSummaryViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.type",
                 propertyType,
@@ -90,7 +95,9 @@ class PropertyRegistrationCheckAnswersPage(
     private fun getOwnershipTypeDetails(journeyData: JourneyData) =
         FormSummaryViewModel(
             "forms.checkPropertyAnswers.propertyDetails.ownership",
-            objectToStringKeyedMap(journeyData[RegisterPropertyStepId.OwnershipType.urlPathSegment])?.get("ownershipType"),
+            OwnershipType.valueOf(
+                objectToStringKeyedMap(journeyData[RegisterPropertyStepId.OwnershipType.urlPathSegment])?.get("ownershipType") as String,
+            ),
             RegisterPropertyStepId.OwnershipType.urlPathSegment,
         )
 
@@ -118,7 +125,7 @@ class PropertyRegistrationCheckAnswersPage(
         return FormSummaryViewModel(
             "forms.checkPropertyAnswers.propertyDetails.licensing",
             listOfNotNull(
-                licensingType.name,
+                licensingType,
                 licenceNumber,
             ),
             RegisterPropertyStepId.LicensingType.urlPathSegment,
@@ -140,12 +147,17 @@ class PropertyRegistrationCheckAnswersPage(
         }
     }
 
-    private fun getLandlordTypeDetails(journeyData: JourneyData) =
-        FormSummaryViewModel(
+    private fun getLandlordTypeDetails(journeyData: JourneyData): FormSummaryViewModel {
+        val landlordType =
+            LandlordType.valueOf(
+                objectToStringKeyedMap(journeyData[RegisterPropertyStepId.LandlordType.urlPathSegment])?.get("landlordType") as String,
+            )
+        return FormSummaryViewModel(
             "forms.checkPropertyAnswers.propertyDetails.landlordType",
-            "TODO: PRSD-674",
-            "https://mhclgdigital.atlassian.net/browse/PRSD-674",
+            landlordType,
+            RegisterPropertyStepId.LandlordType.urlPathSegment,
         )
+    }
 
     private class AddressHelpers(
         val addressDataService: AddressDataService,
