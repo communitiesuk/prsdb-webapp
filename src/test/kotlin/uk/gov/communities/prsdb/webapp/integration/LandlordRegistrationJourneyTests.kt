@@ -223,7 +223,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in (unverified, international, selected address)`(page: Page) {
         val namePage = navigator.goToLandlordRegistrationNameFormPage()
-        namePage.nameInput.fill("name")
+        namePage.nameInput.fill("landlord name")
         namePage.form.submit()
 
         val dateOfBirthPage = assertPageIs(page, DateOfBirthFormPageLandlordRegistration::class)
@@ -323,7 +323,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in (unverified, international, manual address)`(page: Page) {
         val namePage = navigator.goToLandlordRegistrationNameFormPage()
-        namePage.nameInput.fill("name")
+        namePage.nameInput.fill("landlord name")
         namePage.form.submit()
 
         val dateOfBirthPage = assertPageIs(page, DateOfBirthFormPageLandlordRegistration::class)
