@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.models.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
@@ -34,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import java.time.LocalDate
 
 @Component
 class LandlordRegistrationJourney(
@@ -513,6 +515,8 @@ class LandlordRegistrationJourney(
             journeyDataService.clearJourneyDataFromSession()
 
             return "/$REGISTER_LANDLORD_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT"
+        }
+
         fun doesJourneyDataContainVerifiedIdentity(journeyData: JourneyData): Boolean {
             val pageData = objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment]) ?: mapOf()
             return pageData[VerifiedIdentityModel.NAME_KEY] is String &&
