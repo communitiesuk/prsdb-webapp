@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationCheckAnsw
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoAdditionalLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoMandatoryLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LandlordTypeFormModel
@@ -68,7 +69,7 @@ class PropertyRegistrationJourney(
                 hmoMandatoryLicenceStep(),
                 hmoAdditionalLicenceStep(),
                 landlordTypeStep(),
-                checkAnswersStep(addressDataService),
+                checkAnswersStep(journeyDataService, propertyRegistrationService, addressDataService),
                 Step(
                     id = RegisterPropertyStepId.PlaceholderPage,
                     page =
@@ -479,12 +480,22 @@ class PropertyRegistrationJourney(
                 nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
             )
 
-        fun checkAnswersStep(addressDataService: AddressDataService) =
-            Step(
-                id = RegisterPropertyStepId.CheckAnswers,
-                page = PropertyRegistrationCheckAnswersPage(addressDataService),
-                nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
-            )
+        fun checkAnswersStep(
+            journeyDataService: JourneyDataService,
+            propertyRegistrationService: PropertyRegistrationService,
+            addressDataService: AddressDataService,
+        ) = Step(
+            id = RegisterPropertyStepId.CheckAnswers,
+            page = PropertyRegistrationCheckAnswersPage(addressDataService),
+            handleSubmitAndRedirect = { journeyData, _ ->
+                checkAnswersSubmitAndRedirect(
+                    journeyData,
+                    journeyDataService,
+                    propertyRegistrationService,
+                    addressDataService,
+                )
+            },
+        )
 
         private fun occupancyNextAction(journeyData: JourneyData): Pair<RegisterPropertyStepId, Int?> =
             when (
@@ -531,6 +542,25 @@ class PropertyRegistrationJourney(
                 LicensingType.HMO_ADDITIONAL_LICENCE -> Pair(RegisterPropertyStepId.HmoAdditionalLicence, null)
                 LicensingType.NO_LICENSING -> Pair(RegisterPropertyStepId.CheckAnswers, null)
             }
+        }
+
+        private fun checkAnswersSubmitAndRedirect(
+            journeyData: JourneyData,
+            journeyDataService: JourneyDataService,
+            propertyRegistrationService: PropertyRegistrationService,
+            addressDataService: AddressDataService,
+        ): String {
+            val address = PropertyRegistrationJourneyDataHelper.getAddress(journeyDataService, journeyData, addressDataService)
+            if (address?.uprn != null) {
+                // If the address was manually entered, the uprn will be null and we cannot check if it is already registered
+                propertyRegistrationService.getIsAddressRegistered(address.uprn, ignoreCache = true)
+            }
+
+            // Add to DB
+
+            // clear session
+
+            return "$REGISTER_PROPERTY_JOURNEY_URL/confirmation"
         }
     }
 }
