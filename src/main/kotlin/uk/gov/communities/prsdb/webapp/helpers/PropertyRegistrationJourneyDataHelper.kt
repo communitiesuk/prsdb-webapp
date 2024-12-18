@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.helpers
 
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
@@ -61,6 +62,42 @@ class PropertyRegistrationJourneyDataHelper {
 
             return LandlordType.valueOf(landlordTypeString)
         }
+
+        fun getIsOccupied(
+            journeyDataService: JourneyDataService,
+            journeyData: JourneyData,
+        ): Boolean? = journeyDataService.getFieldBooleanValue(journeyData, RegisterPropertyStepId.Occupancy.urlPathSegment, "occupied")
+
+        fun getNumberOfHouseholds(
+            journeyDataService: JourneyDataService,
+            journeyData: JourneyData,
+        ): Int? =
+            journeyDataService
+                .getFieldIntegerValue(journeyData, RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment, "numberOfHouseholds")
+
+        fun getNumberOfTenants(
+            journeyDataService: JourneyDataService,
+            journeyData: JourneyData,
+        ): Int? =
+            journeyDataService
+                .getFieldIntegerValue(journeyData, RegisterPropertyStepId.NumberOfPeople.urlPathSegment, "numberOfPeople")
+
+        fun getLicensingType(
+            journeyDataService: JourneyDataService,
+            journeyData: JourneyData,
+        ): LicensingType? {
+            val licensingType =
+                journeyDataService
+                    .getFieldStringValue(journeyData, RegisterPropertyStepId.LicensingType.urlPathSegment, "licensingType")
+                    ?: return null
+            return LicensingType.valueOf(licensingType)
+        }
+
+        fun getLicenseNumber(
+            journeyDataService: JourneyDataService,
+            journeyData: JourneyData,
+            licenseNumberPathSegment: String,
+        ): String? = journeyDataService.getFieldStringValue(journeyData, licenseNumberPathSegment, "licenceNumber")
 
         private fun getSelectedAddress(
             journeyDataService: JourneyDataService,

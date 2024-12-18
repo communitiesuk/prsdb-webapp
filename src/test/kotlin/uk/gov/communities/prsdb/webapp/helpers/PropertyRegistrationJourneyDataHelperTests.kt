@@ -1,11 +1,14 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
@@ -150,5 +153,142 @@ class PropertyRegistrationJourneyDataHelperTests {
         val landlordType = PropertyRegistrationJourneyDataHelper.getLandlordType(mockJourneyDataService, mockJourneyData)
 
         assertEquals(expectedLandlordType, landlordType)
+    }
+
+    @Test
+    fun `getIsOccupied returns true if the property is occupied`() {
+        whenever(
+            mockJourneyDataService.getFieldBooleanValue(
+                mockJourneyData,
+                RegisterPropertyStepId.Occupancy.urlPathSegment,
+                "occupied",
+            ),
+        ).thenReturn(true)
+
+        assertTrue(PropertyRegistrationJourneyDataHelper.getIsOccupied(mockJourneyDataService, mockJourneyData) ?: false)
+    }
+
+    @Test
+    fun `getIsOccupied returns false if the property is not occupied`() {
+        whenever(
+            mockJourneyDataService.getFieldBooleanValue(
+                mockJourneyData,
+                RegisterPropertyStepId.Occupancy.urlPathSegment,
+                "occupied",
+            ),
+        ).thenReturn(false)
+
+        assertFalse(PropertyRegistrationJourneyDataHelper.getIsOccupied(mockJourneyDataService, mockJourneyData) ?: true)
+    }
+
+    @Test
+    fun `getNumberOfHouseholds returns the number of households`() {
+        val expectedNumberOfHouseholds = 2
+        whenever(
+            mockJourneyDataService.getFieldIntegerValue(
+                mockJourneyData,
+                RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment,
+                "numberOfHouseholds",
+            ),
+        ).thenReturn(expectedNumberOfHouseholds)
+
+        val numberOfHouseholds = PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(mockJourneyDataService, mockJourneyData)
+
+        assertEquals(expectedNumberOfHouseholds, numberOfHouseholds)
+    }
+
+    @Test
+    fun `getNumberOfTenants returns the number of people in the house`() {
+        val expectedNumberOfTenants = 2
+        whenever(
+            mockJourneyDataService.getFieldIntegerValue(
+                mockJourneyData,
+                RegisterPropertyStepId.NumberOfPeople.urlPathSegment,
+                "numberOfPeople",
+            ),
+        ).thenReturn(expectedNumberOfTenants)
+
+        val numberOfTenants = PropertyRegistrationJourneyDataHelper.getNumberOfTenants(mockJourneyDataService, mockJourneyData)
+
+        assertEquals(expectedNumberOfTenants, numberOfTenants)
+    }
+
+    @Test
+    fun `getLicensingType returns the licensing type`() {
+        val expectedLicensingType = LicensingType.SELECTIVE_LICENCE
+        whenever(
+            mockJourneyDataService.getFieldStringValue(
+                mockJourneyData,
+                RegisterPropertyStepId.LicensingType.urlPathSegment,
+                "licensingType",
+            ),
+        ).thenReturn(LicensingType.SELECTIVE_LICENCE.name)
+
+        val licensingType = PropertyRegistrationJourneyDataHelper.getLicensingType(mockJourneyDataService, mockJourneyData)
+
+        assertEquals(expectedLicensingType, licensingType)
+    }
+
+    @Test
+    fun `getLicenceNumber returns the selective license number `() {
+        val expectedLicenseNumber = "L1234"
+        whenever(
+            mockJourneyDataService.getFieldStringValue(
+                mockJourneyData,
+                RegisterPropertyStepId.SelectiveLicence.urlPathSegment,
+                "licenceNumber",
+            ),
+        ).thenReturn(expectedLicenseNumber)
+
+        val licenseNumber =
+            PropertyRegistrationJourneyDataHelper.getLicenseNumber(
+                mockJourneyDataService,
+                mockJourneyData,
+                RegisterPropertyStepId.SelectiveLicence.urlPathSegment,
+            )
+
+        assertEquals(expectedLicenseNumber, licenseNumber)
+    }
+
+    @Test
+    fun `getLicenceNumber returns the HmoMandatoryLicence number `() {
+        val expectedLicenseNumber = "L1234"
+        whenever(
+            mockJourneyDataService.getFieldStringValue(
+                mockJourneyData,
+                RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment,
+                "licenceNumber",
+            ),
+        ).thenReturn(expectedLicenseNumber)
+
+        val licenseNumber =
+            PropertyRegistrationJourneyDataHelper.getLicenseNumber(
+                mockJourneyDataService,
+                mockJourneyData,
+                RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment,
+            )
+
+        assertEquals(expectedLicenseNumber, licenseNumber)
+    }
+
+    @Test
+    fun `getLicenceNumber returns the HmoAdditionalLicence number `() {
+        val expectedLicenseNumber = "L1234"
+        whenever(
+            mockJourneyDataService.getFieldStringValue(
+                mockJourneyData,
+                RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment,
+                "licenceNumber",
+            ),
+        ).thenReturn(expectedLicenseNumber)
+
+        val licenseNumber =
+            PropertyRegistrationJourneyDataHelper.getLicenseNumber(
+                mockJourneyDataService,
+                mockJourneyData,
+                RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment,
+            )
+
+        assertEquals(expectedLicenseNumber, licenseNumber)
     }
 }
