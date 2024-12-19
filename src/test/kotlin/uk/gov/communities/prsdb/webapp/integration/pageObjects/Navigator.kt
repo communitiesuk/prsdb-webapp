@@ -16,11 +16,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.CheckAnswersPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.LandingPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.SuccessPageLaUserRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.SummaryPageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmIdentityFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
@@ -35,7 +36,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SummaryPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HouseholdsFormPagePropertyRegistration
@@ -132,7 +132,7 @@ class Navigator(
     fun goToLandlordRegistrationSelectAddressPage(): SelectAddressFormPageLandlordRegistration {
         val lookupAddressPage = goToLandlordRegistrationLookupAddressPage()
         lookupAddressPage.postcodeInput.fill("EG")
-        lookupAddressPage.houseNameOrNumberInput.fill("5")
+        lookupAddressPage.houseNameOrNumberInput.fill("1")
         lookupAddressPage.form.submit()
         return createValidPage(page, SelectAddressFormPageLandlordRegistration::class)
     }
@@ -155,7 +155,7 @@ class Navigator(
 
     fun goToLandlordRegistrationLookupContactAddressPage(): LookupContactAddressFormPageLandlordRegistration {
         val internationalAddressPage = goToLandlordRegistrationInternationalAddressPage()
-        internationalAddressPage.textAreaInput.fill("address")
+        internationalAddressPage.textAreaInput.fill("international address")
         internationalAddressPage.form.submit()
         return createValidPage(page, LookupContactAddressFormPageLandlordRegistration::class)
     }
@@ -175,16 +175,30 @@ class Navigator(
         return createValidPage(page, ManualContactAddressFormPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationSummaryPage(): SummaryPageLandlordRegistration {
-        val selectAddressPage = goToLandlordRegistrationSelectContactAddressPage()
-        selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
-        selectAddressPage.form.submit()
-        return createValidPage(page, SummaryPageLandlordRegistration::class)
+    fun goToLandlordRegistrationCheckAnswersPage(
+        livesInUK: Boolean = true,
+        isManualAddressChosen: Boolean = false,
+    ): CheckAnswersPageLandlordRegistration {
+        if (isManualAddressChosen) {
+            val manualAddressPage =
+                if (livesInUK) goToLandlordRegistrationManualAddressPage() else goToLandlordRegistrationManualContactAddressPage()
+            manualAddressPage.addressLineOneInput.fill("1 Example Road")
+            manualAddressPage.townOrCityInput.fill("Townville")
+            manualAddressPage.postcodeInput.fill("EG1 2AB")
+            manualAddressPage.form.submit()
+            return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
+        } else {
+            val selectAddressPage =
+                if (livesInUK) goToLandlordRegistrationSelectAddressPage() else goToLandlordRegistrationSelectContactAddressPage()
+            selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
+            selectAddressPage.form.submit()
+            return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
+        }
     }
 
     fun goToLandlordRegistrationDeclarationPage(): DeclarationFormPageLandlordRegistration {
-        val summaryPage = goToLandlordRegistrationSummaryPage()
-        summaryPage.submitButton.click()
+        val checkAnswersPage = goToLandlordRegistrationCheckAnswersPage()
+        checkAnswersPage.form.submit()
         return createValidPage(page, DeclarationFormPageLandlordRegistration::class)
     }
 
@@ -213,11 +227,11 @@ class Navigator(
         return emailPage
     }
 
-    fun goToLaUserRegistrationCheckAnswersPage(): SummaryPageLaUserRegistration {
+    fun goToLaUserRegistrationCheckAnswersPage(): CheckAnswersPageLaUserRegistration {
         val emailPage = goToLaUserRegistrationEmailFormPage()
         emailPage.emailInput.fill("test.user@example.com")
         emailPage.form.submit()
-        val checkAnswersPage = createValidPage(page, SummaryPageLaUserRegistration::class)
+        val checkAnswersPage = createValidPage(page, CheckAnswersPageLaUserRegistration::class)
         return checkAnswersPage
     }
 
