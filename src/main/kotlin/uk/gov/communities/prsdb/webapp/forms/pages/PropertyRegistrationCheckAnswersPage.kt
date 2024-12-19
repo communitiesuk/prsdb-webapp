@@ -106,30 +106,45 @@ class PropertyRegistrationCheckAnswersPage(
             LicensingType.valueOf(
                 objectToStringKeyedMap(journeyData[RegisterPropertyStepId.LicensingType.urlPathSegment])?.get("licensingType") as String,
             )
-        val licenceNumber =
-            when (licensingType) {
-                LicensingType.SELECTIVE_LICENCE ->
-                    objectToStringKeyedMap(
-                        journeyData[RegisterPropertyStepId.SelectiveLicence.urlPathSegment],
-                    )?.get("licenceNumber") as String
-                LicensingType.HMO_MANDATORY_LICENCE ->
-                    objectToStringKeyedMap(
-                        journeyData[RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment],
-                    )?.get("licenceNumber") as String
-                LicensingType.HMO_ADDITIONAL_LICENCE ->
-                    objectToStringKeyedMap(
-                        journeyData[RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment],
-                    )?.get("licenceNumber") as String
-                LicensingType.NO_LICENSING -> null
-            }
+        val licenceNumber = getLicenceNumberOfType(licensingType, journeyData)
+        val licensingSummaryValue = getLicensingSummaryValue(licenceNumber, licensingType)
         return FormSummaryViewModel(
             "forms.checkPropertyAnswers.propertyDetails.licensing",
-            listOfNotNull(
-                licensingType,
-                licenceNumber,
-            ),
+            licensingSummaryValue,
             RegisterPropertyStepId.LicensingType.urlPathSegment,
         )
+    }
+
+    private fun getLicensingSummaryValue(
+        licenceNumber: String?,
+        licensingType: LicensingType,
+    ): Any =
+        if (licenceNumber != null) {
+            listOf(licensingType, licenceNumber)
+        } else {
+            licensingType
+        }
+
+    private fun getLicenceNumberOfType(
+        licensingType: LicensingType,
+        journeyData: JourneyData,
+    ) = when (licensingType) {
+        LicensingType.SELECTIVE_LICENCE ->
+            objectToStringKeyedMap(
+                journeyData[RegisterPropertyStepId.SelectiveLicence.urlPathSegment],
+            )?.get("licenceNumber") as String
+
+        LicensingType.HMO_MANDATORY_LICENCE ->
+            objectToStringKeyedMap(
+                journeyData[RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment],
+            )?.get("licenceNumber") as String
+
+        LicensingType.HMO_ADDITIONAL_LICENCE ->
+            objectToStringKeyedMap(
+                journeyData[RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment],
+            )?.get("licenceNumber") as String
+
+        LicensingType.NO_LICENSING -> null
     }
 
     private fun getTenancyDetails(journeyData: JourneyData): List<FormSummaryViewModel> {
@@ -229,14 +244,20 @@ class PropertyRegistrationCheckAnswersPage(
             ),
             FormSummaryViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.households",
-                objectToStringKeyedMap(
-                    journeyData[RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment],
-                )?.get("numberOfHouseholds") as String,
+                (
+                    objectToStringKeyedMap(
+                        journeyData[RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment],
+                    )?.get("numberOfHouseholds") as String
+                ).toIntOrNull(),
                 RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment,
             ),
             FormSummaryViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.people",
-                objectToStringKeyedMap(journeyData[RegisterPropertyStepId.NumberOfPeople.urlPathSegment])?.get("numberOfPeople") as String,
+                (
+                    objectToStringKeyedMap(
+                        journeyData[RegisterPropertyStepId.NumberOfPeople.urlPathSegment],
+                    )?.get("numberOfPeople") as String
+                ).toIntOrNull(),
                 RegisterPropertyStepId.NumberOfPeople.urlPathSegment,
             ),
         )
