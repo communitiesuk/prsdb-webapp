@@ -3,20 +3,19 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
-import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper as DataHelper
 
 class PropertyRegistrationCheckAnswersPage(
-    addressDataService: AddressDataService,
+    private val addressDataService: AddressDataService,
+    private val journeyDataService: JourneyDataService,
 ) : Page(
         NoInputFormModel::class,
         "forms/propertyRegistrationCheckAnswersForm",
@@ -25,8 +24,6 @@ class PropertyRegistrationCheckAnswersPage(
             "submitButtonText" to "forms.buttons.saveAndContinue",
         ),
     ) {
-    private val addressHelpers = AddressHelpers(addressDataService)
-
     override fun populateModelAndGetTemplateName(
         validator: Validator,
         model: Model,
@@ -44,12 +41,7 @@ class PropertyRegistrationCheckAnswersPage(
     }
 
     private fun getPropertyName(journeyData: JourneyData) =
-        if (addressHelpers.isManualAddress(journeyData)) {
-            addressHelpers.getManualAddressValue(journeyData[RegisterPropertyStepId.ManualAddress.urlPathSegment])
-        } else {
-            val addressData = objectToStringKeyedMap(journeyData[RegisterPropertyStepId.SelectAddress.urlPathSegment])
-            addressData?.get("address") as String
-        }
+        DataHelper.getAddress(journeyDataService, journeyData, addressDataService)?.singleLineAddress
 
     private fun getPropertyDetailsSummary(journeyData: JourneyData): List<FormSummaryViewModel> =
         getAddressDetails(journeyData) +
@@ -59,53 +51,67 @@ class PropertyRegistrationCheckAnswersPage(
             getTenancyDetails(journeyData) +
             getLandlordTypeDetails(journeyData)
 
-    private fun getAddressDetails(journeyData: JourneyData): List<FormSummaryViewModel> =
-        if (addressHelpers.isManualAddress(journeyData)) {
-            addressHelpers.manualAddressDetails(journeyData)
+    private fun getAddressDetails(journeyData: JourneyData): List<FormSummaryViewModel> {
+        val address = DataHelper.getAddress(journeyDataService, journeyData, addressDataService)
+        val custodianCode = address?.custodianCode ?: DataHelper.getCustodianCode(journeyDataService, journeyData)
+        return listOfNotNull(
+            FormSummaryViewModel(
+                "forms.checkPropertyAnswers.propertyDetails.address",
+                address?.singleLineAddress,
+                RegisterPropertyStepId.LookupAddress.urlPathSegment,
+            ),
+            address?.uprn?.let {
+                // Only include the UPRN summary if the UPRN is present
+                FormSummaryViewModel(
+                    "forms.checkPropertyAnswers.propertyDetails.uprn",
+                    address.uprn,
+                    null,
+                )
+            },
+            FormSummaryViewModel(
+                "forms.checkPropertyAnswers.propertyDetails.localAuthority",
+                getLocalAuthority(custodianCode).displayName,
+                getChangeLocalAuthorityUrl(journeyData),
+            ),
+        )
+    }
+
+    private fun getChangeLocalAuthorityUrl(journeyData: JourneyData) =
+        if (DataHelper.isManualAddressChosen(journeyDataService, journeyData)) {
+            RegisterPropertyStepId.LocalAuthority.urlPathSegment
         } else {
-            addressHelpers.selectedAddressDetails(journeyData)
+            null
         }
 
     private fun getPropertyTypeDetails(journeyData: JourneyData): FormSummaryViewModel {
-        val propertyType =
-            PropertyType.valueOf(
-                objectToStringKeyedMap(
-                    journeyData[RegisterPropertyStepId.PropertyType.urlPathSegment],
-                )?.get("propertyType") as String,
-            )
-        return if (propertyType != PropertyType.OTHER) {
-            FormSummaryViewModel(
-                "forms.checkPropertyAnswers.propertyDetails.type",
-                propertyType,
-                RegisterPropertyStepId.PropertyType.urlPathSegment,
-            )
-        } else {
-            val otherType =
-                objectToStringKeyedMap(
-                    journeyData[RegisterPropertyStepId.PropertyType.urlPathSegment],
-                )?.get("customPropertyType") as String
-            FormSummaryViewModel(
-                "forms.checkPropertyAnswers.propertyDetails.type",
-                listOf(propertyType, otherType),
-                RegisterPropertyStepId.PropertyType.urlPathSegment,
-            )
-        }
+        val propertyType = DataHelper.getPropertyType(journeyDataService, journeyData)!!
+        val customType = DataHelper.getCustomPropertyType(journeyDataService, journeyData)
+        return FormSummaryViewModel(
+            "forms.checkPropertyAnswers.propertyDetails.type",
+            getPropertyTypeSummaryValue(propertyType, customType),
+            RegisterPropertyStepId.PropertyType.urlPathSegment,
+        )
     }
+
+    private fun getPropertyTypeSummaryValue(
+        propertyType: PropertyType,
+        customType: String?,
+    ): Any =
+        if (propertyType == PropertyType.OTHER) {
+            listOf(propertyType, customType)
+        } else {
+            propertyType
+        }
 
     private fun getOwnershipTypeDetails(journeyData: JourneyData) =
         FormSummaryViewModel(
             "forms.checkPropertyAnswers.propertyDetails.ownership",
-            OwnershipType.valueOf(
-                objectToStringKeyedMap(journeyData[RegisterPropertyStepId.OwnershipType.urlPathSegment])?.get("ownershipType") as String,
-            ),
+            DataHelper.getOwnershipType(journeyDataService, journeyData),
             RegisterPropertyStepId.OwnershipType.urlPathSegment,
         )
 
     private fun getLicensingTypeDetails(journeyData: JourneyData): FormSummaryViewModel {
-        val licensingType =
-            LicensingType.valueOf(
-                objectToStringKeyedMap(journeyData[RegisterPropertyStepId.LicensingType.urlPathSegment])?.get("licensingType") as String,
-            )
+        val licensingType = DataHelper.getLicensingType(journeyDataService, journeyData)!!
         val licenceNumber = getLicenceNumberOfType(licensingType, journeyData)
         val licensingSummaryValue = getLicensingSummaryValue(licenceNumber, licensingType)
         return FormSummaryViewModel(
@@ -130,26 +136,29 @@ class PropertyRegistrationCheckAnswersPage(
         journeyData: JourneyData,
     ) = when (licensingType) {
         LicensingType.SELECTIVE_LICENCE ->
-            objectToStringKeyedMap(
-                journeyData[RegisterPropertyStepId.SelectiveLicence.urlPathSegment],
-            )?.get("licenceNumber") as String
-
+            DataHelper.getLicenseNumber(
+                journeyDataService,
+                journeyData,
+                RegisterPropertyStepId.SelectiveLicence.urlPathSegment,
+            )
         LicensingType.HMO_MANDATORY_LICENCE ->
-            objectToStringKeyedMap(
-                journeyData[RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment],
-            )?.get("licenceNumber") as String
-
+            DataHelper.getLicenseNumber(
+                journeyDataService,
+                journeyData,
+                RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment,
+            )
         LicensingType.HMO_ADDITIONAL_LICENCE ->
-            objectToStringKeyedMap(
-                journeyData[RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment],
-            )?.get("licenceNumber") as String
-
+            DataHelper.getLicenseNumber(
+                journeyDataService,
+                journeyData,
+                RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment,
+            )
         LicensingType.NO_LICENSING -> null
     }
 
     private fun getTenancyDetails(journeyData: JourneyData): List<FormSummaryViewModel> {
-        val occupied = objectToStringKeyedMap(journeyData[RegisterPropertyStepId.Occupancy.urlPathSegment])?.get("occupied") as String
-        if (occupied == "true") {
+        val occupied = DataHelper.getIsOccupied(journeyDataService, journeyData)!!
+        if (occupied) {
             return getOccupyingTenantsDetails(journeyData)
         } else {
             return listOf(
@@ -163,10 +172,7 @@ class PropertyRegistrationCheckAnswersPage(
     }
 
     private fun getLandlordTypeDetails(journeyData: JourneyData): FormSummaryViewModel {
-        val landlordType =
-            LandlordType.valueOf(
-                objectToStringKeyedMap(journeyData[RegisterPropertyStepId.LandlordType.urlPathSegment])?.get("landlordType") as String,
-            )
+        val landlordType = DataHelper.getLandlordType(journeyDataService, journeyData)!!
         return FormSummaryViewModel(
             "forms.checkPropertyAnswers.propertyDetails.landlordType",
             landlordType,
@@ -174,66 +180,7 @@ class PropertyRegistrationCheckAnswersPage(
         )
     }
 
-    private class AddressHelpers(
-        val addressDataService: AddressDataService,
-    ) {
-        fun selectedAddressDetails(journeyData: JourneyData): List<FormSummaryViewModel> {
-            val addressData = objectToStringKeyedMap(journeyData[RegisterPropertyStepId.SelectAddress.urlPathSegment])
-            val singleLineAddress = addressData?.get("address") as String
-            val address = addressDataService.getAddressData(singleLineAddress)
-            return listOf(
-                FormSummaryViewModel(
-                    "forms.checkPropertyAnswers.propertyDetails.address",
-                    singleLineAddress,
-                    RegisterPropertyStepId.LookupAddress.urlPathSegment,
-                ),
-                FormSummaryViewModel(
-                    "forms.checkPropertyAnswers.propertyDetails.uprn",
-                    address?.uprn,
-                    null,
-                ),
-                FormSummaryViewModel(
-                    "forms.checkPropertyAnswers.propertyDetails.localAuthority",
-                    getLocalAuthority(address?.custodianCode).displayName,
-                    null,
-                ),
-            )
-        }
-
-        fun manualAddressDetails(journeyData: JourneyData) =
-            listOf(
-                FormSummaryViewModel(
-                    "forms.checkPropertyAnswers.propertyDetails.address",
-                    getManualAddressValue(journeyData[RegisterPropertyStepId.ManualAddress.urlPathSegment]),
-                    RegisterPropertyStepId.LookupAddress.urlPathSegment,
-                ),
-                FormSummaryViewModel(
-                    "forms.checkPropertyAnswers.propertyDetails.localAuthority",
-                    getLocalAuthority(
-                        objectToStringKeyedMap(
-                            journeyData[RegisterPropertyStepId.LocalAuthority.urlPathSegment],
-                        )?.get("localAuthorityCustodianCode") as String,
-                    ).displayName,
-                    RegisterPropertyStepId.LocalAuthority.urlPathSegment,
-                ),
-            )
-
-        fun getLocalAuthority(custodianCode: String?) = LOCAL_AUTHORITIES.single { it.custodianCode == custodianCode }
-
-        fun isManualAddress(journeyData: JourneyData): Boolean =
-            objectToStringKeyedMap(journeyData[RegisterPropertyStepId.SelectAddress.urlPathSegment])?.get("address") ==
-                MANUAL_ADDRESS_CHOSEN
-
-        fun getManualAddressValue(manualAddressData: Any?): String {
-            val addressLineOne = objectToStringKeyedMap(manualAddressData)?.get("addressLineOne")
-            val addressLineTwo = objectToStringKeyedMap(manualAddressData)?.get("addressLineTwo")
-            val townOrCity = objectToStringKeyedMap(manualAddressData)?.get("townOrCity")
-            val county = objectToStringKeyedMap(manualAddressData)?.get("county")
-            val postcode = objectToStringKeyedMap(manualAddressData)?.get("postcode")
-            return listOfNotNull(addressLineOne, addressLineTwo, townOrCity, county, postcode)
-                .joinToString(", ")
-        }
-    }
+    private fun getLocalAuthority(custodianCode: String?) = LOCAL_AUTHORITIES.single { it.custodianCode == custodianCode }
 
     private fun getOccupyingTenantsDetails(journeyData: JourneyData): List<FormSummaryViewModel> =
         listOf(
@@ -244,20 +191,12 @@ class PropertyRegistrationCheckAnswersPage(
             ),
             FormSummaryViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.households",
-                (
-                    objectToStringKeyedMap(
-                        journeyData[RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment],
-                    )?.get("numberOfHouseholds") as String
-                ).toIntOrNull(),
+                DataHelper.getNumberOfHouseholds(journeyDataService, journeyData)!!,
                 RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment,
             ),
             FormSummaryViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.people",
-                (
-                    objectToStringKeyedMap(
-                        journeyData[RegisterPropertyStepId.NumberOfPeople.urlPathSegment],
-                    )?.get("numberOfPeople") as String
-                ).toIntOrNull(),
+                DataHelper.getNumberOfTenants(journeyDataService, journeyData)!!,
                 RegisterPropertyStepId.NumberOfPeople.urlPathSegment,
             ),
         )

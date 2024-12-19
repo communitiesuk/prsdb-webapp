@@ -27,6 +27,16 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
             }
         }
 
+        fun getCustodianCode(
+            journeyDataService: JourneyDataService,
+            journeyData: JourneyData,
+        ): String? =
+            journeyDataService.getFieldStringValue(
+                journeyData,
+                RegisterPropertyStepId.LocalAuthority.urlPathSegment,
+                "localAuthorityCustodianCode",
+            )
+
         fun getPropertyType(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
@@ -112,7 +122,7 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
                 "address",
             )
 
-        private fun isManualAddressChosen(
+        fun isManualAddressChosen(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
         ) = getSelectedAddress(journeyDataService, journeyData) == MANUAL_ADDRESS_CHOSEN

@@ -68,7 +68,7 @@ class PropertyRegistrationJourney(
                 hmoMandatoryLicenceStep(),
                 hmoAdditionalLicenceStep(),
                 landlordTypeStep(),
-                checkAnswersStep(addressDataService),
+                checkAnswersStep(addressDataService, journeyDataService),
                 Step(
                     id = RegisterPropertyStepId.PlaceholderPage,
                     page =
@@ -479,12 +479,14 @@ class PropertyRegistrationJourney(
                 nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
             )
 
-        fun checkAnswersStep(addressDataService: AddressDataService) =
-            Step(
-                id = RegisterPropertyStepId.CheckAnswers,
-                page = PropertyRegistrationCheckAnswersPage(addressDataService),
-                nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
-            )
+        fun checkAnswersStep(
+            addressDataService: AddressDataService,
+            journeyDataService: JourneyDataService,
+        ) = Step(
+            id = RegisterPropertyStepId.CheckAnswers,
+            page = PropertyRegistrationCheckAnswersPage(addressDataService, journeyDataService),
+            nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
+        )
 
         private fun occupancyNextAction(journeyData: JourneyData): Pair<RegisterPropertyStepId, Int?> =
             when (

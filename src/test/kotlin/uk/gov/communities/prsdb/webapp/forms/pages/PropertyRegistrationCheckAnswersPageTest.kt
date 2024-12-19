@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class PropertyRegistrationCheckAnswersPageTest {
     private lateinit var page: PropertyRegistrationCheckAnswersPage
@@ -39,7 +40,7 @@ class PropertyRegistrationCheckAnswersPageTest {
                 LOCAL_AUTHORITIES[15].custodianCode,
             ),
         )
-        page = PropertyRegistrationCheckAnswersPage(addressService)
+        page = PropertyRegistrationCheckAnswersPage(addressService, JourneyDataService(mock(), mock(), mock(), mock()))
         validator = mock()
         whenever(validator.supports(any<Class<*>>())).thenReturn(true)
         model = ExtendedModelMap()
