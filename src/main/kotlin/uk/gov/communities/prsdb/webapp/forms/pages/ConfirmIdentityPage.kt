@@ -3,9 +3,9 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
-import uk.gov.communities.prsdb.webapp.models.dataModels.FormSummaryDataModel
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
 import kotlin.reflect.KClass
 
 class ConfirmIdentityPage(
@@ -23,12 +23,12 @@ class ConfirmIdentityPage(
         val identityData = getIdentityData()
         val formData =
             mutableListOf(
-                FormSummaryDataModel(
+                FormSummaryViewModel(
                     "forms.confirmDetails.rowHeading.name",
                     identityData?.get(VerifiedIdentityModel.NAME_KEY),
                     null,
                 ),
-                FormSummaryDataModel(
+                FormSummaryViewModel(
                     "forms.confirmDetails.rowHeading.dob",
                     identityData?.get(VerifiedIdentityModel.BIRTH_DATE_KEY),
                     null,

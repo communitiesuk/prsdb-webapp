@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.pages.ConfirmIdentityPage
-import uk.gov.communities.prsdb.webapp.forms.pages.LandlordRegistrationSummaryPage
+import uk.gov.communities.prsdb.webapp.forms.pages.LandlordRegistrationCheckAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.VerifyIdentityPage
@@ -63,7 +63,7 @@ class LandlordRegistrationJourney(
                 lookupContactAddressStep(),
                 selectContactAddressStep(journeyDataService, addressLookupService, addressDataService),
                 manualContactAddressStep(),
-                checkAnswersStep(),
+                checkAnswersStep(journeyDataService, addressDataService),
                 declarationStep(journeyDataService, landlordService, addressDataService),
             ),
     ) {
@@ -397,24 +397,27 @@ class LandlordRegistrationJourney(
                 saveAfterSubmit = false,
             )
 
-        private fun checkAnswersStep() =
-            Step(
-                // TODO PRSD-372 update message value(s)
-                id = LandlordRegistrationStepId.CheckAnswers,
-                page =
-                    LandlordRegistrationSummaryPage(
-                        formModel = CheckAnswersFormModel::class,
-                        templateName = "forms/checkAnswersForm",
-                        content =
-                            mapOf(
-                                "title" to "registerAsALandlord.title",
-                                "summaryName" to "registerAsALandlord.title",
-                                "submitButtonText" to "forms.buttons.confirmAndContinue",
-                            ),
-                    ),
-                nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Declaration, null) },
-                saveAfterSubmit = false,
-            )
+        private fun checkAnswersStep(
+            journeyDataService: JourneyDataService,
+            addressDataService: AddressDataService,
+        ) = Step(
+            id = LandlordRegistrationStepId.CheckAnswers,
+            page =
+                LandlordRegistrationCheckAnswersPage(
+                    formModel = CheckAnswersFormModel::class,
+                    templateName = "forms/checkAnswersForm",
+                    content =
+                        mapOf(
+                            "title" to "registerAsALandlord.title",
+                            "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
+                            "submitButtonText" to "forms.buttons.confirmAndContinue",
+                        ),
+                    journeyDataService = journeyDataService,
+                    addressDataService = addressDataService,
+                ),
+            nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Declaration, null) },
+            saveAfterSubmit = false,
+        )
 
         private fun declarationStep(
             journeyDataService: JourneyDataService,
