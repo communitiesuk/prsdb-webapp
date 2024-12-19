@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService.Companion.getFieldEnumValue
 
-class PropertyRegistrationJourneyDataHelper {
+class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
     companion object {
         fun getAddress(
             journeyDataService: JourneyDataService,
@@ -20,7 +20,7 @@ class PropertyRegistrationJourneyDataHelper {
             addressDataService: AddressDataService,
         ): AddressDataModel? {
             return if (isManualAddressChosen(journeyDataService, journeyData)) {
-                addressDataService.getManualAddress(journeyDataService, journeyData, RegisterPropertyStepId.ManualAddress.urlPathSegment)
+                getManualAddress(journeyDataService, journeyData, RegisterPropertyStepId.ManualAddress.urlPathSegment)
             } else {
                 val selectedAddress = getSelectedAddress(journeyDataService, journeyData) ?: return null
                 addressDataService.getAddressData(selectedAddress)

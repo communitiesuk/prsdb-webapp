@@ -190,8 +190,28 @@ class LandlordJourneyDataHelperTests {
         ).thenReturn(MANUAL_ADDRESS_CHOSEN)
 
         whenever(
-            mockAddressDataService.getManualAddress(mockJourneyDataService, mockJourneyData, manualAddressPathSegment),
-        ).thenReturn(expectedAddressDataModel)
+            mockJourneyDataService.getFieldStringValue(
+                mockJourneyData,
+                manualAddressPathSegment,
+                "addressLineOne",
+            ),
+        ).thenReturn(addressLineOne)
+
+        whenever(
+            mockJourneyDataService.getFieldStringValue(
+                mockJourneyData,
+                manualAddressPathSegment,
+                "townOrCity",
+            ),
+        ).thenReturn(townOrCity)
+
+        whenever(
+            mockJourneyDataService.getFieldStringValue(
+                mockJourneyData,
+                manualAddressPathSegment,
+                "postcode",
+            ),
+        ).thenReturn(postcode)
 
         val addressDataModel =
             LandlordJourneyDataHelper.getAddress(mockJourneyDataService, mockJourneyData, mockAddressDataService)

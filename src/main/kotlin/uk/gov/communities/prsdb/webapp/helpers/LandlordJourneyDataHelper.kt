@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.helpers
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
+import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper.Companion.getManualAddress
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -119,7 +120,7 @@ class LandlordJourneyDataHelper {
             val livesInUK = getLivesInUK(journeyDataService, journeyData) ?: return null
 
             return if (isManualAddressChosen(journeyDataService, journeyData, !livesInUK)) {
-                getManualAddress(journeyDataService, journeyData, !livesInUK, addressDataService)
+                getManualAddress(journeyDataService, journeyData, !livesInUK)
             } else {
                 val selectedAddress = getSelectedAddress(journeyDataService, journeyData, !livesInUK) ?: return null
                 addressDataService.getAddressData(selectedAddress)
@@ -149,7 +150,6 @@ class LandlordJourneyDataHelper {
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
             isContactAddress: Boolean = false,
-            addressDataService: AddressDataService,
         ): AddressDataModel? {
             val manualAddressPathSegment =
                 if (isContactAddress) {
@@ -158,7 +158,7 @@ class LandlordJourneyDataHelper {
                     LandlordRegistrationStepId.ManualAddress.urlPathSegment
                 }
 
-            return addressDataService.getManualAddress(journeyDataService, journeyData, manualAddressPathSegment)
+            return JourneyDataHelper.getManualAddress(journeyDataService, journeyData, manualAddressPathSegment)
         }
 
         fun getInternationalAddress(
