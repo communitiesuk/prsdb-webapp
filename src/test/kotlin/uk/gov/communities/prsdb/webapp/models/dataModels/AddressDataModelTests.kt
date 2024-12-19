@@ -1,25 +1,73 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels
 
+import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import kotlin.test.assertEquals
 
 class AddressDataModelTests {
-    @ParameterizedTest
-    @CsvSource(
-        "Flat 10,Townville,EG1 2AB,1 Example Road,Countyshire,'Flat 10, 1 Example Road, Townville, Countyshire, EG1 2AB'",
-        "1 Example Road,Townville,EG1 2AB,,Countyshire,'1 Example Road, Townville, Countyshire, EG1 2AB'",
-        "Flat 10,Townville,EG1 2AB,1 Example Road,,'Flat 10, 1 Example Road, Townville, EG1 2AB'",
-        "1 Example Road,Townville,EG1 2AB,,,'1 Example Road, Townville, EG1 2AB'",
-    )
+    companion object {
+        @JvmStatic
+        fun provideAddresses() =
+            listOf(
+                Arguments.of(
+                    Named.of(
+                        "no fields blank or missing",
+                        "Flat 10, 1 Example Road, Townville, Countyshire, EG1 2AB",
+                    ),
+                    "Flat 10",
+                    "Townville",
+                    "EG1 2AB",
+                    "1 Example Road",
+                    "Countyshire",
+                ),
+                Arguments.of(
+                    Named.of(
+                        "addressLineTwo blank",
+                        "1 Example Road, Townville, Countyshire, EG1 2AB",
+                    ),
+                    "1 Example Road",
+                    "Townville",
+                    "EG1 2AB",
+                    "",
+                    "Countyshire",
+                ),
+                Arguments.of(
+                    Named.of(
+                        "county blank",
+                        "Flat 10, 1 Example Road, Townville, EG1 2AB",
+                    ),
+                    "Flat 10",
+                    "Townville",
+                    "EG1 2AB",
+                    "1 Example Road",
+                    "",
+                ),
+                Arguments.of(
+                    Named.of(
+                        "addressLineTwo and county missing",
+                        "1 Example Road, Townville, EG1 2AB",
+                    ),
+                    "1 Example Road",
+                    "Townville",
+                    "EG1 2AB",
+                    null,
+                    null,
+                ),
+            )
+    }
+
+    @ParameterizedTest(name = "when given an address with {0}")
+    @MethodSource("provideAddresses")
     fun `parseSingleLineAddress returns a corresponding address string`(
+        expectedAddressString: String,
         addressLineOne: String,
         townOrCity: String,
         postcode: String,
         addressLineTwo: String?,
         county: String?,
-        expectedAddressString: String,
     ) {
         assertEquals(
             expectedAddressString,
