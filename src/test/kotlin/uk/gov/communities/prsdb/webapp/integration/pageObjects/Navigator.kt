@@ -132,7 +132,7 @@ class Navigator(
     fun goToLandlordRegistrationSelectAddressPage(): SelectAddressFormPageLandlordRegistration {
         val lookupAddressPage = goToLandlordRegistrationLookupAddressPage()
         lookupAddressPage.postcodeInput.fill("EG")
-        lookupAddressPage.houseNameOrNumberInput.fill("5")
+        lookupAddressPage.houseNameOrNumberInput.fill("1")
         lookupAddressPage.form.submit()
         return createValidPage(page, SelectAddressFormPageLandlordRegistration::class)
     }
@@ -155,7 +155,7 @@ class Navigator(
 
     fun goToLandlordRegistrationLookupContactAddressPage(): LookupContactAddressFormPageLandlordRegistration {
         val internationalAddressPage = goToLandlordRegistrationInternationalAddressPage()
-        internationalAddressPage.textAreaInput.fill("address")
+        internationalAddressPage.textAreaInput.fill("international address")
         internationalAddressPage.form.submit()
         return createValidPage(page, LookupContactAddressFormPageLandlordRegistration::class)
     }
@@ -175,11 +175,25 @@ class Navigator(
         return createValidPage(page, ManualContactAddressFormPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationCheckAnswersPage(): CheckAnswersPageLandlordRegistration {
-        val selectAddressPage = goToLandlordRegistrationSelectContactAddressPage()
-        selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
-        selectAddressPage.form.submit()
-        return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
+    fun goToLandlordRegistrationCheckAnswersPage(
+        livesInUK: Boolean = true,
+        isManualAddressChosen: Boolean = false,
+    ): CheckAnswersPageLandlordRegistration {
+        if (isManualAddressChosen) {
+            val manualAddressPage =
+                if (livesInUK) goToLandlordRegistrationManualAddressPage() else goToLandlordRegistrationManualContactAddressPage()
+            manualAddressPage.addressLineOneInput.fill("1 Example Road")
+            manualAddressPage.townOrCityInput.fill("Townville")
+            manualAddressPage.postcodeInput.fill("EG1 2AB")
+            manualAddressPage.form.submit()
+            return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
+        } else {
+            val selectAddressPage =
+                if (livesInUK) goToLandlordRegistrationSelectAddressPage() else goToLandlordRegistrationSelectContactAddressPage()
+            selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
+            selectAddressPage.form.submit()
+            return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
+        }
     }
 
     fun goToLandlordRegistrationDeclarationPage(): DeclarationFormPageLandlordRegistration {
