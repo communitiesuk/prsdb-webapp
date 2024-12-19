@@ -22,6 +22,8 @@ class Form(
 
     fun getCheckboxes() = Checkboxes(page)
 
+    fun getSummaryList() = SummaryList(page)
+
     fun submit() {
         getSubmitButton().click()
         page.waitForLoadState()
