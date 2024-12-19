@@ -27,7 +27,6 @@ import uk.gov.communities.prsdb.webapp.models.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
-import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
@@ -35,7 +34,6 @@ import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
-import java.time.LocalDate
 
 @Component
 class LandlordRegistrationJourney(
@@ -65,7 +63,7 @@ class LandlordRegistrationJourney(
                 lookupContactAddressStep(),
                 selectContactAddressStep(journeyDataService, addressLookupService, addressDataService),
                 manualContactAddressStep(),
-                checkAnswersStep(journeyDataService),
+                checkAnswersStep(journeyDataService, addressDataService),
                 declarationStep(journeyDataService, landlordService, addressDataService),
             ),
     ) {
@@ -399,24 +397,27 @@ class LandlordRegistrationJourney(
                 saveAfterSubmit = false,
             )
 
-        private fun checkAnswersStep(journeyDataService: JourneyDataService) =
-            Step(
-                id = LandlordRegistrationStepId.CheckAnswers,
-                page =
-                    LandlordRegistrationCheckAnswersPage(
-                        formModel = CheckAnswersFormModel::class,
-                        templateName = "forms/checkAnswersForm",
-                        content =
-                            mapOf(
-                                "title" to "registerAsALandlord.title",
-                                "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
-                                "submitButtonText" to "forms.buttons.confirmAndContinue",
-                            ),
-                        journeyDataService = journeyDataService,
-                    ),
-                nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Declaration, null) },
-                saveAfterSubmit = false,
-            )
+        private fun checkAnswersStep(
+            journeyDataService: JourneyDataService,
+            addressDataService: AddressDataService,
+        ) = Step(
+            id = LandlordRegistrationStepId.CheckAnswers,
+            page =
+                LandlordRegistrationCheckAnswersPage(
+                    formModel = CheckAnswersFormModel::class,
+                    templateName = "forms/checkAnswersForm",
+                    content =
+                        mapOf(
+                            "title" to "registerAsALandlord.title",
+                            "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
+                            "submitButtonText" to "forms.buttons.confirmAndContinue",
+                        ),
+                    journeyDataService = journeyDataService,
+                    addressDataService = addressDataService,
+                ),
+            nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Declaration, null) },
+            saveAfterSubmit = false,
+        )
 
         private fun declarationStep(
             journeyDataService: JourneyDataService,
@@ -515,12 +516,6 @@ class LandlordRegistrationJourney(
             journeyDataService.clearJourneyDataFromSession()
 
             return "/$REGISTER_LANDLORD_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT"
-        }
-
-        fun doesJourneyDataContainVerifiedIdentity(journeyData: JourneyData): Boolean {
-            val pageData = objectToStringKeyedMap(journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment]) ?: mapOf()
-            return pageData[VerifiedIdentityModel.NAME_KEY] is String &&
-                pageData[VerifiedIdentityModel.BIRTH_DATE_KEY] is LocalDate
         }
     }
 }
