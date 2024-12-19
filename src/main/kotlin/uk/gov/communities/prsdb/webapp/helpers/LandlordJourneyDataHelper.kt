@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.helpers
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
+import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper.Companion.getManualAddress
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -157,48 +158,7 @@ class LandlordJourneyDataHelper {
                     LandlordRegistrationStepId.ManualAddress.urlPathSegment
                 }
 
-            val addressLineOne =
-                journeyDataService.getFieldStringValue(
-                    journeyData,
-                    manualAddressPathSegment,
-                    "addressLineOne",
-                ) ?: return null
-
-            val townOrCity =
-                journeyDataService.getFieldStringValue(
-                    journeyData,
-                    manualAddressPathSegment,
-                    "townOrCity",
-                ) ?: return null
-
-            val postcode =
-                journeyDataService.getFieldStringValue(
-                    journeyData,
-                    manualAddressPathSegment,
-                    "postcode",
-                ) ?: return null
-
-            val addressLineTwo =
-                journeyDataService.getFieldStringValue(
-                    journeyData,
-                    manualAddressPathSegment,
-                    "addressLineTwo",
-                )
-
-            val county =
-                journeyDataService.getFieldStringValue(
-                    journeyData,
-                    manualAddressPathSegment,
-                    "county",
-                )
-
-            return AddressDataModel.fromManualAddressData(
-                addressLineOne,
-                townOrCity,
-                postcode,
-                addressLineTwo,
-                county,
-            )
+            return JourneyDataHelper.getManualAddress(journeyDataService, journeyData, manualAddressPathSegment)
         }
 
         fun getInternationalAddress(

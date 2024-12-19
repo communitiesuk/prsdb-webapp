@@ -129,4 +129,17 @@ class JourneyDataService(
         val fieldAsString = getFieldStringValue(journeyData, urlPathSegment, fieldName, subPageNumber) ?: return null
         return fieldAsString == "true"
     }
+
+    companion object {
+        inline fun <reified E : Enum<E>> getFieldEnumValue(
+            journeyDataService: JourneyDataService,
+            journeyData: JourneyData,
+            urlPathSegment: String,
+            fieldName: String,
+            subPageNumber: Int? = null,
+        ): E? {
+            val fieldAsString = journeyDataService.getFieldStringValue(journeyData, urlPathSegment, fieldName, subPageNumber) ?: return null
+            return enumValueOf<E>(fieldAsString)
+        }
+    }
 }
