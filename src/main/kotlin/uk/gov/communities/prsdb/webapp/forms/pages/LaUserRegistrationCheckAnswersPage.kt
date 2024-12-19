@@ -6,8 +6,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
-import uk.gov.communities.prsdb.webapp.models.dataModels.FormSummaryDataModel
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import kotlin.reflect.KClass
@@ -26,7 +26,7 @@ class LaUserRegistrationCheckAnswersPage(
         prevStepUrl: String?,
     ): String {
         val journeyData = journeyDataService.getJourneyDataFromSession()
-        val formData = mutableListOf<FormSummaryDataModel>()
+        val formData = mutableListOf<FormSummaryViewModel>()
         val sessionToken = invitationService.getTokenFromSession()
 
         val localAuthority =
@@ -38,17 +38,17 @@ class LaUserRegistrationCheckAnswersPage(
 
         formData.addAll(
             listOf(
-                FormSummaryDataModel(
+                FormSummaryViewModel(
                     "registerLaUser.checkAnswers.rowHeading.localAuthority",
                     localAuthority?.name,
                     null,
                 ),
-                FormSummaryDataModel(
+                FormSummaryViewModel(
                     "registerLaUser.checkAnswers.rowHeading.name",
                     objectToStringKeyedMap(journeyData["name"])?.get("name"),
                     "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Name.urlPathSegment}",
                 ),
-                FormSummaryDataModel(
+                FormSummaryViewModel(
                     "registerLaUser.checkAnswers.rowHeading.email",
                     objectToStringKeyedMap(journeyData["email"])?.get("emailAddress"),
                     "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Email.urlPathSegment}",

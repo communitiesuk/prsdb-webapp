@@ -15,7 +15,6 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.models.dataModels.FormSummaryDataModel
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoAdditionalLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoMandatoryLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LandlordTypeFormModel
@@ -31,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.models.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectLocalAuthorityFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectiveLicenceFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
@@ -81,27 +81,27 @@ class PropertyRegistrationJourney(
                                     "submitButtonText" to "forms.buttons.saveAndContinue",
                                     "propertyDetails" to
                                         listOf(
-                                            FormSummaryDataModel(
+                                            FormSummaryViewModel(
                                                 "forms.checkPropertyAnswers.propertyDetails.address",
                                                 "1 example road EX4 PL3",
                                                 null,
                                             ),
-                                            FormSummaryDataModel(
+                                            FormSummaryViewModel(
                                                 "forms.checkPropertyAnswers.propertyDetails.uprn",
                                                 "100023584755",
                                                 null,
                                             ),
-                                            FormSummaryDataModel(
+                                            FormSummaryViewModel(
                                                 "forms.checkPropertyAnswers.propertyDetails.type",
                                                 "Flat",
                                                 null,
                                             ),
-                                            FormSummaryDataModel(
+                                            FormSummaryViewModel(
                                                 "forms.checkPropertyAnswers.propertyDetails.ownership",
                                                 "Freehold",
                                                 null,
                                             ),
-                                            FormSummaryDataModel(
+                                            FormSummaryViewModel(
                                                 "forms.checkPropertyAnswers.propertyDetails.landlordType",
                                                 "Individual",
                                                 null,
@@ -557,7 +557,8 @@ class PropertyRegistrationJourney(
         }
 
         private fun licensingTypeNextAction(journeyData: JourneyData): Pair<RegisterPropertyStepId, Int?> {
-            val licensingTypePageData = objectToStringKeyedMap(journeyData[RegisterPropertyStepId.LicensingType.urlPathSegment])
+            val licensingTypePageData =
+                objectToStringKeyedMap(journeyData[RegisterPropertyStepId.LicensingType.urlPathSegment])
             val licensingType = LicensingType.valueOf(licensingTypePageData?.get("licensingType") as String)
 
             return when (licensingType) {
