@@ -28,7 +28,7 @@ class MessageKeyConverter {
             when (landlordType) {
                 LandlordType.SOLE -> "forms.checkPropertyAnswers.propertyDetails.landlordType.sole"
                 LandlordType.JOINT -> " forms.checkPropertyAnswers.propertyDetails.landlordType.joint"
-                LandlordType.COMPANY -> TODO()
+                LandlordType.COMPANY -> TODO("PRSD-674 - Organisational Landlords")
             }
 
         private fun convertLicensingType(licensingType: LicensingType): String =
