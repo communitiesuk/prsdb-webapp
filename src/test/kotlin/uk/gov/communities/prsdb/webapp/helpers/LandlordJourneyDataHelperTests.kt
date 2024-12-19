@@ -21,6 +21,10 @@ class LandlordJourneyDataHelperTests {
 
     private val mockJourneyData: JourneyData = mutableMapOf()
 
+    companion object {
+        private const val COUNTRY_OF_RESIDENCE = "France"
+    }
+
     @BeforeEach
     fun setup() {
         mockJourneyDataService = mock()
@@ -109,6 +113,34 @@ class LandlordJourneyDataHelperTests {
         val manualDOB = LandlordJourneyDataHelper.getDOB(mockJourneyDataService, mockJourneyData)
 
         assertEquals(expectedManualDOB, manualDOB)
+    }
+
+    @ParameterizedTest(name = "when livesInUK = {0}")
+    @CsvSource("true,", "false,$COUNTRY_OF_RESIDENCE")
+    fun `getNonUKCountryOfResidence returns the corresponding country or null`(
+        livesInUK: Boolean,
+        expectedNonUKCountryOfResidence: String?,
+    ) {
+        whenever(
+            mockJourneyDataService.getFieldBooleanValue(
+                mockJourneyData,
+                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
+                "livesInUK",
+            ),
+        ).thenReturn(livesInUK)
+
+        whenever(
+            mockJourneyDataService.getFieldStringValue(
+                mockJourneyData,
+                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
+                "countryOfResidence",
+            ),
+        ).thenReturn(COUNTRY_OF_RESIDENCE)
+
+        val nonUKCountryOfResidence =
+            LandlordJourneyDataHelper.getNonUKCountryOfResidence(mockJourneyDataService, mockJourneyData)
+
+        assertEquals(expectedNonUKCountryOfResidence, nonUKCountryOfResidence)
     }
 
     @ParameterizedTest(name = "when livesInUK = {0}")
