@@ -21,6 +21,7 @@ import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmationPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
@@ -34,7 +35,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SummaryPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.net.URI
@@ -85,7 +85,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
         selectAddressPage.form.submit()
 
-        val summaryPage = assertPageIs(page, SummaryPageLandlordRegistration::class)
+        val summaryPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
         summaryPage.submitButton.click()
 
         val declarationPage = assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
@@ -138,7 +138,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         manualAddressPage.postcodeInput.fill("EG1 2AB")
         manualAddressPage.form.submit()
 
-        val summaryPage = assertPageIs(page, SummaryPageLandlordRegistration::class)
+        val summaryPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
         summaryPage.submitButton.click()
 
         val declarationPage = assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
@@ -196,7 +196,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         selectContactAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
         selectContactAddressPage.form.submit()
 
-        val summaryPage = assertPageIs(page, SummaryPageLandlordRegistration::class)
+        val summaryPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
         summaryPage.submitButton.click()
 
         val declarationPage = assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
@@ -262,7 +262,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         manualContactAddressPage.postcodeInput.fill("EG1 2AB")
         manualContactAddressPage.form.submit()
 
-        val summaryPage = assertPageIs(page, SummaryPageLandlordRegistration::class)
+        val summaryPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
         summaryPage.submitButton.click()
 
         val declarationPage = assertPageIs(page, DeclarationFormPageLandlordRegistration::class)

@@ -10,10 +10,10 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.CheckAnswersPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.SuccessPageLaUserRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.SummaryPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 
 @Sql("/data-mockuser-not-lauser.sql")
@@ -85,7 +85,7 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
             val emailPage = navigator.goToLaUserRegistrationEmailFormPage()
             emailPage.emailInput.fill("test@example.com")
             emailPage.form.submit()
-            assertPageIs(page, SummaryPageLaUserRegistration::class)
+            assertPageIs(page, CheckAnswersPageLaUserRegistration::class)
         }
 
         @Test
