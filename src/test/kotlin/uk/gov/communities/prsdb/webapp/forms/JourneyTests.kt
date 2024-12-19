@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import jakarta.servlet.http.HttpSession
 import jakarta.validation.Validation
 import jakarta.validation.ValidatorFactory
 import jakarta.validation.constraints.NotNull
@@ -8,14 +10,17 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyMap
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.mock
+import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
@@ -26,6 +31,8 @@ import org.springframework.validation.support.BindingAwareModelMap
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.forms.journeys.Journey
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
@@ -51,6 +58,7 @@ class JourneyTests {
         StepOne("step1"),
         StepTwo("step2"),
         StepThree("step3"),
+        StepFour("step4"),
     }
 
     class TestJourney(
@@ -357,6 +365,118 @@ class JourneyTests {
             val propertyValue = bindingResult.getRawFieldValue("testProperty")
             assertEquals("testPropertyValue", propertyValue)
             assertEquals("templateName", result)
+        }
+    }
+
+    @ExtendWith(MockitoExtension::class)
+    @Nested
+    inner class FilteredJourneyData {
+        @Mock
+        private lateinit var mockHttpSession: HttpSession
+
+        @Mock
+        private lateinit var mockFormContextRepository: FormContextRepository
+
+        @Mock
+        private lateinit var mockOneLoginUserRepository: OneLoginUserRepository
+
+        private lateinit var journeyDataService: JourneyDataService
+
+        @BeforeEach
+        fun setup() {
+            journeyDataService =
+                JourneyDataService(
+                    mockHttpSession,
+                    mockFormContextRepository,
+                    mockOneLoginUserRepository,
+                    ObjectMapper(),
+                )
+        }
+
+        @Test
+        fun `populateModelAndGetViewName returns populateModelAndGetTemplateName with filteredJourneyData as a parameter`() {
+            // Arrange
+            val spiedOnJourneyDataService = spy(journeyDataService)
+            val page =
+                Page(
+                    TestFormModel::class,
+                    "templateName",
+                    mutableMapOf("testKey" to "testValue"),
+                )
+            val spiedOnPage = spy(page)
+
+            val testJourney =
+                TestJourney(
+                    JourneyType.LANDLORD_REGISTRATION,
+                    initialStepId = TestStepId.StepOne,
+                    journeyDataService = spiedOnJourneyDataService,
+                    validator = validator,
+                    steps =
+                        setOf(
+                            Step(
+                                TestStepId.StepOne,
+                                page =
+                                    Page(
+                                        TestFormModel::class,
+                                        "index",
+                                        mutableMapOf(),
+                                    ),
+                                nextAction = { _, _ -> Pair(TestStepId.StepThree, null) },
+                            ),
+                            Step(
+                                TestStepId.StepTwo,
+                                page =
+                                    Page(
+                                        TestFormModel::class,
+                                        "templateName",
+                                        mutableMapOf("testKey" to "testValue"),
+                                    ),
+                            ),
+                            Step(
+                                TestStepId.StepThree,
+                                page =
+                                    Page(
+                                        TestFormModel::class,
+                                        "index",
+                                        mutableMapOf("testKey" to "testValue"),
+                                    ),
+                                nextAction = { _, _ -> Pair(TestStepId.StepFour, null) },
+                            ),
+                            Step(
+                                TestStepId.StepFour,
+                                page = spiedOnPage,
+                            ),
+                        ),
+                )
+            val model = BindingAwareModelMap()
+            val pageDataStepOne: PageData = mutableMapOf("testProperty" to "testProperty")
+            val pageDataStepTwo: PageData = mutableMapOf("testPropertyTwo" to "testProperty")
+            val pageDataStepThree: PageData = mutableMapOf("testProperty" to "testProperty")
+            val pageDataStepFour: PageData = mutableMapOf("testProperty" to "testProperty")
+            val journeyData: JourneyData =
+                mutableMapOf(
+                    TestStepId.StepOne.urlPathSegment to pageDataStepOne,
+                    TestStepId.StepTwo.urlPathSegment to pageDataStepTwo,
+                    TestStepId.StepThree.urlPathSegment to pageDataStepThree,
+                )
+            val filteredJourneyData: JourneyData =
+                mutableMapOf(
+                    TestStepId.StepOne.urlPathSegment to pageDataStepOne,
+                    TestStepId.StepThree.urlPathSegment to pageDataStepThree,
+                )
+            whenever(spiedOnJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
+
+            // Act
+            testJourney.populateModelAndGetViewName(TestStepId.StepFour, model, null, pageDataStepFour)
+
+            // Assert
+            verify(spiedOnPage).populateModelAndGetTemplateName(
+                testJourney.validator,
+                model,
+                pageDataStepFour,
+                TestStepId.StepThree.urlPathSegment,
+                filteredJourneyData,
+            )
         }
     }
 
