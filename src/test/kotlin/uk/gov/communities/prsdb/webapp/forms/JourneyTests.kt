@@ -394,7 +394,7 @@ class JourneyTests {
         }
 
         @Test
-        fun `calls populateModelAndGetTemplateName() from page with filteredJourneyData as a parameter when is present`() {
+        fun `populateModelAndGetViewName returns populateModelAndGetTemplateName with filteredJourneyData as a parameter`() {
             // Arrange
             val spiedOnJourneyDataService = spy(journeyDataService)
             val page =
