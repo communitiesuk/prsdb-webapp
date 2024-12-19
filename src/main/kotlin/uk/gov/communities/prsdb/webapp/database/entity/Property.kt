@@ -28,9 +28,6 @@ class Property(
     lateinit var propertyBuildType: PropertyType
         private set
 
-    @Column(nullable = false)
-    var hasGasSupply: Boolean? = null
-
     @OneToOne(optional = false)
     @JoinColumn(name = "address_id", nullable = false, foreignKey = ForeignKey(name = "FK_PROPERTY_ADDRESS"))
     lateinit var address: Address
@@ -39,5 +36,17 @@ class Property(
     constructor(id: Long, address: Address, isActive: Boolean) : this(id) {
         this.address = address
         this.isActive = isActive
+    }
+
+    constructor(
+        status: RegistrationStatus,
+        isActive: Boolean,
+        propertyType: PropertyType,
+        address: Address,
+    ) : this() {
+        this.status = status
+        this.isActive = isActive
+        this.propertyBuildType = propertyType
+        this.address = address
     }
 }

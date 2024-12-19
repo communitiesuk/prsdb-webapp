@@ -13,6 +13,7 @@ import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import java.time.OffsetDateTime
 
 @Entity
@@ -36,7 +37,14 @@ class PropertyOwnership(
         private set
 
     @Column(nullable = false)
+    lateinit var ownershipType: OwnershipType
+
+    @Column(nullable = false)
     var currentNumHouseholds: Int = 0
+        private set
+
+    @Column(nullable = false)
+    var currentNumTenants: Int = 0
         private set
 
     @OneToOne(optional = false)
@@ -58,7 +66,63 @@ class PropertyOwnership(
     lateinit var property: Property
         private set
 
+    @OneToOne
+    @JoinColumn(name = "license_id", nullable = true, foreignKey = ForeignKey(name = "FK_PROPERTY_OWNERSHIP_LICENSE"))
+    var license: License? = null
+        private set
+
     constructor(id: Long, isActive: Boolean) : this(id) {
         this.isActive = isActive
+    }
+
+    constructor(
+        isActive: Boolean,
+        occupancyType: OccupancyType,
+        landlordType: LandlordType,
+        ownershipType: OwnershipType,
+        currentNumHouseholds: Int,
+        currentNumTenants: Int,
+        registrationNumber: RegistrationNumber,
+        primaryLandlord: Landlord,
+        property: Property,
+        license: License?,
+    ) : this() {
+        this.isActive = isActive
+        this.occupancyType = occupancyType
+        this.landlordType = landlordType
+        this.ownershipType = ownershipType
+        this.currentNumHouseholds = currentNumHouseholds
+        this.currentNumTenants = currentNumTenants
+        this.currentNumTenants = currentNumTenants
+        this.registrationNumber = registrationNumber
+        this.primaryLandlord = primaryLandlord
+        this.property = property
+        this.license = license
+    }
+
+    constructor(
+        id: Long,
+        isActive: Boolean,
+        occupancyType: OccupancyType,
+        landlordType: LandlordType,
+        ownershipType: OwnershipType,
+        currentNumHouseholds: Int,
+        currentNumTenants: Int,
+        registrationNumber: RegistrationNumber,
+        primaryLandlord: Landlord,
+        property: Property,
+        license: License?,
+    ) : this(id) {
+        this.isActive = isActive
+        this.occupancyType = occupancyType
+        this.landlordType = landlordType
+        this.ownershipType = ownershipType
+        this.currentNumHouseholds = currentNumHouseholds
+        this.currentNumTenants = currentNumTenants
+        this.currentNumTenants = currentNumTenants
+        this.registrationNumber = registrationNumber
+        this.primaryLandlord = primaryLandlord
+        this.property = property
+        this.license = license
     }
 }
