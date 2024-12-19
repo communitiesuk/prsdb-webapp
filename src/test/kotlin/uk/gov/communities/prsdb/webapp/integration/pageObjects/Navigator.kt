@@ -193,7 +193,7 @@ class Navigator(
 
     fun goToLandlordRegistrationDeclarationPage(): DeclarationFormPageLandlordRegistration {
         val checkAnswersPage = goToLandlordRegistrationCheckAnswersPageInternationalLandlordSelectAddress()
-        checkAnswersPage.submitButton.click()
+        checkAnswersPage.form.submit()
         return createValidPage(page, DeclarationFormPageLandlordRegistration::class)
     }
 
