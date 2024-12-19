@@ -74,9 +74,28 @@ class PropertyRegistrationJourneyDataHelperTests {
         ).thenReturn(MANUAL_ADDRESS_CHOSEN)
 
         whenever(
-            mockAddressDataService
-                .getManualAddress(mockJourneyDataService, mockJourneyData, RegisterPropertyStepId.ManualAddress.urlPathSegment),
-        ).thenReturn(expectedAddressDataModel)
+            mockJourneyDataService.getFieldStringValue(
+                mockJourneyData,
+                RegisterPropertyStepId.ManualAddress.urlPathSegment,
+                "addressLineOne",
+            ),
+        ).thenReturn(addressLineOne)
+
+        whenever(
+            mockJourneyDataService.getFieldStringValue(
+                mockJourneyData,
+                RegisterPropertyStepId.ManualAddress.urlPathSegment,
+                "townOrCity",
+            ),
+        ).thenReturn(townOrCity)
+
+        whenever(
+            mockJourneyDataService.getFieldStringValue(
+                mockJourneyData,
+                RegisterPropertyStepId.ManualAddress.urlPathSegment,
+                "postcode",
+            ),
+        ).thenReturn(postcode)
 
         val addressDataModel =
             PropertyRegistrationJourneyDataHelper.getAddress(

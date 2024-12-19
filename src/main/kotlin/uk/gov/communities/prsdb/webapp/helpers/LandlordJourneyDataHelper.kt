@@ -158,7 +158,7 @@ class LandlordJourneyDataHelper {
                     LandlordRegistrationStepId.ManualAddress.urlPathSegment
                 }
 
-            return addressDataService.getManualAddress(journeyDataService, journeyData, manualAddressPathSegment)
+            return JourneyDataHelper.getManualAddress(journeyDataService, journeyData, manualAddressPathSegment)
         }
 
         fun getInternationalAddress(

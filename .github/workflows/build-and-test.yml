@@ -34,6 +34,7 @@ jobs:
             ${{ secrets.ONE_LOGIN_PRIVATE_KEY }}
           ONE_LOGIN_PUBLIC_KEY: |
             ${{ secrets.ONE_LOGIN_PUBLIC_KEY }}
+          EMAILNOTIFICATIONS_APIKEY: ${{ secrets.NOTIFY_KEY }}
         run: ./gradlew clean check --no-daemon
 
       - name: Report pipeline status
