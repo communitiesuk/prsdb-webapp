@@ -155,7 +155,7 @@ class Navigator(
 
     fun goToLandlordRegistrationLookupContactAddressPage(): LookupContactAddressFormPageLandlordRegistration {
         val internationalAddressPage = goToLandlordRegistrationInternationalAddressPage()
-        internationalAddressPage.textAreaInput.fill("address")
+        internationalAddressPage.textAreaInput.fill("international address")
         internationalAddressPage.form.submit()
         return createValidPage(page, LookupContactAddressFormPageLandlordRegistration::class)
     }
@@ -175,26 +175,24 @@ class Navigator(
         return createValidPage(page, ManualContactAddressFormPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationCheckAnswersPageInternationalLandlord(): CheckAnswersPageLandlordRegistration {
+    fun goToLandlordRegistrationCheckAnswersPageInternationalLandlordSelectAddress(): CheckAnswersPageLandlordRegistration {
         val selectAddressPage = goToLandlordRegistrationSelectContactAddressPage()
         selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
         selectAddressPage.form.submit()
         return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationCheckAnswersPageUKResidentLandlord(): CheckAnswersPageLandlordRegistration {
+    fun goToLandlordRegistrationCheckAnswersPageLandlordManualAddress(): CheckAnswersPageLandlordRegistration {
         val manualAddressPage = goToLandlordRegistrationManualAddressPage()
-        manualAddressPage.addressLineOneInput.fill("address line one")
-        manualAddressPage.addressLineTwoInput.fill("address line two")
-        manualAddressPage.townOrCityInput.fill("town")
-        manualAddressPage.countyInput.fill("county")
+        manualAddressPage.addressLineOneInput.fill("1 Example Road")
+        manualAddressPage.townOrCityInput.fill("Townville")
         manualAddressPage.postcodeInput.fill("EG1 2AB")
         manualAddressPage.form.submit()
         return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
     }
 
     fun goToLandlordRegistrationDeclarationPage(): DeclarationFormPageLandlordRegistration {
-        val checkAnswersPage = goToLandlordRegistrationCheckAnswersPageInternationalLandlord()
+        val checkAnswersPage = goToLandlordRegistrationCheckAnswersPageInternationalLandlordSelectAddress()
         checkAnswersPage.submitButton.click()
         return createValidPage(page, DeclarationFormPageLandlordRegistration::class)
     }
