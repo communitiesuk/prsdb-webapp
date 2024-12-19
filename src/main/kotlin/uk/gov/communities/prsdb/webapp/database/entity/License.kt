@@ -20,4 +20,9 @@ class License(
     @Column(nullable = false)
     lateinit var licenseNumber: String
         private set
+
+    constructor(licenseType: LicensingType, licenseNumber: String) : this() {
+        this.licenseType = licenseType
+        this.licenseNumber = licenseNumber
+    }
 }

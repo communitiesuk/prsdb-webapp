@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
+import jakarta.servlet.http.HttpSession
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
@@ -47,6 +49,7 @@ class PropertyRegistrationJourney(
     addressLookupService: AddressLookupService,
     addressDataService: AddressDataService,
     propertyRegistrationService: PropertyRegistrationService,
+    session: HttpSession,
 ) : Journey<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
         initialStepId = RegisterPropertyStepId.LookupAddress,
@@ -69,7 +72,7 @@ class PropertyRegistrationJourney(
                 hmoMandatoryLicenceStep(),
                 hmoAdditionalLicenceStep(),
                 landlordTypeStep(),
-                checkAnswersStep(journeyDataService, propertyRegistrationService, addressDataService),
+                checkAnswersStep(journeyDataService, propertyRegistrationService, addressDataService, session),
                 Step(
                     id = RegisterPropertyStepId.PlaceholderPage,
                     page =
@@ -484,6 +487,7 @@ class PropertyRegistrationJourney(
             journeyDataService: JourneyDataService,
             propertyRegistrationService: PropertyRegistrationService,
             addressDataService: AddressDataService,
+            session: HttpSession,
         ) = Step(
             id = RegisterPropertyStepId.CheckAnswers,
             page = PropertyRegistrationCheckAnswersPage(addressDataService),
@@ -493,6 +497,7 @@ class PropertyRegistrationJourney(
                     journeyDataService,
                     propertyRegistrationService,
                     addressDataService,
+                    session,
                 )
             },
         )
@@ -549,18 +554,49 @@ class PropertyRegistrationJourney(
             journeyDataService: JourneyDataService,
             propertyRegistrationService: PropertyRegistrationService,
             addressDataService: AddressDataService,
+            session: HttpSession,
         ): String {
-            val address = PropertyRegistrationJourneyDataHelper.getAddress(journeyDataService, journeyData, addressDataService)
-            if (address?.uprn != null) {
+            val address = PropertyRegistrationJourneyDataHelper.getAddress(journeyDataService, journeyData, addressDataService)!!
+            if (address.uprn != null) {
                 // If the address was manually entered, the uprn will be null and we cannot check if it is already registered
                 if (propertyRegistrationService.getIsAddressRegistered(address.uprn, ignoreCache = true)) {
                     return "$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.AlreadyRegistered.urlPathSegment}"
                 }
             }
 
-            // Add to DB
+            val licenseType = PropertyRegistrationJourneyDataHelper.getLicensingType(journeyDataService, journeyData)!!
+            val licenceNumberPathSegment =
+                when (licenseType) {
+                    LicensingType.SELECTIVE_LICENCE -> RegisterPropertyStepId.SelectiveLicence.urlPathSegment
+                    LicensingType.HMO_MANDATORY_LICENCE -> RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment
+                    LicensingType.HMO_ADDITIONAL_LICENCE -> RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment
+                    LicensingType.NO_LICENSING -> ""
+                }
+            val licenceNumber =
+                if (licenseType != LicensingType.NO_LICENSING) {
+                    PropertyRegistrationJourneyDataHelper
+                        .getLicenseNumber(journeyDataService, journeyData, licenceNumberPathSegment)!!
+                } else {
+                    ""
+                }
 
-            // clear session
+            val propertyOwnershipId =
+                propertyRegistrationService.registerProperty(
+                    address = address,
+                    propertyType = PropertyRegistrationJourneyDataHelper.getPropertyType(journeyDataService, journeyData)!!,
+                    licenseType = licenseType,
+                    licenceNumber = licenceNumber,
+                    landlordType = PropertyRegistrationJourneyDataHelper.getLandlordType(journeyDataService, journeyData)!!,
+                    ownershipType = PropertyRegistrationJourneyDataHelper.getOwnershipType(journeyDataService, journeyData)!!,
+                    numberOfHouseholds = PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(journeyDataService, journeyData)!!,
+                    numberOfPeople = PropertyRegistrationJourneyDataHelper.getNumberOfTenants(journeyDataService, journeyData)!!,
+                    baseUserId = SecurityContextHolder.getContext().authentication.name,
+                )
+
+            journeyDataService.clearJourneyDataFromSession()
+
+            // The propertyOwnershipId will be used on the confirmation page to retrieve the record from the database
+            session.setAttribute("propertyOwnershipId", propertyOwnershipId)
 
             return "$REGISTER_PROPERTY_JOURNEY_URL/confirmation"
         }

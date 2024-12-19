@@ -6,7 +6,6 @@ CREATE TABLE property
     status              SMALLINT                                NOT NULL,
     is_active           BOOLEAN                                 NOT NULL,
     property_build_type SMALLINT                                NOT NULL,
-    has_gas_supply      BOOLEAN                                 NOT NULL,
     address_id          BIGINT                                  NOT NULL,
     CONSTRAINT pk_property PRIMARY KEY (id)
 );
