@@ -183,8 +183,8 @@ class Navigator(
     }
 
     fun goToLandlordRegistrationDeclarationPage(): DeclarationFormPageLandlordRegistration {
-        val summaryPage = goToLandlordRegistrationCheckAnswersPage()
-        summaryPage.submitButton.click()
+        val checkAnswersPage = goToLandlordRegistrationCheckAnswersPage()
+        checkAnswersPage.form.submit()
         return createValidPage(page, DeclarationFormPageLandlordRegistration::class)
     }
 
@@ -223,7 +223,7 @@ class Navigator(
 
     fun goToLaUserRegistrationSuccessPage(): SuccessPageLaUserRegistration {
         val checkAnswersPage = goToLaUserRegistrationCheckAnswersPage()
-        checkAnswersPage.submit()
+        checkAnswersPage.form.submit()
         val successPage = createValidPage(page, SuccessPageLaUserRegistration::class)
         return successPage
     }

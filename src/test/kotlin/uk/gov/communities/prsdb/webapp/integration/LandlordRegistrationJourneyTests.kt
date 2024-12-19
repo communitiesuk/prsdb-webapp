@@ -85,8 +85,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
         selectAddressPage.form.submit()
 
-        val summaryPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
-        summaryPage.submitButton.click()
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
+        checkAnswersPage.form.submit()
 
         val declarationPage = assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
         declarationPage.checkbox.check()
@@ -138,8 +138,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         manualAddressPage.postcodeInput.fill("EG1 2AB")
         manualAddressPage.form.submit()
 
-        val summaryPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
-        summaryPage.submitButton.click()
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
+        checkAnswersPage.form.submit()
 
         val declarationPage = assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
         declarationPage.checkbox.check()
@@ -196,8 +196,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         selectContactAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
         selectContactAddressPage.form.submit()
 
-        val summaryPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
-        summaryPage.submitButton.click()
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
+        checkAnswersPage.form.submit()
 
         val declarationPage = assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
         declarationPage.checkbox.check()
@@ -262,8 +262,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         manualContactAddressPage.postcodeInput.fill("EG1 2AB")
         manualContactAddressPage.form.submit()
 
-        val summaryPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
-        summaryPage.submitButton.click()
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
+        checkAnswersPage.form.submit()
 
         val declarationPage = assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
         declarationPage.checkbox.check()

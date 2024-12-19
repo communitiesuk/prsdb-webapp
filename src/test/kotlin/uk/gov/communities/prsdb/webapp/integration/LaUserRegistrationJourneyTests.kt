@@ -115,30 +115,29 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
     inner class LaUserRegistrationCheckAnswers {
         @Test
         fun `Page renders when we navigate to this step through the registration journey`() {
-            val formPage = navigator.goToLaUserRegistrationCheckAnswersPage()
-            assertThat(formPage.heading).containsText("Check your answers")
+            val checkAnswersPage = navigator.goToLaUserRegistrationCheckAnswersPage()
+            assertThat(checkAnswersPage.heading).containsText("Check your answers")
         }
 
         @Test
-        fun `Change Name link navigates to the name step`() {
-            val formPage = navigator.goToLaUserRegistrationCheckAnswersPage()
-            val linkedPage = formPage.changeName()
-            assertPageIs(linkedPage, NameFormPageLaUserRegistration::class)
+        fun `Change Name link navigates to the name step`(page: Page) {
+            val checkAnswersPage = navigator.goToLaUserRegistrationCheckAnswersPage()
+            checkAnswersPage.changeNameLink.click()
+            assertPageIs(page, NameFormPageLaUserRegistration::class)
         }
 
         @Test
-        fun `Change Email link navigates to the email step`() {
-            val formPage = navigator.goToLaUserRegistrationCheckAnswersPage()
-            val linkedPage = formPage.changeEmail()
-            assertPageIs(linkedPage, EmailFormPageLaUserRegistration::class)
+        fun `Change Email link navigates to the email step`(page: Page) {
+            val checkAnswersPage = navigator.goToLaUserRegistrationCheckAnswersPage()
+            checkAnswersPage.changeEmailLink.click()
+            assertPageIs(page, EmailFormPageLaUserRegistration::class)
         }
 
         @Test
-        fun `Submitting redirects to the success page`() {
-            val formPage = navigator.goToLaUserRegistrationCheckAnswersPage()
-            assertThat(formPage.heading).containsText("Check your answers")
-            val nextPage = formPage.submit()
-            assertPageIs(nextPage, SuccessPageLaUserRegistration::class)
+        fun `Submitting redirects to the success page`(page: Page) {
+            val checkAnswersPage = navigator.goToLaUserRegistrationCheckAnswersPage()
+            checkAnswersPage.form.submit()
+            assertPageIs(page, SuccessPageLaUserRegistration::class)
         }
     }
 
