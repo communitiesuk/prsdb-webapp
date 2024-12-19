@@ -43,11 +43,9 @@ class PropertyOwnershipServiceTests {
         val landlord = Landlord()
         val property = Property()
         val license = License()
-        val propertyOwnershipId = 1234.toLong()
 
         val expectedPropertyOwnership =
             PropertyOwnership(
-                propertyOwnershipId,
                 isActive = true,
                 occupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
                 landlordType = landlordType,
@@ -87,11 +85,9 @@ class PropertyOwnershipServiceTests {
         val tenants = 2
         val landlord = Landlord()
         val property = Property()
-        val propertyOwnershipId = 1234.toLong()
 
         val expectedPropertyOwnership =
             PropertyOwnership(
-                id = propertyOwnershipId,
                 isActive = true,
                 occupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
                 landlordType = landlordType,
