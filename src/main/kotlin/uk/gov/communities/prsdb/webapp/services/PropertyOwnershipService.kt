@@ -25,7 +25,7 @@ class PropertyOwnershipService(
         numberOfPeople: Int,
         primaryLandlord: Landlord,
         property: Property,
-        license: License?,
+        license: License? = null,
         isActive: Boolean = true,
         occupancyType: OccupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
     ): PropertyOwnership {
