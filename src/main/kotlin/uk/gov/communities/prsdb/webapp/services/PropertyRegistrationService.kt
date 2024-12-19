@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyRepository
@@ -33,5 +34,9 @@ class PropertyRegistrationService(
         }
 
         return databaseResult
+    }
+
+    @Transactional
+    fun createProperty() {
     }
 }

@@ -13,6 +13,7 @@ import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import java.time.OffsetDateTime
 
 @Entity
@@ -36,7 +37,14 @@ class PropertyOwnership(
         private set
 
     @Column(nullable = false)
+    lateinit var ownershipType: OwnershipType
+
+    @Column(nullable = false)
     var currentNumHouseholds: Int = 0
+        private set
+
+    @Column(nullable = false)
+    var currentNumTenants: Int = 0
         private set
 
     @OneToOne(optional = false)
@@ -56,6 +64,11 @@ class PropertyOwnership(
     @ManyToOne(optional = false)
     @JoinColumn(name = "property_id", nullable = false, foreignKey = ForeignKey(name = "FK_PROPERTY_OWNERSHIP_PROPERTY"))
     lateinit var property: Property
+        private set
+
+    @OneToOne
+    @JoinColumn(name = "license_id", nullable = true, foreignKey = ForeignKey(name = "FK_PROPERTY_OWNERSHIP_LICENSE"))
+    lateinit var license: License
         private set
 
     constructor(id: Long, isActive: Boolean) : this(id) {

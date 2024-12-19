@@ -20,10 +20,13 @@ CREATE TABLE property_ownership
     tenancy_start_date     TIMESTAMP WITHOUT TIME ZONE,
     occupancy_type         SMALLINT                                NOT NULL,
     landlord_type          SMALLINT                                NOT NULL,
+    ownership_type         SMALLINT                                NOT NULL,
     current_num_households INTEGER                                 NOT NULL,
+    current_num_tenants    INTEGER                                 NOT NULL,
     registration_number_id BIGINT                                  NOT NULL,
     property_id            BIGINT                                  NOT NULL,
     primary_landlord_id    BIGINT                                  NOT NULL,
+
     CONSTRAINT pk_propertyownership PRIMARY KEY (id)
 );
 
