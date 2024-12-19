@@ -553,7 +553,9 @@ class PropertyRegistrationJourney(
             val address = PropertyRegistrationJourneyDataHelper.getAddress(journeyDataService, journeyData, addressDataService)
             if (address?.uprn != null) {
                 // If the address was manually entered, the uprn will be null and we cannot check if it is already registered
-                propertyRegistrationService.getIsAddressRegistered(address.uprn, ignoreCache = true)
+                if (propertyRegistrationService.getIsAddressRegistered(address.uprn, ignoreCache = true)) {
+                    return "$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.AlreadyRegistered.urlPathSegment}"
+                }
             }
 
             // Add to DB
