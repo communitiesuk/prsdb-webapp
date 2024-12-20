@@ -15,7 +15,7 @@ class PropertyRegistrationService(
         if (cachedResult != null) return cachedResult
 
         val property = propertyRepository.findByAddress_Uprn(uprn)
-        if (property == null || !property.isActive || property.id == null) {
+        if (property == null || !property.isActive) {
             addressDataService.setCachedAddressRegisteredResult(uprn, false)
             return false
         }

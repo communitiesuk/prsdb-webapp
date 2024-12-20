@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
 class Property(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+    val id: Long = 0,
 ) : ModifiableAuditableEntity() {
     @Column(nullable = false)
     lateinit var status: RegistrationStatus
