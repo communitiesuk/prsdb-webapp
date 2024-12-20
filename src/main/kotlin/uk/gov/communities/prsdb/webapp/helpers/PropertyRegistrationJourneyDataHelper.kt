@@ -42,7 +42,11 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
         ): String? =
-            journeyDataService.getFieldStringValue(journeyData, RegisterPropertyStepId.PropertyType.urlPathSegment, "customPropertyType")
+            journeyDataService.getFieldStringValue(
+                journeyData,
+                RegisterPropertyStepId.PropertyType.urlPathSegment,
+                "customPropertyType",
+            )
 
         fun getOwnershipType(
             journeyDataService: JourneyDataService,
@@ -69,21 +73,34 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
         fun getIsOccupied(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
-        ): Boolean? = journeyDataService.getFieldBooleanValue(journeyData, RegisterPropertyStepId.Occupancy.urlPathSegment, "occupied")
+        ): Boolean? =
+            journeyDataService.getFieldBooleanValue(
+                journeyData,
+                RegisterPropertyStepId.Occupancy.urlPathSegment,
+                "occupied",
+            )
 
         fun getNumberOfHouseholds(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
         ): Int? =
             journeyDataService
-                .getFieldIntegerValue(journeyData, RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment, "numberOfHouseholds")
+                .getFieldIntegerValue(
+                    journeyData,
+                    RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment,
+                    "numberOfHouseholds",
+                )
 
         fun getNumberOfTenants(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
         ): Int? =
             journeyDataService
-                .getFieldIntegerValue(journeyData, RegisterPropertyStepId.NumberOfPeople.urlPathSegment, "numberOfPeople")
+                .getFieldIntegerValue(
+                    journeyData,
+                    RegisterPropertyStepId.NumberOfPeople.urlPathSegment,
+                    "numberOfPeople",
+                )
 
         fun getLicensingType(
             journeyDataService: JourneyDataService,
@@ -99,8 +116,17 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
         fun getLicenseNumber(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
-            licenseNumberPathSegment: String,
-        ): String? = journeyDataService.getFieldStringValue(journeyData, licenseNumberPathSegment, "licenceNumber")
+        ): String? {
+            val licenseNumberPathSegment =
+                when (getLicensingType(journeyDataService, journeyData)!!) {
+                    LicensingType.SELECTIVE_LICENCE -> RegisterPropertyStepId.SelectiveLicence.urlPathSegment
+                    LicensingType.HMO_MANDATORY_LICENCE -> RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment
+                    LicensingType.HMO_ADDITIONAL_LICENCE -> RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment
+                    LicensingType.NO_LICENSING -> return ""
+                }
+
+            return journeyDataService.getFieldStringValue(journeyData, licenseNumberPathSegment, "licenceNumber")
+        }
 
         private fun getSelectedAddress(
             journeyDataService: JourneyDataService,
@@ -112,7 +138,7 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
                 "address",
             )
 
-        private fun isManualAddressChosen(
+        fun isManualAddressChosen(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
         ) = getSelectedAddress(journeyDataService, journeyData) == MANUAL_ADDRESS_CHOSEN
