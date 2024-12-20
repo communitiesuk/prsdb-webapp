@@ -58,12 +58,16 @@ class RegisterPropertyController(
             principal,
         )
 
-    @GetMapping("/confirmation")
+    @GetMapping("/$CONFIRMATION_PAGE_PATH_SEGMENT")
     fun getConfirmation(model: Model): String {
         // TODO: PRSD-597: Retrieve single line address, maybe from the session?
         model.addAttribute("singleLineAddress", "Flat 1, 11 Elm Drive, London, NW8 2DK")
         model.addAttribute("prn", "P1234")
 
         return "registerPropertyConfirmation"
+    }
+
+    companion object {
+        const val CONFIRMATION_PAGE_PATH_SEGMENT = "confirmation"
     }
 }
