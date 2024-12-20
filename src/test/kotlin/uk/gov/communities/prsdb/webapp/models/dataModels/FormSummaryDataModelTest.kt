@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
 
 class FormSummaryDataModelTest {
     companion object {
@@ -25,7 +26,7 @@ class FormSummaryDataModelTest {
     @Test
     fun `isListSummaryItem returns true if the summary value is a list`() {
         // Arrange
-        val model = FormSummaryDataModel("", listOf<Any>(), null)
+        val model = FormSummaryViewModel("", listOf<Any>(), null)
 
         // Act
         val result = model.isListSummaryItem()
@@ -37,7 +38,7 @@ class FormSummaryDataModelTest {
     @Test
     fun `isListSummaryItem returns false if the summary value is not a list`() {
         // Arrange
-        val model = FormSummaryDataModel("", "value", null)
+        val model = FormSummaryViewModel("", "value", null)
 
         // Act
         val result = model.isListSummaryItem()
@@ -50,7 +51,7 @@ class FormSummaryDataModelTest {
     @MethodSource("getConvertableValues")
     fun `getConvertedFieldValue converts known values to message keys`(value: Any) {
         // Arrange
-        val model = FormSummaryDataModel("", value, null)
+        val model = FormSummaryViewModel("", value, null)
         val messageText = javaClass.getResource("/messages.properties")?.readText() ?: ""
 
         // Act
