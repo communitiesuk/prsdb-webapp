@@ -37,4 +37,16 @@ class Property(
         this.address = address
         this.isActive = isActive
     }
+
+    constructor(
+        status: RegistrationStatus,
+        propertyType: PropertyType,
+        address: Address,
+        isActive: Boolean = true,
+    ) : this() {
+        this.status = status
+        this.isActive = isActive
+        this.propertyBuildType = propertyType
+        this.address = address
+    }
 }

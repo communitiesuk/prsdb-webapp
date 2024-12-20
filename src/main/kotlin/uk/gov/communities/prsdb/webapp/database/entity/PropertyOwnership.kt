@@ -82,4 +82,29 @@ class PropertyOwnership(
     constructor(id: Long, isActive: Boolean) : this(id) {
         this.isActive = isActive
     }
+
+    constructor(
+        occupancyType: OccupancyType,
+        landlordType: LandlordType,
+        ownershipType: OwnershipType,
+        currentNumHouseholds: Int,
+        currentNumTenants: Int,
+        registrationNumber: RegistrationNumber,
+        primaryLandlord: Landlord,
+        property: Property,
+        license: License?,
+        isActive: Boolean = true,
+    ) : this() {
+        this.isActive = isActive
+        this.occupancyType = occupancyType
+        this.landlordType = landlordType
+        this.ownershipType = ownershipType
+        this.currentNumHouseholds = currentNumHouseholds
+        this.currentNumTenants = currentNumTenants
+        this.currentNumTenants = currentNumTenants
+        this.registrationNumber = registrationNumber
+        this.primaryLandlord = primaryLandlord
+        this.property = property
+        this.license = license
+    }
 }
