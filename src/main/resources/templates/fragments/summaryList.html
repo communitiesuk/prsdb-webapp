@@ -3,8 +3,15 @@
         <dt class="govuk-summary-list__key" th:text="#{${row.fieldHeading}}">
             fieldHeading
         </dt>
-        <dd class="govuk-summary-list__value" th:text="${{row.fieldValue}}">
+        <dd
+                th:unless="${row.isListSummaryItem}" class="govuk-summary-list__value"
+                th:text="${#messages.msgOrNull(row.convertedFieldValue)} ?: ${{row.convertedFieldValue}} ">
             fieldValue
+        </dd>
+        <dd th:if="${row.isListSummaryItem}" class="govuk-summary-list__value" >
+            <th:block th:each="value: ${row.convertedFieldValue}">
+                <div th:text="${#messages.msgOrNull(value)} ?: ${{value}}"></div>
+            </th:block>
         </dd>
         <dd class="govuk-summary-list__actions">
             <a th:if="${row.changeUrl} != null" class="govuk-link" th:href="@{${row.changeUrl}}" th:text="#{forms.links.change}">

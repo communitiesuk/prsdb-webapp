@@ -10,6 +10,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.jdbc.Sql
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -17,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AlreadyRegisteredFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HouseholdsFormPagePropertyRegistration
@@ -44,8 +46,21 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         whenever(
             osPlacesClient.search(any(), any()),
         ).thenReturn(
-            "{'results':[{'DPA':{'ADDRESS':'1, Example Road, EG1 2AB'," +
-                "'LOCAL_CUSTODIAN_CODE':100,'UPRN':'1','BUILDING_NUMBER':1,'POSTCODE':'EG1 2AB'}}]}",
+            """
+            {
+              "results": [
+                {
+                  "DPA": {
+                    "ADDRESS": "1, Example Road, EG1 2AB",
+                    "LOCAL_CUSTODIAN_CODE": ${LOCAL_AUTHORITIES[11].custodianCode},
+                    "UPRN": "1",
+                    "BUILDING_NUMBER": 1,
+                    "POSTCODE": "EG1 2AB"
+                  }
+                }
+              ]
+            }
+            """.trimIndent(),
         )
     }
 
@@ -130,6 +145,12 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         // fill in and submit
         selectiveLicencePage.licenceNumberInput.fill("licence number")
         selectiveLicencePage.form.submit()
+        val checkAnswersPage = assertPageIs(page, CheckAnswersFormPagePropertyRegistration::class)
+
+        // Check answers - render page
+        assertThat(checkAnswersPage.form.getFieldsetHeading()).containsText("Check your answers for:")
+        //  submit
+        checkAnswersPage.form.submit()
 
         assertEquals("/register-property/placeholder", URI(page.url()).path)
     }
@@ -379,7 +400,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val licensingTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
             licensingTypePage.form.getRadios().selectValue(LicensingType.NO_LICENSING)
             licensingTypePage.form.submit()
-            assertEquals("/register-property/placeholder", URI(page.url()).path)
+            assertPageIs(page, CheckAnswersFormPagePropertyRegistration::class)
         }
 
         @Test
@@ -430,7 +451,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val hmoMandatoryLicencePage = navigator.goToPropertyRegistrationHmoMandatoryLicencePage()
             hmoMandatoryLicencePage.licenceNumberInput.fill("licence number")
             hmoMandatoryLicencePage.form.submit()
-            assertEquals("/register-property/placeholder", URI(page.url()).path)
+            assertPageIs(page, CheckAnswersFormPagePropertyRegistration::class)
         }
 
         @Test
@@ -462,7 +483,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val hmoAdditionalLicencePage = navigator.goToPropertyRegistrationHmoAdditionalLicencePage()
             hmoAdditionalLicencePage.licenceNumberInput.fill("licence number")
             hmoAdditionalLicencePage.form.submit()
-            assertEquals("/register-property/placeholder", URI(page.url()).path)
+            assertPageIs(page, CheckAnswersFormPagePropertyRegistration::class)
         }
 
         @Test
