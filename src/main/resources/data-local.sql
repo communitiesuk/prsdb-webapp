@@ -61,7 +61,8 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (3, '10/07/24', 4003001003, 1),
        (4, '10/14/24', 5004001004, 1),
        (5, '10/09/24', 6005001005, 1),
-       (6, '12/10/24', 7006001006, 0);
+       (6, '12/10/24', 7006001006, 0),
+       (7, '12/19/24', 8005001005, 1);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -87,17 +88,19 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:f
         'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', 'Tobias Evans', 'tobyevans@importantco.com'),
        (5, '09/13/24', '09/13/24', 5, 5, '05/13/1950', true, 07111111111,
         'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', 'Margaret Mary Smith',
-        'mm.smith@importantco.com');
+        'mm.smith@importantco.com'),
+        (6, '12/19/24', '12/19/24', 7,5,'06/13/1989',true,07111111111,
+         'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo','PRSDB Landlord', 'Team-PRSDB+landlord@softwire.com');
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
-INSERT INTO property (id, status, is_active, property_build_type, has_gas_supply, address_id)
-VALUES (1, 1, true, 1, true, 6);
+INSERT INTO property (id, status, is_active, property_build_type, address_id)
+VALUES (1, 1, true, 1, 6);
 
 SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
 
-INSERT INTO property_ownership (id, is_active, occupancy_type, landlord_type, current_num_households,
+INSERT INTO property_ownership (id, is_active, occupancy_type, landlord_type, ownership_type, current_num_households, current_num_tenants,
                                 registration_number_id, primary_landlord_id, property_id)
-VALUES (1, true, 0, 0, 1, 6, 1, 1);
+VALUES (1, true, 0, 0, 1,1, 2,6, 1, 1);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));

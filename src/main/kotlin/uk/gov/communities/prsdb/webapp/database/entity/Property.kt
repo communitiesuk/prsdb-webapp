@@ -28,9 +28,6 @@ class Property(
     lateinit var propertyBuildType: PropertyType
         private set
 
-    @Column(nullable = false)
-    var hasGasSupply: Boolean? = null
-
     @OneToOne(optional = false)
     @JoinColumn(name = "address_id", nullable = false, foreignKey = ForeignKey(name = "FK_PROPERTY_ADDRESS"))
     lateinit var address: Address
