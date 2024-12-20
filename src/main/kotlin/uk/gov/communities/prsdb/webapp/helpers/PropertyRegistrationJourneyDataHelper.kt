@@ -138,7 +138,7 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
                 "address",
             )
 
-        private fun isManualAddressChosen(
+        fun isManualAddressChosen(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
         ) = getSelectedAddress(journeyDataService, journeyData) == MANUAL_ADDRESS_CHOSEN
