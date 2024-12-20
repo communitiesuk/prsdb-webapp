@@ -6,7 +6,6 @@ CREATE TABLE property
     status              SMALLINT                                NOT NULL,
     is_active           BOOLEAN                                 NOT NULL,
     property_build_type SMALLINT                                NOT NULL,
-    has_gas_supply      BOOLEAN                                 NOT NULL,
     address_id          BIGINT                                  NOT NULL,
     CONSTRAINT pk_property PRIMARY KEY (id)
 );
@@ -20,7 +19,9 @@ CREATE TABLE property_ownership
     tenancy_start_date     TIMESTAMP WITHOUT TIME ZONE,
     occupancy_type         SMALLINT                                NOT NULL,
     landlord_type          SMALLINT                                NOT NULL,
+    ownership_type         SMALLINT                                NOT NULL,
     current_num_households INTEGER                                 NOT NULL,
+    current_num_tenants    INTEGER                                 NOT NULL,
     registration_number_id BIGINT                                  NOT NULL,
     property_id            BIGINT                                  NOT NULL,
     primary_landlord_id    BIGINT                                  NOT NULL,
@@ -33,7 +34,7 @@ ALTER TABLE property
 ALTER TABLE property_ownership
     ADD CONSTRAINT uc_propertyownership_registration_number UNIQUE (registration_number_id);
 
-CREATE UNIQUE INDEX one_active_ownership_per_property ON property_ownership(property_id)
+CREATE UNIQUE INDEX one_active_ownership_per_property ON property_ownership (property_id)
     WHERE is_active;
 
 ALTER TABLE property

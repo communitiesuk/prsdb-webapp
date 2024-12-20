@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
 class Property(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+    val id: Long = 0,
 ) : ModifiableAuditableEntity() {
     @Column(nullable = false)
     lateinit var status: RegistrationStatus
@@ -28,9 +28,6 @@ class Property(
     lateinit var propertyBuildType: PropertyType
         private set
 
-    @Column(nullable = false)
-    var hasGasSupply: Boolean? = null
-
     @OneToOne(optional = false)
     @JoinColumn(name = "address_id", nullable = false, foreignKey = ForeignKey(name = "FK_PROPERTY_ADDRESS"))
     lateinit var address: Address
@@ -39,5 +36,17 @@ class Property(
     constructor(id: Long, address: Address, isActive: Boolean) : this(id) {
         this.address = address
         this.isActive = isActive
+    }
+
+    constructor(
+        status: RegistrationStatus,
+        propertyType: PropertyType,
+        address: Address,
+        isActive: Boolean = true,
+    ) : this() {
+        this.status = status
+        this.isActive = isActive
+        this.propertyBuildType = propertyType
+        this.address = address
     }
 }
