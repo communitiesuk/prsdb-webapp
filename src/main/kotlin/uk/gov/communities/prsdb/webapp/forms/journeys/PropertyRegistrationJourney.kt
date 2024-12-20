@@ -1,9 +1,11 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
+import jakarta.persistence.EntityExistsException
+import jakarta.servlet.http.HttpSession
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
-import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
@@ -16,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationCheckAnsw
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoAdditionalLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoMandatoryLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LandlordTypeFormModel
@@ -46,6 +49,7 @@ class PropertyRegistrationJourney(
     addressLookupService: AddressLookupService,
     addressDataService: AddressDataService,
     propertyRegistrationService: PropertyRegistrationService,
+    session: HttpSession,
 ) : Journey<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
         initialStepId = RegisterPropertyStepId.LookupAddress,
@@ -60,27 +64,15 @@ class PropertyRegistrationJourney(
                 localAuthorityStep(),
                 propertyTypeStep(),
                 ownershipTypeStep(),
-                occupancyStep(),
+                occupancyStep(journeyDataService),
                 numberOfHouseholdsStep(),
                 numberOfPeopleStep(),
-                licensingTypeStep(),
+                licensingTypeStep(journeyDataService),
                 selectiveLicenceStep(),
                 hmoMandatoryLicenceStep(),
                 hmoAdditionalLicenceStep(),
                 landlordTypeStep(),
-                checkAnswersStep(addressDataService, journeyDataService),
-                Step(
-                    id = RegisterPropertyStepId.PlaceholderPage,
-                    page =
-                        Page(
-                            formModel = NoInputFormModel::class,
-                            templateName = "placeholder",
-                            content =
-                                mapOf(
-                                    "title" to "registerProperty.title",
-                                ),
-                        ),
-                ),
+                checkAnswersStep(journeyDataService, propertyRegistrationService, addressDataService, session),
             ),
     ) {
     companion object {
@@ -282,7 +274,7 @@ class PropertyRegistrationJourney(
                 nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
             )
 
-        private fun occupancyStep() =
+        private fun occupancyStep(journeyDataService: JourneyDataService) =
             Step(
                 id = RegisterPropertyStepId.Occupancy,
                 page =
@@ -308,7 +300,7 @@ class PropertyRegistrationJourney(
                                     ),
                             ),
                     ),
-                nextAction = { journeyData, _ -> occupancyNextAction(journeyData) },
+                nextAction = { journeyData, _ -> occupancyNextAction(journeyData, journeyDataService) },
             )
 
         private fun numberOfHouseholdsStep() =
@@ -376,7 +368,7 @@ class PropertyRegistrationJourney(
                 nextAction = { _, _ -> Pair(RegisterPropertyStepId.LicensingType, null) },
             )
 
-        private fun licensingTypeStep() =
+        private fun licensingTypeStep(journeyDataService: JourneyDataService) =
             Step(
                 id = RegisterPropertyStepId.LicensingType,
                 page =
@@ -413,7 +405,7 @@ class PropertyRegistrationJourney(
                                     ),
                             ),
                     ),
-                nextAction = { journeyData, _ -> licensingTypeNextAction(journeyData) },
+                nextAction = { journeyData, _ -> licensingTypeNextAction(journeyData, journeyDataService) },
             )
 
         private fun selectiveLicenceStep() =
@@ -480,27 +472,32 @@ class PropertyRegistrationJourney(
             )
 
         fun checkAnswersStep(
-            addressDataService: AddressDataService,
             journeyDataService: JourneyDataService,
+            propertyRegistrationService: PropertyRegistrationService,
+            addressDataService: AddressDataService,
+            session: HttpSession,
         ) = Step(
             id = RegisterPropertyStepId.CheckAnswers,
             page = PropertyRegistrationCheckAnswersPage(addressDataService, journeyDataService),
-            nextAction = { _, _ -> Pair(RegisterPropertyStepId.PlaceholderPage, null) },
+            handleSubmitAndRedirect = { journeyData, _ ->
+                checkAnswersSubmitAndRedirect(
+                    journeyData,
+                    journeyDataService,
+                    propertyRegistrationService,
+                    addressDataService,
+                    session,
+                )
+            },
         )
 
-        private fun occupancyNextAction(journeyData: JourneyData): Pair<RegisterPropertyStepId, Int?> =
-            when (
-                val propertyIsOccupied =
-                    objectToStringKeyedMap(journeyData[RegisterPropertyStepId.Occupancy.urlPathSegment])
-                        ?.get("occupied")
-                        .toString()
-            ) {
-                "true" -> Pair(RegisterPropertyStepId.NumberOfHouseholds, null)
-                "false" -> Pair(RegisterPropertyStepId.LandlordType, null)
-                else -> throw IllegalArgumentException(
-                    "Invalid value for journeyData[\"${RegisterPropertyStepId.Occupancy.urlPathSegment}\"][\"occupied\"]:" +
-                        propertyIsOccupied,
-                )
+        private fun occupancyNextAction(
+            journeyData: JourneyData,
+            journeyDataService: JourneyDataService,
+        ): Pair<RegisterPropertyStepId, Int?> =
+            if (PropertyRegistrationJourneyDataHelper.getIsOccupied(journeyDataService, journeyData)!!) {
+                Pair(RegisterPropertyStepId.NumberOfHouseholds, null)
+            } else {
+                Pair(RegisterPropertyStepId.LandlordType, null)
             }
 
         private fun selectAddressNextAction(
@@ -508,31 +505,99 @@ class PropertyRegistrationJourney(
             journeyDataService: JourneyDataService,
             addressDataService: AddressDataService,
             propertyRegistrationService: PropertyRegistrationService,
-        ): Pair<RegisterPropertyStepId, Int?> {
-            val singleLineAddress =
-                journeyDataService
-                    .getFieldStringValue(journeyData, RegisterPropertyStepId.SelectAddress.urlPathSegment, "address")
-            if (singleLineAddress == MANUAL_ADDRESS_CHOSEN || singleLineAddress == null) {
-                return Pair(RegisterPropertyStepId.ManualAddress, null)
+        ): Pair<RegisterPropertyStepId, Int?> =
+            if (PropertyRegistrationJourneyDataHelper.isManualAddressChosen(journeyDataService, journeyData)) {
+                Pair(RegisterPropertyStepId.ManualAddress, null)
             } else {
-                val addressData = addressDataService.getAddressData(singleLineAddress)
-                if (addressData?.uprn != null && propertyRegistrationService.getIsAddressRegistered(addressData.uprn)) {
-                    return Pair(RegisterPropertyStepId.AlreadyRegistered, null)
+                val selectedAddress =
+                    PropertyRegistrationJourneyDataHelper.getAddress(
+                        journeyDataService,
+                        journeyData,
+                        addressDataService,
+                    )!!
+                val selectedAddressData = addressDataService.getAddressData(selectedAddress.singleLineAddress)!!
+                if (selectedAddressData.uprn != null &&
+                    propertyRegistrationService.getIsAddressRegistered(selectedAddressData.uprn)
+                ) {
+                    Pair(RegisterPropertyStepId.AlreadyRegistered, null)
+                } else {
+                    Pair(RegisterPropertyStepId.PropertyType, null)
                 }
-                return Pair(RegisterPropertyStepId.PropertyType, null)
             }
-        }
 
-        private fun licensingTypeNextAction(journeyData: JourneyData): Pair<RegisterPropertyStepId, Int?> {
-            val licensingTypePageData =
-                objectToStringKeyedMap(journeyData[RegisterPropertyStepId.LicensingType.urlPathSegment])
-            val licensingType = LicensingType.valueOf(licensingTypePageData?.get("licensingType") as String)
-
-            return when (licensingType) {
+        private fun licensingTypeNextAction(
+            journeyData: JourneyData,
+            journeyDataService: JourneyDataService,
+        ): Pair<RegisterPropertyStepId, Int?> =
+            when (PropertyRegistrationJourneyDataHelper.getLicensingType(journeyDataService, journeyData)!!) {
                 LicensingType.SELECTIVE_LICENCE -> Pair(RegisterPropertyStepId.SelectiveLicence, null)
                 LicensingType.HMO_MANDATORY_LICENCE -> Pair(RegisterPropertyStepId.HmoMandatoryLicence, null)
                 LicensingType.HMO_ADDITIONAL_LICENCE -> Pair(RegisterPropertyStepId.HmoAdditionalLicence, null)
                 LicensingType.NO_LICENSING -> Pair(RegisterPropertyStepId.CheckAnswers, null)
+            }
+
+        private fun checkAnswersSubmitAndRedirect(
+            journeyData: JourneyData,
+            journeyDataService: JourneyDataService,
+            propertyRegistrationService: PropertyRegistrationService,
+            addressDataService: AddressDataService,
+            session: HttpSession,
+        ): String {
+            try {
+                val propertyOwnershipId =
+                    propertyRegistrationService.registerPropertyAndReturnOwnershipId(
+                        address =
+                            PropertyRegistrationJourneyDataHelper.getAddress(
+                                journeyDataService,
+                                journeyData,
+                                addressDataService,
+                            )!!,
+                        propertyType =
+                            PropertyRegistrationJourneyDataHelper.getPropertyType(
+                                journeyDataService,
+                                journeyData,
+                            )!!,
+                        licenseType =
+                            PropertyRegistrationJourneyDataHelper.getLicensingType(
+                                journeyDataService,
+                                journeyData,
+                            )!!,
+                        licenceNumber =
+                            PropertyRegistrationJourneyDataHelper.getLicenseNumber(
+                                journeyDataService,
+                                journeyData,
+                            )!!,
+                        landlordType =
+                            PropertyRegistrationJourneyDataHelper.getLandlordType(
+                                journeyDataService,
+                                journeyData,
+                            )!!,
+                        ownershipType =
+                            PropertyRegistrationJourneyDataHelper.getOwnershipType(
+                                journeyDataService,
+                                journeyData,
+                            )!!,
+                        numberOfHouseholds =
+                            PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(
+                                journeyDataService,
+                                journeyData,
+                            )!!,
+                        numberOfPeople =
+                            PropertyRegistrationJourneyDataHelper.getNumberOfTenants(
+                                journeyDataService,
+                                journeyData,
+                            )!!,
+                        baseUserId = SecurityContextHolder.getContext().authentication.name,
+                    )
+
+                journeyDataService.clearJourneyDataFromSession()
+
+                // The propertyOwnershipId will be used on the confirmation page to retrieve the record from the database
+                session.setAttribute("propertyOwnershipId", propertyOwnershipId)
+
+                return "$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT"
+            } catch (exception: EntityExistsException) {
+                return "$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.AlreadyRegistered.urlPathSegment}"
             }
         }
     }
