@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
 
-class FormSummaryDataModelTest {
+class FormSummaryViewModelTest {
     companion object {
         @JvmStatic
         val convertableValues =

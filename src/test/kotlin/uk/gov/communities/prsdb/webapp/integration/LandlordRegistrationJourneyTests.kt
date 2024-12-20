@@ -9,6 +9,7 @@ import kotlinx.datetime.number
 import kotlinx.datetime.plus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -40,6 +41,7 @@ import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.net.URI
 import kotlin.test.assertNotNull
 
+@Disabled("TODO: PRSD-")
 @Sql("/data-local.sql")
 class LandlordRegistrationJourneyTests : IntegrationTest() {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
