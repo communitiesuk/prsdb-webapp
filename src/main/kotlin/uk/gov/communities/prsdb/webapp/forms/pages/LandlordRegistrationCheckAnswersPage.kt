@@ -3,23 +3,27 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
-import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.helpers.LandlordJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import kotlin.reflect.KClass
 
 class LandlordRegistrationCheckAnswersPage(
-    formModel: KClass<out FormModel>,
-    templateName: String,
-    content: Map<String, Any>,
     private val journeyDataService: JourneyDataService,
     private val addressDataService: AddressDataService,
-) : Page(formModel, templateName, content) {
+) : Page(
+        formModel = CheckAnswersFormModel::class,
+        templateName = "forms/checkAnswersForm",
+        content =
+            mapOf(
+                "title" to "registerAsALandlord.title",
+                "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
+                "submitButtonText" to "forms.buttons.confirmAndContinue",
+            ),
+    ) {
     override fun populateModelAndGetTemplateName(
         validator: Validator,
         model: Model,
@@ -45,12 +49,12 @@ class LandlordRegistrationCheckAnswersPage(
             FormSummaryViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.name",
                 LandlordJourneyDataHelper.getName(journeyDataService, journeyData)!!,
-                if (isIdentityVerified) null else "/${BASE_CHANGE_URL}/${LandlordRegistrationStepId.Name.urlPathSegment}",
+                if (isIdentityVerified) null else LandlordRegistrationStepId.Name.urlPathSegment,
             ),
             FormSummaryViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.dateOfBirth",
                 LandlordJourneyDataHelper.getDOB(journeyDataService, journeyData)!!,
-                if (isIdentityVerified) null else "/${BASE_CHANGE_URL}/${LandlordRegistrationStepId.DateOfBirth.urlPathSegment}",
+                if (isIdentityVerified) null else LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
             ),
         )
     }
@@ -60,12 +64,12 @@ class LandlordRegistrationCheckAnswersPage(
             FormSummaryViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.email",
                 LandlordJourneyDataHelper.getEmail(journeyDataService, journeyData)!!,
-                "/${BASE_CHANGE_URL}/${LandlordRegistrationStepId.Email.urlPathSegment}",
+                LandlordRegistrationStepId.Email.urlPathSegment,
             ),
             FormSummaryViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.telephoneNumber",
                 LandlordJourneyDataHelper.getPhoneNumber(journeyDataService, journeyData)!!,
-                "/${BASE_CHANGE_URL}/${LandlordRegistrationStepId.PhoneNumber.urlPathSegment}",
+                LandlordRegistrationStepId.PhoneNumber.urlPathSegment,
             ),
         )
 
@@ -82,7 +86,7 @@ class LandlordRegistrationCheckAnswersPage(
             FormSummaryViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.ukResident",
                 if (livesInUK) "commonText.yes" else "commonText.no",
-                "/${BASE_CHANGE_URL}/${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}",
+                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
             ),
         )
 
@@ -91,12 +95,12 @@ class LandlordRegistrationCheckAnswersPage(
             FormSummaryViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence",
                 LandlordJourneyDataHelper.getNonUKCountryOfResidence(journeyDataService, journeyData)!!,
-                "/${BASE_CHANGE_URL}/${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}",
+                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
             ),
             FormSummaryViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.contactAddressOutsideUK",
                 LandlordJourneyDataHelper.getInternationalAddress(journeyDataService, journeyData)!!,
-                "/${BASE_CHANGE_URL}/${LandlordRegistrationStepId.InternationalAddress.urlPathSegment}",
+                LandlordRegistrationStepId.InternationalAddress.urlPathSegment,
             ),
         )
 
@@ -118,9 +122,7 @@ class LandlordRegistrationCheckAnswersPage(
                 address.singleLineAddress,
                 getContactAddressChangeURLPathSegment(journeyData, livesInUK),
             ),
-            if (localAuthority == null) {
-                null
-            } else {
+            localAuthority?.let {
                 FormSummaryViewModel(
                     "registerAsALandlord.checkAnswers.rowHeading.localAuthority",
                     localAuthority,
@@ -149,8 +151,4 @@ class LandlordRegistrationCheckAnswersPage(
                 LandlordRegistrationStepId.LookupContactAddress.urlPathSegment
             }
         }
-
-    companion object {
-        private val BASE_CHANGE_URL = JourneyType.LANDLORD_REGISTRATION.urlPathSegment
-    }
 }

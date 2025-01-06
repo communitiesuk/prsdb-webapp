@@ -402,19 +402,7 @@ class LandlordRegistrationJourney(
             addressDataService: AddressDataService,
         ) = Step(
             id = LandlordRegistrationStepId.CheckAnswers,
-            page =
-                LandlordRegistrationCheckAnswersPage(
-                    formModel = CheckAnswersFormModel::class,
-                    templateName = "forms/checkAnswersForm",
-                    content =
-                        mapOf(
-                            "title" to "registerAsALandlord.title",
-                            "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
-                            "submitButtonText" to "forms.buttons.confirmAndContinue",
-                        ),
-                    journeyDataService = journeyDataService,
-                    addressDataService = addressDataService,
-                ),
+            page = LandlordRegistrationCheckAnswersPage(journeyDataService, addressDataService),
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Declaration, null) },
             saveAfterSubmit = false,
         )
