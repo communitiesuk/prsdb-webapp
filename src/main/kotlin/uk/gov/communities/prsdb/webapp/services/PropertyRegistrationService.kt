@@ -23,18 +23,23 @@ class PropertyRegistrationService(
     private val licenseService: LicenseService,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    fun getIsAddressRegistered(uprn: Long): Boolean {
-        val cachedResult = addressDataService.getCachedAddressRegisteredResult(uprn)
-        if (cachedResult != null) return cachedResult
+    fun getIsAddressRegistered(
+        uprn: Long,
+        ignoreCache: Boolean = false,
+    ): Boolean {
+        if (!ignoreCache) {
+            val cachedResult = addressDataService.getCachedAddressRegisteredResult(uprn)
+            if (cachedResult != null) return cachedResult
+        }
 
         val property = propertyRepository.findByAddress_Uprn(uprn)
         if (property == null || !property.isActive) {
-            addressDataService.setCachedAddressRegisteredResult(uprn, false)
+            if (!ignoreCache) addressDataService.setCachedAddressRegisteredResult(uprn, false)
             return false
         }
 
         val databaseResult = propertyOwnershipRepository.existsByIsActiveTrueAndProperty_Id(property.id)
-        addressDataService.setCachedAddressRegisteredResult(uprn, databaseResult)
+        if (!ignoreCache) addressDataService.setCachedAddressRegisteredResult(uprn, databaseResult)
         return databaseResult
     }
 
@@ -50,7 +55,9 @@ class PropertyRegistrationService(
         numberOfPeople: Int,
         baseUserId: String,
     ): Long? {
-        if (address.uprn != null && getIsAddressRegistered(address.uprn)) throw EntityExistsException("Address already registered")
+        if (address.uprn != null && getIsAddressRegistered(address.uprn, ignoreCache = true)) {
+            throw EntityExistsException("Address already registered")
+        }
 
         val landlord =
             landlordRepository.findByBaseUser_Id(baseUserId)

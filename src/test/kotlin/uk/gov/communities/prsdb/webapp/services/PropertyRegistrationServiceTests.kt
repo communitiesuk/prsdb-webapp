@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.CsvSource
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -113,6 +114,23 @@ class PropertyRegistrationServiceTests {
         val result = propertyRegistrationService.getIsAddressRegistered(uprn)
 
         verify(mockAddressDataService).setCachedAddressRegisteredResult(uprn, result)
+        assertEquals(expectedValue, result)
+    }
+
+    @Test
+    fun `getAddressIsRegistered ignores the cache when ignoreCache is true`() {
+        val expectedValue = true
+
+        val uprn = 0L
+        val activeProperty = Property(id = 1, address = Address(), isActive = true)
+
+        whenever(mockPropertyRepository.findByAddress_Uprn(uprn)).thenReturn(activeProperty)
+        whenever(mockPropertyOwnershipRepository.existsByIsActiveTrueAndProperty_Id(activeProperty.id))
+            .thenReturn(expectedValue)
+
+        val result = propertyRegistrationService.getIsAddressRegistered(uprn, ignoreCache = true)
+
+        verify(mockAddressDataService, never()).getCachedAddressRegisteredResult(uprn)
         assertEquals(expectedValue, result)
     }
 
