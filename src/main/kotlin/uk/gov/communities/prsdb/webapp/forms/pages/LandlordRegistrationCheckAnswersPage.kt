@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.helpers.LandlordJourneyDataHelper
@@ -108,29 +107,22 @@ class LandlordRegistrationCheckAnswersPage(
         journeyData: JourneyData,
         addressDataService: AddressDataService,
         livesInUK: Boolean,
-    ): List<FormSummaryViewModel> {
-        val address = LandlordJourneyDataHelper.getAddress(journeyDataService, journeyData, addressDataService)!!
-        val localAuthority = LOCAL_AUTHORITIES.find { it.custodianCode == address.custodianCode }?.displayName
-
-        return listOfNotNull(
-            FormSummaryViewModel(
-                if (livesInUK) {
-                    "registerAsALandlord.checkAnswers.rowHeading.contactAddress"
-                } else {
-                    "registerAsALandlord.checkAnswers.rowHeading.ukContactAddress"
-                },
-                address.singleLineAddress,
-                getContactAddressChangeURLPathSegment(journeyData, livesInUK),
-            ),
-            localAuthority?.let {
-                FormSummaryViewModel(
-                    "registerAsALandlord.checkAnswers.rowHeading.localAuthority",
-                    localAuthority,
-                    null,
-                )
+    ): FormSummaryViewModel =
+        FormSummaryViewModel(
+            if (livesInUK) {
+                "registerAsALandlord.checkAnswers.rowHeading.contactAddress"
+            } else {
+                "registerAsALandlord.checkAnswers.rowHeading.ukContactAddress"
             },
+            LandlordJourneyDataHelper
+                .getAddress(
+                    journeyDataService,
+                    journeyData,
+                    addressDataService,
+                )!!
+                .singleLineAddress,
+            getContactAddressChangeURLPathSegment(journeyData, livesInUK),
         )
-    }
 
     private fun getContactAddressChangeURLPathSegment(
         journeyData: JourneyData,
