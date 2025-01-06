@@ -596,9 +596,9 @@ class PropertyRegistrationJourney(
                 // The propertyOwnershipId will be used on the confirmation page to retrieve the record from the database
                 session.setAttribute("propertyOwnershipId", propertyOwnershipId)
 
-                return "/$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT"
+                return CONFIRMATION_PAGE_PATH_SEGMENT
             } catch (exception: EntityExistsException) {
-                return "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.AlreadyRegistered.urlPathSegment}"
+                return RegisterPropertyStepId.AlreadyRegistered.urlPathSegment
             }
         }
     }
