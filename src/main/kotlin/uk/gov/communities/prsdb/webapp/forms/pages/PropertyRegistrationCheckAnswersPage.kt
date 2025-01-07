@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
@@ -53,28 +54,54 @@ class PropertyRegistrationCheckAnswersPage(
 
     private fun getAddressDetails(journeyData: JourneyData): List<FormSummaryViewModel> {
         val address = DataHelper.getAddress(journeyDataService, journeyData, addressDataService)!!
-        val custodianCode = address.custodianCode ?: DataHelper.getCustodianCode(journeyDataService, journeyData)!!
-        return listOfNotNull(
+        val isSelectedAddress = address.uprn != null
+        return if (isSelectedAddress) {
+            getSelectedAddressDetails(journeyData, address)
+        } else {
+            val custodianCode = DataHelper.getCustodianCode(journeyDataService, journeyData)!!
+            getManualAddressDetails(journeyData, address.singleLineAddress, custodianCode)
+        }
+    }
+
+    private fun getSelectedAddressDetails(
+        journeyData: JourneyData,
+        address: AddressDataModel,
+    ): List<FormSummaryViewModel> =
+        listOf(
             FormSummaryViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.address",
                 address.singleLineAddress,
                 RegisterPropertyStepId.LookupAddress.urlPathSegment,
             ),
-            address.uprn?.let {
-                // Only include the UPRN summary if the UPRN is present
-                FormSummaryViewModel(
-                    "forms.checkPropertyAnswers.propertyDetails.uprn",
-                    address.uprn,
-                    null,
-                )
-            },
+            FormSummaryViewModel(
+                "forms.checkPropertyAnswers.propertyDetails.uprn",
+                address.uprn,
+                null,
+            ),
+            FormSummaryViewModel(
+                "forms.checkPropertyAnswers.propertyDetails.localAuthority",
+                getLocalAuthority(address.custodianCode).displayName,
+                getChangeLocalAuthorityUrl(journeyData),
+            ),
+        )
+
+    private fun getManualAddressDetails(
+        journeyData: JourneyData,
+        singleLineAddress: String,
+        custodianCode: String,
+    ): List<FormSummaryViewModel> =
+        listOf(
+            FormSummaryViewModel(
+                "forms.checkPropertyAnswers.propertyDetails.address",
+                singleLineAddress,
+                RegisterPropertyStepId.ManualAddress.urlPathSegment,
+            ),
             FormSummaryViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.localAuthority",
                 getLocalAuthority(custodianCode).displayName,
                 getChangeLocalAuthorityUrl(journeyData),
             ),
         )
-    }
 
     private fun getChangeLocalAuthorityUrl(journeyData: JourneyData) =
         if (DataHelper.isManualAddressChosen(journeyDataService, journeyData)) {
@@ -133,10 +160,10 @@ class PropertyRegistrationCheckAnswersPage(
 
     private fun getTenancyDetails(journeyData: JourneyData): List<FormSummaryViewModel> {
         val occupied = DataHelper.getIsOccupied(journeyDataService, journeyData)!!
-        if (occupied) {
-            return getOccupyingTenantsDetails(journeyData)
+        return if (occupied) {
+            getOccupyingTenantsDetails(journeyData)
         } else {
-            return listOf(
+            listOf(
                 FormSummaryViewModel(
                     "forms.checkPropertyAnswers.propertyDetails.occupied",
                     false,

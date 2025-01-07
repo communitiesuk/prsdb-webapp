@@ -113,7 +113,7 @@ class PropertyRegistrationCheckAnswersPageTests {
             FormSummaryViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.address",
                 manualAddressMap.values.joinToString(", "),
-                RegisterPropertyStepId.LookupAddress.urlPathSegment,
+                RegisterPropertyStepId.ManualAddress.urlPathSegment,
             ),
             propertyDetails.single {
                 it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.address"
