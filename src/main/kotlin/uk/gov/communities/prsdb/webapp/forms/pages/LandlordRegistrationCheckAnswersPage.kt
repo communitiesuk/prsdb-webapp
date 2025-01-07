@@ -84,7 +84,7 @@ class LandlordRegistrationCheckAnswersPage(
         listOf(
             FormSummaryViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.ukResident",
-                if (livesInUK) "commonText.yes" else "commonText.no",
+                livesInUK,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
             ),
         )
