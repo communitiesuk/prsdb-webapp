@@ -41,7 +41,7 @@ class PropertyRegistrationCheckAnswersPage(
     }
 
     private fun getPropertyName(journeyData: JourneyData) =
-        DataHelper.getAddress(journeyDataService, journeyData, addressDataService)?.singleLineAddress
+        DataHelper.getAddress(journeyDataService, journeyData, addressDataService)!!.singleLineAddress
 
     private fun getPropertyDetailsSummary(journeyData: JourneyData): List<FormSummaryViewModel> =
         getAddressDetails(journeyData) +
@@ -52,15 +52,15 @@ class PropertyRegistrationCheckAnswersPage(
             getLandlordTypeDetails(journeyData)
 
     private fun getAddressDetails(journeyData: JourneyData): List<FormSummaryViewModel> {
-        val address = DataHelper.getAddress(journeyDataService, journeyData, addressDataService)
-        val custodianCode = address?.custodianCode ?: DataHelper.getCustodianCode(journeyDataService, journeyData)
+        val address = DataHelper.getAddress(journeyDataService, journeyData, addressDataService)!!
+        val custodianCode = address.custodianCode ?: DataHelper.getCustodianCode(journeyDataService, journeyData)!!
         return listOfNotNull(
             FormSummaryViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.address",
-                address?.singleLineAddress,
+                address.singleLineAddress,
                 RegisterPropertyStepId.LookupAddress.urlPathSegment,
             ),
-            address?.uprn?.let {
+            address.uprn?.let {
                 // Only include the UPRN summary if the UPRN is present
                 FormSummaryViewModel(
                     "forms.checkPropertyAnswers.propertyDetails.uprn",
@@ -106,13 +106,13 @@ class PropertyRegistrationCheckAnswersPage(
     private fun getOwnershipTypeDetails(journeyData: JourneyData) =
         FormSummaryViewModel(
             "forms.checkPropertyAnswers.propertyDetails.ownership",
-            DataHelper.getOwnershipType(journeyDataService, journeyData),
+            DataHelper.getOwnershipType(journeyDataService, journeyData)!!,
             RegisterPropertyStepId.OwnershipType.urlPathSegment,
         )
 
     private fun getLicensingTypeDetails(journeyData: JourneyData): FormSummaryViewModel {
         val licensingType = DataHelper.getLicensingType(journeyDataService, journeyData)!!
-        val licenceNumber = getLicenceNumberOfType(licensingType, journeyData)
+        val licenceNumber = DataHelper.getLicenseNumber(journeyDataService, journeyData)!!
         val licensingSummaryValue = getLicensingSummaryValue(licenceNumber, licensingType)
         return FormSummaryViewModel(
             "forms.checkPropertyAnswers.propertyDetails.licensing",
@@ -125,36 +125,11 @@ class PropertyRegistrationCheckAnswersPage(
         licenceNumber: String?,
         licensingType: LicensingType,
     ): Any =
-        if (licenceNumber != null) {
+        if (licensingType != LicensingType.NO_LICENSING) {
             listOf(licensingType, licenceNumber)
         } else {
             licensingType
         }
-
-    private fun getLicenceNumberOfType(
-        licensingType: LicensingType,
-        journeyData: JourneyData,
-    ) = when (licensingType) {
-        LicensingType.SELECTIVE_LICENCE ->
-            DataHelper.getLicenseNumber(
-                journeyDataService,
-                journeyData,
-                RegisterPropertyStepId.SelectiveLicence.urlPathSegment,
-            )
-        LicensingType.HMO_MANDATORY_LICENCE ->
-            DataHelper.getLicenseNumber(
-                journeyDataService,
-                journeyData,
-                RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment,
-            )
-        LicensingType.HMO_ADDITIONAL_LICENCE ->
-            DataHelper.getLicenseNumber(
-                journeyDataService,
-                journeyData,
-                RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment,
-            )
-        LicensingType.NO_LICENSING -> null
-    }
 
     private fun getTenancyDetails(journeyData: JourneyData): List<FormSummaryViewModel> {
         val occupied = DataHelper.getIsOccupied(journeyDataService, journeyData)!!

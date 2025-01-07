@@ -109,8 +109,17 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
         fun getLicenseNumber(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
-            licenseNumberPathSegment: String,
-        ): String? = journeyDataService.getFieldStringValue(journeyData, licenseNumberPathSegment, "licenceNumber")
+        ): String? {
+            val licenseNumberPathSegment =
+                when (getLicensingType(journeyDataService, journeyData)!!) {
+                    LicensingType.SELECTIVE_LICENCE -> RegisterPropertyStepId.SelectiveLicence.urlPathSegment
+                    LicensingType.HMO_MANDATORY_LICENCE -> RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment
+                    LicensingType.HMO_ADDITIONAL_LICENCE -> RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment
+                    LicensingType.NO_LICENSING -> return ""
+                }
+
+            return journeyDataService.getFieldStringValue(journeyData, licenseNumberPathSegment, "licenceNumber")
+        }
 
         private fun getSelectedAddress(
             journeyDataService: JourneyDataService,
