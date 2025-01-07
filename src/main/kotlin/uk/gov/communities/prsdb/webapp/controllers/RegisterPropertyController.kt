@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import jakarta.servlet.http.HttpSession
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -8,16 +9,22 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_OWNERSHIP_ID
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
 @PreAuthorize("hasRole('LANDLORD')")
 @Controller
 @RequestMapping("/$REGISTER_PROPERTY_JOURNEY_URL")
 class RegisterPropertyController(
-    var propertyRegistrationJourney: PropertyRegistrationJourney,
+    private val propertyRegistrationJourney: PropertyRegistrationJourney,
+    private val propertyOwnershipService: PropertyOwnershipService,
+    private val session: HttpSession,
 ) {
     @GetMapping
     fun index(model: Model): String {
@@ -59,10 +66,20 @@ class RegisterPropertyController(
         )
 
     @GetMapping("/$CONFIRMATION_PAGE_PATH_SEGMENT")
-    fun getConfirmation(model: Model): String {
-        // TODO: PRSD-597: Retrieve single line address, maybe from the session?
-        model.addAttribute("singleLineAddress", "Flat 1, 11 Elm Drive, London, NW8 2DK")
-        model.addAttribute("prn", "P1234")
+    fun getConfirmation(
+        model: Model,
+        principal: Principal,
+    ): String {
+        val propertyOwnershipID = session.getAttribute(PROPERTY_OWNERSHIP_ID)?.toString()?.toLong()
+        val propertyOwnership =
+            propertyOwnershipID?.let { propertyOwnershipService.retrievePropertyOwnership(it) }
+                ?: throw PrsdbWebException("User ${principal.name} has not recently registered a property")
+
+        model.addAttribute("singleLineAddress", propertyOwnership.property.address.singleLineAddress)
+        model.addAttribute(
+            "prn",
+            RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
+        )
 
         return "registerPropertyConfirmation"
     }

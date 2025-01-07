@@ -6,6 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_OWNERSHIP_ID
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
@@ -593,8 +594,7 @@ class PropertyRegistrationJourney(
 
                 journeyDataService.clearJourneyDataFromSession()
 
-                // The propertyOwnershipId will be used on the confirmation page to retrieve the record from the database
-                session.setAttribute("propertyOwnershipId", propertyOwnershipId)
+                session.setAttribute(PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
 
                 return CONFIRMATION_PAGE_PATH_SEGMENT
             } catch (exception: EntityExistsException) {
