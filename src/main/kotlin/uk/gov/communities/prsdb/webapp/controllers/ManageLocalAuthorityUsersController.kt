@@ -253,4 +253,11 @@ class ManageLocalAuthorityUsersController(
         model.addAttribute("localAuthority", currentAuthority)
         return "inviteLAUserSuccess"
     }
+
+    @GetMapping("/cancel-invitation/{invitationId}")
+    fun cancelInvitation(
+        @PathVariable localAuthorityId: Int,
+        @PathVariable invitationId: Long,
+        model: Model,
+    ): String = "cancelLAUserInvitation"
 }
