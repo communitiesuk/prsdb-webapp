@@ -259,11 +259,18 @@ class PropertyRegistrationJourneyDataHelperTests {
             ),
         ).thenReturn(expectedLicenseNumber)
 
+        whenever(
+            mockJourneyDataService.getFieldStringValue(
+                mockJourneyData,
+                RegisterPropertyStepId.LicensingType.urlPathSegment,
+                "licensingType",
+            ),
+        ).thenReturn(LicensingType.SELECTIVE_LICENCE.name)
+
         val licenseNumber =
             PropertyRegistrationJourneyDataHelper.getLicenseNumber(
                 mockJourneyDataService,
                 mockJourneyData,
-                RegisterPropertyStepId.SelectiveLicence.urlPathSegment,
             )
 
         assertEquals(expectedLicenseNumber, licenseNumber)
@@ -280,11 +287,18 @@ class PropertyRegistrationJourneyDataHelperTests {
             ),
         ).thenReturn(expectedLicenseNumber)
 
+        whenever(
+            mockJourneyDataService.getFieldStringValue(
+                mockJourneyData,
+                RegisterPropertyStepId.LicensingType.urlPathSegment,
+                "licensingType",
+            ),
+        ).thenReturn(LicensingType.HMO_MANDATORY_LICENCE.name)
+
         val licenseNumber =
             PropertyRegistrationJourneyDataHelper.getLicenseNumber(
                 mockJourneyDataService,
                 mockJourneyData,
-                RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment,
             )
 
         assertEquals(expectedLicenseNumber, licenseNumber)
@@ -300,12 +314,18 @@ class PropertyRegistrationJourneyDataHelperTests {
                 "licenceNumber",
             ),
         ).thenReturn(expectedLicenseNumber)
+        whenever(
+            mockJourneyDataService.getFieldStringValue(
+                mockJourneyData,
+                RegisterPropertyStepId.LicensingType.urlPathSegment,
+                "licensingType",
+            ),
+        ).thenReturn(LicensingType.HMO_ADDITIONAL_LICENCE.name)
 
         val licenseNumber =
             PropertyRegistrationJourneyDataHelper.getLicenseNumber(
                 mockJourneyDataService,
                 mockJourneyData,
-                RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment,
             )
 
         assertEquals(expectedLicenseNumber, licenseNumber)

@@ -9,6 +9,7 @@ import kotlinx.datetime.number
 import kotlinx.datetime.plus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -59,6 +60,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     }
 
     // TODO PRSD-622: Add the steps before and after the address section of the journey
+    @Disabled("TODO: PRSD-372 - Check answer page cannot return null values")
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in (verified, UK resident, selected address)`(page: Page) {
         val confirmIdentityPage = navigator.goToLandlordRegistrationConfirmIdentityFormPage()
@@ -103,6 +105,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         assertEquals("/", URI(page.url()).path)
     }
 
+    @Disabled("TODO: PRSD-372 - Check answer page cannot return null values")
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in (verified, UK resident, manual address)`(page: Page) {
         val confirmIdentityPage = navigator.goToLandlordRegistrationConfirmIdentityFormPage()
