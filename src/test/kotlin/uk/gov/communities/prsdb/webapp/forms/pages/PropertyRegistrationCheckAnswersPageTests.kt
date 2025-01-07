@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -17,12 +16,12 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
-import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
-class PropertyRegistrationCheckAnswersPageTest {
+class PropertyRegistrationCheckAnswersPageTests {
     private lateinit var page: PropertyRegistrationCheckAnswersPage
     private lateinit var addressService: AddressDataService
     private lateinit var validator: Validator
@@ -34,12 +33,6 @@ class PropertyRegistrationCheckAnswersPageTest {
     @BeforeEach
     fun setup() {
         addressService = mock()
-        whenever(addressService.getAddressData(anyString())).thenReturn(
-            AddressDataModel(
-                "3, Example Road, EG",
-                LOCAL_AUTHORITIES[15].custodianCode,
-            ),
-        )
         page = PropertyRegistrationCheckAnswersPage(addressService, JourneyDataService(mock(), mock(), mock(), mock()))
         validator = mock()
         whenever(validator.supports(any<Class<*>>())).thenReturn(true)
@@ -49,11 +42,11 @@ class PropertyRegistrationCheckAnswersPageTest {
         journeyDataBuilder = JourneyDataBuilder.default(addressService)
     }
 
-    private fun getPropertyDetails(journeyData: MutableMap<String, Any?>): List<*> {
+    private fun getPropertyDetails(journeyData: MutableMap<String, Any?>): List<FormSummaryViewModel> {
         page.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData)
 
         val propertyDetails = model.asMap()["propertyDetails"] as List<*>
-        return propertyDetails
+        return propertyDetails.filterIsInstance<FormSummaryViewModel>()
     }
 
     @Test
@@ -74,8 +67,7 @@ class PropertyRegistrationCheckAnswersPageTest {
                 RegisterPropertyStepId.LookupAddress.urlPathSegment,
             ),
             propertyDetails.single {
-                it is FormSummaryViewModel &&
-                    it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.address"
+                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.address"
             },
         )
         assertEquals(
@@ -85,8 +77,7 @@ class PropertyRegistrationCheckAnswersPageTest {
                 null,
             ),
             propertyDetails.single {
-                it is FormSummaryViewModel &&
-                    it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.uprn"
+                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.uprn"
             },
         )
         assertEquals(
@@ -96,8 +87,7 @@ class PropertyRegistrationCheckAnswersPageTest {
                 null,
             ),
             propertyDetails.single {
-                it is FormSummaryViewModel &&
-                    it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.localAuthority"
+                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.localAuthority"
             },
         )
     }
@@ -126,8 +116,7 @@ class PropertyRegistrationCheckAnswersPageTest {
                 RegisterPropertyStepId.LookupAddress.urlPathSegment,
             ),
             propertyDetails.single {
-                it is FormSummaryViewModel &&
-                    it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.address"
+                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.address"
             },
         )
         assertEquals(
@@ -137,15 +126,13 @@ class PropertyRegistrationCheckAnswersPageTest {
                 RegisterPropertyStepId.LocalAuthority.urlPathSegment,
             ),
             propertyDetails.single {
-                it is FormSummaryViewModel &&
-                    it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.localAuthority"
+                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.localAuthority"
             },
         )
 
         Assertions.assertFalse(
             propertyDetails.any {
-                it is FormSummaryViewModel &&
-                    it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.uprn"
+                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.uprn"
             },
         )
     }
@@ -165,8 +152,7 @@ class PropertyRegistrationCheckAnswersPageTest {
                 RegisterPropertyStepId.PropertyType.urlPathSegment,
             ),
             propertyDetails.single {
-                it is FormSummaryViewModel &&
-                    it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.type"
+                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.type"
             },
         )
     }
@@ -188,8 +174,7 @@ class PropertyRegistrationCheckAnswersPageTest {
                 RegisterPropertyStepId.PropertyType.urlPathSegment,
             ),
             propertyDetails.single {
-                it is FormSummaryViewModel &&
-                    it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.type"
+                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.type"
             },
         )
     }
@@ -210,8 +195,7 @@ class PropertyRegistrationCheckAnswersPageTest {
                 RegisterPropertyStepId.OwnershipType.urlPathSegment,
             ),
             propertyDetails.single {
-                it is FormSummaryViewModel &&
-                    it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.ownership"
+                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.ownership"
             },
         )
     }
@@ -232,8 +216,7 @@ class PropertyRegistrationCheckAnswersPageTest {
                 RegisterPropertyStepId.LicensingType.urlPathSegment,
             ),
             propertyDetails.single {
-                it is FormSummaryViewModel &&
-                    it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.licensing"
+                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.licensing"
             },
         )
     }
@@ -255,8 +238,7 @@ class PropertyRegistrationCheckAnswersPageTest {
                 RegisterPropertyStepId.LicensingType.urlPathSegment,
             ),
             propertyDetails.single {
-                it is FormSummaryViewModel &&
-                    it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.licensing"
+                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.licensing"
             },
         )
     }
@@ -277,8 +259,7 @@ class PropertyRegistrationCheckAnswersPageTest {
                 RegisterPropertyStepId.Occupancy.urlPathSegment,
             ),
             propertyDetails.single {
-                it is FormSummaryViewModel &&
-                    it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.occupied"
+                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.occupied"
             },
         )
     }
@@ -301,8 +282,7 @@ class PropertyRegistrationCheckAnswersPageTest {
                 RegisterPropertyStepId.Occupancy.urlPathSegment,
             ),
             propertyDetails.single {
-                it is FormSummaryViewModel &&
-                    it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.occupied"
+                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.occupied"
             },
         )
         assertEquals(
@@ -313,8 +293,7 @@ class PropertyRegistrationCheckAnswersPageTest {
             ),
             propertyDetails
                 .single {
-                    it is FormSummaryViewModel &&
-                        it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.households"
+                    it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.households"
                 },
         )
         assertEquals(
@@ -324,8 +303,7 @@ class PropertyRegistrationCheckAnswersPageTest {
                 RegisterPropertyStepId.NumberOfPeople.urlPathSegment,
             ),
             propertyDetails.single {
-                it is FormSummaryViewModel &&
-                    it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.people"
+                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.people"
             },
         )
     }
@@ -346,8 +324,7 @@ class PropertyRegistrationCheckAnswersPageTest {
                 RegisterPropertyStepId.LandlordType.urlPathSegment,
             ),
             propertyDetails.single {
-                it is FormSummaryViewModel &&
-                    it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.landlordType"
+                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.landlordType"
             },
         )
     }

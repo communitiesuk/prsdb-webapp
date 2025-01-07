@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.forms.pages
+package uk.gov.communities.prsdb.webapp.mockObjects
 
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
@@ -10,14 +10,15 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 
 class JourneyDataBuilder(
-    initialJourneyData: Map<String, Any?>?,
     private val mockAddressDataService: AddressDataService,
+    initialJourneyData: Map<String, Any?>? = null,
 ) {
     private val journeyData = initialJourneyData?.toMutableMap() ?: mutableMapOf()
 
     fun build() = journeyData
 
     companion object {
+        private val defaultAddress = "4, Example Road, EG"
         private val defaultJourneyData: Map<String, Any?> =
             mapOf(
                 "lookup-address" to
@@ -27,7 +28,7 @@ class JourneyDataBuilder(
                     ),
                 "select-address" to
                     mutableMapOf(
-                        "address" to "4, Example Road, EG",
+                        "address" to defaultAddress,
                     ),
                 "property-type" to
                     mutableMapOf(
@@ -64,7 +65,8 @@ class JourneyDataBuilder(
                     ),
             )
 
-        fun default(addressService: AddressDataService) = JourneyDataBuilder(defaultJourneyData, addressService)
+        fun default(addressService: AddressDataService) =
+            JourneyDataBuilder(addressService, defaultJourneyData).withSelectedAddress(defaultAddress, 709902, 22)
     }
 
     fun withSelectedAddress(
@@ -122,7 +124,7 @@ class JourneyDataBuilder(
         journeyData["licensing-type"] = mutableMapOf("licensingType" to licensingType.name)
         when (licensingType) {
             LicensingType.SELECTIVE_LICENCE -> journeyData["selective-licence"] = mutableMapOf("licenceNumber" to licenseNumber)
-            LicensingType.HMO_MANDATORY_LICENCE -> journeyData["hom-mandatory-licence"] = mutableMapOf("licenceNumber" to licenseNumber)
+            LicensingType.HMO_MANDATORY_LICENCE -> journeyData["hmo-mandatory-licence"] = mutableMapOf("licenceNumber" to licenseNumber)
             LicensingType.HMO_ADDITIONAL_LICENCE -> journeyData["hmo-additional-licence"] = mutableMapOf("licenceNumber" to licenseNumber)
             LicensingType.NO_LICENSING -> {}
         }
@@ -147,7 +149,7 @@ class JourneyDataBuilder(
             mutableMapOf(
                 "occupied" to "true",
             )
-        journeyData[ "number-of-households" ] =
+        journeyData["number-of-households"] =
             mutableMapOf(
                 "numberOfHouseholds" to households.toString(),
             )
