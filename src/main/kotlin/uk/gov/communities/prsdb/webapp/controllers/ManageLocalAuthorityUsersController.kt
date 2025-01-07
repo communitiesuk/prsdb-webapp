@@ -272,9 +272,19 @@ class ManageLocalAuthorityUsersController(
     fun cancelInvitation(
         @PathVariable localAuthorityId: Int,
         @PathVariable invitationId: Long,
+        redirectAttributes: RedirectAttributes,
     ): String {
         val invitation = invitationService.getInvitationById(invitationId)
         invitationService.deleteInvitation(invitation)
+
+        redirectAttributes.addFlashAttribute("deletedEmail", invitation.invitedEmail)
+        redirectAttributes.addFlashAttribute("localAuthority", invitation.invitingAuthority)
         return "redirect:../cancel-invitation/success"
     }
+
+    @GetMapping("/cancel-invitation/success")
+    fun cancelInvitationSuccess(
+        @PathVariable localAuthorityId: String,
+        model: Model,
+    ): String = "cancelLAUserInvitationSuccess"
 }
