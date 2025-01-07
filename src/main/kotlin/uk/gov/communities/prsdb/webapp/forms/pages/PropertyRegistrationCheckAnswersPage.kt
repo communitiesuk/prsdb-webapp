@@ -54,19 +54,15 @@ class PropertyRegistrationCheckAnswersPage(
 
     private fun getAddressDetails(journeyData: JourneyData): List<FormSummaryViewModel> {
         val address = DataHelper.getAddress(journeyDataService, journeyData, addressDataService)!!
-        val isSelectedAddress = address.uprn != null
-        return if (isSelectedAddress) {
-            getSelectedAddressDetails(journeyData, address)
-        } else {
+        return if (DataHelper.isManualAddressChosen(journeyDataService, journeyData)) {
             val custodianCode = DataHelper.getCustodianCode(journeyDataService, journeyData)!!
-            getManualAddressDetails(journeyData, address.singleLineAddress, custodianCode)
+            getManualAddressDetails(address.singleLineAddress, custodianCode)
+        } else {
+            getSelectedAddressDetails(address)
         }
     }
 
-    private fun getSelectedAddressDetails(
-        journeyData: JourneyData,
-        address: AddressDataModel,
-    ): List<FormSummaryViewModel> =
+    private fun getSelectedAddressDetails(address: AddressDataModel): List<FormSummaryViewModel> =
         listOf(
             FormSummaryViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.address",
@@ -81,12 +77,11 @@ class PropertyRegistrationCheckAnswersPage(
             FormSummaryViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.localAuthority",
                 getLocalAuthority(address.custodianCode).displayName,
-                getChangeLocalAuthorityUrl(journeyData),
+                null,
             ),
         )
 
     private fun getManualAddressDetails(
-        journeyData: JourneyData,
         singleLineAddress: String,
         custodianCode: String,
     ): List<FormSummaryViewModel> =
@@ -99,16 +94,9 @@ class PropertyRegistrationCheckAnswersPage(
             FormSummaryViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.localAuthority",
                 getLocalAuthority(custodianCode).displayName,
-                getChangeLocalAuthorityUrl(journeyData),
+                RegisterPropertyStepId.LocalAuthority.urlPathSegment,
             ),
         )
-
-    private fun getChangeLocalAuthorityUrl(journeyData: JourneyData) =
-        if (DataHelper.isManualAddressChosen(journeyDataService, journeyData)) {
-            RegisterPropertyStepId.LocalAuthority.urlPathSegment
-        } else {
-            null
-        }
 
     private fun getPropertyTypeDetails(journeyData: JourneyData): FormSummaryViewModel {
         val propertyType = DataHelper.getPropertyType(journeyDataService, journeyData)!!
