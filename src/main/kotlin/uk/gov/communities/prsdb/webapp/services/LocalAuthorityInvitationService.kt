@@ -67,4 +67,6 @@ class LocalAuthorityInvitationService(
     fun clearTokenFromSession() {
         session.setAttribute(LA_USER_INVITATION_TOKEN, null)
     }
+
+    fun getInvitationById(id: Long): LocalAuthorityInvitation = invitationRepository.getById(id)
 }

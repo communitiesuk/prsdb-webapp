@@ -15,4 +15,6 @@ interface LocalAuthorityInvitationRepository : JpaRepository<LocalAuthorityInvit
     ): List<LocalAuthorityInvitation>
 
     fun countByInvitingAuthority(invitingAuthority: LocalAuthority): Long
+
+    fun getById(id: Long): LocalAuthorityInvitation
 }

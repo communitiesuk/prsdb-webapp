@@ -255,9 +255,26 @@ class ManageLocalAuthorityUsersController(
     }
 
     @GetMapping("/cancel-invitation/{invitationId}")
-    fun cancelInvitation(
+    fun confirmCancelInvitation(
         @PathVariable localAuthorityId: Int,
         @PathVariable invitationId: Long,
         model: Model,
-    ): String = "cancelLAUserInvitation"
+    ): String {
+        val invitation = invitationService.getInvitationById(invitationId)
+
+        model.addAttribute("backLinkPath", "../manage-users")
+        model.addAttribute("email", invitation.invitedEmail)
+
+        return "cancelLAUserInvitation"
+    }
+
+    @PostMapping("/cancel-invitation/{invitationId}")
+    fun cancelInvitation(
+        @PathVariable localAuthorityId: Int,
+        @PathVariable invitationId: Long,
+    ): String {
+        val invitation = invitationService.getInvitationById(invitationId)
+        invitationService.deleteInvitation(invitation)
+        return "redirect:../cancel-invitation/success"
+    }
 }
