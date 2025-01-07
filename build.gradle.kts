@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "uk.gov.communities.prsdb"
-version = "0.0.1-SNAPSHOT"
+version = "latest"
 
 java {
     toolchain {

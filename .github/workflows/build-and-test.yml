@@ -1,8 +1,5 @@
 name: Build and Test
 on:
-  push:
-    branches:
-      - main
   pull_request:
 
 jobs:
@@ -36,17 +33,3 @@ jobs:
             ${{ secrets.ONE_LOGIN_PUBLIC_KEY }}
           EMAILNOTIFICATIONS_APIKEY: ${{ secrets.NOTIFY_KEY }}
         run: ./gradlew clean check --no-daemon
-
-      - name: Report pipeline status
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
-        id: slack
-        uses: slackapi/slack-github-action@v1.26.0
-        with:
-          payload: |
-            {
-              "commit": ${{ toJson(github.event.head_commit.message) }},
-              "result": "${{ job.status == 'success' && 'Success :tick:' || 'Failure :no-cross:' }}",
-              "url": "${{ format('https://github.com/communitiesuk/prsdb-webapp/actions/runs/{0}', github.run_id) }}"
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
