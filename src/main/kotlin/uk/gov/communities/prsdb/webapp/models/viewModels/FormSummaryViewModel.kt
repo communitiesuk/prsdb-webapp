@@ -7,8 +7,6 @@ data class FormSummaryViewModel(
     val fieldValue: Any?,
     val changeUrl: String?,
 ) {
-    fun isListSummaryItem(): Boolean = fieldValue is List<*>
-
     fun getConvertedFieldValue(): Any? =
         if (fieldValue is List<*>) {
             fieldValue.map { getSingleValueMessageKey(it) }
