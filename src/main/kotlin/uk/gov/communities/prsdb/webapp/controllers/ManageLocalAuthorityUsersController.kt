@@ -258,9 +258,22 @@ class ManageLocalAuthorityUsersController(
     fun confirmCancelInvitation(
         @PathVariable localAuthorityId: Int,
         @PathVariable invitationId: Long,
+        principal: Principal,
         model: Model,
     ): String {
         val invitation = invitationService.getInvitationById(invitationId)
+
+        val (_, authority) =
+            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+                localAuthorityId,
+                principal.name,
+            )
+
+        if (authority != invitation.invitingAuthority) {
+            throw AccessDeniedException(
+                "Local authority user for LA ${authority.name} tried to cancel an invitation from LA ${invitation.invitingAuthority.name}",
+            )
+        }
 
         model.addAttribute("backLinkPath", "../manage-users")
         model.addAttribute("email", invitation.invitedEmail)
@@ -275,6 +288,7 @@ class ManageLocalAuthorityUsersController(
         redirectAttributes: RedirectAttributes,
     ): String {
         val invitation = invitationService.getInvitationById(invitationId)
+
         invitationService.deleteInvitation(invitation)
 
         redirectAttributes.addFlashAttribute("deletedEmail", invitation.invitedEmail)
