@@ -18,8 +18,9 @@ class JourneyDataBuilder(
     fun build() = journeyData
 
     companion object {
-        private val defaultAddress = "4, Example Road, EG"
-        private val defaultJourneyData: Map<String, Any?> =
+        private const val DEFAULT_ADDRESS = "4, Example Road, EG"
+
+        private val defaultPropertyJourneyData: Map<String, Any?> =
             mapOf(
                 "lookup-address" to
                     mutableMapOf(
@@ -28,7 +29,7 @@ class JourneyDataBuilder(
                     ),
                 "select-address" to
                     mutableMapOf(
-                        "address" to defaultAddress,
+                        "address" to DEFAULT_ADDRESS,
                     ),
                 "property-type" to
                     mutableMapOf(
@@ -65,8 +66,12 @@ class JourneyDataBuilder(
                     ),
             )
 
-        fun default(addressService: AddressDataService) =
-            JourneyDataBuilder(addressService, defaultJourneyData).withSelectedAddress(defaultAddress, 709902, 22)
+        fun propertyDefault(addressService: AddressDataService) =
+            JourneyDataBuilder(addressService, defaultPropertyJourneyData).withSelectedAddress(
+                DEFAULT_ADDRESS,
+                709902,
+                22,
+            )
     }
 
     fun withSelectedAddress(
@@ -123,9 +128,18 @@ class JourneyDataBuilder(
     ): JourneyDataBuilder {
         journeyData["licensing-type"] = mutableMapOf("licensingType" to licensingType.name)
         when (licensingType) {
-            LicensingType.SELECTIVE_LICENCE -> journeyData["selective-licence"] = mutableMapOf("licenceNumber" to licenseNumber)
-            LicensingType.HMO_MANDATORY_LICENCE -> journeyData["hmo-mandatory-licence"] = mutableMapOf("licenceNumber" to licenseNumber)
-            LicensingType.HMO_ADDITIONAL_LICENCE -> journeyData["hmo-additional-licence"] = mutableMapOf("licenceNumber" to licenseNumber)
+            LicensingType.SELECTIVE_LICENCE ->
+                journeyData["selective-licence"] =
+                    mutableMapOf("licenceNumber" to licenseNumber)
+
+            LicensingType.HMO_MANDATORY_LICENCE ->
+                journeyData["hmo-mandatory-licence"] =
+                    mutableMapOf("licenceNumber" to licenseNumber)
+
+            LicensingType.HMO_ADDITIONAL_LICENCE ->
+                journeyData["hmo-additional-licence"] =
+                    mutableMapOf("licenceNumber" to licenseNumber)
+
             LicensingType.NO_LICENSING -> {}
         }
         return this
@@ -153,7 +167,7 @@ class JourneyDataBuilder(
             mutableMapOf(
                 "numberOfHouseholds" to households.toString(),
             )
-        journeyData[ "number-of-people" ] =
+        journeyData["number-of-people"] =
             mutableMapOf(
                 "numberOfPeople" to people.toString(),
             )

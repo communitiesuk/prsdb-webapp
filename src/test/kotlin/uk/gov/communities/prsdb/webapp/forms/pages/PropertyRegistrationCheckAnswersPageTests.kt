@@ -39,7 +39,7 @@ class PropertyRegistrationCheckAnswersPageTests {
         model = ExtendedModelMap()
         pageData = mock()
         prevStepUrl = "mock"
-        journeyDataBuilder = JourneyDataBuilder.default(addressService)
+        journeyDataBuilder = JourneyDataBuilder.propertyDefault(addressService)
     }
 
     private fun getPropertyDetails(journeyData: MutableMap<String, Any?>): List<FormSummaryViewModel> {
