@@ -56,7 +56,7 @@ class PropertyRegistrationService(
             landlordRepository.findByBaseUser_Id(baseUserId)
                 ?: throw EntityNotFoundException("User not registered as a landlord")
 
-        val property = propertyService.createProperty(address, propertyType)
+        val property = propertyService.activateOrCreateProperty(address, propertyType)
 
         val license =
             if (licenseType != LicensingType.NO_LICENSING) {
@@ -75,6 +75,10 @@ class PropertyRegistrationService(
                 property = property,
                 license = license,
             )
+
+        address.uprn?.let {
+            addressDataService.setCachedAddressRegisteredResult(it, true)
+        }
 
         return propertyOwnership.id
     }

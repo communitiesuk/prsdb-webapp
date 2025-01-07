@@ -14,21 +14,33 @@ class PropertyService(
     private val addressService: AddressService,
 ) {
     @Transactional
-    fun createProperty(
+    fun activateOrCreateProperty(
         addressDataModel: AddressDataModel,
         propertyType: PropertyType,
-        isActive: Boolean = true,
-        registrationStatus: RegistrationStatus = RegistrationStatus.REGISTERED,
     ): Property {
         val address = addressService.findOrCreateAddress(addressDataModel)
 
-        return propertyRepository.save(
-            Property(
-                status = registrationStatus,
-                isActive = isActive,
-                propertyType = propertyType,
-                address = address,
-            ),
-        )
+        val existingProperty = address.uprn?.let { propertyRepository.findByAddress_Uprn(it) }
+
+        return if (existingProperty != null) {
+            activateProperty(existingProperty, propertyType)
+        } else {
+            propertyRepository.save(
+                Property(
+                    status = RegistrationStatus.REGISTERED,
+                    propertyType = propertyType,
+                    address = address,
+                ),
+            )
+        }
+    }
+
+    fun activateProperty(
+        property: Property,
+        propertyType: PropertyType,
+    ): Property {
+        property.isActive = true
+        property.propertyBuildType = propertyType
+        return propertyRepository.save(property)
     }
 }

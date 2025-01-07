@@ -26,7 +26,6 @@ class Property(
 
     @Column(nullable = false)
     lateinit var propertyBuildType: PropertyType
-        private set
 
     @OneToOne(optional = false)
     @JoinColumn(name = "address_id", nullable = false, foreignKey = ForeignKey(name = "FK_PROPERTY_ADDRESS"))

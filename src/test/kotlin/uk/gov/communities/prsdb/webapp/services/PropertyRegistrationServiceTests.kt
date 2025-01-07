@@ -198,7 +198,7 @@ class PropertyRegistrationServiceTests {
             )
 
         whenever(mockLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
-        whenever(mockPropertyService.createProperty(addressDataModel, propertyType)).thenReturn(
+        whenever(mockPropertyService.activateOrCreateProperty(addressDataModel, propertyType)).thenReturn(
             property,
         )
         whenever(mockLicenceService.createLicense(licenceType, licenceNumber)).thenReturn(licence)
@@ -262,7 +262,7 @@ class PropertyRegistrationServiceTests {
             )
 
         whenever(mockLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
-        whenever(mockPropertyService.createProperty(addressDataModel, propertyType)).thenReturn(
+        whenever(mockPropertyService.activateOrCreateProperty(addressDataModel, propertyType)).thenReturn(
             property,
         )
         whenever(
