@@ -17,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.InvalidTokenException
 import java.util.UUID
-import kotlin.test.assertNotNull
 
 class LocalAuthorityInvitationServiceTests {
     private lateinit var mockLaInviteRepository: LocalAuthorityInvitationRepository
@@ -113,14 +112,15 @@ class LocalAuthorityInvitationServiceTests {
     @Test
     fun `getInvitationById returns an invitation if the id is in the database`() {
         val testId = 123.toLong()
-        whenever(mockLaInviteRepository.getById(testId)).thenReturn(
+        val invitationFromDatabase =
             LocalAuthorityInvitation(
                 UUID.randomUUID(),
                 "test@example.com",
                 LocalAuthority(),
-            ),
-        )
+            )
 
-        assertNotNull(inviteService.getInvitationById(testId))
+        whenever(mockLaInviteRepository.getById(testId)).thenReturn(invitationFromDatabase)
+
+        assertEquals(invitationFromDatabase, inviteService.getInvitationById(testId))
     }
 }

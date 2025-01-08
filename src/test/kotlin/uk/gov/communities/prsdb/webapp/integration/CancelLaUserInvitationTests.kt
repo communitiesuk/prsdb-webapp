@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 class CancelLaUserInvitationTests : IntegrationTest() {
     @Test
     fun `an la user invitation can be cancelled`(page: Page) {
-        // Edit the pending user
+        // Changing the pending user takes you to the cancel invitation page
         var manageUsersPage = navigator.goToManageLaUsers(1)
         assertThat(manageUsersPage.table.getCell(1, ACCOUNT_STATUS_COL_INDEX)).containsText("PENDING")
         assertThat(manageUsersPage.table.getCell(1, USERNAME_COL_INDEX)).containsText("invited.user@example.com")
