@@ -96,11 +96,14 @@ class PropertyRegistrationCheckAnswersPageTests {
     @Test
     fun `propertyDetails has the correct address summary rows for a manual address`() {
         // Arrange
-        val manualAddress = AddressDataModel.fromManualAddressData("3 Example Road", "Townville", "EG")
+        val addressLineOne = "3 Example Road"
+        val townOrCity = "Townville"
+        val postcode = "EG1 2AB"
+        val manualAddress = AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode)
 
         val localAuthorityIndex = 19
         val journeyData =
-            journeyDataBuilder.withManualAddress("3 Example Road", "Townville", "EG", localAuthorityIndex).build()
+            journeyDataBuilder.withManualAddress(addressLineOne, townOrCity, postcode, localAuthorityIndex).build()
 
         // Act
         val propertyDetails = getPropertyDetails(journeyData)

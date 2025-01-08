@@ -13,10 +13,6 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder.Companion.DEFAULT_ADDRESS
-import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder.Companion.DEFAULT_DOB
-import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder.Companion.DEFAULT_EMAIL_ADDRESS
-import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder.Companion.DEFAULT_NAME
-import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder.Companion.DEFAULT_PHONE_NUMBER
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
@@ -83,14 +79,16 @@ class LandlordRegistrationCheckAnswersPageTests {
 
     @Test
     fun `formData has the correct name and DOB (unverified)`() {
-        val journeyData = journeyDataBuilder.build()
+        val name = "Arthur Dent"
+        val dob = LocalDate.of(200, 1, 1)
+        val journeyData = journeyDataBuilder.withUnverifiedUser(name, dob).build()
 
         val formData = getFormData(journeyData)
 
         assertEquals(
             FormSummaryViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.name",
-                DEFAULT_NAME,
+                name,
                 LandlordRegistrationStepId.Name.urlPathSegment,
             ),
             formData.single {
@@ -100,7 +98,7 @@ class LandlordRegistrationCheckAnswersPageTests {
         assertEquals(
             FormSummaryViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.dateOfBirth",
-                DEFAULT_DOB,
+                dob,
                 LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
             ),
             formData.single {
@@ -111,14 +109,16 @@ class LandlordRegistrationCheckAnswersPageTests {
 
     @Test
     fun `formData has the correct email and phone number`() {
-        val journeyData = journeyDataBuilder.build()
+        val emailAddress = "example@email.com"
+        val phoneNumber = "07123456789"
+        val journeyData = journeyDataBuilder.withEmailAddress(emailAddress).withPhoneNumber(phoneNumber).build()
 
         val formData = getFormData(journeyData)
 
         assertEquals(
             FormSummaryViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.email",
-                DEFAULT_EMAIL_ADDRESS,
+                emailAddress,
                 LandlordRegistrationStepId.Email.urlPathSegment,
             ),
             formData.single {
@@ -128,7 +128,7 @@ class LandlordRegistrationCheckAnswersPageTests {
         assertEquals(
             FormSummaryViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.telephoneNumber",
-                DEFAULT_PHONE_NUMBER,
+                phoneNumber,
                 LandlordRegistrationStepId.PhoneNumber.urlPathSegment,
             ),
             formData.single {

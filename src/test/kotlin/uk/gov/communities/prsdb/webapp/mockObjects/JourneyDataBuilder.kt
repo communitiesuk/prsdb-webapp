@@ -21,15 +21,7 @@ class JourneyDataBuilder(
     fun build() = journeyData
 
     companion object {
-        const val DEFAULT_NAME = "Arthur Dent"
-
-        val DEFAULT_DOB = LocalDate.of(2000, 6, 8)
-
         const val DEFAULT_ADDRESS = "4, Example Road, EG"
-
-        const val DEFAULT_PHONE_NUMBER = "07123456789"
-
-        const val DEFAULT_EMAIL_ADDRESS = "test@example.com"
 
         private val defaultPropertyJourneyData: Map<String, Any?> =
             mapOf(
@@ -84,18 +76,17 @@ class JourneyDataBuilder(
                 22,
             )
 
-        // Unverified, National, Selected Address
         private val defaultLandlordJourneyData: Map<String, Any?> =
             mapOf(
-                LandlordRegistrationStepId.Name.urlPathSegment to mutableMapOf("name" to DEFAULT_NAME),
+                LandlordRegistrationStepId.Name.urlPathSegment to mutableMapOf("name" to "Arthur Dent"),
                 LandlordRegistrationStepId.DateOfBirth.urlPathSegment to
                     mutableMapOf(
-                        "day" to DEFAULT_DOB.dayOfMonth,
-                        "month" to DEFAULT_DOB.monthValue,
-                        "year" to DEFAULT_DOB.year,
+                        "day" to 6,
+                        "month" to 8,
+                        "year" to 2000,
                     ),
-                LandlordRegistrationStepId.Email.urlPathSegment to mutableMapOf("emailAddress" to DEFAULT_EMAIL_ADDRESS),
-                LandlordRegistrationStepId.PhoneNumber.urlPathSegment to mutableMapOf("phoneNumber" to DEFAULT_PHONE_NUMBER),
+                LandlordRegistrationStepId.Email.urlPathSegment to mutableMapOf("emailAddress" to "test@example.com"),
+                LandlordRegistrationStepId.PhoneNumber.urlPathSegment to mutableMapOf("phoneNumber" to "07123456789"),
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment to mutableMapOf("livesInUK" to true),
                 LandlordRegistrationStepId.SelectAddress.urlPathSegment to mutableMapOf("address" to DEFAULT_ADDRESS),
             )
@@ -239,6 +230,26 @@ class JourneyDataBuilder(
                 "name" to name,
                 "birthDate" to dob,
             )
+        return this
+    }
+
+    fun withUnverifiedUser(
+        name: String,
+        dob: LocalDate,
+    ): JourneyDataBuilder {
+        journeyData[LandlordRegistrationStepId.Name.urlPathSegment] = mutableMapOf("name" to name)
+        journeyData[LandlordRegistrationStepId.DateOfBirth.urlPathSegment] =
+            mutableMapOf("day" to dob.dayOfMonth, "month" to dob.monthValue, "year" to dob.year)
+        return this
+    }
+
+    fun withEmailAddress(emailAddress: String): JourneyDataBuilder {
+        journeyData[LandlordRegistrationStepId.Email.urlPathSegment] = mutableMapOf("emailAddress" to emailAddress)
+        return this
+    }
+
+    fun withPhoneNumber(phoneNumber: String): JourneyDataBuilder {
+        journeyData[LandlordRegistrationStepId.PhoneNumber.urlPathSegment] = mutableMapOf("phoneNumber" to phoneNumber)
         return this
     }
 
