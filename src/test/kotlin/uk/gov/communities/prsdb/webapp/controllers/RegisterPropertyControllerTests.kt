@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @WebMvcTest(RegisterPropertyController::class)
 class RegisterPropertyControllerTests(
@@ -18,6 +19,9 @@ class RegisterPropertyControllerTests(
 ) : ControllerTest(webContext) {
     @MockBean
     lateinit var propertyRegistrationJourney: PropertyRegistrationJourney
+
+    @MockBean
+    lateinit var propertyOwnershipService: PropertyOwnershipService
 
     @BeforeEach
     fun setupMocks() {

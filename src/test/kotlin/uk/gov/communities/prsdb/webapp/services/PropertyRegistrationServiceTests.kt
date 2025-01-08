@@ -139,7 +139,9 @@ class PropertyRegistrationServiceTests {
         val registeredAddress = AddressDataModel(singleLineAddress = "1 Example Road", uprn = 0L)
 
         val spiedOnPropertyRegistrationService = spy(propertyRegistrationService)
-        whenever(spiedOnPropertyRegistrationService.getIsAddressRegistered(registeredAddress.uprn!!)).thenReturn(true)
+        whenever(
+            spiedOnPropertyRegistrationService.getIsAddressRegistered(registeredAddress.uprn!!, ignoreCache = true),
+        ).thenReturn(true)
 
         val errorThrown =
             assertThrows<EntityExistsException> {
