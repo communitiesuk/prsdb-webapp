@@ -3,7 +3,9 @@ package uk.gov.communities.prsdb.webapp.helpers
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
@@ -20,6 +22,17 @@ class LandlordJourneyDataHelperTests {
     private lateinit var mockAddressDataService: AddressDataService
 
     private val mockJourneyData: JourneyData = mutableMapOf()
+
+    companion object {
+        private const val COUNTRY_OF_RESIDENCE = "France"
+
+        @JvmStatic
+        private fun provideCountryOfResidenceFormInputs() =
+            listOf(
+                Arguments.of(true, null),
+                Arguments.of(false, COUNTRY_OF_RESIDENCE),
+            )
+    }
 
     @BeforeEach
     fun setup() {
@@ -112,7 +125,35 @@ class LandlordJourneyDataHelperTests {
     }
 
     @ParameterizedTest(name = "when livesInUK = {0}")
-    @CsvSource("true", "false")
+    @MethodSource("provideCountryOfResidenceFormInputs")
+    fun `getNonUKCountryOfResidence returns the corresponding country or null`(
+        livesInUK: Boolean,
+        expectedNonUKCountryOfResidence: String?,
+    ) {
+        whenever(
+            mockJourneyDataService.getFieldBooleanValue(
+                mockJourneyData,
+                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
+                "livesInUK",
+            ),
+        ).thenReturn(livesInUK)
+
+        whenever(
+            mockJourneyDataService.getFieldStringValue(
+                mockJourneyData,
+                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
+                "countryOfResidence",
+            ),
+        ).thenReturn(COUNTRY_OF_RESIDENCE)
+
+        val nonUKCountryOfResidence =
+            LandlordJourneyDataHelper.getNonUKCountryOfResidence(mockJourneyDataService, mockJourneyData)
+
+        assertEquals(expectedNonUKCountryOfResidence, nonUKCountryOfResidence)
+    }
+
+    @ParameterizedTest(name = "when livesInUK = {0}")
+    @ValueSource(booleans = [true, false])
     fun `getAddress returns the corresponding selected address`(livesInUK: Boolean) {
         val selectAddressPathSegment =
             if (livesInUK) {
@@ -152,7 +193,7 @@ class LandlordJourneyDataHelperTests {
     }
 
     @ParameterizedTest(name = "when livesInUK = {0}")
-    @CsvSource("true", "false")
+    @ValueSource(booleans = [true, false])
     fun `getAddress returns the corresponding manual address`(livesInUK: Boolean) {
         val selectAddressPathSegment =
             if (livesInUK) {

@@ -2,12 +2,15 @@ package uk.gov.communities.prsdb.webapp.mockObjects
 
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
+import java.time.LocalDate
 
 class JourneyDataBuilder(
     private val mockAddressDataService: AddressDataService,
@@ -18,8 +21,9 @@ class JourneyDataBuilder(
     fun build() = journeyData
 
     companion object {
-        private val defaultAddress = "4, Example Road, EG"
-        private val defaultJourneyData: Map<String, Any?> =
+        const val DEFAULT_ADDRESS = "4, Example Road, EG"
+
+        private val defaultPropertyJourneyData: Map<String, Any?> =
             mapOf(
                 "lookup-address" to
                     mutableMapOf(
@@ -28,7 +32,7 @@ class JourneyDataBuilder(
                     ),
                 "select-address" to
                     mutableMapOf(
-                        "address" to defaultAddress,
+                        "address" to DEFAULT_ADDRESS,
                     ),
                 "property-type" to
                     mutableMapOf(
@@ -65,37 +69,76 @@ class JourneyDataBuilder(
                     ),
             )
 
-        fun default(addressService: AddressDataService) =
-            JourneyDataBuilder(addressService, defaultJourneyData).withSelectedAddress(defaultAddress, 709902, 22)
+        fun propertyDefault(addressService: AddressDataService) =
+            JourneyDataBuilder(addressService, defaultPropertyJourneyData).withSelectedAddress(
+                DEFAULT_ADDRESS,
+                709902,
+                22,
+            )
+
+        private val defaultLandlordJourneyData: Map<String, Any?> =
+            mapOf(
+                LandlordRegistrationStepId.Name.urlPathSegment to mutableMapOf("name" to "Arthur Dent"),
+                LandlordRegistrationStepId.DateOfBirth.urlPathSegment to
+                    mutableMapOf(
+                        "day" to 6,
+                        "month" to 8,
+                        "year" to 2000,
+                    ),
+                LandlordRegistrationStepId.Email.urlPathSegment to mutableMapOf("emailAddress" to "test@example.com"),
+                LandlordRegistrationStepId.PhoneNumber.urlPathSegment to mutableMapOf("phoneNumber" to "07123456789"),
+                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment to mutableMapOf("livesInUK" to true),
+                LandlordRegistrationStepId.SelectAddress.urlPathSegment to mutableMapOf("address" to DEFAULT_ADDRESS),
+            )
+
+        fun landlordDefault(addressService: AddressDataService) =
+            JourneyDataBuilder(addressService, defaultLandlordJourneyData).withSelectedAddress(
+                DEFAULT_ADDRESS,
+                709902,
+                22,
+            )
     }
 
     fun withSelectedAddress(
-        addressName: String,
-        uprn: Long,
-        localAuthorityIndex: Int,
+        singleLineAddress: String,
+        uprn: Long? = null,
+        localAuthorityIndex: Int? = null,
+        isContactAddress: Boolean = false,
     ): JourneyDataBuilder {
-        whenever(mockAddressDataService.getAddressData(addressName)).thenReturn(
+        whenever(mockAddressDataService.getAddressData(singleLineAddress)).thenReturn(
             AddressDataModel(
-                addressName,
-                LOCAL_AUTHORITIES[localAuthorityIndex].custodianCode,
+                singleLineAddress,
+                custodianCode = localAuthorityIndex?.let { LOCAL_AUTHORITIES[it].custodianCode },
                 uprn = uprn,
             ),
         )
-        journeyData["select-address"] =
-            mutableMapOf(
-                "address" to addressName,
-            )
+
+        val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
+        journeyData[selectAddressKey] = mutableMapOf("address" to singleLineAddress)
         return this
     }
 
     fun withManualAddress(
-        manualAddressMap: MutableMap<String, String>,
-        localAuthorityIndex: Int,
+        addressLineOne: String,
+        townOrCity: String,
+        postcode: String,
+        localAuthorityIndex: Int? = null,
+        isContactAddress: Boolean = false,
     ): JourneyDataBuilder {
-        journeyData["select-address"] = mutableMapOf("address" to "MANUAL")
-        journeyData["manual-address"] = manualAddressMap
+        val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
+        journeyData[selectAddressKey] = mutableMapOf("address" to MANUAL_ADDRESS_CHOSEN)
+
+        val manualAddressKey = if (isContactAddress) "manual-contact-address" else "manual-address"
+        journeyData[manualAddressKey] =
+            mutableMapOf(
+                "addressLineOne" to addressLineOne,
+                "townOrCity" to townOrCity,
+                "postcode" to postcode,
+            )
+
         journeyData["local-authority"] =
-            mutableMapOf("localAuthorityCustodianCode" to LOCAL_AUTHORITIES[localAuthorityIndex].custodianCode)
+            mutableMapOf("localAuthorityCustodianCode" to localAuthorityIndex?.let { LOCAL_AUTHORITIES[it].custodianCode })
+
         return this
     }
 
@@ -123,9 +166,18 @@ class JourneyDataBuilder(
     ): JourneyDataBuilder {
         journeyData["licensing-type"] = mutableMapOf("licensingType" to licensingType.name)
         when (licensingType) {
-            LicensingType.SELECTIVE_LICENCE -> journeyData["selective-licence"] = mutableMapOf("licenceNumber" to licenseNumber)
-            LicensingType.HMO_MANDATORY_LICENCE -> journeyData["hmo-mandatory-licence"] = mutableMapOf("licenceNumber" to licenseNumber)
-            LicensingType.HMO_ADDITIONAL_LICENCE -> journeyData["hmo-additional-licence"] = mutableMapOf("licenceNumber" to licenseNumber)
+            LicensingType.SELECTIVE_LICENCE ->
+                journeyData["selective-licence"] =
+                    mutableMapOf("licenceNumber" to licenseNumber)
+
+            LicensingType.HMO_MANDATORY_LICENCE ->
+                journeyData["hmo-mandatory-licence"] =
+                    mutableMapOf("licenceNumber" to licenseNumber)
+
+            LicensingType.HMO_ADDITIONAL_LICENCE ->
+                journeyData["hmo-additional-licence"] =
+                    mutableMapOf("licenceNumber" to licenseNumber)
+
             LicensingType.NO_LICENSING -> {}
         }
         return this
@@ -153,7 +205,7 @@ class JourneyDataBuilder(
             mutableMapOf(
                 "numberOfHouseholds" to households.toString(),
             )
-        journeyData[ "number-of-people" ] =
+        journeyData["number-of-people"] =
             mutableMapOf(
                 "numberOfPeople" to people.toString(),
             )
@@ -166,6 +218,72 @@ class JourneyDataBuilder(
             mutableMapOf(
                 "landlordType" to type.name,
             )
+        return this
+    }
+
+    fun withVerifiedUser(
+        name: String,
+        dob: LocalDate,
+    ): JourneyDataBuilder {
+        journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment] =
+            mutableMapOf(
+                "name" to name,
+                "birthDate" to dob,
+            )
+        return this
+    }
+
+    fun withUnverifiedUser(
+        name: String,
+        dob: LocalDate,
+    ): JourneyDataBuilder {
+        journeyData[LandlordRegistrationStepId.Name.urlPathSegment] = mutableMapOf("name" to name)
+        journeyData[LandlordRegistrationStepId.DateOfBirth.urlPathSegment] =
+            mutableMapOf("day" to dob.dayOfMonth, "month" to dob.monthValue, "year" to dob.year)
+        return this
+    }
+
+    fun withEmailAddress(emailAddress: String): JourneyDataBuilder {
+        journeyData[LandlordRegistrationStepId.Email.urlPathSegment] = mutableMapOf("emailAddress" to emailAddress)
+        return this
+    }
+
+    fun withPhoneNumber(phoneNumber: String): JourneyDataBuilder {
+        journeyData[LandlordRegistrationStepId.PhoneNumber.urlPathSegment] = mutableMapOf("phoneNumber" to phoneNumber)
+        return this
+    }
+
+    fun withInternationalAndSelectedContactAddress(
+        countryOfResidence: String,
+        internationalAddress: String,
+        selectedAddress: String,
+    ): JourneyDataBuilder =
+        this
+            .withInternationalAddress(countryOfResidence, internationalAddress)
+            .withSelectedAddress(selectedAddress, isContactAddress = true)
+
+    fun withInternationalAndManualContactAddress(
+        countryOfResidence: String,
+        internationalAddress: String,
+        addressLineOne: String,
+        townOrCity: String,
+        postcode: String,
+    ): JourneyDataBuilder =
+        this
+            .withInternationalAddress(countryOfResidence, internationalAddress)
+            .withManualAddress(addressLineOne, townOrCity, postcode, isContactAddress = true)
+
+    private fun withInternationalAddress(
+        countryOfResidence: String,
+        internationalAddress: String,
+    ): JourneyDataBuilder {
+        journeyData[LandlordRegistrationStepId.CountryOfResidence.urlPathSegment] =
+            mutableMapOf(
+                "livesInUK" to false,
+                "countryOfResidence" to countryOfResidence,
+            )
+        journeyData[LandlordRegistrationStepId.InternationalAddress.urlPathSegment] =
+            mutableMapOf("internationalAddress" to internationalAddress)
         return this
     }
 }

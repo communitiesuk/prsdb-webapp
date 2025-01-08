@@ -9,7 +9,6 @@ import kotlinx.datetime.number
 import kotlinx.datetime.plus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -50,7 +49,6 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
     @BeforeEach
     fun setup() {
-        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
         whenever(
             osPlacesClient.search(any(), any()),
         ).thenReturn(
@@ -59,8 +57,6 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         )
     }
 
-    // TODO PRSD-622: Add the steps before and after the address section of the journey
-    @Disabled("TODO: PRSD-372 - Check answer page cannot return null values")
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in (verified, UK resident, selected address)`(page: Page) {
         val confirmIdentityPage = navigator.goToLandlordRegistrationConfirmIdentityFormPage()
@@ -105,7 +101,6 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         assertEquals("/", URI(page.url()).path)
     }
 
-    @Disabled("TODO: PRSD-372 - Check answer page cannot return null values")
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in (verified, UK resident, manual address)`(page: Page) {
         val confirmIdentityPage = navigator.goToLandlordRegistrationConfirmIdentityFormPage()
@@ -117,7 +112,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
         val phoneNumPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
         val number = phoneNumberUtil.getExampleNumber("GB")
-        phoneNumPage.phoneNumberInput.fill("${number.countryCode}${number.nationalNumber}")
+        val formattedNumber = "${number.countryCode}${number.nationalNumber}"
+        phoneNumPage.phoneNumberInput.fill(formattedNumber)
         phoneNumPage.form.submit()
 
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
@@ -134,10 +130,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         selectAddressPage.form.submit()
 
         val manualAddressPage = assertPageIs(page, ManualAddressFormPageLandlordRegistration::class)
-        manualAddressPage.addressLineOneInput.fill("address line one")
-        manualAddressPage.addressLineTwoInput.fill("address line two")
-        manualAddressPage.townOrCityInput.fill("town")
-        manualAddressPage.countyInput.fill("county")
+        manualAddressPage.addressLineOneInput.fill("1 Example Road")
+        manualAddressPage.townOrCityInput.fill("Townville")
         manualAddressPage.postcodeInput.fill("EG1 2AB")
         manualAddressPage.form.submit()
 
@@ -162,7 +156,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in (unverified, international, selected address)`(page: Page) {
         val namePage = navigator.goToLandlordRegistrationNameFormPage()
-        namePage.nameInput.fill("name")
+        namePage.nameInput.fill("landlord name")
         namePage.form.submit()
 
         val dateOfBirthPage = assertPageIs(page, DateOfBirthFormPageLandlordRegistration::class)
@@ -177,7 +171,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
         val phoneNumPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
         val number = phoneNumberUtil.getExampleNumber("GB")
-        phoneNumPage.phoneNumberInput.fill("${number.countryCode}${number.nationalNumber}")
+        val formattedNumber = "${number.countryCode}${number.nationalNumber}"
+        phoneNumPage.phoneNumberInput.fill(formattedNumber)
         phoneNumPage.form.submit()
 
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
@@ -220,7 +215,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in (unverified, international, manual address)`(page: Page) {
         val namePage = navigator.goToLandlordRegistrationNameFormPage()
-        namePage.nameInput.fill("name")
+        namePage.nameInput.fill("landlord name")
         namePage.form.submit()
 
         val dateOfBirthPage = assertPageIs(page, DateOfBirthFormPageLandlordRegistration::class)
@@ -235,7 +230,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
         val phoneNumPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
         val number = phoneNumberUtil.getExampleNumber("GB")
-        phoneNumPage.phoneNumberInput.fill("${number.countryCode}${number.nationalNumber}")
+        val formattedNumber = "${number.countryCode}${number.nationalNumber}"
+        phoneNumPage.phoneNumberInput.fill(formattedNumber)
         phoneNumPage.form.submit()
 
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
@@ -258,10 +254,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         selectContactAddressPage.form.submit()
 
         val manualContactAddressPage = assertPageIs(page, ManualContactAddressFormPageLandlordRegistration::class)
-        manualContactAddressPage.addressLineOneInput.fill("address line one")
-        manualContactAddressPage.addressLineTwoInput.fill("address line two")
-        manualContactAddressPage.townOrCityInput.fill("town")
-        manualContactAddressPage.countyInput.fill("county")
+        manualContactAddressPage.addressLineOneInput.fill("1 Example Road")
+        manualContactAddressPage.townOrCityInput.fill("Townville")
         manualContactAddressPage.postcodeInput.fill("EG1 2AB")
         manualContactAddressPage.form.submit()
 
