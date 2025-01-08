@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -95,16 +96,11 @@ class PropertyRegistrationCheckAnswersPageTests {
     @Test
     fun `propertyDetails has the correct address summary rows for a manual address`() {
         // Arrange
-        val manualAddressMap =
-            mutableMapOf(
-                "addressLineOne" to "Flat B",
-                "addressLineTwo" to "3 Example Road",
-                "townOrCity" to "Exampleton",
-                "county" to "Exampleshire",
-                "postcode" to "EG",
-            )
+        val manualAddress = AddressDataModel.fromManualAddressData("3 Example Road", "Townville", "EG")
+
         val localAuthorityIndex = 19
-        val journeyData = journeyDataBuilder.withManualAddress(manualAddressMap, localAuthorityIndex).build()
+        val journeyData =
+            journeyDataBuilder.withManualAddress("3 Example Road", "Townville", "EG", localAuthorityIndex).build()
 
         // Act
         val propertyDetails = getPropertyDetails(journeyData)
@@ -112,7 +108,7 @@ class PropertyRegistrationCheckAnswersPageTests {
         assertEquals(
             FormSummaryViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.address",
-                manualAddressMap.values.joinToString(", "),
+                manualAddress.singleLineAddress,
                 RegisterPropertyStepId.ManualAddress.urlPathSegment,
             ),
             propertyDetails.single {
