@@ -78,7 +78,7 @@ SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM addr
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
                       is_active, phone_number, subject_identifier, name, email)
-VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:fdc:gov.uk:2022:KLMNO',
+VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:fdc:gov.uk:2022:UVWXY',
         'Alexander Smith', 'alex.surname@example.com'),
        (2, '09/13/24', '09/13/24', 2, 2, '08/13/2001', true, 07111111111, 'urn:fdc:gov.uk:2022:ABCDE',
         'Alexandra Davies', 'alexandra.q.davies@example.com'),
@@ -89,8 +89,9 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:f
        (5, '09/13/24', '09/13/24', 5, 5, '05/13/1950', true, 07111111111,
         'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', 'Margaret Mary Smith',
         'mm.smith@importantco.com'),
-        (6, '12/19/24', '12/19/24', 7,5,'06/13/1989',true,07111111111,
-         'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo','PRSDB Landlord', 'Team-PRSDB+landlord@softwire.com');
+       (6, '12/19/24', '12/19/24', 7, 5, '06/13/1989', true, 07111111111,
+        'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', 'PRSDB Landlord',
+        'Team-PRSDB+landlord@softwire.com');
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
@@ -99,8 +100,9 @@ VALUES (1, 1, true, 1, 6);
 
 SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
 
-INSERT INTO property_ownership (id, is_active, occupancy_type, landlord_type, ownership_type, current_num_households, current_num_tenants,
+INSERT INTO property_ownership (id, is_active, occupancy_type, landlord_type, ownership_type, current_num_households,
+                                current_num_tenants,
                                 registration_number_id, primary_landlord_id, property_id)
-VALUES (1, true, 0, 0, 1,1, 2,6, 1, 1);
+VALUES (1, true, 0, 0, 1, 1, 2, 6, 1, 1);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
