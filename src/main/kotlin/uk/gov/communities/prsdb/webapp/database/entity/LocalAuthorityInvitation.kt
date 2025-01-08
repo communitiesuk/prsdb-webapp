@@ -11,11 +11,11 @@ import jakarta.persistence.ManyToOne
 import java.util.UUID
 
 @Entity
-class LocalAuthorityInvitation() : AuditableEntity() {
+class LocalAuthorityInvitation(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long? = null
-
+    val id: Long? = null,
+) : AuditableEntity() {
     @Column(nullable = false, unique = true)
     lateinit var token: UUID
         private set
@@ -30,6 +30,12 @@ class LocalAuthorityInvitation() : AuditableEntity() {
         private set
 
     constructor(token: UUID, email: String, invitingAuthority: LocalAuthority) : this() {
+        this.token = token
+        this.invitedEmail = email
+        this.invitingAuthority = invitingAuthority
+    }
+
+    constructor(id: Long, token: UUID, email: String, invitingAuthority: LocalAuthority) : this(id) {
         this.token = token
         this.invitedEmail = email
         this.invitingAuthority = invitingAuthority

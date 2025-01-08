@@ -269,7 +269,7 @@ class ManageLocalAuthorityUsersController(
                 principal.name,
             )
 
-        if (authority != invitation.invitingAuthority) {
+        if (authority.id != invitation.invitingAuthority.id) {
             throw AccessDeniedException(
                 "Local authority user for LA ${authority.name} tried to cancel an invitation from LA ${invitation.invitingAuthority.name}",
             )
