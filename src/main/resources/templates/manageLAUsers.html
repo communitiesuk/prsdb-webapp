@@ -31,7 +31,7 @@
                         <a th:href="@{${user.pending ? 'cancel-invitation/' + user.id : 'edit-user/' + user.id}}"
                            class="govuk-link"
                            th:text="#{manageLAUsers.table.change}"
-                           th:if="${currentUser.id} != ${user.id}"
+                           th:if="(${currentUser.id} != ${user.id}) or ${user.pending}"
                         >
                             manageLAUsers.table.change
                         </a>
