@@ -51,12 +51,30 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         whenever(
             osPlacesClient.search(any(), any()),
         ).thenReturn(
-            "{'results':[" +
-                "{'DPA':{'ADDRESS':'1, Example Road, EG1 2AB'," +
-                "'LOCAL_CUSTODIAN_CODE':100,'UPRN':'1','BUILDING_NUMBER':1,'POSTCODE':'EG1 2AB'}}," +
-                "{'DPA':{'ADDRESS':'already registered address'," +
-                "'LOCAL_CUSTODIAN_CODE':100,'UPRN':'1123456','BUILDING_NUMBER':1,'POSTCODE':'EG1 2AB'}}" +
-                "]}",
+            """
+            {
+              "results": [
+                {
+                  "DPA": {
+                    "ADDRESS": "1, Example Road, EG1 2AB",
+                    "LOCAL_CUSTODIAN_CODE": ${LOCAL_AUTHORITIES[11].custodianCode},
+                    "UPRN": "1",
+                    "BUILDING_NUMBER": 1,
+                    "POSTCODE": "EG1 2AB"
+                  }
+                },
+                {
+                  "DPA": {
+                    "ADDRESS": "already registered address",
+                    "LOCAL_CUSTODIAN_CODE": ${LOCAL_AUTHORITIES[11].custodianCode},
+                    "UPRN": "1123456",
+                    "BUILDING_NUMBER": 1,
+                    "POSTCODE": "EG1 3CD"
+                  }
+                }
+              ]
+            }
+            """.trimIndent(),
         )
     }
 
@@ -141,7 +159,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         // fill in and submit
         selectiveLicencePage.licenceNumberInput.fill("licence number")
         selectiveLicencePage.form.submit()
-        val checkAnswersPage = assertPageIs(page, CheckAnswersFormPagePropertyRegistration::class)
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
         // Check answers - render page
         assertThat(checkAnswersPage.form.getFieldsetHeading()).containsText("Check your answers for:")
