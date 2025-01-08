@@ -83,9 +83,7 @@ class PropertyRegistrationService(
                 license = license,
             )
 
-        address.uprn?.let {
-            addressDataService.setCachedAddressRegisteredResult(it, true)
-        }
+        address.uprn?.let { addressDataService.setCachedAddressRegisteredResult(it, true) }
 
         return propertyOwnership.id
     }

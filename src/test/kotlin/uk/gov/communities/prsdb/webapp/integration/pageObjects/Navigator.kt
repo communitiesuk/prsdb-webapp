@@ -6,11 +6,11 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
-import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
@@ -54,6 +54,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import java.time.LocalDate
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT as LANDLORD_CONFIRMATION
+import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT as PROPERTY_CONFIRMATION
 
 class Navigator(
     private val page: Page,
@@ -203,7 +205,7 @@ class Navigator(
     }
 
     fun skipToLandlordRegistrationConfirmationPage(): ErrorPage {
-        navigate("$REGISTER_LANDLORD_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT")
+        navigate("$REGISTER_LANDLORD_JOURNEY_URL/$LANDLORD_CONFIRMATION")
         return createValidPage(page, ErrorPage::class)
     }
 
@@ -349,6 +351,11 @@ class Navigator(
         licensingTypePage.form.getRadios().selectValue(LicensingType.HMO_ADDITIONAL_LICENCE)
         licensingTypePage.form.submit()
         return createValidPage(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationConfirmationPage(): ErrorPage {
+        navigate("$REGISTER_PROPERTY_JOURNEY_URL/$PROPERTY_CONFIRMATION")
+        return createValidPage(page, ErrorPage::class)
     }
 
     private fun navigate(path: String): Response? = page.navigate("http://localhost:$port/$path")
