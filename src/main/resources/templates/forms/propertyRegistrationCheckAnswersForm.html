@@ -4,6 +4,7 @@
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="propertyName" type="java.lang.String"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="showUprnDetail" type="java.lang.Boolean"*/-->
 <!DOCTYPE html>
 
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl})}">
@@ -33,11 +34,13 @@
                         forms.checkPropertyAnswers.propertyDetails.hint
                     </div>
                     <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
-                    <details id="details-content" th:replace="~{fragments/details :: details(#{forms.checkPropertyAnswers.propertyDetails.detail.summary},~{::#details-content/content()})}">
-                        <div class="govuk-details__text" th:text="#{forms.checkPropertyAnswers.propertyDetails.detail.text}">
-                            forms.checkPropertyAnswers.propertyDetails.detail.text
-                        </div>
-                    </details>
+                    <th:block th:if="${showUprnDetail}">
+                        <details id="details-content"  th:replace="~{fragments/details :: details(#{forms.checkPropertyAnswers.propertyDetails.detail.summary},~{::#details-content/content()})}">
+                            <div class="govuk-details__text" th:text="#{forms.checkPropertyAnswers.propertyDetails.detail.text}">
+                                forms.checkPropertyAnswers.propertyDetails.detail.text
+                            </div>
+                        </details>
+                    </th:block>
                 </th:block>
             </div>
             <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('additional-landlords', ~{:: #additional-landlords-panel-content})}">
