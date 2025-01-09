@@ -1,0 +1,17 @@
+# exclude hidden dirs .git etc.
+.*
+# exclude Intellij specific files
+*.iml
+# exclude source files
+gradle
+src
+# exclude build binaries
+build/*
+bin/*
+dist
+# except files for docker
+!build/docker
+# Exclude files for local development
+docker-compose.local.yml
+adrs
+**/*.pem
