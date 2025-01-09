@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
-      contents: write
+      contents: read
     env:
       AWS_REGION: "eu-west-2"
     steps:
@@ -48,21 +48,6 @@ jobs:
           repository: communitiesuk/prsdb-webapp
           prefix: 'v0.'
 
-      - name: Bump version tag
-        uses: cabinetoffice/action-bump-semver@v1
-        id: bump-semver
-        with:
-          current_version: ${{ steps.get-latest-tag.outputs.tag }}
-          level: minor
-
-      - name: Push version tag
-        run: |
-          tag=${{ steps.bump-semver.outputs.new_version }}
-          git config user.name "${GITHUB_ACTOR}"
-          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-          git tag "${tag}"
-          git push origin "${tag}"
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -78,12 +63,20 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: "integration-webapp"
-          IMAGE_TAG: ${{ steps.bump-semver.outputs.new_version }}
+          IMAGE_TAG: "${{ steps.bump-semver.outputs.new_version }}-${{ github.sha }}"
         run: |
           ./gradlew bootBuildImage
           IMAGE=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker tag prsdb-webapp:latest $IMAGE
           docker push $IMAGE
+
+      - name: Push version tag
+        run: |
+          tag=${{ steps.bump-semver.outputs.new_version }}
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git tag "${tag}"
+          git push origin "${tag}"
 
       # ToDo PRSD-752: Update task definition and redeploy ECS service
 
