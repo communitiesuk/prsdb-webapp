@@ -17,6 +17,10 @@ class EmailTemplateModelsTests {
                     LocalAuthorityInvitationEmail(createLocalAuthority(1, "name"), URI("https://example.com")),
                     "/emails/LocalAuthorityInvitation.md",
                 ),
+                EmailTemplateTestData(
+                    LocalAuthorityInvitationCancellationEmail(createLocalAuthority(1, "name")),
+                    "/emails/LocalAuthorityInvitationCancellation.md",
+                ),
             )
 
         private fun createLocalAuthority(
