@@ -1,7 +1,12 @@
 spring:
   application:
     name: 'prsdb-webapp'
+  mvc:
+    format:
+      date: "d MMMM yyyy"
+
 notify:
   api-key: ${EMAILNOTIFICATIONS_APIKEY}
+
 os-places:
   api-key: ${OS_PLACES_API_KEY}

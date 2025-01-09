@@ -103,14 +103,18 @@ class LandlordJourneyDataHelper {
             "livesInUK",
         )
 
-        fun getCountryOfResidence(
+        fun getNonUKCountryOfResidence(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
-        ) = journeyDataService.getFieldStringValue(
-            journeyData,
-            LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
-            "countryOfResidence",
-        )
+        ) = if (getLivesInUK(journeyDataService, journeyData) == true) {
+            null
+        } else {
+            journeyDataService.getFieldStringValue(
+                journeyData,
+                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
+                "countryOfResidence",
+            )
+        }
 
         fun getAddress(
             journeyDataService: JourneyDataService,

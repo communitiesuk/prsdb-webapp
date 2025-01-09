@@ -63,7 +63,7 @@ class LandlordRegistrationJourney(
                 lookupContactAddressStep(),
                 selectContactAddressStep(journeyDataService, addressLookupService, addressDataService),
                 manualContactAddressStep(),
-                checkAnswersStep(),
+                checkAnswersStep(journeyDataService, addressDataService),
                 declarationStep(journeyDataService, landlordService, addressDataService),
             ),
     ) {
@@ -397,24 +397,15 @@ class LandlordRegistrationJourney(
                 saveAfterSubmit = false,
             )
 
-        private fun checkAnswersStep() =
-            Step(
-                // TODO PRSD-372 update message value(s)
-                id = LandlordRegistrationStepId.CheckAnswers,
-                page =
-                    LandlordRegistrationCheckAnswersPage(
-                        formModel = CheckAnswersFormModel::class,
-                        templateName = "forms/checkAnswersForm",
-                        content =
-                            mapOf(
-                                "title" to "registerAsALandlord.title",
-                                "summaryName" to "registerAsALandlord.title",
-                                "submitButtonText" to "forms.buttons.confirmAndContinue",
-                            ),
-                    ),
-                nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Declaration, null) },
-                saveAfterSubmit = false,
-            )
+        private fun checkAnswersStep(
+            journeyDataService: JourneyDataService,
+            addressDataService: AddressDataService,
+        ) = Step(
+            id = LandlordRegistrationStepId.CheckAnswers,
+            page = LandlordRegistrationCheckAnswersPage(journeyDataService, addressDataService),
+            nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Declaration, null) },
+            saveAfterSubmit = false,
+        )
 
         private fun declarationStep(
             journeyDataService: JourneyDataService,

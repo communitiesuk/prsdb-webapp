@@ -38,6 +38,7 @@ class PropertyRegistrationCheckAnswersPage(
 
         model.addAttribute("propertyDetails", propertyDetails)
         model.addAttribute("propertyName", propertyName)
+        model.addAttribute("showUprnDetail", !DataHelper.isManualAddressChosen(journeyDataService, journeyData))
         return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData)
     }
 
