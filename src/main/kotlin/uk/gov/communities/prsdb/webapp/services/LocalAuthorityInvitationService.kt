@@ -42,6 +42,10 @@ class LocalAuthorityInvitationService(
         invitationRepository.delete(invitation)
     }
 
+    fun deleteInvitation(invitationId: Long) {
+        invitationRepository.deleteById(invitationId)
+    }
+
     fun tokenIsValid(token: String): Boolean {
         try {
             getInvitationFromToken(token)
@@ -68,5 +72,5 @@ class LocalAuthorityInvitationService(
         session.setAttribute(LA_USER_INVITATION_TOKEN, null)
     }
 
-    fun getInvitationById(id: Long): LocalAuthorityInvitation = invitationRepository.getById(id)
+    fun getInvitationById(id: Long): LocalAuthorityInvitation = invitationRepository.getReferenceById(id)
 }

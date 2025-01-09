@@ -408,6 +408,6 @@ class ManageLocalAuthorityUsersControllerTests(
                 }
             }
 
-        verify(localAuthorityInvitationService).deleteInvitation(invitation)
+        verify(localAuthorityInvitationService).deleteInvitation(DEFAULT_LA_INVITATION_ID)
     }
 }

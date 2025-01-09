@@ -288,7 +288,7 @@ class ManageLocalAuthorityUsersController(
         redirectAttributes: RedirectAttributes,
     ): String {
         val invitation = invitationService.getInvitationById(invitationId)
-        invitationService.deleteInvitation(invitation)
+        invitationService.deleteInvitation(invitationId)
 
         redirectAttributes.addFlashAttribute("deletedEmail", invitation.invitedEmail)
         redirectAttributes.addFlashAttribute("localAuthority", invitation.invitingAuthority)

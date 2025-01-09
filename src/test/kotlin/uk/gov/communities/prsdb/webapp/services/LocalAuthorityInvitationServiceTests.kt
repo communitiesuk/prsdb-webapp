@@ -119,7 +119,7 @@ class LocalAuthorityInvitationServiceTests {
                 LocalAuthority(),
             )
 
-        whenever(mockLaInviteRepository.getById(testId)).thenReturn(invitationFromDatabase)
+        whenever(mockLaInviteRepository.getReferenceById(testId)).thenReturn(invitationFromDatabase)
 
         assertEquals(invitationFromDatabase, inviteService.getInvitationById(testId))
     }
