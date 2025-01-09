@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import java.time.LocalDate
 
@@ -57,7 +58,19 @@ class LandlordService(
     fun searchForLandlords(
         searchTerm: String,
         limit: Int = DEFAULT_LANDLORD_SEARCH_LIMIT,
-    ): List<Landlord> = landlordRepository.searchMatching(searchTerm, limit)
+    ): List<LandlordSearchResultDataModel> {
+        RegistrationNumberDataModel.parseOrNull(searchTerm)?.let { registrationNumber ->
+            if (registrationNumber.isType(RegistrationNumberType.LANDLORD)) {
+                retrieveLandlordByRegNum(registrationNumber)?.let { landlord ->
+                    return listOf(LandlordSearchResultDataModel.fromLandlord(landlord))
+                }
+            }
+        }
+
+        return landlordRepository
+            .searchMatching(searchTerm, limit)
+            .map { LandlordSearchResultDataModel.fromLandlord(it) }
+    }
 
     // TODO PRSD-652: Change this once pagination has been implemented
     companion object {
