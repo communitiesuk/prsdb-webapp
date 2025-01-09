@@ -592,7 +592,7 @@ class PropertyRegistrationJourney(
                         baseUserId = SecurityContextHolder.getContext().authentication.name,
                     )
 
-                journeyDataService.clearJourneyDataFromSession()
+                journeyDataService.deleteJourneyData()
 
                 session.setAttribute(PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
 

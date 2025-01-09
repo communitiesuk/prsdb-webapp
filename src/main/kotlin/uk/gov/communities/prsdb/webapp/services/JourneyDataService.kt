@@ -86,6 +86,14 @@ class JourneyDataService(
         setContextId(contextId)
     }
 
+    fun deleteJourneyData() {
+        val contextId = getContextId() ?: return
+        formContextRepository.deleteById(contextId)
+
+        session.removeAttribute("contextId")
+        clearJourneyDataFromSession()
+    }
+
     fun clearJourneyDataFromSession() {
         session.setAttribute("journeyData", null)
     }
@@ -138,7 +146,9 @@ class JourneyDataService(
             fieldName: String,
             subPageNumber: Int? = null,
         ): E? {
-            val fieldAsString = journeyDataService.getFieldStringValue(journeyData, urlPathSegment, fieldName, subPageNumber) ?: return null
+            val fieldAsString =
+                journeyDataService.getFieldStringValue(journeyData, urlPathSegment, fieldName, subPageNumber)
+                    ?: return null
             return enumValueOf<E>(fieldAsString)
         }
     }
