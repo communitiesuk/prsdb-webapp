@@ -1,6 +1,8 @@
 # exclude hidden dirs .git etc.
 .*
+# exclude Intellij specific files
 *.iml
+# exclude source files
 gradle
 src
 # exclude build binaries
