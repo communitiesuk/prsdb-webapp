@@ -72,7 +72,8 @@ class JourneyDataService(
                 )
             }
         val savedFormContext = formContextRepository.save(formContext)
-        return savedFormContext.id!!
+        setContextId(savedFormContext.id!!)
+        return savedFormContext.id
     }
 
     fun loadJourneyDataIntoSession(contextId: Long) {
