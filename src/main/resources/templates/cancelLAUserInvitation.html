@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body th:replace="~{fragments/layout :: layout(#{cancelLAUserInvitation.title}, ~{::body/content()}, false)}">
+<a th:replace="~{fragments/forms/backLink :: backLink(${backLinkPath})}">backLink</a>
+<th:block th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main})}">
+    <main class="govuk-main-wrapper">
+        <header id="header">
+            <h1 class="govuk-heading-l" th:text="#{cancelLAUserInvitation.heading}">cancelLAUserInvitation.heading</h1>
+        </header>
+        <section>
+            <p class="govuk-body">
+                <strong th:text="#{cancelLAUserInvitation.emailLabel}+':'">cancelLAUserInvitation.emailLabel:</strong>
+                <span th:text="${email}" th:remove="tag">email</span>
+            </p>
+        </section>
+        <section>
+            <p class="govuk-body" th:text="#{cancelLAUserInvitation.para.one}">cancelLAUserInvitation.para.one</p>
+            <p class="govuk-body" th:text="#{cancelLAUserInvitation.para.two}">cancelLAUserInvitation.para.two</p>
+            <p class="govuk-body" th:text="#{cancelLAUserInvitation.para.three}">cancelLAUserInvitation.para.two</p>
+        </section>
+        <form method="post" th:action="@{''}">
+            <button th:replace="~{fragments/buttons/warningButton :: warningButton(buttonText=#{cancelLAUserInvitation.cancelButton})}"></button>
+        </form>
+    </main>
+</th:block>
+</body>
+</html>

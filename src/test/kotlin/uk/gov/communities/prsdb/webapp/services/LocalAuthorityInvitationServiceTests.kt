@@ -108,4 +108,19 @@ class LocalAuthorityInvitationServiceTests {
 
         assertFalse(inviteService.tokenIsValid(testUuid.toString()))
     }
+
+    @Test
+    fun `getInvitationById returns an invitation if the id is in the database`() {
+        val testId = 123.toLong()
+        val invitationFromDatabase =
+            LocalAuthorityInvitation(
+                UUID.randomUUID(),
+                "test@example.com",
+                LocalAuthority(),
+            )
+
+        whenever(mockLaInviteRepository.getReferenceById(testId)).thenReturn(invitationFromDatabase)
+
+        assertEquals(invitationFromDatabase, inviteService.getInvitationById(testId))
+    }
 }
