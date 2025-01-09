@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Compan
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationCancellationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
@@ -409,5 +410,26 @@ class ManageLocalAuthorityUsersControllerTests(
             }
 
         verify(localAuthorityInvitationService).deleteInvitation(DEFAULT_LA_INVITATION_ID)
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_ADMIN"])
+    fun `cancelInvitation emails a cancellation notification to the invited email address`() {
+        val invitation = createLocalAuthorityInvitation()
+        whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
+
+        mvc
+            .post("/local-authority/$DEFAULT_LA_ID/cancel-invitation/$DEFAULT_LA_INVITATION_ID") {
+                contentType = MediaType.APPLICATION_FORM_URLENCODED
+                with(csrf())
+            }.andExpect {
+                status {
+                    is3xxRedirection()
+                    redirectedUrl("../cancel-invitation/success")
+                }
+            }
+
+        verify(emailNotificationService)
+            .sendEmail(invitation.invitedEmail, LocalAuthorityInvitationCancellationEmail(invitation.invitingAuthority))
     }
 }
