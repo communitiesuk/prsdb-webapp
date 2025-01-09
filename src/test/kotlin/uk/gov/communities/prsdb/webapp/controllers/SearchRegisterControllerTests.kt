@@ -12,17 +12,17 @@ class SearchRegisterControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
     @Test
-    fun `SearchHomeController returns a redirect for unauthenticated user`() {
-        mvc.get("/search").andExpect {
+    fun `SearchRegisterController returns a redirect for unauthenticated user`() {
+        mvc.get("/search/landlord").andExpect {
             status { is3xxRedirection() }
         }
     }
 
     @Test
     @WithMockUser
-    fun `SearchHomeController returns 403 for unauthorized user`() {
+    fun `SearchRegisterController returns 403 for unauthorized user`() {
         mvc
-            .get("/search")
+            .get("/search/landlord")
             .andExpect {
                 status { isForbidden() }
             }
@@ -30,9 +30,9 @@ class SearchRegisterControllerTests(
 
     @Test
     @WithMockUser(roles = ["LA_USER"])
-    fun `SearchHomeController returns 200 for authorized user`() {
+    fun `SearchRegisterController returns 200 for authorized user`() {
         mvc
-            .get("/search")
+            .get("/search/landlord")
             .andExpect {
                 status { isOk() }
             }
