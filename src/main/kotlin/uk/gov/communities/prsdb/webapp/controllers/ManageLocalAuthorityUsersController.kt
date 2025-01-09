@@ -17,6 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ConfirmedEmailDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationCancellationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -28,7 +29,8 @@ import java.security.Principal
 @Controller
 @RequestMapping("/local-authority/{localAuthorityId}")
 class ManageLocalAuthorityUsersController(
-    var emailSender: EmailNotificationService<LocalAuthorityInvitationEmail>,
+    var invitationEmailSender: EmailNotificationService<LocalAuthorityInvitationEmail>,
+    var cancellationEmailSender: EmailNotificationService<LocalAuthorityInvitationCancellationEmail>,
     var invitationService: LocalAuthorityInvitationService,
     val localAuthorityDataService: LocalAuthorityDataService,
 ) {
@@ -226,7 +228,7 @@ class ManageLocalAuthorityUsersController(
         try {
             val token = invitationService.createInvitationToken(emailModel.email, currentAuthority)
             val invitationLinkAddress = invitationService.buildInvitationUri(token)
-            emailSender.sendEmail(
+            invitationEmailSender.sendEmail(
                 emailModel.email,
                 LocalAuthorityInvitationEmail(currentAuthority, invitationLinkAddress),
             )
@@ -289,6 +291,11 @@ class ManageLocalAuthorityUsersController(
     ): String {
         val invitation = invitationService.getInvitationById(invitationId)
         invitationService.deleteInvitation(invitationId)
+
+        cancellationEmailSender.sendEmail(
+            invitation.invitedEmail,
+            LocalAuthorityInvitationCancellationEmail(invitation.invitingAuthority),
+        )
 
         redirectAttributes.addFlashAttribute("deletedEmail", invitation.invitedEmail)
         redirectAttributes.addFlashAttribute("localAuthority", invitation.invitingAuthority)
