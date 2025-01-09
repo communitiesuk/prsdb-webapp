@@ -6,6 +6,8 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.security.Principal
@@ -30,13 +32,14 @@ class LandlordUserController(
 
         // TODO PRSD-747 to pass Id verification status to model with verified label and message key
         model.addAttribute("name", landlord.name)
-        model.addAttribute("registrationNumber", landlord.registrationNumber)
+        model.addAttribute("registrationNumber", RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber))
         model.addAttribute("registrationDate", registeredDate)
         model.addAttribute("dateOfBirth", landlord.dateOfBirth)
         model.addAttribute("email", landlord.email)
         model.addAttribute("phoneNumber", landlord.phoneNumber)
         // TODO PRSD-742 to update this check
-        model.addAttribute("isUKResident", landlord.internationalAddress == null)
+        model.addAttribute("isUKResident", MessageKeyConverter.convert(landlord.internationalAddress == null))
+        model.addAttribute("internationalAddress", landlord.internationalAddress)
         model.addAttribute("internationalAddress", landlord.internationalAddress)
         model.addAttribute("ukAddress", landlord.address.singleLineAddress)
         // TODO PRSD-670: Replace with link to dashboard
