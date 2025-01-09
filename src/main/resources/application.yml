@@ -10,15 +10,24 @@ spring:
     hikari:
       connection-init-sql: SET pg_trgm.word_similarity_threshold = 0.2
 
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    properties:
+    jpa:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        ddl-auto: validate
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.PostgreSQLDialect
+      defer-datasource-initialization: true
 
   flyway:
-    enabled: false
+    enabled: true
+    locations: classpath:db/migrations
+    validate-on-migrate: true
+
+  sql:
+    init:
+      mode: always
+      platform: ${ENVIRONMENT_NAME}
+      continue-on-error: true
 
   data:
     redis:

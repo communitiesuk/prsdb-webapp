@@ -1,0 +1,80 @@
+name: Build and Deploy
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      AWS_REGION: "eu-west-2"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: 17
+          cache: 'gradle'
+
+      - name: Install node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+
+      - name: Run gradle `check` to run linting and tests
+        env:
+          ONE_LOGIN_PRIVATE_KEY: |
+            ${{ secrets.ONE_LOGIN_PRIVATE_KEY }}
+          ONE_LOGIN_PUBLIC_KEY: |
+            ${{ secrets.ONE_LOGIN_PUBLIC_KEY }}
+          EMAILNOTIFICATIONS_APIKEY: ${{ secrets.NOTIFY_KEY }}
+        run: ./gradlew clean check --no-daemon
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::794038239680:role/integration-push-image
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: "integration-webapp"
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          ./gradlew bootBuildImage
+          IMAGE=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker tag prsdb-webapp:latest $IMAGE
+          docker push $IMAGE
+
+      # ToDo PRSD-752: Update task definition and redeploy ECS service
+
+      - name: Report pipeline status
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: slack
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          payload: |
+            {
+              "commit": ${{ toJson(github.event.head_commit.message) }},
+              "result": "${{ job.status == 'success' && 'Success :tick:' || 'Failure :no-cross:' }}",
+              "url": "${{ format('https://github.com/communitiesuk/prsdb-webapp/actions/runs/{0}', github.run_id) }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
