@@ -1,9 +1,11 @@
 package uk.gov.communities.prsdb.webapp.mockObjects
 
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
+import java.util.UUID
 
 class MockLocalAuthorityData {
     companion object {
@@ -40,5 +42,15 @@ class MockLocalAuthorityData {
                 email = "loggedinuser@example.gov.uk",
             )
         }
+
+        const val DEFAULT_LA_INVITATION_ID = 123L
+
+        fun createLocalAuthorityInvitation(localAuthorityId: Int = DEFAULT_LA_ID): LocalAuthorityInvitation =
+            LocalAuthorityInvitation(
+                DEFAULT_LA_INVITATION_ID,
+                UUID.randomUUID(),
+                "invited.email@example.com",
+                createLocalAuthority(localAuthorityId),
+            )
     }
 }
