@@ -59,7 +59,8 @@ class LandlordService(
         limit: Int = DEFAULT_LANDLORD_SEARCH_LIMIT,
     ): List<Landlord> = landlordRepository.searchMatching(searchTerm, limit)
 
+    // TODO PRSD-652: Change this once pagination has been implemented
     companion object {
-        private const val DEFAULT_LANDLORD_SEARCH_LIMIT = 3
+        private const val DEFAULT_LANDLORD_SEARCH_LIMIT = 25
     }
 }
