@@ -93,24 +93,24 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
         fun getNumberOfHouseholds(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
-        ): Int? =
+        ): Int =
             journeyDataService
                 .getFieldIntegerValue(
                     journeyData,
                     RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment,
                     "numberOfHouseholds",
-                )
+                ) ?: 0
 
         fun getNumberOfTenants(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
-        ): Int? =
+        ): Int =
             journeyDataService
                 .getFieldIntegerValue(
                     journeyData,
                     RegisterPropertyStepId.NumberOfPeople.urlPathSegment,
                     "numberOfPeople",
-                )
+                ) ?: 0
 
         fun getLicensingType(
             journeyDataService: JourneyDataService,

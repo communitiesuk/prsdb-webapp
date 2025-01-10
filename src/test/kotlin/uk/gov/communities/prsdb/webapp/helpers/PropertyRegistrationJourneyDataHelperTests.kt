@@ -226,6 +226,23 @@ class PropertyRegistrationJourneyDataHelperTests {
     }
 
     @Test
+    fun `getNumberOfHouseholds returns 0 when there are no households`() {
+        val expectedNumberOfHouseholds = 0
+        whenever(
+            mockJourneyDataService.getFieldIntegerValue(
+                mockJourneyData,
+                RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment,
+                "numberOfHouseholds",
+            ),
+        ).thenReturn(null)
+
+        val numberOfHouseholds =
+            PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(mockJourneyDataService, mockJourneyData)
+
+        assertEquals(expectedNumberOfHouseholds, numberOfHouseholds)
+    }
+
+    @Test
     fun `getNumberOfTenants returns the number of people in the house`() {
         val expectedNumberOfTenants = 2
         whenever(
@@ -235,6 +252,23 @@ class PropertyRegistrationJourneyDataHelperTests {
                 "numberOfPeople",
             ),
         ).thenReturn(expectedNumberOfTenants)
+
+        val numberOfTenants =
+            PropertyRegistrationJourneyDataHelper.getNumberOfTenants(mockJourneyDataService, mockJourneyData)
+
+        assertEquals(expectedNumberOfTenants, numberOfTenants)
+    }
+
+    @Test
+    fun `getNumberOfTenants returns 0 when there are no people in the house`() {
+        val expectedNumberOfTenants = 0
+        whenever(
+            mockJourneyDataService.getFieldIntegerValue(
+                mockJourneyData,
+                RegisterPropertyStepId.NumberOfPeople.urlPathSegment,
+                "numberOfPeople",
+            ),
+        ).thenReturn(null)
 
         val numberOfTenants =
             PropertyRegistrationJourneyDataHelper.getNumberOfTenants(mockJourneyDataService, mockJourneyData)

@@ -583,12 +583,12 @@ class PropertyRegistrationJourney(
                             PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(
                                 journeyDataService,
                                 journeyData,
-                            ) ?: 0,
+                            ),
                         numberOfPeople =
                             PropertyRegistrationJourneyDataHelper.getNumberOfTenants(
                                 journeyDataService,
                                 journeyData,
-                            ) ?: 0,
+                            ),
                         baseUserId = SecurityContextHolder.getContext().authentication.name,
                     )
 
