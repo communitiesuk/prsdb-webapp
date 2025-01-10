@@ -188,9 +188,7 @@ class PropertyRegistrationJourneyDataHelperTests {
             ),
         ).thenReturn(true)
 
-        assertTrue(
-            PropertyRegistrationJourneyDataHelper.getIsOccupied(mockJourneyDataService, mockJourneyData) ?: false,
-        )
+        assertTrue(PropertyRegistrationJourneyDataHelper.getIsOccupied(mockJourneyDataService, mockJourneyData)!!)
     }
 
     @Test
@@ -203,9 +201,7 @@ class PropertyRegistrationJourneyDataHelperTests {
             ),
         ).thenReturn(false)
 
-        assertFalse(
-            PropertyRegistrationJourneyDataHelper.getIsOccupied(mockJourneyDataService, mockJourneyData) ?: true,
-        )
+        assertFalse(PropertyRegistrationJourneyDataHelper.getIsOccupied(mockJourneyDataService, mockJourneyData)!!)
     }
 
     @Test
