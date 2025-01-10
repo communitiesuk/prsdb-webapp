@@ -253,4 +253,51 @@ class ManageLocalAuthorityUsersController(
         model.addAttribute("localAuthority", currentAuthority)
         return "inviteLAUserSuccess"
     }
+
+    @GetMapping("/cancel-invitation/{invitationId}")
+    fun confirmCancelInvitation(
+        @PathVariable localAuthorityId: Int,
+        @PathVariable invitationId: Long,
+        principal: Principal,
+        model: Model,
+    ): String {
+        val invitation = invitationService.getInvitationById(invitationId)
+
+        val (_, authority) =
+            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+                localAuthorityId,
+                principal.name,
+            )
+
+        if (authority.id != invitation.invitingAuthority.id) {
+            throw AccessDeniedException(
+                "Local authority user for LA ${authority.name} tried to cancel an invitation from LA ${invitation.invitingAuthority.name}",
+            )
+        }
+
+        model.addAttribute("backLinkPath", "../manage-users")
+        model.addAttribute("email", invitation.invitedEmail)
+
+        return "cancelLAUserInvitation"
+    }
+
+    @PostMapping("/cancel-invitation/{invitationId}")
+    fun cancelInvitation(
+        @PathVariable localAuthorityId: Int,
+        @PathVariable invitationId: Long,
+        redirectAttributes: RedirectAttributes,
+    ): String {
+        val invitation = invitationService.getInvitationById(invitationId)
+        invitationService.deleteInvitation(invitationId)
+
+        redirectAttributes.addFlashAttribute("deletedEmail", invitation.invitedEmail)
+        redirectAttributes.addFlashAttribute("localAuthority", invitation.invitingAuthority)
+        return "redirect:../cancel-invitation/success"
+    }
+
+    @GetMapping("/cancel-invitation/success")
+    fun cancelInvitationSuccess(
+        @PathVariable localAuthorityId: String,
+        model: Model,
+    ): String = "cancelLAUserInvitationSuccess"
 }
