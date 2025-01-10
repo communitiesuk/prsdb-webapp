@@ -34,12 +34,12 @@ class PropertyRegistrationService(
 
         val property = propertyRepository.findByAddress_Uprn(uprn)
         if (property == null || !property.isActive) {
-            if (!ignoreCache) addressDataService.setCachedAddressRegisteredResult(uprn, false)
+            addressDataService.setCachedAddressRegisteredResult(uprn, false)
             return false
         }
 
         val databaseResult = propertyOwnershipRepository.existsByIsActiveTrueAndProperty_Id(property.id)
-        if (!ignoreCache) addressDataService.setCachedAddressRegisteredResult(uprn, databaseResult)
+        addressDataService.setCachedAddressRegisteredResult(uprn, databaseResult)
         return databaseResult
     }
 
