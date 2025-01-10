@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{registerProperty.title}, ~{::main}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div id="page-contents"
+         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <div id="confirmation-banner"
+             th:replace="~{fragments/confirmationPageBanner :: confirmationPageBanner(#{registerProperty.confirmation.banner.heading}, ~{::#confirmation-banner/content()})}">
+        </div>
+        <section>
+            <table th:replace="~{fragments/tables/table :: table(${ {'registerProperty.confirmation.table.address.heading','registerProperty.confirmation.table.prn.heading'} }, ~{::tbody})}">
+                <tbody class="govuk-table__body">
+                <tr class="govuk_table__row">
+                    <td class="govuk-table__cell govuk-!-width-one-half" th:text="${singleLineAddress}"></td>
+                    <td class="govuk-table__cell govuk-!-width-one-half" th:text="${prn}"></td>
+                </tr>
+                </tbody>
+            </table>
+            <h1 class="govuk-heading-l" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h1>
+            <p class="govuk-body" th:utext="#{registerProperty.confirmation.whatHappensNext.paragraph.one}">
+                registerProperty.confirmation.whatHappensNext.paragraph.one
+            </p>
+            <p class="govuk-body" th:text="#{registerProperty.confirmation.whatHappensNext.paragraph.two}">
+                registerProperty.confirmation.whatHappensNext.paragraph.two
+            </p>
+        </section>
+        <!-- TODO PRSD-670: Replace with link to dashboard -->
+        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/}, #{common.confirmationPage.goToDashboard})}">
+            common.confirmationPage.goToDashboard
+        </a>
+    </div>
+</main>
+</html>

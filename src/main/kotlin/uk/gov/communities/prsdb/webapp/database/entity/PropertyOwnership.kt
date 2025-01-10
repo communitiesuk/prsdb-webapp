@@ -97,7 +97,6 @@ class PropertyOwnership(
         this.ownershipType = ownershipType
         this.currentNumHouseholds = currentNumHouseholds
         this.currentNumTenants = currentNumTenants
-        this.currentNumTenants = currentNumTenants
         this.registrationNumber = registrationNumber
         this.primaryLandlord = primaryLandlord
         this.property = property
@@ -122,7 +121,6 @@ class PropertyOwnership(
         this.landlordType = landlordType
         this.ownershipType = ownershipType
         this.currentNumHouseholds = currentNumHouseholds
-        this.currentNumTenants = currentNumTenants
         this.currentNumTenants = currentNumTenants
         this.registrationNumber = registrationNumber
         this.primaryLandlord = primaryLandlord

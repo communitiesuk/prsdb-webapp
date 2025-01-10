@@ -34,7 +34,7 @@ class OSPlacesAPIStubController {
         } catch (exception: Exception) {
             println(exception.message)
             return "{'results':[{'DPA':{'ADDRESS':'1, Example Road, EG'," +
-                "'LOCAL_CUSTODIAN_CODE':100,'UPRN':'0123456','BUILDING_NUMBER':1,'POSTCODE':'EG'}}]}"
+                "'LOCAL_CUSTODIAN_CODE':${getCustodianCode(1)},'UPRN':'0123456','BUILDING_NUMBER':1,'POSTCODE':'EG'}}]}"
         }
     }
 

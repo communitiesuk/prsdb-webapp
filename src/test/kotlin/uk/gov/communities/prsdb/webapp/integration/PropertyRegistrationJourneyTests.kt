@@ -6,9 +6,11 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentCaptor.captor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
@@ -16,9 +18,12 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AlreadyRegisteredFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmationPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HouseholdsFormPagePropertyRegistration
@@ -33,13 +38,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalAuthorityFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import java.net.URI
 
 @Sql("/data-local.sql")
 class PropertyRegistrationJourneyTests : IntegrationTest() {
-    @MockBean
-    lateinit var propertyRegistrationService: PropertyRegistrationService
+    @SpyBean
+    private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
 
     @BeforeEach
     fun setup() {
@@ -57,6 +62,15 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
                     "BUILDING_NUMBER": 1,
                     "POSTCODE": "EG1 2AB"
                   }
+                },
+                {
+                  "DPA": {
+                    "ADDRESS": "already registered address",
+                    "LOCAL_CUSTODIAN_CODE": ${LOCAL_AUTHORITIES[11].custodianCode},
+                    "UPRN": "1123456",
+                    "BUILDING_NUMBER": 1,
+                    "POSTCODE": "EG1 3CD"
+                  }
                 }
               ]
             }
@@ -66,7 +80,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in`(page: Page) {
-        // TODO: this can be added to as more steps are added to the journey
+        // TODO PRSD-622: this can be added to as more steps are added to the journey
 
         // Start page (not a journey step, but it is how the user accesses the journey)
         val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
@@ -145,14 +159,25 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         // fill in and submit
         selectiveLicencePage.licenceNumberInput.fill("licence number")
         selectiveLicencePage.form.submit()
-        val checkAnswersPage = assertPageIs(page, CheckAnswersFormPagePropertyRegistration::class)
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
         // Check answers - render page
         assertThat(checkAnswersPage.form.getFieldsetHeading()).containsText("Check your answers for:")
         //  submit
         checkAnswersPage.form.submit()
+        val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
 
-        assertEquals("/register-property/placeholder", URI(page.url()).path)
+        // Confirmation - render page
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        val expectedPropertyRegNum =
+            RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnershipCaptor.value.registrationNumber)
+        assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
+        // go to dashboard
+        confirmationPage.clickGoToDashboard()
+
+        // TODO PRSD-670: Replace with dashboard page
+        assertEquals("/", URI(page.url()).path)
     }
 
     @Nested
@@ -192,10 +217,8 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         @Test
         fun `Selecting an already-registered address navigates to the AlreadyRegistered step`(page: Page) {
-            whenever(propertyRegistrationService.getIsAddressRegistered(any())).thenReturn(true)
-
             val selectAddressPage = navigator.goToPropertyRegistrationSelectAddressPage()
-            selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
+            selectAddressPage.radios.selectValue("already registered address")
             selectAddressPage.form.submit()
             assertPageIs(page, AlreadyRegisteredFormPagePropertyRegistration::class)
         }
@@ -400,7 +423,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val licensingTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
             licensingTypePage.form.getRadios().selectValue(LicensingType.NO_LICENSING)
             licensingTypePage.form.submit()
-            assertPageIs(page, CheckAnswersFormPagePropertyRegistration::class)
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
 
         @Test
@@ -451,7 +474,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val hmoMandatoryLicencePage = navigator.goToPropertyRegistrationHmoMandatoryLicencePage()
             hmoMandatoryLicencePage.licenceNumberInput.fill("licence number")
             hmoMandatoryLicencePage.form.submit()
-            assertPageIs(page, CheckAnswersFormPagePropertyRegistration::class)
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
 
         @Test
@@ -483,7 +506,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val hmoAdditionalLicencePage = navigator.goToPropertyRegistrationHmoAdditionalLicencePage()
             hmoAdditionalLicencePage.licenceNumberInput.fill("licence number")
             hmoAdditionalLicencePage.form.submit()
-            assertPageIs(page, CheckAnswersFormPagePropertyRegistration::class)
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
 
         @Test
@@ -505,6 +528,15 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             hmoAdditionalLicencePage.licenceNumberInput.fill(aVeryLongString)
             hmoAdditionalLicencePage.form.submit()
             assertThat(hmoAdditionalLicencePage.form.getErrorMessage()).containsText("The licensing number is too long")
+        }
+    }
+
+    @Nested
+    inner class Confirmation {
+        @Test
+        fun `Navigating here with an incomplete form returns a 400 error page`() {
+            val errorPage = navigator.skipToPropertyRegistrationConfirmationPage()
+            assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
         }
     }
 }

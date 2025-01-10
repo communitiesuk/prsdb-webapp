@@ -72,7 +72,8 @@ class JourneyDataService(
                 )
             }
         val savedFormContext = formContextRepository.save(formContext)
-        return savedFormContext.id!!
+        setContextId(savedFormContext.id!!)
+        return savedFormContext.id
     }
 
     fun loadJourneyDataIntoSession(contextId: Long) {
@@ -84,6 +85,14 @@ class JourneyDataService(
             objectToStringKeyedMap(objectMapper.readValue(formContext.context, Any::class.java)) ?: mutableMapOf()
         setJourneyData(loadedJourneyData)
         setContextId(contextId)
+    }
+
+    fun deleteJourneyData() {
+        val contextId = getContextId() ?: return
+        formContextRepository.deleteById(contextId)
+
+        session.removeAttribute("contextId")
+        clearJourneyDataFromSession()
     }
 
     fun clearJourneyDataFromSession() {
@@ -138,7 +147,9 @@ class JourneyDataService(
             fieldName: String,
             subPageNumber: Int? = null,
         ): E? {
-            val fieldAsString = journeyDataService.getFieldStringValue(journeyData, urlPathSegment, fieldName, subPageNumber) ?: return null
+            val fieldAsString =
+                journeyDataService.getFieldStringValue(journeyData, urlPathSegment, fieldName, subPageNumber)
+                    ?: return null
             return enumValueOf<E>(fieldAsString)
         }
     }

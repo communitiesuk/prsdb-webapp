@@ -40,7 +40,7 @@ import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.net.URI
 import kotlin.test.assertNotNull
 
-@Sql("/data-local.sql")
+@Sql("/data-mockuser-not-landlord.sql")
 class LandlordRegistrationJourneyTests : IntegrationTest() {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
 

@@ -52,7 +52,11 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
         ): String? =
-            journeyDataService.getFieldStringValue(journeyData, RegisterPropertyStepId.PropertyType.urlPathSegment, "customPropertyType")
+            journeyDataService.getFieldStringValue(
+                journeyData,
+                RegisterPropertyStepId.PropertyType.urlPathSegment,
+                "customPropertyType",
+            )
 
         fun getOwnershipType(
             journeyDataService: JourneyDataService,
@@ -79,21 +83,34 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
         fun getIsOccupied(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
-        ): Boolean? = journeyDataService.getFieldBooleanValue(journeyData, RegisterPropertyStepId.Occupancy.urlPathSegment, "occupied")
+        ): Boolean? =
+            journeyDataService.getFieldBooleanValue(
+                journeyData,
+                RegisterPropertyStepId.Occupancy.urlPathSegment,
+                "occupied",
+            )
 
         fun getNumberOfHouseholds(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
-        ): Int? =
+        ): Int =
             journeyDataService
-                .getFieldIntegerValue(journeyData, RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment, "numberOfHouseholds")
+                .getFieldIntegerValue(
+                    journeyData,
+                    RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment,
+                    "numberOfHouseholds",
+                ) ?: 0
 
         fun getNumberOfTenants(
             journeyDataService: JourneyDataService,
             journeyData: JourneyData,
-        ): Int? =
+        ): Int =
             journeyDataService
-                .getFieldIntegerValue(journeyData, RegisterPropertyStepId.NumberOfPeople.urlPathSegment, "numberOfPeople")
+                .getFieldIntegerValue(
+                    journeyData,
+                    RegisterPropertyStepId.NumberOfPeople.urlPathSegment,
+                    "numberOfPeople",
+                ) ?: 0
 
         fun getLicensingType(
             journeyDataService: JourneyDataService,
