@@ -27,7 +27,7 @@ class JourneyDataHelperTests {
         val mockJourneyData: JourneyData = mutableMapOf()
 
         whenever(
-            mockJourneyDataService.getFieldStringValue(
+            JourneyDataService.getFieldStringValue(
                 mockJourneyData,
                 manualAddressPathSegment,
                 "addressLineOne",
@@ -35,7 +35,7 @@ class JourneyDataHelperTests {
         ).thenReturn(addressLineOne)
 
         whenever(
-            mockJourneyDataService.getFieldStringValue(
+            JourneyDataService.getFieldStringValue(
                 mockJourneyData,
                 manualAddressPathSegment,
                 "townOrCity",
@@ -43,14 +43,14 @@ class JourneyDataHelperTests {
         ).thenReturn(townOrCity)
 
         whenever(
-            mockJourneyDataService.getFieldStringValue(
+            JourneyDataService.getFieldStringValue(
                 mockJourneyData,
                 manualAddressPathSegment,
                 "postcode",
             ),
         ).thenReturn(postcode)
 
-        val addressDataModel = JourneyDataHelper.getManualAddress(mockJourneyDataService, mockJourneyData, manualAddressPathSegment)
+        val addressDataModel = JourneyDataHelper.getManualAddress(mockJourneyData, manualAddressPathSegment)
 
         assertEquals(expectedAddressDataModel, addressDataModel)
     }

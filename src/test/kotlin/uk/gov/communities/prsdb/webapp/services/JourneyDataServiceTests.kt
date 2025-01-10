@@ -64,7 +64,7 @@ class JourneyDataServiceTests {
                 )
 
             // Act
-            val pageData = journeyDataService.getPageData(journeyData, pageName, null)
+            val pageData = JourneyDataService.getPageData(journeyData, pageName, null)
 
             // Assert
             assertEquals(pageData?.get(key), value)
@@ -77,7 +77,7 @@ class JourneyDataServiceTests {
             val journeyData: JourneyData = mutableMapOf()
 
             // Act
-            val pageData = journeyDataService.getPageData(journeyData, pageName, null)
+            val pageData = JourneyDataService.getPageData(journeyData, pageName, null)
 
             // Assert
             assertNull(pageData)
@@ -96,7 +96,7 @@ class JourneyDataServiceTests {
                 )
 
             // Act
-            val subPageData = journeyDataService.getPageData(journeyData, pageName, subPageNumber)
+            val subPageData = JourneyDataService.getPageData(journeyData, pageName, subPageNumber)
 
             // Assert
             assertEquals(subPageData?.get(key), value)
@@ -110,7 +110,7 @@ class JourneyDataServiceTests {
             val journeyData: JourneyData = mutableMapOf(pageName to mutableMapOf<String, Any>())
 
             // Act
-            val subPageData = journeyDataService.getPageData(journeyData, pageName, subPageNumber)
+            val subPageData = JourneyDataService.getPageData(journeyData, pageName, subPageNumber)
 
             // Assert
             assertNull(subPageData)
@@ -218,7 +218,7 @@ class JourneyDataServiceTests {
             val journeyType = JourneyType.LANDLORD_REGISTRATION
             val principalId = "testPrincipleSub"
             val principal = Principal { principalId }
-            val journeyData: JourneyData = mutableMapOf<String, Any?>()
+            val journeyData: JourneyData = mutableMapOf()
 
             // FormContext
             val contextId: Long = 123
@@ -242,7 +242,6 @@ class JourneyDataServiceTests {
         fun `stores the new journey data in the session`() {
             // Function Args
             val journeyType = JourneyType.LANDLORD_REGISTRATION
-            val principalId = "testPrincipleSub"
 
             // JourneyData
             val pageName = "testPage"

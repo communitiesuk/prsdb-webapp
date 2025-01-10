@@ -10,147 +10,105 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService.Companion.getFieldEnumValue
 
 class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
     companion object {
         fun getAddress(
-            journeyDataService: JourneyDataService,
             journeyData: JourneyData,
             addressDataService: AddressDataService,
         ): AddressDataModel? {
-            return if (isManualAddressChosen(journeyDataService, journeyData)) {
-                getManualAddress(journeyDataService, journeyData, RegisterPropertyStepId.ManualAddress.urlPathSegment)
+            return if (isManualAddressChosen(journeyData)) {
+                getManualAddress(journeyData, RegisterPropertyStepId.ManualAddress.urlPathSegment)
             } else {
-                val selectedAddress = getSelectedAddress(journeyDataService, journeyData) ?: return null
+                val selectedAddress = getSelectedAddress(journeyData) ?: return null
                 addressDataService.getAddressData(selectedAddress)
             }
         }
 
-        fun getCustodianCode(
-            journeyDataService: JourneyDataService,
-            journeyData: JourneyData,
-        ): String? =
-            journeyDataService.getFieldStringValue(
+        fun getCustodianCode(journeyData: JourneyData): String? =
+            JourneyDataService.getFieldStringValue(
                 journeyData,
                 RegisterPropertyStepId.LocalAuthority.urlPathSegment,
                 "localAuthorityCustodianCode",
             )
 
-        fun getPropertyType(
-            journeyDataService: JourneyDataService,
-            journeyData: JourneyData,
-        ): PropertyType? =
-            getFieldEnumValue<PropertyType>(
-                journeyDataService,
+        fun getPropertyType(journeyData: JourneyData): PropertyType? =
+            JourneyDataService.getFieldEnumValue<PropertyType>(
                 journeyData,
                 RegisterPropertyStepId.PropertyType.urlPathSegment,
                 "propertyType",
             )
 
-        fun getCustomPropertyType(
-            journeyDataService: JourneyDataService,
-            journeyData: JourneyData,
-        ): String? =
-            journeyDataService.getFieldStringValue(
+        fun getCustomPropertyType(journeyData: JourneyData): String? =
+            JourneyDataService.getFieldStringValue(
                 journeyData,
                 RegisterPropertyStepId.PropertyType.urlPathSegment,
                 "customPropertyType",
             )
 
-        fun getOwnershipType(
-            journeyDataService: JourneyDataService,
-            journeyData: JourneyData,
-        ): OwnershipType? =
-            getFieldEnumValue<OwnershipType>(
-                journeyDataService,
+        fun getOwnershipType(journeyData: JourneyData): OwnershipType? =
+            JourneyDataService.getFieldEnumValue<OwnershipType>(
                 journeyData,
                 RegisterPropertyStepId.OwnershipType.urlPathSegment,
                 "ownershipType",
             )
 
-        fun getLandlordType(
-            journeyDataService: JourneyDataService,
-            journeyData: JourneyData,
-        ): LandlordType? =
-            getFieldEnumValue<LandlordType>(
-                journeyDataService,
+        fun getLandlordType(journeyData: JourneyData): LandlordType? =
+            JourneyDataService.getFieldEnumValue<LandlordType>(
                 journeyData,
                 RegisterPropertyStepId.LandlordType.urlPathSegment,
                 "landlordType",
             )
 
-        fun getIsOccupied(
-            journeyDataService: JourneyDataService,
-            journeyData: JourneyData,
-        ): Boolean? =
-            journeyDataService.getFieldBooleanValue(
+        fun getIsOccupied(journeyData: JourneyData): Boolean? =
+            JourneyDataService.getFieldBooleanValue(
                 journeyData,
                 RegisterPropertyStepId.Occupancy.urlPathSegment,
                 "occupied",
             )
 
-        fun getNumberOfHouseholds(
-            journeyDataService: JourneyDataService,
-            journeyData: JourneyData,
-        ): Int =
-            journeyDataService
+        fun getNumberOfHouseholds(journeyData: JourneyData): Int =
+            JourneyDataService
                 .getFieldIntegerValue(
                     journeyData,
                     RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment,
                     "numberOfHouseholds",
                 ) ?: 0
 
-        fun getNumberOfTenants(
-            journeyDataService: JourneyDataService,
-            journeyData: JourneyData,
-        ): Int =
-            journeyDataService
+        fun getNumberOfTenants(journeyData: JourneyData): Int =
+            JourneyDataService
                 .getFieldIntegerValue(
                     journeyData,
                     RegisterPropertyStepId.NumberOfPeople.urlPathSegment,
                     "numberOfPeople",
                 ) ?: 0
 
-        fun getLicensingType(
-            journeyDataService: JourneyDataService,
-            journeyData: JourneyData,
-        ): LicensingType? =
-            getFieldEnumValue<LicensingType>(
-                journeyDataService,
+        fun getLicensingType(journeyData: JourneyData): LicensingType? =
+            JourneyDataService.getFieldEnumValue<LicensingType>(
                 journeyData,
                 RegisterPropertyStepId.LicensingType.urlPathSegment,
                 "licensingType",
             )
 
-        fun getLicenseNumber(
-            journeyDataService: JourneyDataService,
-            journeyData: JourneyData,
-        ): String? {
+        fun getLicenseNumber(journeyData: JourneyData): String? {
             val licenseNumberPathSegment =
-                when (getLicensingType(journeyDataService, journeyData)!!) {
+                when (getLicensingType(journeyData)!!) {
                     LicensingType.SELECTIVE_LICENCE -> RegisterPropertyStepId.SelectiveLicence.urlPathSegment
                     LicensingType.HMO_MANDATORY_LICENCE -> RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment
                     LicensingType.HMO_ADDITIONAL_LICENCE -> RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment
                     LicensingType.NO_LICENSING -> return ""
                 }
 
-            return journeyDataService.getFieldStringValue(journeyData, licenseNumberPathSegment, "licenceNumber")
+            return JourneyDataService.getFieldStringValue(journeyData, licenseNumberPathSegment, "licenceNumber")
         }
 
-        private fun getSelectedAddress(
-            journeyDataService: JourneyDataService,
-            journeyData: JourneyData,
-        ): String? =
-            journeyDataService.getFieldStringValue(
+        private fun getSelectedAddress(journeyData: JourneyData): String? =
+            JourneyDataService.getFieldStringValue(
                 journeyData,
                 RegisterPropertyStepId.SelectAddress.urlPathSegment,
                 "address",
             )
 
-        fun isManualAddressChosen(
-            journeyDataService: JourneyDataService,
-            journeyData: JourneyData,
-        ) = getSelectedAddress(journeyDataService, journeyData) == MANUAL_ADDRESS_CHOSEN
+        fun isManualAddressChosen(journeyData: JourneyData) = getSelectedAddress(journeyData) == MANUAL_ADDRESS_CHOSEN
     }
 }

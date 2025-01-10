@@ -235,7 +235,7 @@ class JourneyTests {
             val journeyData: JourneyData =
                 mutableMapOf(TestStepId.StepOne.urlPathSegment to pageData)
             whenever(
-                mockJourneyDataService.getPageData(
+                JourneyDataService.getPageData(
                     anyMap(),
                     anyString(),
                     anyOrNull(),
@@ -288,7 +288,7 @@ class JourneyTests {
             val journeyData: JourneyData =
                 mutableMapOf()
             whenever(
-                mockJourneyDataService.getPageData(
+                JourneyDataService.getPageData(
                     anyMap(),
                     anyString(),
                     anyOrNull(),
@@ -342,7 +342,7 @@ class JourneyTests {
             val journeyData: JourneyData =
                 mutableMapOf(TestStepId.StepOne.urlPathSegment to pageData)
             whenever(
-                mockJourneyDataService.getPageData(
+                JourneyDataService.getPageData(
                     anyMap(),
                     anyString(),
                     anyOrNull(),
@@ -560,7 +560,7 @@ class JourneyTests {
             val journeyData: JourneyData =
                 mutableMapOf(TestStepId.StepOne.urlPathSegment to pageData)
             whenever(
-                mockJourneyDataService.getPageData(
+                JourneyDataService.getPageData(
                     anyMap(),
                     anyString(),
                     anyOrNull(),
@@ -627,7 +627,7 @@ class JourneyTests {
             val pageData: PageData = mutableMapOf("testProperty" to "testPropertyValue")
             val journeyData: JourneyData = mutableMapOf()
             whenever(
-                mockJourneyDataService.getPageData(
+                JourneyDataService.getPageData(
                     anyMap(),
                     anyString(),
                     anyOrNull(),
@@ -694,7 +694,7 @@ class JourneyTests {
             val pageData: PageData = mutableMapOf("testProperty" to "testPropertyValue")
             val journeyData: JourneyData = mutableMapOf()
             whenever(
-                mockJourneyDataService.getPageData(
+                JourneyDataService.getPageData(
                     anyMap(),
                     anyString(),
                     anyOrNull(),
@@ -765,7 +765,7 @@ class JourneyTests {
             val pageData: PageData = mutableMapOf("testProperty" to "testPropertyValue")
             val journeyData: JourneyData = mutableMapOf()
             whenever(
-                mockJourneyDataService.getPageData(
+                JourneyDataService.getPageData(
                     anyMap(),
                     anyString(),
                     anyOrNull(),
@@ -817,7 +817,7 @@ class JourneyTests {
             val pageData: PageData = mutableMapOf("testProperty" to "testPropertyValue")
             val journeyData: JourneyData = mutableMapOf()
             whenever(
-                mockJourneyDataService.getPageData(
+                JourneyDataService.getPageData(
                     anyMap(),
                     anyString(),
                     anyOrNull(),

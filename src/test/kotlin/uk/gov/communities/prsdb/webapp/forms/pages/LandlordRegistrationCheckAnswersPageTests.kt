@@ -16,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder.Companion.
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import java.time.LocalDate
 
 class LandlordRegistrationCheckAnswersPageTests {
@@ -31,7 +30,7 @@ class LandlordRegistrationCheckAnswersPageTests {
     @BeforeEach
     fun setup() {
         addressService = mock()
-        page = LandlordRegistrationCheckAnswersPage(JourneyDataService(mock(), mock(), mock(), mock()), addressService)
+        page = LandlordRegistrationCheckAnswersPage(addressService)
         validator = mock()
         whenever(validator.supports(any<Class<*>>())).thenReturn(true)
         model = ExtendedModelMap()

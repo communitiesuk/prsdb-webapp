@@ -7,40 +7,39 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 open class JourneyDataHelper {
     companion object {
         fun getManualAddress(
-            journeyDataService: JourneyDataService,
             journeyData: JourneyData,
             manualAddressPathSegment: String,
         ): AddressDataModel? {
             val addressLineOne =
-                journeyDataService.getFieldStringValue(
+                JourneyDataService.getFieldStringValue(
                     journeyData,
                     manualAddressPathSegment,
                     "addressLineOne",
                 ) ?: return null
 
             val townOrCity =
-                journeyDataService.getFieldStringValue(
+                JourneyDataService.getFieldStringValue(
                     journeyData,
                     manualAddressPathSegment,
                     "townOrCity",
                 ) ?: return null
 
             val postcode =
-                journeyDataService.getFieldStringValue(
+                JourneyDataService.getFieldStringValue(
                     journeyData,
                     manualAddressPathSegment,
                     "postcode",
                 ) ?: return null
 
             val addressLineTwo =
-                journeyDataService.getFieldStringValue(
+                JourneyDataService.getFieldStringValue(
                     journeyData,
                     manualAddressPathSegment,
                     "addressLineTwo",
                 )
 
             val county =
-                journeyDataService.getFieldStringValue(
+                JourneyDataService.getFieldStringValue(
                     journeyData,
                     manualAddressPathSegment,
                     "county",

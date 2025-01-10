@@ -49,7 +49,7 @@ abstract class Journey<T : StepId>(
         val prevStepDetails = getPrevStep(journeyData, requestedStep, subPageNumber)
         val prevStepUrl = getPrevStepUrl(prevStepDetails?.step, prevStepDetails?.subPageNumber)
         var pageData =
-            submittedPageData ?: journeyDataService.getPageData(journeyData, requestedStep.name, subPageNumber)
+            submittedPageData ?: JourneyDataService.getPageData(journeyData, requestedStep.name, subPageNumber)
         return requestedStep.page.populateModelAndGetTemplateName(
             validator,
             model,
@@ -123,12 +123,12 @@ abstract class Journey<T : StepId>(
         var currentSubPageNumber: Int? = null
         var filteredJourneyData: JourneyData = mutableMapOf()
         while (!(currentStep.id == targetStep.id && currentSubPageNumber == targetSubPageNumber)) {
-            val pageData = journeyDataService.getPageData(journeyData, currentStep.name, currentSubPageNumber)
+            val pageData = JourneyDataService.getPageData(journeyData, currentStep.name, currentSubPageNumber)
             if (pageData == null || !currentStep.isSatisfied(validator, pageData)) return null
 
             // This stores journeyData for only the journey path the user is on
             // and excludes user data for pages in the journey that belong to a different path
-            val stepData = journeyDataService.getPageData(journeyData, currentStep.name, null)
+            val stepData = JourneyDataService.getPageData(journeyData, currentStep.name, null)
             filteredJourneyData[currentStep.name] = stepData
 
             val (nextStepId, nextSubPageNumber) =
