@@ -80,7 +80,7 @@ class RegisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation returns 403 if there's no property ownership ID in session`() {
+    fun `getConfirmation returns 400 if there's no property ownership ID in session`() {
         val propertyOwnershipID = 0L
 
         whenever(propertyOwnershipService.retrievePropertyOwnership(propertyOwnershipID)).thenReturn(
@@ -89,12 +89,12 @@ class RegisterPropertyControllerTests(
 
         mvc
             .get("/$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT")
-            .andExpect { status { isForbidden() } }
+            .andExpect { status { isBadRequest() } }
     }
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation returns 403 if the property ownership ID in session is not valid`() {
+    fun `getConfirmation returns 400 if the property ownership ID in session is not valid`() {
         val propertyOwnershipID = 0L
 
         whenever(propertyOwnershipService.retrievePropertyOwnership(propertyOwnershipID)).thenReturn(null)
@@ -104,6 +104,6 @@ class RegisterPropertyControllerTests(
                 MockMvcRequestBuilders
                     .get("/$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT")
                     .sessionAttr(PROPERTY_OWNERSHIP_ID, propertyOwnershipID),
-            ).andExpect(MockMvcResultMatchers.status().isForbidden)
+            ).andExpect(MockMvcResultMatchers.status().isBadRequest)
     }
 }

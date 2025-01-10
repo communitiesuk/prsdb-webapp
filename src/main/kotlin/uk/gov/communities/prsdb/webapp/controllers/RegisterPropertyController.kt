@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.servlet.http.HttpSession
-import org.springframework.security.access.AccessDeniedException
+import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_OWNERSHIP_ID
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
@@ -72,10 +73,16 @@ class RegisterPropertyController(
     ): String {
         val propertyOwnershipID =
             session.getAttribute(PROPERTY_OWNERSHIP_ID)?.toString()?.toLong()
-                ?: throw AccessDeniedException("$PROPERTY_OWNERSHIP_ID was not found in the session")
+                ?: throw ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "$PROPERTY_OWNERSHIP_ID was not found in the session",
+                )
         val propertyOwnership =
             propertyOwnershipService.retrievePropertyOwnership(propertyOwnershipID)
-                ?: throw AccessDeniedException("No property ownership with id $propertyOwnershipID was found in the database")
+                ?: throw ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "No property ownership with id $propertyOwnershipID was found in the database",
+                )
 
         model.addAttribute("singleLineAddress", propertyOwnership.property.address.singleLineAddress)
         model.addAttribute(
