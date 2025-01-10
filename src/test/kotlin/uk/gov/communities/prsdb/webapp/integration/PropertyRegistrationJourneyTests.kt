@@ -534,9 +534,9 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     @Nested
     inner class Confirmation {
         @Test
-        fun `Navigating here with an incomplete form returns a 403 error page`() {
+        fun `Navigating here with an incomplete form returns a 400 error page`() {
             val errorPage = navigator.skipToPropertyRegistrationConfirmationPage()
-            assertThat(errorPage.heading).containsText("You do not have permission to access this page")
+            assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
         }
     }
 }
