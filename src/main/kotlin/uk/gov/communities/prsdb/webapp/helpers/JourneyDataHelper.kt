@@ -6,6 +6,21 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 open class JourneyDataHelper {
     companion object {
+        fun getLookupAddressHouseNameOrNumberAndPostcode(
+            journeyData: JourneyData,
+            lookupAddressPathSegment: String,
+        ): Pair<String, String>? {
+            val houseNameOrNumber =
+                JourneyDataService.getFieldStringValue(journeyData, lookupAddressPathSegment, "houseNameOrNumber")
+                    ?: return null
+
+            val postcode =
+                JourneyDataService.getFieldStringValue(journeyData, lookupAddressPathSegment, "postcode")
+                    ?: return null
+
+            return Pair(houseNameOrNumber, postcode)
+        }
+
         fun getManualAddress(
             journeyData: JourneyData,
             manualAddressPathSegment: String,

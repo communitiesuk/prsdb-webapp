@@ -60,8 +60,8 @@ class PropertyRegistrationJourney(
         steps =
             setOf(
                 lookupAddressStep(),
-                selectAddressStep(journeyDataService, addressLookupService, addressDataService, propertyRegistrationService),
-                alreadyRegisteredStep(journeyDataService),
+                selectAddressStep(addressLookupService, addressDataService, propertyRegistrationService),
+                alreadyRegisteredStep(),
                 manualAddressStep(),
                 localAuthorityStep(),
                 propertyTypeStep(),
@@ -101,7 +101,6 @@ class PropertyRegistrationJourney(
             )
 
         private fun selectAddressStep(
-            journeyDataService: JourneyDataService,
             addressLookupService: AddressLookupService,
             addressDataService: AddressDataService,
             propertyRegistrationService: PropertyRegistrationService,
@@ -120,8 +119,7 @@ class PropertyRegistrationJourney(
                                 "/$REGISTER_PROPERTY_JOURNEY_URL/" +
                                 RegisterPropertyStepId.LookupAddress.urlPathSegment,
                         ),
-                    urlPathSegment = RegisterPropertyStepId.LookupAddress.urlPathSegment,
-                    journeyDataService = journeyDataService,
+                    lookupAddressPathSegment = RegisterPropertyStepId.LookupAddress.urlPathSegment,
                     addressLookupService = addressLookupService,
                     addressDataService = addressDataService,
                 ),
@@ -130,7 +128,7 @@ class PropertyRegistrationJourney(
             },
         )
 
-        private fun alreadyRegisteredStep(journeyDataService: JourneyDataService) =
+        private fun alreadyRegisteredStep() =
             Step(
                 id = RegisterPropertyStepId.AlreadyRegistered,
                 page =
@@ -144,8 +142,7 @@ class PropertyRegistrationJourney(
                                     "/$REGISTER_PROPERTY_JOURNEY_URL/" +
                                     RegisterPropertyStepId.LookupAddress.urlPathSegment,
                             ),
-                        journeyDataService = journeyDataService,
-                        urlPathSegment = RegisterPropertyStepId.SelectAddress.urlPathSegment,
+                        selectedAddressPathSegment = RegisterPropertyStepId.SelectAddress.urlPathSegment,
                     ),
             )
 

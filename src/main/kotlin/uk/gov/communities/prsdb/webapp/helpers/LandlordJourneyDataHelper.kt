@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import java.time.LocalDate
 
-class LandlordJourneyDataHelper {
+class LandlordJourneyDataHelper : JourneyDataHelper() {
     companion object {
         fun getName(journeyData: JourneyData) = getVerifiedName(journeyData) ?: getManualName(journeyData)
 
@@ -19,7 +19,7 @@ class LandlordJourneyDataHelper {
                 "name",
             )
 
-        private fun getVerifiedName(journeyData: JourneyData) =
+        fun getVerifiedName(journeyData: JourneyData) =
             JourneyDataService.getFieldStringValue(
                 journeyData,
                 LandlordRegistrationStepId.VerifyIdentity.urlPathSegment,
@@ -28,7 +28,7 @@ class LandlordJourneyDataHelper {
 
         fun getDOB(journeyData: JourneyData) = getVerifiedDOB(journeyData) ?: getManualDOB(journeyData)
 
-        private fun getVerifiedDOB(journeyData: JourneyData) =
+        fun getVerifiedDOB(journeyData: JourneyData) =
             JourneyDataService.getFieldLocalDateValue(
                 journeyData,
                 LandlordRegistrationStepId.VerifyIdentity.urlPathSegment,
@@ -135,7 +135,7 @@ class LandlordJourneyDataHelper {
                     LandlordRegistrationStepId.ManualAddress.urlPathSegment
                 }
 
-            return JourneyDataHelper.getManualAddress(journeyData, manualAddressPathSegment)
+            return getManualAddress(journeyData, manualAddressPathSegment)
         }
 
         fun getInternationalAddress(journeyData: JourneyData) =

@@ -52,16 +52,16 @@ class LandlordRegistrationJourney(
                 verifyIdentityStep(),
                 nameStep(),
                 dateOfBirthStep(),
-                confirmIdentityStep(journeyDataService),
+                confirmIdentityStep(),
                 emailStep(),
                 phoneNumberStep(),
                 countryOfResidenceStep(),
                 lookupAddressStep(),
-                selectAddressStep(journeyDataService, addressLookupService, addressDataService),
+                selectAddressStep(addressLookupService, addressDataService),
                 manualAddressStep(),
                 internationalAddressStep(),
                 lookupContactAddressStep(),
-                selectContactAddressStep(journeyDataService, addressLookupService, addressDataService),
+                selectContactAddressStep(addressLookupService, addressDataService),
                 manualContactAddressStep(),
                 checkAnswersStep(addressDataService),
                 declarationStep(journeyDataService, landlordService, addressDataService),
@@ -122,7 +122,7 @@ class LandlordRegistrationJourney(
                 saveAfterSubmit = false,
             )
 
-        private fun confirmIdentityStep(journeyDataService: JourneyDataService) =
+        private fun confirmIdentityStep() =
             Step(
                 id = LandlordRegistrationStepId.ConfirmIdentity,
                 page =
@@ -134,13 +134,7 @@ class LandlordRegistrationJourney(
                                 "title" to "registerAsALandlord.title",
                                 "submitButtonText" to "forms.buttons.confirmAndContinue",
                             ),
-                    ) {
-                        val journeyData = journeyDataService.getJourneyDataFromSession()
-                        JourneyDataService.getPageData(
-                            journeyData,
-                            LandlordRegistrationStepId.VerifyIdentity.urlPathSegment,
-                        )
-                    },
+                    ),
                 nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Email, null) },
                 saveAfterSubmit = false,
             )
@@ -242,7 +236,6 @@ class LandlordRegistrationJourney(
             )
 
         private fun selectAddressStep(
-            journeyDataService: JourneyDataService,
             addressLookupService: AddressLookupService,
             addressDataService: AddressDataService,
         ) = Step(
@@ -260,8 +253,7 @@ class LandlordRegistrationJourney(
                                 "/${REGISTER_LANDLORD_JOURNEY_URL}/" +
                                 LandlordRegistrationStepId.LookupAddress.urlPathSegment,
                         ),
-                    urlPathSegment = LandlordRegistrationStepId.LookupAddress.urlPathSegment,
-                    journeyDataService = journeyDataService,
+                    lookupAddressPathSegment = LandlordRegistrationStepId.LookupAddress.urlPathSegment,
                     addressLookupService = addressLookupService,
                     addressDataService = addressDataService,
                 ),
@@ -337,7 +329,6 @@ class LandlordRegistrationJourney(
             )
 
         private fun selectContactAddressStep(
-            journeyDataService: JourneyDataService,
             addressLookupService: AddressLookupService,
             addressDataService: AddressDataService,
         ) = Step(
@@ -355,8 +346,7 @@ class LandlordRegistrationJourney(
                                 "/${REGISTER_LANDLORD_JOURNEY_URL}/" +
                                 LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
                         ),
-                    urlPathSegment = LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
-                    journeyDataService = journeyDataService,
+                    lookupAddressPathSegment = LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
                     addressLookupService = addressLookupService,
                     addressDataService = addressDataService,
                 ),
