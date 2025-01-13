@@ -82,6 +82,7 @@ jobs:
     uses: communitiesuk/prsdb-infra/.github/workflows/update-task-definition.yml@main
     with:
       environment_name: integration
+      account_id: 794038239680
       image_name: ${{ needs.build-and-deploy.outputs.image_name }}
 
       # ToDo PRSD-752: Redeploy ECS service
