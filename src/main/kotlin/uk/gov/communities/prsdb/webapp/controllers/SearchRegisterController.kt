@@ -22,8 +22,22 @@ class SearchRegisterController(
         @RequestParam(value = "page", required = false) page: Int = 1,
     ): String {
         if (!query.isNullOrBlank()) {
-            val results = landlordService.searchForLandlords(query, currentPageNumber = page - 1)
-            model.addAttribute("searchResults", results)
+            val pagedLandlordList = landlordService.searchForLandlords(query, currentPageNumber = page - 1)
+
+            if (pagedLandlordList.totalPages < page) {
+                return "redirect:/search/landlord?query=$query"
+            }
+
+            val resultsOnPage = pagedLandlordList.content.size
+            val firstResultShown = pagedLandlordList.pageable.pageNumber * pagedLandlordList.pageable.pageSize + 1
+            val lastResultShown = firstResultShown + resultsOnPage
+
+            model.addAttribute("searchResults", pagedLandlordList)
+            model.addAttribute("totalPages", pagedLandlordList.totalPages)
+            model.addAttribute("firstShownResult", firstResultShown)
+            model.addAttribute("lastResultShown", lastResultShown)
+            model.addAttribute("totalResults", pagedLandlordList.totalElements)
+            model.addAttribute("currentPage", page)
         }
 
         model.addAttribute("searchWrapperModel", SearchWrapperModel())
