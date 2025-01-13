@@ -10,5 +10,11 @@
     "name": "LA User Invitation",
     "subject": "PRD - You've been invited by a local authority to register on the Privately Rented Database",
     "bodyLocation": "/emails/LocalAuthorityInvitation.md"
+  },
+  {
+    "id": "2e6bba9d-22e4-4032-a3bc-b4f7f18662a8",
+    "name": "LA User Invitation Cancellation",
+    "subject": "PRD - Your invite to register on the database is cancelled",
+    "bodyLocation": "/emails/LocalAuthorityInvitationCancellation.md"
   }
 ]
