@@ -21,31 +21,31 @@
                             <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.registrationDate', ${registrationDate}, null)}" ></div>
                             <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.name', ${name}, null)}" ></div>
                             <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.dateOfBirth', ${dateOfBirth}, null)}" ></div>
-                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.emailAddress', ${email}, 'https://www.google.com')}" ></div>
-                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.telephoneNumber', ${phoneNumber}, 'https://www.google.com')}" ></div>
-                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.ukResident', ${isUKResident}, 'https://www.google.com')}" ></div>
+                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.emailAddress', ${email}, null)}" ></div>
+                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.telephoneNumber', ${phoneNumber}, null)}" ></div>
+                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.ukResident', ${isUKResident}, null)}" ></div>
                             <th:block th:if="${isUKResident}">
-                                <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.contactAddress', ${ukAddress}, 'https://www.google.com')}" ></div>
+                                <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.contactAddress', ${ukAddress}, null)}" ></div>
                             </th:block>
                             <th:block th:unless="${isUKResident}">
-                                <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.country', ${ukAddress}, 'https://www.google.com')}" ></div>
-                                <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.homeCountryAddress', ${internationalAddress}, 'https://www.google.com')}" ></div>
-                                <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.ukAddress', ${ukAddress}, 'https://www.google.com')}" ></div>
+                                <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.country', ${ukAddress}, null)}" ></div>
+                                <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.homeCountryAddress', ${internationalAddress}, null)}" ></div>
+                                <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.ukAddress', ${ukAddress}, null)}" ></div>
                             </th:block>
                         </dl>
                         <h2 class="govuk-heading-m" th:text="#{landlordDetails.personalDetails.optionalChoices.heading}">landlordDetails.personalDetails.optionalChoices.heading</h2>
                         <p class="govuk-hint" th:text="#{landlordDetails.personalDetails.optionalChoices.hint}">landlordDetails.personalDetails.optionalChoices.hint</p>
                         <dl class="govuk-summary-list">
-                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.optionalChoices.legalChanges', 'commonText.yes', 'https://www.google.com')}" ></div>
-                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.optionalChoices.research', 'commonText.no', 'https://www.google.com')}" ></div>
+                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.optionalChoices.legalChanges', 'TODO PRSD-746', null)}" ></div>
+                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.optionalChoices.research', 'TODO PRSD-746', null)}" ></div>
                         </dl>
                     </th:block>
                 </div>
 
                 <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('registered-properties', ~{:: #registered-properties-panel-content})}">
                     <th:block id="registered-properties-panel-content">
-                        <h2 class="govuk-heading-m">TODO: PRSD-701</h2>
-                        <p class="govuk-body">This tab will show details of registered properties, and will be implemented as part of PRSD-701</p>
+                        <h2 class="govuk-heading-m">TODO: PRSD-702</h2>
+                        <p class="govuk-body">This tab will show details of registered properties, and will be implemented as part of PRSD-702</p>
                     </th:block>
                 </div>
             </th:block>

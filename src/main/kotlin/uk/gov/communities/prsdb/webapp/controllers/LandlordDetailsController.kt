@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.security.Principal
@@ -15,8 +14,8 @@ import java.time.LocalDate
 
 @PreAuthorize("hasRole('LANDLORD')")
 @Controller
-@RequestMapping("/landlord-user")
-class LandlordUserController(
+@RequestMapping("/landlord-details")
+class LandlordDetailsController(
     val landlordService: LandlordService,
     val addressDataService: AddressDataService,
 ) {
@@ -32,20 +31,18 @@ class LandlordUserController(
 
         // TODO PRSD-747 to pass Id verification status to model with verified label and message key
         model.addAttribute("name", landlord.name)
-        model.addAttribute("registrationNumber", RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber))
         model.addAttribute("registrationDate", registeredDate)
         model.addAttribute("dateOfBirth", landlord.dateOfBirth)
         model.addAttribute("email", landlord.email)
         model.addAttribute("phoneNumber", landlord.phoneNumber)
-        // TODO PRSD-742 to update this check
         model.addAttribute("isUKResident", MessageKeyConverter.convert(landlord.internationalAddress == null))
-        model.addAttribute("internationalAddress", landlord.internationalAddress)
+        // TODO PRSD-742 will make country of residence available and should be displayed alongside the international address
         model.addAttribute("internationalAddress", landlord.internationalAddress)
         model.addAttribute("ukAddress", landlord.address.singleLineAddress)
         // TODO PRSD-670: Replace with link to dashboard
         model.addAttribute("backUrl", "/")
 
-        // TODO
+        // TODO PRSD-746 - add user consent information to this page once it is captured.
 
         return "landlordDetailsView"
     }
