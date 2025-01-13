@@ -60,7 +60,7 @@ class ExampleSearchController(
                 "registrationNumber" to
                     RegistrationNumberDataModel(
                         landlord.registrationNumber.type,
-                        landlord.registrationNumber.number!!,
+                        landlord.registrationNumber.number,
                     ).toString(),
             )
         } else {

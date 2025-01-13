@@ -62,12 +62,15 @@ class LocalAuthorityDataServiceTests {
 
         // Act
         val (returnedUserModel, returnedLocalAuthority) =
-            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, get1LID(DEFAULT_1L_USER_NAME))
+            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+                DEFAULT_LA_ID,
+                get1LID(DEFAULT_1L_USER_NAME),
+            )
 
         // Assert
         Assertions.assertEquals(
             LocalAuthorityUserDataModel(
-                localAuthorityUser.id!!,
+                localAuthorityUser.id,
                 baseUser.name + "_LA",
                 localAuthority.name,
                 localAuthorityUser.isManager,
@@ -316,7 +319,8 @@ class LocalAuthorityDataServiceTests {
         val baseUser = createOneLoginUser(DEFAULT_1L_USER_NAME)
         val baseUserId = get1LID(DEFAULT_1L_USER_NAME)
         val localAuthority = createLocalAuthority()
-        val expectedNewUser = LocalAuthorityUser(baseUser, false, localAuthority, "Sample Name", "sample.name@example.com")
+        val expectedNewUser =
+            LocalAuthorityUser(baseUser, false, localAuthority, "Sample Name", "sample.name@example.com")
         whenever(oneLoginUserRepository.getReferenceById(baseUserId)).thenReturn(baseUser)
 
         // Act

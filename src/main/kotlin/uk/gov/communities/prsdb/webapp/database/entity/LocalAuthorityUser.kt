@@ -13,7 +13,7 @@ import jakarta.persistence.OneToOne
 class LocalAuthorityUser(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+    val id: Long = 0,
 ) : ModifiableAuditableEntity() {
     @OneToOne(optional = false)
     @JoinColumn(name = "subject_identifier", nullable = false, foreignKey = ForeignKey(name = "FK_LA_USER_1L_USER"))
@@ -34,7 +34,14 @@ class LocalAuthorityUser(
     lateinit var localAuthority: LocalAuthority
         private set
 
-    constructor(id: Long, baseUser: OneLoginUser, isManager: Boolean, localAuthority: LocalAuthority, name: String, email: String) :
+    constructor(
+        id: Long,
+        baseUser: OneLoginUser,
+        isManager: Boolean,
+        localAuthority: LocalAuthority,
+        name: String,
+        email: String,
+    ) :
         this(id) {
         this.baseUser = baseUser
         this.isManager = isManager
@@ -43,7 +50,13 @@ class LocalAuthorityUser(
         this.email = email
     }
 
-    constructor(baseUser: OneLoginUser, isManager: Boolean, localAuthority: LocalAuthority, name: String, email: String) : this() {
+    constructor(
+        baseUser: OneLoginUser,
+        isManager: Boolean,
+        localAuthority: LocalAuthority,
+        name: String,
+        email: String,
+    ) : this() {
         this.baseUser = baseUser
         this.isManager = isManager
         this.localAuthority = localAuthority

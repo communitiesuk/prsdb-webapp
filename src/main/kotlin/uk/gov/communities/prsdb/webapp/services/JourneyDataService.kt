@@ -72,7 +72,7 @@ class JourneyDataService(
                 )
             }
         val savedFormContext = formContextRepository.save(formContext)
-        setContextId(savedFormContext.id!!)
+        setContextId(savedFormContext.id)
         return savedFormContext.id
     }
 

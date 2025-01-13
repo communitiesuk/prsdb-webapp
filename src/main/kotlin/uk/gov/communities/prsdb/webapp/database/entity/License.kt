@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 class License(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+    val id: Long = 0,
 ) : ModifiableAuditableEntity() {
     @Column(nullable = false)
     lateinit var licenseType: LicensingType

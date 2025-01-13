@@ -11,10 +11,10 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 class RegistrationNumber() : AuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long? = null
+    private val id: Long = 0
 
     @Column(nullable = false, unique = true)
-    var number: Long? = null
+    var number: Long = 0
         private set
 
     @Column(nullable = false)
