@@ -17,7 +17,8 @@
             <tbody class="govuk-table__body">
             <tr class="govuk_table__row" th:each="landlord: ${searchResults}">
                 <td class="govuk-table__cell">
-                    <a class="govuk-link" th:href="@{''}" th:text="${landlord.name}"></a>
+                    <a class="govuk-link" th:href="@{${baseLandlordDetailsURL + '/' + landlord.id}}"
+                       th:text="${landlord.name}"></a>
                     <br>
                     <span th:remove="tag" th:text="${landlord.registrationNumber}"></span>
                 </td>
