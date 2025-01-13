@@ -89,9 +89,8 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:f
        (5, '09/13/24', '09/13/24', 5, 5, '05/13/1950', true, 07111111111,
         'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', 'Margaret Mary Smith',
         'mm.smith@importantco.com'),
-       (6, '12/19/24', '12/19/24', 7, 5, '06/13/1989', true, 07111111111,
-        'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', 'PRSDB Landlord',
-        'Team-PRSDB+landlord@softwire.com');
+        (6, '12/19/24', '12/19/24', 7,5,'06/13/1989',true,07111111111,
+         'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo','PRSDB Landlord', 'Team-PRSDB+landlord@softwire.com');
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
