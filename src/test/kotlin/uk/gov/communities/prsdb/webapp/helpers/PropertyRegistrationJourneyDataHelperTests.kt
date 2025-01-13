@@ -195,7 +195,7 @@ class PropertyRegistrationJourneyDataHelperTests {
     @Test
     fun `getLicenceNumber returns the no licence number `() {
         val expectedLicenseNumber = ""
-        val mockJourneyData = journeyDataBuilder.build()
+        val mockJourneyData = journeyDataBuilder.withLicensingType(LicensingType.NO_LICENSING).build()
 
         val licenseNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(mockJourneyData)
 

@@ -1,10 +1,9 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
@@ -17,17 +16,6 @@ import kotlin.test.assertEquals
 class LandlordRegistrationJourneyDataHelperTests {
     private lateinit var mockAddressDataService: AddressDataService
     private lateinit var journeyDataBuilder: JourneyDataBuilder
-
-    companion object {
-        private const val COUNTRY_OF_RESIDENCE = "France"
-
-        @JvmStatic
-        private fun provideCountryOfResidenceFormInputs() =
-            listOf(
-                Arguments.of(true, null),
-                Arguments.of(false, COUNTRY_OF_RESIDENCE),
-            )
-    }
 
     @BeforeEach
     fun setup() {
@@ -75,23 +63,29 @@ class LandlordRegistrationJourneyDataHelperTests {
         assertEquals(expectedManualDOB, manualDOB)
     }
 
-    @ParameterizedTest(name = "when livesInUK = {0}")
-    @MethodSource("provideCountryOfResidenceFormInputs")
-    fun `getNonUKCountryOfResidence returns the corresponding country or null`(
-        livesInUK: Boolean,
-        expectedNonUKCountryOfResidence: String?,
-    ) {
+    @Test
+    fun `getNonUKCountryOfResidence returns the corresponding country`() {
+        val expectedCountryOfResidence = "US"
         val mockJourneyData =
             journeyDataBuilder
                 .withInternationalAndSelectedContactAddress(
-                    COUNTRY_OF_RESIDENCE,
+                    expectedCountryOfResidence,
                     "international address",
                     "selected address",
                 ).build()
 
         val nonUKCountryOfResidence = LandlordRegistrationJourneyDataHelper.getNonUKCountryOfResidence(mockJourneyData)
 
-        assertEquals(expectedNonUKCountryOfResidence, nonUKCountryOfResidence)
+        assertEquals(expectedCountryOfResidence, nonUKCountryOfResidence)
+    }
+
+    @Test
+    fun `getNonUKCountryOfResidence returns null if the user lives in the UK`() {
+        val mockJourneyData = journeyDataBuilder.build()
+
+        val nonUKCountryOfResidence = LandlordRegistrationJourneyDataHelper.getNonUKCountryOfResidence(mockJourneyData)
+
+        assertNull(nonUKCountryOfResidence)
     }
 
     @ParameterizedTest(name = "when livesInUK = {0}")
@@ -99,7 +93,12 @@ class LandlordRegistrationJourneyDataHelperTests {
     fun `getAddress returns the corresponding selected address`(livesInUK: Boolean) {
         val selectedAddress = "1 Example Address, EG1 2AB"
         val mockJourneyData =
-            journeyDataBuilder.withSelectedAddress(selectedAddress, isContactAddress = !livesInUK).build()
+            journeyDataBuilder
+                .withInternationalAndSelectedContactAddress(
+                    "countryOfResidence",
+                    "international address",
+                    selectedAddress,
+                ).build()
         val expectedAddressDataModel = AddressDataModel(selectedAddress)
 
         whenever(mockAddressDataService.getAddressData(selectedAddress)).thenReturn(expectedAddressDataModel)
@@ -117,8 +116,13 @@ class LandlordRegistrationJourneyDataHelperTests {
         val postcode = "EG1 2AB"
         val mockJourneyData =
             journeyDataBuilder
-                .withManualAddress(addressLineOne, townOrCity, postcode, isContactAddress = !livesInUK)
-                .build()
+                .withInternationalAndManualContactAddress(
+                    "countryofResidence",
+                    "international address",
+                    addressLineOne,
+                    townOrCity,
+                    postcode,
+                ).build()
         val expectedAddressDataModel = AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode)
 
         val addressDataModel =
