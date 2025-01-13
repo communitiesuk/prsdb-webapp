@@ -9,6 +9,7 @@
         <th:block th:replace="~{fragments/searchBar :: searchBar(
             #{landlordSearch.searchBar.label}, #{landlordSearch.searchBar.hint}, ${searchWrapperModel})}">
         </th:block>
+        <h2 class="govuk-heading-m" th:text="#{landlordSearch.table.heading}">landlordSearch.table.heading</h2>
         <table th:if="${searchResults != null}" th:replace="~{fragments/tables/table :: table(
             ${ {'landlordSearch.table.heading.landlord','landlordSearch.table.heading.address','landlordSearch.table.heading.info'} },
             ~{::tbody}
@@ -29,6 +30,10 @@
             </tr>
             </tbody>
         </table>
+        <details id="details-content"
+                 th:replace="~{fragments/details :: details(#{landlordSearch.details.heading},~{::#details-content/content()})}">
+            <div class="govuk-details__text" th:text="#{landlordSearch.details.body}">landlordSearch.details.body</div>
+        </details>
     </section>
 </main>
 </html>
