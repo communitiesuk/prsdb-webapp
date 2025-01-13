@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
@@ -46,4 +47,6 @@ class PropertyOwnershipService(
             ),
         )
     }
+
+    fun retrievePropertyOwnership(id: Long): PropertyOwnership? = propertyOwnershipRepository.findByIdOrNull(id)
 }
