@@ -18,26 +18,26 @@
                 <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('personal-details', ~{:: #personal-details-panel-content})}">
                     <th:block id="personal-details-panel-content">
                         <dl class="govuk-summary-list">
-                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.registrationDate', ${registrationDate}, null)}" ></div>
-                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.name', ${name}, null)}" ></div>
-                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.dateOfBirth', ${dateOfBirth}, null)}" ></div>
-                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.emailAddress', ${email}, null)}" ></div>
-                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.telephoneNumber', ${phoneNumber}, null)}" ></div>
-                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.ukResident', ${isUKResident}, null)}" ></div>
-                            <th:block th:if="${isUKResident}">
-                                <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.contactAddress', ${ukAddress}, null)}" ></div>
+                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.registrationDate', ${registrationDate})}" ></div>
+                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.name', ${name})}" ></div>
+                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.dateOfBirth', ${dateOfBirth})}" ></div>
+                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.emailAddress', ${email})}" ></div>
+                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.telephoneNumber', ${phoneNumber})}" ></div>
+                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.ukResident', ${isUKResident})}" ></div>
+                            <th:block th:if="${isUKResident.fieldValue}">
+                                <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.contactAddress', ${ukAddress})}" ></div>
                             </th:block>
-                            <th:block th:unless="${isUKResident}">
-                                <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.country', ${ukAddress}, null)}" ></div>
-                                <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.homeCountryAddress', ${internationalAddress}, null)}" ></div>
-                                <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.ukAddress', ${ukAddress}, null)}" ></div>
+                            <th:block th:unless="${isUKResident.fieldValue}">
+                                <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.country', ${ukAddress})}" ></div>
+                                <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.homeCountryAddress', ${internationalAddress})}" ></div>
+                                <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.ukAddress', ${ukAddress})}" ></div>
                             </th:block>
                         </dl>
                         <h2 class="govuk-heading-m" th:text="#{landlordDetails.personalDetails.optionalChoices.heading}">landlordDetails.personalDetails.optionalChoices.heading</h2>
                         <p class="govuk-hint" th:text="#{landlordDetails.personalDetails.optionalChoices.hint}">landlordDetails.personalDetails.optionalChoices.hint</p>
                         <dl class="govuk-summary-list">
-                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.optionalChoices.legalChanges', 'TODO PRSD-746', null)}" ></div>
-                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.optionalChoices.research', 'TODO PRSD-746', null)}" ></div>
+                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.optionalChoices.legalChanges', ${legalChanges})}" ></div>
+                            <div th:replace="~{fragments/summaryRow :: summaryRow('landlordDetails.personalDetails.optionalChoices.research', ${research})}" ></div>
                         </dl>
                     </th:block>
                 </div>

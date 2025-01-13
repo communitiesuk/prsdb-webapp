@@ -1,5 +1,5 @@
 <dl th:fragment="summaryList(listRows)" class="govuk-summary-list">
     <th:block th:each="row: ${listRows}">
-        <div th:replace="~{fragments/summaryRow :: summaryRow(${row.fieldHeading}, ${row.convertedFieldValue}, ${row.changeUrl})}" ></div>
+        <div th:replace="~{fragments/summaryRow :: summaryRow(${row.fieldHeading}, ${row.summaryRow})}" ></div>
     </th:block>
 </dl>
