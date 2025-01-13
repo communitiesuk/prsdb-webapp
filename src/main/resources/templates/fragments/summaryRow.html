@@ -1,0 +1,15 @@
+<div th:fragment="summaryRow(heading, values, changeUrl)" class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key" th:text="#{${heading}}">
+    </dt>
+    <dd  class="govuk-summary-list__value" >
+        <!--/* If and only if there is a single value (as opposed to a list) we should th:remove the p tag to avoid unnecessary nesting */-->
+        <p th:remove="${iteratorStatus.size == 1} ? tag : none"
+           th:each="value, iteratorStatus: ${values}" class="govuk-body"
+           th:text="${#messages.msgOrNull(value)} ?: ${{value}}">row.convertedFieldValue</p>
+    </dd>
+    <dd class="govuk-summary-list__actions">
+        <a th:if="${changeUrl} != null" class="govuk-link" th:href="@{${changeUrl}}" th:text="#{forms.links.change}">
+            <span class="govuk-visually-hidden" th:text="#{${heading}}">fieldHeading</span>
+        </a>
+    </dd>
+</div>
