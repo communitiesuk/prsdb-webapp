@@ -29,6 +29,7 @@ class LandlordDetailsController(
                 ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
         val registeredDate = LocalDate.of(landlord.createdDate.year, landlord.createdDate.monthValue, landlord.createdDate.dayOfMonth)
 
+        // Add personal details to model
         // TODO PRSD-747 to pass Id verification status to model with verified label and message key
         model.addAttribute("name", landlord.name)
         model.addAttribute("registrationDate", registeredDate)
@@ -43,6 +44,9 @@ class LandlordDetailsController(
         model.addAttribute("backUrl", "/")
 
         // TODO PRSD-746 - add user consent information to this page once it is captured.
+
+        // Add properties to model
+        // TODO PRSD-702 add properties to model
 
         return "landlordDetailsView"
     }
