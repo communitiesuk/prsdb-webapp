@@ -30,4 +30,23 @@ class JourneyDataHelperTests {
 
         assertEquals(expectedAddressDataModel, addressDataModel)
     }
+
+    @Test
+    fun `getLookupAddressHouseNameOrNumberAndPostcode returns a house name or number and postcode pair from journey data`() {
+        val expectedHouseNameOrNumber = "1"
+        val expectedPostcode = "EG1 2AB"
+        val mockJourneyData =
+            journeyDataBuilder
+                .withLookupAddress(expectedHouseNameOrNumber, expectedPostcode)
+                .build()
+
+        val (houseNameOrNumber, postcode) =
+            JourneyDataHelper.getLookupAddressHouseNameOrNumberAndPostcode(
+                mockJourneyData,
+                "lookup-address",
+            )!!
+
+        assertEquals(expectedHouseNameOrNumber, houseNameOrNumber)
+        assertEquals(expectedPostcode, postcode)
+    }
 }
