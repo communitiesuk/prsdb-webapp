@@ -19,9 +19,10 @@ class SearchRegisterController(
     fun searchForLandlords(
         model: Model,
         @RequestParam(required = false) query: String?,
+        @RequestParam(value = "page", required = false) page: Int = 1,
     ): String {
         if (!query.isNullOrBlank()) {
-            val results = landlordService.searchForLandlords(query)
+            val results = landlordService.searchForLandlords(query, currentPageNumber = page - 1)
             model.addAttribute("searchResults", results)
         }
 

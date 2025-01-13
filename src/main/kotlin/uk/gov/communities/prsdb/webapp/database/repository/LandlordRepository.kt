@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.database.repository
 
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
@@ -16,11 +18,11 @@ interface LandlordRepository : JpaRepository<Landlord?, Long?> {
         "SELECT l.* " +
             "FROM landlord l  " +
             "WHERE (l.phone_number || ' ' || l.email || ' ' || l.name) %> :searchQuery " +
-            "ORDER BY (l.phone_number || ' ' || l.email || ' ' || l.name) <->> :searchQuery LIMIT :limit",
+            "ORDER BY (l.phone_number || ' ' || l.email || ' ' || l.name) <->> :searchQuery",
         nativeQuery = true,
     )
     fun searchMatching(
         @Param("searchQuery")searchQuery: String,
-        @Param("limit")limit: Int,
-    ): List<Landlord>
+        pageable: Pageable,
+    ): Page<Landlord>
 }

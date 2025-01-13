@@ -39,9 +39,9 @@ class ExampleSearchController(
             if (registrationNumber != null && registrationNumber.isType(RegistrationNumberType.LANDLORD)) {
                 val landlordOrNull = landlordService.retrieveLandlordByRegNum(registrationNumber)
                 mapOf("registration number match" to summariseLandlord(landlordOrNull))
-            } else if (searchTerm.length >= 5) {
+           /* } else if (searchTerm.length >= 5) {
                 val landlordsFound = landlordService.searchForLandlords(searchTerm)
-                mapOf("trigram matches" to landlordsFound.map { summariseLandlord(it) })
+                mapOf("trigram matches" to landlordsFound.map { summariseLandlord(it) })*/
             } else {
                 mapOf()
             }
