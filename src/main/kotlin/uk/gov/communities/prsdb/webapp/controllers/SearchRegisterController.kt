@@ -27,8 +27,8 @@ class SearchRegisterController(
         }
 
         model.addAttribute("searchWrapperModel", SearchWrapperModel())
-        // TODO: add landlord details page base URL to model
-        model.addAttribute("baseLandlordDetailsURL", "")
+        // TODO PRSD-656: add LA view of landlord details page base URL to model
+        model.addAttribute("baseLandlordDetailsURL", "/landlord-details")
 
         return if (query?.isBlank() == true) "redirect:landlord" else "searchLandlord"
     }
