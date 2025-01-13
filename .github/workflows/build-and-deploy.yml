@@ -13,6 +13,8 @@ jobs:
       contents: read
     env:
       AWS_REGION: "eu-west-2"
+    outputs:
+      image_name: ${{ steps.build-image.outputs.image_name }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -69,9 +71,25 @@ jobs:
           IMAGE=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker tag prsdb-webapp:latest $IMAGE
           docker push $IMAGE
+          echo "image_name=$IMAGE" >> $GITHUB_OUTPUT
 
-      # ToDo PRSD-752: Update task definition and redeploy ECS service
+  update-task-definition:
+    name: Update task definition
+    needs: build-and-deploy
+    permissions:
+      id-token: write
+      contents: read
+    uses: communitiesuk/prsdb-infra/.github/workflows/update-task-definition.yml@main
+    with:
+      environment_name: integration
+      image_name: ${{ needs.build-and-deploy.outputs.image_name }}
 
+      # ToDo PRSD-752: Redeploy ECS service
+
+  report-pipeline-status:
+    runs-on: ubuntu-latest
+    needs: update-task-definition
+    steps:
       - name: Report pipeline status
         if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         id: slack
@@ -80,7 +98,7 @@ jobs:
           payload: |
             {
               "commit": ${{ toJson(github.event.head_commit.message) }},
-              "result": "${{ job.status == 'success' && 'Success :tick:' || 'Failure :no-cross:' }}",
+              "result": "${{ (needs.update-task-definition.result == 'success' || needs.update-task-definition.result == 'skipped') && 'Success :tick:' || 'Failure :no-cross:' }}",
               "url": "${{ format('https://github.com/communitiesuk/prsdb-webapp/actions/runs/{0}', github.run_id) }}"
             }
         env:
