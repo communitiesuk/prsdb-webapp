@@ -24,7 +24,6 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import java.security.Principal
 import java.util.Optional
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 @ExtendWith(MockitoExtension::class)
 class JourneyDataServiceTests {
@@ -48,73 +47,6 @@ class JourneyDataServiceTests {
                 mockOneLoginUserRepository,
                 ObjectMapper(),
             )
-    }
-
-    @Nested
-    inner class GetPageDataTests {
-        @Test
-        fun `returns page data from journeyData if subPageNumber is null`() {
-            // Arrange
-            val pageName = "testPage"
-            val key = "testKey"
-            val value = "testValue"
-            val journeyData: JourneyData =
-                mutableMapOf(
-                    pageName to mutableMapOf(key to value),
-                )
-
-            // Act
-            val pageData = JourneyDataService.getPageData(journeyData, pageName, null)
-
-            // Assert
-            assertEquals(pageData?.get(key), value)
-        }
-
-        @Test
-        fun `returns null if page data is missing`() {
-            // Arrange
-            val pageName = "testPage"
-            val journeyData: JourneyData = mutableMapOf()
-
-            // Act
-            val pageData = JourneyDataService.getPageData(journeyData, pageName, null)
-
-            // Assert
-            assertNull(pageData)
-        }
-
-        @Test
-        fun `returns subPage data from journeyData if subPageNumber is provided`() {
-            // Arrange
-            val pageName = "testPage"
-            val subPageNumber = 12
-            val key = "testKey"
-            val value = "testValue"
-            val journeyData: JourneyData =
-                mutableMapOf(
-                    pageName to mutableMapOf(subPageNumber.toString() to mutableMapOf(key to value)),
-                )
-
-            // Act
-            val subPageData = JourneyDataService.getPageData(journeyData, pageName, subPageNumber)
-
-            // Assert
-            assertEquals(subPageData?.get(key), value)
-        }
-
-        @Test
-        fun `returns null if sub page data is missing`() {
-            // Arrange
-            val pageName = "testPage"
-            val subPageNumber = 12
-            val journeyData: JourneyData = mutableMapOf(pageName to mutableMapOf<String, Any>())
-
-            // Act
-            val subPageData = JourneyDataService.getPageData(journeyData, pageName, subPageNumber)
-
-            // Assert
-            assertNull(subPageData)
-        }
     }
 
     @Nested

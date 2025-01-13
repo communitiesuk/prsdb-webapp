@@ -11,10 +11,8 @@ import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import java.security.Principal
-import java.time.LocalDate
 
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -85,73 +83,5 @@ class JourneyDataService(
 
     fun clearJourneyDataFromSession() {
         session.setAttribute("journeyData", null)
-    }
-
-    companion object {
-        fun getPageData(
-            journeyData: JourneyData,
-            pageName: String,
-            subPageNumber: Int? = null,
-        ): PageData? {
-            var pageData = objectToStringKeyedMap(journeyData[pageName])
-            if (subPageNumber != null && pageData != null) {
-                pageData = objectToStringKeyedMap(pageData[subPageNumber.toString()])
-            }
-            return pageData
-        }
-
-        fun getFieldStringValue(
-            journeyData: JourneyData,
-            urlPathSegment: String,
-            fieldName: String,
-            subPageNumber: Int? = null,
-        ): String? {
-            val pageData = getPageData(journeyData, urlPathSegment, subPageNumber)
-            return pageData?.get(fieldName)?.toString()
-        }
-
-        fun getFieldIntegerValue(
-            journeyData: JourneyData,
-            urlPathSegment: String,
-            fieldName: String,
-            subPageNumber: Int? = null,
-        ): Int? {
-            val fieldAsString =
-                getFieldStringValue(journeyData, urlPathSegment, fieldName, subPageNumber) ?: return null
-            return fieldAsString.toInt()
-        }
-
-        fun getFieldLocalDateValue(
-            journeyData: JourneyData,
-            urlPathSegment: String,
-            fieldName: String,
-            subPageNumber: Int? = null,
-        ): LocalDate? {
-            val fieldAsString =
-                getFieldStringValue(journeyData, urlPathSegment, fieldName, subPageNumber) ?: return null
-            return fieldAsString.let { LocalDate.parse(fieldAsString) }
-        }
-
-        fun getFieldBooleanValue(
-            journeyData: JourneyData,
-            urlPathSegment: String,
-            fieldName: String,
-            subPageNumber: Int? = null,
-        ): Boolean? {
-            val fieldAsString =
-                getFieldStringValue(journeyData, urlPathSegment, fieldName, subPageNumber) ?: return null
-            return fieldAsString == "true"
-        }
-
-        inline fun <reified E : Enum<E>> getFieldEnumValue(
-            journeyData: JourneyData,
-            urlPathSegment: String,
-            fieldName: String,
-            subPageNumber: Int? = null,
-        ): E? {
-            val fieldAsString =
-                getFieldStringValue(journeyData, urlPathSegment, fieldName, subPageNumber) ?: return null
-            return enumValueOf<E>(fieldAsString)
-        }
     }
 }

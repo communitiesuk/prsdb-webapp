@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import java.time.LocalDate
 
 class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
@@ -13,14 +12,14 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
         fun getName(journeyData: JourneyData) = getVerifiedName(journeyData) ?: getManualName(journeyData)
 
         private fun getManualName(journeyData: JourneyData) =
-            JourneyDataService.getFieldStringValue(
+            getFieldStringValue(
                 journeyData,
                 LandlordRegistrationStepId.Name.urlPathSegment,
                 "name",
             )
 
         fun getVerifiedName(journeyData: JourneyData) =
-            JourneyDataService.getFieldStringValue(
+            getFieldStringValue(
                 journeyData,
                 LandlordRegistrationStepId.VerifyIdentity.urlPathSegment,
                 "name",
@@ -29,7 +28,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
         fun getDOB(journeyData: JourneyData) = getVerifiedDOB(journeyData) ?: getManualDOB(journeyData)
 
         fun getVerifiedDOB(journeyData: JourneyData) =
-            JourneyDataService.getFieldLocalDateValue(
+            getFieldLocalDateValue(
                 journeyData,
                 LandlordRegistrationStepId.VerifyIdentity.urlPathSegment,
                 "birthDate",
@@ -37,21 +36,21 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
 
         private fun getManualDOB(journeyData: JourneyData): LocalDate? {
             val day =
-                JourneyDataService.getFieldIntegerValue(
+                getFieldIntegerValue(
                     journeyData,
                     LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
                     "day",
                 ) ?: return null
 
             val month =
-                JourneyDataService.getFieldIntegerValue(
+                getFieldIntegerValue(
                     journeyData,
                     LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
                     "month",
                 ) ?: return null
 
             val year =
-                JourneyDataService.getFieldIntegerValue(
+                getFieldIntegerValue(
                     journeyData,
                     LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
                     "year",
@@ -61,21 +60,21 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
         }
 
         fun getEmail(journeyData: JourneyData) =
-            JourneyDataService.getFieldStringValue(
+            getFieldStringValue(
                 journeyData,
                 LandlordRegistrationStepId.Email.urlPathSegment,
                 "emailAddress",
             )
 
         fun getPhoneNumber(journeyData: JourneyData) =
-            JourneyDataService.getFieldStringValue(
+            getFieldStringValue(
                 journeyData,
                 LandlordRegistrationStepId.PhoneNumber.urlPathSegment,
                 "phoneNumber",
             )
 
         fun getLivesInUK(journeyData: JourneyData) =
-            JourneyDataService.getFieldBooleanValue(
+            getFieldBooleanValue(
                 journeyData,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
                 "livesInUK",
@@ -85,7 +84,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             if (getLivesInUK(journeyData) == true) {
                 null
             } else {
-                JourneyDataService.getFieldStringValue(
+                getFieldStringValue(
                     journeyData,
                     LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
                     "countryOfResidence",
@@ -117,7 +116,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
                     LandlordRegistrationStepId.SelectAddress.urlPathSegment
                 }
 
-            return JourneyDataService.getFieldStringValue(
+            return getFieldStringValue(
                 journeyData,
                 selectAddressPathSegment,
                 "address",
@@ -139,7 +138,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
         }
 
         fun getInternationalAddress(journeyData: JourneyData) =
-            JourneyDataService.getFieldStringValue(
+            getFieldStringValue(
                 journeyData,
                 LandlordRegistrationStepId.InternationalAddress.urlPathSegment,
                 "internationalAddress",

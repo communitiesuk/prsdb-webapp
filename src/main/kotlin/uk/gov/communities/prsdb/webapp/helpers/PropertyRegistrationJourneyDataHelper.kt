@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
     companion object {
@@ -26,65 +25,63 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
         }
 
         fun getCustodianCode(journeyData: JourneyData): String? =
-            JourneyDataService.getFieldStringValue(
+            getFieldStringValue(
                 journeyData,
                 RegisterPropertyStepId.LocalAuthority.urlPathSegment,
                 "localAuthorityCustodianCode",
             )
 
         fun getPropertyType(journeyData: JourneyData): PropertyType? =
-            JourneyDataService.getFieldEnumValue<PropertyType>(
+            getFieldEnumValue<PropertyType>(
                 journeyData,
                 RegisterPropertyStepId.PropertyType.urlPathSegment,
                 "propertyType",
             )
 
         fun getCustomPropertyType(journeyData: JourneyData): String? =
-            JourneyDataService.getFieldStringValue(
+            getFieldStringValue(
                 journeyData,
                 RegisterPropertyStepId.PropertyType.urlPathSegment,
                 "customPropertyType",
             )
 
         fun getOwnershipType(journeyData: JourneyData): OwnershipType? =
-            JourneyDataService.getFieldEnumValue<OwnershipType>(
+            getFieldEnumValue<OwnershipType>(
                 journeyData,
                 RegisterPropertyStepId.OwnershipType.urlPathSegment,
                 "ownershipType",
             )
 
         fun getLandlordType(journeyData: JourneyData): LandlordType? =
-            JourneyDataService.getFieldEnumValue<LandlordType>(
+            getFieldEnumValue<LandlordType>(
                 journeyData,
                 RegisterPropertyStepId.LandlordType.urlPathSegment,
                 "landlordType",
             )
 
         fun getIsOccupied(journeyData: JourneyData): Boolean? =
-            JourneyDataService.getFieldBooleanValue(
+            getFieldBooleanValue(
                 journeyData,
                 RegisterPropertyStepId.Occupancy.urlPathSegment,
                 "occupied",
             )
 
         fun getNumberOfHouseholds(journeyData: JourneyData): Int =
-            JourneyDataService
-                .getFieldIntegerValue(
-                    journeyData,
-                    RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment,
-                    "numberOfHouseholds",
-                ) ?: 0
+            getFieldIntegerValue(
+                journeyData,
+                RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment,
+                "numberOfHouseholds",
+            ) ?: 0
 
         fun getNumberOfTenants(journeyData: JourneyData): Int =
-            JourneyDataService
-                .getFieldIntegerValue(
-                    journeyData,
-                    RegisterPropertyStepId.NumberOfPeople.urlPathSegment,
-                    "numberOfPeople",
-                ) ?: 0
+            getFieldIntegerValue(
+                journeyData,
+                RegisterPropertyStepId.NumberOfPeople.urlPathSegment,
+                "numberOfPeople",
+            ) ?: 0
 
         fun getLicensingType(journeyData: JourneyData): LicensingType? =
-            JourneyDataService.getFieldEnumValue<LicensingType>(
+            getFieldEnumValue<LicensingType>(
                 journeyData,
                 RegisterPropertyStepId.LicensingType.urlPathSegment,
                 "licensingType",
@@ -99,11 +96,11 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
                     LicensingType.NO_LICENSING -> return ""
                 }
 
-            return JourneyDataService.getFieldStringValue(journeyData, licenseNumberPathSegment, "licenceNumber")
+            return getFieldStringValue(journeyData, licenseNumberPathSegment, "licenceNumber")
         }
 
         private fun getSelectedAddress(journeyData: JourneyData): String? =
-            JourneyDataService.getFieldStringValue(
+            getFieldStringValue(
                 journeyData,
                 RegisterPropertyStepId.SelectAddress.urlPathSegment,
                 "address",

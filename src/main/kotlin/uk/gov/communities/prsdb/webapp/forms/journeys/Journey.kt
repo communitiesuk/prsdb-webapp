@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
+import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import java.security.Principal
 import java.util.Optional
@@ -37,8 +38,8 @@ abstract class Journey<T : StepId>(
         subPageNumber: Int?,
         submittedPageData: PageData? = null,
     ): String {
-        var journeyData: JourneyData = journeyDataService.getJourneyDataFromSession()
-        var requestedStep =
+        val journeyData: JourneyData = journeyDataService.getJourneyDataFromSession()
+        val requestedStep =
             steps.singleOrNull { step -> step.id == stepId } ?: throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Step ${stepId.urlPathSegment} not valid for journey ${journeyType.urlPathSegment}",
@@ -48,8 +49,8 @@ abstract class Journey<T : StepId>(
         }
         val prevStepDetails = getPrevStep(journeyData, requestedStep, subPageNumber)
         val prevStepUrl = getPrevStepUrl(prevStepDetails?.step, prevStepDetails?.subPageNumber)
-        var pageData =
-            submittedPageData ?: JourneyDataService.getPageData(journeyData, requestedStep.name, subPageNumber)
+        val pageData =
+            submittedPageData ?: JourneyDataHelper.getPageData(journeyData, requestedStep.name, subPageNumber)
         return requestedStep.page.populateModelAndGetTemplateName(
             validator,
             model,
@@ -66,7 +67,7 @@ abstract class Journey<T : StepId>(
         subPageNumber: Int?,
         principal: Principal,
     ): String {
-        var currentStep =
+        val currentStep =
             steps.singleOrNull { step -> step.id == stepId } ?: throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Step ${stepId.urlPathSegment} not valid for journey ${journeyType.urlPathSegment}",
@@ -116,19 +117,19 @@ abstract class Journey<T : StepId>(
         targetStep: Step<T>,
         targetSubPageNumber: Int?,
     ): StepDetails<T>? {
-        var initialStep = steps.singleOrNull { step -> step.id == initialStepId } ?: return null
+        val initialStep = steps.singleOrNull { step -> step.id == initialStepId } ?: return null
         var currentStep = initialStep
         var prevStep: Step<T>? = null
         var prevSubPageNumber: Int? = null
         var currentSubPageNumber: Int? = null
-        var filteredJourneyData: JourneyData = mutableMapOf()
+        val filteredJourneyData: JourneyData = mutableMapOf()
         while (!(currentStep.id == targetStep.id && currentSubPageNumber == targetSubPageNumber)) {
-            val pageData = JourneyDataService.getPageData(journeyData, currentStep.name, currentSubPageNumber)
+            val pageData = JourneyDataHelper.getPageData(journeyData, currentStep.name, currentSubPageNumber)
             if (pageData == null || !currentStep.isSatisfied(validator, pageData)) return null
 
             // This stores journeyData for only the journey path the user is on
             // and excludes user data for pages in the journey that belong to a different path
-            val stepData = JourneyDataService.getPageData(journeyData, currentStep.name, null)
+            val stepData = JourneyDataHelper.getPageData(journeyData, currentStep.name, null)
             filteredJourneyData[currentStep.name] = stepData
 
             val (nextStepId, nextSubPageNumber) =
