@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
-import uk.gov.communities.prsdb.webapp.helpers.LandlordJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
 import kotlin.reflect.KClass
@@ -26,12 +26,12 @@ class ConfirmIdentityPage(
             mutableListOf(
                 FormSummaryViewModel(
                     "forms.confirmDetails.rowHeading.name",
-                    LandlordJourneyDataHelper.getVerifiedName(journeyData)!!,
+                    LandlordRegistrationJourneyDataHelper.getVerifiedName(journeyData)!!,
                     null,
                 ),
                 FormSummaryViewModel(
                     "forms.confirmDetails.rowHeading.dob",
-                    LandlordJourneyDataHelper.getVerifiedDOB(journeyData)!!,
+                    LandlordRegistrationJourneyDataHelper.getVerifiedDOB(journeyData)!!,
                     null,
                 ),
             )

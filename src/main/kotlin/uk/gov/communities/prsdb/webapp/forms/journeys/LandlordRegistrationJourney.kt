@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.VerifyIdentityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.helpers.LandlordJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.CountryOfResidenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.DateOfBirthFormModel
@@ -73,7 +73,7 @@ class LandlordRegistrationJourney(
                 id = LandlordRegistrationStepId.VerifyIdentity,
                 page = VerifyIdentityPage(),
                 nextAction = { journeyData, _ ->
-                    if (LandlordJourneyDataHelper.isIdentityVerified(journeyData)) {
+                    if (LandlordRegistrationJourneyDataHelper.isIdentityVerified(journeyData)) {
                         Pair(LandlordRegistrationStepId.ConfirmIdentity, null)
                     } else {
                         Pair(LandlordRegistrationStepId.Name, null)
@@ -424,21 +424,21 @@ class LandlordRegistrationJourney(
         )
 
         private fun countryOfResidenceNextAction(journeyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
-            if (LandlordJourneyDataHelper.getLivesInUK(journeyData)!!) {
+            if (LandlordRegistrationJourneyDataHelper.getLivesInUK(journeyData)!!) {
                 Pair(LandlordRegistrationStepId.LookupAddress, null)
             } else {
                 Pair(LandlordRegistrationStepId.InternationalAddress, null)
             }
 
         private fun selectAddressNextAction(journeyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
-            if (LandlordJourneyDataHelper.isManualAddressChosen(journeyData)) {
+            if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
                 Pair(LandlordRegistrationStepId.ManualAddress, null)
             } else {
                 Pair(LandlordRegistrationStepId.CheckAnswers, null)
             }
 
         private fun selectContactAddressNextAction(journeyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
-            if (LandlordJourneyDataHelper.isManualAddressChosen(journeyData, isContactAddress = true)
+            if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData, isContactAddress = true)
             ) {
                 Pair(LandlordRegistrationStepId.ManualContactAddress, null)
             } else {
@@ -453,14 +453,14 @@ class LandlordRegistrationJourney(
         ): String {
             landlordService.createLandlord(
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
-                name = LandlordJourneyDataHelper.getName(journeyData)!!,
-                email = LandlordJourneyDataHelper.getEmail(journeyData)!!,
-                phoneNumber = LandlordJourneyDataHelper.getPhoneNumber(journeyData)!!,
+                name = LandlordRegistrationJourneyDataHelper.getName(journeyData)!!,
+                email = LandlordRegistrationJourneyDataHelper.getEmail(journeyData)!!,
+                phoneNumber = LandlordRegistrationJourneyDataHelper.getPhoneNumber(journeyData)!!,
                 addressDataModel =
-                    LandlordJourneyDataHelper.getAddress(journeyData, addressDataService)!!,
+                    LandlordRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!,
                 internationalAddress =
-                    LandlordJourneyDataHelper.getInternationalAddress(journeyData),
-                dateOfBirth = LandlordJourneyDataHelper.getDOB(journeyData)!!,
+                    LandlordRegistrationJourneyDataHelper.getInternationalAddress(journeyData),
+                dateOfBirth = LandlordRegistrationJourneyDataHelper.getDOB(journeyData)!!,
             )
 
             journeyDataService.clearJourneyDataFromSession()

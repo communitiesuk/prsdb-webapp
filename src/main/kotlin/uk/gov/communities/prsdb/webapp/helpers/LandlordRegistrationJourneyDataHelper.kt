@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import java.time.LocalDate
 
-class LandlordJourneyDataHelper : JourneyDataHelper() {
+class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
     companion object {
         fun getName(journeyData: JourneyData) = getVerifiedName(journeyData) ?: getManualName(journeyData)
 

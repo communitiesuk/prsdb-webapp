@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import java.time.LocalDate
 import kotlin.test.assertEquals
 
-class LandlordJourneyDataHelperTests {
+class LandlordRegistrationJourneyDataHelperTests {
     private lateinit var mockAddressDataService: AddressDataService
     private lateinit var journeyDataBuilder: JourneyDataBuilder
 
@@ -40,7 +40,7 @@ class LandlordJourneyDataHelperTests {
         val expectedVerifiedName = "verified name"
         val mockJourneyData = journeyDataBuilder.withVerifiedUser(expectedVerifiedName, LocalDate.of(1, 1, 1)).build()
 
-        val verifiedName = LandlordJourneyDataHelper.getName(mockJourneyData)
+        val verifiedName = LandlordRegistrationJourneyDataHelper.getName(mockJourneyData)
 
         assertEquals(expectedVerifiedName, verifiedName)
     }
@@ -50,7 +50,7 @@ class LandlordJourneyDataHelperTests {
         val expectedManualName = "manual name"
         val mockJourneyData = journeyDataBuilder.withUnverifiedUser(expectedManualName, LocalDate.of(1, 1, 1)).build()
 
-        val manualName = LandlordJourneyDataHelper.getName(mockJourneyData)
+        val manualName = LandlordRegistrationJourneyDataHelper.getName(mockJourneyData)
 
         assertEquals(expectedManualName, manualName)
     }
@@ -60,7 +60,7 @@ class LandlordJourneyDataHelperTests {
         val expectedVerifiedDOB = LocalDate.of(2000, 1, 1)
         val mockJourneyData = journeyDataBuilder.withVerifiedUser("name", expectedVerifiedDOB).build()
 
-        val verifiedDOB = LandlordJourneyDataHelper.getDOB(mockJourneyData)
+        val verifiedDOB = LandlordRegistrationJourneyDataHelper.getDOB(mockJourneyData)
 
         assertEquals(expectedVerifiedDOB, verifiedDOB)
     }
@@ -70,7 +70,7 @@ class LandlordJourneyDataHelperTests {
         val expectedManualDOB = LocalDate.of(2000, 1, 1)
         val mockJourneyData = journeyDataBuilder.withUnverifiedUser("name", expectedManualDOB).build()
 
-        val manualDOB = LandlordJourneyDataHelper.getDOB(mockJourneyData)
+        val manualDOB = LandlordRegistrationJourneyDataHelper.getDOB(mockJourneyData)
 
         assertEquals(expectedManualDOB, manualDOB)
     }
@@ -89,7 +89,7 @@ class LandlordJourneyDataHelperTests {
                     "selected address",
                 ).build()
 
-        val nonUKCountryOfResidence = LandlordJourneyDataHelper.getNonUKCountryOfResidence(mockJourneyData)
+        val nonUKCountryOfResidence = LandlordRegistrationJourneyDataHelper.getNonUKCountryOfResidence(mockJourneyData)
 
         assertEquals(expectedNonUKCountryOfResidence, nonUKCountryOfResidence)
     }
@@ -104,7 +104,7 @@ class LandlordJourneyDataHelperTests {
 
         whenever(mockAddressDataService.getAddressData(selectedAddress)).thenReturn(expectedAddressDataModel)
 
-        val addressDataModel = LandlordJourneyDataHelper.getAddress(mockJourneyData, mockAddressDataService)
+        val addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(mockJourneyData, mockAddressDataService)
 
         assertEquals(expectedAddressDataModel, addressDataModel)
     }
@@ -122,7 +122,7 @@ class LandlordJourneyDataHelperTests {
         val expectedAddressDataModel = AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode)
 
         val addressDataModel =
-            LandlordJourneyDataHelper.getAddress(mockJourneyData, mockAddressDataService)
+            LandlordRegistrationJourneyDataHelper.getAddress(mockJourneyData, mockAddressDataService)
 
         assertEquals(expectedAddressDataModel, addressDataModel)
     }
