@@ -138,11 +138,11 @@ class PropertyOwnershipServiceTests {
         val propertyOwnership3 = createPropertyOwnership(primaryLandlord = landlord, property = properties[2])
         val propertyOwnership4 = createPropertyOwnership(primaryLandlord = landlord, property = properties[3])
 
-        val landlordsProperties: List<PropertyOwnership> =
-            listOf(propertyOwnership1, propertyOwnership2, propertyOwnership3, propertyOwnership4)
-
         @Test
         fun `Returns a list of Landlords properites in correctly formatted data model`() {
+            val landlordsProperties: List<PropertyOwnership> =
+                listOf(propertyOwnership1, propertyOwnership2, propertyOwnership3, propertyOwnership4)
+
             whenever(
                 mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status_Registered(
                     "landlord",
@@ -151,8 +151,7 @@ class PropertyOwnershipServiceTests {
 
             val result = propertyOwnershipService.getLandlordRegisteredPropertiesDetails("landlord")
 
-            // TODO the test set up is working time to assert some asserts
-            println(result)
+            assertTrue(result.size == 4)
         }
     }
 }
