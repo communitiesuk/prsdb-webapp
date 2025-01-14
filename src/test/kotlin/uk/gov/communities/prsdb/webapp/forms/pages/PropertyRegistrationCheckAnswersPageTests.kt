@@ -20,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class PropertyRegistrationCheckAnswersPageTests {
     private lateinit var page: PropertyRegistrationCheckAnswersPage
@@ -34,7 +33,7 @@ class PropertyRegistrationCheckAnswersPageTests {
     @BeforeEach
     fun setup() {
         addressService = mock()
-        page = PropertyRegistrationCheckAnswersPage(addressService, JourneyDataService(mock(), mock(), mock(), mock()))
+        page = PropertyRegistrationCheckAnswersPage(addressService)
         validator = mock()
         whenever(validator.supports(any<Class<*>>())).thenReturn(true)
         model = ExtendedModelMap()
