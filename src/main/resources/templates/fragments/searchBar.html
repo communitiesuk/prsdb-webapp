@@ -1,0 +1,15 @@
+<div class="moj-search" th:fragment="searchBar(label, hint, searchWrapperModel)">
+    <form method="get" th:action="@{''}" th:object="${searchWrapperModel}">
+        <div class="govuk-form-group">
+            <label class="govuk-label moj-search__label govuk-!-font-weight-bold" th:for="'query'"
+                   th:text="${label}">
+            </label>
+            <div id="search-hint" class="govuk-hint moj-search__hint " th:text="${hint}"></div>
+            <input class="govuk-input moj-search__input " type="search" th:field="*{query}"
+                   aria-describedby="search-hint">
+        </div>
+        <button type="submit" class="govuk-button moj-search__button " data-module="govuk-button"
+                th:text="#{searchButtonText}">
+        </button>
+    </form>
+</div>

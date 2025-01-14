@@ -1,7 +1,9 @@
-import {initAll} from 'govuk-frontend'
+import {initAll as initGDS} from 'govuk-frontend';
 import {initSelectAutocomplete} from "./autocomplete";
 
-initAll()
+initGDS()
 
 initSelectAutocomplete()
+
+window.MOJFrontend.initAll()
 

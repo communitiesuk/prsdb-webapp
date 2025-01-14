@@ -18,7 +18,7 @@ class MockLandlordData {
     companion object {
         private fun createAddress() = Address(AddressDataModel("1 Example Road, EG1 2AB"))
 
-        private fun createLandlord() =
+        fun createLandlord() =
             Landlord(
                 baseUser = OneLoginUser(),
                 name = "name",
