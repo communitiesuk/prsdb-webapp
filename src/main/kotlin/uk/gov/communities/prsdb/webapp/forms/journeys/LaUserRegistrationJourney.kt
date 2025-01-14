@@ -29,7 +29,7 @@ class LaUserRegistrationJourney(
                 landingPageStep(),
                 registerUserStep(),
                 emailStep(),
-                checkAnswersStep(journeyDataService, invitationService),
+                checkAnswersStep(invitationService),
             ),
     ) {
     companion object {
@@ -87,25 +87,22 @@ class LaUserRegistrationJourney(
                 nextAction = { _, _ -> Pair(RegisterLaUserStepId.CheckAnswers, null) },
             )
 
-        private fun checkAnswersStep(
-            journeyDataService: JourneyDataService,
-            invitationService: LocalAuthorityInvitationService,
-        ) = Step(
-            id = RegisterLaUserStepId.CheckAnswers,
-            page =
-                LaUserRegistrationCheckAnswersPage(
-                    formModel = CheckAnswersFormModel::class,
-                    templateName = "forms/checkAnswersForm",
-                    content =
-                        mapOf(
-                            "title" to "registerLAUser.title",
-                            "summaryName" to "registerLaUser.checkAnswers.summaryName",
-                            "submitButtonText" to "forms.buttons.confirm",
-                        ),
-                    journeyDataService,
-                    invitationService,
-                ),
-            handleSubmitAndRedirect = { _, _ -> "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/success" },
-        )
+        private fun checkAnswersStep(invitationService: LocalAuthorityInvitationService) =
+            Step(
+                id = RegisterLaUserStepId.CheckAnswers,
+                page =
+                    LaUserRegistrationCheckAnswersPage(
+                        formModel = CheckAnswersFormModel::class,
+                        templateName = "forms/checkAnswersForm",
+                        content =
+                            mapOf(
+                                "title" to "registerLAUser.title",
+                                "summaryName" to "registerLaUser.checkAnswers.summaryName",
+                                "submitButtonText" to "forms.buttons.confirm",
+                            ),
+                        invitationService,
+                    ),
+                handleSubmitAndRedirect = { _, _ -> "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/success" },
+            )
     }
 }

@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 class FormContext() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null
+    val id: Long = 0
 
     @Column(nullable = false)
     lateinit var journeyType: JourneyType

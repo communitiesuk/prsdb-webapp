@@ -1,46 +1,62 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
+import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import java.time.LocalDate
 
 open class JourneyDataHelper {
     companion object {
+        fun getLookupAddressHouseNameOrNumberAndPostcode(
+            journeyData: JourneyData,
+            lookupAddressPathSegment: String,
+        ): Pair<String, String>? {
+            val houseNameOrNumber =
+                getFieldStringValue(journeyData, lookupAddressPathSegment, "houseNameOrNumber")
+                    ?: return null
+
+            val postcode =
+                getFieldStringValue(journeyData, lookupAddressPathSegment, "postcode")
+                    ?: return null
+
+            return Pair(houseNameOrNumber, postcode)
+        }
+
         fun getManualAddress(
-            journeyDataService: JourneyDataService,
             journeyData: JourneyData,
             manualAddressPathSegment: String,
         ): AddressDataModel? {
             val addressLineOne =
-                journeyDataService.getFieldStringValue(
+                getFieldStringValue(
                     journeyData,
                     manualAddressPathSegment,
                     "addressLineOne",
                 ) ?: return null
 
             val townOrCity =
-                journeyDataService.getFieldStringValue(
+                getFieldStringValue(
                     journeyData,
                     manualAddressPathSegment,
                     "townOrCity",
                 ) ?: return null
 
             val postcode =
-                journeyDataService.getFieldStringValue(
+                getFieldStringValue(
                     journeyData,
                     manualAddressPathSegment,
                     "postcode",
                 ) ?: return null
 
             val addressLineTwo =
-                journeyDataService.getFieldStringValue(
+                getFieldStringValue(
                     journeyData,
                     manualAddressPathSegment,
                     "addressLineTwo",
                 )
 
             val county =
-                journeyDataService.getFieldStringValue(
+                getFieldStringValue(
                     journeyData,
                     manualAddressPathSegment,
                     "county",
@@ -53,6 +69,72 @@ open class JourneyDataHelper {
                 addressLineTwo,
                 county,
             )
+        }
+
+        fun getPageData(
+            journeyData: JourneyData,
+            pageName: String,
+            subPageNumber: Int? = null,
+        ): PageData? {
+            var pageData = objectToStringKeyedMap(journeyData[pageName])
+            if (subPageNumber != null && pageData != null) {
+                pageData = objectToStringKeyedMap(pageData[subPageNumber.toString()])
+            }
+            return pageData
+        }
+
+        fun getFieldStringValue(
+            journeyData: JourneyData,
+            urlPathSegment: String,
+            fieldName: String,
+            subPageNumber: Int? = null,
+        ): String? {
+            val pageData = getPageData(journeyData, urlPathSegment, subPageNumber)
+            return pageData?.get(fieldName)?.toString()
+        }
+
+        fun getFieldIntegerValue(
+            journeyData: JourneyData,
+            urlPathSegment: String,
+            fieldName: String,
+            subPageNumber: Int? = null,
+        ): Int? {
+            val fieldAsString =
+                getFieldStringValue(journeyData, urlPathSegment, fieldName, subPageNumber) ?: return null
+            return fieldAsString.toInt()
+        }
+
+        fun getFieldLocalDateValue(
+            journeyData: JourneyData,
+            urlPathSegment: String,
+            fieldName: String,
+            subPageNumber: Int? = null,
+        ): LocalDate? {
+            val fieldAsString =
+                getFieldStringValue(journeyData, urlPathSegment, fieldName, subPageNumber) ?: return null
+            return fieldAsString.let { LocalDate.parse(fieldAsString) }
+        }
+
+        fun getFieldBooleanValue(
+            journeyData: JourneyData,
+            urlPathSegment: String,
+            fieldName: String,
+            subPageNumber: Int? = null,
+        ): Boolean? {
+            val fieldAsString =
+                getFieldStringValue(journeyData, urlPathSegment, fieldName, subPageNumber) ?: return null
+            return fieldAsString == "true"
+        }
+
+        inline fun <reified E : Enum<E>> getFieldEnumValue(
+            journeyData: JourneyData,
+            urlPathSegment: String,
+            fieldName: String,
+            subPageNumber: Int? = null,
+        ): E? {
+            val fieldAsString =
+                getFieldStringValue(journeyData, urlPathSegment, fieldName, subPageNumber) ?: return null
+            return enumValueOf<E>(fieldAsString)
         }
     }
 }

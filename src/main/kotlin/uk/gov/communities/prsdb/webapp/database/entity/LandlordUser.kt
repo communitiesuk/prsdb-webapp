@@ -14,7 +14,7 @@ import java.util.Date
 class LandlordUser : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long? = null
+    private val id: Long = 0
 
     @Column(nullable = false)
     lateinit var phoneNumber: String

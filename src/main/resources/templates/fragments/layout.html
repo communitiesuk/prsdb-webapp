@@ -6,10 +6,8 @@
         government services and information</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#0b0c0c">
-    <link rel="icon" sizes="48x48" href="/static/assets/images/favicon.ico"
-          th:href="@{/assets/images/favicon.ico}">
-    <link rel="icon" sizes="any" href="/static/assets/images/favicon.svg"
-          th:href="@{/assets/images/favicon.svg}"
+    <link rel="icon" sizes="48x48" href="/static/assets/images/favicon.ico" th:href="@{/assets/images/favicon.ico}">
+    <link rel="icon" sizes="any" href="/static/assets/images/favicon.svg" th:href="@{/assets/images/favicon.svg}"
           type="image/svg+xml">
     <link rel="mask-icon" href="/static/assets/images/govuk-icon-mask.svg"
           th:href="@{/assets/images/govuk-icon-mask.svg}" color="#0b0c0c">
@@ -22,6 +20,7 @@
     <link rel="stylesheet" href="/static/assets/css/service-header.css" th:href="@{/assets/css/service-header.css}">
     <link rel="stylesheet" href="/static/assets/css/accessible-autocomplete.min.css"
           th:href="@{/assets/css/accessible-autocomplete.min.css}"/>
+    <link rel="stylesheet" href="/static/assets/css/moj-frontend.min.css" th:href="@{/assets/css/moj-frontend.min.css}">
 </head>
 <body class="govuk-template__body">
 <script>
@@ -34,7 +33,8 @@
     <div th:replace="${content}"></div>
 </div>
 <div th:replace="~{ fragments/footer :: footer }"></div>
-<script type="module" src="/static/asset/js/index.js" th:src="@{/assets/js/index.js}"></script>
-<script type="module" src="/static/asset/js/service-header.js" th:src="@{/assets/js/service-header.js}"></script>
+<script type="module" src="/static/assets/js/jquery.js" th:src="@{/assets/js/jquery.js}"></script>
+<script type="module" src="/static/assets/js/index.js" th:src="@{/assets/js/index.js}"></script>
+<script type="module" src="/static/assets/js/service-header.js" th:src="@{/assets/js/service-header.js}"></script>
 </body>
 </html>

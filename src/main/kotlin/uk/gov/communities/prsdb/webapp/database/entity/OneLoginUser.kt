@@ -7,7 +7,7 @@ import jakarta.persistence.Id
 @Entity
 class OneLoginUser(
     @Id
-    private val id: String? = null,
+    private val id: String = "",
 ) : ModifiableAuditableEntity() {
     @Column(nullable = false)
     lateinit var name: String

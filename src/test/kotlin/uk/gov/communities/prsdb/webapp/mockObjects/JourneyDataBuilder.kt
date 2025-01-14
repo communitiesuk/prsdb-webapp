@@ -99,6 +99,16 @@ class JourneyDataBuilder(
             )
     }
 
+    fun withLookupAddress(
+        houseNameOrNumber: String,
+        postcode: String,
+        isContactAddress: Boolean = false,
+    ): JourneyDataBuilder {
+        val lookupAddressKey = if (isContactAddress) "lookup-contact-address" else "lookup-address"
+        journeyData[lookupAddressKey] = mutableMapOf("houseNameOrNumber" to houseNameOrNumber, "postcode" to postcode)
+        return this
+    }
+
     fun withSelectedAddress(
         singleLineAddress: String,
         uprn: Long? = null,
