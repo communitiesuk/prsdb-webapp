@@ -7,7 +7,6 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -303,38 +302,10 @@ class Navigator(
         return createValidPage(page, OwnershipTypeFormPagePropertyRegistration::class)
     }
 
-    fun goToPropertyRegistrationOccupancyPage(): OccupancyFormPagePropertyRegistration {
+    fun goToPropertyRegistrationLicensingTypePage(): LicensingTypeFormPagePropertyRegistration {
         val ownershipTypePage = goToPropertyRegistrationOwnershipTypePage()
         ownershipTypePage.form.getRadios().selectValue(OwnershipType.FREEHOLD)
         ownershipTypePage.form.submit()
-        return createValidPage(page, OccupancyFormPagePropertyRegistration::class)
-    }
-
-    fun goToPropertyRegistrationHouseholdsPage(): HouseholdsFormPagePropertyRegistration {
-        val occupancyPage = goToPropertyRegistrationOccupancyPage()
-        occupancyPage.form.getRadios().selectValue("true")
-        occupancyPage.form.submit()
-        return createValidPage(page, HouseholdsFormPagePropertyRegistration::class)
-    }
-
-    fun goToPropertyRegistrationPeoplePage(): PeopleFormPagePropertyRegistration {
-        val householdsPage = goToPropertyRegistrationHouseholdsPage()
-        householdsPage.householdsInput.fill("2")
-        householdsPage.form.submit()
-        return createValidPage(page, PeopleFormPagePropertyRegistration::class)
-    }
-
-    fun goToPropertyRegistrationLandlordTypePage(): LandlordTypeFormPagePropertyRegistration {
-        val peoplePage = goToPropertyRegistrationPeoplePage()
-        peoplePage.peopleInput.fill("4")
-        peoplePage.form.submit()
-        return createValidPage(page, LandlordTypeFormPagePropertyRegistration::class)
-    }
-
-    fun goToPropertyRegistrationLicensingTypePage(): LicensingTypeFormPagePropertyRegistration {
-        val landlordTypePage = goToPropertyRegistrationLandlordTypePage()
-        landlordTypePage.form.getRadios().selectValue(LandlordType.SOLE)
-        landlordTypePage.form.submit()
         return createValidPage(page, LicensingTypeFormPagePropertyRegistration::class)
     }
 
@@ -357,6 +328,34 @@ class Navigator(
         licensingTypePage.form.getRadios().selectValue(LicensingType.HMO_ADDITIONAL_LICENCE)
         licensingTypePage.form.submit()
         return createValidPage(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
+    }
+
+    fun goToPropertyRegistrationOccupancyPage(): OccupancyFormPagePropertyRegistration {
+        val licensingTypePage = goToPropertyRegistrationLicensingTypePage()
+        licensingTypePage.form.getRadios().selectValue(LicensingType.NO_LICENSING)
+        licensingTypePage.form.submit()
+        return createValidPage(page, OccupancyFormPagePropertyRegistration::class)
+    }
+
+    fun goToPropertyRegistrationHouseholdsPage(): HouseholdsFormPagePropertyRegistration {
+        val occupancyPage = goToPropertyRegistrationOccupancyPage()
+        occupancyPage.form.getRadios().selectValue("true")
+        occupancyPage.form.submit()
+        return createValidPage(page, HouseholdsFormPagePropertyRegistration::class)
+    }
+
+    fun goToPropertyRegistrationPeoplePage(): PeopleFormPagePropertyRegistration {
+        val householdsPage = goToPropertyRegistrationHouseholdsPage()
+        householdsPage.householdsInput.fill("2")
+        householdsPage.form.submit()
+        return createValidPage(page, PeopleFormPagePropertyRegistration::class)
+    }
+
+    fun goToPropertyRegistrationLandlordTypePage(): LandlordTypeFormPagePropertyRegistration {
+        val peoplePage = goToPropertyRegistrationPeoplePage()
+        peoplePage.peopleInput.fill("4")
+        peoplePage.form.submit()
+        return createValidPage(page, LandlordTypeFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationConfirmationPage(): ErrorPage {
