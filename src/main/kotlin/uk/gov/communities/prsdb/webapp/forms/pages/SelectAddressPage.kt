@@ -3,22 +3,21 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
-import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
+import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import kotlin.reflect.KClass
 
 class SelectAddressPage(
     formModel: KClass<out FormModel>,
     templateName: String,
     content: Map<String, Any>,
-    private val urlPathSegment: String,
-    private val journeyDataService: JourneyDataService,
+    private val lookupAddressPathSegment: String,
     private val addressLookupService: AddressLookupService,
     private val addressDataService: AddressDataService,
 ) : Page(formModel, templateName, content) {
@@ -27,11 +26,15 @@ class SelectAddressPage(
         model: Model,
         pageData: Map<String, Any?>?,
         prevStepUrl: String?,
+        journeyData: JourneyData?,
     ): String {
-        val journeyData = journeyDataService.getJourneyDataFromSession()
-        val houseNameOrNumber =
-            objectToStringKeyedMap(journeyData[urlPathSegment])?.get("houseNameOrNumber").toString()
-        val postcode = objectToStringKeyedMap(journeyData[urlPathSegment])?.get("postcode").toString()
+        journeyData!!
+
+        val (houseNameOrNumber, postcode) =
+            JourneyDataHelper.getLookupAddressHouseNameOrNumberAndPostcode(
+                journeyData,
+                lookupAddressPathSegment,
+            )!!
 
         val addressLookupResults = addressLookupService.search(houseNameOrNumber, postcode)
         addressDataService.setAddressData(addressLookupResults)
