@@ -94,7 +94,7 @@ class RegistrationNumberDataModelTests {
     @Test
     fun `fromRegistrationNumber returns an equivalent data model`() {
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, MAX_REG_NUM)
-        val expectedRegNumDataModel = RegistrationNumberDataModel(registrationNumber.type, registrationNumber.number!!)
+        val expectedRegNumDataModel = RegistrationNumberDataModel(registrationNumber.type, registrationNumber.number)
 
         val registrationNumberDataModel = RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber)
 

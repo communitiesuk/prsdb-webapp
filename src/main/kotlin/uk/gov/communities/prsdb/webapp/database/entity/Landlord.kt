@@ -15,7 +15,7 @@ import java.time.LocalDate
 class Landlord() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long? = null
+    val id: Long = 0
 
     @OneToOne(optional = false)
     @JoinColumn(name = "subject_identifier", nullable = false, foreignKey = ForeignKey(name = "FK_LANDLORD_1L_USER"))
