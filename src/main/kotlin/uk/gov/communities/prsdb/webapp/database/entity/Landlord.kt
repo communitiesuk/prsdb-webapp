@@ -59,7 +59,7 @@ class Landlord() : ModifiableAuditableEntity() {
         private set
 
     @Column(nullable = false)
-    var isActive: Boolean? = null
+    var isActive: Boolean = false
         private set
 
     constructor(

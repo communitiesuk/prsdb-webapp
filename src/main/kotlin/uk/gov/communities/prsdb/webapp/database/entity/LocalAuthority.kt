@@ -10,7 +10,7 @@ import jakarta.persistence.Id
 class LocalAuthority(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int? = null,
+    val id: Int = 0,
 ) : ModifiableAuditableEntity() {
     @Column(nullable = false)
     lateinit var name: String

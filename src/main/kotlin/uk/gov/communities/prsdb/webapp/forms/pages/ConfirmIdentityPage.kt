@@ -2,9 +2,9 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
+import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
-import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
 import kotlin.reflect.KClass
 
@@ -12,25 +12,26 @@ class ConfirmIdentityPage(
     formModel: KClass<out FormModel>,
     templateName: String,
     content: Map<String, Any>,
-    private val getIdentityData: () -> PageData?,
 ) : Page(formModel, templateName, content) {
     override fun populateModelAndGetTemplateName(
         validator: Validator,
         model: Model,
         pageData: Map<String, Any?>?,
         prevStepUrl: String?,
+        journeyData: JourneyData?,
     ): String {
-        val identityData = getIdentityData()
+        journeyData!!
+
         val formData =
             mutableListOf(
                 FormSummaryViewModel(
                     "forms.confirmDetails.rowHeading.name",
-                    identityData?.get(VerifiedIdentityModel.NAME_KEY),
+                    LandlordRegistrationJourneyDataHelper.getVerifiedName(journeyData)!!,
                     null,
                 ),
                 FormSummaryViewModel(
                     "forms.confirmDetails.rowHeading.dob",
-                    identityData?.get(VerifiedIdentityModel.BIRTH_DATE_KEY),
+                    LandlordRegistrationJourneyDataHelper.getVerifiedDOB(journeyData)!!,
                     null,
                 ),
             )

@@ -12,12 +12,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.anyLong
-import org.mockito.ArgumentMatchers.anyMap
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.spy
@@ -232,17 +229,8 @@ class JourneyTests {
                 )
             val model = BindingAwareModelMap()
             val pageData: PageData = mutableMapOf("testProperty" to "testPropertyValue")
-            val journeyData: JourneyData =
-                mutableMapOf(TestStepId.StepOne.urlPathSegment to pageData)
-            whenever(
-                mockJourneyDataService.getPageData(
-                    anyMap(),
-                    anyString(),
-                    anyOrNull(),
-                ),
-            ).thenReturn(
-                pageData,
-            )
+            val journeyData: JourneyData = mutableMapOf(TestStepId.StepOne.urlPathSegment to pageData)
+
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
@@ -285,17 +273,8 @@ class JourneyTests {
                         ),
                 )
             val model = BindingAwareModelMap()
-            val journeyData: JourneyData =
-                mutableMapOf()
-            whenever(
-                mockJourneyDataService.getPageData(
-                    anyMap(),
-                    anyString(),
-                    anyOrNull(),
-                ),
-            ).thenReturn(
-                mutableMapOf(),
-            )
+            val journeyData: JourneyData = mutableMapOf()
+
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
@@ -339,21 +318,12 @@ class JourneyTests {
                 )
             val model = BindingAwareModelMap()
             val pageData: PageData = mutableMapOf("testProperty" to "testPropertyValue")
-            val journeyData: JourneyData =
-                mutableMapOf(TestStepId.StepOne.urlPathSegment to pageData)
-            whenever(
-                mockJourneyDataService.getPageData(
-                    anyMap(),
-                    anyString(),
-                    anyOrNull(),
-                ),
-            ).thenReturn(
-                pageData,
-            )
+            val journeyData: JourneyData = mutableMapOf(TestStepId.StepOne.urlPathSegment to pageData)
+
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
-            val result = testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, null)
+            val result = testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, pageData)
 
             // Assert
             assertIs<BindingResult>(model[BindingResult.MODEL_KEY_PREFIX + "formModel"])
@@ -559,15 +529,7 @@ class JourneyTests {
             val pageData: PageData = mutableMapOf()
             val journeyData: JourneyData =
                 mutableMapOf(TestStepId.StepOne.urlPathSegment to pageData)
-            whenever(
-                mockJourneyDataService.getPageData(
-                    anyMap(),
-                    anyString(),
-                    anyOrNull(),
-                ),
-            ).thenReturn(
-                pageData,
-            )
+
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
@@ -626,15 +588,7 @@ class JourneyTests {
             val principal = Principal { "testPrincipalId" }
             val pageData: PageData = mutableMapOf("testProperty" to "testPropertyValue")
             val journeyData: JourneyData = mutableMapOf()
-            whenever(
-                mockJourneyDataService.getPageData(
-                    anyMap(),
-                    anyString(),
-                    anyOrNull(),
-                ),
-            ).thenReturn(
-                pageData,
-            )
+
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
@@ -693,15 +647,7 @@ class JourneyTests {
             val principal = Principal { "testPrincipalId" }
             val pageData: PageData = mutableMapOf("testProperty" to "testPropertyValue")
             val journeyData: JourneyData = mutableMapOf()
-            whenever(
-                mockJourneyDataService.getPageData(
-                    anyMap(),
-                    anyString(),
-                    anyOrNull(),
-                ),
-            ).thenReturn(
-                pageData,
-            )
+
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
@@ -764,15 +710,7 @@ class JourneyTests {
             val principal = Principal { "testPrincipalId" }
             val pageData: PageData = mutableMapOf("testProperty" to "testPropertyValue")
             val journeyData: JourneyData = mutableMapOf()
-            whenever(
-                mockJourneyDataService.getPageData(
-                    anyMap(),
-                    anyString(),
-                    anyOrNull(),
-                ),
-            ).thenReturn(
-                pageData,
-            )
+
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
@@ -816,15 +754,7 @@ class JourneyTests {
             val principal = Principal { "testPrincipalId" }
             val pageData: PageData = mutableMapOf("testProperty" to "testPropertyValue")
             val journeyData: JourneyData = mutableMapOf()
-            whenever(
-                mockJourneyDataService.getPageData(
-                    anyMap(),
-                    anyString(),
-                    anyOrNull(),
-                ),
-            ).thenReturn(
-                pageData,
-            )
+
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act and Assert
