@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.helpers.LocalAuthorityDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegisteredPropertyDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 @Service
 class PropertyOwnershipService(
@@ -55,18 +56,22 @@ class PropertyOwnershipService(
     fun getLandlordRegisteredPropertiesDetails(baseUserId: String): List<RegisteredPropertyDataModel> {
         val allActiveProperties = retrieveAllPropertiesForLandlord(baseUserId)
         val registeredProperties = mutableListOf<RegisteredPropertyDataModel>()
-        for (property in allActiveProperties) {
+        for (propertyOwnership in allActiveProperties) {
             val registeredProperty =
                 RegisteredPropertyDataModel(
-                    address = property.property.address.singleLineAddress,
-                    registrationNumber = property.registrationNumber.toString(),
+                    address = propertyOwnership.property.address.singleLineAddress,
+                    registrationNumber =
+                        RegistrationNumberDataModel
+                            .fromRegistrationNumber(
+                                propertyOwnership.registrationNumber,
+                            ).toString(),
                     localAuthorityName =
                         LocalAuthorityDataHelper
                             .getLocalAuthorityDisplayName(
-                                property.property.address.custodianCode,
+                                propertyOwnership.property.address.custodianCode,
                             ),
-                    propertyLicence = getLicenceTypeMessageKey(property.license),
-                    isTenanted = MessageKeyConverter.convert(property.currentNumTenants > 0),
+                    propertyLicence = getLicenceTypeMessageKey(propertyOwnership.license),
+                    isTenanted = MessageKeyConverter.convert(propertyOwnership.currentNumTenants > 0),
                 )
             registeredProperties.add(registeredProperty)
         }

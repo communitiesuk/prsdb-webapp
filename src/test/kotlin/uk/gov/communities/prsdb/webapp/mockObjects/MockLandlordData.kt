@@ -23,12 +23,13 @@ class MockLandlordData {
             custodianCode: String = "1045",
         ) = Address(AddressDataModel(singleLineAddress, custodianCode))
 
-        fun createFourDifferentAddresses(): List<Address> =
+        fun createFiveDifferentAddresses(): List<Address> =
             listOf(
                 createAddress(singleLineAddress = "11 Example Road, EG1 2AB"),
                 createAddress(singleLineAddress = "12 Example Road, EG1 2AB"),
                 createAddress(singleLineAddress = "13 Example Road, EG1 2AB"),
                 createAddress(singleLineAddress = "14 Example Road, EG1 2AB"),
+                createAddress(singleLineAddress = "15 Example Road, EG1 2AB"),
             )
 
         fun createLandlord(
@@ -63,8 +64,8 @@ class MockLandlordData {
             isActive = isActive,
         )
 
-        fun createFourDifferentProperties(): List<Property> {
-            val addresses = createFourDifferentAddresses()
+        fun createFiveDifferentProperties(): List<Property> {
+            val addresses = createFiveDifferentAddresses()
 
             val properties =
                 listOf(
@@ -72,6 +73,7 @@ class MockLandlordData {
                     createProperty(address = addresses[1]),
                     createProperty(address = addresses[2]),
                     createProperty(address = addresses[3]),
+                    createProperty(address = addresses[4]),
                 )
 
             return properties
