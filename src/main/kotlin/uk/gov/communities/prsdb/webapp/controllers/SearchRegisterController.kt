@@ -28,7 +28,13 @@ class SearchRegisterController(
         model.addAttribute("searchWrapperModel", SearchWrapperModel())
         // TODO PRSD-656: add LA view of landlord details page base URL to model
         model.addAttribute("baseLandlordDetailsURL", "/landlord-details")
+        // TODO PRSD-659: add LA property search base URL to model
+        model.addAttribute("propertySearchURL", "property")
 
         return if (query?.isBlank() == true) "redirect:landlord" else "searchLandlord"
     }
+
+    // TODO PRSD-659: implement property search endpoint
+    @GetMapping("/property")
+    fun searchForProperties() = "error/404"
 }

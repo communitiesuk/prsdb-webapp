@@ -32,6 +32,15 @@
                 </tr>
                 </tbody>
             </table>
+            <div th:if="${searchResults.size() == 0}" class="govuk-!-text-align-centre">
+                <h1 class="govuk-heading-l" th:text="#{landlordSearch.error.heading}">
+                    landlordSearch.error.heading</h1>
+                <div class="govuk-hint">
+                    <span th:remove="tag" th:text="#{landlordSearch.error.hint.beforeLink}">landlordSearch.error.hint.beforeLink</span>
+                    <a class="govuk-link" th:href="@{${propertySearchURL}}"
+                       th:text="#{landlordSearch.error.hint.link}">landlordSearch.error.hint.link</a>
+                </div>
+            </div>
         </th:block>
         <details id="details-content"
                  th:replace="~{fragments/details :: details(#{landlordSearch.details.heading},~{::#details-content/content()})}">
