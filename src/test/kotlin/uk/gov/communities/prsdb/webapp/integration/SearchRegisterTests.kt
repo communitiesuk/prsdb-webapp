@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import kotlin.test.assertContains
 
-@Sql("/data-local.sql")
+@Sql("/data-landlord-search.sql")
 class SearchRegisterTests : IntegrationTest() {
     @Test
     fun `results table does not show before search has been requested`() {
