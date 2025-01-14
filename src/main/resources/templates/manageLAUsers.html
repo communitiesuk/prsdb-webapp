@@ -12,7 +12,8 @@
         <section>
             <table th:replace="~{fragments/tables/table :: table(
                             ${ { 'manageLAUsers.table.usernameHeading', 'manageLAUsers.table.accessLevelHeading', 'manageLAUsers.table.accountStatusHeading', '' } },
-                            ~{::tbody}
+                            ~{::tbody},
+                            null
                         )}
                     ">
                 <tbody class="govuk-table__body">
