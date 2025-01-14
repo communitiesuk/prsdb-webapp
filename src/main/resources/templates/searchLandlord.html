@@ -9,6 +9,12 @@
         <th:block th:replace="~{fragments/searchBar :: searchBar(
             #{landlordSearch.searchBar.label}, #{landlordSearch.searchBar.hint}, ${searchWrapperModel})}">
         </th:block>
+    </section>
+    <hr class="govuk-section-break govuk-section-break--m">
+    <section>
+        <nav th:if="${totalPages > 1}"
+             th:replace="~{fragments/pagination/pagination :: pagination(${totalPages}, ${currentPage})}">
+        </nav>
         <h2 class="govuk-heading-m" th:text="#{landlordSearch.table.heading}">landlordSearch.table.heading</h2>
         <table th:if="${searchResults != null}" th:replace="~{fragments/tables/table :: table(
             ${ {'landlordSearch.table.heading.landlord','landlordSearch.table.heading.address','landlordSearch.table.heading.info'} },
@@ -31,6 +37,9 @@
             </tr>
             </tbody>
         </table>
+        <nav th:if="${totalPages > 1}"
+             th:replace="~{fragments/pagination/pagination :: pagination(${totalPages}, ${currentPage})}">
+        </nav>
         <details id="details-content"
                  th:replace="~{fragments/details :: details(#{landlordSearch.details.heading},~{::#details-content/content()})}">
             <div class="govuk-details__text" th:text="#{landlordSearch.details.body}">landlordSearch.details.body</div>
