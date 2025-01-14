@@ -4,14 +4,12 @@ import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
-import uk.gov.communities.prsdb.webapp.helpers.LandlordJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class LandlordRegistrationCheckAnswersPage(
-    private val journeyDataService: JourneyDataService,
     private val addressDataService: AddressDataService,
 ) : Page(
         formModel = CheckAnswersFormModel::class,
@@ -42,17 +40,17 @@ class LandlordRegistrationCheckAnswersPage(
     }
 
     private fun getIdentityFormData(journeyData: JourneyData): List<FormSummaryViewModel> {
-        val isIdentityVerified = LandlordJourneyDataHelper.isIdentityVerified(journeyDataService, journeyData)
+        val isIdentityVerified = LandlordRegistrationJourneyDataHelper.isIdentityVerified(journeyData)
 
         return listOf(
             FormSummaryViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.name",
-                LandlordJourneyDataHelper.getName(journeyDataService, journeyData)!!,
+                LandlordRegistrationJourneyDataHelper.getName(journeyData)!!,
                 if (isIdentityVerified) null else LandlordRegistrationStepId.Name.urlPathSegment,
             ),
             FormSummaryViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.dateOfBirth",
-                LandlordJourneyDataHelper.getDOB(journeyDataService, journeyData)!!,
+                LandlordRegistrationJourneyDataHelper.getDOB(journeyData)!!,
                 if (isIdentityVerified) null else LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
             ),
         )
@@ -62,18 +60,18 @@ class LandlordRegistrationCheckAnswersPage(
         listOf(
             FormSummaryViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.email",
-                LandlordJourneyDataHelper.getEmail(journeyDataService, journeyData)!!,
+                LandlordRegistrationJourneyDataHelper.getEmail(journeyData)!!,
                 LandlordRegistrationStepId.Email.urlPathSegment,
             ),
             FormSummaryViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.telephoneNumber",
-                LandlordJourneyDataHelper.getPhoneNumber(journeyDataService, journeyData)!!,
+                LandlordRegistrationJourneyDataHelper.getPhoneNumber(journeyData)!!,
                 LandlordRegistrationStepId.PhoneNumber.urlPathSegment,
             ),
         )
 
     private fun getAddressFormData(journeyData: JourneyData): List<FormSummaryViewModel> {
-        val livesInUK = LandlordJourneyDataHelper.getLivesInUK(journeyDataService, journeyData)!!
+        val livesInUK = LandlordRegistrationJourneyDataHelper.getLivesInUK(journeyData)!!
 
         return getLivesInUKFormData(livesInUK) +
             (if (!livesInUK) getInternationalAddressFormData(journeyData) else emptyList()) +
@@ -93,12 +91,12 @@ class LandlordRegistrationCheckAnswersPage(
         listOf(
             FormSummaryViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence",
-                LandlordJourneyDataHelper.getNonUKCountryOfResidence(journeyDataService, journeyData)!!,
+                LandlordRegistrationJourneyDataHelper.getNonUKCountryOfResidence(journeyData)!!,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
             ),
             FormSummaryViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.contactAddressOutsideUK",
-                LandlordJourneyDataHelper.getInternationalAddress(journeyDataService, journeyData)!!,
+                LandlordRegistrationJourneyDataHelper.getInternationalAddress(journeyData)!!,
                 LandlordRegistrationStepId.InternationalAddress.urlPathSegment,
             ),
         )
@@ -114,13 +112,7 @@ class LandlordRegistrationCheckAnswersPage(
             } else {
                 "registerAsALandlord.checkAnswers.rowHeading.ukContactAddress"
             },
-            LandlordJourneyDataHelper
-                .getAddress(
-                    journeyDataService,
-                    journeyData,
-                    addressDataService,
-                )!!
-                .singleLineAddress,
+            LandlordRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!.singleLineAddress,
             getContactAddressChangeURLPathSegment(journeyData, livesInUK),
         )
 
@@ -129,14 +121,14 @@ class LandlordRegistrationCheckAnswersPage(
         livesInUK: Boolean,
     ): String =
         if (livesInUK) {
-            if (LandlordJourneyDataHelper.isManualAddressChosen(journeyDataService, journeyData)) {
+            if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
                 LandlordRegistrationStepId.ManualAddress.urlPathSegment
             } else {
                 LandlordRegistrationStepId.LookupAddress.urlPathSegment
             }
         } else {
             val isContactAddress = true
-            if (LandlordJourneyDataHelper.isManualAddressChosen(journeyDataService, journeyData, isContactAddress)
+            if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData, isContactAddress)
             ) {
                 LandlordRegistrationStepId.ManualContactAddress.urlPathSegment
             } else {

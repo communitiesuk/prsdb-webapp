@@ -2,16 +2,24 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.verify
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.junit.jupiter.MockitoSettings
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
+import org.mockito.quality.Strictness
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
@@ -19,11 +27,14 @@ import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import kotlin.test.assertNull
 
 @ExtendWith(MockitoExtension::class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class LandlordServiceTests {
     @Mock
     private lateinit var mockLandlordRepository: LandlordRepository
@@ -39,6 +50,48 @@ class LandlordServiceTests {
 
     @InjectMocks
     private lateinit var landlordService: LandlordService
+
+    companion object {
+        private val landlord = createLandlord()
+
+        @JvmStatic
+        fun provideRegNumsAndExpectedSearchResults() =
+            listOf(
+                Arguments.of(
+                    Named.of(
+                        "the registration number is valid",
+                        RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
+                    ),
+                    listOf(LandlordSearchResultDataModel.fromLandlord(landlord)),
+                ),
+                Arguments.of(
+                    Named.of(
+                        "the registration number does not exist",
+                        RegistrationNumberDataModel
+                            .fromRegistrationNumber(
+                                RegistrationNumber(RegistrationNumberType.LANDLORD, 1L),
+                            ).toString(),
+                    ),
+                    emptyList<LandlordSearchResultDataModel>(),
+                ),
+                Arguments.of(
+                    Named.of(
+                        "the registration number is of the wrong type",
+                        RegistrationNumberDataModel
+                            .fromRegistrationNumber(RegistrationNumber(RegistrationNumberType.PROPERTY, 0L))
+                            .toString(),
+                    ),
+                    emptyList<LandlordSearchResultDataModel>(),
+                ),
+                Arguments.of(
+                    Named.of(
+                        "the registration number is not a registration number",
+                        "not a registration number",
+                    ),
+                    emptyList<LandlordSearchResultDataModel>(),
+                ),
+            )
+    }
 
     @Test
     fun `retrieveLandlordByRegNum returns a landlord given its registration number`() {
@@ -131,5 +184,32 @@ class LandlordServiceTests {
         val landlordCaptor = captor<Landlord>()
         verify(mockLandlordRepository).save(landlordCaptor.capture())
         assertTrue(ReflectionEquals(expectedLandlord, "id").matches(landlordCaptor.value))
+    }
+
+    @ParameterizedTest(name = "when {0}")
+    @MethodSource("provideRegNumsAndExpectedSearchResults")
+    fun `searchForLandlords returns a corresponding list of LandlordSearchResultDataModels (LRN query)`(
+        registrationNumber: String,
+        expectedSearchResults: List<LandlordSearchResultDataModel>,
+    ) {
+        whenever(mockLandlordRepository.findByRegistrationNumber_Number(landlord.registrationNumber.number))
+            .thenReturn(landlord)
+
+        val searchResults = landlordService.searchForLandlords(registrationNumber)
+
+        assertEquals(expectedSearchResults, searchResults)
+    }
+
+    @Test
+    fun `searchForLandlords returns a corresponding list of LandlordSearchResultDataModels`() {
+        val searchQuery = "query"
+        val matchingLandlords = listOf(createLandlord(), createLandlord(), createLandlord())
+        val expectedSearchResults = matchingLandlords.map { LandlordSearchResultDataModel.fromLandlord(it) }
+
+        whenever(mockLandlordRepository.searchMatching(eq(searchQuery), anyInt())).thenReturn(matchingLandlords)
+
+        val searchResults = landlordService.searchForLandlords(searchQuery)
+
+        assertEquals(expectedSearchResults, searchResults)
     }
 }
