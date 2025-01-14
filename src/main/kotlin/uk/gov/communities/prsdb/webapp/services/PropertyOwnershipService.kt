@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -12,6 +13,9 @@ import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.helpers.LocalAuthorityDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegisteredPropertyDataModel
 
 @Service
 class PropertyOwnershipService(
@@ -48,5 +52,34 @@ class PropertyOwnershipService(
         )
     }
 
+    fun getLandlordRegisteredPropertiesDetails(baseUserId: String): List<RegisteredPropertyDataModel> {
+        val allActiveProperties = retrieveAllPropertiesForLandlord(baseUserId)
+        val registeredProperties = mutableListOf<RegisteredPropertyDataModel>()
+        for (property in allActiveProperties) {
+            val registeredProperty =
+                RegisteredPropertyDataModel(
+                    address = property.property.address.singleLineAddress,
+                    registrationNumber = property.registrationNumber.toString(),
+                    localAuthorityName =
+                        LocalAuthorityDataHelper
+                            .getLocalAuthorityDisplayName(
+                                property.property.address.custodianCode,
+                            ),
+                    propertyLicence = getLicenceTypeMessageKey(property.license),
+                    isTenanted = MessageKeyConverter.convert(property.currentNumTenants > 0),
+                )
+            registeredProperties.add(registeredProperty)
+        }
+        return registeredProperties
+    }
+
     fun retrievePropertyOwnership(id: Long): PropertyOwnership? = propertyOwnershipRepository.findByIdOrNull(id)
+
+    private fun retrieveAllPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
+        propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status_Registered(baseUserId)
+
+    private fun getLicenceTypeMessageKey(licence: License?): String {
+        val licenceType = licence?.licenseType ?: LicensingType.NO_LICENSING
+        return MessageKeyConverter.convert(licenceType)
+    }
 }

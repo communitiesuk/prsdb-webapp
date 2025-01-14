@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor.captor
@@ -21,6 +22,9 @@ import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createFourDifferentProperties
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createLandlord
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 
 @ExtendWith(MockitoExtension::class)
 class PropertyOwnershipServiceTests {
@@ -121,5 +125,34 @@ class PropertyOwnershipServiceTests {
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
         assertTrue(ReflectionEquals(expectedPropertyOwnership).matches(propertyOwnershipCaptor.value))
+    }
+
+    @Nested
+    inner class GetLandlordRegisteredPropertiesDetails {
+        val landlord = createLandlord()
+
+        val properties = createFourDifferentProperties()
+
+        val propertyOwnership1 = createPropertyOwnership(primaryLandlord = landlord, property = properties[0])
+        val propertyOwnership2 = createPropertyOwnership(primaryLandlord = landlord, property = properties[1])
+        val propertyOwnership3 = createPropertyOwnership(primaryLandlord = landlord, property = properties[2])
+        val propertyOwnership4 = createPropertyOwnership(primaryLandlord = landlord, property = properties[3])
+
+        val landlordsProperties: List<PropertyOwnership> =
+            listOf(propertyOwnership1, propertyOwnership2, propertyOwnership3, propertyOwnership4)
+
+        @Test
+        fun `Returns a list of Landlords properites in correctly formatted data model`() {
+            whenever(
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status_Registered(
+                    "landlord",
+                ),
+            ).thenReturn(landlordsProperties)
+
+            val result = propertyOwnershipService.getLandlordRegisteredPropertiesDetails("landlord")
+
+            // TODO the test set up is working time to assert some asserts
+            println(result)
+        }
     }
 }
