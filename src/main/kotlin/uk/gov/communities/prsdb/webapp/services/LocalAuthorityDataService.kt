@@ -32,7 +32,7 @@ class LocalAuthorityDataService(
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $subjectId is not an LA user")
         val userModel =
             LocalAuthorityUserDataModel(
-                localAuthorityUser.id!!,
+                localAuthorityUser.id,
                 localAuthorityUser.name,
                 localAuthorityUser.localAuthority.name,
                 localAuthorityUser.isManager,
