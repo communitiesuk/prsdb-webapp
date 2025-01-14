@@ -117,6 +117,20 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         // fill in and submit
         ownershipTypePage.form.getRadios().selectValue(OwnershipType.FREEHOLD)
         ownershipTypePage.form.submit()
+        val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
+
+        // Licensing type - render page
+        assertThat(licensingTypePage.form.getFieldsetHeading()).containsText("Select the type of licensing you have for your property")
+        // fill in and submit
+        licensingTypePage.form.getRadios().selectValue(LicensingType.SELECTIVE_LICENCE)
+        licensingTypePage.form.submit()
+        val selectiveLicencePage = assertPageIs(page, SelectiveLicenceFormPagePropertyRegistration::class)
+
+        // Selective licence - render page
+        assertThat(selectiveLicencePage.form.getFieldsetHeading()).containsText("What is your selective licence number?")
+        // fill in and submit
+        selectiveLicencePage.licenceNumberInput.fill("licence number")
+        selectiveLicencePage.form.submit()
         val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
 
         // Occupancy - render page
@@ -145,20 +159,6 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         // fill in and submit
         landlordTypePage.form.getRadios().selectValue(LandlordType.SOLE)
         landlordTypePage.form.submit()
-        val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
-
-        // Licensing type - render page
-        assertThat(licensingTypePage.form.getFieldsetHeading()).containsText("Select the type of licensing you have for your property")
-        // fill in and submit
-        licensingTypePage.form.getRadios().selectValue(LicensingType.SELECTIVE_LICENCE)
-        licensingTypePage.form.submit()
-        val selectiveLicencePage = assertPageIs(page, SelectiveLicenceFormPagePropertyRegistration::class)
-
-        // Selective licence - render page
-        assertThat(selectiveLicencePage.form.getFieldsetHeading()).containsText("What is your selective licence number?")
-        // fill in and submit
-        selectiveLicencePage.licenceNumberInput.fill("licence number")
-        selectiveLicencePage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
         // Check answers - render page
@@ -423,7 +423,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val licensingTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
             licensingTypePage.form.getRadios().selectValue(LicensingType.NO_LICENSING)
             licensingTypePage.form.submit()
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
         }
 
         @Test
@@ -474,7 +474,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val hmoMandatoryLicencePage = navigator.goToPropertyRegistrationHmoMandatoryLicencePage()
             hmoMandatoryLicencePage.licenceNumberInput.fill("licence number")
             hmoMandatoryLicencePage.form.submit()
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
         }
 
         @Test
@@ -506,7 +506,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val hmoAdditionalLicencePage = navigator.goToPropertyRegistrationHmoAdditionalLicencePage()
             hmoAdditionalLicencePage.licenceNumberInput.fill("licence number")
             hmoAdditionalLicencePage.form.submit()
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
         }
 
         @Test

@@ -265,7 +265,7 @@ class PropertyRegistrationJourney(
                                     ),
                             ),
                     ),
-                nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
+                nextAction = { _, _ -> Pair(RegisterPropertyStepId.LicensingType, null) },
             )
 
         private fun occupancyStep() =
@@ -359,7 +359,7 @@ class PropertyRegistrationJourney(
                                     ),
                             ),
                     ),
-                nextAction = { _, _ -> Pair(RegisterPropertyStepId.LicensingType, null) },
+                nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
             )
 
         private fun licensingTypeStep() =
@@ -418,7 +418,7 @@ class PropertyRegistrationJourney(
                                 "detailMainText" to "forms.selectiveLicence.detail.text",
                             ),
                     ),
-                nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
+                nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
             )
 
         private fun hmoMandatoryLicenceStep() =
@@ -443,7 +443,7 @@ class PropertyRegistrationJourney(
                                     ),
                             ),
                     ),
-                nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
+                nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
             )
 
         private fun hmoAdditionalLicenceStep() =
@@ -462,7 +462,7 @@ class PropertyRegistrationJourney(
                                 "detailMainText" to "forms.hmoAdditionalLicence.detail.text",
                             ),
                     ),
-                nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
+                nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
             )
 
         fun checkAnswersStep(
@@ -516,7 +516,7 @@ class PropertyRegistrationJourney(
                 LicensingType.SELECTIVE_LICENCE -> Pair(RegisterPropertyStepId.SelectiveLicence, null)
                 LicensingType.HMO_MANDATORY_LICENCE -> Pair(RegisterPropertyStepId.HmoMandatoryLicence, null)
                 LicensingType.HMO_ADDITIONAL_LICENCE -> Pair(RegisterPropertyStepId.HmoAdditionalLicence, null)
-                LicensingType.NO_LICENSING -> Pair(RegisterPropertyStepId.CheckAnswers, null)
+                LicensingType.NO_LICENSING -> Pair(RegisterPropertyStepId.Occupancy, null)
             }
 
         private fun checkAnswersSubmitAndRedirect(
