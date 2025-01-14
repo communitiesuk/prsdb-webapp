@@ -150,20 +150,20 @@ class PropertyOwnershipServiceTests {
                         "11 Example Road, EG1 2AB",
                         "P-CCCF-ZHXX",
                         "DERBYSHIRE DALES DISTRICT COUNCIL",
-                        "forms.checkPropertyAnswers.propertyDetails.noLicensing",
+                        "Not Licenced",
                         "commonText.no",
                     ),
                     RegisteredPropertyDataModel(
                         "12 Example Road, EG1 2AB",
                         "P-CCCF-ZHXX",
                         "DERBYSHIRE DALES DISTRICT COUNCIL",
-                        "forms.checkPropertyAnswers.propertyDetails.noLicensing",
+                        "Not Licenced",
                         "commonText.no",
                     ),
                 )
 
             whenever(
-                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status_Registered(
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(
                     "landlord",
                 ),
             ).thenReturn(landlordsProperties)
@@ -185,7 +185,7 @@ class PropertyOwnershipServiceTests {
                 listOf(propertyOwnership1, propertyOwnership2, propertyOwnership3)
 
             whenever(
-                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status_Registered(
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(
                     "landlord",
                 ),
             ).thenReturn(landlordsProperties)
@@ -217,18 +217,18 @@ class PropertyOwnershipServiceTests {
                 listOf(propertyOwnership1, propertyOwnership2, propertyOwnership3, propertyOwnership4, propertyOwnership5)
 
             whenever(
-                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status_Registered(
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(
                     "landlord",
                 ),
             ).thenReturn(landlordsProperties)
 
             val result = propertyOwnershipService.getLandlordRegisteredPropertiesDetails("landlord")
 
-            assertEquals(result[0].propertyLicence, "forms.licensingType.radios.option.selectiveLicence.label")
-            assertEquals(result[1].propertyLicence, "forms.licensingType.radios.option.hmoMandatory.label")
-            assertEquals(result[2].propertyLicence, "forms.licensingType.radios.option.hmoAdditional.label")
-            assertEquals(result[3].propertyLicence, "forms.checkPropertyAnswers.propertyDetails.noLicensing")
-            assertEquals(result[4].propertyLicence, "forms.checkPropertyAnswers.propertyDetails.noLicensing")
+            assertEquals(result[0].propertyLicence, "Selective licence")
+            assertEquals(result[1].propertyLicence, "HMO licence")
+            assertEquals(result[2].propertyLicence, "Additional licence")
+            assertEquals(result[3].propertyLicence, "Not Licenced")
+            assertEquals(result[4].propertyLicence, "Not Licenced")
         }
     }
 }

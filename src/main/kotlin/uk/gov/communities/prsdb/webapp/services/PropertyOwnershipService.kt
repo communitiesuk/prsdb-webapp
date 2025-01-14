@@ -53,7 +53,7 @@ class PropertyOwnershipService(
         )
     }
 
-    fun getLandlordRegisteredPropertiesDetails(baseUserId: String): List<RegisteredPropertyDataModel> {
+    fun getLandlordRegisteredPropertiesDetails(baseUserId: String): MutableList<RegisteredPropertyDataModel> {
         val allActiveProperties = retrieveAllPropertiesForLandlord(baseUserId)
         val registeredProperties = mutableListOf<RegisteredPropertyDataModel>()
         for (propertyOwnership in allActiveProperties) {
@@ -70,7 +70,7 @@ class PropertyOwnershipService(
                             .getLocalAuthorityDisplayName(
                                 propertyOwnership.property.address.custodianCode,
                             ),
-                    propertyLicence = getLicenceTypeMessageKey(propertyOwnership.license),
+                    propertyLicence = getLicenceTypeDisplayName(propertyOwnership.license),
                     isTenanted = MessageKeyConverter.convert(propertyOwnership.currentNumTenants > 0),
                 )
             registeredProperties.add(registeredProperty)
@@ -81,10 +81,10 @@ class PropertyOwnershipService(
     fun retrievePropertyOwnership(id: Long): PropertyOwnership? = propertyOwnershipRepository.findByIdOrNull(id)
 
     private fun retrieveAllPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
-        propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status_Registered(baseUserId)
+        propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(baseUserId)
 
-    private fun getLicenceTypeMessageKey(licence: License?): String {
+    private fun getLicenceTypeDisplayName(licence: License?): String {
         val licenceType = licence?.licenseType ?: LicensingType.NO_LICENSING
-        return MessageKeyConverter.convert(licenceType)
+        return licenceType.displayName
     }
 }

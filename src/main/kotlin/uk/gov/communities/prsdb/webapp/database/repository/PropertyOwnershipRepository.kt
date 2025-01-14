@@ -9,5 +9,5 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
     fun existsByIsActiveTrueAndProperty_Id(id: Long): Boolean
 
     @Suppress("ktlint:standard:function-naming")
-    fun findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status_Registered(userId: String): List<PropertyOwnership>
+    fun findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(userId: String): List<PropertyOwnership>
 }
