@@ -7,6 +7,7 @@ import org.junit.jupiter.api.assertThrows
 import org.opentest4j.AssertionFailedError
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.ADDRESS_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.CONTACT_INFO_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.LANDLORD_COL_INDEX
@@ -59,5 +60,32 @@ class SearchRegisterTests : IntegrationTest() {
         // TODO PRSD-656: Replace with landlord details page assertion
         assertPageIs(page, ErrorPage::class)
         assertContains(page.url(), "/landlord-details/1")
+    }
+
+    @Test
+    fun `pagination component does not show if there is only one page of results`(page: Page) {
+        val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
+        searchLandlordRegisterPage.searchBar.search("Alex")
+
+        val exception = assertThrows<AssertionFailedError> { searchLandlordRegisterPage.getPaginationComponent() }
+        assertContains(exception.message!!, "Expected 1 instance of Locator@.govuk-pagination, found 0")
+    }
+
+    @Test
+    fun `pagination links all work`(page: Page) {
+        val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
+        searchLandlordRegisterPage.searchBar.search("PRSDB")
+
+        searchLandlordRegisterPage.getPaginationComponent().getNextLink().click()
+        assertContains(page.url(), "page=2")
+        val nextPage = assertPageIs(page, SearchLandlordRegisterPage::class)
+
+        nextPage.getPaginationComponent().getPreviousLink().click()
+        assertContains(page.url(), "page=1")
+        val previousPage = assertPageIs(page, SearchLandlordRegisterPage::class)
+
+        previousPage.getPaginationComponent().getPageNumberLink(2).click()
+        assertContains(page.url(), "page=2")
+        assertPageIs(page, SearchLandlordRegisterPage::class)
     }
 }
