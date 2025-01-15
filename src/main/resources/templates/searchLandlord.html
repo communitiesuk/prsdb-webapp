@@ -32,7 +32,8 @@
                 </tr>
                 </tbody>
             </table>
-            <div th:if="${searchResults.size() == 0}" class="govuk-!-text-align-centre" id="no-results">
+            <div th:if="${searchResults.size() == 0}"
+                 class="govuk-!-text-align-centre govuk-!-margin-bottom-6" id="no-results">
                 <h1 class="govuk-heading-l" th:text="#{landlordSearch.error.heading}">
                     landlordSearch.error.heading
                 </h1>
