@@ -34,11 +34,13 @@
             </table>
             <div th:if="${searchResults.size() == 0}" class="govuk-!-text-align-centre" id="no-results">
                 <h1 class="govuk-heading-l" th:text="#{landlordSearch.error.heading}">
-                    landlordSearch.error.heading</h1>
+                    landlordSearch.error.heading
+                </h1>
                 <div class="govuk-hint">
                     <span th:remove="tag" th:text="#{landlordSearch.error.hint.beforeLink}">landlordSearch.error.hint.beforeLink</span>
                     <a class="govuk-link" th:href="@{${propertySearchURL}}"
-                       th:text="#{landlordSearch.error.hint.link}">landlordSearch.error.hint.link</a>
+                       th:text="#{landlordSearch.error.hint.link}">landlordSearch.error.hint.link
+                    </a>
                 </div>
             </div>
         </th:block>
