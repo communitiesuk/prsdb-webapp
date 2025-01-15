@@ -5,7 +5,7 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.SummaryListRowViewModel
 import kotlin.reflect.KClass
 
 class ConfirmIdentityPage(
@@ -24,12 +24,12 @@ class ConfirmIdentityPage(
 
         val formData =
             mutableListOf(
-                FormSummaryViewModel(
+                SummaryListRowViewModel(
                     "forms.confirmDetails.rowHeading.name",
                     LandlordRegistrationJourneyDataHelper.getVerifiedName(journeyData)!!,
                     null,
                 ),
-                FormSummaryViewModel(
+                SummaryListRowViewModel(
                     "forms.confirmDetails.rowHeading.dob",
                     LandlordRegistrationJourneyDataHelper.getVerifiedDOB(journeyData)!!,
                     null,

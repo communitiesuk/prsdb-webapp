@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.formModels.CheckAnswersFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 
 class LandlordRegistrationCheckAnswersPage(
@@ -39,16 +39,16 @@ class LandlordRegistrationCheckAnswersPage(
         return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)
     }
 
-    private fun getIdentityFormData(journeyData: JourneyData): List<FormSummaryViewModel> {
+    private fun getIdentityFormData(journeyData: JourneyData): List<SummaryListRowViewModel> {
         val isIdentityVerified = LandlordRegistrationJourneyDataHelper.isIdentityVerified(journeyData)
 
         return listOf(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.name",
                 LandlordRegistrationJourneyDataHelper.getName(journeyData)!!,
                 if (isIdentityVerified) null else LandlordRegistrationStepId.Name.urlPathSegment,
             ),
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.dateOfBirth",
                 LandlordRegistrationJourneyDataHelper.getDOB(journeyData)!!,
                 if (isIdentityVerified) null else LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
@@ -56,21 +56,21 @@ class LandlordRegistrationCheckAnswersPage(
         )
     }
 
-    private fun getEmailAndPhoneFormData(journeyData: JourneyData): List<FormSummaryViewModel> =
+    private fun getEmailAndPhoneFormData(journeyData: JourneyData): List<SummaryListRowViewModel> =
         listOf(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.email",
                 LandlordRegistrationJourneyDataHelper.getEmail(journeyData)!!,
                 LandlordRegistrationStepId.Email.urlPathSegment,
             ),
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.telephoneNumber",
                 LandlordRegistrationJourneyDataHelper.getPhoneNumber(journeyData)!!,
                 LandlordRegistrationStepId.PhoneNumber.urlPathSegment,
             ),
         )
 
-    private fun getAddressFormData(journeyData: JourneyData): List<FormSummaryViewModel> {
+    private fun getAddressFormData(journeyData: JourneyData): List<SummaryListRowViewModel> {
         val livesInUK = LandlordRegistrationJourneyDataHelper.getLivesInUK(journeyData)!!
 
         return getLivesInUKFormData(livesInUK) +
@@ -78,23 +78,23 @@ class LandlordRegistrationCheckAnswersPage(
             getContactAddressFormData(journeyData, addressDataService, livesInUK)
     }
 
-    private fun getLivesInUKFormData(livesInUK: Boolean): List<FormSummaryViewModel> =
+    private fun getLivesInUKFormData(livesInUK: Boolean): List<SummaryListRowViewModel> =
         listOf(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.ukResident",
                 livesInUK,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
             ),
         )
 
-    private fun getInternationalAddressFormData(journeyData: JourneyData): List<FormSummaryViewModel> =
+    private fun getInternationalAddressFormData(journeyData: JourneyData): List<SummaryListRowViewModel> =
         listOf(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence",
                 LandlordRegistrationJourneyDataHelper.getNonUKCountryOfResidence(journeyData)!!,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
             ),
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.contactAddressOutsideUK",
                 LandlordRegistrationJourneyDataHelper.getInternationalAddress(journeyData)!!,
                 LandlordRegistrationStepId.InternationalAddress.urlPathSegment,
@@ -105,8 +105,8 @@ class LandlordRegistrationCheckAnswersPage(
         journeyData: JourneyData,
         addressDataService: AddressDataService,
         livesInUK: Boolean,
-    ): FormSummaryViewModel =
-        FormSummaryViewModel(
+    ): SummaryListRowViewModel =
+        SummaryListRowViewModel(
             if (livesInUK) {
                 "registerAsALandlord.checkAnswers.rowHeading.contactAddress"
             } else {

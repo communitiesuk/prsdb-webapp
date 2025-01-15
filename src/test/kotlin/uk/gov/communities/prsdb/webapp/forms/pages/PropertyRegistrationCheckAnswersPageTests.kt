@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 
 class PropertyRegistrationCheckAnswersPageTests {
@@ -42,11 +42,11 @@ class PropertyRegistrationCheckAnswersPageTests {
         journeyDataBuilder = JourneyDataBuilder.propertyDefault(addressService)
     }
 
-    private fun getPropertyDetails(journeyData: MutableMap<String, Any?>): List<FormSummaryViewModel> {
+    private fun getPropertyDetails(journeyData: MutableMap<String, Any?>): List<SummaryListRowViewModel> {
         page.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData)
 
         val propertyDetails = model.asMap()["propertyDetails"] as List<*>
-        return propertyDetails.filterIsInstance<FormSummaryViewModel>()
+        return propertyDetails.filterIsInstance<SummaryListRowViewModel>()
     }
 
     @Test
@@ -61,7 +61,7 @@ class PropertyRegistrationCheckAnswersPageTests {
         val propertyDetails = getPropertyDetails(journeyData)
 
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.address",
                 addressName,
                 RegisterPropertyStepId.LookupAddress.urlPathSegment,
@@ -71,7 +71,7 @@ class PropertyRegistrationCheckAnswersPageTests {
             },
         )
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.uprn",
                 uprn,
                 null,
@@ -81,7 +81,7 @@ class PropertyRegistrationCheckAnswersPageTests {
             },
         )
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.localAuthority",
                 LOCAL_AUTHORITIES[localAuthorityIndex].displayName,
                 null,
@@ -108,7 +108,7 @@ class PropertyRegistrationCheckAnswersPageTests {
         val propertyDetails = getPropertyDetails(journeyData)
 
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.address",
                 manualAddress.singleLineAddress,
                 RegisterPropertyStepId.ManualAddress.urlPathSegment,
@@ -118,7 +118,7 @@ class PropertyRegistrationCheckAnswersPageTests {
             },
         )
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.localAuthority",
                 LOCAL_AUTHORITIES[localAuthorityIndex].displayName,
                 RegisterPropertyStepId.LocalAuthority.urlPathSegment,
@@ -144,7 +144,7 @@ class PropertyRegistrationCheckAnswersPageTests {
         val propertyDetails = getPropertyDetails(journeyData)
 
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.type",
                 PropertyType.DETACHED_HOUSE,
                 RegisterPropertyStepId.PropertyType.urlPathSegment,
@@ -166,7 +166,7 @@ class PropertyRegistrationCheckAnswersPageTests {
 
         // Assert
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.type",
                 listOf(PropertyType.OTHER, customType),
                 RegisterPropertyStepId.PropertyType.urlPathSegment,
@@ -187,7 +187,7 @@ class PropertyRegistrationCheckAnswersPageTests {
 
         // Assert
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.ownership",
                 OwnershipType.FREEHOLD,
                 RegisterPropertyStepId.OwnershipType.urlPathSegment,
@@ -208,7 +208,7 @@ class PropertyRegistrationCheckAnswersPageTests {
 
         // Assert
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.licensing",
                 LicensingType.NO_LICENSING,
                 RegisterPropertyStepId.LicensingType.urlPathSegment,
@@ -230,7 +230,7 @@ class PropertyRegistrationCheckAnswersPageTests {
 
         // Assert
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.licensing",
                 listOf(LicensingType.SELECTIVE_LICENCE, licenceNumber),
                 RegisterPropertyStepId.LicensingType.urlPathSegment,
@@ -251,7 +251,7 @@ class PropertyRegistrationCheckAnswersPageTests {
 
         // Assert
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.occupied",
                 false,
                 RegisterPropertyStepId.Occupancy.urlPathSegment,
@@ -274,7 +274,7 @@ class PropertyRegistrationCheckAnswersPageTests {
 
         // Assert
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.occupied",
                 true,
                 RegisterPropertyStepId.Occupancy.urlPathSegment,
@@ -284,7 +284,7 @@ class PropertyRegistrationCheckAnswersPageTests {
             },
         )
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.households",
                 households,
                 RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment,
@@ -295,7 +295,7 @@ class PropertyRegistrationCheckAnswersPageTests {
                 },
         )
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.people",
                 people,
                 RegisterPropertyStepId.NumberOfPeople.urlPathSegment,
@@ -316,7 +316,7 @@ class PropertyRegistrationCheckAnswersPageTests {
 
         // Assert
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.landlordType",
                 LandlordType.SOLE,
                 RegisterPropertyStepId.LandlordType.urlPathSegment,

@@ -6,9 +6,9 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
-import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.SummaryListRowViewModel
 
-class FormSummaryViewModelTest {
+class SummaryListRowViewModelTest {
     companion object {
         @JvmStatic
         val convertableValues =
@@ -24,7 +24,7 @@ class FormSummaryViewModelTest {
     @MethodSource("getConvertableValues")
     fun `getConvertedFieldValue converts known values to message keys`(value: Any) {
         // Arrange
-        val model = FormSummaryViewModel("", value, null)
+        val model = SummaryListRowViewModel("", value, null)
         val messageText = javaClass.getResource("/messages.properties")?.readText() ?: ""
 
         // Act
