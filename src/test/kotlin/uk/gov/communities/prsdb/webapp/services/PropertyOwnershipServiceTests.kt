@@ -164,7 +164,7 @@ class PropertyOwnershipServiceTests {
                 )
 
             whenever(
-                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveFalseAndProperty_Status(
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
                     "landlord",
                     RegistrationStatus.REGISTERED,
                 ),
@@ -187,7 +187,7 @@ class PropertyOwnershipServiceTests {
                 listOf(propertyOwnership1, propertyOwnership2, propertyOwnership3)
 
             whenever(
-                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveFalseAndProperty_Status(
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
                     "landlord",
                     RegistrationStatus.REGISTERED,
                 ),
@@ -220,7 +220,7 @@ class PropertyOwnershipServiceTests {
                 listOf(propertyOwnership1, propertyOwnership2, propertyOwnership3, propertyOwnership4, propertyOwnership5)
 
             whenever(
-                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveFalseAndProperty_Status(
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
                     "landlord",
                     RegistrationStatus.REGISTERED,
                 ),

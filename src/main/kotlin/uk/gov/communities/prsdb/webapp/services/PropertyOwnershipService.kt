@@ -82,7 +82,7 @@ class PropertyOwnershipService(
     fun retrievePropertyOwnership(id: Long): PropertyOwnership? = propertyOwnershipRepository.findByIdOrNull(id)
 
     private fun retrieveAllPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
-        propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveFalseAndProperty_Status(
+        propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
             baseUserId,
             RegistrationStatus.REGISTERED,
         )
