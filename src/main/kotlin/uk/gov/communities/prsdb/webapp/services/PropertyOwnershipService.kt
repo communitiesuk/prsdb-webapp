@@ -54,34 +54,30 @@ class PropertyOwnershipService(
         )
     }
 
-    fun getLandlordRegisteredPropertiesDetails(baseUserId: String): MutableList<RegisteredPropertyDataModel> {
-        val allActiveProperties = retrieveAllPropertiesForLandlord(baseUserId)
-        val registeredProperties = mutableListOf<RegisteredPropertyDataModel>()
-        for (propertyOwnership in allActiveProperties) {
-            val registeredProperty =
-                RegisteredPropertyDataModel(
-                    address = propertyOwnership.property.address.singleLineAddress,
-                    registrationNumber =
-                        RegistrationNumberDataModel
-                            .fromRegistrationNumber(
-                                propertyOwnership.registrationNumber,
-                            ).toString(),
-                    localAuthorityName =
-                        LocalAuthorityDataHelper
-                            .getLocalAuthorityDisplayName(
-                                propertyOwnership.property.address.custodianCode,
-                            ),
-                    propertyLicence = getLicenceTypeDisplayName(propertyOwnership.license),
-                    isTenanted = MessageKeyConverter.convert(propertyOwnership.currentNumTenants > 0),
-                )
-            registeredProperties.add(registeredProperty)
+    fun getLandlordRegisteredPropertiesDetails(baseUserId: String): List<RegisteredPropertyDataModel> {
+        val allActiveProperties = retrieveAllRegisteredPropertiesForLandlord(baseUserId)
+        return allActiveProperties.map { propertyOwnership ->
+            RegisteredPropertyDataModel(
+                address = propertyOwnership.property.address.singleLineAddress,
+                registrationNumber =
+                    RegistrationNumberDataModel
+                        .fromRegistrationNumber(
+                            propertyOwnership.registrationNumber,
+                        ).toString(),
+                localAuthorityName =
+                    LocalAuthorityDataHelper
+                        .getLocalAuthorityDisplayName(
+                            propertyOwnership.property.address.custodianCode,
+                        ),
+                propertyLicence = getLicenceTypeDisplayName(propertyOwnership.license),
+                isTenanted = MessageKeyConverter.convert(propertyOwnership.currentNumTenants > 0),
+            )
         }
-        return registeredProperties
     }
 
     fun retrievePropertyOwnership(id: Long): PropertyOwnership? = propertyOwnershipRepository.findByIdOrNull(id)
 
-    private fun retrieveAllPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
+    private fun retrieveAllRegisteredPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
         propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
             baseUserId,
             RegistrationStatus.REGISTERED,

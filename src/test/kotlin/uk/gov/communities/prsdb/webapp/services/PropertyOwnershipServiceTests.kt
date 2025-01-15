@@ -138,7 +138,7 @@ class PropertyOwnershipServiceTests {
         val properties = createFiveDifferentProperties()
 
         @Test
-        fun `Returns a list of Landlords properites in correctly formatted data model`() {
+        fun `Returns a list of Landlords properties  in correctly formatted data model`() {
             val propertyOwnership1 = createPropertyOwnership(primaryLandlord = landlord, property = properties[0])
             val propertyOwnership2 = createPropertyOwnership(primaryLandlord = landlord, property = properties[1])
 
@@ -173,8 +173,7 @@ class PropertyOwnershipServiceTests {
             val result = propertyOwnershipService.getLandlordRegisteredPropertiesDetails("landlord")
 
             assertTrue(result.size == 2)
-            assertTrue(ReflectionEquals(expectedResults[0]).matches(result[0]))
-            assertTrue(ReflectionEquals(expectedResults[1]).matches(result[1]))
+            assertEquals(expectedResults, result)
         }
 
         @Test
