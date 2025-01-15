@@ -14,7 +14,7 @@ import java.util.UUID
 class LocalAuthorityInvitation(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+    val id: Long = 0,
 ) : AuditableEntity() {
     @Column(nullable = false, unique = true)
     lateinit var token: UUID
