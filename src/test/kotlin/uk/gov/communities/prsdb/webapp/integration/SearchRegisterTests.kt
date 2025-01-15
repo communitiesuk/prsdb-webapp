@@ -68,7 +68,7 @@ class SearchRegisterTests : IntegrationTest() {
         searchLandlordRegisterPage.searchBar.search("Alex")
 
         val exception = assertThrows<AssertionFailedError> { searchLandlordRegisterPage.getPaginationComponent() }
-        assertContains(exception.message!!, "Expected 1 instance of Locator@.govuk-pagination, found 0")
+        assertContains(exception.message!!, "Expected 1 instance of Locator@.govuk-pagination >> nth=0, found 0")
     }
 
     @Test
