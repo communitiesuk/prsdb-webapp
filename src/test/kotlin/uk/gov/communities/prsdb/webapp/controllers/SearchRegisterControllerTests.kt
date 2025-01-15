@@ -1,11 +1,16 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE
+import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import kotlin.test.Test
 
@@ -41,5 +46,62 @@ class SearchRegisterControllerTests(
             .andExpect {
                 status { isOk() }
             }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_USER"])
+    fun `searchRegisterController returns 200 for a valid page request`() {
+        whenever(landlordService.searchForLandlords("PRSDB", 1))
+            .thenReturn(
+                PageImpl(
+                    listOf(
+                        LandlordSearchResultDataModel(
+                            123.toLong(),
+                            "Test name",
+                            "L-123ABC",
+                            "1 Street Address",
+                            "test@example.com",
+                            "01223 123456",
+                        ),
+                    ),
+                    PageRequest.of(
+                        1,
+                        MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE,
+                    ),
+                    2,
+                ),
+            )
+
+        mvc.get("/search/landlord?query=PRSDB&page=2").andExpect {
+            status { isOk() }
+        }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_USER"])
+    fun `SearchRegisterController redirects if the requested page number is less than 1`() {
+        mvc.get("/search/landlord?query=PRSDB&page=0").andExpect {
+            status { is3xxRedirection() }
+        }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_USER"])
+    fun `SearchRegisterController redirects if the requested page number is more than the total pages`() {
+        whenever(landlordService.searchForLandlords("PRSDB", 2))
+            .thenReturn(
+                PageImpl(
+                    emptyList<LandlordSearchResultDataModel>(),
+                    PageRequest.of(
+                        2,
+                        MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE,
+                    ),
+                    1,
+                ),
+            )
+
+        mvc.get("/search/landlord?query=PRSDB&page=3").andExpect {
+            status { is3xxRedirection() }
+        }
     }
 }

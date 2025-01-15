@@ -22,6 +22,10 @@ class SearchRegisterController(
         @RequestParam(value = "page", required = false) page: Int = 1,
     ): String {
         if (!query.isNullOrBlank()) {
+            if (page < 1) {
+                return "redirect:/search/landlord?query=$query"
+            }
+
             val pagedLandlordList = landlordService.searchForLandlords(query, currentPageNumber = page - 1)
 
             if (pagedLandlordList.totalPages in 1..<page) {
