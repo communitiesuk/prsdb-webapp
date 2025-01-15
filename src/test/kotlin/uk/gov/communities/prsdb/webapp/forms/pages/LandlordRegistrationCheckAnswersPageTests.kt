@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder.Companion.DEFAULT_ADDRESS
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import java.time.LocalDate
 
@@ -39,11 +39,11 @@ class LandlordRegistrationCheckAnswersPageTests {
         journeyDataBuilder = JourneyDataBuilder.landlordDefault(addressService)
     }
 
-    private fun getFormData(journeyData: MutableMap<String, Any?>): List<FormSummaryViewModel> {
+    private fun getFormData(journeyData: MutableMap<String, Any?>): List<SummaryListRowViewModel> {
         page.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData)
 
         val formData = model.asMap()["formData"] as List<*>
-        return formData.filterIsInstance<FormSummaryViewModel>()
+        return formData.filterIsInstance<SummaryListRowViewModel>()
     }
 
     @Test
@@ -55,7 +55,7 @@ class LandlordRegistrationCheckAnswersPageTests {
         val formData = getFormData(journeyData)
 
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.name",
                 name,
                 null,
@@ -65,7 +65,7 @@ class LandlordRegistrationCheckAnswersPageTests {
             },
         )
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.dateOfBirth",
                 dob,
                 null,
@@ -85,7 +85,7 @@ class LandlordRegistrationCheckAnswersPageTests {
         val formData = getFormData(journeyData)
 
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.name",
                 name,
                 LandlordRegistrationStepId.Name.urlPathSegment,
@@ -95,7 +95,7 @@ class LandlordRegistrationCheckAnswersPageTests {
             },
         )
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.dateOfBirth",
                 dob,
                 LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
@@ -115,7 +115,7 @@ class LandlordRegistrationCheckAnswersPageTests {
         val formData = getFormData(journeyData)
 
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.email",
                 emailAddress,
                 LandlordRegistrationStepId.Email.urlPathSegment,
@@ -125,7 +125,7 @@ class LandlordRegistrationCheckAnswersPageTests {
             },
         )
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.telephoneNumber",
                 phoneNumber,
                 LandlordRegistrationStepId.PhoneNumber.urlPathSegment,
@@ -143,7 +143,7 @@ class LandlordRegistrationCheckAnswersPageTests {
         val formData = getFormData(journeyData)
 
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.ukResident",
                 true,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
@@ -161,7 +161,7 @@ class LandlordRegistrationCheckAnswersPageTests {
         val formData = getFormData(journeyData)
 
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.contactAddress",
                 DEFAULT_ADDRESS,
                 LandlordRegistrationStepId.LookupAddress.urlPathSegment,
@@ -185,7 +185,7 @@ class LandlordRegistrationCheckAnswersPageTests {
         val formData = getFormData(journeyData)
 
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.contactAddress",
                 AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode).singleLineAddress,
                 LandlordRegistrationStepId.ManualAddress.urlPathSegment,
@@ -212,7 +212,7 @@ class LandlordRegistrationCheckAnswersPageTests {
         val formData = getFormData(journeyData)
 
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence",
                 countryOfResidence,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
@@ -222,7 +222,7 @@ class LandlordRegistrationCheckAnswersPageTests {
             },
         )
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.contactAddressOutsideUK",
                 internationalAddress,
                 LandlordRegistrationStepId.InternationalAddress.urlPathSegment,
@@ -232,7 +232,7 @@ class LandlordRegistrationCheckAnswersPageTests {
             },
         )
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.ukContactAddress",
                 selectedAddress,
                 LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
@@ -263,7 +263,7 @@ class LandlordRegistrationCheckAnswersPageTests {
         val formData = getFormData(journeyData)
 
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence",
                 countryOfResidence,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
@@ -273,7 +273,7 @@ class LandlordRegistrationCheckAnswersPageTests {
             },
         )
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.contactAddressOutsideUK",
                 internationalAddress,
                 LandlordRegistrationStepId.InternationalAddress.urlPathSegment,
@@ -283,7 +283,7 @@ class LandlordRegistrationCheckAnswersPageTests {
             },
         )
         assertEquals(
-            FormSummaryViewModel(
+            SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.ukContactAddress",
                 AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode).singleLineAddress,
                 LandlordRegistrationStepId.ManualContactAddress.urlPathSegment,
