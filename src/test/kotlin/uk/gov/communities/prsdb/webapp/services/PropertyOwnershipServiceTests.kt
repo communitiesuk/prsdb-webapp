@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.Property
@@ -163,8 +164,9 @@ class PropertyOwnershipServiceTests {
                 )
 
             whenever(
-                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveFalseAndProperty_Status(
                     "landlord",
+                    RegistrationStatus.REGISTERED,
                 ),
             ).thenReturn(landlordsProperties)
 
@@ -185,8 +187,9 @@ class PropertyOwnershipServiceTests {
                 listOf(propertyOwnership1, propertyOwnership2, propertyOwnership3)
 
             whenever(
-                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveFalseAndProperty_Status(
                     "landlord",
+                    RegistrationStatus.REGISTERED,
                 ),
             ).thenReturn(landlordsProperties)
 
@@ -217,8 +220,9 @@ class PropertyOwnershipServiceTests {
                 listOf(propertyOwnership1, propertyOwnership2, propertyOwnership3, propertyOwnership4, propertyOwnership5)
 
             whenever(
-                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveFalseAndProperty_Status(
                     "landlord",
+                    RegistrationStatus.REGISTERED,
                 ),
             ).thenReturn(landlordsProperties)
 

@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.Property
@@ -81,7 +82,10 @@ class PropertyOwnershipService(
     fun retrievePropertyOwnership(id: Long): PropertyOwnership? = propertyOwnershipRepository.findByIdOrNull(id)
 
     private fun retrieveAllPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
-        propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(baseUserId)
+        propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveFalseAndProperty_Status(
+            baseUserId,
+            RegistrationStatus.REGISTERED,
+        )
 
     private fun getLicenceTypeDisplayName(licence: License?): String {
         val licenceType = licence?.licenseType ?: LicensingType.NO_LICENSING
