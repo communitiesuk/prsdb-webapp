@@ -1,6 +1,5 @@
-<a th:fragment="pageLink(pageNumber, isCurrentPage)" class="govuk-link govuk-pagination__link"
-   th:with="urlWithParams=(${param.query==null} ? @{''(page=${pageNumber})} : @{''(page=${pageNumber}, query=${param.query})})"
-   th:href="${urlWithParams}"
+<a th:fragment="pageLink(pageNumber, isCurrentPage, extraParametersString)" class="govuk-link govuk-pagination__link"
+   th:href="${extraParametersString} == null ? @{'?page='+${pageNumber}} : @{${extraParametersString}+'&page='+${pageNumber}}"
    th:text="${pageNumber}"
    th:attr="aria-label='Page '+${pageNumber}"
    th:attrappend="aria-current=${isCurrentPage}?'page'"

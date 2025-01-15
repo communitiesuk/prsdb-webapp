@@ -1,8 +1,8 @@
-<ul th:fragment="listHighlightedPages(currentPage, totalPages)" class="govuk-pagination__list">
+<ul th:fragment="listHighlightedPages(currentPage, totalPages, extraParametersString)" class="govuk-pagination__list">
     <!--Link to first page-->
     <li class="govuk-pagination__item"
         th:classappend="${1==currentPage ? 'govuk-pagination__item--current' : ''}">
-        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${1},${1==currentPage})}">
+        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${1},${1==currentPage},${extraParametersString})}">
         </a>
     </li>
 
@@ -13,19 +13,19 @@
 
     <!--Link to previous page if applicable-->
     <li th:if="${currentPage > 2}" class="govuk-pagination__item">
-        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${currentPage}-1,false)}">
+        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${currentPage}-1,false,${extraParametersString})}">
         </a>
     </li>
 
     <!--Link to current page if not already shown-->
     <li th:if="${currentPage > 1 && currentPage < totalPages}" class="govuk-pagination__item govuk-pagination__item--current">
-        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${currentPage},true)}">
+        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${currentPage},true,${extraParametersString})}">
         </a>
     </li>
 
     <!--Link to next page if applicable-->
     <li th:if="${currentPage<totalPages - 1}" class="govuk-pagination__item">
-        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${currentPage}+1,false)}">
+        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${currentPage}+1,false,${extraParametersString})}">
         </a>
     </li>
 
@@ -37,7 +37,7 @@
     <!--Link to last page-->
     <li class="govuk-pagination__item"
         th:classappend="${totalPages==currentPage ? 'govuk-pagination__item--current' : ''}">
-        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${totalPages},${totalPages==currentPage})}">
+        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${totalPages},${totalPages==currentPage},${extraParametersString})}">
         </a>
     </li>
 </ul>

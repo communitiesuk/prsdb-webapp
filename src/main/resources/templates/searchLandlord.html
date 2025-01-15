@@ -12,7 +12,7 @@
         <th:block th:if="${searchResults != null}">
             <hr class="govuk-section-break govuk-section-break--m">
             <th:block th:if="${totalPages > 1}">
-                <nav th:replace="~{fragments/pagination/pagination :: pagination(${totalPages}, ${currentPage})}"></nav>
+                <nav th:replace="~{fragments/pagination/pagination :: pagination(${totalPages}, ${currentPage}, ${parameterStringNoPage})}"></nav>
             </th:block>
             <h2 class="govuk-heading-m" th:text="#{landlordSearch.table.heading}">landlordSearch.table.heading</h2>
             <table th:replace="~{fragments/tables/table :: table(
@@ -37,7 +37,7 @@
                 </tbody>
             </table>
             <th:block th:if="${totalPages > 1}">
-                <nav th:replace="~{fragments/pagination/pagination :: pagination(${totalPages}, ${currentPage})}"></nav>
+                <nav th:replace="~{fragments/pagination/pagination :: pagination(${totalPages}, ${currentPage},${parameterStringNoPage})}"></nav>
             </th:block>
         </th:block>
         <details id="details-content"

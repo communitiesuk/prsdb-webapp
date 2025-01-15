@@ -1,8 +1,5 @@
-<div th:fragment="next(nextPage)" class="govuk-pagination__next">
-    <a th:with="urlWithParams=(${param.query==null} ? @{''(page=${nextPage})} : @{''(page=${nextPage}, query=${param.query})})"
-       class="govuk-link govuk-pagination__link"
-       th:href="${urlWithParams}"
-       rel="next">
+<div th:fragment="next(nextPage,extraParametersString)" class="govuk-pagination__next">
+    <a class="govuk-link govuk-pagination__link" th:href="${extraParametersString} == null ? @{'?page='+${nextPage}} : @{${extraParametersString}+'&page='+${nextPage}}" rel="next">
       <span class="govuk-pagination__link-title" th:text="#{pagination.nextText}">
         Next<span class="govuk-visually-hidden" th:text="#{pagination.pageText}"> page</span>
       </span>

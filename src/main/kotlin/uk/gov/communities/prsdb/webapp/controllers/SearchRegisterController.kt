@@ -32,6 +32,7 @@ class SearchRegisterController(
                 return "redirect:/search/landlord?query=$query"
             }
 
+            model.addAttribute("parameterStringNoPage", "?query=$query")
             model.addAttribute("searchResults", pagedLandlordList)
             model.addAttribute("totalPages", pagedLandlordList.totalPages)
             model.addAttribute("currentPage", page)
