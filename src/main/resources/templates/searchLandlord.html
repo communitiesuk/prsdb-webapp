@@ -17,14 +17,14 @@
             )}">
                 <tbody class="govuk-table__body">
                 <tr class="govuk_table__row" th:each="landlord: ${searchResults}">
-                    <td class="govuk-table__cell">
+                    <td class="govuk-table__cell govuk-!-width-one-third">
                         <a class="govuk-link" th:href="@{${baseLandlordDetailsURL + '/' + landlord.id}}"
                            th:text="${landlord.name}"></a>
                         <br>
                         <span th:remove="tag" th:text="${landlord.registrationNumber}"></span>
                     </td>
-                    <td class="govuk-table__cell" th:text="${landlord.contactAddress}"></td>
-                    <td class="govuk-table__cell">
+                    <td class="govuk-table__cell govuk-!-width-one-third" th:text="${landlord.contactAddress}"></td>
+                    <td class="govuk-table__cell govuk-!-width-one-third">
                         <span th:remove="tag" th:text="${landlord.phoneNumber}"></span>
                         <br>
                         <span th:remove="tag" th:text="${landlord.email}"></span>
