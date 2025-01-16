@@ -37,6 +37,9 @@ class SearchRegisterTests : IntegrationTest() {
 
         assertThat(resultTable.getHeaderCell(CONTACT_INFO_COL_INDEX)).containsText("Contact information")
         assertThat(resultTable.getCell(0, CONTACT_INFO_COL_INDEX)).containsText("7111111111\nalex.surname@example.com")
+
+        val exception = assertThrows<AssertionFailedError> { searchLandlordRegisterPage.getErrorMessage() }
+        assertContains(exception.message!!, "Expected 1 instance of Locator@#no-results >> nth=0, found 0")
     }
 
     @Test
@@ -59,5 +62,24 @@ class SearchRegisterTests : IntegrationTest() {
         // TODO PRSD-656: Replace with landlord details page assertion
         assertPageIs(page, ErrorPage::class)
         assertContains(page.url(), "/landlord-details/1")
+    }
+
+    @Test
+    fun `error shows if search has no results`() {
+        val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
+        searchLandlordRegisterPage.searchBar.search("non-matching query")
+
+        assertContains(searchLandlordRegisterPage.getErrorMessageText(), "No landlord record found")
+    }
+
+    @Test
+    fun `property search link shows if search has no results`(page: Page) {
+        val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
+        searchLandlordRegisterPage.searchBar.search("non-matching query")
+        searchLandlordRegisterPage.getPropertySearchLink().click()
+
+        // TODO PRSD-659: Replace with landlord details page assertion
+        assertPageIs(page, ErrorPage::class)
+        assertContains(page.url(), "/search/property")
     }
 }

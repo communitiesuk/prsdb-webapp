@@ -7,7 +7,7 @@
              th:replace="~{fragments/confirmationPageBanner :: confirmationPageBanner(#{registerProperty.confirmation.banner.heading}, ~{::#confirmation-banner/content()})}">
         </div>
         <section>
-            <table th:replace="~{fragments/tables/table :: table(${ {'registerProperty.confirmation.table.address.heading','registerProperty.confirmation.table.prn.heading'} }, ~{::tbody})}">
+            <table th:replace="~{fragments/tables/table :: table(${ {'registerProperty.confirmation.table.address.heading','registerProperty.confirmation.table.prn.heading'} }, ~{::tbody}, null)}">
                 <tbody class="govuk-table__body">
                 <tr class="govuk_table__row">
                     <td class="govuk-table__cell govuk-!-width-one-half" th:text="${singleLineAddress}"></td>

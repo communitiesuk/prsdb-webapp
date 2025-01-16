@@ -10,10 +10,10 @@
             #{landlordSearch.searchBar.label}, #{landlordSearch.searchBar.hint}, ${searchWrapperModel})}">
         </th:block>
         <th:block th:if="${searchResults != null}">
-            <h2 class="govuk-heading-m" th:text="#{landlordSearch.table.heading}">landlordSearch.table.heading</h2>
             <table th:replace="~{fragments/tables/table :: table(
                 ${ {'landlordSearch.table.heading.landlord','landlordSearch.table.heading.address','landlordSearch.table.heading.info'} },
-                ~{::tbody}
+                ~{::tbody},
+                #{landlordSearch.table.heading}
             )}">
                 <tbody class="govuk-table__body">
                 <tr class="govuk_table__row" th:each="landlord: ${searchResults}">
@@ -32,6 +32,18 @@
                 </tr>
                 </tbody>
             </table>
+            <div th:if="${searchResults.size() == 0}"
+                 class="govuk-!-text-align-centre govuk-!-margin-bottom-6" id="no-results">
+                <h1 class="govuk-heading-l" th:text="#{landlordSearch.error.heading}">
+                    landlordSearch.error.heading
+                </h1>
+                <div class="govuk-hint">
+                    <span th:remove="tag" th:text="#{landlordSearch.error.hint.beforeLink}">landlordSearch.error.hint.beforeLink</span>
+                    <a class="govuk-link" th:href="@{${propertySearchURL}}"
+                       th:text="#{landlordSearch.error.hint.link}">landlordSearch.error.hint.link
+                    </a>
+                </div>
+            </div>
         </th:block>
         <details id="details-content"
                  th:replace="~{fragments/details :: details(#{landlordSearch.details.heading},~{::#details-content/content()})}">
