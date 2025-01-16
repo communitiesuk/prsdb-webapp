@@ -54,6 +54,8 @@ class SearchRegisterController(
         model.addAttribute("baseLandlordDetailsURL", "/landlord-details")
         // TODO PRSD-659: add LA property search base URL to model
         model.addAttribute("propertySearchURL", "property")
+        // TODO PRSD-647: Set backURL to LA landing page
+        model.addAttribute("backURL", "")
 
         return if (query?.isBlank() == true) "redirect:landlord" else "searchLandlord"
     }

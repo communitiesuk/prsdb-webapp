@@ -10,7 +10,7 @@
                     <th:block id="tab-headings">
                         <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('personal-details', #{landlordDetails.personalDetails.heading})}">
                         </li>
-                        <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('registered-properties', 'Registered properties')}">
+                        <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('registered-properties', #{landlordDetails.registeredProperties.heading})}">
                         </li>
                     </th:block>
                 </ul>
@@ -26,8 +26,24 @@
 
                 <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('registered-properties', ~{:: #registered-properties-panel-content})}">
                     <th:block id="registered-properties-panel-content">
-                        <h2 class="govuk-heading-m">TODO: PRSD-702</h2>
-                        <p class="govuk-body">This tab will show details of registered properties, and will be implemented as part of PRSD-702</p>
+                        <table th:replace="~{fragments/tables/table :: table(
+                            ${ { 'landlordDetails.registeredProperties.table.addressHeading', 'landlordDetails.registeredProperties.table.localAuthorityHeading', 'landlordDetails.registeredProperties.table.licenceHeading', 'landlordDetails.registeredProperties.table.tenantedHeading' } },
+                            ~{::tbody}
+                        )}
+                    ">
+                            <tbody class="govuk-table__body">
+                            <tr class="govuk_table__row" th:each="property: ${registeredPropertiesList}">
+                                <td class="govuk-table__cell govuk-!-width-one-quarter">
+                                    <a class="govuk-link" th:text="${property.address}" href="/">${property.address}</a>
+                                    <br>
+                                    <span th:remove="tag" th:text="${property.registrationNumber}"></span>
+                                </td>
+                                <td class="govuk-table__cell govuk-!-width-one-quarter" th:text="${property.localAuthorityName}"></td>
+                                <td class="govuk-table__cell govuk-!-width-one-quarter" th:text="${property.propertyLicence}"></td>
+                                <td class="govuk-table__cell govuk-!-width-one-quarter" th:text="#{${property.tenantedMessageKey}}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </th:block>
                 </div>
             </th:block>
