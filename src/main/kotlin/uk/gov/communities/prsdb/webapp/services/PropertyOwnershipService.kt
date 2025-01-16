@@ -50,12 +50,10 @@ class PropertyOwnershipService(
         )
     }
 
-    fun getRegisteredPropertiesForLandlord(baseUserId: String): List<RegisteredPropertyDataModel> {
-        val allActiveProperties = retrieveAllRegisteredPropertiesForLandlord(baseUserId)
-        return allActiveProperties.map { propertyOwnership ->
+    fun getRegisteredPropertiesForLandlord(baseUserId: String): List<RegisteredPropertyDataModel> =
+        retrieveAllRegisteredPropertiesForLandlord(baseUserId).map { propertyOwnership ->
             RegisteredPropertyDataModel.fromPropertyOwnership(propertyOwnership)
         }
-    }
 
     fun retrievePropertyOwnership(id: Long): PropertyOwnership? = propertyOwnershipRepository.findByIdOrNull(id)
 

@@ -152,7 +152,7 @@ class PropertyOwnershipServiceTests {
             val expectedLocalAuthority = "DERBYSHIRE DALES DISTRICT COUNCIL"
             val expectedRegistrationNumber = "P-CCCF-ZHXX"
             val expectedPropertyLicence = "Not Licenced"
-            val expectedIsTenantedValue = "commonText.no"
+            val expectedIsTenantedMessageKey = "commonText.no"
 
             val propertyOwnership1 =
                 createPropertyOwnership(
@@ -181,14 +181,14 @@ class PropertyOwnershipServiceTests {
                         expectedRegistrationNumber,
                         expectedLocalAuthority,
                         expectedPropertyLicence,
-                        expectedIsTenantedValue,
+                        expectedIsTenantedMessageKey,
                     ),
                     RegisteredPropertyDataModel(
                         address2,
                         expectedRegistrationNumber,
                         expectedLocalAuthority,
                         expectedPropertyLicence,
-                        expectedIsTenantedValue,
+                        expectedIsTenantedMessageKey,
                     ),
                 )
 
@@ -223,9 +223,9 @@ class PropertyOwnershipServiceTests {
 
             val result = propertyOwnershipService.getRegisteredPropertiesForLandlord("landlord")
 
-            assertEquals(result[0].isTenanted, "commonText.no")
-            assertEquals(result[1].isTenanted, "commonText.yes")
-            assertEquals(result[2].isTenanted, "commonText.yes")
+            assertEquals(result[0].isTenantedMessageKey, "commonText.no")
+            assertEquals(result[1].isTenantedMessageKey, "commonText.yes")
+            assertEquals(result[2].isTenantedMessageKey, "commonText.yes")
         }
 
         @Test

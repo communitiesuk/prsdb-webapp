@@ -11,7 +11,7 @@ data class RegisteredPropertyDataModel(
     val registrationNumber: String,
     val localAuthorityName: String,
     val propertyLicence: String,
-    val isTenanted: String,
+    val isTenantedMessageKey: String,
 ) {
     companion object {
         fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): RegisteredPropertyDataModel =
@@ -28,7 +28,7 @@ data class RegisteredPropertyDataModel(
                             propertyOwnership.property.address.custodianCode,
                         ),
                 propertyLicence = getLicenceTypeDisplayName(propertyOwnership.license),
-                isTenanted = MessageKeyConverter.convert(propertyOwnership.currentNumTenants > 0),
+                isTenantedMessageKey = MessageKeyConverter.convert(propertyOwnership.currentNumTenants > 0),
             )
 
         // TODO PRSD-785 use MessageKeyConverter here and remove display names on LicensingType
