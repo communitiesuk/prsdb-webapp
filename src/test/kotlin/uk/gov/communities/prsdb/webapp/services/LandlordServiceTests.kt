@@ -22,7 +22,6 @@ import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
-import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
@@ -209,13 +208,14 @@ class LandlordServiceTests {
     @Test
     fun `searchForLandlords returns a corresponding list of LandlordSearchResultDataModels`() {
         val searchQuery = "query"
-        val pageRequest = PageRequest.of(0, MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE)
+        val maxEntriesOnPage = 25
+        val pageRequest = PageRequest.of(0, maxEntriesOnPage)
         val matchingLandlords = listOf(createLandlord(), createLandlord(), createLandlord())
         val expectedSearchResults = matchingLandlords.map { LandlordSearchResultDataModel.fromLandlord(it) }
 
         whenever(mockLandlordRepository.searchMatching(searchQuery, pageRequest)).thenReturn(PageImpl(matchingLandlords))
 
-        val searchResults = landlordService.searchForLandlords(searchQuery, 0, MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE)
+        val searchResults = landlordService.searchForLandlords(searchQuery, 0, maxEntriesOnPage)
 
         assertEquals(expectedSearchResults, searchResults.content)
     }
