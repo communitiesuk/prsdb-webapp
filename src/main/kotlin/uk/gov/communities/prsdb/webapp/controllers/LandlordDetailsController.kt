@@ -63,11 +63,11 @@ class LandlordDetailsController(
                 SummaryListRowViewModel("landlordDetails.personalDetails.registrationDate", registeredDate, null),
                 SummaryListRowViewModel("landlordDetails.personalDetails.lrn", registrationNumber, null),
                 // TODO PRSD-747 to pass Id verification status to model with verified label and message key
-                SummaryListRowViewModel("landlordDetails.personalDetails.name", landlord.name, null),
-                SummaryListRowViewModel("landlordDetails.personalDetails.dateOfBirth", landlord.dateOfBirth, null),
-                SummaryListRowViewModel("landlordDetails.personalDetails.emailAddress", landlord.email, null),
-                SummaryListRowViewModel("landlordDetails.personalDetails.telephoneNumber", landlord.phoneNumber, null),
-                SummaryListRowViewModel("landlordDetails.personalDetails.ukResident", isUkResident, null),
+                SummaryListRowViewModel("landlordDetails.personalDetails.name", landlord.name, "$UPDATE_ROUTE/name"),
+                SummaryListRowViewModel("landlordDetails.personalDetails.dateOfBirth", landlord.dateOfBirth, "$UPDATE_ROUTE/date-of-birth"),
+                SummaryListRowViewModel("landlordDetails.personalDetails.emailAddress", landlord.email, "$UPDATE_ROUTE/email"),
+                SummaryListRowViewModel("landlordDetails.personalDetails.telephoneNumber", landlord.phoneNumber, "$UPDATE_ROUTE/telephone"),
+                SummaryListRowViewModel("landlordDetails.personalDetails.ukResident", isUkResident, "$UPDATE_ROUTE/country-of-residence"),
             )
 
         val residencyPersonalDetails =
@@ -84,8 +84,12 @@ class LandlordDetailsController(
         listOf(
             // TODO: PRSD-742 to add country as a separate field
             SummaryListRowViewModel("landlordDetails.personalDetails.country", "TODO: PRSD-742", null),
-            SummaryListRowViewModel("landlordDetails.personalDetails.nonUkAddress", landlord.internationalAddress, null),
-            SummaryListRowViewModel("landlordDetails.personalDetails.ukAddress", landlord.address.singleLineAddress, null),
+            SummaryListRowViewModel("landlordDetails.personalDetails.nonUkAddress", landlord.internationalAddress, "$UPDATE_ROUTE/address"),
+            SummaryListRowViewModel(
+                "landlordDetails.personalDetails.ukAddress",
+                landlord.address.singleLineAddress,
+                "$UPDATE_ROUTE/contact-address",
+            ),
         )
 
     private fun formatUkAddressDetails(landlord: Landlord) =
@@ -93,7 +97,7 @@ class LandlordDetailsController(
             SummaryListRowViewModel(
                 "landlordDetails.personalDetails.contactAddress",
                 landlord.address.singleLineAddress,
-                null,
+                "$UPDATE_ROUTE/address",
             ),
         )
 
@@ -103,5 +107,9 @@ class LandlordDetailsController(
             SummaryListRowViewModel("landlordDetails.personalDetails.optionalChoices.legalChanges", "TODO PRSD-746", null),
             SummaryListRowViewModel("landlordDetails.personalDetails.optionalChoices.research", "TODO PRSD-746", null),
         )
+    }
+
+    companion object {
+        const val UPDATE_ROUTE = "landlord-details/update"
     }
 }
