@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
-import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -14,10 +13,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
-import uk.gov.communities.prsdb.webapp.helpers.LocalAuthorityDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegisteredPropertyDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 @Service
 class PropertyOwnershipService(
@@ -54,24 +50,10 @@ class PropertyOwnershipService(
         )
     }
 
-    fun getLandlordRegisteredPropertiesDetails(baseUserId: String): List<RegisteredPropertyDataModel> {
+    fun getRegisteredPropertiesForLandlord(baseUserId: String): List<RegisteredPropertyDataModel> {
         val allActiveProperties = retrieveAllRegisteredPropertiesForLandlord(baseUserId)
         return allActiveProperties.map { propertyOwnership ->
-            RegisteredPropertyDataModel(
-                address = propertyOwnership.property.address.singleLineAddress,
-                registrationNumber =
-                    RegistrationNumberDataModel
-                        .fromRegistrationNumber(
-                            propertyOwnership.registrationNumber,
-                        ).toString(),
-                localAuthorityName =
-                    LocalAuthorityDataHelper
-                        .getLocalAuthorityDisplayName(
-                            propertyOwnership.property.address.custodianCode,
-                        ),
-                propertyLicence = getLicenceTypeDisplayName(propertyOwnership.license),
-                isTenanted = MessageKeyConverter.convert(propertyOwnership.currentNumTenants > 0),
-            )
+            RegisteredPropertyDataModel.fromPropertyOwnership(propertyOwnership)
         }
     }
 
@@ -82,9 +64,4 @@ class PropertyOwnershipService(
             baseUserId,
             RegistrationStatus.REGISTERED,
         )
-
-    private fun getLicenceTypeDisplayName(licence: License?): String {
-        val licenceType = licence?.licenseType ?: LicensingType.NO_LICENSING
-        return licenceType.displayName
-    }
 }

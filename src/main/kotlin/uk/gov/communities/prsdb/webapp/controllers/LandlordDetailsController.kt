@@ -32,7 +32,7 @@ class LandlordDetailsController(
             landlordService.retrieveLandlordByBaseUserId(principal.name)
                 ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
 
-        val registeredPropertiesList = propertyOwnershipService.getLandlordRegisteredPropertiesDetails(principal.name)
+        val registeredPropertiesList = propertyOwnershipService.getRegisteredPropertiesForLandlord(principal.name)
 
         model.addAttribute("personalDetails", formatLandlordPersonalDetails(landlord))
         model.addAttribute("consentInformation", getConsentInformation(landlord))
