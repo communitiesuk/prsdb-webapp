@@ -12,7 +12,6 @@ class ManageLaUsersPage(
     page: Page,
 ) : BasePage(page, "/manage-users") {
     val table = Table(page)
-    val pagination = Pagination(page)
     val inviteAnotherUserButton = getButton(page, "Invite another user")
     val returnToDashboardButton: Locator = getButton(page, "Return to dashboard")
 
@@ -24,4 +23,6 @@ class ManageLaUsersPage(
     }
 
     fun getChangeLink(rowIndex: Int) = getChildComponent(table.getCell(rowIndex, ACTIONS_COL_INDEX), "a")
+
+    fun getPaginationComponent() = Pagination(page)
 }

@@ -54,15 +54,16 @@ class ManageLAUsersTests : IntegrationTest() {
     @Test
     fun `pagination component renders with more than 10 table entries`(page: Page) {
         var managePage = navigator.goToManageLaUsers(localAuthorityId)
-        assertThat(managePage.pagination.getNextLink()).isVisible()
-        assertEquals("1", managePage.pagination.getCurrentPageNumberLinkText())
-        assertThat(managePage.pagination.getPageNumberLink(2)).isVisible()
+        val pagination = managePage.getPaginationComponent()
+        assertThat(pagination.getNextLink()).isVisible()
+        assertEquals("1", pagination.getCurrentPageNumberLinkText())
+        assertThat(pagination.getPageNumberLink(2)).isVisible()
 
-        managePage.pagination.getPageNumberLink(2).click()
+        pagination.getPageNumberLink(2).click()
         managePage = assertPageIs(page, ManageLaUsersPage::class)
 
-        assertThat(managePage.pagination.getPreviousLink()).isVisible()
-        assertThat(managePage.pagination.getPageNumberLink(1)).isVisible()
-        assertEquals("2", managePage.pagination.getCurrentPageNumberLinkText())
+        assertThat(pagination.getPreviousLink()).isVisible()
+        assertThat(pagination.getPageNumberLink(1)).isVisible()
+        assertEquals("2", pagination.getCurrentPageNumberLinkText())
     }
 }
