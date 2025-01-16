@@ -118,13 +118,13 @@ VALUES (1, '09/13/24', 2001001001, 1),
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
-INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address)
-VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road'),
-       (2, '09/13/24', '09/13/24', 2, '2 Fake Way'),
-       (3, '09/13/24', '09/13/24', 3, '3 Imaginary Street'),
-       (4, '09/13/24', '09/13/24', 4, '4 Pretend Crescent'),
-       (5, '09/13/24', '09/13/24', 5, '5 Mythical Place'),
-       (6, '12/10/2024', '12/10/2024', 1123456, '1, Example Road, EG');
+INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, custodian_code)
+VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', '1940'),
+       (2, '09/13/24', '09/13/24', 2, '2 Fake Way', '1945'),
+       (3, '09/13/24', '09/13/24', 3, '3 Imaginary Street', '1945'),
+       (4, '09/13/24', '09/13/24', 4, '4 Pretend Crescent', '1945'),
+       (5, '09/13/24', '09/13/24', 5, '5 Mythical Place', '3245'),
+       (6, '12/10/2024', '12/10/2024', 1123456, '1, Example Road, EG', '3245');
 
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
