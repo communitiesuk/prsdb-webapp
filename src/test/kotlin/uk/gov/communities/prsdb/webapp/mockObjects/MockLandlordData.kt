@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.mockObjects
 
+import org.mockito.Mockito.mock
+import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -15,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import java.time.LocalDate
+import java.time.OffsetDateTime
 
 class MockLandlordData {
     companion object {
@@ -100,5 +103,37 @@ class MockLandlordData {
             property = property,
             license = license,
         )
+
+        fun createMockNonUkLandlord(): Landlord {
+            val landlord: Landlord = mock()
+            whenever(landlord.baseUser).thenReturn(OneLoginUser())
+            whenever(landlord.name).thenReturn("name")
+            whenever(landlord.email).thenReturn("example@email.com")
+            whenever(landlord.phoneNumber).thenReturn("07123456789")
+            whenever(landlord.address).thenReturn(createAddress())
+            whenever(landlord.registrationNumber).thenReturn(RegistrationNumber(RegistrationNumberType.LANDLORD, 0L))
+            whenever(landlord.internationalAddress).thenReturn("1600 Pennsylvania Avenue, Washington DC, United States of America")
+            whenever(landlord.dateOfBirth).thenReturn(LocalDate.now())
+            whenever(landlord.lastModifiedDate).thenReturn(OffsetDateTime.now())
+            whenever(landlord.createdDate).thenReturn(OffsetDateTime.now())
+
+            return landlord
+        }
+
+        fun createMockLandlord(): Landlord {
+            val landlord: Landlord = mock()
+            whenever(landlord.baseUser).thenReturn(OneLoginUser())
+            whenever(landlord.name).thenReturn("name")
+            whenever(landlord.email).thenReturn("example@email.com")
+            whenever(landlord.phoneNumber).thenReturn("07123456789")
+            whenever(landlord.address).thenReturn(createAddress())
+            whenever(landlord.registrationNumber).thenReturn(RegistrationNumber(RegistrationNumberType.LANDLORD, 0L))
+            whenever(landlord.internationalAddress).thenReturn(null)
+            whenever(landlord.dateOfBirth).thenReturn(LocalDate.now())
+            whenever(landlord.lastModifiedDate).thenReturn(OffsetDateTime.now())
+            whenever(landlord.createdDate).thenReturn(OffsetDateTime.now())
+
+            return landlord
+        }
     }
 }
