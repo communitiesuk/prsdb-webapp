@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{landlordSearch.title}, ~{::html/content()}, false)}">
-<!--TODO PRSD-647: Set backlink to LA landing page-->
-<a th:replace="~{fragments/forms/backLink :: backLink('')}">backLink</a>
+<html>
+<body th:replace="~{fragments/layout :: layout(#{landlordSearch.title}, ~{::body/content()}, false)}">
+<a th:replace="~{fragments/forms/backLink :: backLink(${backURL})}">backLink</a>
 <main class="govuk-main-wrapper" id="main-content">
     <header>
         <h1 class="govuk-heading-l" th:text="#{landlordSearch.heading}">landlordSearch.heading</h1>
@@ -53,4 +53,5 @@
         </details>
     </section>
 </main>
+</body>
 </html>
