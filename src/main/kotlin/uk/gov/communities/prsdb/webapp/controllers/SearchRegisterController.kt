@@ -6,6 +6,7 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.models.wrapperModels.SearchWrapperModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 
@@ -32,7 +33,15 @@ class SearchRegisterController(
                 return "redirect:/search/landlord?query=$query"
             }
 
-            model.addAttribute("parameterStringNoPage", "?query=$query")
+            val urlWithoutPage =
+                UriComponentsBuilder
+                    .newInstance()
+                    .path("/search/landlord")
+                    .queryParam("query", query)
+                    .build()
+                    .toUriString()
+
+            model.addAttribute("unpagedUrl", urlWithoutPage)
             model.addAttribute("searchResults", pagedLandlordList.content)
             model.addAttribute("totalPages", pagedLandlordList.totalPages)
             model.addAttribute("currentPage", page)

@@ -12,7 +12,7 @@
         <th:block th:if="${searchResults != null}">
             <hr class="govuk-section-break govuk-section-break--m">
             <th:block th:if="${totalPages > 1}">
-                <nav th:replace="~{fragments/pagination/pagination :: pagination(${totalPages}, ${currentPage}, ${parameterStringNoPage})}"></nav>
+                <nav th:replace="~{fragments/pagination/pagination :: pagination(${totalPages}, ${currentPage}, ${unpagedUrl})}"></nav>
             </th:block>
             <h2 class="govuk-heading-m" th:text="#{landlordSearch.table.heading}">landlordSearch.table.heading</h2>
             <table th:replace="~{fragments/tables/table :: table(

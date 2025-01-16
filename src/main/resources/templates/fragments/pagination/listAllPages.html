@@ -1,8 +1,8 @@
-<ul th:fragment="listAllPages(currentPage, totalPages, extraParametersString)" class="govuk-pagination__list">
+<ul th:fragment="listAllPages(currentPage, totalPages, unpagedUrl)" class="govuk-pagination__list">
     <li th:each="page : ${#numbers.sequence(1, totalPages)}"
         class="govuk-pagination__item"
         th:classappend="${page==currentPage ? 'govuk-pagination__item--current' : ''}">
-        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${page},${page==currentPage},${extraParametersString})}">
+        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${page},${page==currentPage},${unpagedUrl})}">
         </a>
     </li>
 </ul>
