@@ -48,10 +48,6 @@ export default {
                         dest: 'dist/css'
                     },
                     {
-                        src: 'node_modules/@ministryofjustice/frontend/moj/all.js',
-                        dest: 'dist/js',
-                    },
-                    {
                         src: 'node_modules/@ministryofjustice/frontend/moj/moj-frontend.min.css',
                         dest: 'dist/css'
                     },
@@ -63,10 +59,6 @@ export default {
                         src: 'node_modules/@ministryofjustice/frontend/moj/assets/fonts/**/*',
                         dest: 'dist/fonts',
                     },
-                    {
-                        src: 'node_modules/jquery/dist/jquery.js',
-                        dest: 'dist/js',
-                    }
                 ],
             }
         )
