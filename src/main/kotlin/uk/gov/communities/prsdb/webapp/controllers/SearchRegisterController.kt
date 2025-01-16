@@ -28,12 +28,12 @@ class SearchRegisterController(
 
             val pagedLandlordList = landlordService.searchForLandlords(query, currentPageNumber = page - 1)
 
-            if (pagedLandlordList.totalPages < page) {
+            if (pagedLandlordList.totalPages in 1..<page) {
                 return "redirect:/search/landlord?query=$query"
             }
 
             model.addAttribute("parameterStringNoPage", "?query=$query")
-            model.addAttribute("searchResults", pagedLandlordList)
+            model.addAttribute("searchResults", pagedLandlordList.content)
             model.addAttribute("totalPages", pagedLandlordList.totalPages)
             model.addAttribute("currentPage", page)
         } else {
