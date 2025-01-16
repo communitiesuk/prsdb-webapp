@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -34,6 +35,7 @@ class LandlordDetailsController(
 
         val registeredPropertiesList = propertyOwnershipService.getRegisteredPropertiesForLandlord(principal.name)
 
+        model.addAttribute("name", landlord.name)
         model.addAttribute("personalDetails", formatLandlordPersonalDetails(landlord))
         model.addAttribute("consentInformation", getConsentInformation(landlord))
         model.addAttribute("registeredPropertiesList", registeredPropertiesList)
@@ -54,10 +56,12 @@ class LandlordDetailsController(
     private fun formatLandlordPersonalDetails(landlord: Landlord): List<SummaryListRowViewModel> {
         val registeredDate = LocalDate.of(landlord.createdDate.year, landlord.createdDate.monthValue, landlord.createdDate.dayOfMonth)
         val isUkResident = landlord.internationalAddress == null
+        val registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber)
 
         val residencyIndependentPersonalDetails =
             listOf(
                 SummaryListRowViewModel("landlordDetails.personalDetails.registrationDate", registeredDate, null),
+                SummaryListRowViewModel("landlordDetails.personalDetails.lrn", registrationNumber, null),
                 // TODO PRSD-747 to pass Id verification status to model with verified label and message key
                 SummaryListRowViewModel("landlordDetails.personalDetails.name", landlord.name, null),
                 SummaryListRowViewModel("landlordDetails.personalDetails.dateOfBirth", landlord.dateOfBirth, null),

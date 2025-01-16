@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels
 
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 data class SummaryListRowViewModel(
     val fieldHeading: String,
@@ -18,6 +19,7 @@ data class SummaryListRowViewModel(
         when (value) {
             is Enum<*> -> MessageKeyConverter.convert(value)
             is Boolean -> MessageKeyConverter.convert(value)
+            is RegistrationNumberDataModel -> value.toString()
             else -> value
         }
 }
