@@ -44,6 +44,10 @@ class ManageLocalAuthorityUsersController(
         val (currentUser, currentUserLocalAuthority) =
             localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
 
+        if (page < 1) {
+            return "redirect:/local-authority/{localAuthorityId}/manage-users"
+        }
+
         val pagedUserList =
             localAuthorityDataService.getPaginatedUsersAndInvitations(
                 currentUserLocalAuthority,

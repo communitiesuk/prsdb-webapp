@@ -1,5 +1,5 @@
-<div th:fragment="next(nextPage)" class="govuk-pagination__next">
-    <a class="govuk-link govuk-pagination__link" th:href="@{${#ctx.#requestdatavalues.url('')}(page=${nextPage})}" rel="next">
+<div th:fragment="next(nextPage,unpagedUrl)" class="govuk-pagination__next">
+    <a class="govuk-link govuk-pagination__link" th:href="${unpagedUrl} == null ? @{''(page=${nextPage})} : @{${unpagedUrl}(page=${nextPage})}" rel="next">
       <span class="govuk-pagination__link-title" th:text="#{pagination.nextText}">
         Next<span class="govuk-visually-hidden" th:text="#{pagination.pageText}"> page</span>
       </span>
