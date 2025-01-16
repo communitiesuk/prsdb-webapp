@@ -36,7 +36,7 @@ class LandlordDetailsController(
 
         model.addAttribute("personalDetails", formatLandlordPersonalDetails(landlord))
         model.addAttribute("consentInformation", getConsentInformation(landlord))
-        model.addAttribute("registeredProperties", registeredProperties)
+        model.addAttribute("registeredPropertiesList", registeredPropertiesList)
 
         // TODO PRSD-670: Replace with link to dashboard
         model.addAttribute("backUrl", "/")
