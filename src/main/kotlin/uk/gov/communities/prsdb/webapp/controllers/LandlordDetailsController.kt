@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.viewModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 import java.time.LocalDate
 
@@ -19,6 +20,7 @@ import java.time.LocalDate
 class LandlordDetailsController(
     val landlordService: LandlordService,
     val addressDataService: AddressDataService,
+    val propertyOwnershipService: PropertyOwnershipService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping
@@ -30,14 +32,14 @@ class LandlordDetailsController(
             landlordService.retrieveLandlordByBaseUserId(principal.name)
                 ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
 
+        val registeredPropertiesList = propertyOwnershipService.getRegisteredPropertiesForLandlord(principal.name)
+
         model.addAttribute("personalDetails", formatLandlordPersonalDetails(landlord))
         model.addAttribute("consentInformation", getConsentInformation(landlord))
+        model.addAttribute("registeredPropertiesList", registeredPropertiesList)
 
         // TODO PRSD-670: Replace with link to dashboard
         model.addAttribute("backUrl", "/")
-
-        // Add properties to model
-        // TODO PRSD-702 add properties to model
 
         return "landlordDetailsView"
     }

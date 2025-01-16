@@ -2,11 +2,11 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.helpers.LocalAuthorityDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SummaryListRowViewModel
@@ -74,7 +74,7 @@ class PropertyRegistrationCheckAnswersPage(
             ),
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.localAuthority",
-                getLocalAuthority(address.custodianCode).displayName,
+                LocalAuthorityDataHelper.getLocalAuthorityDisplayName(address.custodianCode),
                 null,
             ),
         )
@@ -91,7 +91,7 @@ class PropertyRegistrationCheckAnswersPage(
             ),
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.localAuthority",
-                getLocalAuthority(custodianCode).displayName,
+                LocalAuthorityDataHelper.getLocalAuthorityDisplayName(custodianCode),
                 RegisterPropertyStepId.LocalAuthority.urlPathSegment,
             ),
         )
@@ -167,8 +167,6 @@ class PropertyRegistrationCheckAnswersPage(
             RegisterPropertyStepId.LandlordType.urlPathSegment,
         )
     }
-
-    private fun getLocalAuthority(custodianCode: String?) = LOCAL_AUTHORITIES.single { it.custodianCode == custodianCode }
 
     private fun getOccupyingTenantsDetails(journeyData: JourneyData): List<SummaryListRowViewModel> =
         listOf(

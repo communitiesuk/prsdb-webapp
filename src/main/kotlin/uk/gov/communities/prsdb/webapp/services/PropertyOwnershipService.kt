@@ -7,11 +7,13 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegisteredPropertyDataModel
 
 @Service
 class PropertyOwnershipService(
@@ -48,5 +50,16 @@ class PropertyOwnershipService(
         )
     }
 
+    fun getRegisteredPropertiesForLandlord(baseUserId: String): List<RegisteredPropertyDataModel> =
+        retrieveAllRegisteredPropertiesForLandlord(baseUserId).map { propertyOwnership ->
+            RegisteredPropertyDataModel.fromPropertyOwnership(propertyOwnership)
+        }
+
     fun retrievePropertyOwnership(id: Long): PropertyOwnership? = propertyOwnershipRepository.findByIdOrNull(id)
+
+    private fun retrieveAllRegisteredPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
+        propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
+            baseUserId,
+            RegistrationStatus.REGISTERED,
+        )
 }
