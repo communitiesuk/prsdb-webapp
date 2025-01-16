@@ -1,4 +1,4 @@
-<div class="moj-search" th:fragment="searchBar(label, hint, searchWrapperModel)">
+<div class="moj-search govuk-!-margin-bottom-6" th:fragment="searchBar(label, hint, searchWrapperModel)">
     <form method="get" th:action="@{''}" th:object="${searchWrapperModel}">
         <div class="govuk-form-group">
             <label class="govuk-label moj-search__label govuk-!-font-weight-bold" th:for="'query'"

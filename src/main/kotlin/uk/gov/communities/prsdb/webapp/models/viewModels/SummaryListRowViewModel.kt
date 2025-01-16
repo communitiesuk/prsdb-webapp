@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels
 
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 
-data class FormSummaryViewModel(
+data class SummaryListRowViewModel(
     val fieldHeading: String,
     val fieldValue: Any?,
     val changeUrl: String?,

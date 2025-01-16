@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.helpers.LaUserRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.FormSummaryViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import kotlin.reflect.KClass
 
@@ -26,7 +26,7 @@ class LaUserRegistrationCheckAnswersPage(
         journeyData: JourneyData?,
     ): String {
         journeyData!!
-        val formData = mutableListOf<FormSummaryViewModel>()
+        val formData = mutableListOf<SummaryListRowViewModel>()
         val sessionToken = invitationService.getTokenFromSession()
 
         val localAuthority =
@@ -38,17 +38,17 @@ class LaUserRegistrationCheckAnswersPage(
 
         formData.addAll(
             listOf(
-                FormSummaryViewModel(
+                SummaryListRowViewModel(
                     "registerLaUser.checkAnswers.rowHeading.localAuthority",
                     localAuthority.name,
                     null,
                 ),
-                FormSummaryViewModel(
+                SummaryListRowViewModel(
                     "registerLaUser.checkAnswers.rowHeading.name",
                     LaUserRegistrationJourneyDataHelper.getName(journeyData),
                     "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Name.urlPathSegment}",
                 ),
-                FormSummaryViewModel(
+                SummaryListRowViewModel(
                     "registerLaUser.checkAnswers.rowHeading.email",
                     LaUserRegistrationJourneyDataHelper.getEmail(journeyData),
                     "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Email.urlPathSegment}",
