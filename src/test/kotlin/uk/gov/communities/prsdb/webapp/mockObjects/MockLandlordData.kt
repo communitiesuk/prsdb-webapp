@@ -44,16 +44,22 @@ class MockLandlordData {
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 0L),
             internationalAddress: String? = null,
             dateOfBirth: LocalDate? = null,
-        ) = Landlord(
-            baseUser = baseUser,
-            name = name,
-            email = email,
-            phoneNumber = phoneNumber,
-            address = address,
-            registrationNumber = registrationNumber,
-            internationalAddress = internationalAddress,
-            dateOfBirth = dateOfBirth,
-        )
+            createdAt: OffsetDateTime = OffsetDateTime.now(),
+        ): Landlord {
+            val landlord: Landlord = mock()
+            whenever(landlord.baseUser).thenReturn(baseUser)
+            whenever(landlord.name).thenReturn(name)
+            whenever(landlord.email).thenReturn(email)
+            whenever(landlord.phoneNumber).thenReturn(phoneNumber)
+            whenever(landlord.address).thenReturn(address)
+            whenever(landlord.registrationNumber).thenReturn(registrationNumber)
+            whenever(landlord.dateOfBirth).thenReturn(dateOfBirth)
+            whenever(landlord.lastModifiedDate).thenReturn(OffsetDateTime.now())
+            whenever(landlord.internationalAddress).thenReturn(internationalAddress)
+            whenever(landlord.createdDate).thenReturn(createdAt)
+
+            return landlord
+        }
 
         fun createProperty(
             status: RegistrationStatus = RegistrationStatus.REGISTERED,
@@ -103,37 +109,5 @@ class MockLandlordData {
             property = property,
             license = license,
         )
-
-        fun createMockNonUkLandlord(): Landlord {
-            val landlord: Landlord = mock()
-            whenever(landlord.baseUser).thenReturn(OneLoginUser())
-            whenever(landlord.name).thenReturn("name")
-            whenever(landlord.email).thenReturn("example@email.com")
-            whenever(landlord.phoneNumber).thenReturn("07123456789")
-            whenever(landlord.address).thenReturn(createAddress())
-            whenever(landlord.registrationNumber).thenReturn(RegistrationNumber(RegistrationNumberType.LANDLORD, 0L))
-            whenever(landlord.internationalAddress).thenReturn("1600 Pennsylvania Avenue, Washington DC, United States of America")
-            whenever(landlord.dateOfBirth).thenReturn(LocalDate.now())
-            whenever(landlord.lastModifiedDate).thenReturn(OffsetDateTime.now())
-            whenever(landlord.createdDate).thenReturn(OffsetDateTime.now())
-
-            return landlord
-        }
-
-        fun createMockLandlord(): Landlord {
-            val landlord: Landlord = mock()
-            whenever(landlord.baseUser).thenReturn(OneLoginUser())
-            whenever(landlord.name).thenReturn("name")
-            whenever(landlord.email).thenReturn("example@email.com")
-            whenever(landlord.phoneNumber).thenReturn("07123456789")
-            whenever(landlord.address).thenReturn(createAddress())
-            whenever(landlord.registrationNumber).thenReturn(RegistrationNumber(RegistrationNumberType.LANDLORD, 0L))
-            whenever(landlord.internationalAddress).thenReturn(null)
-            whenever(landlord.dateOfBirth).thenReturn(LocalDate.now())
-            whenever(landlord.lastModifiedDate).thenReturn(OffsetDateTime.now())
-            whenever(landlord.createdDate).thenReturn(OffsetDateTime.now())
-
-            return landlord
-        }
     }
 }
