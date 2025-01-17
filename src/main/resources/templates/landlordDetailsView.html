@@ -3,7 +3,13 @@
 <main class="govuk-main-wrapper" id="main-content">
     <div id="page-contents">
         <h2 class="govuk-heading-m" th:text="#{landlordDetails.heading}">landlordDetails.heading</h2>
-        <h1 class="govuk-heading-l" th:text="${name}">landlord.name</h1>
+
+        <div th:replace="~{fragments/buttons/pageHeaderActions :: pageHeaderActions(${name}, ~{:: #delete-record-button})}">
+            <th:block id="delete-record-button">
+                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink('delete-record', #{landlordDetails.removeRecord})}"></a>
+            </th:block>
+        </div>
+
         <div th:replace="~{fragments/tabs/tabs :: tabs(~{:: #tabs-content})}" >
             <th:block id="tabs-content">
                 <ul th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{:: #tab-headings})}">
@@ -17,10 +23,10 @@
 
                 <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('personal-details', ~{:: #personal-details-panel-content})}">
                     <th:block id="personal-details-panel-content">
-                        <dl th:replace="~{fragments/summaryList :: summaryList(${personalDetails})}" ></dl>
+                        <dl th:replace="~{fragments/summaryList :: summaryList(${landlord.personalDetails})}" ></dl>
                         <h2 class="govuk-heading-m" th:text="#{landlordDetails.personalDetails.optionalChoices.heading}">landlordDetails.personalDetails.optionalChoices.heading</h2>
                         <p class="govuk-hint" th:text="#{landlordDetails.personalDetails.optionalChoices.hint}">landlordDetails.personalDetails.optionalChoices.hint</p>
-                        <dl th:replace="~{fragments/summaryList :: summaryList(${consentInformation})}" ></dl>
+                        <dl th:replace="~{fragments/summaryList :: summaryList(${landlord.consentInformation})}" ></dl>
                     </th:block>
                 </div>
 

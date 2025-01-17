@@ -65,9 +65,10 @@ class RegisterPropertyControllerTests(
     @WithMockUser(roles = ["LANDLORD"])
     fun `getConfirmation returns 200 if a property has been registered`() {
         val propertyOwnershipID = 0L
+        val propertyOwnership = createPropertyOwnership()
 
         whenever(propertyOwnershipService.retrievePropertyOwnership(propertyOwnershipID)).thenReturn(
-            createPropertyOwnership(),
+            propertyOwnership,
         )
 
         mvc
@@ -82,9 +83,10 @@ class RegisterPropertyControllerTests(
     @WithMockUser(roles = ["LANDLORD"])
     fun `getConfirmation returns 400 if there's no property ownership ID in session`() {
         val propertyOwnershipID = 0L
+        val propertyOwnership = createPropertyOwnership()
 
         whenever(propertyOwnershipService.retrievePropertyOwnership(propertyOwnershipID)).thenReturn(
-            createPropertyOwnership(),
+            propertyOwnership,
         )
 
         mvc
