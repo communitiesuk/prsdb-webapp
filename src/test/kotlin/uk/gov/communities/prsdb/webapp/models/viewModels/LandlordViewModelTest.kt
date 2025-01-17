@@ -6,6 +6,7 @@ import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toLocalDateTime
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertIterableEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -45,14 +46,19 @@ class LandlordViewModelTest {
         // Assert
         val headerList = viewModel.personalDetails.map { it.fieldHeading }
 
-        assertEquals(headerList[0], "landlordDetails.personalDetails.registrationDate")
-        assertEquals(headerList[1], "landlordDetails.personalDetails.lrn")
-        assertEquals(headerList[2], "landlordDetails.personalDetails.name")
-        assertEquals(headerList[3], "landlordDetails.personalDetails.dateOfBirth")
-        assertEquals(headerList[4], "landlordDetails.personalDetails.emailAddress")
-        assertEquals(headerList[5], "landlordDetails.personalDetails.telephoneNumber")
-        assertEquals(headerList[6], "landlordDetails.personalDetails.ukResident")
-        assertEquals(headerList[7], "landlordDetails.personalDetails.contactAddress")
+        val expectedHeaderList =
+            listOf(
+                "landlordDetails.personalDetails.registrationDate",
+                "landlordDetails.personalDetails.lrn",
+                "landlordDetails.personalDetails.name",
+                "landlordDetails.personalDetails.dateOfBirth",
+                "landlordDetails.personalDetails.emailAddress",
+                "landlordDetails.personalDetails.telephoneNumber",
+                "landlordDetails.personalDetails.ukResident",
+                "landlordDetails.personalDetails.contactAddress",
+            )
+
+        assertIterableEquals(expectedHeaderList, headerList)
     }
 
     @Test
@@ -66,16 +72,21 @@ class LandlordViewModelTest {
         // Assert
         val headerList = viewModel.personalDetails.map { it.fieldHeading }
 
-        assertEquals(headerList[0], "landlordDetails.personalDetails.registrationDate")
-        assertEquals(headerList[1], "landlordDetails.personalDetails.lrn")
-        assertEquals(headerList[2], "landlordDetails.personalDetails.name")
-        assertEquals(headerList[3], "landlordDetails.personalDetails.dateOfBirth")
-        assertEquals(headerList[4], "landlordDetails.personalDetails.emailAddress")
-        assertEquals(headerList[5], "landlordDetails.personalDetails.telephoneNumber")
-        assertEquals(headerList[6], "landlordDetails.personalDetails.ukResident")
-        assertEquals(headerList[7], "landlordDetails.personalDetails.country")
-        assertEquals(headerList[8], "landlordDetails.personalDetails.nonUkAddress")
-        assertEquals(headerList[9], "landlordDetails.personalDetails.ukAddress")
+        val expectedHeaderList =
+            listOf(
+                "landlordDetails.personalDetails.registrationDate",
+                "landlordDetails.personalDetails.lrn",
+                "landlordDetails.personalDetails.name",
+                "landlordDetails.personalDetails.dateOfBirth",
+                "landlordDetails.personalDetails.emailAddress",
+                "landlordDetails.personalDetails.telephoneNumber",
+                "landlordDetails.personalDetails.ukResident",
+                "landlordDetails.personalDetails.country",
+                "landlordDetails.personalDetails.nonUkAddress",
+                "landlordDetails.personalDetails.ukAddress",
+            )
+
+        assertIterableEquals(expectedHeaderList, headerList)
     }
 
     @ParameterizedTest(name = "on a {0} in {1}")
