@@ -1,0 +1,10 @@
+
+<div th:fragment="pageHeaderActions(heading, buttons)" class="moj-page-header-actions">
+    <div class="moj-page-header-actions__title">
+        <h1 class="govuk-heading-l" th:text="${heading}">heading</h1>
+    </div>
+
+    <div class="moj-page-header-actions__actions">
+        <div th:replace="${buttons}"></div>
+    </div>
+</div>

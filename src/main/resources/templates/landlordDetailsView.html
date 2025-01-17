@@ -4,20 +4,11 @@
     <div id="page-contents">
         <h2 class="govuk-heading-m" th:text="#{landlordDetails.heading}">landlordDetails.heading</h2>
 
-        <div class="moj-page-header-actions">
-            <div class="moj-page-header-actions__title">
-                <h1 class="govuk-heading-l" th:text="${name}">landlord.name</h1>
-            </div>
-
-            <div class="moj-page-header-actions__actions">
-                <div class="moj-button-group moj-button-group--inline">
-                    <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink('delete-record', #{landlordDetails.removeRecord})}"></a>
-                </div>
-            </div>
-
+        <div th:replace="~{fragments/buttons/pageHeaderActions :: pageHeaderActions(${name}, ~{:: #delete-record-button})}">
+            <th:block id="delete-record-button">
+                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink('delete-record', #{landlordDetails.removeRecord})}"></a>
+            </th:block>
         </div>
-
-
 
         <div th:replace="~{fragments/tabs/tabs :: tabs(~{:: #tabs-content})}" >
             <th:block id="tabs-content">
