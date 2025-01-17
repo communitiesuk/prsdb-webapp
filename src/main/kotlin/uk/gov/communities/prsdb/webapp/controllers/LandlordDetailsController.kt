@@ -33,8 +33,7 @@ class LandlordDetailsController(
         val landlordViewModel = LandlordViewModel(landlord)
 
         model.addAttribute("name", landlordViewModel.name)
-        model.addAttribute("personalDetails", landlordViewModel.personalDetails)
-        model.addAttribute("consentInformation", landlordViewModel.consentInformation)
+        model.addAttribute("landlord", landlordViewModel)
 
         val registeredPropertiesList = propertyOwnershipService.getRegisteredPropertiesForLandlord(principal.name)
 

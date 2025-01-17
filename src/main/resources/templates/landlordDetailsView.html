@@ -23,10 +23,10 @@
 
                 <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('personal-details', ~{:: #personal-details-panel-content})}">
                     <th:block id="personal-details-panel-content">
-                        <dl th:replace="~{fragments/summaryList :: summaryList(${personalDetails})}" ></dl>
+                        <dl th:replace="~{fragments/summaryList :: summaryList(${landlord.personalDetails})}" ></dl>
                         <h2 class="govuk-heading-m" th:text="#{landlordDetails.personalDetails.optionalChoices.heading}">landlordDetails.personalDetails.optionalChoices.heading</h2>
                         <p class="govuk-hint" th:text="#{landlordDetails.personalDetails.optionalChoices.hint}">landlordDetails.personalDetails.optionalChoices.hint</p>
-                        <dl th:replace="~{fragments/summaryList :: summaryList(${consentInformation})}" ></dl>
+                        <dl th:replace="~{fragments/summaryList :: summaryList(${landlord.consentInformation})}" ></dl>
                     </th:block>
                 </div>
 
