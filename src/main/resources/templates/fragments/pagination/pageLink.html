@@ -1,7 +1,7 @@
-<a th:fragment="pageLink(page, isCurrentPage)" class="govuk-link govuk-pagination__link"
-   th:href="@{${#ctx.#requestdatavalues.url('')}(page=${page})}"
-   th:text="${page}"
-   th:attr="aria-label='Page '+${page}"
+<a th:fragment="pageLink(pageNumber, isCurrentPage, unpagedUrl)" class="govuk-link govuk-pagination__link"
+   th:href="${unpagedUrl} == null ? @{''(page=${pageNumber})} : @{${unpagedUrl}(page=${pageNumber})}"
+   th:text="${pageNumber}"
+   th:attr="aria-label='Page '+${pageNumber}"
    th:attrappend="aria-current=${isCurrentPage}?'page'"
    >
 </a>

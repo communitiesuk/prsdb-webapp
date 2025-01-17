@@ -6,6 +6,7 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.models.wrapperModels.SearchWrapperModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 
@@ -19,10 +20,33 @@ class SearchRegisterController(
     fun searchForLandlords(
         model: Model,
         @RequestParam(required = false) query: String?,
+        @RequestParam(value = "page", required = false) page: Int = 1,
     ): String {
         if (!query.isNullOrBlank()) {
-            val results = landlordService.searchForLandlords(query)
-            model.addAttribute("searchResults", results)
+            if (page < 1) {
+                return "redirect:/search/landlord?query=$query"
+            }
+
+            val pagedLandlordList = landlordService.searchForLandlords(query, currentPageNumber = page - 1)
+
+            if (pagedLandlordList.totalPages in 1..<page) {
+                return "redirect:/search/landlord?query=$query"
+            }
+
+            val urlWithoutPage =
+                UriComponentsBuilder
+                    .newInstance()
+                    .path("/search/landlord")
+                    .queryParam("query", query)
+                    .build()
+                    .toUriString()
+
+            model.addAttribute("unpagedUrl", urlWithoutPage)
+            model.addAttribute("searchResults", pagedLandlordList.content)
+            model.addAttribute("totalPages", pagedLandlordList.totalPages)
+            model.addAttribute("currentPage", page)
+        } else {
+            model.addAttribute("totalPages", 0)
         }
 
         model.addAttribute("searchWrapperModel", SearchWrapperModel())

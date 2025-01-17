@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_TABLE_PAGE
+import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LA_USERS_TABLE_PAGE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
@@ -70,7 +70,7 @@ class LocalAuthorityDataService(
     fun getPaginatedUsersAndInvitations(
         localAuthority: LocalAuthority,
         currentPageNumber: Int,
-        pageSize: Int = MAX_ENTRIES_IN_TABLE_PAGE,
+        pageSize: Int = MAX_ENTRIES_IN_LA_USERS_TABLE_PAGE,
     ): Page<LocalAuthorityUserDataModel> {
         val pageRequest =
             PageRequest.of(

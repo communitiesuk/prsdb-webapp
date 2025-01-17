@@ -1,7 +1,11 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
@@ -57,23 +61,21 @@ class LandlordService(
 
     fun searchForLandlords(
         searchTerm: String,
-        limit: Int = DEFAULT_LANDLORD_SEARCH_LIMIT,
-    ): List<LandlordSearchResultDataModel> {
+        currentPageNumber: Int = 0,
+        pageSize: Int = MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE,
+    ): Page<LandlordSearchResultDataModel> {
         RegistrationNumberDataModel.parseOrNull(searchTerm)?.let { registrationNumber ->
             if (registrationNumber.isType(RegistrationNumberType.LANDLORD)) {
                 retrieveLandlordByRegNum(registrationNumber)?.let { landlord ->
-                    return listOf(LandlordSearchResultDataModel.fromLandlord(landlord))
+                    return PageImpl(listOf(LandlordSearchResultDataModel.fromLandlord(landlord)))
                 }
             }
         }
 
-        return landlordRepository
-            .searchMatching(searchTerm, limit)
-            .map { LandlordSearchResultDataModel.fromLandlord(it) }
-    }
+        val pageRequest = PageRequest.of(currentPageNumber, pageSize)
 
-    // TODO PRSD-652: Change this once pagination has been implemented
-    companion object {
-        private const val DEFAULT_LANDLORD_SEARCH_LIMIT = 25
+        return landlordRepository
+            .searchMatching(searchTerm, pageRequest)
+            .map { LandlordSearchResultDataModel.fromLandlord(it) }
     }
 }

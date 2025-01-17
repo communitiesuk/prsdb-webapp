@@ -39,16 +39,16 @@
                         )}
                     ">
                             <tbody class="govuk-table__body">
-                            <tr class="govuk_table__row" th:each="property: ${registeredPropertiesList}">
-                                <td class="govuk-table__cell govuk-!-width-one-quarter">
-                                    <a class="govuk-link" th:text="${property.address}" href="/">${property.address}</a>
-                                    <br>
-                                    <span th:remove="tag" th:text="${property.registrationNumber}"></span>
-                                </td>
-                                <td class="govuk-table__cell govuk-!-width-one-quarter" th:text="${property.localAuthorityName}"></td>
-                                <td class="govuk-table__cell govuk-!-width-one-quarter" th:text="${property.propertyLicence}"></td>
-                                <td class="govuk-table__cell govuk-!-width-one-quarter" th:text="#{${property.tenantedMessageKey}}"></td>
-                            </tr>
+                                <tr class="govuk_table__row" th:each="property: ${registeredPropertiesList}">
+                                    <td class="govuk-table__cell govuk-!-width-one-quarter">
+                                        <a class="govuk-link" th:text="${property.address}" href="/">${property.address}</a>
+                                        <br>
+                                        <span th:remove="tag" th:text="${property.registrationNumber}"></span>
+                                    </td>
+                                    <td class="govuk-table__cell govuk-!-width-one-quarter" th:text="${property.localAuthorityName}"></td>
+                                    <td class="govuk-table__cell govuk-!-width-one-quarter" th:text="${property.propertyLicence}"></td>
+                                    <td class="govuk-table__cell govuk-!-width-one-quarter" th:text="#{${property.isTenantedMessageKey}}"></td>
+                                </tr>
                             </tbody>
                         </table>
                     </th:block>
