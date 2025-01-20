@@ -11,30 +11,39 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 
 class PropertyRegistrationJourneyDataHelperTests {
     private lateinit var mockAddressDataService: AddressDataService
+    private lateinit var mockLocalAuthorityService: LocalAuthorityService
     private lateinit var journeyDataBuilder: JourneyDataBuilder
 
     @BeforeEach
     fun setup() {
         mockAddressDataService = mock()
-        journeyDataBuilder = JourneyDataBuilder.propertyDefault(mockAddressDataService)
+        mockLocalAuthorityService = mock()
+        journeyDataBuilder = JourneyDataBuilder.propertyDefault(mockAddressDataService, mockLocalAuthorityService)
     }
 
     @Test
     fun `getAddress returns the selected address`() {
         val selectedAddress = "1 Example Address, EG1 2AB"
-        val mockJourneyData = journeyDataBuilder.withSelectedAddress(selectedAddress).build()
-        val expectedAddressDataModel = AddressDataModel(selectedAddress)
+        val localAuthority = createLocalAuthority()
+        val mockJourneyData =
+            journeyDataBuilder.withSelectedAddress(selectedAddress, localAuthority = localAuthority).build()
+        val expectedAddressDataModel = AddressDataModel(selectedAddress, localAuthorityId = localAuthority.id)
 
         whenever(mockAddressDataService.getAddressData(selectedAddress)).thenReturn(expectedAddressDataModel)
 
-        val addressDataModel = PropertyRegistrationJourneyDataHelper.getAddress(mockJourneyData, mockAddressDataService)
+        val addressDataModel =
+            PropertyRegistrationJourneyDataHelper.getAddress(
+                mockJourneyData,
+                mockAddressDataService,
+            )
 
         assertEquals(expectedAddressDataModel, addressDataModel)
     }
@@ -44,10 +53,28 @@ class PropertyRegistrationJourneyDataHelperTests {
         val addressLineOne = "1 Example Address"
         val townOrCity = "Townville"
         val postcode = "EG1 2AB"
-        val mockJourneyData = journeyDataBuilder.withManualAddress(addressLineOne, townOrCity, postcode).build()
-        val expectedAddressDataModel = AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode)
+        val localAuthority = createLocalAuthority()
+        val mockJourneyData =
+            journeyDataBuilder
+                .withManualAddress(addressLineOne, townOrCity, postcode, localAuthority)
+                .build()
+        val expectedAddressDataModel =
+            AddressDataModel.fromManualAddressData(
+                addressLineOne,
+                townOrCity,
+                postcode,
+                localAuthorityId = localAuthority.id,
+            )
 
-        val addressDataModel = PropertyRegistrationJourneyDataHelper.getAddress(mockJourneyData, mockAddressDataService)
+        whenever(mockLocalAuthorityService.retrieveLocalAuthorityByCustodianCode(localAuthority.custodianCode)).thenReturn(
+            localAuthority,
+        )
+
+        val addressDataModel =
+            PropertyRegistrationJourneyDataHelper.getAddress(
+                mockJourneyData,
+                mockAddressDataService,
+            )
         assertEquals(expectedAddressDataModel, addressDataModel)
     }
 

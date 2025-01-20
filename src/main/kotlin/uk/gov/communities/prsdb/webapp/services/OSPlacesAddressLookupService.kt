@@ -7,7 +7,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
 @Service
 class OSPlacesAddressLookupService(
-    val osPlacesClient: OSPlacesClient,
+    private val osPlacesClient: OSPlacesClient,
+    private val localAuthorityService: LocalAuthorityService,
 ) : AddressLookupService {
     override fun search(
         houseNameOrNumber: String,
@@ -28,7 +29,7 @@ class OSPlacesAddressLookupService(
             addresses.add(
                 AddressDataModel(
                     singleLineAddress = dataset.getString("ADDRESS"),
-                    custodianCode = dataset.getInt("LOCAL_CUSTODIAN_CODE").toString(),
+                    localAuthorityId = getLocalAuthorityId(dataset),
                     uprn = if (dataset.getString("UPRN").isEmpty()) null else dataset.getString("UPRN").toLong(),
                     organisation = dataset.optString("ORGANISATION_NAME", null),
                     subBuilding = dataset.optString("SUB_BUILDING_NAME", null),
@@ -47,5 +48,10 @@ class OSPlacesAddressLookupService(
             )
         }
         return addresses
+    }
+
+    private fun getLocalAuthorityId(dataset: JSONObject): Int {
+        val custodianCode = dataset.getInt("LOCAL_CUSTODIAN_CODE").toString()
+        return localAuthorityService.retrieveLocalAuthorityByCustodianCode(custodianCode)!!.id
     }
 }
