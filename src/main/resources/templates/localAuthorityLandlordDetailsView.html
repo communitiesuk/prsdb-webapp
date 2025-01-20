@@ -7,7 +7,6 @@
 
         <h1 class="govuk-heading-l" th:text="${name}">name</h1>
 
-<!--         MAKE THE BELOW UTEXT-->
         <div th:replace="~{fragments/insetText :: insetText(#{landlordDetails.lastUpdated(${name},${lastModifiedDate})})}">landlordDetails.lastUpdated</div>
 
         <div th:replace="~{fragments/tabs/tabs :: tabs(~{:: #tabs-content})}" >
