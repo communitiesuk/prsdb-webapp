@@ -129,22 +129,27 @@ VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', '1940'),
        (3, '09/13/24', '09/13/24', 3, '3 Imaginary Street', '1945'),
        (4, '09/13/24', '09/13/24', 4, '4 Pretend Crescent', '1945'),
        (5, '09/13/24', '09/13/24', 5, '5 Mythical Place', '3245'),
-       (6, '12/10/2024', '12/10/2024', 1123456, '1, Example Road, EG', '3245');
+       (6, '12/10/2024', '12/10/2024', 1123456, '1, Example Road, EG', '3245'),
+       (7, '09/13/24', '09/13/24', 6, '2 Fictional Road', '1940'),
+       (8, '09/13/24', '09/13/24', 7, '3 Fake Way', '1945'),
+       (9, '09/13/24', '09/13/24', 8, '4 Imaginary Street', '1945'),
+       (10, '09/13/24', '09/13/24', 9, '5 Pretend Crescent', '1945'),
+       (11, '09/13/24', '09/13/24', 10, '6 Mythical Place', '3245');
 
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
                       is_active, phone_number, subject_identifier, name, email)
 VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:fdc:gov.uk:2022:UVWXY',
-        'PRSDB Alexander Smith', 'alex.surname@example.com'),
+        'Alexander Smith', 'alex.surname@example.com'),
        (2, '09/13/24', '09/13/24', 2, 2, '08/13/2001', true, 07111111111, 'urn:fdc:gov.uk:2022:ABCDE',
-        'PRSDB Alexandra Davies', 'alexandra.q.davies@example.com'),
+        'Alexandra Davies', 'alexandra.q.davies@example.com'),
        (3, '09/13/24', '09/13/24', 3, 3, '07/13/1997', true, 07111111111, 'urn:fdc:gov.uk:2022:PQRST',
-        'PRSDB Evan Alexandrescu', 'unrelatedemail@completelydifferentdomain.com'),
+        'Evan Alexandrescu', 'unrelatedemail@completelydifferentdomain.com'),
        (4, '09/13/24', '09/13/24', 4, 4, '06/13/1989', true, 07111111111,
-        'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', 'PRSDB Tobias Evans', 'tobyevans@importantco.com'),
+        'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', 'Tobias Evans', 'tobyevans@importantco.com'),
        (5, '09/13/24', '09/13/24', 5, 5, '05/13/1950', true, 07111111111,
-        'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', 'PRSDB Margaret Mary Smith',
+        'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', 'Margaret Mary Smith',
         'mm.smith@importantco.com'),
         (6, '12/19/24', '12/19/24', 7,5,'06/13/1989',true,07111111111,
          'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo','PRSDB Landlord', 'Team-PRSDB+landlord@softwire.com'),
@@ -180,11 +185,11 @@ SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM lan
 
 INSERT INTO property (id, status, is_active, property_build_type, address_id)
 VALUES (1, 1, true, 1, 6),
-       (2, 1, true, 1, 1),
-       (3, 1, true, 1, 2),
-       (4, 1, true, 1, 3),
-       (5, 1, true, 1, 4),
-       (6, 1, false, 1, 5);
+       (2, 1, true, 1, 7),
+       (3, 1, true, 1, 8),
+       (4, 1, true, 1, 9),
+       (5, 1, true, 1, 10),
+       (6, 1, false, 1, 11);
 
 SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
 
