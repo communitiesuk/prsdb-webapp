@@ -7,7 +7,14 @@
 
         <h1 class="govuk-heading-l" th:text="${name}">name</h1>
 
-        <div th:replace="~{fragments/insetText :: insetText(#{landlordDetails.lastUpdated(${name},${lastModifiedDate})})}">landlordDetails.lastUpdated</div>
+        <div th:replace="~{fragments/insetText :: insetText(~{:: #last-updated-text})}">
+            <th:block id="last-updated-text">
+                <strong th:text="${name}">name</strong>
+                <span th:text="#{landlordDetails.lastUpdated.afterName} + ' '">landlordDetails.lastUpdated.afterName</span>
+                <strong th:text="${lastModifiedDate}">lastModifiedDate</strong>
+                <span th:text="#{landlordDetails.lastUpdated.afterDate}">landlordDetails.lastUpdated.afterDate</span>
+            </th:block>
+        </div>
 
         <div th:replace="~{fragments/tabs/tabs :: tabs(~{:: #tabs-content})}" >
             <th:block id="tabs-content">
