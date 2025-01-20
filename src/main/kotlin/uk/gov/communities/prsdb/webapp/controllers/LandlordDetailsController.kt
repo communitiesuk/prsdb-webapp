@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import kotlinx.datetime.toKotlinInstant
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.LandlordViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -45,12 +47,29 @@ class LandlordDetailsController(
         return "landlordDetailsView"
     }
 
-    // TODO PRSD-656: return LA view of landlord details
     @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
     @GetMapping("/{id}")
     fun getLandlordDetails(
         @PathVariable id: String,
-    ) = "error/404"
+        model: Model,
+    ): String {
+        // TODO PRSD-656: is this the right exception?
+        val landlord =
+            landlordService.retrieveLandlordById(id.toLong()) ?: throw PrsdbWebException("Landlord $id not found")
+
+        val lastModifiedDate = DateTimeHelper.getDateInUK(landlord.lastModifiedDate.toInstant().toKotlinInstant())
+
+        val landlordViewModel = LandlordViewModel(landlord = landlord, withChangeLinks = false)
+
+        model.addAttribute("name", landlordViewModel.name)
+        model.addAttribute("lastModifiedDate", lastModifiedDate)
+        model.addAttribute("landlord", landlordViewModel)
+
+        // TODO PRSD-670: Replace with link to dashboard
+        model.addAttribute("backUrl", "/")
+
+        return "localAuthorityLandlordDetailsView"
+    }
 
     companion object {
         const val UPDATE_ROUTE = "landlord-details/update"
