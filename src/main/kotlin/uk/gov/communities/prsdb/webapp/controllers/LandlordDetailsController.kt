@@ -53,7 +53,6 @@ class LandlordDetailsController(
         @PathVariable id: String,
         model: Model,
     ): String {
-        // TODO PRSD-656: is this the right exception?
         val landlord =
             landlordService.retrieveLandlordById(id.toLong()) ?: throw PrsdbWebException("Landlord $id not found")
 

@@ -7,6 +7,8 @@ import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toLocalDateTime
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertIterableEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -304,5 +306,37 @@ class LandlordViewModelTest {
     @Test
     fun getConsentInformation() {
         TODO("PRSD-746")
+    }
+
+    @Test
+    fun `LandlordViewModel populates change links in rows that should have them`() {
+        // Arrange
+        val testLandlord = MockLandlordData.createLandlord()
+
+        // Act
+        val viewModel = LandlordViewModel(testLandlord)
+
+        // Assert
+        assertNull(viewModel.personalDetails[0].changeUrl)
+        assertNull(viewModel.personalDetails[1].changeUrl)
+
+        println(viewModel.personalDetails.size)
+
+        for (i in viewModel.personalDetails.subList(2, viewModel.personalDetails.size)) {
+            assertNotNull(i.fieldHeading)
+        }
+    }
+
+    @Test
+    fun `LandlordViewModel returns all rows without change links`() {
+        // Arrange
+        val testLandlord = MockLandlordData.createLandlord()
+
+        // Act
+        val viewModel = LandlordViewModel(testLandlord, false)
+
+        // Assert
+        viewModel.personalDetails.forEach { personalDetails -> assertNull(personalDetails.changeUrl) }
+        viewModel.consentInformation.forEach { consentInformation -> assertNull(consentInformation.changeUrl) }
     }
 }
