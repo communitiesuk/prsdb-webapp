@@ -2,9 +2,12 @@ package uk.gov.communities.prsdb.webapp.database.entity
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.ForeignKey
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
 @Entity
@@ -45,10 +48,12 @@ class Address() : ModifiableAuditableEntity() {
     var postcode: String? = null
         private set
 
-    var custodianCode: String? = null
+    @ManyToOne
+    @JoinColumn(foreignKey = ForeignKey(name = "FK_ADDRESS_LA"))
+    var localAuthority: LocalAuthority? = null
         private set
 
-    constructor(addressDataModel: AddressDataModel) : this() {
+    constructor(addressDataModel: AddressDataModel, localAuthority: LocalAuthority? = null) : this() {
         this.uprn = addressDataModel.uprn
         this.singleLineAddress = addressDataModel.singleLineAddress
         this.organisation = addressDataModel.organisation
@@ -61,6 +66,6 @@ class Address() : ModifiableAuditableEntity() {
         this.postcode = addressDataModel.postcode
         this.townName = addressDataModel.townName
         this.postcode = addressDataModel.postcode
-        this.custodianCode = addressDataModel.custodianCode
+        this.localAuthority = localAuthority
     }
 }
