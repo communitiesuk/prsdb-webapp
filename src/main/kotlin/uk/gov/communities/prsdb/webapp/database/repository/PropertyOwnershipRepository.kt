@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.database.repository
 
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -18,4 +19,13 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
     ): List<PropertyOwnership>
 
     fun countByPrimaryLandlord(primaryLandlord: Landlord): Int
+
+    @Query(
+        "SELECT COUNT(primary_landlord_id) " +
+            "FROM property_ownership po  " +
+            "WHERE po.primary_landlord_id IN (:primaryLandlordIds)" +
+            "GROUP BY po.primary_landlord_id",
+        nativeQuery = true,
+    )
+    fun countListedProperties(primaryLandlordIds: List<Long>): List<Int>
 }

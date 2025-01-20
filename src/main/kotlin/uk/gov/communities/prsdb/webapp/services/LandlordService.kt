@@ -83,6 +83,11 @@ class LandlordService(
 
         val pageRequest = PageRequest.of(currentPageNumber, pageSize)
 
+        val landlords =
+            landlordRepository
+                .searchMatching(searchTerm, pageRequest)
+        val listedPropertyCounts = propertyOwnershipRepository.countListedProperties(landlords.content.map { it.id })
+
         return landlordRepository
             .searchMatching(searchTerm, pageRequest)
             .map {
