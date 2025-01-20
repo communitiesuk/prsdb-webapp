@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels
 
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropertyCount
 
 data class LandlordSearchResultDataModel(
     val id: Long,
@@ -25,12 +26,11 @@ data class LandlordSearchResultDataModel(
                 phoneNumber = landlord.phoneNumber,
             )
 
-        fun fromLandlordWithListedProperties(
-            landlord: Landlord,
-            listedPropertyCount: Int,
+        fun fromLandlordWithListedPropertyCount(
+            landlordWithListedPropertyCount: LandlordWithListedPropertyCount,
         ): LandlordSearchResultDataModel {
-            val dataModel = fromLandlord(landlord)
-            dataModel.listedPropertyCount = listedPropertyCount
+            val dataModel = fromLandlord(landlordWithListedPropertyCount.landlord)
+            dataModel.listedPropertyCount = landlordWithListedPropertyCount.count
             return dataModel
         }
     }

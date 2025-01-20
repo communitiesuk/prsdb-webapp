@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPropertyCountRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -21,6 +22,7 @@ class LandlordService(
     private val landlordRepository: LandlordRepository,
     private val oneLoginUserRepository: OneLoginUserRepository,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
+    private val landlordWithListedPropertyCountRepository: LandlordWithListedPropertyCountRepository,
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
 ) {
@@ -71,9 +73,8 @@ class LandlordService(
                 retrieveLandlordByRegNum(registrationNumber)?.let { landlord ->
                     return PageImpl(
                         listOf(
-                            LandlordSearchResultDataModel.fromLandlordWithListedProperties(
-                                landlord,
-                                propertyOwnershipRepository.countByPrimaryLandlord(landlord),
+                            LandlordSearchResultDataModel.fromLandlordWithListedPropertyCount(
+                                landlordWithListedPropertyCountRepository.findByLandlordId(landlord.id),
                             ),
                         ),
                     )
@@ -83,18 +84,12 @@ class LandlordService(
 
         val pageRequest = PageRequest.of(currentPageNumber, pageSize)
 
-        val landlords =
-            landlordRepository
-                .searchMatching(searchTerm, pageRequest)
-        val listedPropertyCounts = propertyOwnershipRepository.countListedProperties(landlords.content.map { it.id })
-
         return landlordRepository
             .searchMatching(searchTerm, pageRequest)
-            .map {
-                LandlordSearchResultDataModel.fromLandlordWithListedProperties(
-                    it,
-                    propertyOwnershipRepository.countByPrimaryLandlord(it),
-                )
+            .let { landlords ->
+                landlordWithListedPropertyCountRepository
+                    .findByLandlordIdIn(landlords.content.map { it.id }, pageRequest)
+                    .map { LandlordSearchResultDataModel.fromLandlordWithListedPropertyCount(it) }
             }
     }
 }
