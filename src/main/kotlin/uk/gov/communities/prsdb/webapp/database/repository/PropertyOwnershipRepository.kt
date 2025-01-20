@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.database.repository
 
 import org.springframework.data.jpa.repository.JpaRepository
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 
 interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
@@ -15,4 +16,6 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
         userId: String,
         status: RegistrationStatus,
     ): List<PropertyOwnership>
+
+    fun countByPrimaryLandlord(primaryLandlord: Landlord): Int
 }

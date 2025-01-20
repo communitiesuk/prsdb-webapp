@@ -9,6 +9,7 @@ data class LandlordSearchResultDataModel(
     val contactAddress: String,
     val email: String,
     val phoneNumber: String,
+    var listedPropertyCount: Int = 0,
 ) {
     companion object {
         fun fromLandlord(landlord: Landlord) =
@@ -23,5 +24,14 @@ data class LandlordSearchResultDataModel(
                 email = landlord.email,
                 phoneNumber = landlord.phoneNumber,
             )
+
+        fun fromLandlordWithListedProperties(
+            landlord: Landlord,
+            listedPropertyCount: Int,
+        ): LandlordSearchResultDataModel {
+            val dataModel = fromLandlord(landlord)
+            dataModel.listedPropertyCount = listedPropertyCount
+            return dataModel
+        }
     }
 }
