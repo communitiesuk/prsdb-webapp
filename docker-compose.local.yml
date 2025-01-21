@@ -11,8 +11,8 @@ services:
       - POSTGRES_DB=prsdblocal
     volumes:
       - type: bind
-        source: ./src/main/resources/data/local_authorities/addressbase-local-custodian-codes.csv
-        target: /data/addressbase-local-custodian-codes.csv
+        source: ./src/main/resources/data/local_authorities/local_authorities.csv
+        target: /data/local_authorities.csv
   redis:
     image: redis:7.4-alpine
     restart: always

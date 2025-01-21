@@ -9,7 +9,7 @@ CREATE TABLE tmp
 );
 
 COPY tmp
-    FROM '/data/addressbase-local-custodian-codes.csv'
+    FROM '/data/local_authorities.csv'
     WITH (FORMAT CSV, HEADER);
 
 INSERT INTO local_authority(custodian_code, name)

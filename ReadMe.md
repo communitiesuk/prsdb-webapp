@@ -82,41 +82,55 @@ Database migrations <will be/ are> run at deployment time for all non-local depl
 the `flywayMigrate` Gradle task. When developing locally using the `local` profile the migrations will run at
 application start up. If you are using the `local` launch profile in IntelliJ, this will also run the `flywayClean` task
 before running the migrations. After the migrations have run Spring Boot will then run the SQL in `data-local.sql` to
-populate the database with seed data. 
+populate the database with seed data.
+
+### Updating Local Authority Data
+
+The project uses a migration (`V1_10_0__populate_la_table.sql`) to populate the `local_authority` table with data from
+`src/main/resources/data/local_authorities/local_authorities.csv`. If the CSV file is updated, create a copy of
+it and call it `local_authorities_V<version number>.csv`, where `version number` is one more than the latest version in
+`src/main/resources/data/local_authorities`.
 
 ### Mock One Login Oauth2
 
-For development, we've mocked elements of the governments one login system (that the web app will be using in deployment).
-When you start the app using the `local` run configuration, this will be available, when you attempt to login. It will automatically log you in as a user that has every role - and therefore can access all pages.
+For development, we've mocked elements of the governments one login system (that the web app will be using in
+deployment).
+When you start the app using the `local` run configuration, this will be available, when you attempt to login. It will
+automatically log you in as a user that has every role - and therefore can access all pages.
 
 If you are adding new roles please add the user with the `userId` set in `MockOneLoginHelper` to that new role/table.
 
-If you need to be able to login as a user that has specific roles then you can change the `userId` in `MockOneLoginHelper` to the id from the `one_login_user` table of a user that has the permissions you want.
+If you need to be able to login as a user that has specific roles then you can change the `userId` in
+`MockOneLoginHelper` to the id from the `one_login_user` table of a user that has the permissions you want.
 
 #### Disabling the mock One Login Oauth2
 
-If you need to disable the mock to run the app with One login's integration system, edit the run configuration so that it uses the `local-auth` profile instead of the `local-no-auth` profile.
+If you need to disable the mock to run the app with One login's integration system, edit the run configuration so that
+it uses the `local-auth` profile instead of the `local-no-auth` profile.
 
 ### One Login accounts
-When you run the app with the one login mock disabled and try to view pages, you will be prompted to sign in or create a One Login account. 
 
-To view most pages, your account will need to have been added to the relevant database (e.g. LandlordUser, 
-LocalAuthorityUser) for you to be able to see the page. It checks the database on login (you can step through 
-`getRolesforSubjectId` in `UserRolesService` to test it), so you will need to log in again to see the change in 
-permissions (if logging out is not yet implemented, try running in an incognito tab so you are prompted to log in 
-again). 
+When you run the app with the one login mock disabled and try to view pages, you will be prompted to sign in or create a
+One Login account.
 
-For local dev, you can add your account by modifying the `data-local.sql` file. Insert an entry into the 
+To view most pages, your account will need to have been added to the relevant database (e.g. LandlordUser,
+LocalAuthorityUser) for you to be able to see the page. It checks the database on login (you can step through
+`getRolesforSubjectId` in `UserRolesService` to test it), so you will need to log in again to see the change in
+permissions (if logging out is not yet implemented, try running in an incognito tab so you are prompted to log in
+again).
+
+For local dev, you can add your account by modifying the `data-local.sql` file. Insert an entry into the
 `one_login_user` database with a subject_identifier matching your real one login id (see below).
-Then you can add entries to any other user database that you need access to (e.g. landlord_user, local_authority_user 
+Then you can add entries to any other user database that you need access to (e.g. landlord_user, local_authority_user
 with is_manager set to true to see local authority admin pages).
 
 #### Finding your One Login id
-One way to find your id is to check the `subjectId` in `getRolesForSubjectId` in the `UserRolesService` while you are 
+
+One way to find your id is to check the `subjectId` in `getRolesForSubjectId` in the `UserRolesService` while you are
 logging in.
 
 * Run the app in debug mode, add a break point in `getRolesForSubjectId`
-* If you are already logged in it won't hit the breakpoint. Load the app in an incognito tab so that you are prompted 
+* If you are already logged in it won't hit the breakpoint. Load the app in an incognito tab so that you are prompted
   to log in again.
 * When you hit the debug point, your one login id should be available in `subjectId`
   (it should look like `urn:fdc:gov.uk:2022:string-of-characters`)
