@@ -75,6 +75,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
     testImplementation("com.deque.html.axe-core:playwright:4.4.1")
+
     // Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
 
@@ -83,6 +84,9 @@ dependencies {
 
     // DateTime
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
+
+    // CSV Data Loading
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv")
 }
 
 kotlin {
@@ -122,6 +126,5 @@ buildscript {
     dependencies {
         classpath("org.postgresql:postgresql:42.7.4")
         classpath("org.flywaydb:flyway-database-postgresql:10.18.0")
-//        classpath("com.googlecode.libphonenumber:libphonenumber:8.13.49")
     }
 }
