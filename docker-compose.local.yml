@@ -9,6 +9,10 @@ services:
       - POSTGRES_PASSWORD=notarealpassword
       - POSTGRES_USER=postgres
       - POSTGRES_DB=prsdblocal
+    volumes:
+      - type: bind
+        source: ./src/main/resources/data/local_authorities/addressbase-local-custodian-codes.csv
+        target: /data/addressbase-local-custodian-codes.csv
   redis:
     image: redis:7.4-alpine
     restart: always
