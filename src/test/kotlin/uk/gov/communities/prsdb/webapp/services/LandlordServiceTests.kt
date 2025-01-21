@@ -70,6 +70,7 @@ class LandlordServiceTests {
                         RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
                     ),
                     listOf(LandlordSearchResultDataModel.fromLandlord(landlord)),
+                    0,
                 ),
                 Arguments.of(
                     Named.of(
@@ -80,6 +81,7 @@ class LandlordServiceTests {
                             ).toString(),
                     ),
                     emptyList<LandlordSearchResultDataModel>(),
+                    0,
                 ),
                 Arguments.of(
                     Named.of(
@@ -89,6 +91,7 @@ class LandlordServiceTests {
                             .toString(),
                     ),
                     emptyList<LandlordSearchResultDataModel>(),
+                    0,
                 ),
                 Arguments.of(
                     Named.of(
@@ -96,6 +99,19 @@ class LandlordServiceTests {
                         "not a registration number",
                     ),
                     emptyList<LandlordSearchResultDataModel>(),
+                    0,
+                ),
+                Arguments.of(
+                    Named.of(
+                        "the landlord has listed properties",
+                        RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
+                    ),
+                    listOf(
+                        LandlordSearchResultDataModel.fromLandlordWithListedPropertyCount(
+                            LandlordWithListedPropertyCount(landlord.id, landlord, 3),
+                        ),
+                    ),
+                    3,
                 ),
             )
     }
@@ -198,13 +214,14 @@ class LandlordServiceTests {
     fun `searchForLandlords returns a corresponding list of LandlordSearchResultDataModels (LRN query)`(
         registrationNumber: String,
         expectedSearchResults: List<LandlordSearchResultDataModel>,
+        listedPropertyCount: Int,
     ) {
         val landlordId = landlord.id
 
         whenever(mockLandlordRepository.findByRegistrationNumber_Number(landlord.registrationNumber.number))
             .thenReturn(landlord)
         whenever(mockLandlordWithListedPropertyCountRepository.findByLandlordId(landlord.id))
-            .thenReturn(LandlordWithListedPropertyCount(landlordId, landlord, 0))
+            .thenReturn(LandlordWithListedPropertyCount(landlordId, landlord, listedPropertyCount))
 
         whenever(mockLandlordRepository.searchMatching(eq(registrationNumber), any()))
             .thenReturn(PageImpl(emptyList<Landlord>()))
@@ -285,5 +302,32 @@ class LandlordServiceTests {
 
         assertEquals(expectedSearchResultsPage1, searchResults1.content)
         assertEquals(expectedSearchResultsPage2, searchResults2.content)
+    }
+
+    @Test
+    fun `searchForLandlords returns LandlordSearchResultDataModels including listedPropertyCount`() {
+        val searchQuery = "query"
+        val maxEntriesOnPage = 25
+
+        val matchingLandlords = mutableListOf<Landlord>()
+        val matchingLandlordsWithListedPropertyCount = mutableListOf<LandlordWithListedPropertyCount>()
+        for (i in 1..3) {
+            val landlord = createLandlord()
+            matchingLandlords.add(landlord)
+            matchingLandlordsWithListedPropertyCount.add(LandlordWithListedPropertyCount(landlord.id, landlord, i))
+        }
+
+        val expectedSearchResults =
+            matchingLandlordsWithListedPropertyCount
+                .map { LandlordSearchResultDataModel.fromLandlordWithListedPropertyCount(it) }
+
+        whenever(mockLandlordRepository.searchMatching(searchQuery, PageRequest.of(0, maxEntriesOnPage)))
+            .thenReturn(PageImpl(matchingLandlords))
+        whenever(mockLandlordWithListedPropertyCountRepository.findByLandlordIdIn(matchingLandlords.map { it.id }))
+            .thenReturn(matchingLandlordsWithListedPropertyCount)
+
+        val searchResults = landlordService.searchForLandlords(searchQuery, 0, maxEntriesOnPage)
+
+        assertEquals(expectedSearchResults, searchResults.content)
     }
 }
