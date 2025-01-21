@@ -14,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
-import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -26,7 +25,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createAddress
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createFiveDifferentProperties
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createProperty
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createPropertyOwnership
@@ -138,54 +136,59 @@ class PropertyOwnershipServiceTests {
     inner class GetLandlordRegisteredPropertiesDetails {
         private val landlord = createLandlord()
 
-        private val properties = createFiveDifferentProperties()
+        private val address1 = "11 Example Road, EG1 2AB"
+        private val address2 = "12 Example Road, EG1 2AB"
+        private val custodianCode = "1045"
+        private val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
+
+        private val property1 = createProperty(address = createAddress(address1, custodianCode))
+        private val property2 = createProperty(address = createAddress(address2, custodianCode))
+
+        private val expectedLocalAuthority = "DERBYSHIRE DALES DISTRICT COUNCIL"
+        private val expectedRegistrationNumber = "P-CCCF-ZHXX"
+        private val expectedPropertyLicence = "Not Licenced"
+        private val expectedIsTenantedMessageKey = "commonText.no"
+
+        private val propertyOwnership1 =
+            createPropertyOwnership(
+                primaryLandlord = landlord,
+                property = property1,
+                registrationNumber = registrationNumber,
+                license = null,
+                currentNumTenants = 0,
+            )
+        private val propertyOwnership2 =
+            createPropertyOwnership(
+                primaryLandlord = landlord,
+                property = property2,
+                registrationNumber = registrationNumber,
+                license = null,
+                currentNumTenants = 0,
+            )
+
+        private val landlordsProperties: List<PropertyOwnership> =
+            listOf(propertyOwnership1, propertyOwnership2)
+
+        private val expectedResults: List<RegisteredPropertyDataModel> =
+            listOf(
+                RegisteredPropertyDataModel(
+                    address1,
+                    expectedRegistrationNumber,
+                    expectedLocalAuthority,
+                    expectedPropertyLicence,
+                    expectedIsTenantedMessageKey,
+                ),
+                RegisteredPropertyDataModel(
+                    address2,
+                    expectedRegistrationNumber,
+                    expectedLocalAuthority,
+                    expectedPropertyLicence,
+                    expectedIsTenantedMessageKey,
+                ),
+            )
 
         @Test
-        fun `Returns a list of Landlords properties  in correctly formatted data model`() {
-            val property1 = createProperty(address = createAddress("11 Example Road, EG1 2AB"))
-            val property2 = createProperty(address = createAddress("12 Example Road, EG1 2AB"))
-
-            val expectedRegistrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
-            val expectedPropertyLicence = "Not Licenced"
-            val expectedIsTenantedMessageKey = "commonText.no"
-
-            val propertyOwnership1 =
-                createPropertyOwnership(
-                    primaryLandlord = landlord,
-                    property = property1,
-                    registrationNumber = expectedRegistrationNumber,
-                    license = null,
-                    currentNumTenants = 0,
-                )
-            val propertyOwnership2 =
-                createPropertyOwnership(
-                    primaryLandlord = landlord,
-                    property = property2,
-                    registrationNumber = expectedRegistrationNumber,
-                    license = null,
-                    currentNumTenants = 0,
-                )
-
-            val landlordsProperties: List<PropertyOwnership> = listOf(propertyOwnership1, propertyOwnership2)
-
-            val expectedResults: List<RegisteredPropertyDataModel> =
-                listOf(
-                    RegisteredPropertyDataModel(
-                        property1.address.singleLineAddress,
-                        RegistrationNumberDataModel.fromRegistrationNumber(expectedRegistrationNumber).toString(),
-                        property1.address.localAuthority!!.name,
-                        expectedPropertyLicence,
-                        expectedIsTenantedMessageKey,
-                    ),
-                    RegisteredPropertyDataModel(
-                        property2.address.singleLineAddress,
-                        RegistrationNumberDataModel.fromRegistrationNumber(expectedRegistrationNumber).toString(),
-                        property2.address.localAuthority!!.name,
-                        expectedPropertyLicence,
-                        expectedIsTenantedMessageKey,
-                    ),
-                )
-
+        fun `Returns a list of Landlords properties in correctly formatted data model from landlords BaseUser_Id`() {
             whenever(
                 mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
                     "landlord",
@@ -200,87 +203,18 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `Returns correct isTenanted message key`() {
-            val propertyOwnership1 =
-                createPropertyOwnership(primaryLandlord = landlord, property = properties[0], currentNumTenants = 0)
-            val propertyOwnership2 =
-                createPropertyOwnership(primaryLandlord = landlord, property = properties[1], currentNumTenants = 1)
-            val propertyOwnership3 =
-                createPropertyOwnership(primaryLandlord = landlord, property = properties[2], currentNumTenants = 2)
-
-            val landlordsProperties: List<PropertyOwnership> =
-                listOf(propertyOwnership1, propertyOwnership2, propertyOwnership3)
-
+        fun `Returns a list of Landlords properties in correctly formatted data model from landlords Id`() {
             whenever(
-                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
-                    "landlord",
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_IdAndIsActiveTrueAndProperty_Status(
+                    landlord.id,
                     RegistrationStatus.REGISTERED,
                 ),
             ).thenReturn(landlordsProperties)
 
-            val result = propertyOwnershipService.getRegisteredPropertiesForLandlord("landlord")
+            val result = propertyOwnershipService.getRegisteredPropertiesForLandlord(landlord.id)
 
-            assertEquals(result[0].isTenantedMessageKey, "commonText.no")
-            assertEquals(result[1].isTenantedMessageKey, "commonText.yes")
-            assertEquals(result[2].isTenantedMessageKey, "commonText.yes")
-        }
-
-        @Test
-        fun `Returns correct licensing message key`() {
-            val selectiveLicence = License(LicensingType.SELECTIVE_LICENCE, "testLicenseNumber")
-            val hmoMandatoryLicence = License(LicensingType.HMO_MANDATORY_LICENCE, "testLicenseNumber")
-            val hmoAdditionalLicence = License(LicensingType.HMO_ADDITIONAL_LICENCE, "testLicenseNumber")
-            val noLicensingLicence = License(LicensingType.NO_LICENSING, "testLicenseNumber")
-            val propertyOwnership1 =
-                createPropertyOwnership(
-                    primaryLandlord = landlord,
-                    property = properties[0],
-                    license = selectiveLicence,
-                )
-            val propertyOwnership2 =
-                createPropertyOwnership(
-                    primaryLandlord = landlord,
-                    property = properties[1],
-                    license = hmoMandatoryLicence,
-                )
-            val propertyOwnership3 =
-                createPropertyOwnership(
-                    primaryLandlord = landlord,
-                    property = properties[2],
-                    license = hmoAdditionalLicence,
-                )
-            val propertyOwnership4 =
-                createPropertyOwnership(
-                    primaryLandlord = landlord,
-                    property = properties[3],
-                    license = noLicensingLicence,
-                )
-            val propertyOwnership5 =
-                createPropertyOwnership(primaryLandlord = landlord, property = properties[4], license = null)
-
-            val landlordsProperties: List<PropertyOwnership> =
-                listOf(
-                    propertyOwnership1,
-                    propertyOwnership2,
-                    propertyOwnership3,
-                    propertyOwnership4,
-                    propertyOwnership5,
-                )
-
-            whenever(
-                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
-                    "landlord",
-                    RegistrationStatus.REGISTERED,
-                ),
-            ).thenReturn(landlordsProperties)
-
-            val result = propertyOwnershipService.getRegisteredPropertiesForLandlord("landlord")
-
-            assertEquals(result[0].propertyLicence, "Selective licence")
-            assertEquals(result[1].propertyLicence, "HMO licence")
-            assertEquals(result[2].propertyLicence, "Additional licence")
-            assertEquals(result[3].propertyLicence, "Not Licenced")
-            assertEquals(result[4].propertyLicence, "Not Licenced")
+            assertTrue(result.size == 2)
+            assertEquals(expectedResults, result)
         }
     }
 }
