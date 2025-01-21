@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{landlordDetails.title}, ~{::main}, false)}">
+<a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+<main class="govuk-main-wrapper" id="main-content">
+    <div id="page-contents">
+        <h2 class="govuk-heading-m" th:text="#{landlordDetails.heading}">landlordDetails.heading</h2>
+
+        <h1 class="govuk-heading-l" th:text="${name}">name</h1>
+
+        <div th:replace="~{fragments/warningInsetText :: warningInsetText(~{:: #last-updated-text})}">
+            <th:block id="last-updated-text">
+                <strong th:text="${name}">name</strong>
+                <span th:text="' ' + #{landlordDetails.lastUpdated.afterName} + ' '">landlordDetails.lastUpdated.afterName</span>
+                <strong th:text="${lastModifiedDate}">lastModifiedDate</strong>
+                <span th:text="#{landlordDetails.lastUpdated.afterDate}">landlordDetails.lastUpdated.afterDate</span>
+            </th:block>
+        </div>
+
+        <div th:replace="~{fragments/tabs/tabs :: tabs(~{:: #tabs-content})}" >
+            <th:block id="tabs-content">
+                <ul th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{:: #tab-headings})}">
+                    <th:block id="tab-headings">
+                        <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('personal-details', #{landlordDetails.personalDetails.heading})}">
+                        </li>
+                        <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('registered-properties', #{landlordDetails.registeredProperties.heading})}">
+                        </li>
+                    </th:block>
+                </ul>
+
+                <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('personal-details', ~{:: #personal-details-panel-content})}">
+                    <th:block id="personal-details-panel-content">
+                        <dl th:replace="~{fragments/summaryList :: summaryList(${landlord.personalDetails})}" ></dl>
+                        <h2 class="govuk-heading-m" th:text="#{landlordDetails.personalDetails.optionalChoices.heading}">landlordDetails.personalDetails.optionalChoices.heading</h2>
+                        <dl th:replace="~{fragments/summaryList :: summaryList(${landlord.consentInformation})}" ></dl>
+                    </th:block>
+                </div>
+
+                <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('registered-properties', ~{:: #registered-properties-panel-content})}">
+                    <th:block id="registered-properties-panel-content">
+<!--                        TODO PRSD-658 add registered properties table here-->
+                    </th:block>
+                </div>
+            </th:block>
+        </div>
+
+    </div>
+</main>
+</html>
