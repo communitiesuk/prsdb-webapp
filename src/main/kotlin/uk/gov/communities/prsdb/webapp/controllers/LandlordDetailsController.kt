@@ -66,7 +66,7 @@ class LandlordDetailsController(
         model.addAttribute("lastModifiedDate", lastModifiedDate)
         model.addAttribute("landlord", landlordViewModel)
 
-        // TODO PRSD-670: Replace with link to dashboard
+        // TODO PRSD-805: Replace with previous url for back link
         model.addAttribute("backUrl", "/")
 
         return "localAuthorityLandlordDetailsView"

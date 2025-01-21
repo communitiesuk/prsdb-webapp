@@ -10,7 +10,7 @@
         <div th:replace="~{fragments/warningInsetText :: warningInsetText(~{:: #last-updated-text})}">
             <th:block id="last-updated-text">
                 <strong th:text="${name}">name</strong>
-                <span th:text="#{landlordDetails.lastUpdated.afterName} + ' '">landlordDetails.lastUpdated.afterName</span>
+                <span th:text="' ' + #{landlordDetails.lastUpdated.afterName} + ' '">landlordDetails.lastUpdated.afterName</span>
                 <strong th:text="${lastModifiedDate}">lastModifiedDate</strong>
                 <span th:text="#{landlordDetails.lastUpdated.afterDate}">landlordDetails.lastUpdated.afterDate</span>
             </th:block>
