@@ -1,12 +1,13 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import kotlinx.datetime.toKotlinInstant
+import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.LandlordViewModel
@@ -50,13 +51,14 @@ class LandlordDetailsController(
     @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
     @GetMapping("/{id}")
     fun getLandlordDetails(
-        @PathVariable id: String,
+        @PathVariable id: Long,
         model: Model,
     ): String {
         val landlord =
-            landlordService.retrieveLandlordById(id.toLong()) ?: throw PrsdbWebException("Landlord $id not found")
+            landlordService.retrieveLandlordById(id)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Landlord $id not found")
 
-        val lastModifiedDate = DateTimeHelper.getDateInUK(landlord.lastModifiedDate.toInstant().toKotlinInstant())
+        val lastModifiedDate = DateTimeHelper.getDateInUK(landlord.lastModifiedDate)
 
         val landlordViewModel = LandlordViewModel(landlord = landlord, withChangeLinks = false)
 

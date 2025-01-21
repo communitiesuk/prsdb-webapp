@@ -7,7 +7,7 @@
 
         <h1 class="govuk-heading-l" th:text="${name}">name</h1>
 
-        <div th:replace="~{fragments/insetText :: insetText(~{:: #last-updated-text})}">
+        <div th:replace="~{fragments/warningInsetText :: warningInsetText(~{:: #last-updated-text})}">
             <th:block id="last-updated-text">
                 <strong th:text="${name}">name</strong>
                 <span th:text="#{landlordDetails.lastUpdated.afterName} + ' '">landlordDetails.lastUpdated.afterName</span>
@@ -37,6 +37,7 @@
 
                 <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('registered-properties', ~{:: #registered-properties-panel-content})}">
                     <th:block id="registered-properties-panel-content">
+<!--                        TODO PRSD-658 add registered properties table here-->
                     </th:block>
                 </div>
             </th:block>

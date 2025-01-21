@@ -320,11 +320,12 @@ class LandlordViewModelTest {
         assertNull(viewModel.personalDetails[0].changeUrl)
         assertNull(viewModel.personalDetails[1].changeUrl)
 
-        println(viewModel.personalDetails.size)
-
         for (i in viewModel.personalDetails.subList(2, viewModel.personalDetails.size)) {
-            assertNotNull(i.fieldHeading)
+            assertNotNull(i.changeUrl)
         }
+
+        // TODO PRSD-746 change assertion for consentInformation once links have been added
+        viewModel.consentInformation.forEach { consentInformation -> assertNull(consentInformation.changeUrl) }
     }
 
     @Test
@@ -333,7 +334,7 @@ class LandlordViewModelTest {
         val testLandlord = MockLandlordData.createLandlord()
 
         // Act
-        val viewModel = LandlordViewModel(testLandlord, false)
+        val viewModel = LandlordViewModel(testLandlord, withChangeLinks = false)
 
         // Assert
         viewModel.personalDetails.forEach { personalDetails -> assertNull(personalDetails.changeUrl) }
