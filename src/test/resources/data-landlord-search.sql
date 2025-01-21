@@ -41,10 +41,6 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', 'Bob T Builder', 'bobthebuilder@gmail.com',
        ('urn:fdc:gov.uk:2022:Y', '', '', '01/15/25', '01/15/25'),
        ('urn:fdc:gov.uk:2022:Z', '', '', '01/15/25', '01/15/25');
 
-
-INSERT INTO local_authority (id, name, custodian_code, created_date, last_modified_date)
-VALUES (1, 'Betelgeuse', '123', '09/13/24', '09/13/24');
-
 INSERT INTO local_authority_user (subject_identifier, is_manager, local_authority_id, created_date, last_modified_date,
                                   name, email)
 VALUES ('urn:fdc:gov.uk:2022:UVWXY', true, 1, '10/14/24', '10/14/24', 'Mock User', 'test@la.com');

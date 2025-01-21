@@ -56,7 +56,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
                 {
                   "DPA": {
                     "ADDRESS": "1, Example Road, EG1 2AB",
-                    "LOCAL_CUSTODIAN_CODE": 100,
+                    "LOCAL_CUSTODIAN_CODE": 28,
                     "UPRN": "1",
                     "BUILDING_NUMBER": 1,
                     "POSTCODE": "EG1 2AB"
@@ -65,7 +65,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
                 {
                   "DPA": {
                     "ADDRESS": "already registered address",
-                    "LOCAL_CUSTODIAN_CODE": 100,
+                    "LOCAL_CUSTODIAN_CODE": 28,
                     "UPRN": "1123456",
                     "BUILDING_NUMBER": 1,
                     "POSTCODE": "EG1 3CD"
@@ -254,8 +254,8 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             selectLocalAuthorityPage.form
                 .getSelect()
                 .autocompleteInput
-                .fill("Betel")
-            selectLocalAuthorityPage.form.getSelect().selectValue("Betelgeuse")
+                .fill("ISLE OF MAN")
+            selectLocalAuthorityPage.form.getSelect().selectValue("ISLE OF MAN")
             selectLocalAuthorityPage.form.submit()
             assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
         }

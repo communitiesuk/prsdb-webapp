@@ -27,7 +27,7 @@ class EditLAUserTests : IntegrationTest() {
         var editUserPage = assertPageIs(page, EditLaUserPage::class)
         assertThat(editUserPage.name).containsText("Arthur Dent")
         // TODO PRSD-405: fix when LA users have email addresses
-        assertThat(editUserPage.email).containsText("Arthur Dent@Betelgeuse.gov.uk")
+        assertThat(editUserPage.email).containsText("Arthur Dent@ISLE OF MAN.gov.uk")
         assertEquals("false", editUserPage.isManagerRadios.getSelectedValue())
 
         // Update the user's access level to admin
@@ -58,12 +58,12 @@ class EditLAUserTests : IntegrationTest() {
         val confirmDeletePage = assertPageIs(page, ConfirmDeleteLaUserPage::class)
         assertThat(confirmDeletePage.userDetailsSection).containsText("Arthur Dent")
         // TODO PRSD-405: fix when LA users have email addresses
-        assertThat(confirmDeletePage.userDetailsSection).containsText("Arthur Dent@Betelgeuse.gov.uk")
+        assertThat(confirmDeletePage.userDetailsSection).containsText("Arthur Dent@ISLE OF MAN.gov.uk")
         confirmDeletePage.form.submit()
         val successPage = assertPageIs(page, DeleteLaUserSuccessPage::class)
 
         // The success page confirms the user is deleted
-        assertThat(successPage.confirmationBanner).containsText("You've removed Arthur Dent's account from Betelgeuse")
+        assertThat(successPage.confirmationBanner).containsText("You've removed Arthur Dent's account from ISLE OF MAN")
         successPage.returnButton.click()
         manageUsersPage = assertPageIs(page, ManageLaUsersPage::class)
 
