@@ -12,5 +12,5 @@ class LocalAuthorityService(
 
     fun retrieveLocalAuthorityByCustodianCode(custodianCode: String) = localAuthorityRepository.findByCustodianCode(custodianCode)
 
-    fun retrieveAllLocalAuthorities(): List<LocalAuthority> = localAuthorityRepository.findAll()
+    fun retrieveAllLocalAuthorities(): List<LocalAuthority> = localAuthorityRepository.findAllByOrderByNameAsc()
 }
