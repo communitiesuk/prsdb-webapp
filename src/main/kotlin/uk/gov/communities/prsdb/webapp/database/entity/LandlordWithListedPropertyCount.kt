@@ -11,12 +11,12 @@ import jakarta.persistence.OneToOne
 class LandlordWithListedPropertyCount(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val landlord_id: Long = 0,
+    val landlordId: Long = 0,
 ) {
     @OneToOne(optional = false)
     @JoinColumn(name = "landlord_id", referencedColumnName = "id")
     lateinit var landlord: Landlord
         private set
 
-    var count: Int = 0
+    var listedPropertyCount: Int = 0
 }

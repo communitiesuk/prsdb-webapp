@@ -197,7 +197,7 @@ INSERT INTO property_ownership (id, is_active, occupancy_type, landlord_type, ow
                                 current_num_tenants,
                                 registration_number_id, primary_landlord_id, property_id)
 VALUES (1, true, 0, 0, 1, 1, 2, 6, 1, 1),
-       (2, true, 0, 0, 1, 1, 2, 34, 2, 2),
+       (2, false, 0, 0, 1, 1, 2, 34, 2, 2),
        (3, true, 0, 0, 1, 1, 2, 35, 4, 3),
        (4, true, 0, 0, 1, 1, 2, 36, 1, 4),
        (5, true, 0, 0, 1, 1, 2, 37, 1, 5),

@@ -30,7 +30,7 @@ data class LandlordSearchResultDataModel(
             landlordWithListedPropertyCount: LandlordWithListedPropertyCount,
         ): LandlordSearchResultDataModel {
             val dataModel = fromLandlord(landlordWithListedPropertyCount.landlord)
-            dataModel.listedPropertyCount = landlordWithListedPropertyCount.count
+            dataModel.listedPropertyCount = landlordWithListedPropertyCount.listedPropertyCount
             return dataModel
         }
     }
