@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPropertyCountRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
-import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -21,7 +20,6 @@ import java.time.LocalDate
 class LandlordService(
     private val landlordRepository: LandlordRepository,
     private val oneLoginUserRepository: OneLoginUserRepository,
-    private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val landlordWithListedPropertyCountRepository: LandlordWithListedPropertyCountRepository,
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
@@ -87,9 +85,13 @@ class LandlordService(
         return landlordRepository
             .searchMatching(searchTerm, pageRequest)
             .let { landlords ->
-                landlordWithListedPropertyCountRepository
-                    .findByLandlordIdIn(landlords.content.map { it.id }, pageRequest)
-                    .map { LandlordSearchResultDataModel.fromLandlordWithListedPropertyCount(it) }
+                PageImpl(
+                    landlordWithListedPropertyCountRepository
+                        .findByLandlordIdIn(landlords.content.map { it.id })
+                        .map { LandlordSearchResultDataModel.fromLandlordWithListedPropertyCount(it) },
+                    pageRequest,
+                    landlords.totalElements,
+                )
             }
     }
 }

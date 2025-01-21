@@ -25,9 +25,11 @@ import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropertyCount
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPropertyCountRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -43,6 +45,9 @@ class LandlordServiceTests {
 
     @Mock
     private lateinit var mockOneLoginUserRepository: OneLoginUserRepository
+
+    @Mock
+    private lateinit var mockLandlordWithListedPropertyCountRepository: LandlordWithListedPropertyCountRepository
 
     @Mock
     private lateinit var mockAddressService: AddressService
@@ -194,8 +199,12 @@ class LandlordServiceTests {
         registrationNumber: String,
         expectedSearchResults: List<LandlordSearchResultDataModel>,
     ) {
+        val landlordId = landlord.id
+
         whenever(mockLandlordRepository.findByRegistrationNumber_Number(landlord.registrationNumber.number))
             .thenReturn(landlord)
+        whenever(mockLandlordWithListedPropertyCountRepository.findByLandlordId(landlord.id))
+            .thenReturn(LandlordWithListedPropertyCount(landlordId, landlord, 0))
 
         whenever(mockLandlordRepository.searchMatching(eq(registrationNumber), any()))
             .thenReturn(PageImpl(emptyList<Landlord>()))
@@ -210,10 +219,20 @@ class LandlordServiceTests {
         val searchQuery = "query"
         val maxEntriesOnPage = 25
         val pageRequest = PageRequest.of(0, maxEntriesOnPage)
-        val matchingLandlords = listOf(createLandlord(), createLandlord(), createLandlord())
+
+        val matchingLandlords = mutableListOf<Landlord>()
+        val matchingLandlordsWithListedPropertyCount = mutableListOf<LandlordWithListedPropertyCount>()
+        for (i in 1..3) {
+            val landlord = createLandlord()
+            matchingLandlords.add(landlord)
+            matchingLandlordsWithListedPropertyCount.add(LandlordWithListedPropertyCount(landlord.id, landlord, 0))
+        }
+
         val expectedSearchResults = matchingLandlords.map { LandlordSearchResultDataModel.fromLandlord(it) }
 
         whenever(mockLandlordRepository.searchMatching(searchQuery, pageRequest)).thenReturn(PageImpl(matchingLandlords))
+        whenever(mockLandlordWithListedPropertyCountRepository.findByLandlordIdIn(matchingLandlords.map { it.id }))
+            .thenReturn(matchingLandlordsWithListedPropertyCount)
 
         val searchResults = landlordService.searchForLandlords(searchQuery, 0, maxEntriesOnPage)
 
@@ -226,26 +245,40 @@ class LandlordServiceTests {
         val maxEntriesOnPage = 25
 
         val landlordsFromRepository = mutableListOf<Landlord>()
+        val landlordsWithListedPropertyCount = mutableListOf<LandlordWithListedPropertyCount>()
         for (i in 1..40) {
-            landlordsFromRepository.add(createLandlord())
+            val landlord = createLandlord()
+            landlordsFromRepository.add(landlord)
+            landlordsWithListedPropertyCount.add(LandlordWithListedPropertyCount(landlord.id, landlord, 0))
         }
 
         val pageRequest1 = PageRequest.of(0, maxEntriesOnPage)
         val pageRequest2 = PageRequest.of(1, maxEntriesOnPage)
 
+        val landlordsPage1 = landlordsFromRepository.subList(0, maxEntriesOnPage)
+        val landlordsPage2 = landlordsFromRepository.subList(maxEntriesOnPage, 40)
+        val landlordWithListedPropertyCountPage1 = landlordsWithListedPropertyCount.subList(0, maxEntriesOnPage)
+        val landlordWithListedPropertyCountPage2 = landlordsWithListedPropertyCount.subList(maxEntriesOnPage, 40)
+
         whenever(mockLandlordRepository.searchMatching(searchQuery, pageRequest1))
-            .thenReturn(PageImpl(landlordsFromRepository.subList(0, maxEntriesOnPage)))
+            .thenReturn(PageImpl(landlordsPage1))
         whenever(mockLandlordRepository.searchMatching(searchQuery, pageRequest2))
-            .thenReturn(PageImpl(landlordsFromRepository.subList(maxEntriesOnPage, 40)))
+            .thenReturn(PageImpl(landlordsPage2))
+        whenever(
+            mockLandlordWithListedPropertyCountRepository
+                .findByLandlordIdIn(landlordsPage1.map { it.id }),
+        ).thenReturn(landlordWithListedPropertyCountPage1)
+        whenever(
+            mockLandlordWithListedPropertyCountRepository
+                .findByLandlordIdIn(landlordsPage2.map { it.id }),
+        ).thenReturn(landlordWithListedPropertyCountPage2)
 
         val expectedSearchResultsPage1 =
-            landlordsFromRepository
-                .subList(0, maxEntriesOnPage)
-                .map { LandlordSearchResultDataModel.fromLandlord(it) }
+            landlordWithListedPropertyCountPage1
+                .map { LandlordSearchResultDataModel.fromLandlordWithListedPropertyCount(it) }
         val expectedSearchResultsPage2 =
-            landlordsFromRepository
-                .subList(maxEntriesOnPage, 40)
-                .map { LandlordSearchResultDataModel.fromLandlord(it) }
+            landlordWithListedPropertyCountPage2
+                .map { LandlordSearchResultDataModel.fromLandlordWithListedPropertyCount(it) }
 
         val searchResults1 = landlordService.searchForLandlords(searchQuery, 0, maxEntriesOnPage)
         val searchResults2 = landlordService.searchForLandlords(searchQuery, 1, maxEntriesOnPage)

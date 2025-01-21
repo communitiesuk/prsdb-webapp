@@ -19,4 +19,13 @@ class LandlordWithListedPropertyCount(
         private set
 
     var listedPropertyCount: Int = 0
+
+    constructor(
+        id: Long,
+        landlord: Landlord,
+        listedPropertyCount: Int,
+    ) : this(id) {
+        this.landlord = landlord
+        this.listedPropertyCount = listedPropertyCount
+    }
 }
