@@ -1,18 +1,14 @@
-package uk.gov.communities.prsdb.webapp.services
+package uk.gov.communities.prsdb.webapp.helpers
 
 import com.fasterxml.jackson.dataformat.csv.CsvMapper
 import com.fasterxml.jackson.dataformat.csv.CsvSchema
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import org.springframework.stereotype.Service
 import org.springframework.util.ResourceUtils
 import uk.gov.communities.prsdb.webapp.models.dataModels.PlaceNameDataModel
 
-@Service
-class DataLoaderService {
+class DataLoader {
     companion object {
-        val PLACE_NAMES = loadPlaceNames().sortedBy { it.name }
-
-        private fun loadPlaceNames(): List<PlaceNameDataModel> {
+        fun loadPlaceNames(): List<PlaceNameDataModel> {
             // Files taken from https://www.gov.wales/bydtermcymru/international-place-names
             val placeNameCSVFiles =
                 listOf(
@@ -34,6 +30,7 @@ class DataLoaderService {
             return placeNameCSVFiles
                 .map { filePath -> loadCsvFile<PlaceNameDataModel>(filePath, csvSchema) }
                 .reduce { currentPlaceNameList, nextPlaceNameList -> currentPlaceNameList + nextPlaceNameList }
+                .sortedBy { it.name }
         }
 
         private inline fun <reified T> loadCsvFile(
