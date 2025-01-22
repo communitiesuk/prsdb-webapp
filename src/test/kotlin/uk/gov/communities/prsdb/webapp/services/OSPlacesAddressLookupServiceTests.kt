@@ -28,17 +28,30 @@ class OSPlacesAddressLookupServiceTests {
 
     @Test
     fun `search returns a corresponding list of addresses`() {
+        val invalidCustodianCode = 10000000
+
         val addressesJSON =
             "{'results':[" +
                 "{'DPA':{'ADDRESS':'1, Example Road, EG','LOCAL_CUSTODIAN_CODE':1,'UPRN':'1234','BUILDING_NUMBER':1,'POSTCODE':'EG'}}," +
                 "{'DPA':{'ADDRESS':'2, Example Road, EG','LOCAL_CUSTODIAN_CODE':2,'UPRN':'','BUILDING_NUMBER':2,'POSTCODE':'EG'}}," +
-                "{'DPA':{'ADDRESS':'Main, Example Road, EG','LOCAL_CUSTODIAN_CODE':3,'UPRN':'','BUILDING_NAME':'Main','POSTCODE':'EG'}}" +
+                "{'DPA':{'ADDRESS':'Main, Example Road, EG','LOCAL_CUSTODIAN_CODE':$invalidCustodianCode," +
+                "'UPRN':'','BUILDING_NAME':'Main','POSTCODE':'EG'}}" +
                 "]}"
         val expectedAddresses =
             listOf(
-                AddressDataModel("1, Example Road, EG", 1, 1234, buildingNumber = "1", postcode = "EG"),
-                AddressDataModel("2, Example Road, EG", 2, buildingNumber = "2", postcode = "EG"),
-                AddressDataModel("Main, Example Road, EG", 3, buildingName = "Main", postcode = "EG"),
+                AddressDataModel(
+                    "1, Example Road, EG",
+                    localAuthorityId = 1,
+                    1234,
+                    buildingNumber = "1",
+                    postcode = "EG",
+                ),
+                AddressDataModel("2, Example Road, EG", localAuthorityId = 2, buildingNumber = "2", postcode = "EG"),
+                AddressDataModel(
+                    "Main, Example Road, EG",
+                    buildingName = "Main",
+                    postcode = "EG",
+                ),
             )
 
         whenever(
@@ -46,12 +59,12 @@ class OSPlacesAddressLookupServiceTests {
         ).thenReturn(addressesJSON)
 
         whenever(mockLocalAuthorityService.retrieveLocalAuthorityByCustodianCode(anyString())).then {
-            LocalAuthority(
+            val custodianCode =
                 it.arguments
                     .first()
                     .toString()
-                    .toInt(),
-            )
+                    .toInt()
+            if (custodianCode == invalidCustodianCode) null else LocalAuthority(custodianCode)
         }
 
         val addresses = addressLookupService.search("", "")

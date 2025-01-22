@@ -49,7 +49,7 @@ class Address() : ModifiableAuditableEntity() {
         private set
 
     @ManyToOne
-    @JoinColumn(foreignKey = ForeignKey(name = "FK_ADDRESS_LA"))
+    @JoinColumn(name = "local_authority_id", foreignKey = ForeignKey(name = "FK_ADDRESS_LA"))
     var localAuthority: LocalAuthority? = null
         private set
 

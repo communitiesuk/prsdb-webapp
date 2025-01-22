@@ -50,8 +50,13 @@ class OSPlacesAddressLookupService(
         return addresses
     }
 
-    private fun getLocalAuthorityId(dataset: JSONObject): Int {
+    private fun getLocalAuthorityId(dataset: JSONObject): Int? {
         val custodianCode = dataset.getInt("LOCAL_CUSTODIAN_CODE").toString()
-        return localAuthorityService.retrieveLocalAuthorityByCustodianCode(custodianCode)!!.id
+        try {
+            return localAuthorityService.retrieveLocalAuthorityByCustodianCode(custodianCode)!!.id
+        } catch (exception: NullPointerException) {
+            println("No local authority found for $custodianCode retrieved from OSPlaces")
+            return null
+        }
     }
 }
