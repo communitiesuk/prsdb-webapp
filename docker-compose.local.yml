@@ -9,6 +9,10 @@ services:
       - POSTGRES_PASSWORD=notarealpassword
       - POSTGRES_USER=postgres
       - POSTGRES_DB=prsdblocal
+    volumes:
+      - type: bind
+        source: ./src/main/resources/db/migrations/data/local_authorities/local_authorities.csv
+        target: /data/local_authorities.csv
   redis:
     image: redis:7.4-alpine
     restart: always

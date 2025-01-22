@@ -36,13 +36,13 @@ class AddressDataServiceTests {
         val addressDataJSON =
             Json.encodeToString(
                 listOf(
-                    AddressDataModel("1, Example Road, EG", "100", 1234, buildingNumber = "1", postcode = "EG"),
-                    AddressDataModel("2, Example Road, EG", "101", buildingNumber = "2", postcode = "EG"),
-                    AddressDataModel("Main, Example Road, EG", "102", buildingName = "Main", postcode = "EG"),
+                    AddressDataModel("1, Example Road, EG", 1, 1234, buildingNumber = "1", postcode = "EG"),
+                    AddressDataModel("2, Example Road, EG", 2, buildingNumber = "2", postcode = "EG"),
+                    AddressDataModel("Main, Example Road, EG", 3, buildingName = "Main", postcode = "EG"),
                 ).associateBy { it.singleLineAddress },
             )
         val expectedAddressData =
-            AddressDataModel("1, Example Road, EG", "100", 1234, buildingNumber = "1", postcode = "EG")
+            AddressDataModel("1, Example Road, EG", 1, 1234, buildingNumber = "1", postcode = "EG")
 
         whenever(mockHttpSession.getAttribute("addressData")).thenReturn(addressDataJSON)
 
@@ -56,9 +56,9 @@ class AddressDataServiceTests {
         val addressDataJSON =
             Json.encodeToString(
                 listOf(
-                    AddressDataModel("1, Example Road, EG", "100", 1234, buildingNumber = "1", postcode = "EG"),
-                    AddressDataModel("2, Example Road, EG", "101", buildingNumber = "2", postcode = "EG"),
-                    AddressDataModel("Main, Example Road, EG", "102", buildingName = "Main", postcode = "EG"),
+                    AddressDataModel("1, Example Road, EG", 1, 1234, buildingNumber = "1", postcode = "EG"),
+                    AddressDataModel("2, Example Road, EG", 2, buildingNumber = "2", postcode = "EG"),
+                    AddressDataModel("Main, Example Road, EG", 3, buildingName = "Main", postcode = "EG"),
                 ).associateBy { it.singleLineAddress },
             )
 
@@ -73,9 +73,9 @@ class AddressDataServiceTests {
     fun `setAddressData stores the given address data as a serialized map`() {
         val addressDataList =
             listOf(
-                AddressDataModel("1, Example Road, EG", "100", 1234, buildingNumber = "1", postcode = "EG"),
-                AddressDataModel("2, Example Road, EG", "101", buildingNumber = "2", postcode = "EG"),
-                AddressDataModel("Main, Example Road, EG", "102", buildingName = "Main", postcode = "EG"),
+                AddressDataModel("1, Example Road, EG", 1, 1234, buildingNumber = "1", postcode = "EG"),
+                AddressDataModel("2, Example Road, EG", 2, buildingNumber = "2", postcode = "EG"),
+                AddressDataModel("Main, Example Road, EG", 3, buildingName = "Main", postcode = "EG"),
             )
         val expectedAddressDataString = Json.encodeToString(addressDataList.associateBy { it.singleLineAddress })
 

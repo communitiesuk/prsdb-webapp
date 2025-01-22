@@ -17,19 +17,16 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
             addressDataService: AddressDataService,
         ): AddressDataModel? {
             return if (isManualAddressChosen(journeyData)) {
-                getManualAddress(journeyData, RegisterPropertyStepId.ManualAddress.urlPathSegment)
+                getManualAddress(
+                    journeyData,
+                    RegisterPropertyStepId.ManualAddress.urlPathSegment,
+                    RegisterPropertyStepId.LocalAuthority.urlPathSegment,
+                )
             } else {
                 val selectedAddress = getSelectedAddress(journeyData) ?: return null
                 addressDataService.getAddressData(selectedAddress)
             }
         }
-
-        fun getCustodianCode(journeyData: JourneyData): String? =
-            getFieldStringValue(
-                journeyData,
-                RegisterPropertyStepId.LocalAuthority.urlPathSegment,
-                "localAuthorityCustodianCode",
-            )
 
         fun getPropertyType(journeyData: JourneyData): PropertyType? =
             getFieldEnumValue<PropertyType>(

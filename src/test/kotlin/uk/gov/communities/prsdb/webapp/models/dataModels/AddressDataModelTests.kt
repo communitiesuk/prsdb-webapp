@@ -61,7 +61,7 @@ class AddressDataModelTests {
 
     @ParameterizedTest(name = "when given an address with {0}")
     @MethodSource("provideAddresses")
-    fun `parseSingleLineAddress returns a corresponding address string`(
+    fun `manualAddressDataToSingleLineAddress returns a corresponding address string`(
         expectedAddressString: String,
         addressLineOne: String,
         townOrCity: String,
@@ -82,12 +82,13 @@ class AddressDataModelTests {
     }
 
     @Test
-    fun `parseAddressDataModel returns a corresponding AddressDataModel`() {
+    fun `fromManualAddressData returns a corresponding AddressDataModel`() {
         val expectedAddressDataModel =
             AddressDataModel(
                 singleLineAddress = "Flat 10, 1 Example Road, Townville, Countyshire, EG1 2AB",
                 townName = "Townville",
                 postcode = "EG1 2AB",
+                localAuthorityId = 1,
             )
 
         val addressDataModel =
@@ -97,6 +98,7 @@ class AddressDataModelTests {
                 "EG1 2AB",
                 "1 Example Road",
                 "Countyshire",
+                1,
             )
 
         assertEquals(expectedAddressDataModel, addressDataModel)

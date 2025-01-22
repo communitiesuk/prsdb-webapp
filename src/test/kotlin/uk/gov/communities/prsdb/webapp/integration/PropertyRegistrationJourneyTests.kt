@@ -12,7 +12,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.jdbc.Sql
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -57,7 +56,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
                 {
                   "DPA": {
                     "ADDRESS": "1, Example Road, EG1 2AB",
-                    "LOCAL_CUSTODIAN_CODE": ${LOCAL_AUTHORITIES[11].custodianCode},
+                    "LOCAL_CUSTODIAN_CODE": 28,
                     "UPRN": "1",
                     "BUILDING_NUMBER": 1,
                     "POSTCODE": "EG1 2AB"
@@ -66,7 +65,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
                 {
                   "DPA": {
                     "ADDRESS": "already registered address",
-                    "LOCAL_CUSTODIAN_CODE": ${LOCAL_AUTHORITIES[11].custodianCode},
+                    "LOCAL_CUSTODIAN_CODE": 28,
                     "UPRN": "1123456",
                     "BUILDING_NUMBER": 1,
                     "POSTCODE": "EG1 3CD"
@@ -255,8 +254,8 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             selectLocalAuthorityPage.form
                 .getSelect()
                 .autocompleteInput
-                .fill("Cambridge")
-            selectLocalAuthorityPage.form.getSelect().selectValue("CAMBRIDGE CITY COUNCIL")
+                .fill("ISLE OF MAN")
+            selectLocalAuthorityPage.form.getSelect().selectValue("ISLE OF MAN")
             selectLocalAuthorityPage.form.submit()
             assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
         }
@@ -265,7 +264,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         fun `Submitting without selecting an LA return an error`(page: Page) {
             val selectLocalAuthorityPage = navigator.goToPropertyRegistrationSelectLocalAuthorityPage()
             selectLocalAuthorityPage.form.submit()
-            assertThat(selectLocalAuthorityPage.form.getErrorMessage("localAuthorityCustodianCode"))
+            assertThat(selectLocalAuthorityPage.form.getErrorMessage("localAuthorityId"))
                 .containsText("Select a local authority to continue")
         }
     }

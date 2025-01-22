@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
@@ -112,7 +113,7 @@ class RegisterLAUserControllerTests(
             )
         whenever(journeyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
-        val localAuthority = LocalAuthority(1, "Local Authority 1")
+        val localAuthority = createLocalAuthority()
         whenever(invitationService.getAuthorityForToken("token123")).thenReturn(localAuthority)
 
         // Act
@@ -140,7 +141,7 @@ class RegisterLAUserControllerTests(
             )
         whenever(journeyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
-        val localAuthority = LocalAuthority(1, "Local Authority 1")
+        val localAuthority = LocalAuthority(1, "Local Authority 1", "custodian code")
         whenever(invitationService.getAuthorityForToken("token123")).thenReturn(localAuthority)
 
         val invitation = LocalAuthorityInvitation()

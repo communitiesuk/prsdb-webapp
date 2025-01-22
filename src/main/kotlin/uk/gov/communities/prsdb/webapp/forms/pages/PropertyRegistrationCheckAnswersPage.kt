@@ -6,15 +6,16 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
-import uk.gov.communities.prsdb.webapp.helpers.LocalAuthorityDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper as DataHelper
 
 class PropertyRegistrationCheckAnswersPage(
     private val addressDataService: AddressDataService,
+    private val localAuthorityService: LocalAuthorityService,
 ) : Page(
         NoInputFormModel::class,
         "forms/propertyRegistrationCheckAnswersForm",
@@ -53,8 +54,7 @@ class PropertyRegistrationCheckAnswersPage(
     private fun getAddressDetails(journeyData: JourneyData): List<SummaryListRowViewModel> {
         val address = DataHelper.getAddress(journeyData, addressDataService)!!
         return if (DataHelper.isManualAddressChosen(journeyData)) {
-            val custodianCode = DataHelper.getCustodianCode(journeyData)!!
-            getManualAddressDetails(address.singleLineAddress, custodianCode)
+            getManualAddressDetails(address)
         } else {
             getSelectedAddressDetails(address)
         }
@@ -74,24 +74,21 @@ class PropertyRegistrationCheckAnswersPage(
             ),
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.localAuthority",
-                LocalAuthorityDataHelper.getLocalAuthorityDisplayName(address.custodianCode),
+                localAuthorityService.retrieveLocalAuthorityById(address.localAuthorityId!!).name,
                 null,
             ),
         )
 
-    private fun getManualAddressDetails(
-        singleLineAddress: String,
-        custodianCode: String,
-    ): List<SummaryListRowViewModel> =
+    private fun getManualAddressDetails(address: AddressDataModel): List<SummaryListRowViewModel> =
         listOf(
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.address",
-                singleLineAddress,
+                address.singleLineAddress,
                 RegisterPropertyStepId.ManualAddress.urlPathSegment,
             ),
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.localAuthority",
-                LocalAuthorityDataHelper.getLocalAuthorityDisplayName(custodianCode),
+                localAuthorityService.retrieveLocalAuthorityById(address.localAuthorityId!!).name,
                 RegisterPropertyStepId.LocalAuthority.urlPathSegment,
             ),
         )
