@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 
 class LandlordViewModel(
     private val landlord: Landlord,
+    private val withChangeLinks: Boolean = true,
 ) {
     val name: String = landlord.name
 
@@ -15,8 +16,16 @@ class LandlordViewModel(
         get() {
             // TODO PRSD-746 - add user consent information to this page once it is captured (this will need to be passed into the constructor since this is a view model)
             return listOf(
-                SummaryListRowViewModel("landlordDetails.personalDetails.optionalChoices.legalChanges", "TODO PRSD-746", null),
-                SummaryListRowViewModel("landlordDetails.personalDetails.optionalChoices.research", "TODO PRSD-746", null),
+                SummaryListRowViewModel(
+                    "landlordDetails.personalDetails.optionalChoices.legalChanges",
+                    "TODO PRSD-746",
+                    toggleChangeLink(null),
+                ),
+                SummaryListRowViewModel(
+                    "landlordDetails.personalDetails.optionalChoices.research",
+                    "TODO PRSD-746",
+                    toggleChangeLink(null),
+                ),
             )
         }
 
@@ -41,27 +50,27 @@ class LandlordViewModel(
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.name",
                     landlord.name,
-                    "$UPDATE_ROUTE/name",
+                    toggleChangeLink("$UPDATE_ROUTE/name"),
                 ),
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.dateOfBirth",
                     landlord.dateOfBirth,
-                    "$UPDATE_ROUTE/date-of-birth",
+                    toggleChangeLink("$UPDATE_ROUTE/date-of-birth"),
                 ),
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.emailAddress",
                     landlord.email,
-                    "$UPDATE_ROUTE/email",
+                    toggleChangeLink("$UPDATE_ROUTE/email"),
                 ),
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.telephoneNumber",
                     landlord.phoneNumber,
-                    "$UPDATE_ROUTE/telephone",
+                    toggleChangeLink("$UPDATE_ROUTE/telephone"),
                 ),
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.ukResident",
                     isUkResident,
-                    "$UPDATE_ROUTE/country-of-residence",
+                    toggleChangeLink("$UPDATE_ROUTE/country-of-residence"),
                 ),
             )
 
@@ -81,17 +90,17 @@ class LandlordViewModel(
             SummaryListRowViewModel(
                 "landlordDetails.personalDetails.country",
                 "TODO: PRSD-742",
-                null,
+                toggleChangeLink(null),
             ),
             SummaryListRowViewModel(
                 "landlordDetails.personalDetails.nonUkAddress",
                 landlord.internationalAddress,
-                "$UPDATE_ROUTE/address",
+                toggleChangeLink("$UPDATE_ROUTE/address"),
             ),
             SummaryListRowViewModel(
                 "landlordDetails.personalDetails.ukAddress",
                 landlord.address.singleLineAddress,
-                "$UPDATE_ROUTE/contact-address",
+                toggleChangeLink("$UPDATE_ROUTE/contact-address"),
             ),
         )
 
@@ -100,7 +109,14 @@ class LandlordViewModel(
             SummaryListRowViewModel(
                 "landlordDetails.personalDetails.contactAddress",
                 landlord.address.singleLineAddress,
-                "$UPDATE_ROUTE/address",
+                toggleChangeLink("$UPDATE_ROUTE/address"),
             ),
         )
+
+    private fun toggleChangeLink(link: String?): String? =
+        if (withChangeLinks) {
+            link
+        } else {
+            null
+        }
 }
