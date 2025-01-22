@@ -12,6 +12,6 @@ class LandlordDetailsPage(
     fun getActiveTabPanelId() = tabs.activePanel?.getAttribute("id")
 
     fun goToRegisteredProperties() {
-        tabs.goToTab(1)
+        tabs.goToTab("Registered properties")
     }
 }
