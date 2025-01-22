@@ -14,7 +14,7 @@ class TestcontainersConfiguration {
     @ServiceConnection
     fun postgresContainer(): PostgreSQLContainer<*> =
         PostgreSQLContainer(DockerImageName.parse("postgres:latest")).withCopyFileToContainer(
-            MountableFile.forClasspathResource("data/local_authorities/local_authorities.csv"),
+            MountableFile.forClasspathResource("db/migrations/data/local_authorities/local_authorities.csv"),
             "/data/local_authorities.csv",
         )
 
