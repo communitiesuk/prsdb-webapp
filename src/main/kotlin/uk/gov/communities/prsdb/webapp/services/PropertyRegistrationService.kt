@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyRepository
@@ -54,7 +55,7 @@ class PropertyRegistrationService(
         numberOfHouseholds: Int,
         numberOfPeople: Int,
         baseUserId: String,
-    ): Long? {
+    ): RegistrationNumber {
         if (address.uprn != null && getIsAddressRegistered(address.uprn, ignoreCache = true)) {
             throw EntityExistsException("Address already registered")
         }
@@ -85,6 +86,6 @@ class PropertyRegistrationService(
 
         address.uprn?.let { addressDataService.setCachedAddressRegisteredResult(it, true) }
 
-        return propertyOwnership.registrationNumber.number
+        return propertyOwnership.registrationNumber
     }
 }

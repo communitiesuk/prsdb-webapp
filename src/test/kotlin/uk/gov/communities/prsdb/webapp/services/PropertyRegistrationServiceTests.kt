@@ -242,7 +242,7 @@ class PropertyRegistrationServiceTests {
                 baseUserId,
             )
 
-        assertEquals(expectedPropertyOwnership.registrationNumber.number, propertyRegistrationNumber)
+        assertEquals(expectedPropertyOwnership.registrationNumber, propertyRegistrationNumber)
     }
 
     @Test
@@ -301,6 +301,6 @@ class PropertyRegistrationServiceTests {
                 baseUserId,
             )
 
-        assertEquals(expectedPropertyOwnership.registrationNumber.number, propertyRegistrationNumber)
+        assertEquals(expectedPropertyOwnership.registrationNumber, propertyRegistrationNumber)
     }
 }

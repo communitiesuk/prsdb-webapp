@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoAdditionalLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoMandatoryLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LandlordTypeFormModel
@@ -537,9 +538,10 @@ class PropertyRegistrationJourney(
             session: HttpSession,
         ): String {
             try {
+                val address = PropertyRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!
                 val propertyRegistrationNumber =
                     propertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(
-                        address = PropertyRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!,
+                        address = address,
                         propertyType = PropertyRegistrationJourneyDataHelper.getPropertyType(journeyData)!!,
                         licenseType = PropertyRegistrationJourneyDataHelper.getLicensingType(journeyData)!!,
                         licenceNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(journeyData)!!,
@@ -553,15 +555,15 @@ class PropertyRegistrationJourney(
                 confirmationEmailSender.sendEmail(
                     "jasmin.conterio@softwire.com",
                     PropertyRegistrationConfirmationEmail(
-                        "prn",
-                        "singleLineAddress",
+                        RegistrationNumberDataModel.fromRegistrationNumber(propertyRegistrationNumber).toString(),
+                        address.singleLineAddress,
                         "£0.00 NOT YET IMPLEMENTED",
                     ),
                 )
 
                 journeyDataService.deleteJourneyData()
 
-                session.setAttribute(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber)
+                session.setAttribute(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber.number)
 
                 return CONFIRMATION_PAGE_PATH_SEGMENT
             } catch (exception: EntityExistsException) {
