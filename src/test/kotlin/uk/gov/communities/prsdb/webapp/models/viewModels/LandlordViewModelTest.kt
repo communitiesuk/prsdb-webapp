@@ -7,11 +7,14 @@ import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toLocalDateTime
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertIterableEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
+import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData
@@ -118,7 +121,8 @@ class LandlordViewModelTest {
     @Test
     fun `Landlord personal details shows the correct lrn`() {
         // Arrange
-        val registrationNumber = RegistrationNumberDataModel.parse("LGYTKPJRR")
+        val registrationNumber =
+            RegistrationNumberDataModel.parseTypeOrNull("LGYTKPJRR", RegistrationNumberType.LANDLORD)!!
         val testLandlord =
             MockLandlordData.createLandlord(
                 registrationNumber = RegistrationNumber(registrationNumber.type, registrationNumber.number),
@@ -128,7 +132,10 @@ class LandlordViewModelTest {
         val viewModel = LandlordViewModel(testLandlord)
 
         // Assert
-        val lrn = viewModel.personalDetails.single { it.fieldHeading == "landlordDetails.personalDetails.lrn" }.getConvertedFieldValue()
+        val lrn =
+            viewModel.personalDetails
+                .single { it.fieldHeading == "landlordDetails.personalDetails.lrn" }
+                .getConvertedFieldValue()
         assertEquals(lrn, registrationNumber.toString())
     }
 
@@ -304,5 +311,38 @@ class LandlordViewModelTest {
     @Test
     fun getConsentInformation() {
         TODO("PRSD-746")
+    }
+
+    @Test
+    fun `LandlordViewModel populates change links in rows that should have them`() {
+        // Arrange
+        val testLandlord = MockLandlordData.createLandlord()
+
+        // Act
+        val viewModel = LandlordViewModel(testLandlord)
+
+        // Assert
+        assertNull(viewModel.personalDetails[0].changeUrl)
+        assertNull(viewModel.personalDetails[1].changeUrl)
+
+        for (i in viewModel.personalDetails.subList(2, viewModel.personalDetails.size)) {
+            assertNotNull(i.changeUrl)
+        }
+
+        // TODO PRSD-746 change assertion for consentInformation once links have been added
+        viewModel.consentInformation.forEach { consentInformation -> assertNull(consentInformation.changeUrl) }
+    }
+
+    @Test
+    fun `LandlordViewModel returns all rows without change links`() {
+        // Arrange
+        val testLandlord = MockLandlordData.createLandlord()
+
+        // Act
+        val viewModel = LandlordViewModel(testLandlord, withChangeLinks = false)
+
+        // Assert
+        viewModel.personalDetails.forEach { personalDetails -> assertNull(personalDetails.changeUrl) }
+        viewModel.consentInformation.forEach { consentInformation -> assertNull(consentInformation.changeUrl) }
     }
 }

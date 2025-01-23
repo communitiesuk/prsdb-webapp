@@ -26,7 +26,7 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
         val testToken = "test token"
         whenever(invitationService.getTokenFromSession()).thenReturn(testToken)
         whenever(invitationService.tokenIsValid(testToken)).thenReturn(true)
-        val testLocalAuthority = LocalAuthority(1, "Test Authority")
+        val testLocalAuthority = LocalAuthority(1, "Test Authority", "custodian code")
         whenever(invitationService.getAuthorityForToken(testToken)).thenReturn(testLocalAuthority)
     }
 

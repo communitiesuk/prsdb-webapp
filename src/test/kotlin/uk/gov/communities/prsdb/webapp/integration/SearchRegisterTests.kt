@@ -63,9 +63,6 @@ class SearchRegisterTests : IntegrationTest() {
         val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
         searchLandlordRegisterPage.searchBar.search("L-CKSQ-3SX9")
         searchLandlordRegisterPage.getLandlordLink(rowIndex = 0).click()
-
-        // TODO PRSD-656: Replace with landlord details page assertion
-        assertPageIs(page, ErrorPage::class)
         assertContains(page.url(), "/landlord-details/1")
     }
 

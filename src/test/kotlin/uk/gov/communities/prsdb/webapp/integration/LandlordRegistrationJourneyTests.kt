@@ -53,7 +53,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             osPlacesClient.search(any(), any()),
         ).thenReturn(
             "{'results':[{'DPA':{'ADDRESS':'1, Example Road, EG1 2AB'," +
-                "'LOCAL_CUSTODIAN_CODE':100,'UPRN':'1','BUILDING_NUMBER':1,'POSTCODE':'EG1 2AB'}}]}",
+                "'LOCAL_CUSTODIAN_CODE':28,'UPRN':'1','BUILDING_NUMBER':1,'POSTCODE':'EG1 2AB'}}]}",
         )
     }
 

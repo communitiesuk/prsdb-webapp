@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.repository.AddressRepository
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import kotlin.test.assertEquals
 
@@ -18,6 +19,9 @@ import kotlin.test.assertEquals
 class AddressServiceTests {
     @Mock
     private lateinit var mockAddressRepository: AddressRepository
+
+    @Mock
+    private lateinit var mockLocalAuthorityService: LocalAuthorityService
 
     @InjectMocks
     private lateinit var addressService: AddressService
@@ -64,5 +68,22 @@ class AddressServiceTests {
         val addressCaptor = captor<Address>()
         verify(mockAddressRepository).save(addressCaptor.capture())
         assertEquals(addressDataModel.singleLineAddress, addressCaptor.value.singleLineAddress)
+    }
+
+    @Test
+    fun `findOrCreateAddress creates an address with a local authority`() {
+        val localAuthority = createLocalAuthority()
+        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB", localAuthorityId = localAuthority.id)
+
+        whenever(mockLocalAuthorityService.retrieveLocalAuthorityById(addressDataModel.localAuthorityId!!)).thenReturn(
+            localAuthority,
+        )
+        whenever(mockAddressRepository.save(any(Address::class.java))).thenReturn(mockAddress)
+
+        addressService.findOrCreateAddress(addressDataModel)
+
+        val addressCaptor = captor<Address>()
+        verify(mockAddressRepository).save(addressCaptor.capture())
+        assertEquals(addressDataModel.localAuthorityId, addressCaptor.value.localAuthority!!.id)
     }
 }

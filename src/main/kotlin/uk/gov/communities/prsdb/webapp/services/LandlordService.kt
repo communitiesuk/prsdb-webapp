@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -32,6 +33,8 @@ class LandlordService(
     }
 
     fun retrieveLandlordByBaseUserId(baseUserId: String): Landlord? = landlordRepository.findByBaseUser_Id(baseUserId)
+
+    fun retrieveLandlordById(id: Long): Landlord? = landlordRepository.findByIdOrNull(id)
 
     @Transactional
     fun createLandlord(
@@ -63,35 +66,28 @@ class LandlordService(
 
     fun searchForLandlords(
         searchTerm: String,
+        laUserId: String,
+        useLAFilter: Boolean = false,
         currentPageNumber: Int = 0,
         pageSize: Int = MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE,
     ): Page<LandlordSearchResultDataModel> {
-        RegistrationNumberDataModel.parseOrNull(searchTerm)?.let { registrationNumber ->
-            if (registrationNumber.isType(RegistrationNumberType.LANDLORD)) {
-                retrieveLandlordByRegNum(registrationNumber)?.let { landlord ->
-                    return PageImpl(
-                        listOf(
-                            LandlordSearchResultDataModel.fromLandlordWithListedPropertyCount(
-                                landlordWithListedPropertyCountRepository.findByLandlordId(landlord.id),
-                            ),
-                        ),
-                    )
-                }
-            }
-        }
-
+        val lrn = RegistrationNumberDataModel.parseTypeOrNull(searchTerm, RegistrationNumberType.LANDLORD)
         val pageRequest = PageRequest.of(currentPageNumber, pageSize)
 
-        return landlordRepository
-            .searchMatching(searchTerm, pageRequest)
-            .let { landlords ->
-                PageImpl(
-                    landlordWithListedPropertyCountRepository
-                        .findByLandlordIdIn(landlords.content.map { it.id })
-                        .map { LandlordSearchResultDataModel.fromLandlordWithListedPropertyCount(it) },
-                    pageRequest,
-                    landlords.totalElements,
-                )
+        val landlordPage = (
+            if (lrn == null) {
+                landlordRepository.searchMatching(searchTerm, laUserId, useLAFilter, pageRequest)
+            } else {
+                landlordRepository.searchMatchingLRN(lrn.number, laUserId, useLAFilter, pageRequest)
             }
+        )
+
+        return PageImpl(
+            landlordWithListedPropertyCountRepository
+                .findByLandlordIdIn(landlordPage.content.map { it.id })
+                .map { LandlordSearchResultDataModel.fromLandlordWithListedPropertyCount(it) },
+            pageRequest,
+            landlordPage.totalElements,
+        )
     }
 }

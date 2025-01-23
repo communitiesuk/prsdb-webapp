@@ -12,14 +12,19 @@ data class RegistrationNumberDataModel(
     val number: Long,
 ) {
     companion object {
-        fun parseOrNull(regNumString: String): RegistrationNumberDataModel? =
+        fun parseTypeOrNull(
+            regNumString: String,
+            type: RegistrationNumberType,
+        ): RegistrationNumberDataModel? =
             try {
-                parse(regNumString)
+                parse(regNumString).let { regNum -> if (regNum.isType(type)) regNum else null }
             } catch (_: Exception) {
                 null
             }
 
-        fun parse(regNumString: String): RegistrationNumberDataModel {
+        fun fromRegistrationNumber(regNum: RegistrationNumber) = RegistrationNumberDataModel(regNum.type, regNum.number)
+
+        private fun parse(regNumString: String): RegistrationNumberDataModel {
             val baseRegNumString = getBaseRegNumString(regNumString)
 
             validateBaseRegNumString(baseRegNumString)
@@ -33,8 +38,6 @@ data class RegistrationNumberDataModel(
 
             return RegistrationNumberDataModel(regNumType, regNumNumber)
         }
-
-        fun fromRegistrationNumber(regNum: RegistrationNumber) = RegistrationNumberDataModel(regNum.type, regNum.number)
 
         private fun getBaseRegNumString(regNumString: String): String = regNumString.filter { it.isLetterOrDigit() }.uppercase()
 
@@ -64,5 +67,5 @@ data class RegistrationNumberDataModel(
             regNumString.substring(REG_NUM_SEG_LENGTH)
     }
 
-    fun isType(type: RegistrationNumberType) = this.type == type
+    private fun isType(type: RegistrationNumberType) = this.type == type
 }

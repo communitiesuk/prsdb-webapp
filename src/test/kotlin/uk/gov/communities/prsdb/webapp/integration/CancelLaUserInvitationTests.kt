@@ -28,7 +28,7 @@ class CancelLaUserInvitationTests : IntegrationTest() {
         val successPage = assertPageIs(page, CancelLaUserInvitationSuccessPage::class)
 
         // The success page confirms the user is deleted
-        assertThat(successPage.confirmationBanner).containsText("You've cancelled invited.user@example.com's invitation from Betelgeuse")
+        assertThat(successPage.confirmationBanner).containsText("You've cancelled invited.user@example.com's invitation from ISLE OF MAN")
         successPage.returnButton.click()
         manageUsersPage = assertPageIs(page, ManageLaUsersPage::class)
 

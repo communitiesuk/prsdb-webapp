@@ -15,16 +15,15 @@ import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
 class MockLandlordData {
     companion object {
-        fun createAddress(
-            singleLineAddress: String = "1 Example Road, EG1 2AB",
-            custodianCode: String = "1045",
-        ) = Address(AddressDataModel(singleLineAddress, custodianCode))
+        fun createAddress(singleLineAddress: String = "1 Example Road, EG1 2AB") =
+            Address(AddressDataModel(singleLineAddress), createLocalAuthority())
 
         fun createFiveDifferentAddresses(): List<Address> =
             listOf(

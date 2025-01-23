@@ -16,7 +16,12 @@ class LocalAuthority(
     lateinit var name: String
         private set
 
-    constructor(id: Int, name: String) : this(id) {
+    @Column(nullable = false, unique = true)
+    lateinit var custodianCode: String
+        private set
+
+    constructor(id: Int, name: String, custodianCode: String) : this(id) {
         this.name = name
+        this.custodianCode = custodianCode
     }
 }
