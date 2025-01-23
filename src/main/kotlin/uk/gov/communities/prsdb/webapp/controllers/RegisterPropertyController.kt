@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_OWNERSHIP_ID
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
@@ -71,17 +71,17 @@ class RegisterPropertyController(
         model: Model,
         principal: Principal,
     ): String {
-        val propertyOwnershipID =
-            session.getAttribute(PROPERTY_OWNERSHIP_ID)?.toString()?.toLong()
+        val propertyRegistrationNumber =
+            session.getAttribute(PROPERTY_REGISTRATION_NUMBER)?.toString()?.toLong()
                 ?: throw ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "$PROPERTY_OWNERSHIP_ID was not found in the session",
+                    "$PROPERTY_REGISTRATION_NUMBER was not found in the session",
                 )
         val propertyOwnership =
-            propertyOwnershipService.retrievePropertyOwnership(propertyOwnershipID)
+            propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)
                 ?: throw ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "No property ownership with id $propertyOwnershipID was found in the database",
+                    "No property ownership with registration number $propertyRegistrationNumber was found in the database",
                 )
 
         model.addAttribute("singleLineAddress", propertyOwnership.property.address.singleLineAddress)

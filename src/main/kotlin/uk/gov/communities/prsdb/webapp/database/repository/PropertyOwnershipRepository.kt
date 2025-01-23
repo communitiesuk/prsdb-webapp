@@ -15,4 +15,7 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
         userId: String,
         status: RegistrationStatus,
     ): List<PropertyOwnership>
+
+    @Suppress("ktlint:standard:function-naming")
+    fun findByRegistrationNumber_Number(registrationNumber: Long): PropertyOwnership?
 }

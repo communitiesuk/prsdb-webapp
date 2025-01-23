@@ -44,7 +44,7 @@ class PropertyRegistrationService(
     }
 
     @Transactional
-    fun registerPropertyAndReturnOwnershipId(
+    fun registerPropertyAndReturnPropertyRegistrationNumber(
         address: AddressDataModel,
         propertyType: PropertyType,
         licenseType: LicensingType,
@@ -85,6 +85,6 @@ class PropertyRegistrationService(
 
         address.uprn?.let { addressDataService.setCachedAddressRegisteredResult(it, true) }
 
-        return propertyOwnership.id
+        return propertyOwnership.registrationNumber.number
     }
 }

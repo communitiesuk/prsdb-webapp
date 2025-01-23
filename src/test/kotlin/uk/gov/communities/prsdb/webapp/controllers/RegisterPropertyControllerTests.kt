@@ -11,9 +11,11 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.web.context.WebApplicationContext
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_OWNERSHIP_ID
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createPropertyOwnership
@@ -64,10 +66,13 @@ class RegisterPropertyControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"])
     fun `getConfirmation returns 200 if a property has been registered`() {
-        val propertyOwnershipID = 0L
-        val propertyOwnership = createPropertyOwnership()
+        val propertyRegistrationNumber = 0L
+        val propertyOwnership =
+            createPropertyOwnership(
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
+            )
 
-        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyOwnershipID)).thenReturn(
+        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(
             propertyOwnership,
         )
 
@@ -75,17 +80,20 @@ class RegisterPropertyControllerTests(
             .perform(
                 MockMvcRequestBuilders
                     .get("/$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT")
-                    .sessionAttr(PROPERTY_OWNERSHIP_ID, propertyOwnershipID),
+                    .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
             ).andExpect(MockMvcResultMatchers.status().isOk())
     }
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
     fun `getConfirmation returns 400 if there's no property ownership ID in session`() {
-        val propertyOwnershipID = 0L
-        val propertyOwnership = createPropertyOwnership()
+        val propertyRegistrationNumber = 0L
+        val propertyOwnership =
+            createPropertyOwnership(
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
+            )
 
-        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyOwnershipID)).thenReturn(
+        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(
             propertyOwnership,
         )
 
@@ -97,15 +105,15 @@ class RegisterPropertyControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"])
     fun `getConfirmation returns 400 if the property ownership ID in session is not valid`() {
-        val propertyOwnershipID = 0L
+        val propertyRegistrationNumber = 0L
 
-        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyOwnershipID)).thenReturn(null)
+        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(null)
 
         mvc
             .perform(
                 MockMvcRequestBuilders
                     .get("/$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT")
-                    .sessionAttr(PROPERTY_OWNERSHIP_ID, propertyOwnershipID),
+                    .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
             ).andExpect(MockMvcResultMatchers.status().isBadRequest)
     }
 }

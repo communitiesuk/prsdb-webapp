@@ -18,7 +18,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -26,11 +25,11 @@ import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.Property
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyRepository
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
 @ExtendWith(MockitoExtension::class)
@@ -135,7 +134,7 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerPropertyAndReturnOwnershipId throws an error if the given address is registered`() {
+    fun `registerPropertyAndReturnPropertyRegistrationNumber throws an error if the given address is registered`() {
         val registeredAddress = AddressDataModel(singleLineAddress = "1 Example Road", uprn = 0L)
 
         val spiedOnPropertyRegistrationService = spy(propertyRegistrationService)
@@ -145,7 +144,7 @@ class PropertyRegistrationServiceTests {
 
         val errorThrown =
             assertThrows<EntityExistsException> {
-                spiedOnPropertyRegistrationService.registerPropertyAndReturnOwnershipId(
+                spiedOnPropertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(
                     registeredAddress,
                     PropertyType.DETACHED_HOUSE,
                     LicensingType.NO_LICENSING,
@@ -162,14 +161,14 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerPropertyAndReturnOwnershipId throws an error if the logged in user is not a landlord`() {
+    fun `registerPropertyAndReturnPropertyRegistrationNumber throws an error if the logged in user is not a landlord`() {
         val nonLandlordUserId = "baseUserId"
 
         whenever(mockLandlordRepository.findByBaseUser_Id(nonLandlordUserId)).thenReturn(null)
 
         val errorThrown =
             assertThrows<EntityNotFoundException> {
-                propertyRegistrationService.registerPropertyAndReturnOwnershipId(
+                propertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(
                     AddressDataModel("1 Example Road"),
                     PropertyType.DETACHED_HOUSE,
                     LicensingType.NO_LICENSING,
@@ -186,7 +185,7 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerPropertyAndReturnOwnershipId registers the property if all fields are populated`() {
+    fun `registerPropertyAndReturnPropertyRegistrationNumber registers the property if all fields are populated`() {
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
         val propertyType = PropertyType.DETACHED_HOUSE
         val licenceType = LicensingType.SELECTIVE_LICENCE
@@ -199,22 +198,18 @@ class PropertyRegistrationServiceTests {
         val landlord = Landlord()
         val property = Property()
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
-        val expectedPropertyOwnershipId = 1234.toLong()
-        val licence = License()
+        val licence = License(licenceType, licenceNumber)
 
         val expectedPropertyOwnership =
-            PropertyOwnership(
-                id = expectedPropertyOwnershipId,
-                isActive = true,
-                occupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
+            createPropertyOwnership(
                 landlordType = landlordType,
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
-                registrationNumber = registrationNumber,
                 primaryLandlord = landlord,
                 property = property,
                 license = licence,
+                registrationNumber = registrationNumber,
             )
 
         whenever(mockLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
@@ -234,8 +229,8 @@ class PropertyRegistrationServiceTests {
             ),
         ).thenReturn(expectedPropertyOwnership)
 
-        val propertyId =
-            propertyRegistrationService.registerPropertyAndReturnOwnershipId(
+        val propertyRegistrationNumber =
+            propertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(
                 addressDataModel,
                 propertyType,
                 licenceType,
@@ -247,11 +242,11 @@ class PropertyRegistrationServiceTests {
                 baseUserId,
             )
 
-        assertEquals(expectedPropertyOwnershipId, propertyId)
+        assertEquals(expectedPropertyOwnership.registrationNumber.number, propertyRegistrationNumber)
     }
 
     @Test
-    fun `registerPropertyAndReturnOwnershipId registers the property if there is no license`() {
+    fun `registerPropertyAndReturnPropertyRegistrationNumber registers the property if there is no license`() {
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
         val propertyType = PropertyType.DETACHED_HOUSE
         val licenceType = LicensingType.NO_LICENSING
@@ -264,21 +259,17 @@ class PropertyRegistrationServiceTests {
         val landlord = Landlord()
         val property = Property()
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
-        val expectedPropertyOwnershipId = 1234.toLong()
 
         val expectedPropertyOwnership =
-            PropertyOwnership(
-                id = expectedPropertyOwnershipId,
-                isActive = true,
-                occupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
+            createPropertyOwnership(
                 landlordType = landlordType,
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
-                registrationNumber = registrationNumber,
                 primaryLandlord = landlord,
                 property = property,
                 license = null,
+                registrationNumber = registrationNumber,
             )
 
         whenever(mockLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
@@ -297,8 +288,8 @@ class PropertyRegistrationServiceTests {
             ),
         ).thenReturn(expectedPropertyOwnership)
 
-        val propertyId =
-            propertyRegistrationService.registerPropertyAndReturnOwnershipId(
+        val propertyRegistrationNumber =
+            propertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(
                 addressDataModel,
                 propertyType,
                 licenceType,
@@ -310,6 +301,6 @@ class PropertyRegistrationServiceTests {
                 baseUserId,
             )
 
-        assertEquals(expectedPropertyOwnershipId, propertyId)
+        assertEquals(expectedPropertyOwnership.registrationNumber.number, propertyRegistrationNumber)
     }
 }
