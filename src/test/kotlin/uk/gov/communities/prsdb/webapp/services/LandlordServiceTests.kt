@@ -152,10 +152,16 @@ class LandlordServiceTests {
             expectedSearchResults.map { LandlordSearchResultDataModel.fromLandlord(it) }
 
         whenever(
-            mockLandlordRepository.searchMatching(searchQuery, laUserBaseId, expectedPageRequest),
+            mockLandlordRepository.searchMatching(searchQuery, laUserBaseId, pageable = expectedPageRequest),
         ).thenReturn(PageImpl(expectedSearchResults))
 
-        val searchResults = landlordService.searchForLandlords(searchQuery, laUserBaseId, currentPageNumber, pageSize)
+        val searchResults =
+            landlordService.searchForLandlords(
+                searchQuery,
+                laUserBaseId,
+                currentPageNumber = currentPageNumber,
+                pageSize = pageSize,
+            )
 
         assertEquals(expectedFormattedSearchResults, searchResults.content)
     }
@@ -174,10 +180,16 @@ class LandlordServiceTests {
             expectedSearchResults.map { LandlordSearchResultDataModel.fromLandlord(it) }
 
         whenever(
-            mockLandlordRepository.searchMatchingLRN(searchLRN, laUserBaseId, expectedPageRequest),
+            mockLandlordRepository.searchMatchingLRN(searchLRN, laUserBaseId, pageable = expectedPageRequest),
         ).thenReturn(PageImpl(expectedSearchResults))
 
-        val searchResults = landlordService.searchForLandlords(searchQuery, laUserBaseId, currentPageNumber, pageSize)
+        val searchResults =
+            landlordService.searchForLandlords(
+                searchQuery,
+                laUserBaseId,
+                currentPageNumber = currentPageNumber,
+                pageSize = pageSize,
+            )
 
         assertEquals(expectedFormattedSearchResults, searchResults.content)
     }
@@ -185,7 +197,7 @@ class LandlordServiceTests {
     @Test
     fun `searchForLandlords returns the requested page of LandlordSearchResultDataModels`() {
         val searchQuery = "query"
-        val laUserId = null
+        val laUserBaseId = "laUserBaseId"
         val pageSize = 25
 
         val landlordsFromRepository = mutableListOf<Landlord>()
@@ -205,13 +217,25 @@ class LandlordServiceTests {
         val expectedFormattedSearchResults2 =
             expectedSearchResults2.map { LandlordSearchResultDataModel.fromLandlord(it) }
 
-        whenever(mockLandlordRepository.searchMatching(searchQuery, laUserId, expectedPageRequest1))
+        whenever(mockLandlordRepository.searchMatching(searchQuery, laUserBaseId, pageable = expectedPageRequest1))
             .thenReturn(PageImpl(expectedSearchResults1))
-        whenever(mockLandlordRepository.searchMatching(searchQuery, laUserId, expectedPageRequest2))
+        whenever(mockLandlordRepository.searchMatching(searchQuery, laUserBaseId, pageable = expectedPageRequest2))
             .thenReturn(PageImpl(expectedSearchResults2))
 
-        val searchResults1 = landlordService.searchForLandlords(searchQuery, laUserId, pageNumber1, pageSize)
-        val searchResults2 = landlordService.searchForLandlords(searchQuery, laUserId, pageNumber2, pageSize)
+        val searchResults1 =
+            landlordService.searchForLandlords(
+                searchQuery,
+                laUserBaseId,
+                currentPageNumber = pageNumber1,
+                pageSize = pageSize,
+            )
+        val searchResults2 =
+            landlordService.searchForLandlords(
+                searchQuery,
+                laUserBaseId,
+                currentPageNumber = pageNumber2,
+                pageSize = pageSize,
+            )
 
         assertEquals(expectedFormattedSearchResults1, searchResults1.content)
         assertEquals(expectedFormattedSearchResults2, searchResults2.content)

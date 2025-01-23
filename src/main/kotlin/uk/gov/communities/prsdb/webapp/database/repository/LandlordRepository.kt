@@ -24,7 +24,8 @@ interface LandlordRepository : JpaRepository<Landlord?, Long?> {
     )
     fun searchMatching(
         @Param("searchQuery") searchQuery: String,
-        @Param("laUserBaseId") laUserBaseId: String? = null,
+        @Param("laUserBaseId") laUserBaseId: String,
+        @Param("useLAFilter") useLAFilter: Boolean = false,
         pageable: Pageable,
     ): Page<Landlord>
 
@@ -37,7 +38,8 @@ interface LandlordRepository : JpaRepository<Landlord?, Long?> {
     )
     fun searchMatchingLRN(
         @Param("searchLRN") searchLRN: Long,
-        @Param("laUserBaseId") laUserBaseId: String? = null,
+        @Param("laUserBaseId") laUserBaseId: String,
+        @Param("useLAFilter") useLAFilter: Boolean = false,
         pageable: Pageable,
     ): Page<Landlord>
 
@@ -55,7 +57,7 @@ interface LandlordRepository : JpaRepository<Landlord?, Long?> {
                           WHERE l.id = po.primary_landlord_id 
                           AND po.is_active 
                           AND ol.id = :laUserBaseId)
-                  OR :laUserBaseId IS NULL) 
+                  OR NOT :useLAFilter) 
             """
     }
 }

@@ -63,7 +63,8 @@ class LandlordService(
 
     fun searchForLandlords(
         searchTerm: String,
-        laUserId: String? = null,
+        laUserId: String,
+        useLAFilter: Boolean = false,
         currentPageNumber: Int = 0,
         pageSize: Int = MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE,
     ): Page<LandlordSearchResultDataModel> {
@@ -72,9 +73,9 @@ class LandlordService(
 
         return (
             if (lrn == null) {
-                landlordRepository.searchMatching(searchTerm, laUserId, pageRequest)
+                landlordRepository.searchMatching(searchTerm, laUserId, useLAFilter, pageRequest)
             } else {
-                landlordRepository.searchMatchingLRN(lrn.number, laUserId, pageRequest)
+                landlordRepository.searchMatchingLRN(lrn.number, laUserId, useLAFilter, pageRequest)
             }
         ).map { LandlordSearchResultDataModel.fromLandlord(it) }
     }

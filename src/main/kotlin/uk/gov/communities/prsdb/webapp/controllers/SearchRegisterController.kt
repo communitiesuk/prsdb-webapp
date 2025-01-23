@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.models.wrapperModels.SearchWrapperModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import java.security.Principal
 
 @Controller
 @RequestMapping("/search")
@@ -21,13 +22,15 @@ class SearchRegisterController(
         model: Model,
         @RequestParam(required = false) query: String?,
         @RequestParam(value = "page", required = false) page: Int = 1,
+        principal: Principal,
     ): String {
         if (!query.isNullOrBlank()) {
             if (page < 1) {
                 return "redirect:/search/landlord?query=$query"
             }
 
-            val pagedLandlordList = landlordService.searchForLandlords(query, currentPageNumber = page - 1)
+            val pagedLandlordList =
+                landlordService.searchForLandlords(query, principal.name, currentPageNumber = page - 1)
 
             if (pagedLandlordList.totalPages in 1..<page) {
                 return "redirect:/search/landlord?query=$query"
