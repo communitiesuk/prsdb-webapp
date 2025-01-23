@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels
 
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropertyCount
 
 data class LandlordSearchResultDataModel(
@@ -13,25 +12,18 @@ data class LandlordSearchResultDataModel(
     var listedPropertyCount: Int = 0,
 ) {
     companion object {
-        fun fromLandlord(landlord: Landlord) =
+        fun fromLandlordWithListedPropertyCount(landlordWithListedPropertyCount: LandlordWithListedPropertyCount) =
             LandlordSearchResultDataModel(
-                id = landlord.id,
-                name = landlord.name,
+                id = landlordWithListedPropertyCount.landlord.id,
+                name = landlordWithListedPropertyCount.landlord.name,
                 registrationNumber =
                     RegistrationNumberDataModel
-                        .fromRegistrationNumber(landlord.registrationNumber)
+                        .fromRegistrationNumber(landlordWithListedPropertyCount.landlord.registrationNumber)
                         .toString(),
-                contactAddress = landlord.address.singleLineAddress,
-                email = landlord.email,
-                phoneNumber = landlord.phoneNumber,
+                contactAddress = landlordWithListedPropertyCount.landlord.address.singleLineAddress,
+                email = landlordWithListedPropertyCount.landlord.email,
+                phoneNumber = landlordWithListedPropertyCount.landlord.phoneNumber,
+                listedPropertyCount = landlordWithListedPropertyCount.listedPropertyCount,
             )
-
-        fun fromLandlordWithListedPropertyCount(
-            landlordWithListedPropertyCount: LandlordWithListedPropertyCount,
-        ): LandlordSearchResultDataModel {
-            val dataModel = fromLandlord(landlordWithListedPropertyCount.landlord)
-            dataModel.listedPropertyCount = landlordWithListedPropertyCount.listedPropertyCount
-            return dataModel
-        }
     }
 }

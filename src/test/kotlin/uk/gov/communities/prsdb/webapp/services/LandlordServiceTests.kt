@@ -165,7 +165,7 @@ class LandlordServiceTests {
         }
 
         val expectedFormattedSearchResults =
-            matchingLandlords.map { LandlordSearchResultDataModel.fromLandlord(it) }
+            matchingLandlordsWithListedPropertyCount.map { LandlordSearchResultDataModel.fromLandlordWithListedPropertyCount(it) }
 
         whenever(
             mockLandlordRepository.searchMatching(searchQuery, laUserBaseId, pageable = pageRequest),
@@ -197,7 +197,7 @@ class LandlordServiceTests {
         val matchingLandlordWithListedPropertyCount =
             listOf(LandlordWithListedPropertyCount(matchingLandlord[0].id, matchingLandlord[0], 0))
         val expectedFormattedSearchResults =
-            matchingLandlord.map { LandlordSearchResultDataModel.fromLandlord(it) }
+            matchingLandlordWithListedPropertyCount.map { LandlordSearchResultDataModel.fromLandlordWithListedPropertyCount(it) }
 
         whenever(
             mockLandlordRepository.searchMatchingLRN(searchLRN, laUserBaseId, pageable = pageRequest),

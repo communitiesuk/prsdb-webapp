@@ -7,27 +7,6 @@ import kotlin.test.assertEquals
 
 class LandlordSearchResultsDataModelTests {
     @Test
-    fun `fromLandlord returns a corresponding LandlordSearchResultsDataModel`() {
-        val landlord = createLandlord()
-        val expectedLandlordSearchResultDataModel =
-            LandlordSearchResultDataModel(
-                id = landlord.id,
-                name = landlord.name,
-                registrationNumber =
-                    RegistrationNumberDataModel
-                        .fromRegistrationNumber(landlord.registrationNumber)
-                        .toString(),
-                contactAddress = landlord.address.singleLineAddress,
-                email = landlord.email,
-                phoneNumber = landlord.phoneNumber,
-            )
-
-        val landlordSearchResultDataModel = LandlordSearchResultDataModel.fromLandlord(landlord)
-
-        assertEquals(expectedLandlordSearchResultDataModel, landlordSearchResultDataModel)
-    }
-
-    @Test
     fun `fromLandlordWithListedPropertyCount returns a corresponding LandlordSearchResultsDataModel`() {
         val landlord = createLandlord()
         val landlordWithListedPropertyCount = LandlordWithListedPropertyCount(landlord.id, landlord, 3)
