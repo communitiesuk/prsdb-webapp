@@ -369,5 +369,10 @@ class Navigator(
         return createValidPage(page, LandlordDetailsPage::class)
     }
 
+    fun goToLandlordDetailsAsALocalAuthorityUser(id: Long): LandlordDetailsPage {
+        navigate("landlord-details/$id")
+        return createValidPage(page, LandlordDetailsPage::class)
+    }
+
     private fun navigate(path: String): Response? = page.navigate("http://localhost:$port/$path")
 }
