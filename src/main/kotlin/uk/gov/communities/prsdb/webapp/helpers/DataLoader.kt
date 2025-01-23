@@ -8,15 +8,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.PlaceNameDataModel
 
 class DataLoader {
     companion object {
-        fun loadPlaceNames(): List<PlaceNameDataModel> {
-            // Files taken from https://www.gov.wales/bydtermcymru/international-place-names
-            val placeNameCSVFiles =
-                listOf(
-                    "classpath:data/place_names/country_names.csv",
-                    "classpath:data/place_names/crown_dependency_names.csv",
-                    "classpath:data/place_names/overseas_territory_names.csv",
-                )
-
+        fun loadPlaceNames(placeNameCSVFiles: List<String>): List<PlaceNameDataModel> {
             val csvSchema =
                 CsvSchema
                     .builder()
