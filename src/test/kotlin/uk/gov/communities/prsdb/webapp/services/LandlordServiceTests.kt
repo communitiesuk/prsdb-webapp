@@ -12,8 +12,11 @@ import org.mockito.Mockito.verify
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
+import org.mockito.kotlin.any
+import org.mockito.kotlin.never
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -192,6 +195,56 @@ class LandlordServiceTests {
             )
 
         assertEquals(expectedFormattedSearchResults, searchResults.content)
+    }
+
+    @Test
+    fun `searchForLandlords returns no results when given a non-landlord registration number`() {
+        val searchQuery = "P-CCCC-CCCC"
+        val laUserBaseId = "laUserBaseId"
+        val currentPageNumber = 0
+        val pageSize = 25
+        val expectedPageRequest = PageRequest.of(currentPageNumber, pageSize)
+        val expectedSearchResults = emptyList<LandlordSearchResultDataModel>()
+
+        whenever(
+            mockLandlordRepository.searchMatching(searchQuery, laUserBaseId, pageable = expectedPageRequest),
+        ).thenReturn(Page.empty())
+
+        val searchResults =
+            landlordService.searchForLandlords(
+                searchQuery,
+                laUserBaseId,
+                currentPageNumber = currentPageNumber,
+                pageSize = pageSize,
+            )
+
+        verify(mockLandlordRepository, never()).searchMatchingLRN(any(), any(), any(), any())
+        assertEquals(expectedSearchResults, searchResults.content)
+    }
+
+    @Test
+    fun `searchForLandlords returns no results when given a query that has no LRN or fuzzy search matches`() {
+        val searchQuery = "non-matching query"
+        val laUserBaseId = "laUserBaseId"
+        val currentPageNumber = 0
+        val pageSize = 25
+        val expectedPageRequest = PageRequest.of(currentPageNumber, pageSize)
+        val expectedSearchResults = emptyList<LandlordSearchResultDataModel>()
+
+        whenever(
+            mockLandlordRepository.searchMatching(searchQuery, laUserBaseId, pageable = expectedPageRequest),
+        ).thenReturn(Page.empty())
+
+        val searchResults =
+            landlordService.searchForLandlords(
+                searchQuery,
+                laUserBaseId,
+                currentPageNumber = currentPageNumber,
+                pageSize = pageSize,
+            )
+
+        verify(mockLandlordRepository, never()).searchMatchingLRN(any(), any(), any(), any())
+        assertEquals(expectedSearchResults, searchResults.content)
     }
 
     @Test
