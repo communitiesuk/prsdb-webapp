@@ -35,10 +35,12 @@ import uk.gov.communities.prsdb.webapp.models.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectiveLicenceFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
@@ -52,6 +54,7 @@ class PropertyRegistrationJourney(
     propertyRegistrationService: PropertyRegistrationService,
     localAuthorityService: LocalAuthorityService,
     session: HttpSession,
+    confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
 ) : Journey<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
         initialStepId = RegisterPropertyStepId.LookupAddress,
@@ -79,6 +82,7 @@ class PropertyRegistrationJourney(
                     propertyRegistrationService,
                     addressDataService,
                     localAuthorityService,
+                    confirmationEmailSender,
                     session,
                 ),
             ),
@@ -472,6 +476,7 @@ class PropertyRegistrationJourney(
             propertyRegistrationService: PropertyRegistrationService,
             addressDataService: AddressDataService,
             localAuthorityService: LocalAuthorityService,
+            confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
             session: HttpSession,
         ) = Step(
             id = RegisterPropertyStepId.CheckAnswers,
@@ -482,6 +487,7 @@ class PropertyRegistrationJourney(
                     journeyDataService,
                     propertyRegistrationService,
                     addressDataService,
+                    confirmationEmailSender,
                     session,
                 )
             },
@@ -522,11 +528,12 @@ class PropertyRegistrationJourney(
                 LicensingType.NO_LICENSING -> Pair(RegisterPropertyStepId.Occupancy, null)
             }
 
-        private fun checkAnswersSubmitAndRedirect(
+        fun checkAnswersSubmitAndRedirect(
             journeyData: JourneyData,
             journeyDataService: JourneyDataService,
             propertyRegistrationService: PropertyRegistrationService,
             addressDataService: AddressDataService,
+            confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
             session: HttpSession,
         ): String {
             try {
@@ -542,6 +549,15 @@ class PropertyRegistrationJourney(
                         numberOfPeople = PropertyRegistrationJourneyDataHelper.getNumberOfTenants(journeyData),
                         baseUserId = SecurityContextHolder.getContext().authentication.name,
                     )
+
+                confirmationEmailSender.sendEmail(
+                    "jasmin.conterio@softwire.com",
+                    PropertyRegistrationConfirmationEmail(
+                        "prn",
+                        "singleLineAddress",
+                        "£0.00 NOT YET IMPLEMENTED",
+                    ),
+                )
 
                 journeyDataService.deleteJourneyData()
 
