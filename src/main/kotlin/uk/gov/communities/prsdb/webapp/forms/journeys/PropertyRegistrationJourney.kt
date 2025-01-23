@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpSession
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_OWNERSHIP_ID
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
@@ -18,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.AlreadyRegisteredPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationCheckAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
+import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
@@ -34,14 +34,13 @@ import uk.gov.communities.prsdb.webapp.models.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
-import uk.gov.communities.prsdb.webapp.models.formModels.SelectLocalAuthorityFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectiveLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosDividerViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
 @Component
@@ -51,6 +50,7 @@ class PropertyRegistrationJourney(
     addressLookupService: AddressLookupService,
     addressDataService: AddressDataService,
     propertyRegistrationService: PropertyRegistrationService,
+    localAuthorityService: LocalAuthorityService,
     session: HttpSession,
 ) : Journey<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
@@ -63,7 +63,7 @@ class PropertyRegistrationJourney(
                 selectAddressStep(addressLookupService, addressDataService, propertyRegistrationService),
                 alreadyRegisteredStep(),
                 manualAddressStep(),
-                localAuthorityStep(),
+                localAuthorityStep(localAuthorityService),
                 propertyTypeStep(),
                 ownershipTypeStep(),
                 occupancyStep(),
@@ -74,7 +74,13 @@ class PropertyRegistrationJourney(
                 hmoMandatoryLicenceStep(),
                 hmoAdditionalLicenceStep(),
                 landlordTypeStep(),
-                checkAnswersStep(journeyDataService, propertyRegistrationService, addressDataService, session),
+                checkAnswersStep(
+                    journeyDataService,
+                    propertyRegistrationService,
+                    addressDataService,
+                    localAuthorityService,
+                    session,
+                ),
             ),
     ) {
     companion object {
@@ -124,7 +130,11 @@ class PropertyRegistrationJourney(
                     addressDataService = addressDataService,
                 ),
             nextAction = { journeyData, _ ->
-                selectAddressNextAction(journeyData, addressDataService, propertyRegistrationService)
+                selectAddressNextAction(
+                    journeyData,
+                    addressDataService,
+                    propertyRegistrationService,
+                )
             },
         )
 
@@ -169,27 +179,19 @@ class PropertyRegistrationJourney(
                 nextAction = { _, _ -> Pair(RegisterPropertyStepId.LocalAuthority, null) },
             )
 
-        private fun localAuthorityStep() =
+        private fun localAuthorityStep(localAuthorityService: LocalAuthorityService) =
             Step(
                 id = RegisterPropertyStepId.LocalAuthority,
                 page =
-                    Page(
-                        formModel = SelectLocalAuthorityFormModel::class,
-                        templateName = "forms/selectLocalAuthorityForm",
+                    SelectLocalAuthorityPage(
                         content =
                             mapOf(
                                 "title" to "registerProperty.title",
                                 "fieldSetHeading" to "forms.selectLocalAuthority.fieldSetHeading",
                                 "fieldSetHint" to "forms.selectLocalAuthority.fieldSetHint",
                                 "selectLabel" to "forms.selectLocalAuthority.select.label",
-                                "selectOptions" to
-                                    LOCAL_AUTHORITIES.map {
-                                        SelectViewModel(
-                                            value = it.custodianCode,
-                                            label = it.displayName,
-                                        )
-                                    },
                             ),
+                        localAuthorityService = localAuthorityService,
                     ),
                 nextAction = { _, _ -> Pair(RegisterPropertyStepId.PropertyType, null) },
             )
@@ -469,10 +471,11 @@ class PropertyRegistrationJourney(
             journeyDataService: JourneyDataService,
             propertyRegistrationService: PropertyRegistrationService,
             addressDataService: AddressDataService,
+            localAuthorityService: LocalAuthorityService,
             session: HttpSession,
         ) = Step(
             id = RegisterPropertyStepId.CheckAnswers,
-            page = PropertyRegistrationCheckAnswersPage(addressDataService),
+            page = PropertyRegistrationCheckAnswersPage(addressDataService, localAuthorityService),
             handleSubmitAndRedirect = { journeyData, _ ->
                 checkAnswersSubmitAndRedirect(
                     journeyData,

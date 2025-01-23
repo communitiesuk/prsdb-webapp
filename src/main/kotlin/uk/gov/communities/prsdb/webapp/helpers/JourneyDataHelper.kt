@@ -26,6 +26,7 @@ open class JourneyDataHelper {
         fun getManualAddress(
             journeyData: JourneyData,
             manualAddressPathSegment: String,
+            selectLocalAuthorityPathSegment: String? = null,
         ): AddressDataModel? {
             val addressLineOne =
                 getFieldStringValue(
@@ -62,12 +63,22 @@ open class JourneyDataHelper {
                     "county",
                 )
 
+            val localAuthorityId =
+                selectLocalAuthorityPathSegment?.let {
+                    getFieldIntegerValue(
+                        journeyData,
+                        it,
+                        "localAuthorityId",
+                    ) ?: return null
+                }
+
             return AddressDataModel.fromManualAddressData(
                 addressLineOne,
                 townOrCity,
                 postcode,
                 addressLineTwo,
                 county,
+                localAuthorityId,
             )
         }
 

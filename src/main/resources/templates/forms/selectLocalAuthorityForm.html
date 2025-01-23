@@ -8,12 +8,13 @@
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl})}">
 <th:block id="form-content">
     <fieldset id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'localAuthorityCustodianCode', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'localAuthorityId', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
         <p class="govuk-body">
             <span th:text="#{forms.selectLocalAuthority.paragraph.one.beforeLink}">forms.selectLocalAuthority.paragraph.one.beforeLink</span>
-            <a class="govuk-link" target="_blank" th:href="#{forms.selectLocalAuthority.paragraph.one.linkUrl}" th:text="#{forms.selectLocalAuthority.paragraph.one.linkText}">forms.selectLocalAuthority.paragraph.one.linkText</a>
+            <a class="govuk-link" target="_blank" th:href="#{forms.selectLocalAuthority.paragraph.one.linkUrl}"
+               th:text="#{forms.selectLocalAuthority.paragraph.one.linkText}">forms.selectLocalAuthority.paragraph.one.linkText</a>
         </p>
-        <select th:replace="~{fragments/forms/select :: select(#{${selectLabel}},'localAuthorityCustodianCode',null, ${selectOptions})}"></select>
+        <select th:replace="~{fragments/forms/select :: select(#{${selectLabel}},'localAuthorityId',null, ${selectOptions})}"></select>
     </fieldset>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
 </th:block>

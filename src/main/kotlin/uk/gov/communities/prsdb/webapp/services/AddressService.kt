@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 @Service
 class AddressService(
     private val addressRepository: AddressRepository,
+    private val localAuthorityService: LocalAuthorityService,
 ) {
     @Transactional
     fun findOrCreateAddress(addressDataModel: AddressDataModel): Address {
@@ -17,6 +18,11 @@ class AddressService(
             if (alreadyExistingAddress != null) return alreadyExistingAddress
         }
 
-        return addressRepository.save(Address(addressDataModel))
+        val localAuthority =
+            addressDataModel.localAuthorityId?.let {
+                localAuthorityService.retrieveLocalAuthorityById(it)
+            }
+
+        return addressRepository.save(Address(addressDataModel, localAuthority))
     }
 }

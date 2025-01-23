@@ -71,7 +71,7 @@ class ManageLocalAuthorityUsersControllerTests(
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `ManageLocalAuthorityUsersController returns 200 for authorized user`() {
         val loggedInUserModel = createdLoggedInUserModel()
-        val localAuthority = LocalAuthority(DEFAULT_LA_ID, "Test Local Authority")
+        val localAuthority = LocalAuthority(DEFAULT_LA_ID, "Test Local Authority", "custodianCode")
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenReturn(Pair(loggedInUserModel, localAuthority))
         whenever(localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 0))
@@ -101,7 +101,7 @@ class ManageLocalAuthorityUsersControllerTests(
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `inviting new user with valid form redirects to confirmation page`() {
         val loggedInUserModel = createdLoggedInUserModel()
-        val localAuthority = LocalAuthority(DEFAULT_LA_ID, "Test Local Authority")
+        val localAuthority = LocalAuthority(DEFAULT_LA_ID, "Test Local Authority", "custodian code")
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenReturn(Pair(loggedInUserModel, localAuthority))
         whenever(localAuthorityInvitationService.createInvitationToken(any(), any()))
