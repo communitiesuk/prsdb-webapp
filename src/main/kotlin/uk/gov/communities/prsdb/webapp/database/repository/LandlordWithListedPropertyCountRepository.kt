@@ -5,6 +5,4 @@ import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropert
 
 interface LandlordWithListedPropertyCountRepository : JpaRepository<LandlordWithListedPropertyCount?, Long?> {
     fun findByLandlordIdIn(primaryLandlordId: List<Long>): List<LandlordWithListedPropertyCount>
-
-    fun findByLandlordId(primaryLandlordId: Long): LandlordWithListedPropertyCount
 }
