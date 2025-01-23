@@ -20,7 +20,7 @@ class RegisteredPropertyDataModelTests {
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
         val localAuthority = LocalAuthority(11, "DERBYSHIRE DALES DISTRICT COUNCIL", "1045")
 
-        val property = createProperty(address = createAddress(address))
+        val property = createProperty(address = createAddress(address, localAuthority))
 
         val expectedLocalAuthority = localAuthority.name
         val expectedRegistrationNumber =
