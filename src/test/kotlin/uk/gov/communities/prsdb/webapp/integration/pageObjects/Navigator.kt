@@ -154,8 +154,8 @@ class Navigator(
     fun goToLandlordRegistrationInternationalAddressPage(): InternationalAddressFormPageLandlordRegistration {
         val countryOfResidencePage = goToLandlordRegistrationCountryOfResidencePage()
         countryOfResidencePage.radios.selectValue("false")
-        countryOfResidencePage.select.autocompleteInput.fill("France")
-        countryOfResidencePage.select.selectValue("France")
+        countryOfResidencePage.select.autocompleteInput.fill("Zimbabwe")
+        countryOfResidencePage.select.selectValue("Zimbabwe")
         countryOfResidencePage.form.submit()
         return createValidPage(page, InternationalAddressFormPageLandlordRegistration::class)
     }

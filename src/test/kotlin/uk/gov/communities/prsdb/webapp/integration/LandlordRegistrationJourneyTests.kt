@@ -177,8 +177,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
         countryOfResidencePage.radios.selectValue("false")
-        countryOfResidencePage.select.autocompleteInput.fill("Fr")
-        countryOfResidencePage.select.selectValue("France")
+        countryOfResidencePage.select.autocompleteInput.fill("Zi")
+        countryOfResidencePage.select.selectValue("Zimbabwe")
         countryOfResidencePage.form.submit()
 
         val internationalAddressPage = assertPageIs(page, InternationalAddressFormPageLandlordRegistration::class)
@@ -236,8 +236,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
         countryOfResidencePage.radios.selectValue("false")
-        countryOfResidencePage.select.autocompleteInput.fill("Fr")
-        countryOfResidencePage.select.selectValue("France")
+        countryOfResidencePage.select.autocompleteInput.fill("Zi")
+        countryOfResidencePage.select.selectValue("Zimbabwe")
         countryOfResidencePage.form.submit()
 
         val internationalAddressPage = assertPageIs(page, InternationalAddressFormPageLandlordRegistration::class)
