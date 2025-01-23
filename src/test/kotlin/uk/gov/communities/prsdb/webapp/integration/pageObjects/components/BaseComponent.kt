@@ -11,9 +11,13 @@ abstract class BaseComponent(
     companion object {
         private fun assertLocatorIsValid(
             locator: Locator,
-            expectedLocated: Int = 1,
+            expectedLocatorCount: Int = 1,
         ) {
-            assertEquals(expectedLocated, locator.count(), "Expected 1 instance of $locator, found ${locator.count()}")
+            assertEquals(
+                expectedLocatorCount,
+                locator.count(),
+                "Expected $expectedLocatorCount instance of $locator, found ${locator.count()}",
+            )
         }
 
         fun getComponent(
@@ -41,11 +45,11 @@ abstract class BaseComponent(
         fun getChildrenComponents(
             parentLocator: Locator,
             locatorStr: String,
-            expectedChildren: Int,
+            expectedChildrenCount: Int,
             locatorOptions: Locator.LocatorOptions? = null,
         ): List<Locator> {
             val component = parentLocator.locator(locatorStr, locatorOptions)
-            assertLocatorIsValid(component, expectedChildren)
+            assertLocatorIsValid(component, expectedChildrenCount)
             return component.all()
         }
 

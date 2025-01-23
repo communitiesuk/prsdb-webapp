@@ -16,6 +16,8 @@ class Tabs(
 
     var activePanel = tabPanels.find { it.isVisible }
 
+    fun getActiveTabPanelId() = activePanel?.getAttribute("id")
+
     fun goToTab(tabName: String) {
         tabsList.single { it.textContent().trim() == tabName.trim() }.click()
         hiddenPanels = tabPanels.filter { it.isHidden }

@@ -9,7 +9,7 @@ class LandlordDetailsPage(
 ) : BasePage(page, "/landlord-details") {
     val tabs = Tabs(page, 2)
 
-    fun getActiveTabPanelId() = tabs.activePanel?.getAttribute("id")
+    fun getActiveTabPanelId() = tabs.getActiveTabPanelId()
 
     fun goToRegisteredProperties() {
         tabs.goToTab("Registered properties")
