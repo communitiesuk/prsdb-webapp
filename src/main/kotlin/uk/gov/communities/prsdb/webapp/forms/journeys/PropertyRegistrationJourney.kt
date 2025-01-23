@@ -43,6 +43,7 @@ import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
@@ -54,6 +55,7 @@ class PropertyRegistrationJourney(
     addressDataService: AddressDataService,
     propertyRegistrationService: PropertyRegistrationService,
     localAuthorityService: LocalAuthorityService,
+    landlordService: LandlordService,
     session: HttpSession,
     confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
 ) : Journey<RegisterPropertyStepId>(
@@ -83,6 +85,7 @@ class PropertyRegistrationJourney(
                     propertyRegistrationService,
                     addressDataService,
                     localAuthorityService,
+                    landlordService,
                     confirmationEmailSender,
                     session,
                 ),
@@ -477,6 +480,7 @@ class PropertyRegistrationJourney(
             propertyRegistrationService: PropertyRegistrationService,
             addressDataService: AddressDataService,
             localAuthorityService: LocalAuthorityService,
+            landlordService: LandlordService,
             confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
             session: HttpSession,
         ) = Step(
@@ -488,6 +492,7 @@ class PropertyRegistrationJourney(
                     journeyDataService,
                     propertyRegistrationService,
                     addressDataService,
+                    landlordService,
                     confirmationEmailSender,
                     session,
                 )
@@ -534,11 +539,13 @@ class PropertyRegistrationJourney(
             journeyDataService: JourneyDataService,
             propertyRegistrationService: PropertyRegistrationService,
             addressDataService: AddressDataService,
+            landlordService: LandlordService,
             confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
             session: HttpSession,
         ): String {
             try {
                 val address = PropertyRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!
+                val baseUserId = SecurityContextHolder.getContext().authentication.name
                 val propertyRegistrationNumber =
                     propertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(
                         address = address,
@@ -549,11 +556,11 @@ class PropertyRegistrationJourney(
                         ownershipType = PropertyRegistrationJourneyDataHelper.getOwnershipType(journeyData)!!,
                         numberOfHouseholds = PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(journeyData),
                         numberOfPeople = PropertyRegistrationJourneyDataHelper.getNumberOfTenants(journeyData),
-                        baseUserId = SecurityContextHolder.getContext().authentication.name,
+                        baseUserId = baseUserId,
                     )
 
                 confirmationEmailSender.sendEmail(
-                    "jasmin.conterio@softwire.com",
+                    landlordService.retrieveLandlordByBaseUserId(baseUserId)!!.email,
                     PropertyRegistrationConfirmationEmail(
                         RegistrationNumberDataModel.fromRegistrationNumber(propertyRegistrationNumber).toString(),
                         address.singleLineAddress,
