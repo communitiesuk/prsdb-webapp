@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
+import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
@@ -138,14 +139,18 @@ class PropertyOwnershipServiceTests {
 
         private val address1 = "11 Example Road, EG1 2AB"
         private val address2 = "12 Example Road, EG1 2AB"
-        private val custodianCode = "1045"
+        private val localAuthority = LocalAuthority(11, "DERBYSHIRE DALES DISTRICT COUNCIL", "1045")
         private val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
 
-        private val property1 = createProperty(address = createAddress(address1, custodianCode))
-        private val property2 = createProperty(address = createAddress(address2, custodianCode))
+        private val property1 = createProperty(address = createAddress(address1, localAuthority))
+        private val property2 = createProperty(address = createAddress(address2, localAuthority))
 
-        private val expectedLocalAuthority = "DERBYSHIRE DALES DISTRICT COUNCIL"
-        private val expectedRegistrationNumber = "P-CCCF-ZHXX"
+        private val expectedLocalAuthority = localAuthority.name
+        private val expectedRegistrationNumber =
+            RegistrationNumberDataModel
+                .fromRegistrationNumber(
+                    registrationNumber,
+                ).toString()
         private val expectedPropertyLicence = "Not Licenced"
         private val expectedIsTenantedMessageKey = "commonText.no"
 

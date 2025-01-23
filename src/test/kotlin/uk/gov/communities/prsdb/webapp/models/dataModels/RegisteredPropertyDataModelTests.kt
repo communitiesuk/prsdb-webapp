@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.CsvSource
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.License
+import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createProperty
@@ -16,13 +17,17 @@ class RegisteredPropertyDataModelTests {
     @Test
     fun `Returns a RegisteredPropertyDataModel from a PropertyOwnership`() {
         val address = "11 Example Road, EG1 2AB"
-        val custodianCode = "1045"
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
+        val localAuthority = LocalAuthority(11, "DERBYSHIRE DALES DISTRICT COUNCIL", "1045")
 
-        val property = createProperty(address = createAddress(address, custodianCode))
+        val property = createProperty(address = createAddress(address))
 
-        val expectedLocalAuthority = "DERBYSHIRE DALES DISTRICT COUNCIL"
-        val expectedRegistrationNumber = "P-CCCF-ZHXX"
+        val expectedLocalAuthority = localAuthority.name
+        val expectedRegistrationNumber =
+            RegistrationNumberDataModel
+                .fromRegistrationNumber(
+                    registrationNumber,
+                ).toString()
         val expectedPropertyLicence = "Not Licenced"
         val expectedIsTenantedMessageKey = "commonText.no"
 
