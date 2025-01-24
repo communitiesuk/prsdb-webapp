@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.TaskListItem
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -49,6 +51,24 @@ class RegisterPropertyController(
             model,
             subpage,
         )
+
+    @GetMapping("/task-list")
+    fun getTaskList(model: Model): String {
+        val registerTaskList =
+            listOf(
+                TaskListItem("registerProperty.taskList.register.addAddress", TaskStatus.COMPLETED, "https:www.google.com"),
+                TaskListItem("registerProperty.taskList.register.selectType", TaskStatus.IN_PROGRESS, "https:www.google.com"),
+                TaskListItem("registerProperty.taskList.register.selectOwnership", TaskStatus.NOT_YET_STARTED, "https:www.google.com"),
+                TaskListItem("registerProperty.taskList.register.addLicensing", TaskStatus.CANNOT_START_YET),
+            )
+        val checkAndSubmitTaskList = listOf<TaskListItem>()
+
+        model.addAttribute("registerTasks", registerTaskList)
+        // model.addAttribute("registerTask", registerTaskList.first())
+        // model.addAttribute("checkAndSubmitTasks", checkAndSubmitTaskList)
+
+        return "registerPropertyTaskList"
+    }
 
     @PostMapping("/{stepName}")
     fun postJourneyData(

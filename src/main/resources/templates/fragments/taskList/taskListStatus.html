@@ -1,0 +1,9 @@
+<div th:fragment="taskListStatus(status, id)"
+     class="govuk-task-list__status"
+     th:classappend="${status.text == 'Cannot start yet'} ? 'govuk-task-list__status--cannot-start-yet' : ''"
+     th:id="${id}" >
+    <strong th:remove="${status.tag} ? none : tag" th:text="${status.text}" th:classappend="${status.tagClass}" class="govuk-tag">
+        status.text
+    </strong>
+</div>
+
