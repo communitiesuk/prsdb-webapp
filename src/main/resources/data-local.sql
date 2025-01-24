@@ -125,7 +125,9 @@ SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM addr
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
                       is_active, phone_number, subject_identifier, name, email)
-VALUES (2, '09/13/24', '09/13/24', 2, 2, '08/13/2001', true, 07111111111, 'urn:fdc:gov.uk:2022:ABCDE',
+VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:fdc:gov.uk:2022:UVWXY',
+        'PRSDB Alexander Smith', 'alex.surname@example.com'),
+       (2, '09/13/24', '09/13/24', 2, 2, '08/13/2001', true, 07111111111, 'urn:fdc:gov.uk:2022:ABCDE',
         'PRSDB Alexandra Davies', 'alexandra.q.davies@example.com'),
        (3, '09/13/24', '09/13/24', 3, 3, '07/13/1997', true, 07111111111, 'urn:fdc:gov.uk:2022:PQRST',
         'PRSDB Evan Alexandrescu', 'unrelatedemail@completelydifferentdomain.com'),
@@ -176,6 +178,6 @@ SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM pro
 
 INSERT INTO property_ownership (id, is_active, occupancy_type, landlord_type, ownership_type, current_num_households,
                                 current_num_tenants, registration_number_id, primary_landlord_id, property_id)
-VALUES (2, true, 0, 0, 1, 1, 2, 6, 1, 1);
+VALUES (1, true, 0, 0, 1, 1, 2, 6, 1, 1);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
