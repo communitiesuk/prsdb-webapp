@@ -59,6 +59,10 @@ export default {
                         src: 'node_modules/@ministryofjustice/frontend/moj/assets/fonts/**/*',
                         dest: 'dist/fonts',
                     },
+                    {
+                        src: 'src/main/resources/css/**/*',
+                        dest: 'dist/css'
+                    },
                 ],
             }
         )

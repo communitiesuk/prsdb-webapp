@@ -1,0 +1,7 @@
+:root {
+    --gov-uk-red: #d4351c;
+
+    .border-color-red {
+        border-color: var(--gov-uk-red);
+    }
+}
