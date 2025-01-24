@@ -1,7 +1,7 @@
 :root {
-    --gov-uk-red: #d4351c;
+    --govuk-colour-red: #d4351c;
 
     .border-color-red {
-        border-color: var(--gov-uk-red);
+        border-color: var(--govuk-colour-red);
     }
 }
