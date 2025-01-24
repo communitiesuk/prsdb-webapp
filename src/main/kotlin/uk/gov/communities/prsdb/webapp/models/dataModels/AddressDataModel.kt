@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AddressDataModel(
     val singleLineAddress: String,
-    val custodianCode: String? = null,
+    val localAuthorityId: Int? = null,
     val uprn: Long? = null,
     val organisation: String? = null,
     val subBuilding: String? = null,
@@ -23,12 +23,14 @@ data class AddressDataModel(
             postcode: String,
             addressLineTwo: String? = null,
             county: String? = null,
+            localAuthorityId: Int? = null,
         ): AddressDataModel =
             AddressDataModel(
                 singleLineAddress =
                     manualAddressDataToSingleLineAddress(addressLineOne, townOrCity, postcode, addressLineTwo, county),
                 townName = townOrCity,
                 postcode = postcode,
+                localAuthorityId = localAuthorityId,
             )
 
         fun manualAddressDataToSingleLineAddress(

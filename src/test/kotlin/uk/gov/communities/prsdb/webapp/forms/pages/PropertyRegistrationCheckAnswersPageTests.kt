@@ -10,20 +10,22 @@ import org.mockito.kotlin.whenever
 import org.springframework.ui.ExtendedModelMap
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 
 class PropertyRegistrationCheckAnswersPageTests {
     private lateinit var page: PropertyRegistrationCheckAnswersPage
     private lateinit var addressService: AddressDataService
+    private lateinit var localAuthorityService: LocalAuthorityService
     private lateinit var validator: Validator
     private lateinit var model: Model
     private lateinit var pageData: Map<String, Any?>
@@ -33,13 +35,14 @@ class PropertyRegistrationCheckAnswersPageTests {
     @BeforeEach
     fun setup() {
         addressService = mock()
-        page = PropertyRegistrationCheckAnswersPage(addressService)
+        localAuthorityService = mock()
+        page = PropertyRegistrationCheckAnswersPage(addressService, localAuthorityService)
         validator = mock()
         whenever(validator.supports(any<Class<*>>())).thenReturn(true)
         model = ExtendedModelMap()
         pageData = mock()
         prevStepUrl = "mock"
-        journeyDataBuilder = JourneyDataBuilder.propertyDefault(addressService)
+        journeyDataBuilder = JourneyDataBuilder.propertyDefault(addressService, localAuthorityService)
     }
 
     private fun getPropertyDetails(journeyData: MutableMap<String, Any?>): List<SummaryListRowViewModel> {
@@ -54,8 +57,8 @@ class PropertyRegistrationCheckAnswersPageTests {
         // Arrange
         val addressName = "4, Example Road, EG"
         val uprn: Long = 1002001
-        val localAuthorityIndex = 15
-        val journeyData = journeyDataBuilder.withSelectedAddress(addressName, uprn, localAuthorityIndex).build()
+        val localAuthority = createLocalAuthority()
+        val journeyData = journeyDataBuilder.withSelectedAddress(addressName, uprn, localAuthority).build()
 
         // Act
         val propertyDetails = getPropertyDetails(journeyData)
@@ -83,7 +86,7 @@ class PropertyRegistrationCheckAnswersPageTests {
         assertEquals(
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.localAuthority",
-                LOCAL_AUTHORITIES[localAuthorityIndex].displayName,
+                localAuthority.name,
                 null,
             ),
             propertyDetails.single {
@@ -98,19 +101,21 @@ class PropertyRegistrationCheckAnswersPageTests {
         val addressLineOne = "3 Example Road"
         val townOrCity = "Townville"
         val postcode = "EG1 2AB"
-        val manualAddress = AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode)
+        val localAuthority = createLocalAuthority()
 
-        val localAuthorityIndex = 19
         val journeyData =
-            journeyDataBuilder.withManualAddress(addressLineOne, townOrCity, postcode, localAuthorityIndex).build()
+            journeyDataBuilder
+                .withManualAddress(addressLineOne, townOrCity, postcode, localAuthority)
+                .build()
 
         // Act
         val propertyDetails = getPropertyDetails(journeyData)
 
+        // Assert
         assertEquals(
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.address",
-                manualAddress.singleLineAddress,
+                AddressDataModel.manualAddressDataToSingleLineAddress(addressLineOne, townOrCity, postcode),
                 RegisterPropertyStepId.ManualAddress.urlPathSegment,
             ),
             propertyDetails.single {
@@ -120,7 +125,7 @@ class PropertyRegistrationCheckAnswersPageTests {
         assertEquals(
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.localAuthority",
-                LOCAL_AUTHORITIES[localAuthorityIndex].displayName,
+                localAuthority.name,
                 RegisterPropertyStepId.LocalAuthority.urlPathSegment,
             ),
             propertyDetails.single {

@@ -5,14 +5,16 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITIES
 import uk.gov.communities.prsdb.webapp.constants.MAX_ADDRESSES
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import kotlin.math.min
 
 @Profile("local-mock-os-places")
 @RestController
 @RequestMapping("/local/os-places")
-class OSPlacesAPIStubController {
+class OSPlacesAPIStubController(
+    private val localAuthorityService: LocalAuthorityService,
+) {
     @GetMapping("/find")
     fun lookupAddressesByPostcode(
         @RequestParam query: String,
@@ -38,5 +40,5 @@ class OSPlacesAPIStubController {
         }
     }
 
-    private fun getCustodianCode(index: Int) = LOCAL_AUTHORITIES[index % LOCAL_AUTHORITIES.size].custodianCode
+    private fun getCustodianCode(index: Int) = localAuthorityService.retrieveAllLocalAuthorities().let { it[index % it.size].custodianCode }
 }

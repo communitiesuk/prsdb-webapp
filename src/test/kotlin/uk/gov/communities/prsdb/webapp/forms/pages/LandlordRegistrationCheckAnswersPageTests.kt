@@ -16,11 +16,13 @@ import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder.Companion.
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import java.time.LocalDate
 
 class LandlordRegistrationCheckAnswersPageTests {
     private lateinit var page: LandlordRegistrationCheckAnswersPage
     private lateinit var addressService: AddressDataService
+    private lateinit var localAuthorityService: LocalAuthorityService
     private lateinit var validator: Validator
     private lateinit var model: Model
     private lateinit var pageData: Map<String, Any?>
@@ -30,13 +32,14 @@ class LandlordRegistrationCheckAnswersPageTests {
     @BeforeEach
     fun setup() {
         addressService = mock()
+        localAuthorityService = mock()
         page = LandlordRegistrationCheckAnswersPage(addressService)
         validator = mock()
         whenever(validator.supports(any<Class<*>>())).thenReturn(true)
         model = ExtendedModelMap()
         pageData = mock()
         prevStepUrl = "mock"
-        journeyDataBuilder = JourneyDataBuilder.landlordDefault(addressService)
+        journeyDataBuilder = JourneyDataBuilder.landlordDefault(addressService, localAuthorityService)
     }
 
     private fun getFormData(journeyData: MutableMap<String, Any?>): List<SummaryListRowViewModel> {

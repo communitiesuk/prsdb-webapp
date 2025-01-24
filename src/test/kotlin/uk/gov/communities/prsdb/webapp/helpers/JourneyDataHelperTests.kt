@@ -6,19 +6,23 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class JourneyDataHelperTests {
     private lateinit var mockAddressDataService: AddressDataService
+    private lateinit var mockLocalAuthorityService: LocalAuthorityService
     private lateinit var journeyDataBuilder: JourneyDataBuilder
 
     @BeforeEach
     fun setup() {
         mockAddressDataService = mock()
-        journeyDataBuilder = JourneyDataBuilder.landlordDefault(mockAddressDataService)
+        mockLocalAuthorityService = mock()
+        journeyDataBuilder = JourneyDataBuilder.landlordDefault(mockAddressDataService, mockLocalAuthorityService)
     }
 
     @Test
@@ -30,6 +34,27 @@ class JourneyDataHelperTests {
         val expectedAddressDataModel = AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode)
 
         val addressDataModel = JourneyDataHelper.getManualAddress(mockJourneyData, "manual-address")
+
+        assertEquals(expectedAddressDataModel, addressDataModel)
+    }
+
+    @Test
+    fun `getManualAddress returns an address with a local authority from journey data`() {
+        val addressLineOne = "1 Example Address"
+        val townOrCity = "Townville"
+        val postcode = "EG1 2AB"
+        val localAuthority = createLocalAuthority()
+        val mockJourneyData =
+            journeyDataBuilder.withManualAddress(addressLineOne, townOrCity, postcode, localAuthority).build()
+        val expectedAddressDataModel =
+            AddressDataModel.fromManualAddressData(
+                addressLineOne,
+                townOrCity,
+                postcode,
+                localAuthorityId = localAuthority.id,
+            )
+
+        val addressDataModel = JourneyDataHelper.getManualAddress(mockJourneyData, "manual-address", "local-authority")
 
         assertEquals(expectedAddressDataModel, addressDataModel)
     }

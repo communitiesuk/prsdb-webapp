@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -64,21 +63,20 @@ class LandlordService(
 
     fun searchForLandlords(
         searchTerm: String,
+        laUserId: String,
+        useLAFilter: Boolean = false,
         currentPageNumber: Int = 0,
         pageSize: Int = MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE,
     ): Page<LandlordSearchResultDataModel> {
-        RegistrationNumberDataModel.parseOrNull(searchTerm)?.let { registrationNumber ->
-            if (registrationNumber.isType(RegistrationNumberType.LANDLORD)) {
-                retrieveLandlordByRegNum(registrationNumber)?.let { landlord ->
-                    return PageImpl(listOf(LandlordSearchResultDataModel.fromLandlord(landlord)))
-                }
-            }
-        }
-
+        val lrn = RegistrationNumberDataModel.parseTypeOrNull(searchTerm, RegistrationNumberType.LANDLORD)
         val pageRequest = PageRequest.of(currentPageNumber, pageSize)
 
-        return landlordRepository
-            .searchMatching(searchTerm, pageRequest)
-            .map { LandlordSearchResultDataModel.fromLandlord(it) }
+        return (
+            if (lrn == null) {
+                landlordRepository.searchMatching(searchTerm, laUserId, useLAFilter, pageRequest)
+            } else {
+                landlordRepository.searchMatchingLRN(lrn.number, laUserId, useLAFilter, pageRequest)
+            }
+        ).map { LandlordSearchResultDataModel.fromLandlord(it) }
     }
 }

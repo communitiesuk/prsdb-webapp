@@ -10,17 +10,20 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import java.time.LocalDate
 import kotlin.test.assertEquals
 
 class LandlordRegistrationJourneyDataHelperTests {
     private lateinit var mockAddressDataService: AddressDataService
+    private lateinit var mockLocalAuthorityService: LocalAuthorityService
     private lateinit var journeyDataBuilder: JourneyDataBuilder
 
     @BeforeEach
     fun setup() {
         mockAddressDataService = mock()
-        journeyDataBuilder = JourneyDataBuilder.landlordDefault(mockAddressDataService)
+        mockLocalAuthorityService = mock()
+        journeyDataBuilder = JourneyDataBuilder.landlordDefault(mockAddressDataService, mockLocalAuthorityService)
     }
 
     @Test
