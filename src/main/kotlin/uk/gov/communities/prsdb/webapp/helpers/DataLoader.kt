@@ -21,7 +21,7 @@ class DataLoader {
 
             return placeNameCSVFiles
                 .map { filePath -> loadCsvFile<PlaceNameDataModel>(filePath, csvSchema) }
-                .reduce { currentPlaceNameList, nextPlaceNameList -> currentPlaceNameList + nextPlaceNameList }
+                .flatten()
                 .sortedBy { it.name }
         }
 
