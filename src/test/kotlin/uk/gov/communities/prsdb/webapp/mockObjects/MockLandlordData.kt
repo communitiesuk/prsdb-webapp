@@ -17,8 +17,8 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import java.time.Instant
 import java.time.LocalDate
-import java.time.OffsetDateTime
 
 class MockLandlordData {
     companion object {
@@ -43,7 +43,7 @@ class MockLandlordData {
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 0L),
             internationalAddress: String? = null,
             dateOfBirth: LocalDate? = null,
-            createdAt: OffsetDateTime = OffsetDateTime.now(),
+            createdAt: Instant = Instant.now(),
         ): Landlord {
             val landlord: Landlord = mock()
             whenever(landlord.baseUser).thenReturn(baseUser)
@@ -53,7 +53,7 @@ class MockLandlordData {
             whenever(landlord.address).thenReturn(address)
             whenever(landlord.registrationNumber).thenReturn(registrationNumber)
             whenever(landlord.dateOfBirth).thenReturn(dateOfBirth)
-            whenever(landlord.lastModifiedDate).thenReturn(OffsetDateTime.now())
+            whenever(landlord.lastModifiedDate).thenReturn(Instant.now())
             whenever(landlord.internationalAddress).thenReturn(internationalAddress)
             whenever(landlord.createdDate).thenReturn(createdAt)
 
