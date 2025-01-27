@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.dataModels
+package uk.gov.communities.prsdb.webapp.models.viewModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -12,10 +12,11 @@ import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createProperty
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
-class RegisteredPropertyDataModelTests {
+class RegisteredPropertyViewModelTests {
     @Test
-    fun `Returns a RegisteredPropertyDataModel from a PropertyOwnership`() {
+    fun `Returns a RegisteredPropertyViewModel from a PropertyOwnership`() {
         val address = "11 Example Road, EG1 2AB"
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
         val localAuthority = LocalAuthority(11, "DERBYSHIRE DALES DISTRICT COUNCIL", "1045")
@@ -39,8 +40,8 @@ class RegisteredPropertyDataModelTests {
                 currentNumTenants = 0,
             )
 
-        val expectedRegisteredPropertyDataModel =
-            RegisteredPropertyDataModel(
+        val expectedRegisteredPropertyViewModel =
+            RegisteredPropertyViewModel(
                 address,
                 expectedRegistrationNumber,
                 expectedLocalAuthority,
@@ -48,9 +49,9 @@ class RegisteredPropertyDataModelTests {
                 expectedIsTenantedMessageKey,
             )
 
-        val result = RegisteredPropertyDataModel.fromPropertyOwnership(propertyOwnership)
+        val result = RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
 
-        assertEquals(expectedRegisteredPropertyDataModel, result)
+        assertEquals(expectedRegisteredPropertyViewModel, result)
     }
 
     @ParameterizedTest
@@ -65,7 +66,7 @@ class RegisteredPropertyDataModelTests {
     ) {
         val propertyOwnership = createPropertyOwnership(currentNumTenants = currentNumTenants)
 
-        val result = RegisteredPropertyDataModel.fromPropertyOwnership(propertyOwnership)
+        val result = RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
 
         assertEquals(result.isTenantedMessageKey, expectedMessageKey)
     }
@@ -85,7 +86,7 @@ class RegisteredPropertyDataModelTests {
 
         val propertyOwnership = createPropertyOwnership(license = licence)
 
-        val result = RegisteredPropertyDataModel.fromPropertyOwnership(propertyOwnership)
+        val result = RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
 
         assertEquals(result.propertyLicence, expectedDisplayName)
     }
@@ -94,7 +95,7 @@ class RegisteredPropertyDataModelTests {
     fun `Returns correct licensing display name for property with no licence`() {
         val propertyOwnership = createPropertyOwnership(license = null)
 
-        val result = RegisteredPropertyDataModel.fromPropertyOwnership(propertyOwnership)
+        val result = RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
 
         assertEquals(result.propertyLicence, "Not Licenced")
     }
