@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="local" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <option name="ACTIVE_PROFILES" value="local, local-no-auth, local-mock-os-places, use-notify" />
+    <option name="ACTIVE_PROFILES" value="local, local-no-auth, local-mock-os-places" />
     <option name="envFilePaths">
       <option value="$PROJECT_DIR$/.env" />
     </option>
