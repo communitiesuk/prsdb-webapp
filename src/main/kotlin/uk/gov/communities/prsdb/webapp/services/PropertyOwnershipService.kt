@@ -58,9 +58,20 @@ class PropertyOwnershipService(
         propertyOwnershipRepository
             .findByRegistrationNumber_Number(registrationNumber)
 
+    fun getRegisteredPropertiesForLandlord(landlordId: Long): List<RegisteredPropertyDataModel> =
+        retrieveAllRegisteredPropertiesForLandlord(landlordId).map { propertyOwnership ->
+            RegisteredPropertyDataModel.fromPropertyOwnership(propertyOwnership)
+        }
+
     private fun retrieveAllRegisteredPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
         propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
             baseUserId,
+            RegistrationStatus.REGISTERED,
+        )
+
+    private fun retrieveAllRegisteredPropertiesForLandlord(landlordId: Long): List<PropertyOwnership> =
+        propertyOwnershipRepository.findAllByPrimaryLandlord_IdAndIsActiveTrueAndProperty_Status(
+            landlordId,
             RegistrationStatus.REGISTERED,
         )
 }
