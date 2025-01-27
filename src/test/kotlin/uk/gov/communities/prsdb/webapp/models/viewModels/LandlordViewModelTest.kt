@@ -103,7 +103,7 @@ class LandlordViewModelTest {
         // Arrange
         val testLandlord =
             MockLandlordData.createLandlord(
-                createdAt = OffsetDateTime.ofInstant(instant.toJavaInstant(), ZoneId.of(timeZoneID)),
+                createdAt = OffsetDateTime.ofInstant(instant.toJavaInstant(), ZoneId.of(timeZoneID)).toInstant(),
             )
 
         // Act
