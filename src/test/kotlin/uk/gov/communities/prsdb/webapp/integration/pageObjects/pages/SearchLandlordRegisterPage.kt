@@ -29,5 +29,6 @@ class SearchLandlordRegisterPage(
         const val LANDLORD_COL_INDEX: Int = 0
         const val ADDRESS_COL_INDEX: Int = 1
         const val CONTACT_INFO_COL_INDEX: Int = 2
+        const val LISTED_PROPERTY_COL_INDEX: Int = 3
     }
 }

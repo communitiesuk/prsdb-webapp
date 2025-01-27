@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.ADDRESS_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.CONTACT_INFO_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.LANDLORD_COL_INDEX
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.LISTED_PROPERTY_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import kotlin.test.assertContains
 
@@ -38,6 +39,9 @@ class SearchRegisterTests : IntegrationTest() {
 
         assertThat(resultTable.getHeaderCell(CONTACT_INFO_COL_INDEX)).containsText("Contact information")
         assertThat(resultTable.getCell(0, CONTACT_INFO_COL_INDEX)).containsText("7111111111\nalex.surname@example.com")
+
+        assertThat(resultTable.getHeaderCell(LISTED_PROPERTY_COL_INDEX)).containsText("Listed properties")
+        assertThat(resultTable.getCell(0, LISTED_PROPERTY_COL_INDEX)).containsText("3")
 
         val exception = assertThrows<AssertionFailedError> { searchLandlordRegisterPage.getErrorMessage() }
         assertContains(exception.message!!, "Expected 1 instance of Locator@#no-results >> nth=0, found 0")
