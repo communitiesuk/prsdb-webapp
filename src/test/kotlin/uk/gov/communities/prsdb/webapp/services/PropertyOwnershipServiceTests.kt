@@ -29,8 +29,8 @@ import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.cr
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createProperty
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createPropertyOwnership
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegisteredPropertyDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.RegisteredPropertyViewModel
 
 @ExtendWith(MockitoExtension::class)
 class PropertyOwnershipServiceTests {
@@ -174,16 +174,16 @@ class PropertyOwnershipServiceTests {
         private val landlordsProperties: List<PropertyOwnership> =
             listOf(propertyOwnership1, propertyOwnership2)
 
-        private val expectedResults: List<RegisteredPropertyDataModel> =
+        private val expectedResults: List<RegisteredPropertyViewModel> =
             listOf(
-                RegisteredPropertyDataModel(
+                RegisteredPropertyViewModel(
                     address1,
                     expectedRegistrationNumber,
                     expectedLocalAuthority,
                     expectedPropertyLicence,
                     expectedIsTenantedMessageKey,
                 ),
-                RegisteredPropertyDataModel(
+                RegisteredPropertyViewModel(
                     address2,
                     expectedRegistrationNumber,
                     expectedLocalAuthority,

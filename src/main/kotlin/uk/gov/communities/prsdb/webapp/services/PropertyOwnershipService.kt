@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegisteredPropertyDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.RegisteredPropertyViewModel
 
 @Service
 class PropertyOwnershipService(
@@ -50,14 +50,14 @@ class PropertyOwnershipService(
         )
     }
 
-    fun getRegisteredPropertiesForLandlord(baseUserId: String): List<RegisteredPropertyDataModel> =
+    fun getRegisteredPropertiesForLandlord(baseUserId: String): List<RegisteredPropertyViewModel> =
         retrieveAllRegisteredPropertiesForLandlord(baseUserId).map { propertyOwnership ->
-            RegisteredPropertyDataModel.fromPropertyOwnership(propertyOwnership)
+            RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
         }
 
-    fun getRegisteredPropertiesForLandlord(landlordId: Long): List<RegisteredPropertyDataModel> =
+    fun getRegisteredPropertiesForLandlord(landlordId: Long): List<RegisteredPropertyViewModel> =
         retrieveAllRegisteredPropertiesForLandlord(landlordId).map { propertyOwnership ->
-            RegisteredPropertyDataModel.fromPropertyOwnership(propertyOwnership)
+            RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
         }
 
     fun retrievePropertyOwnership(id: Long): PropertyOwnership? = propertyOwnershipRepository.findByIdOrNull(id)
