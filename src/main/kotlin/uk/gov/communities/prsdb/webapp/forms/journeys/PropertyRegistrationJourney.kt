@@ -559,12 +559,14 @@ class PropertyRegistrationJourney(
                         baseUserId = baseUserId,
                     )
 
+                val prsdUrl = "www.example.com"
+
                 confirmationEmailSender.sendEmail(
                     landlordService.retrieveLandlordByBaseUserId(baseUserId)!!.email,
                     PropertyRegistrationConfirmationEmail(
                         RegistrationNumberDataModel.fromRegistrationNumber(propertyRegistrationNumber).toString(),
                         address.singleLineAddress,
-                        "£0.00 NOT YET IMPLEMENTED",
+                        prsdUrl,
                     ),
                 )
 
