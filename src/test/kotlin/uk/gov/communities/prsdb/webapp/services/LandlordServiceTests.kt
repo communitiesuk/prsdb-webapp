@@ -267,44 +267,6 @@ class LandlordServiceTests {
     }
 
     @Test
-    fun `searchForLandlords returns LandlordSearchResultDataModels including listedPropertyCount`() {
-        val searchQuery = "query"
-        val laUserBaseId = "laUserBaseId"
-        val currentPageNumber = 0
-        val pageSize = 25
-        val expectedPageRequest = PageRequest.of(currentPageNumber, pageSize)
-
-        val matchingLandlords = mutableListOf<Landlord>()
-        val matchingLandlordsWithListedPropertyCount = mutableListOf<LandlordWithListedPropertyCount>()
-        for (i in 1..3) {
-            val landlord = createLandlord()
-            matchingLandlords.add(landlord)
-            matchingLandlordsWithListedPropertyCount.add(LandlordWithListedPropertyCount(landlord.id, landlord, i))
-        }
-
-        val expectedSearchResults =
-            matchingLandlordsWithListedPropertyCount
-                .map { LandlordSearchResultDataModel.fromLandlordWithListedPropertyCount(it) }
-
-        whenever(mockLandlordRepository.searchMatching(searchQuery, laUserBaseId, pageable = expectedPageRequest))
-            .thenReturn(PageImpl(matchingLandlords))
-        whenever(mockLandlordWithListedPropertyCountRepository.findByLandlordIdIn(matchingLandlords.map { it.id }))
-            .thenReturn(matchingLandlordsWithListedPropertyCount)
-
-        val searchResults =
-            landlordService.searchForLandlords(
-                searchQuery,
-                laUserBaseId,
-                currentPageNumber = currentPageNumber,
-                pageSize = pageSize,
-            )
-
-        // Actually we should probably check this with > 1 page of results and check that the total pages on the output is correct. Maybe as a separate test?
-
-        assertEquals(expectedSearchResults, searchResults.content)
-    }
-
-    @Test
     fun `searchForLandlords returns the requested page of LandlordSearchResultDataModels`() {
         val searchQuery = "query"
         val laUserBaseId = "laUserBaseId"

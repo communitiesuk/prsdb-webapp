@@ -74,13 +74,12 @@ class LandlordService(
         val lrn = RegistrationNumberDataModel.parseTypeOrNull(searchTerm, RegistrationNumberType.LANDLORD)
         val pageRequest = PageRequest.of(currentPageNumber, pageSize)
 
-        val landlordPage = (
+        val landlordPage =
             if (lrn == null) {
                 landlordRepository.searchMatching(searchTerm, laUserId, useLAFilter, pageRequest)
             } else {
                 landlordRepository.searchMatchingLRN(lrn.number, laUserId, useLAFilter, pageRequest)
             }
-        )
 
         return PageImpl(
             landlordWithListedPropertyCountRepository
