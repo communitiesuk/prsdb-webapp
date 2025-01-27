@@ -20,7 +20,7 @@
   {
     "id": "90bf3bc0-5269-4a44-8ed2-147c9308196f",
     "name": "Property Registration Confirmation",
-    "subject": "GOV.UK – Your registered property on the PRS Database",
+    "subject": "GOV.UK - Your registered property on the PRS Database",
     "bodyLocation": "/emails/PropertyRegistrationConfirmation.md"
   }
 ]

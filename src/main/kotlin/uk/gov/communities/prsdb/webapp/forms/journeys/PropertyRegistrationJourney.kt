@@ -559,6 +559,7 @@ class PropertyRegistrationJourney(
                         baseUserId = baseUserId,
                     )
 
+                // TODO PRSD-670: Replace with a link to the dashboard page
                 val prsdUrl = "www.example.com"
 
                 confirmationEmailSender.sendEmail(
