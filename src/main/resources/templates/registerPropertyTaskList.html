@@ -11,8 +11,15 @@
             <p class="govuk-body" th:text="#{registerProperty.taskList.subtitle}">registerProperty.taskList.subtitle</p>
         </header>
         <section>
+            <h2 class="govuk-heading-m" th:text="#{registerProperty.taskList.register.heading}">registerProperty.taskList.register.heading</h2>
             <ul class="govuk-task-list">
                 <th:block th:each="task: ${registerTasks}">
+                    <li th:replace="~{fragments/taskList/taskListItem :: taskListItem(${task})}"></li>
+                </th:block>
+            </ul>
+            <h2 class="govuk-heading-m" th:text="#{registerProperty.taskList.checkAndSubmit.heading}">registerProperty.taskList.checkAndSubmit.heading</h2>
+            <ul class="govuk-task-list">
+                <th:block th:each="task: ${checkAndSubmitTasks}">
                     <li th:replace="~{fragments/taskList/taskListItem :: taskListItem(${task})}"></li>
                 </th:block>
             </ul>

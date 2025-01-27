@@ -77,11 +77,16 @@ class RegisterPropertyController(
                     TaskStatusViewModel.fromStatus(TaskStatus.CANNOT_START_YET),
                 ),
             )
-        val checkAndSubmitTaskList = listOf<TaskListItem>()
+        val checkAndSubmitTaskList =
+            listOf(
+                TaskListItem(
+                    "registerProperty.taskList.checkAndSubmit.checkAnswers",
+                    TaskStatusViewModel.fromStatus(TaskStatus.CANNOT_START_YET),
+                ),
+            )
 
         model.addAttribute("registerTasks", registerTaskList)
-        // model.addAttribute("registerTask", registerTaskList.first())
-        // model.addAttribute("checkAndSubmitTasks", checkAndSubmitTaskList)
+        model.addAttribute("checkAndSubmitTasks", checkAndSubmitTaskList)
 
         return "registerPropertyTaskList"
     }
