@@ -66,6 +66,10 @@ class LandlordDetailsController(
         model.addAttribute("lastModifiedDate", lastModifiedDate)
         model.addAttribute("landlord", landlordViewModel)
 
+        val registeredPropertiesList = propertyOwnershipService.getRegisteredPropertiesForLandlord(id)
+
+        model.addAttribute("registeredPropertiesList", registeredPropertiesList)
+
         // TODO PRSD-805: Replace with previous url for back link
         model.addAttribute("backUrl", "/")
 
