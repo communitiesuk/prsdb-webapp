@@ -8,15 +8,20 @@ import jakarta.persistence.IdClass
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
+import java.io.Serializable
 
 @Entity
 @Table(name = "local_authority_user_or_invitation")
 @IdClass(LocalAuthorityUserOrInvitation.CompositeKey::class)
 class LocalAuthorityUserOrInvitation() {
+    // Types used for IdClass must:
+    // - implement equals and hashCode (hence being a data class)
+    // - have a no-args constructor (hence having default values)
+    // - be serializable
     data class CompositeKey(
         val id: Long = 0,
         val entityType: String = "",
-    )
+    ) : Serializable
 
     @Id
     var id: Long = 0
