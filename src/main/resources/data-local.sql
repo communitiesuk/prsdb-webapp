@@ -84,32 +84,37 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (5, '10/09/24', 6005001005, 1),
        (6, '12/10/24', 7006001006, 0),
        (7, '12/19/24', 8005001005, 1),
-       (8, '01/15/25', 1001001001, 1),
-       (9, '01/15/25', 1001001002, 1),
-       (10, '01/15/25', 1001001003, 1),
-       (11, '01/15/25', 1001001004, 1),
-       (12, '01/15/25', 1001001005, 1),
-       (13, '01/15/25', 1001001006, 1),
-       (14, '01/15/25', 1001001007, 1),
-       (15, '01/15/25', 1001001008, 1),
-       (16, '01/15/25', 1001001009, 1),
-       (17, '01/15/25', 1001001010, 1),
-       (18, '01/15/25', 1001001011, 1),
-       (19, '01/15/25', 1001001012, 1),
-       (20, '01/15/25', 1001001013, 1),
-       (21, '01/15/25', 1001001014, 1),
-       (22, '01/15/25', 1001001015, 1),
-       (23, '01/15/25', 1001001016, 1),
-       (24, '01/15/25', 1001001017, 1),
-       (25, '01/15/25', 1001001018, 1),
-       (26, '01/15/25', 1001001019, 1),
-       (27, '01/15/25', 1001001020, 1),
-       (28, '01/15/25', 1001001021, 1),
-       (29, '01/15/25', 1001001022, 1),
-       (30, '01/15/25', 1001001023, 1),
-       (31, '01/15/25', 1001001024, 1),
-       (32, '01/15/25', 1001001025, 1),
-       (33, '01/15/25', 100100106, 1);
+       (8,'01/15/25',1001001001,1),
+       (9,'01/15/25',1001001002,1),
+       (10,'01/15/25',1001001003,1),
+       (11,'01/15/25',1001001004,1),
+       (12,'01/15/25',1001001005,1),
+       (13,'01/15/25',1001001006,1),
+       (14,'01/15/25',1001001007,1),
+       (15,'01/15/25',1001001008,1),
+       (16,'01/15/25',1001001009,1),
+       (17,'01/15/25',1001001010,1),
+       (18,'01/15/25',1001001011,1),
+       (19,'01/15/25',1001001012,1),
+       (20,'01/15/25',1001001013,1),
+       (21,'01/15/25',1001001014,1),
+       (22,'01/15/25',1001001015,1),
+       (23,'01/15/25',1001001016,1),
+       (24,'01/15/25',1001001017,1),
+       (25,'01/15/25',1001001018,1),
+       (26,'01/15/25',1001001019,1),
+       (27,'01/15/25',1001001020,1),
+       (28,'01/15/25',1001001021,1),
+       (29,'01/15/25',1001001022,1),
+       (30,'01/15/25',1001001023,1),
+       (31,'01/15/25',1001001024,1),
+       (32,'01/15/25',1001001025,1),
+       (33,'01/15/25',100100106,1),
+       (34, '12/10/24', 0006001002, 0),
+       (35, '12/10/24', 0006001003, 0),
+       (36, '12/10/24', 0006001004, 0),
+       (37, '12/10/24', 0006001005, 0),
+       (38, '12/10/24', 0006001006, 0);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -119,23 +124,27 @@ VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 1),
        (3, '09/13/24', '09/13/24', 3, '3 Imaginary Street', 1),
        (4, '09/13/24', '09/13/24', 4, '4 Pretend Crescent', 1),
        (5, '09/13/24', '09/13/24', 5, '5 Mythical Place', 1),
-       (6, '12/10/2024', '12/10/2024', 1123456, '1, Example Road, EG', 1);
+       (6, '12/10/2024', '12/10/2024', 1123456, '1, Example Road, EG', 1),
+       (7, '09/13/24', '09/13/24', 6, '2 Fictional Road', 1),
+       (8, '09/13/24', '09/13/24', 7, '3 Fake Way', 1),
+       (9, '09/13/24', '09/13/24', 8, '4 Imaginary Street', 1),
+       (10, '09/13/24', '09/13/24', 9, '5 Pretend Crescent', 1),
+       (11, '09/13/24', '09/13/24', 10, '6 Mythical Place', 1);
 
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
                       is_active, phone_number, subject_identifier, name, email)
 VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:fdc:gov.uk:2022:UVWXY',
-        'PRSDB Alexander Smith', 'alex.surname@example.com'),
+        'Alexander Smith', 'alex.surname@example.com'),
        (2, '09/13/24', '09/13/24', 2, 2, '08/13/2001', true, 07111111111, 'urn:fdc:gov.uk:2022:ABCDE',
-        'PRSDB Alexandra Davies', 'alexandra.q.davies@example.com'),
+        'Alexandra Davies', 'alexandra.q.davies@example.com'),
        (3, '09/13/24', '09/13/24', 3, 3, '07/13/1997', true, 07111111111, 'urn:fdc:gov.uk:2022:PQRST',
-        'PRSDB Evan Alexandrescu', 'unrelatedemail@completelydifferentdomain.com'),
+        'Evan Alexandrescu', 'unrelatedemail@completelydifferentdomain.com'),
        (4, '09/13/24', '09/13/24', 4, 4, '06/13/1989', true, 07111111111,
-        'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', 'PRSDB Tobias Evans',
-        'tobyevans@importantco.com'),
+        'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', 'Tobias Evans', 'tobyevans@importantco.com'),
        (5, '09/13/24', '09/13/24', 5, 5, '05/13/1950', true, 07111111111,
-        'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', 'PRSDB Margaret Mary Smith',
+        'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', 'Margaret Mary Smith',
         'mm.smith@importantco.com'),
        (6, '12/19/24', '12/19/24', 7, 5, '06/13/1989', true, 07111111111,
         'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', 'PRSDB Landlord',
@@ -172,12 +181,23 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:f
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
 INSERT INTO property (id, status, is_active, property_build_type, address_id)
-VALUES (1, 1, true, 1, 6);
+VALUES (1, 1, true, 1, 6),
+       (2, 1, true, 1, 7),
+       (3, 1, true, 1, 8),
+       (4, 1, true, 1, 9),
+       (5, 1, true, 1, 10),
+       (6, 1, false, 1, 11);
 
 SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
 
 INSERT INTO property_ownership (id, is_active, occupancy_type, landlord_type, ownership_type, current_num_households,
-                                current_num_tenants, registration_number_id, primary_landlord_id, property_id)
-VALUES (1, true, 0, 0, 1, 1, 2, 6, 1, 1);
+                                current_num_tenants,
+                                registration_number_id, primary_landlord_id, property_id)
+VALUES (1, true, 0, 0, 1, 1, 2, 6, 1, 1),
+       (2, false, 0, 0, 1, 1, 2, 34, 2, 2),
+       (3, true, 0, 0, 1, 1, 2, 35, 4, 3),
+       (4, true, 0, 0, 1, 1, 2, 36, 1, 4),
+       (5, true, 0, 0, 1, 1, 2, 37, 1, 5),
+       (6, false, 0, 0, 1, 1, 2, 38, 1, 6);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));

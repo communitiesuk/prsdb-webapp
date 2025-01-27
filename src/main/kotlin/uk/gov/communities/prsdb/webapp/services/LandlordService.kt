@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -9,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPropertyCountRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
@@ -19,6 +21,7 @@ import java.time.LocalDate
 class LandlordService(
     private val landlordRepository: LandlordRepository,
     private val oneLoginUserRepository: OneLoginUserRepository,
+    private val landlordWithListedPropertyCountRepository: LandlordWithListedPropertyCountRepository,
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
 ) {
@@ -71,12 +74,19 @@ class LandlordService(
         val lrn = RegistrationNumberDataModel.parseTypeOrNull(searchTerm, RegistrationNumberType.LANDLORD)
         val pageRequest = PageRequest.of(currentPageNumber, pageSize)
 
-        return (
+        val landlordPage =
             if (lrn == null) {
                 landlordRepository.searchMatching(searchTerm, laUserId, useLAFilter, pageRequest)
             } else {
                 landlordRepository.searchMatchingLRN(lrn.number, laUserId, useLAFilter, pageRequest)
             }
-        ).map { LandlordSearchResultDataModel.fromLandlord(it) }
+
+        return PageImpl(
+            landlordWithListedPropertyCountRepository
+                .findByLandlordIdIn(landlordPage.content.map { it.id })
+                .map { LandlordSearchResultDataModel.fromLandlordWithListedPropertyCount(it) },
+            pageRequest,
+            landlordPage.totalElements,
+        )
     }
 }
