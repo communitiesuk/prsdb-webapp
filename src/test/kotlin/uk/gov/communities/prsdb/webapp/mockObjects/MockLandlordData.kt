@@ -11,28 +11,22 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
+import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import java.time.Instant
 import java.time.LocalDate
-import java.time.OffsetDateTime
 
 class MockLandlordData {
     companion object {
-        fun createAddress(singleLineAddress: String = "1 Example Road, EG1 2AB") =
-            Address(AddressDataModel(singleLineAddress), createLocalAuthority())
-
-        fun createFiveDifferentAddresses(): List<Address> =
-            listOf(
-                createAddress(singleLineAddress = "11 Example Road, EG1 2AB"),
-                createAddress(singleLineAddress = "12 Example Road, EG1 2AB"),
-                createAddress(singleLineAddress = "13 Example Road, EG1 2AB"),
-                createAddress(singleLineAddress = "14 Example Road, EG1 2AB"),
-                createAddress(singleLineAddress = "15 Example Road, EG1 2AB"),
-            )
+        fun createAddress(
+            singleLineAddress: String = "1 Example Road, EG1 2AB",
+            localAuthority: LocalAuthority? = createLocalAuthority(),
+        ) = Address(AddressDataModel(singleLineAddress), localAuthority)
 
         fun createLandlord(
             baseUser: OneLoginUser = OneLoginUser(),
@@ -43,7 +37,7 @@ class MockLandlordData {
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 0L),
             internationalAddress: String? = null,
             dateOfBirth: LocalDate? = null,
-            createdAt: OffsetDateTime = OffsetDateTime.now(),
+            createdAt: Instant = Instant.now(),
         ): Landlord {
             val landlord: Landlord = mock()
             whenever(landlord.baseUser).thenReturn(baseUser)
@@ -53,7 +47,7 @@ class MockLandlordData {
             whenever(landlord.address).thenReturn(address)
             whenever(landlord.registrationNumber).thenReturn(registrationNumber)
             whenever(landlord.dateOfBirth).thenReturn(dateOfBirth)
-            whenever(landlord.lastModifiedDate).thenReturn(OffsetDateTime.now())
+            whenever(landlord.lastModifiedDate).thenReturn(Instant.now())
             whenever(landlord.internationalAddress).thenReturn(internationalAddress)
             whenever(landlord.createdDate).thenReturn(createdAt)
 
@@ -71,21 +65,6 @@ class MockLandlordData {
             address = address,
             isActive = isActive,
         )
-
-        fun createFiveDifferentProperties(): List<Property> {
-            val addresses = createFiveDifferentAddresses()
-
-            val properties =
-                listOf(
-                    createProperty(address = addresses[0]),
-                    createProperty(address = addresses[1]),
-                    createProperty(address = addresses[2]),
-                    createProperty(address = addresses[3]),
-                    createProperty(address = addresses[4]),
-                )
-
-            return properties
-        }
 
         fun createPropertyOwnership(
             occupancyType: OccupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
