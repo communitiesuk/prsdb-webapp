@@ -20,4 +20,5 @@ enum class RegisterPropertyStepId(
     HmoAdditionalLicence("hmo-additional-licence"),
     LandlordType("landlord-type"),
     CheckAnswers("check-answers"),
+    Declaration("declaration"),
 }

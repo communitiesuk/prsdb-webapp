@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.models.formModels.DeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoAdditionalLicenceFormModel
@@ -38,6 +39,8 @@ import uk.gov.communities.prsdb.webapp.models.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectiveLicenceFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.CheckboxViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
@@ -82,12 +85,13 @@ class PropertyRegistrationJourney(
                 hmoAdditionalLicenceStep(),
                 landlordTypeStep(),
                 checkAnswersStep(
+                    addressDataService,
+                    localAuthorityService,
+                ),
+                declarationStep(
                     journeyDataService,
                     propertyRegistrationService,
                     addressDataService,
-                    localAuthorityService,
-                    landlordService,
-                    confirmationEmailSender,
                     session,
                 ),
             ),
@@ -477,16 +481,38 @@ class PropertyRegistrationJourney(
             )
 
         fun checkAnswersStep(
-            journeyDataService: JourneyDataService,
-            propertyRegistrationService: PropertyRegistrationService,
             addressDataService: AddressDataService,
             localAuthorityService: LocalAuthorityService,
-            landlordService: LandlordService,
-            confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
-            session: HttpSession,
         ) = Step(
             id = RegisterPropertyStepId.CheckAnswers,
             page = PropertyRegistrationCheckAnswersPage(addressDataService, localAuthorityService),
+            nextAction = { _, _ -> Pair(RegisterPropertyStepId.Declaration, null) },
+        )
+
+        fun declarationStep(
+            journeyDataService: JourneyDataService,
+            propertyRegistrationService: PropertyRegistrationService,
+            addressDataService: AddressDataService,
+            session: HttpSession,
+        ) = Step(
+            id = RegisterPropertyStepId.Declaration,
+            page =
+                Page(
+                    formModel = DeclarationFormModel::class,
+                    templateName = "forms/declarationForm",
+                    content =
+                        mapOf(
+                            "title" to "registerProperty.title",
+                            "options" to
+                                listOf(
+                                    CheckboxViewModel(
+                                        value = "true",
+                                        labelMsgKey = "forms.declaration.checkbox.label",
+                                    ),
+                                ),
+                            "submitButtonText" to "forms.buttons.confirmAndCompleteRegistration",
+                        ),
+                ),
             handleSubmitAndRedirect = { journeyData, _ ->
                 checkAnswersSubmitAndRedirect(
                     journeyData,
