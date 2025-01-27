@@ -503,6 +503,8 @@ class PropertyRegistrationJourney(
                     content =
                         mapOf(
                             "title" to "registerProperty.title",
+                            "bulletOneFineAmount" to "forms.declaration.fines.propertyRegistrationJourneyAmount",
+                            "bulletTwoFineAmount" to "forms.declaration.fines.propertyRegistrationJourneyAmount",
                             "options" to
                                 listOf(
                                     CheckboxViewModel(

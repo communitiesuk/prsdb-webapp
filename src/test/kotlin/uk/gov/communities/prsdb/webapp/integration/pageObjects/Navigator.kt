@@ -7,6 +7,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -38,6 +39,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.DeclarationFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HouseholdsFormPagePropertyRegistration
@@ -358,6 +361,19 @@ class Navigator(
         peoplePage.peopleInput.fill("4")
         peoplePage.form.submit()
         return createValidPage(page, LandlordTypeFormPagePropertyRegistration::class)
+    }
+
+    fun goToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
+        val landlordTypePage = goToPropertyRegistrationLandlordTypePage()
+        landlordTypePage.form.getRadios().selectValue(LandlordType.SOLE)
+        landlordTypePage.form.submit()
+        return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
+    fun goToPropertyRegistrationDeclarationPage(): DeclarationFormPagePropertyRegistration {
+        val checkAnswersPage = goToPropertyRegistrationCheckAnswersPage()
+        checkAnswersPage.form.submit()
+        return createValidPage(page, DeclarationFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationConfirmationPage(): ErrorPage {
