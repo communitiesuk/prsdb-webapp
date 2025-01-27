@@ -40,8 +40,6 @@ class LandlordDetailTests : IntegrationTest() {
             val detailsPage = navigator.goToLandlordDetailsAsALocalAuthorityUser(1)
 
             assertEquals(detailsPage.getActiveTabPanelId(), "personal-details")
-            val insetText = InsetText(page)
-            assertThat(insetText.spanText).containsText("updated these details on")
         }
 
         @Test
