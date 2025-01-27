@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPropertyCountRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
@@ -20,6 +21,7 @@ import java.time.LocalDate
 class LandlordService(
     private val landlordRepository: LandlordRepository,
     private val oneLoginUserRepository: OneLoginUserRepository,
+    private val landlordWithListedPropertyCountRepository: LandlordWithListedPropertyCountRepository,
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
 ) {
@@ -64,21 +66,27 @@ class LandlordService(
 
     fun searchForLandlords(
         searchTerm: String,
+        laUserId: String,
+        useLAFilter: Boolean = false,
         currentPageNumber: Int = 0,
         pageSize: Int = MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE,
     ): Page<LandlordSearchResultDataModel> {
-        RegistrationNumberDataModel.parseOrNull(searchTerm)?.let { registrationNumber ->
-            if (registrationNumber.isType(RegistrationNumberType.LANDLORD)) {
-                retrieveLandlordByRegNum(registrationNumber)?.let { landlord ->
-                    return PageImpl(listOf(LandlordSearchResultDataModel.fromLandlord(landlord)))
-                }
-            }
-        }
-
+        val lrn = RegistrationNumberDataModel.parseTypeOrNull(searchTerm, RegistrationNumberType.LANDLORD)
         val pageRequest = PageRequest.of(currentPageNumber, pageSize)
 
-        return landlordRepository
-            .searchMatching(searchTerm, pageRequest)
-            .map { LandlordSearchResultDataModel.fromLandlord(it) }
+        val landlordPage =
+            if (lrn == null) {
+                landlordRepository.searchMatching(searchTerm, laUserId, useLAFilter, pageRequest)
+            } else {
+                landlordRepository.searchMatchingLRN(lrn.number, laUserId, useLAFilter, pageRequest)
+            }
+
+        return PageImpl(
+            landlordWithListedPropertyCountRepository
+                .findByLandlordIdIn(landlordPage.content.map { it.id })
+                .map { LandlordSearchResultDataModel.fromLandlordWithListedPropertyCount(it) },
+            pageRequest,
+            landlordPage.totalElements,
+        )
     }
 }

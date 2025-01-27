@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
@@ -154,8 +155,8 @@ class Navigator(
     fun goToLandlordRegistrationInternationalAddressPage(): InternationalAddressFormPageLandlordRegistration {
         val countryOfResidencePage = goToLandlordRegistrationCountryOfResidencePage()
         countryOfResidencePage.radios.selectValue("false")
-        countryOfResidencePage.select.autocompleteInput.fill("France")
-        countryOfResidencePage.select.selectValue("France")
+        countryOfResidencePage.select.autocompleteInput.fill("Zimbabwe")
+        countryOfResidencePage.select.selectValue("Zimbabwe")
         countryOfResidencePage.form.submit()
         return createValidPage(page, InternationalAddressFormPageLandlordRegistration::class)
     }
@@ -361,6 +362,11 @@ class Navigator(
     fun skipToPropertyRegistrationConfirmationPage(): ErrorPage {
         navigate("$REGISTER_PROPERTY_JOURNEY_URL/$PROPERTY_CONFIRMATION")
         return createValidPage(page, ErrorPage::class)
+    }
+
+    fun goToLandlordDetails(): LandlordDetailsPage {
+        navigate("landlord-details")
+        return createValidPage(page, LandlordDetailsPage::class)
     }
 
     private fun navigate(path: String): Response? = page.navigate("http://localhost:$port/$path")

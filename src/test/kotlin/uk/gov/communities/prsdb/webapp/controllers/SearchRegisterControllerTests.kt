@@ -51,7 +51,7 @@ class SearchRegisterControllerTests(
     @Test
     @WithMockUser(roles = ["LA_USER"])
     fun `searchRegisterController returns 200 for a valid page request`() {
-        whenever(landlordService.searchForLandlords("PRSDB", 1))
+        whenever(landlordService.searchForLandlords("PRSDB", "user", currentPageNumber = 1))
             .thenReturn(
                 PageImpl(
                     listOf(
@@ -88,7 +88,7 @@ class SearchRegisterControllerTests(
     @Test
     @WithMockUser(roles = ["LA_USER"])
     fun `SearchRegisterController redirects if the requested page number is more than the total pages`() {
-        whenever(landlordService.searchForLandlords("PRSDB", 2))
+        whenever(landlordService.searchForLandlords("PRSDB", "user", currentPageNumber = 2))
             .thenReturn(
                 PageImpl(
                     emptyList<LandlordSearchResultDataModel>(),

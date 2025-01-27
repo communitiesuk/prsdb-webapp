@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
+import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData
@@ -120,7 +121,8 @@ class LandlordViewModelTest {
     @Test
     fun `Landlord personal details shows the correct lrn`() {
         // Arrange
-        val registrationNumber = RegistrationNumberDataModel.parse("LGYTKPJRR")
+        val registrationNumber =
+            RegistrationNumberDataModel.parseTypeOrNull("LGYTKPJRR", RegistrationNumberType.LANDLORD)!!
         val testLandlord =
             MockLandlordData.createLandlord(
                 registrationNumber = RegistrationNumber(registrationNumber.type, registrationNumber.number),
@@ -130,7 +132,10 @@ class LandlordViewModelTest {
         val viewModel = LandlordViewModel(testLandlord)
 
         // Assert
-        val lrn = viewModel.personalDetails.single { it.fieldHeading == "landlordDetails.personalDetails.lrn" }.getConvertedFieldValue()
+        val lrn =
+            viewModel.personalDetails
+                .single { it.fieldHeading == "landlordDetails.personalDetails.lrn" }
+                .getConvertedFieldValue()
         assertEquals(lrn, registrationNumber.toString())
     }
 
