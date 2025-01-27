@@ -16,24 +16,25 @@
                 <nav th:replace="~{fragments/pagination/pagination :: pagination(${totalPages}, ${currentPage}, ${unpagedUrl})}"></nav>
             </th:block>
             <table th:replace="~{fragments/tables/table :: table(
-                ${ {'landlordSearch.table.heading.landlord','landlordSearch.table.heading.address','landlordSearch.table.heading.info'} },
+                ${ {'landlordSearch.table.heading.landlord','landlordSearch.table.heading.address','landlordSearch.table.heading.info', 'landlordSearch.table.heading.listedProperties'} },
                 ~{::tbody},
                 #{landlordSearch.table.heading}
             )}">
                 <tbody class="govuk-table__body">
                 <tr class="govuk_table__row" th:each="landlord: ${searchResults}">
-                    <td class="govuk-table__cell govuk-!-width-one-third">
+                    <td class="govuk-table__cell govuk-!-width-one-quarter">
                         <a class="govuk-link" th:href="@{${baseLandlordDetailsURL + '/' + landlord.id}}"
                            th:text="${landlord.name}"></a>
                         <br>
                         <span th:remove="tag" th:text="${landlord.registrationNumber}"></span>
                     </td>
-                    <td class="govuk-table__cell govuk-!-width-one-third" th:text="${landlord.contactAddress}"></td>
-                    <td class="govuk-table__cell govuk-!-width-one-third">
+                    <td class="govuk-table__cell govuk-!-width-one-quarter" th:text="${landlord.contactAddress}"></td>
+                    <td class="govuk-table__cell govuk-!-width-one-quarter">
                         <span th:remove="tag" th:text="${landlord.phoneNumber}"></span>
                         <br>
                         <span th:remove="tag" th:text="${landlord.email}"></span>
                     </td>
+                    <td class="govuk-table__cell govuk-!-width-one-quarter" th:text="${landlord.listedPropertyCount}"></td>
                 </tr>
                 </tbody>
             </table>
