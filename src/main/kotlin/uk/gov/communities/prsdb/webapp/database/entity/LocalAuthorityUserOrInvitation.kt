@@ -13,10 +13,10 @@ import jakarta.persistence.Table
 @Table(name = "local_authority_user_or_invitation")
 @IdClass(LocalAuthorityUserOrInvitation.CompositeKey::class)
 class LocalAuthorityUserOrInvitation() {
-    class CompositeKey {
-        val id: Long = 0
-        val entityType: String = ""
-    }
+    data class CompositeKey(
+        val id: Long = 0,
+        val entityType: String = "",
+    )
 
     @Id
     var id: Long = 0
