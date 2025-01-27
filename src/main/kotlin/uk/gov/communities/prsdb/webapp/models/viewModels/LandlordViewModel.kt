@@ -38,7 +38,7 @@ class LandlordViewModel(
             listOf(
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.registrationDate",
-                    DateTimeHelper.getDateInUK(landlord.createdDate.toInstant().toKotlinInstant()),
+                    DateTimeHelper.getDateInUK(landlord.createdDate.toKotlinInstant()),
                     null,
                 ),
                 SummaryListRowViewModel(

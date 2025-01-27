@@ -1,11 +1,12 @@
-package uk.gov.communities.prsdb.webapp.models.dataModels
+package uk.gov.communities.prsdb.webapp.models.viewModels
 
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
-data class RegisteredPropertyDataModel(
+data class RegisteredPropertyViewModel(
     val address: String,
     val registrationNumber: String,
     val localAuthorityName: String,
@@ -13,8 +14,8 @@ data class RegisteredPropertyDataModel(
     val isTenantedMessageKey: String,
 ) {
     companion object {
-        fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): RegisteredPropertyDataModel =
-            RegisteredPropertyDataModel(
+        fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): RegisteredPropertyViewModel =
+            RegisteredPropertyViewModel(
                 address = propertyOwnership.property.address.singleLineAddress,
                 registrationNumber =
                     RegistrationNumberDataModel
