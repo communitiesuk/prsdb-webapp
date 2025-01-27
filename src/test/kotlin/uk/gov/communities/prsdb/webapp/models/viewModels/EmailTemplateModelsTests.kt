@@ -21,6 +21,10 @@ class EmailTemplateModelsTests {
                     LocalAuthorityInvitationCancellationEmail(createLocalAuthority(1, "name")),
                     "/emails/LocalAuthorityInvitationCancellation.md",
                 ),
+                EmailTemplateTestData(
+                    PropertyRegistrationConfirmationEmail("P-XXX-YYY", "1 Street Name, Town, Country, AB1 2CD", "www.example.com"),
+                    "/emails/PropertyRegistrationConfirmation.md",
+                ),
             )
 
         private fun createLocalAuthority(
