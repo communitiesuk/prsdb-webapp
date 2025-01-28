@@ -9,10 +9,11 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.config.CustomErrorConfig
 import uk.gov.communities.prsdb.webapp.config.CustomSecurityConfig
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
-@Import(CustomSecurityConfig::class)
+@Import(CustomSecurityConfig::class, CustomErrorConfig::class)
 abstract class ControllerTest(
     private val context: WebApplicationContext,
 ) {
