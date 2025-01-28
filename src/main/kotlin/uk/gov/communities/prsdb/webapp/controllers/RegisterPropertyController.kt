@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.TaskListItem
+import uk.gov.communities.prsdb.webapp.models.viewModels.TaskListItemViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.TaskStatusViewModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -57,29 +57,29 @@ class RegisterPropertyController(
     fun getTaskList(model: Model): String {
         val registerTaskList =
             listOf(
-                TaskListItem(
+                TaskListItemViewModel(
                     "registerProperty.taskList.register.addAddress",
                     TaskStatusViewModel.fromStatus(TaskStatus.COMPLETED),
                     "https:www.google.com",
                 ),
-                TaskListItem(
+                TaskListItemViewModel(
                     "registerProperty.taskList.register.selectType",
                     TaskStatusViewModel.fromStatus(TaskStatus.IN_PROGRESS),
                     "https:www.google.com",
                 ),
-                TaskListItem(
+                TaskListItemViewModel(
                     "registerProperty.taskList.register.selectOwnership",
                     TaskStatusViewModel.fromStatus(TaskStatus.NOT_YET_STARTED),
                     "https:www.google.com",
                 ),
-                TaskListItem(
+                TaskListItemViewModel(
                     "registerProperty.taskList.register.addLicensing",
                     TaskStatusViewModel.fromStatus(TaskStatus.CANNOT_START_YET),
                 ),
             )
         val checkAndSubmitTaskList =
             listOf(
-                TaskListItem(
+                TaskListItemViewModel(
                     "registerProperty.taskList.checkAndSubmit.checkAnswers",
                     TaskStatusViewModel.fromStatus(TaskStatus.CANNOT_START_YET),
                 ),
