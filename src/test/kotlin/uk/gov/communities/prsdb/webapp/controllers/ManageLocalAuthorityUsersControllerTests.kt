@@ -161,6 +161,16 @@ class ManageLocalAuthorityUsersControllerTests(
 
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
+    fun `getEditUserAccessLevelPage returns 404 for admin user specifying a non-number for the user id`() {
+        mvc
+            .get("/local-authority/$DEFAULT_LA_ID/edit-user/not-a-number")
+            .andExpect {
+                status { isNotFound() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_ADMIN"])
     fun `getEditUserAccessLevelPage returns 403 for admin user accessing their own edit page`() {
         val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = createLocalAuthority()
