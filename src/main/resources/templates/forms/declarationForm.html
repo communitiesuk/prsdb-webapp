@@ -13,8 +13,8 @@
         <p class="govuk-body" th:text="#{forms.declaration.paragraph.two}">forms.declaration.paragraph.two</p>
         <p class="govuk-body" th:text="#{forms.declaration.fines.heading}">forms.declaration.fines.heading</p>
         <ul class="govuk-list govuk-list--bullet">
-            <li th:text="#{forms.declaration.fines.bullet.one.beforeAmount} + #{${bulletOneFineAmount}} + #{forms.declaration.fines.bullet.one.afterAmount}">forms.declaration.fines.bullet.one.afterAmount</li>
-            <li th:text="#{forms.declaration.fines.bullet.two.beforeAmount} + #{${bulletTwoFineAmount}} + #{forms.declaration.fines.bullet.two.afterAmount}">forms.declaration.fines.bullet.two.afterAmount</li>
+            <li th:text="#{forms.declaration.fines.bullet.one.beforeAmount} + #{${bulletOneFineAmount}} + ' ' + #{forms.declaration.fines.bullet.one.afterAmount}">forms.declaration.fines.bullet.one.afterAmount</li>
+            <li th:text="#{forms.declaration.fines.bullet.two.beforeAmount} + #{${bulletTwoFineAmount}} + ' ' + #{forms.declaration.fines.bullet.two.afterAmount}">forms.declaration.fines.bullet.two.afterAmount</li>
         </ul>
         <p class="govuk-body">
             <span th:remove="tag" th:text="#{forms.declaration.paragraph.three.beforeLink}">forms.declaration.paragraph.three.beforeLink</span>
