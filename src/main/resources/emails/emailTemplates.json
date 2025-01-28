@@ -18,6 +18,12 @@
     "bodyLocation": "/emails/LocalAuthorityInvitationCancellation.md"
   },
   {
+    "id": "1bd9e020-d6f8-494f-ae6a-904e642d3f55",
+    "name": "Landlord Registration Confirmation",
+    "subject": "GOV.UK - Your landlord registration number",
+    "bodyLocation": "/emails/LandlordRegistrationConfirmation.md"
+  },
+  {
     "id": "90bf3bc0-5269-4a44-8ed2-147c9308196f",
     "name": "Property Registration Confirmation",
     "subject": "GOV.UK - Your registered property on the PRS Database",

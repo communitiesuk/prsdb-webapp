@@ -28,8 +28,8 @@ import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Compan
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createdLoggedInUserModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationCancellationEmail
+import uk.gov.communities.prsdb.webapp.models.emailModels.EmailTemplateModel
+import uk.gov.communities.prsdb.webapp.models.emailModels.LocalAuthorityInvitationCancellationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService

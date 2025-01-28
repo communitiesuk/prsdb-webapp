@@ -6,7 +6,7 @@ import kotlinx.serialization.json.Json
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
-import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateModel
+import uk.gov.communities.prsdb.webapp.models.emailModels.EmailTemplateModel
 import uk.gov.service.notify.NotificationClient
 import uk.gov.service.notify.NotificationClientException
 
@@ -37,6 +37,7 @@ class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
                     "No emails can be sent until the issue is fixed. See inner exception for details.",
                 notifyException,
             )
+
             NotifyErrorType.BAD_REQUEST in errorTypes -> throw PersistentEmailSendException(
                 multipleErrorMessagePrefix +
                     "Send email request was rejected by notify as a bad request. " +

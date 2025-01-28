@@ -45,12 +45,12 @@ class LandlordService(
         addressDataModel: AddressDataModel,
         internationalAddress: String? = null,
         dateOfBirth: LocalDate? = null,
-    ) {
+    ): Landlord {
         val baseUser = oneLoginUserRepository.getReferenceById(baseUserId)
         val address = addressService.findOrCreateAddress(addressDataModel)
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD)
 
-        landlordRepository.save(
+        return landlordRepository.save(
             Landlord(
                 baseUser,
                 name,

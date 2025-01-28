@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.viewModels
+package uk.gov.communities.prsdb.webapp.models.emailModels
 
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import java.net.URI
