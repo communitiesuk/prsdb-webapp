@@ -197,7 +197,6 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         )
 
         // Confirmation - render page
-        val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
         assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
 
         // go to dashboard
