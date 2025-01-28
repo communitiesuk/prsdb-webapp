@@ -1,6 +1,6 @@
 # You have registered a property on the Private Rented Property Database.
 
-[Sign into database](((prsd url))) to view or update these properties.
+[Sign into the database](((prsd url))) to view or update these properties.
 
 ## You registered:
 

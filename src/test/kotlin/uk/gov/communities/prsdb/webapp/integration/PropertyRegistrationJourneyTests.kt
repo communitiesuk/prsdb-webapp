@@ -177,7 +177,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         //  check confirmation email
         verify(confirmationEmailSender).sendEmail(
             "alex.surname@example.com",
-            PropertyRegistrationConfirmationEmail(expectedPropertyRegNum.toString(), "1, Example Road, EG1 2AB", "www.example.com"),
+            PropertyRegistrationConfirmationEmail(expectedPropertyRegNum.toString(), "1, Example Road, EG1 2AB", "https://example.com"),
         )
 
         // Confirmation - render page
