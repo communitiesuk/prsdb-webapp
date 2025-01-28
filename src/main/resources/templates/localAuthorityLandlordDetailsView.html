@@ -45,7 +45,9 @@
                     ">
                             <tbody class="govuk-table__body">
                             <tr class="govuk_table__row" th:each="property: ${registeredPropertiesList}">
-                                <td class="govuk-table__cell" th:text="${property.address}"></td>
+                                <td class="govuk-table__cell">
+                                    <a class="govuk-link" th:text="${property.address}" href="/">${property.address}</a>
+                                </td>
                                 <td class="govuk-table__cell" th:text="${property.registrationNumber}"></td>
                                 <td class="govuk-table__cell" th:text="${property.localAuthorityName}"></td>
                                 <td class="govuk-table__cell" th:text="${property.propertyLicence}"></td>

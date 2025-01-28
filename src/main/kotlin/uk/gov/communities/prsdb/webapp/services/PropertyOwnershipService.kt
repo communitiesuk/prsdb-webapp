@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
@@ -60,7 +59,9 @@ class PropertyOwnershipService(
             RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
         }
 
-    fun retrievePropertyOwnership(id: Long): PropertyOwnership? = propertyOwnershipRepository.findByIdOrNull(id)
+    fun retrievePropertyOwnership(registrationNumber: Long): PropertyOwnership? =
+        propertyOwnershipRepository
+            .findByRegistrationNumber_Number(registrationNumber)
 
     private fun retrieveAllRegisteredPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
         propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(

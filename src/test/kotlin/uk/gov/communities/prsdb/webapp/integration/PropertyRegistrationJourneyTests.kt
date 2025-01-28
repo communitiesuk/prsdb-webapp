@@ -38,12 +38,17 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalAuthorityFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import java.net.URI
 
 @Sql("/data-local.sql")
 class PropertyRegistrationJourneyTests : IntegrationTest() {
     @SpyBean
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
+
+    @SpyBean
+    private lateinit var confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>
 
     @BeforeEach
     fun setup() {
@@ -162,16 +167,23 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         // Check answers - render page
         assertThat(checkAnswersPage.form.getFieldsetHeading()).containsText("Check your answers for:")
+
         //  submit
         checkAnswersPage.form.submit()
-        val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
-
-        // Confirmation - render page
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
         val expectedPropertyRegNum =
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnershipCaptor.value.registrationNumber)
+        //  check confirmation email
+        verify(confirmationEmailSender).sendEmail(
+            "alex.surname@example.com",
+            PropertyRegistrationConfirmationEmail(expectedPropertyRegNum.toString(), "1, Example Road, EG1 2AB", "www.example.com"),
+        )
+
+        // Confirmation - render page
+        val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
         assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
+
         // go to dashboard
         confirmationPage.clickGoToDashboard()
 

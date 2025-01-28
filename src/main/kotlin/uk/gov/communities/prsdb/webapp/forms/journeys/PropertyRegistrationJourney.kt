@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpSession
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_OWNERSHIP_ID
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoAdditionalLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoMandatoryLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LandlordTypeFormModel
@@ -35,11 +36,14 @@ import uk.gov.communities.prsdb.webapp.models.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectiveLicenceFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
@@ -51,7 +55,9 @@ class PropertyRegistrationJourney(
     addressDataService: AddressDataService,
     propertyRegistrationService: PropertyRegistrationService,
     localAuthorityService: LocalAuthorityService,
+    landlordService: LandlordService,
     session: HttpSession,
+    confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
 ) : Journey<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
         initialStepId = RegisterPropertyStepId.LookupAddress,
@@ -79,6 +85,8 @@ class PropertyRegistrationJourney(
                     propertyRegistrationService,
                     addressDataService,
                     localAuthorityService,
+                    landlordService,
+                    confirmationEmailSender,
                     session,
                 ),
             ),
@@ -472,6 +480,8 @@ class PropertyRegistrationJourney(
             propertyRegistrationService: PropertyRegistrationService,
             addressDataService: AddressDataService,
             localAuthorityService: LocalAuthorityService,
+            landlordService: LandlordService,
+            confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
             session: HttpSession,
         ) = Step(
             id = RegisterPropertyStepId.CheckAnswers,
@@ -482,6 +492,8 @@ class PropertyRegistrationJourney(
                     journeyDataService,
                     propertyRegistrationService,
                     addressDataService,
+                    landlordService,
+                    confirmationEmailSender,
                     session,
                 )
             },
@@ -522,17 +534,21 @@ class PropertyRegistrationJourney(
                 LicensingType.NO_LICENSING -> Pair(RegisterPropertyStepId.Occupancy, null)
             }
 
-        private fun checkAnswersSubmitAndRedirect(
+        fun checkAnswersSubmitAndRedirect(
             journeyData: JourneyData,
             journeyDataService: JourneyDataService,
             propertyRegistrationService: PropertyRegistrationService,
             addressDataService: AddressDataService,
+            landlordService: LandlordService,
+            confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
             session: HttpSession,
         ): String {
             try {
-                val propertyOwnershipId =
-                    propertyRegistrationService.registerPropertyAndReturnOwnershipId(
-                        address = PropertyRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!,
+                val address = PropertyRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!
+                val baseUserId = SecurityContextHolder.getContext().authentication.name
+                val propertyRegistrationNumber =
+                    propertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(
+                        address = address,
                         propertyType = PropertyRegistrationJourneyDataHelper.getPropertyType(journeyData)!!,
                         licenseType = PropertyRegistrationJourneyDataHelper.getLicensingType(journeyData)!!,
                         licenceNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(journeyData)!!,
@@ -540,12 +556,24 @@ class PropertyRegistrationJourney(
                         ownershipType = PropertyRegistrationJourneyDataHelper.getOwnershipType(journeyData)!!,
                         numberOfHouseholds = PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(journeyData),
                         numberOfPeople = PropertyRegistrationJourneyDataHelper.getNumberOfTenants(journeyData),
-                        baseUserId = SecurityContextHolder.getContext().authentication.name,
+                        baseUserId = baseUserId,
                     )
+
+                // TODO PRSD-670: Replace with a link to the dashboard page
+                val prsdUrl = "www.example.com"
+
+                confirmationEmailSender.sendEmail(
+                    landlordService.retrieveLandlordByBaseUserId(baseUserId)!!.email,
+                    PropertyRegistrationConfirmationEmail(
+                        RegistrationNumberDataModel.fromRegistrationNumber(propertyRegistrationNumber).toString(),
+                        address.singleLineAddress,
+                        prsdUrl,
+                    ),
+                )
 
                 journeyDataService.deleteJourneyData()
 
-                session.setAttribute(PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
+                session.setAttribute(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber.number)
 
                 return CONFIRMATION_PAGE_PATH_SEGMENT
             } catch (exception: EntityExistsException) {
