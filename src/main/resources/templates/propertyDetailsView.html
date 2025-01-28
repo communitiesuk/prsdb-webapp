@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{propertyDetails.title}, ~{::main}, false)}">
+<a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+<main class="govuk-main-wrapper" id="main-content">
+  <div id="page-contents">
+    <h2 class="govuk-heading-m" th:text="#{propertyDetails.heading}">propertyDetails.heading</h2>
+
+
+    <div th:replace="~{fragments/tabs/tabs :: tabs(~{:: #tabs-content})}" >
+      <th:block id="tabs-content">
+        <ul th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{:: #tab-headings})}">
+          <th:block id="tab-headings">
+            <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('property-details', #{propertyDetails.propertyDetails.heading})}">
+            </li>
+            <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('landlord-details', #{propertyDetails.landlordDetails.heading})}">
+            </li>
+          </th:block>
+        </ul>
+
+        <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('property-details', ~{:: #property-details-panel-content})}">
+          <th:block id="property-details-panel-content">
+          </th:block>
+        </div>
+
+        <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('landlord-details', ~{:: #landlord-details-panel-content})}">
+          <th:block id="landlord-details-panel-content">
+          </th:block>
+        </div>
+      </th:block>
+    </div>
+
+  </div>
+</main>
+</html>
