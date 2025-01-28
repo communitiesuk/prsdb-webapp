@@ -14,7 +14,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
 
 @Configuration
 class CustomErrorConfig {
-    // This only needs to have a higher precedence (lower number) than the default handler (0)
+    // This only needs to have a higher @Order precedence (lower number) than the default handler (0)
     // Other handlers e.g. controller specific handlers should take precedence over this
     @Order(-1)
     @Component
