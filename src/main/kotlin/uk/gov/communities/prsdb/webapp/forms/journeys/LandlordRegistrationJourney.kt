@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_ADDRESS_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_PLACE_NAMES
-import uk.gov.communities.prsdb.webapp.constants.PRSD_BASE_URI
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
@@ -476,7 +476,7 @@ class LandlordRegistrationJourney(
                 landlord.email,
                 LandlordRegistrationConfirmationEmail(
                     RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
-                    PRSD_BASE_URI,
+                    LANDLORD_DASHBOARD_URL,
                 ),
             )
 

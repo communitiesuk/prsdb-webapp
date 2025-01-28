@@ -5,8 +5,8 @@ import jakarta.servlet.http.HttpSession
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
-import uk.gov.communities.prsdb.webapp.constants.PRSD_BASE_URI
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
@@ -565,7 +565,7 @@ class PropertyRegistrationJourney(
                     PropertyRegistrationConfirmationEmail(
                         RegistrationNumberDataModel.fromRegistrationNumber(propertyRegistrationNumber).toString(),
                         address.singleLineAddress,
-                        PRSD_BASE_URI,
+                        LANDLORD_DASHBOARD_URL,
                     ),
                 )
 

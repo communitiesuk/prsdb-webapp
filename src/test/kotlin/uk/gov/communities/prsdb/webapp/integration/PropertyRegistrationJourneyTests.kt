@@ -12,8 +12,8 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.jdbc.Sql
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
-import uk.gov.communities.prsdb.webapp.constants.PRSD_BASE_URI
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -181,7 +181,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             PropertyRegistrationConfirmationEmail(
                 expectedPropertyRegNum.toString(),
                 "1, Example Road, EG1 2AB",
-                PRSD_BASE_URI,
+                LANDLORD_DASHBOARD_URL,
             ),
         )
 
