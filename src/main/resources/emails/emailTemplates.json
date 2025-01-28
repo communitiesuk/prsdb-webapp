@@ -20,7 +20,7 @@
   {
     "id": "1bd9e020-d6f8-494f-ae6a-904e642d3f55",
     "name": "Landlord Registration Confirmation",
-    "subject": "GOV.UK - Your landlord registration number and copy of answers",
+    "subject": "GOV.UK - Your landlord registration number",
     "bodyLocation": "/emails/LandlordRegistrationConfirmation.md"
   },
   {
