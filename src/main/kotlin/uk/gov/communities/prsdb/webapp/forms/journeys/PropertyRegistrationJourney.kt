@@ -22,9 +22,9 @@ import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.models.formModels.DeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.emailModels.PropertyRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.formModels.DeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoAdditionalLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoMandatoryLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LandlordTypeFormModel
@@ -92,6 +92,8 @@ class PropertyRegistrationJourney(
                     journeyDataService,
                     propertyRegistrationService,
                     addressDataService,
+                    landlordService,
+                    confirmationEmailSender,
                     session,
                 ),
             ),
@@ -493,6 +495,8 @@ class PropertyRegistrationJourney(
             journeyDataService: JourneyDataService,
             propertyRegistrationService: PropertyRegistrationService,
             addressDataService: AddressDataService,
+            landlordService: LandlordService,
+            confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
             session: HttpSession,
         ) = Step(
             id = RegisterPropertyStepId.Declaration,
