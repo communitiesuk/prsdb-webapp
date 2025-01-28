@@ -1,3 +1,4 @@
+<!--/*@thymesVar id="status" type="uk.gov.communities.prsdb.webapp.models.viewModels.TaskStatusViewModel"*/-->
 <div th:fragment="taskListStatus(status, id)"
      class="govuk-task-list__status"
      th:classappend="${status.cannotStart} ? 'govuk-task-list__status--cannot-start-yet' : ''"
