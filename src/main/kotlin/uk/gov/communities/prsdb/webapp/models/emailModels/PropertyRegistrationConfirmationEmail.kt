@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.viewModels
+package uk.gov.communities.prsdb.webapp.models.emailModels
 
 data class PropertyRegistrationConfirmationEmail(
     val prn: String,

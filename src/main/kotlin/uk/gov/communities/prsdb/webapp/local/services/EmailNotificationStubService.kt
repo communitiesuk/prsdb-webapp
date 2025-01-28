@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
-import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateModel
+import uk.gov.communities.prsdb.webapp.models.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 
 @Service

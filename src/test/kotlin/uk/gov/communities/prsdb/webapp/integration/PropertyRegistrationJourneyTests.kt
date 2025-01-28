@@ -38,7 +38,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalAuthorityFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import java.net.URI
 

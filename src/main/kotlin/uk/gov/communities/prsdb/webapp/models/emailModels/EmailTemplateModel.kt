@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.viewModels
+package uk.gov.communities.prsdb.webapp.models.emailModels
 
 interface EmailTemplateModel {
     val templateId: EmailTemplateId
