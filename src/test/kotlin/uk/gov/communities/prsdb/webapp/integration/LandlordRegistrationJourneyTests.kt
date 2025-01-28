@@ -15,9 +15,12 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.any
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.jdbc.Sql
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -36,6 +39,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.emailModels.LandlordRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.net.URI
 import kotlin.test.assertNotNull
@@ -46,6 +51,9 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
     @Autowired
     private lateinit var landlordService: LandlordService
+
+    @SpyBean
+    private lateinit var confirmationEmailSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>
 
     @BeforeEach
     fun setup() {
@@ -90,10 +98,16 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         declarationPage.checkbox.check()
         declarationPage.form.submit()
 
-        val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
         val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
         val createdLandlordRegNum =
             RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
+
+        verify(confirmationEmailSender).sendEmail(
+            "test@example.com",
+            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), LANDLORD_DASHBOARD_URL),
+        )
+
+        val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
         assertEquals(createdLandlordRegNum.toString(), confirmationPage.registrationNumberText)
         confirmationPage.clickGoToDashboard()
 
@@ -142,10 +156,16 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         declarationPage.checkbox.check()
         declarationPage.form.submit()
 
-        val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
         val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
         val createdLandlordRegNum =
             RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
+
+        verify(confirmationEmailSender).sendEmail(
+            "test@example.com",
+            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), LANDLORD_DASHBOARD_URL),
+        )
+
+        val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
         assertEquals(createdLandlordRegNum.toString(), confirmationPage.registrationNumberText)
         confirmationPage.clickGoToDashboard()
 
@@ -201,10 +221,16 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         declarationPage.checkbox.check()
         declarationPage.form.submit()
 
-        val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
         val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
         val createdLandlordRegNum =
             RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
+
+        verify(confirmationEmailSender).sendEmail(
+            "test@example.com",
+            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), LANDLORD_DASHBOARD_URL),
+        )
+
+        val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
         assertEquals(createdLandlordRegNum.toString(), confirmationPage.registrationNumberText)
         confirmationPage.clickGoToDashboard()
 
@@ -266,10 +292,16 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         declarationPage.checkbox.check()
         declarationPage.form.submit()
 
-        val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
         val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
         val createdLandlordRegNum =
             RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
+
+        verify(confirmationEmailSender).sendEmail(
+            "test@example.com",
+            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), LANDLORD_DASHBOARD_URL),
+        )
+
+        val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
         assertEquals(createdLandlordRegNum.toString(), confirmationPage.registrationNumberText)
         confirmationPage.clickGoToDashboard()
 
