@@ -14,6 +14,7 @@ class PropertyDetailsViewModel(
     val address: String = propertyOwnership.property.address.singleLineAddress
 
     val primaryLandlordName: String = propertyOwnership.primaryLandlord.name
+    val landlordDetailsUrl: String = "#"
 
     val landlordTypeKey: String =
         when (propertyOwnership.landlordType) {

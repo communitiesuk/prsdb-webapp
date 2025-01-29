@@ -9,9 +9,21 @@
         <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink('delete-record', #{propertyDetails.deleteRecordButton.text})}"></a>
       </th:block>
     </div>
-    <div>
-      TODO: key details section
+    <div class="govuk-grid-row govuk-!-padding-6 margin-zero background-color-grey" aria-description="Key property details">
+      <div class="govuk-grid-column-one-third">
+        <p class="govuk-heading-s" th:text="#{propertyDetails.keyDetails.landlordType}"></p>
+        <p class="govuk-body" th:text="#{${propertyDetails.landlordTypeKey}}"></p>
+      </div>
+      <div class="govuk-grid-column-one-third">
+        <p class="govuk-heading-s" th:text="#{propertyDetails.keyDetails.registeredLandlord}"></p>
+        <a class="govuk-body govuk-link" th:href="@{${propertyDetails.landlordDetailsUrl}}" th:text="${propertyDetails.primaryLandlordName}"></a>
+      </div>
+      <div class="govuk-grid-column-one-third">
+        <p class="govuk-heading-s" th:text="#{propertyDetails.keyDetails.isTenanted}"></p>
+        <p class="govuk-body" th:text="#{${propertyDetails.isTenantedKey}}"></p>
+      </div>
     </div>
+    <hr class="govuk-section-break govuk-section-break--m">
     <div th:replace="~{fragments/tabs/tabs :: tabs(~{:: #tabs-content})}" >
       <th:block id="tabs-content">
         <ul th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{:: #tab-headings})}">
@@ -25,6 +37,8 @@
 
         <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('property-details', ~{:: #property-details-panel-content})}">
           <th:block id="property-details-panel-content">
+            <h2 class="govuk-heading-m" th:text="#{propertyDetails.heading}">propertyDetails.heading</h2>
+            <p class="govuk-hint" th:text="#{propertyDetails.description}">propertyDetails.description</p>
             <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.propertyRecord})}" ></dl>
           </th:block>
         </div>

@@ -1,7 +1,16 @@
 :root {
     --govuk-colour-red: #d4351c;
+    --govuk-colour-light-grey: #f3f2f1;
 }
 
 .border-color-red {
     border-color: var(--govuk-colour-red);
+}
+
+.background-color-grey {
+    background-color: var(--govuk-colour-light-grey);
+}
+
+.margin-zero {
+    margin: 0;
 }
