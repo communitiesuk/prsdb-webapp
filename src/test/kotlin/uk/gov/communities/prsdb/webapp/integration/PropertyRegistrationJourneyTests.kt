@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AlreadyRegisteredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmationPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.DeclarationFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HouseholdsFormPagePropertyRegistration
@@ -171,6 +172,16 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         //  submit
         checkAnswersPage.form.submit()
+        val declarationPage = assertPageIs(page, DeclarationFormPagePropertyRegistration::class)
+
+        // Declaration - render page
+        assertThat(declarationPage.form.getFieldsetHeading()).containsText("Declaration")
+        // submit
+        declarationPage.checkbox.check()
+        declarationPage.form.submit()
+        val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+
+        // Confirmation - render page
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
         val expectedPropertyRegNum =
@@ -186,7 +197,6 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         )
 
         // Confirmation - render page
-        val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
         assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
 
         // go to dashboard
@@ -544,6 +554,16 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             hmoAdditionalLicencePage.licenceNumberInput.fill(aVeryLongString)
             hmoAdditionalLicencePage.form.submit()
             assertThat(hmoAdditionalLicencePage.form.getErrorMessage()).containsText("The licensing number is too long")
+        }
+    }
+
+    @Nested
+    inner class Declaration {
+        @Test
+        fun `Submitting without checking the checkbox returns an error`(page: Page) {
+            val declarationPage = navigator.goToPropertyRegistrationDeclarationPage()
+            declarationPage.form.submit()
+            assertThat(declarationPage.form.getErrorMessage()).containsText("You must agree to the declaration to continue")
         }
     }
 

@@ -408,6 +408,8 @@ class LandlordRegistrationJourney(
                     content =
                         mapOf(
                             "title" to "registerAsALandlord.title",
+                            "bulletOneFineAmount" to "forms.declaration.fines.bullet.one.landlordRegistrationJourneyAmount",
+                            "bulletTwoFineAmount" to "forms.declaration.fines.bullet.two.landlordRegistrationJourneyAmount",
                             "options" to
                                 listOf(
                                     CheckboxViewModel(
