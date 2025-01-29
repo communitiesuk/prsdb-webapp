@@ -40,7 +40,6 @@ import uk.gov.communities.prsdb.webapp.models.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectiveLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.CheckboxViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
