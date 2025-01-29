@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.mockito.kotlin.any
 import org.junit.jupiter.api.Nested
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -8,6 +9,9 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createLandlord
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -18,7 +22,14 @@ class PropertyDetailsControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
     @MockBean
-    private lateinit var propertyOwnershipService: PropertyOwnershipService
+    lateinit var propertyOwnershipService: PropertyOwnershipService
+
+    @MockBean
+    lateinit var landlordService: LandlordService
+
+    private val propertyDetailsUrl = "/property-details"
+
+    private val propertyOwnershipId = "7006001006"
 
     @Nested
     inner class GetPropertyDetailsLandlordViewTests {

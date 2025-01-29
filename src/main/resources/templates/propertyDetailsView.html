@@ -32,7 +32,15 @@
             </div>
 
             <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('landlord-details', ~{:: #landlord-details-panel-content})}">
-              <th:block id="landlord-details-panel-content">
+          <th:block id="landlord-details-panel-content">
+            <h2 class="govuk-heading-m" th:text="#{propertyDetails.landlordDetails.registeredLandlord.heading}">propertyDetails.landlordDetails.registeredLandlord.heading</h2>
+            <p class="govuk-hint" th:text="#{propertyDetails.landlordDetails.registeredLandlord.hint}">propertyDetails.landlordDetails.registeredLandlord.hint</p>
+            <dl class="govuk-summary-list">
+              <div th:replace="~{fragments/summaryRowWithValueLink :: summaryRowWithValueLink(${landlordName.fieldHeading}, ${landlordName.convertedFieldValue}, ${landlordName.changeUrl}, ${landlordDetailsUrl})}" ></div>
+              <th:block th:each="row: ${landlordDetails}">
+                <div th:replace="~{fragments/summaryRow :: summaryRow(${row.fieldHeading}, ${row.convertedFieldValue}, ${row.changeUrl})}" ></div>
+              </th:block>
+            </dl>
               </th:block>
             </div>
           </th:block>
