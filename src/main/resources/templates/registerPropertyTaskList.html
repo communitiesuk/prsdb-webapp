@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<body th:replace="~{fragments/layout :: layout(#{registerProperty.title}, ~{::body/content()}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <th:block id="page-contents"
+              th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <header id="header">
+            <h1 class="govuk-heading-l" th:text="#{registerProperty.taskList.heading}">
+                registerProperty.taskList.heading
+            </h1>
+            <p class="govuk-body" th:text="#{registerProperty.taskList.subtitle}">registerProperty.taskList.subtitle</p>
+        </header>
+        <section>
+            <h2 class="govuk-heading-m" th:text="#{registerProperty.taskList.register.heading}">registerProperty.taskList.register.heading</h2>
+            <ul class="govuk-task-list">
+                <th:block th:each="task, iteratorStatus: ${registerTasks}">
+                    <li th:replace="~{fragments/taskList/taskListItem :: taskListItem(${task}, 'register-tasks-' + ${iteratorStatus.index})}"></li>
+                </th:block>
+            </ul>
+            <h2 class="govuk-heading-m" th:text="#{registerProperty.taskList.checkAndSubmit.heading}">registerProperty.taskList.checkAndSubmit.heading</h2>
+            <ul class="govuk-task-list">
+                <th:block th:each="task, iteratorStatus: ${checkAndSubmitTasks}" >
+                    <li th:replace="~{fragments/taskList/taskListItem :: taskListItem(${task}, 'check-and-submit-tasks-' + ${iteratorStatus.index})}"></li>
+                </th:block>
+            </ul>
+        </section>
+    </th:block>
+</main>
+</body>
+</html>
