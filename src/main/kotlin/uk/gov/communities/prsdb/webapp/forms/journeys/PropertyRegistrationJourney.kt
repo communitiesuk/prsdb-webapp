@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpSession
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
@@ -22,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoAdditionalLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoMandatoryLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LandlordTypeFormModel
@@ -36,7 +38,6 @@ import uk.gov.communities.prsdb.webapp.models.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectiveLicenceFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
@@ -559,15 +560,12 @@ class PropertyRegistrationJourney(
                         baseUserId = baseUserId,
                     )
 
-                // TODO PRSD-670: Replace with a link to the dashboard page
-                val prsdUrl = "https://example.com"
-
                 confirmationEmailSender.sendEmail(
                     landlordService.retrieveLandlordByBaseUserId(baseUserId)!!.email,
                     PropertyRegistrationConfirmationEmail(
                         RegistrationNumberDataModel.fromRegistrationNumber(propertyRegistrationNumber).toString(),
                         address.singleLineAddress,
-                        prsdUrl,
+                        LANDLORD_DASHBOARD_URL,
                     ),
                 )
 

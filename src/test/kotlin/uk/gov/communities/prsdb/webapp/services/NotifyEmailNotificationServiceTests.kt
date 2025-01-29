@@ -13,8 +13,8 @@ import org.mockito.Mockito
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
-import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateId
-import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateModel
+import uk.gov.communities.prsdb.webapp.models.emailModels.EmailTemplateId
+import uk.gov.communities.prsdb.webapp.models.emailModels.EmailTemplateModel
 import uk.gov.service.notify.NotificationClient
 import uk.gov.service.notify.NotificationClientException
 
@@ -33,6 +33,7 @@ class NotifyEmailNotificationServiceTests {
         override val templateId: EmailTemplateId,
     ) : EmailTemplateModel {
         override fun toHashMap(): HashMap<String, String> = hashMap
+
         constructor() : this(hashMapOf(), EmailTemplateId.EXAMPLE_EMAIL)
     }
 
@@ -65,7 +66,8 @@ class NotifyEmailNotificationServiceTests {
             .whenever(notifyClient)
             .sendEmail(any(), any(), any(), any())
 
-        var thrownException = assertThrows<PersistentEmailSendException> { emailNotificationService.sendEmail("", TestEmailTemplate()) }
+        var thrownException =
+            assertThrows<PersistentEmailSendException> { emailNotificationService.sendEmail("", TestEmailTemplate()) }
 
         assertEquals(thrownException.cause, innerException)
     }
@@ -80,7 +82,8 @@ class NotifyEmailNotificationServiceTests {
             .whenever(notifyClient)
             .sendEmail(any(), any(), any(), any())
 
-        var thrownException = assertThrows<TransientEmailSentException> { emailNotificationService.sendEmail("", TestEmailTemplate()) }
+        var thrownException =
+            assertThrows<TransientEmailSentException> { emailNotificationService.sendEmail("", TestEmailTemplate()) }
 
         assertEquals(thrownException.cause, innerException)
     }

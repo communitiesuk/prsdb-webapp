@@ -28,8 +28,8 @@ import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Compan
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createdLoggedInUserModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationCancellationEmail
+import uk.gov.communities.prsdb.webapp.models.emailModels.EmailTemplateModel
+import uk.gov.communities.prsdb.webapp.models.emailModels.LocalAuthorityInvitationCancellationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
@@ -154,6 +154,16 @@ class ManageLocalAuthorityUsersControllerTests(
 
         mvc
             .get("/local-authority/$DEFAULT_LA_ID/edit-user/$DEFAULT_LA_USER_ID")
+            .andExpect {
+                status { isNotFound() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_ADMIN"])
+    fun `getEditUserAccessLevelPage returns 404 for admin user specifying a non-number for the user id`() {
+        mvc
+            .get("/local-authority/$DEFAULT_LA_ID/edit-user/not-a-number")
             .andExpect {
                 status { isNotFound() }
             }
