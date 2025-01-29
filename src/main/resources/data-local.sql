@@ -192,12 +192,12 @@ SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM pro
 
 INSERT INTO property_ownership (id, is_active, occupancy_type, landlord_type, ownership_type, current_num_households,
                                 current_num_tenants,
-                                registration_number_id, primary_landlord_id, property_id)
-VALUES (1, true, 0, 0, 1, 1, 2, 6, 1, 1),
-       (2, false, 0, 0, 1, 1, 2, 34, 2, 2),
-       (3, true, 0, 0, 1, 1, 2, 35, 4, 3),
-       (4, true, 0, 0, 1, 1, 2, 36, 1, 4),
-       (5, true, 0, 0, 1, 1, 2, 37, 1, 5),
-       (6, false, 0, 0, 1, 1, 2, 38, 1, 6);
+                                registration_number_id, primary_landlord_id, property_id, created_date)
+VALUES (1, true, 0, 0, 1, 1, 2, 6, 1, 1, '01/15/25'),
+       (2, false, 0, 0, 1, 1, 2, 34, 2, 2, '01/15/25'),
+       (3, true, 0, 0, 1, 1, 2, 35, 4, 3, '01/15/25'),
+       (4, true, 0, 0, 1, 1, 2, 36, 1, 4, '01/15/25'),
+       (5, true, 0, 0, 1, 1, 2, 37, 1, 5, '01/15/25'),
+       (6, false, 0, 0, 1, 1, 2, 38, 1, 6, '01/15/25');
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
