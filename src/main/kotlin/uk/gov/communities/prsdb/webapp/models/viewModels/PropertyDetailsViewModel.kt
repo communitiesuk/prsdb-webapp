@@ -13,9 +13,6 @@ class PropertyDetailsViewModel(
 ) {
     val address: String = propertyOwnership.property.address.singleLineAddress
 
-    val primaryLandlordName: String = propertyOwnership.primaryLandlord.name
-    val landlordDetailsUrl: String = "#"
-
     val landlordTypeKey: String =
         when (propertyOwnership.landlordType) {
             LandlordType.SOLE -> "propertyDetails.keyDetails.landlordType.sole"
@@ -34,8 +31,8 @@ class PropertyDetailsViewModel(
             ),
             SummaryListRowViewModel(
                 "propertyDetails.keyDetails.registeredLandlord",
-                primaryLandlordName,
-                landlordDetailsUrl,
+                propertyOwnership.primaryLandlord.name,
+                "/landlord-details",
             ),
             SummaryListRowViewModel(
                 "propertyDetails.keyDetails.isTenanted",
