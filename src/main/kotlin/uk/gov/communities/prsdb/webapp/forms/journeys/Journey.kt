@@ -18,8 +18,8 @@ abstract class Journey<T : StepId>(
     private val journeyType: JourneyType,
     val steps: Set<Step<T>>,
     val initialStepId: T,
-    val validator: Validator,
-    val journeyDataService: JourneyDataService,
+    protected val validator: Validator,
+    protected val journeyDataService: JourneyDataService,
 ) {
     fun getStepId(stepName: String): StepId {
         val step = steps.singleOrNull { step -> step.id.urlPathSegment == stepName }
@@ -101,10 +101,10 @@ abstract class Journey<T : StepId>(
         return "redirect:$redirectUrl"
     }
 
-    private fun isReachable(
+    fun isReachable(
         journeyData: JourneyData,
         targetStep: Step<T>,
-        targetSubPageNumber: Int?,
+        targetSubPageNumber: Int? = null,
     ): Boolean {
         // Initial page is always reachable
         if (targetStep.id == initialStepId) return true
