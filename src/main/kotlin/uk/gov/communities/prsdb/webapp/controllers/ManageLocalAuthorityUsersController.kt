@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
+import jakarta.validation.constraints.Min
 import org.springframework.http.MediaType
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
@@ -19,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.ConfirmedEmailDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
 import uk.gov.communities.prsdb.webapp.models.emailModels.LocalAuthorityInvitationCancellationEmail
 import uk.gov.communities.prsdb.webapp.models.emailModels.LocalAuthorityInvitationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
@@ -39,14 +42,11 @@ class ManageLocalAuthorityUsersController(
         @PathVariable localAuthorityId: Int,
         model: Model,
         principal: Principal,
-        @RequestParam(value = "page", required = false) page: Int = 1,
+        @RequestParam(value = "page", required = false) @Min(1) page: Int = 1,
+        httpServletRequest: HttpServletRequest,
     ): String {
         val (currentUser, currentUserLocalAuthority) =
             localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
-
-        if (page < 1) {
-            return "redirect:/local-authority/{localAuthorityId}/manage-users"
-        }
 
         val pagedUserList =
             localAuthorityDataService.getPaginatedUsersAndInvitations(
@@ -61,8 +61,10 @@ class ManageLocalAuthorityUsersController(
         model.addAttribute("currentUser", currentUser)
         model.addAttribute("localAuthority", currentUserLocalAuthority)
         model.addAttribute("userList", pagedUserList)
-        model.addAttribute("totalPages", pagedUserList.totalPages)
-        model.addAttribute("currentPage", page)
+        model.addAttribute(
+            "paginationViewModel",
+            PaginationViewModel(page, pagedUserList.totalPages, httpServletRequest),
+        )
 
         return "manageLAUsers"
     }
