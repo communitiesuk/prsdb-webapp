@@ -7,10 +7,22 @@
     border-color: var(--govuk-colour-red);
 }
 
-.background-color-grey {
+.prsd-key-details__container {
+    display: flex;
+}
+
+.prsd-key-details__list {
+    display: flex;
+    justify-content: space-evenly;
+    gap: 16px;
+    white-space: nowrap;
+    overflow-wrap: normal;
     background-color: var(--govuk-colour-light-grey);
 }
 
-.margin-zero {
-    margin: 0;
+.prsd-key-details__column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
+
