@@ -1,7 +1,8 @@
-<a th:fragment="pageLink(pageNumber, isCurrentPage, unpagedUrl)" class="govuk-link govuk-pagination__link"
-   th:href="${unpagedUrl} == null ? @{''(page=${pageNumber})} : @{${unpagedUrl}(page=${pageNumber})}"
+<!--/*@thymesVar id="paginationViewModel" type="uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel"*/-->
+<a th:fragment="pageLink(pageNumber, paginationViewModel)" class="govuk-link govuk-pagination__link"
+   th:href="${paginationViewModel.getPageLink(pageNumber)}"
    th:text="${pageNumber}"
    th:attr="aria-label='Page '+${pageNumber}"
-   th:attrappend="aria-current=${isCurrentPage}?'page'"
-   >
+   th:attrappend="aria-current=${pageNumber == paginationViewModel.page} ? 'page'"
+>
 </a>

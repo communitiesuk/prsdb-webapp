@@ -1,43 +1,41 @@
-<ul th:fragment="listHighlightedPages(currentPage, totalPages, unpagedUrl)" class="govuk-pagination__list">
+<!--/*@thymesVar id="paginationViewModel" type="uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel"*/-->
+<ul th:fragment="listHighlightedPages(paginationViewModel)" class="govuk-pagination__list">
     <!--Link to first page-->
     <li class="govuk-pagination__item"
-        th:classappend="${1==currentPage ? 'govuk-pagination__item--current' : ''}">
-        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${1},${1==currentPage},${unpagedUrl})}">
-        </a>
+        th:classappend="${paginationViewModel.page == 1 ? 'govuk-pagination__item--current' : ''}">
+        <a th:replace="~{fragments/pagination/pageLink :: pageLink(1, ${paginationViewModel})}"></a>
     </li>
 
     <!--Ellipsis if there will be a gap in page numbers between the first page and the previous or current pages-->
-    <li th:if="${currentPage > 3}" class="govuk-pagination__item govuk-pagination__item--ellipses">
+    <li th:if="${paginationViewModel.page > 3}" class="govuk-pagination__item govuk-pagination__item--ellipses">
         &ctdot;
     </li>
 
     <!--Link to previous page if applicable-->
-    <li th:if="${currentPage > 2}" class="govuk-pagination__item">
-        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${currentPage}-1,false,${unpagedUrl})}">
-        </a>
+    <li th:if="${paginationViewModel.page > 2}" class="govuk-pagination__item">
+        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${paginationViewModel.page - 1},${paginationViewModel})}"></a>
     </li>
 
     <!--Link to current page if not already shown-->
-    <li th:if="${currentPage > 1 && currentPage < totalPages}" class="govuk-pagination__item govuk-pagination__item--current">
-        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${currentPage},true,${unpagedUrl})}">
-        </a>
+    <li th:if="${paginationViewModel.page > 1 && paginationViewModel.page < paginationViewModel.totalPages}"
+        class="govuk-pagination__item govuk-pagination__item--current">
+        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${paginationViewModel.page},${paginationViewModel})}"></a>
     </li>
 
     <!--Link to next page if applicable-->
-    <li th:if="${currentPage<totalPages - 1}" class="govuk-pagination__item">
-        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${currentPage}+1,false,${unpagedUrl})}">
-        </a>
+    <li th:if="${paginationViewModel.page + 1 < paginationViewModel.totalPages}" class="govuk-pagination__item">
+        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${paginationViewModel.page + 1},${paginationViewModel})}"></a>
     </li>
 
     <!--Ellipsis if there will be a gap in page numbers between the last page and the next or current pages-->
-    <li th:if="${currentPage<totalPages - 2}" class="govuk-pagination__item govuk-pagination__item--ellipses">
+    <li th:if="${paginationViewModel.page - 2 < paginationViewModel.totalPages}"
+        class="govuk-pagination__item govuk-pagination__item--ellipses">
         &ctdot;
     </li>
 
     <!--Link to last page-->
     <li class="govuk-pagination__item"
-        th:classappend="${totalPages==currentPage ? 'govuk-pagination__item--current' : ''}">
-        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${totalPages},${totalPages==currentPage},${unpagedUrl})}">
-        </a>
+        th:classappend="${paginationViewModel.page == paginationViewModel.totalPages ? 'govuk-pagination__item--current' : ''}">
+        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${paginationViewModel.totalPages},${paginationViewModel})}"></a>
     </li>
 </ul>

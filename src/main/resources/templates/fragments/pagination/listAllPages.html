@@ -1,8 +1,9 @@
-<ul th:fragment="listAllPages(currentPage, totalPages, unpagedUrl)" class="govuk-pagination__list">
-    <li th:each="page : ${#numbers.sequence(1, totalPages)}"
+<!--/*@thymesVar id="paginationViewModel" type="uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel"*/-->
+<ul th:fragment="listAllPages(paginationViewModel)" class="govuk-pagination__list">
+    <li th:each="page : ${#numbers.sequence(1, paginationViewModel.totalPages)}"
         class="govuk-pagination__item"
-        th:classappend="${page==currentPage ? 'govuk-pagination__item--current' : ''}">
-        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${page},${page==currentPage},${unpagedUrl})}">
+        th:classappend="${page == paginationViewModel.page ? 'govuk-pagination__item--current' : ''}">
+        <a th:replace="~{fragments/pagination/pageLink :: pageLink(${page}, ${paginationViewModel})}">
         </a>
     </li>
 </ul>
