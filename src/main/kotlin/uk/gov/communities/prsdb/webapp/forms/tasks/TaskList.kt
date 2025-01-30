@@ -20,11 +20,9 @@ abstract class TaskList<T : StepId>(
 
     open fun getTaskListViewModels(): List<TaskListItemViewModel> {
         val journeyData = journeyDataService.getJourneyDataFromSession()
-        val registerPropertyList =
-            taskList.map {
-                taskListItemViewModel(journeyData, it)
-            }
-        return registerPropertyList
+        return taskList.map { task ->
+            taskListItemViewModel(journeyData, task)
+        }
     }
 
     private fun taskListItemViewModel(
