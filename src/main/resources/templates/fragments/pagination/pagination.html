@@ -1,7 +1,7 @@
 <!--/*@thymesVar id="paginationViewModel" type="uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel"*/-->
 <nav th:fragment="pagination(paginationViewModel)" class="govuk-pagination" aria-label="Pagination"
      th:if="${paginationViewModel.totalPages > 1}">
-    <div th:if="${paginationViewModel.page != 1}">
+    <div th:if="${paginationViewModel.currentPage != 1}">
         <div th:replace="~{fragments/pagination/previous :: previous(${paginationViewModel})}"></div>
     </div>
     <div th:if="${paginationViewModel.totalPages <= 5}">
@@ -12,7 +12,7 @@
         <ul th:replace="~{fragments/pagination/listHighlightedPages :: listHighlightedPages(${paginationViewModel})}">
         </ul>
     </div>
-    <div th:if="${paginationViewModel.page != paginationViewModel.totalPages}">
+    <div th:if="${paginationViewModel.currentPage != paginationViewModel.totalPages}">
         <div th:replace="~{fragments/pagination/next :: next(${paginationViewModel})}"></div>
     </div>
 </nav>

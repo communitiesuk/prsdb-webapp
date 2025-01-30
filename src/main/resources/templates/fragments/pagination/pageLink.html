@@ -3,6 +3,6 @@
    th:href="${paginationViewModel.getPageLink(pageNumber)}"
    th:text="${pageNumber}"
    th:attr="aria-label='Page '+${pageNumber}"
-   th:attrappend="aria-current=${pageNumber == paginationViewModel.page} ? 'page'"
+   th:attrappend="aria-current=${pageNumber == paginationViewModel.currentPage} ? 'page'"
 >
 </a>

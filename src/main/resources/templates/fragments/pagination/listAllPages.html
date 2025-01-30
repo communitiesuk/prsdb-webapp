@@ -2,7 +2,7 @@
 <ul th:fragment="listAllPages(paginationViewModel)" class="govuk-pagination__list">
     <li th:each="page : ${#numbers.sequence(1, paginationViewModel.totalPages)}"
         class="govuk-pagination__item"
-        th:classappend="${page == paginationViewModel.page ? 'govuk-pagination__item--current' : ''}">
+        th:classappend="${page == paginationViewModel.currentPage ? 'govuk-pagination__item--current' : ''}">
         <a th:replace="~{fragments/pagination/pageLink :: pageLink(${page}, ${paginationViewModel})}">
         </a>
     </li>
