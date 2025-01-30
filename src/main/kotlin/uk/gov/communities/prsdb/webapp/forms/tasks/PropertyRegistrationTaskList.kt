@@ -15,35 +15,35 @@ class PropertyRegistrationTaskList(
     journeyDataService: JourneyDataService,
     validator: Validator,
 ) : TaskList<RegisterPropertyStepId>(propertyRegistrationJourney, journeyDataService, validator) {
-    override val taskList: List<TaskListItemDataModel<RegisterPropertyStepId>>
+    override val taskList: List<Task<RegisterPropertyStepId>>
         get() =
             listOf(
-                TaskListItemDataModel(
+                Task(
                     "registerProperty.taskList.register.addAddress",
                     RegisterPropertyStepId.LookupAddress,
                     RegisterPropertyStepId.PropertyType,
                 ),
-                TaskListItemDataModel(
+                Task(
                     "registerProperty.taskList.register.selectType",
                     RegisterPropertyStepId.PropertyType,
                     RegisterPropertyStepId.OwnershipType,
                 ),
-                TaskListItemDataModel(
+                Task(
                     "registerProperty.taskList.register.selectOwnership",
                     RegisterPropertyStepId.OwnershipType,
                     RegisterPropertyStepId.LicensingType,
                 ),
-                TaskListItemDataModel(
+                Task(
                     "registerProperty.taskList.register.addLicensing",
                     RegisterPropertyStepId.LicensingType,
                     RegisterPropertyStepId.Occupancy,
                 ),
-                TaskListItemDataModel(
+                Task(
                     "registerProperty.taskList.register.addTenancyInfo",
                     RegisterPropertyStepId.Occupancy,
                     RegisterPropertyStepId.LandlordType,
                 ),
-                TaskListItemDataModel(
+                Task(
                     "registerProperty.taskList.register.selectOperation",
                     RegisterPropertyStepId.LandlordType,
                     RegisterPropertyStepId.CheckAnswers,

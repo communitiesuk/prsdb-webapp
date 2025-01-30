@@ -15,10 +15,10 @@ class CheckAndSubmitPropertiesTaskList(
     journeyDataService: JourneyDataService,
     validator: Validator,
 ) : TaskList<RegisterPropertyStepId>(propertyRegistrationJourney, journeyDataService, validator) {
-    override val taskList: List<TaskListItemDataModel<RegisterPropertyStepId>>
+    override val taskList: List<Task<RegisterPropertyStepId>>
         get() =
             listOf(
-                TaskListItemDataModel(
+                Task(
                     "registerProperty.taskList.checkAndSubmit.checkAnswers",
                     RegisterPropertyStepId.CheckAnswers,
                     null,

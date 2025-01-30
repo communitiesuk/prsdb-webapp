@@ -16,7 +16,7 @@ abstract class TaskList<T : StepId>(
     private val validator: Validator,
 ) {
     private val steps = journey.steps
-    protected abstract val taskList: List<TaskListItemDataModel<T>>
+    protected abstract val taskList: List<Task<T>>
 
     open fun getTaskListViewModels(): List<TaskListItemViewModel> {
         val journeyData = journeyDataService.getJourneyDataFromSession()
@@ -29,30 +29,29 @@ abstract class TaskList<T : StepId>(
 
     private fun taskListItemViewModel(
         journeyData: JourneyData,
-        taskListItem: TaskListItemDataModel<T>,
+        task: Task<T>,
     ): TaskListItemViewModel {
-        val status = getStatusForTask(journeyData, taskListItem.startId, taskListItem.completionId)
+        val status = getStatusForTask(journeyData, task)
         return TaskListItemViewModel(
-            taskListItem.nameKey,
+            task.nameKey,
             TaskStatusViewModel.fromStatus(status),
             if (status == TaskStatus.CANNOT_START_YET) {
                 null
             } else {
-                taskListItem.startId.urlPathSegment
+                task.startId.urlPathSegment
             },
         )
     }
 
     private fun getStatusForTask(
         journeyData: JourneyData,
-        firstStepId: T,
-        completionStepId: T? = null,
+        task: Task<T>,
     ): TaskStatus =
-        if (isStepWithIdReachable(journeyData, completionStepId)) {
+        if (isStepWithIdReachable(journeyData, task.completionId)) {
             TaskStatus.COMPLETED
         } else {
-            if (isStepWithIdReachable(journeyData, firstStepId)) {
-                if (isNextStepReachableFromId(journeyData, firstStepId)) {
+            if (isStepWithIdReachable(journeyData, task.startId)) {
+                if (isNextStepReachableFromId(journeyData, task.startId)) {
                     TaskStatus.IN_PROGRESS
                 } else {
                     TaskStatus.NOT_YET_STARTED
@@ -80,7 +79,7 @@ abstract class TaskList<T : StepId>(
         return journey.isStepReachable(journeyData, currentStep)
     }
 
-    protected data class TaskListItemDataModel<T : StepId>(
+    protected data class Task<T : StepId>(
         val nameKey: String,
         val startId: T,
         val completionId: T?,
