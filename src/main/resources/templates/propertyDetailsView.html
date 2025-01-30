@@ -9,23 +9,7 @@
         <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink('delete-record', #{propertyDetails.deleteRecordButton.text})}"></a>
       </th:block>
     </div>
-    <div class="prsd-key-details__container">
-      <dl class="prsd-key-details__list govuk-body">
-        <div class="prsd-key-details__column">
-          <dt class="prsd-key-details__key" th:text="#{propertyDetails.keyDetails.landlordType}"></dt>
-          <dd class="prsd-key-values__value" th:text="#{${propertyDetails.landlordTypeKey}}"></dd>
-        </div>
-        <div class="prsd-key-details__column">
-          <dt class="prsd-key-details__key" th:text="#{propertyDetails.keyDetails.registeredLandlord}"></dt>
-          <dd class="prsd-key-values__value">
-            <a class="govuk-link" th:href="@{${propertyDetails.landlordDetailsUrl}}" th:text="${propertyDetails.primaryLandlordName}"></a>
-          </dd>
-        </div>
-        <div class="prsd-key-details__column">
-          <dt class="prsd-key-details__key" th:text="#{propertyDetails.keyDetails.isTenanted}"></dt>
-          <dd class="prsd-key-values__value" th:text="#{${propertyDetails.isTenantedKey}}"></dd>
-        </div>
-      </dl>
+    <div th:replace="~{fragments/keyDetailsList :: keyDetailsList(${propertyDetails.keyDetails})}">
     </div>
 
     <div th:replace="~{fragments/tabs/tabs :: tabs(~{:: #tabs-content})}" >

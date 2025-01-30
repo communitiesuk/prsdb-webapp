@@ -25,6 +25,25 @@ class PropertyDetailsViewModel(
 
     val isTenantedKey: String = MessageKeyConverter.convert(propertyOwnership.currentNumTenants > 0)
 
+    val keyDetails: List<SummaryListRowViewModel> =
+        listOf(
+            SummaryListRowViewModel(
+                "propertyDetails.keyDetails.landlordType",
+                landlordTypeKey,
+                null,
+            ),
+            SummaryListRowViewModel(
+                "propertyDetails.keyDetails.registeredLandlord",
+                primaryLandlordName,
+                landlordDetailsUrl,
+            ),
+            SummaryListRowViewModel(
+                "propertyDetails.keyDetails.isTenanted",
+                isTenantedKey,
+                null,
+            ),
+        )
+
     val propertyRecord: List<SummaryListRowViewModel> =
         listOf(
             SummaryListRowViewModel(
