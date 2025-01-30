@@ -33,7 +33,7 @@ class SearchRegisterController(
             val pagedLandlordList =
                 landlordService.searchForLandlords(query, principal.name, currentPageNumber = page - 1)
 
-            if (pagedLandlordList.totalPages < page) {
+            if (pagedLandlordList.totalPages != 0 && pagedLandlordList.totalPages < page) {
                 return "redirect:/search/landlord?query=$query"
             }
 
