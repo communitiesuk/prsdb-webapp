@@ -1,7 +1,7 @@
 
 <li th:fragment="taskListItem(task, id)"  class="govuk-task-list__item" th:classappend="${task.url != null} ? 'govuk-task-list__item--with-link' : ''">
     <div class="govuk-task-list__name-and-hint">
-        <a class="govuk-link" th:classappend="${task.url != null} ? 'govuk-task-list__link' : ''"
+        <a class="govuk-link 'govuk-task-list__link" th:remove="${task.url == null} ? tag : none"
            th:href="${task.url}"
            th:text="#{${task.nameKey}}"
            th:aria-describedby="${id}">
