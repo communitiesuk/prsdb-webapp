@@ -10,20 +10,20 @@
       </th:block>
     </div>
     <div class="prsd-key-details__container">
-      <dl class="govuk-summary-list govuk-summary-list--no-border prsd-key-details__list govuk-!-padding-left-4">
-        <div class="govuk-summary-list__row prsd-key-details__column">
-          <dt class="govuk-summary-list__key" th:text="#{propertyDetails.keyDetails.landlordType}"></dt>
-          <dd class="govuk-summary-list__value govuk-body" th:text="#{${propertyDetails.landlordTypeKey}}"></dd>
+      <dl class="prsd-key-details__list govuk-body">
+        <div class="prsd-key-details__column">
+          <dt class="prsd-key-details__key" th:text="#{propertyDetails.keyDetails.landlordType}"></dt>
+          <dd class="prsd-key-values__value" th:text="#{${propertyDetails.landlordTypeKey}}"></dd>
         </div>
-        <div class="govuk-summary-list__row prsd-key-details__column">
-          <dt class="govuk-summary-list__key" th:text="#{propertyDetails.keyDetails.registeredLandlord}"></dt>
-          <dd class="govuk-summary-list__actions">
+        <div class="prsd-key-details__column">
+          <dt class="prsd-key-details__key" th:text="#{propertyDetails.keyDetails.registeredLandlord}"></dt>
+          <dd class="prsd-key-values__value">
             <a class="govuk-link" th:href="@{${propertyDetails.landlordDetailsUrl}}" th:text="${propertyDetails.primaryLandlordName}"></a>
           </dd>
         </div>
-        <div class="govuk-summary-list__row prsd-key-details__column">
-          <dt class="govuk-summary-list__key" th:text="#{propertyDetails.keyDetails.isTenanted}"></dt>
-          <dd class="govuk-summary-list__value govuk-body" th:text="#{${propertyDetails.isTenantedKey}}"></dd>
+        <div class="prsd-key-details__column">
+          <dt class="prsd-key-details__key" th:text="#{propertyDetails.keyDetails.isTenanted}"></dt>
+          <dd class="prsd-key-values__value" th:text="#{${propertyDetails.isTenantedKey}}"></dd>
         </div>
       </dl>
     </div>
