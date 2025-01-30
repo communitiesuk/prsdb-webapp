@@ -16,8 +16,8 @@ class URIQueryBuilderTests {
 
     @Test
     fun `build returns the corresponding URI`() {
-        mockHTTPServletRequest.setParameter("name", "value")
-        val expectedURI = "${mockHTTPServletRequest.requestURI}?name=value"
+        mockHTTPServletRequest.queryString = "name=value"
+        val expectedURI = "${mockHTTPServletRequest.requestURI}?${mockHTTPServletRequest.queryString}"
 
         val builtURI = URIQueryBuilder.fromHTTPServletRequest(mockHTTPServletRequest).build().toUriString()
 
@@ -26,9 +26,9 @@ class URIQueryBuilderTests {
 
     @Test
     fun `updateParam returns the updated URI (single value update)`() {
-        mockHTTPServletRequest.setParameters(mapOf("name1" to "value1", "name2" to "value2"))
+        mockHTTPServletRequest.queryString = "name1=value1&name2=value2"
         val updatedName1Value = "newValue1"
-        val expectedUpdatedURI = "example.com/page?name2=value2&name1=$updatedName1Value"
+        val expectedUpdatedURI = "${mockHTTPServletRequest.requestURI}?name2=value2&name1=$updatedName1Value"
 
         val updatedURI =
             URIQueryBuilder
@@ -42,9 +42,9 @@ class URIQueryBuilderTests {
 
     @Test
     fun `updateParam returns the updated URI (single value insert)`() {
-        mockHTTPServletRequest.setParameter("name2", "value2")
+        mockHTTPServletRequest.queryString = "name2=value2"
         val name1Value = "value1"
-        val expectedUpdatedURI = "example.com/page?name2=value2&name1=$name1Value"
+        val expectedUpdatedURI = "${mockHTTPServletRequest.requestURI}?name2=value2&name1=$name1Value"
 
         val updatedURI =
             URIQueryBuilder
@@ -58,10 +58,10 @@ class URIQueryBuilderTests {
 
     @Test
     fun `updateParam returns the updated URI (multi-value update)`() {
-        mockHTTPServletRequest.setParameters(mapOf("name1" to "value1", "name2" to "value2"))
+        mockHTTPServletRequest.queryString = "name1=value1&name2=value2"
         val updatedName1Values = listOf("newValue1a", "newValue1b")
         val expectedUpdatedURI =
-            "example.com/page?name2=value2&name1=${updatedName1Values[0]}&name1=${updatedName1Values[1]}"
+            "${mockHTTPServletRequest.requestURI}?name2=value2&name1=${updatedName1Values[0]}&name1=${updatedName1Values[1]}"
 
         val updatedURI =
             URIQueryBuilder
@@ -75,10 +75,10 @@ class URIQueryBuilderTests {
 
     @Test
     fun `updateParam returns the updated URI (multi-value insert)`() {
-        mockHTTPServletRequest.setParameter("name2", "value2")
+        mockHTTPServletRequest.queryString = "name2=value2"
         val name1Values = listOf("value1a", "value1b")
         val expectedUpdatedURI =
-            "example.com/page?name2=value2&name1=${name1Values[0]}&name1=${name1Values[1]}"
+            "${mockHTTPServletRequest.requestURI}?name2=value2&name1=${name1Values[0]}&name1=${name1Values[1]}"
 
         val updatedURI =
             URIQueryBuilder
@@ -92,14 +92,9 @@ class URIQueryBuilderTests {
 
     @Test
     fun `removeParam returns the updated URI`() {
-        mockHTTPServletRequest.setParameters(
-            mapOf(
-                "name1" to "value1",
-                "_name1" to "hiddenValue1",
-                "name2" to "value2",
-            ),
-        )
-        val expectedUpdatedURI = "example.com/page?name2=value2"
+        mockHTTPServletRequest.queryString = "name1=value1&_name1=hiddenValue1&name2=value2"
+
+        val expectedUpdatedURI = "${mockHTTPServletRequest.requestURI}?name2=value2"
 
         val updatedURI =
             URIQueryBuilder
@@ -113,8 +108,8 @@ class URIQueryBuilderTests {
 
     @Test
     fun `removeParam returns the original URI if the param does not exist`() {
-        mockHTTPServletRequest.setParameter("name2", "value2")
-        val expectedURI = "${mockHTTPServletRequest.requestURI}?name2=value2"
+        mockHTTPServletRequest.queryString = "name2=value2"
+        val expectedURI = "${mockHTTPServletRequest.requestURI}?${mockHTTPServletRequest.queryString}"
 
         val updatedURI =
             URIQueryBuilder
@@ -128,14 +123,8 @@ class URIQueryBuilderTests {
 
     @Test
     fun `removeParams returns the updated URI`() {
-        mockHTTPServletRequest.setParameters(
-            mapOf(
-                "name1" to "value1",
-                "_name1" to "hiddenValue1",
-                "name2" to "value2",
-            ),
-        )
-        val expectedUpdatedURI = "example.com/page"
+        mockHTTPServletRequest.queryString = "name1=value1&_name1=hiddenValue1&name2=value2"
+        val expectedUpdatedURI = "${mockHTTPServletRequest.requestURI}"
 
         val updatedURI =
             URIQueryBuilder
@@ -149,14 +138,8 @@ class URIQueryBuilderTests {
 
     @Test
     fun `removeParamValue returns the updated URI (single value param)`() {
-        mockHTTPServletRequest.setParameters(
-            mapOf(
-                "name1" to "value1",
-                "_name1" to "hiddenValue1",
-                "name2" to "value2",
-            ),
-        )
-        val expectedUpdatedURI = "example.com/page?name2=value2"
+        mockHTTPServletRequest.queryString = "name1=value1&_name1=hiddenValue1&name2=value2"
+        val expectedUpdatedURI = "${mockHTTPServletRequest.requestURI}?name2=value2"
 
         val updatedURI =
             URIQueryBuilder
@@ -170,15 +153,8 @@ class URIQueryBuilderTests {
 
     @Test
     fun `removeParamValue returns the updated URI (multi-value param)`() {
-        mockHTTPServletRequest.setParameters(
-            mapOf(
-                "name1" to "value1a",
-                "name1" to "value1b",
-                "_name1" to "hiddenValue1",
-                "name2" to "value2",
-            ),
-        )
-        val expectedUpdatedURI = "example.com/page?_name1=hiddenValue1&name2=value2&name1=value1b"
+        mockHTTPServletRequest.queryString = "name1=value1a&name1=value1b&_name1=hiddenValue1&name2=value2"
+        val expectedUpdatedURI = "${mockHTTPServletRequest.requestURI}?_name1=hiddenValue1&name2=value2&name1=value1b"
 
         val updatedURI =
             URIQueryBuilder
@@ -192,8 +168,8 @@ class URIQueryBuilderTests {
 
     @Test
     fun `removeParamValue returns the original URI if the param does not exist`() {
-        mockHTTPServletRequest.setParameter("name2", "value2")
-        val expectedURI = "${mockHTTPServletRequest.requestURI}?name2=value2"
+        mockHTTPServletRequest.queryString = "name2=value2"
+        val expectedURI = "${mockHTTPServletRequest.requestURI}?${mockHTTPServletRequest.queryString}"
 
         val updatedURI =
             URIQueryBuilder
@@ -207,8 +183,8 @@ class URIQueryBuilderTests {
 
     @Test
     fun `removeParamValue returns the original URI if the param does not have the value`() {
-        mockHTTPServletRequest.setParameters(mapOf("name1" to "value1", "name2" to "value2"))
-        val expectedURI = "example.com/page?name2=value2&name1=value1"
+        mockHTTPServletRequest.queryString = "name1=value1&name2=value2"
+        val expectedURI = "${mockHTTPServletRequest.requestURI}?name2=value2&name1=value1"
 
         val updatedURI =
             URIQueryBuilder

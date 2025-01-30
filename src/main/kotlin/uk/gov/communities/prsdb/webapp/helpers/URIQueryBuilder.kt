@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import jakarta.servlet.http.HttpServletRequest
-import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.util.UriComponentsBuilder
 
 class URIQueryBuilder private constructor(
@@ -12,7 +11,7 @@ class URIQueryBuilder private constructor(
             URIQueryBuilder(
                 UriComponentsBuilder
                     .fromUriString(httpServletRequest.requestURI)
-                    .queryParams(LinkedMultiValueMap(httpServletRequest.parameterMap.mapValues { it.value.toList() })),
+                    .query(httpServletRequest.queryString),
             )
 
         private fun getHiddenParam(name: String) = "_$name"
