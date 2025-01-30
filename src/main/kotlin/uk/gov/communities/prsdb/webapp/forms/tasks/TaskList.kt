@@ -77,7 +77,7 @@ abstract class TaskList<T : StepId>(
     ): Boolean {
         if (id == null) return false
         val currentStep = steps.single { it.id == id }
-        return journey.isReachable(journeyData, currentStep)
+        return journey.isStepReachable(journeyData, currentStep)
     }
 
     protected data class TaskListItemDataModel<T : StepId>(

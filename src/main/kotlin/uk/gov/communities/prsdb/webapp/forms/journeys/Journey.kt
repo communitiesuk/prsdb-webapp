@@ -44,7 +44,7 @@ abstract class Journey<T : StepId>(
                 HttpStatus.NOT_FOUND,
                 "Step ${stepId.urlPathSegment} not valid for journey ${journeyType.urlPathSegment}",
             )
-        if (!isReachable(journeyData, requestedStep, subPageNumber)) {
+        if (!isStepReachable(journeyData, requestedStep, subPageNumber)) {
             return "redirect:/${journeyType.urlPathSegment}/${initialStepId.urlPathSegment}"
         }
         val prevStepDetails = getPrevStep(journeyData, requestedStep, subPageNumber)
@@ -101,7 +101,7 @@ abstract class Journey<T : StepId>(
         return "redirect:$redirectUrl"
     }
 
-    fun isReachable(
+    fun isStepReachable(
         journeyData: JourneyData,
         targetStep: Step<T>,
         targetSubPageNumber: Int? = null,
