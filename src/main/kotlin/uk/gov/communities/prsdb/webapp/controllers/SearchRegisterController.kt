@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.servlet.http.HttpServletRequest
+import jakarta.validation.constraints.Min
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -22,21 +23,17 @@ class SearchRegisterController(
     fun searchForLandlords(
         model: Model,
         @RequestParam(required = false) query: String?,
-        @RequestParam(value = "page", required = false) page: Int = 1,
+        @RequestParam(value = "page", required = false) @Min(1) page: Int = 1,
         principal: Principal,
         httpServletRequest: HttpServletRequest,
     ): String {
         var totalPages = 0
 
         if (!query.isNullOrBlank()) {
-            if (page < 1) {
-                return "redirect:/search/landlord?query=$query"
-            }
-
             val pagedLandlordList =
                 landlordService.searchForLandlords(query, principal.name, currentPageNumber = page - 1)
 
-            if (pagedLandlordList.totalPages in 1..<page) {
+            if (pagedLandlordList.totalPages < page) {
                 return "redirect:/search/landlord?query=$query"
             }
 

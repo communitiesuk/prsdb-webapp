@@ -69,7 +69,7 @@ class ManageLocalAuthorityUsersControllerTests(
 
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
-    fun `ManageLocalAuthorityUsersController returns 200 for authorized user`() {
+    fun `index returns 200 for authorized user`() {
         val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = LocalAuthority(DEFAULT_LA_ID, "Test Local Authority", "custodianCode")
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
@@ -94,6 +94,23 @@ class ManageLocalAuthorityUsersControllerTests(
             .get("/local-authority/${DEFAULT_LA_ID}/manage-users")
             .andExpect {
                 status { isForbidden() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_ADMIN"])
+    fun `index returns 404 for authorized user accessing a page less than 1`() {
+        val loggedInUserModel = createdLoggedInUserModel()
+        val localAuthority = LocalAuthority(DEFAULT_LA_ID, "Test Local Authority", "custodianCode")
+        whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            .thenReturn(Pair(loggedInUserModel, localAuthority))
+        whenever(localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 0))
+            .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
+
+        mvc
+            .get("/local-authority/$DEFAULT_LA_ID/manage-users?page=0")
+            .andExpect {
+                status { isNotFound() }
             }
     }
 
