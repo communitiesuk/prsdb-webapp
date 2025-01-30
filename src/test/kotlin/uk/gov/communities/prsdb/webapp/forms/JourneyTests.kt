@@ -441,7 +441,7 @@ class JourneyTests {
 
             // Assert
             verify(spiedOnPage).populateModelAndGetTemplateName(
-                testJourney.validator,
+                validator,
                 model,
                 pageDataStepFour,
                 TestStepId.StepThree.urlPathSegment,
