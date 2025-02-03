@@ -78,6 +78,7 @@ class PropertyDetailsViewModel(
             SummaryListRowViewModel(
                 "propertyDetails.propertyRecord.ownershipType",
                 MessageKeyConverter.convert(propertyOwnership.ownershipType),
+                // TODO PRSD-689: Add update link
                 "#",
             ),
             getLicensingDetails(propertyOwnership),
@@ -87,6 +88,7 @@ class PropertyDetailsViewModel(
                 SummaryListRowViewModel(
                     "propertyDetails.propertyRecord.landlordType",
                     landlordTypeKey,
+                    // TODO PRSD-xxx Add update link
                     "#",
                 ),
             )
@@ -97,16 +99,19 @@ class PropertyDetailsViewModel(
                 SummaryListRowViewModel(
                     "propertyDetails.propertyRecord.occupied",
                     isTenantedKey,
+                    // TODO PRSD-799: Add update link
                     "#",
                 ),
                 SummaryListRowViewModel(
                     "propertyDetails.propertyRecord.numberOfHouseholds",
                     propertyOwnership.currentNumHouseholds,
+                    // TODO PRSD-800: Add update link
                     "#",
                 ),
                 SummaryListRowViewModel(
                     "propertyDetails.propertyRecord.numberOfPeople",
                     propertyOwnership.currentNumTenants,
+                    // TODO PRSD-801: Add update link
                     "#",
                 ),
             )
@@ -115,6 +120,7 @@ class PropertyDetailsViewModel(
                 SummaryListRowViewModel(
                     "propertyDetails.propertyRecord.occupied",
                     isTenantedKey,
+                    // TODO PRSD-799: Add update link
                     "#",
                 ),
             )
@@ -125,6 +131,7 @@ class PropertyDetailsViewModel(
             SummaryListRowViewModel(
                 "propertyDetails.propertyRecord.licensingType",
                 MessageKeyConverter.convert(LicensingType.NO_LICENSING),
+                // TODO PRSD-798: Add update link
                 "#",
             )
         } else {
@@ -134,6 +141,7 @@ class PropertyDetailsViewModel(
                     MessageKeyConverter.convert(propertyOwnership.license!!.licenseType),
                     propertyOwnership.license!!.licenseNumber,
                 ),
+                // TODO PRSD-798: Add update link
                 "#",
             )
         }
