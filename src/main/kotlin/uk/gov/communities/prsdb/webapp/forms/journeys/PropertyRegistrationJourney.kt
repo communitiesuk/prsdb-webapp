@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Co
 import uk.gov.communities.prsdb.webapp.forms.pages.AlreadyRegisteredPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationCheckAnswersPage
+import uk.gov.communities.prsdb.webapp.forms.pages.RegisterPropertyTaskListPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
@@ -63,7 +64,7 @@ class PropertyRegistrationJourney(
     confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
 ) : Journey<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
-        initialStepId = RegisterPropertyStepId.LookupAddress,
+        initialStepId = RegisterPropertyStepId.TaskList,
         validator = validator,
         journeyDataService = journeyDataService,
         steps =
@@ -95,9 +96,17 @@ class PropertyRegistrationJourney(
                     confirmationEmailSender,
                     session,
                 ),
+                taskListStep(),
             ),
     ) {
     companion object {
+        private fun taskListStep() =
+            Step(
+                id = RegisterPropertyStepId.TaskList,
+                page = RegisterPropertyTaskListPage(),
+                nextAction = { _, _ -> Pair(RegisterPropertyStepId.LookupAddress, null) },
+            )
+
         private fun lookupAddressStep() =
             Step(
                 id = RegisterPropertyStepId.LookupAddress,
