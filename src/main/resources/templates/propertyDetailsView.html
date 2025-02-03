@@ -5,8 +5,8 @@
   <div id="page-contents">
     <h2 class="govuk-heading-m" th:text="#{propertyDetails.heading}">propertyDetails.heading</h2>
     <div th:replace="~{fragments/buttons/pageHeaderActions :: pageHeaderActions(${propertyDetails.address}, ~{:: #delete-record-button})}">
-      <th:block id="delete-record-button">
-        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink('delete-record', #{propertyDetails.deleteRecordButton.text})}"></a>
+      <th:block th:if="${deleteRecordLink != null}" id="delete-record-button">
+        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${deleteRecordLink}, #{propertyDetails.deleteRecordButton.text})}"></a>
       </th:block>
     </div>
     <div th:replace="~{fragments/keyDetailsList :: keyDetailsList(${propertyDetails.keyDetails})}">

@@ -5,11 +5,13 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.ViewModelOptionsHelper.Companion.toggleChangeLink
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class PropertyDetailsViewModel(
     private val propertyOwnership: PropertyOwnership,
+    private val withChangeLinks: Boolean = true,
 ) {
     val address: String = propertyOwnership.property.address.singleLineAddress
 
@@ -78,7 +80,7 @@ class PropertyDetailsViewModel(
             SummaryListRowViewModel(
                 "propertyDetails.propertyRecord.ownershipType",
                 MessageKeyConverter.convert(propertyOwnership.ownershipType),
-                "#",
+                toggleChangeLink("#", withChangeLinks),
             ),
             getLicensingDetails(propertyOwnership),
         ) +
@@ -87,7 +89,7 @@ class PropertyDetailsViewModel(
                 SummaryListRowViewModel(
                     "propertyDetails.propertyRecord.landlordType",
                     landlordTypeKey,
-                    "#",
+                    toggleChangeLink("#", withChangeLinks),
                 ),
             )
 
@@ -97,17 +99,17 @@ class PropertyDetailsViewModel(
                 SummaryListRowViewModel(
                     "propertyDetails.propertyRecord.occupied",
                     isTenantedKey,
-                    "#",
+                    toggleChangeLink("#", withChangeLinks),
                 ),
                 SummaryListRowViewModel(
                     "propertyDetails.propertyRecord.numberOfHouseholds",
                     propertyOwnership.currentNumHouseholds,
-                    "#",
+                    toggleChangeLink("#", withChangeLinks),
                 ),
                 SummaryListRowViewModel(
                     "propertyDetails.propertyRecord.numberOfPeople",
                     propertyOwnership.currentNumTenants,
-                    "#",
+                    toggleChangeLink("#", withChangeLinks),
                 ),
             )
         } else {
@@ -115,7 +117,7 @@ class PropertyDetailsViewModel(
                 SummaryListRowViewModel(
                     "propertyDetails.propertyRecord.occupied",
                     isTenantedKey,
-                    "#",
+                    toggleChangeLink("#", withChangeLinks),
                 ),
             )
         }
@@ -125,7 +127,7 @@ class PropertyDetailsViewModel(
             SummaryListRowViewModel(
                 "propertyDetails.propertyRecord.licensingType",
                 MessageKeyConverter.convert(LicensingType.NO_LICENSING),
-                "#",
+                toggleChangeLink("#", withChangeLinks),
             )
         } else {
             SummaryListRowViewModel(
@@ -134,7 +136,7 @@ class PropertyDetailsViewModel(
                     MessageKeyConverter.convert(propertyOwnership.license!!.licenseType),
                     propertyOwnership.license!!.licenseNumber,
                 ),
-                "#",
+                toggleChangeLink("#", withChangeLinks),
             )
         }
 }

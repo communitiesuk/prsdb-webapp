@@ -12,12 +12,12 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyDetailsViewMode
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @Controller
-@RequestMapping("/property-details")
+@RequestMapping
 class PropertyDetailsController(
     val propertyOwnershipService: PropertyOwnershipService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
-    @GetMapping("/{propertyOwnershipId}")
+    @GetMapping("/property-details/{propertyOwnershipId}")
     fun getPropertyDetails(
         @PathVariable propertyOwnershipId: Long,
         model: Model,
@@ -30,6 +30,27 @@ class PropertyDetailsController(
         }
 
         val propertyDetails = PropertyDetailsViewModel(propertyOwnership)
+
+        model.addAttribute("propertyDetails", propertyDetails)
+        model.addAttribute("deleteRecordLink", "delete-record")
+
+        return "propertyDetailsView"
+    }
+
+    @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
+    @GetMapping("/view-property-details/{propertyOwnershipId}")
+    fun getPropertyDetailsLaView(
+        @PathVariable propertyOwnershipId: Long,
+        model: Model,
+    ): String {
+        val propertyOwnership =
+            propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Property ownership $propertyOwnershipId not found")
+        if (!propertyOwnership.isActive) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Property ownership $propertyOwnershipId is inactive")
+        }
+
+        val propertyDetails = PropertyDetailsViewModel(propertyOwnership, withChangeLinks = false)
 
         model.addAttribute("propertyDetails", propertyDetails)
 
