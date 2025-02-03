@@ -9,7 +9,7 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createMockPropertyOwnership
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import kotlin.test.Test
 
@@ -58,7 +58,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `getPropertyDetails returns 200 for a valid request`() {
-            val propertyOwnership = createMockPropertyOwnership()
+            val propertyOwnership = createPropertyOwnership()
 
             whenever(propertyOwnershipService.retrievePropertyOwnershipById(1))
                 .thenReturn(
@@ -109,7 +109,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LA_USER"])
         fun `getPropertyDetails returns 200 for a valid request from an LA user`() {
-            val propertyOwnership = createMockPropertyOwnership()
+            val propertyOwnership = createPropertyOwnership()
 
             whenever(propertyOwnershipService.retrievePropertyOwnershipById(1))
                 .thenReturn(
@@ -124,7 +124,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `getPropertyDetails returns 200 for a valid request from an LA admin`() {
-            val propertyOwnership = createMockPropertyOwnership()
+            val propertyOwnership = createPropertyOwnership()
 
             whenever(propertyOwnershipService.retrievePropertyOwnershipById(1))
                 .thenReturn(

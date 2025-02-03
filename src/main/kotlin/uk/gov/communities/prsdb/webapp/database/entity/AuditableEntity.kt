@@ -17,5 +17,4 @@ abstract class AuditableEntity : Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(updatable = false)
     lateinit var createdDate: Instant
-        private set
 }
