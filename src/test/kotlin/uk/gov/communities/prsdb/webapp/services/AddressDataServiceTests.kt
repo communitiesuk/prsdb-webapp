@@ -9,12 +9,14 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentCaptor.captor
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.capture
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -24,11 +26,14 @@ class AddressDataServiceTests {
     @Mock
     private lateinit var mockHttpSession: HttpSession
 
+    @Mock
+    private lateinit var mockJourneyDataService: JourneyDataService
+
     private lateinit var addressDataService: AddressDataService
 
     @BeforeEach
     fun setup() {
-        addressDataService = AddressDataService(mockHttpSession)
+        addressDataService = AddressDataService(mockHttpSession, mockJourneyDataService)
     }
 
     @Test
@@ -44,7 +49,7 @@ class AddressDataServiceTests {
         val expectedAddressData =
             AddressDataModel("1, Example Road, EG", 1, 1234, buildingNumber = "1", postcode = "EG")
 
-        whenever(mockHttpSession.getAttribute("addressData")).thenReturn(addressDataJSON)
+        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mutableMapOf("address-data" to addressDataJSON))
 
         val addressData = addressDataService.getAddressData("1, Example Road, EG")
 
@@ -62,7 +67,7 @@ class AddressDataServiceTests {
                 ).associateBy { it.singleLineAddress },
             )
 
-        whenever(mockHttpSession.getAttribute("addressData")).thenReturn(addressDataJSON)
+        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mutableMapOf("address-data" to addressDataJSON))
 
         val addressData = addressDataService.getAddressData("invalid address")
 
@@ -79,11 +84,13 @@ class AddressDataServiceTests {
             )
         val expectedAddressDataString = Json.encodeToString(addressDataList.associateBy { it.singleLineAddress })
 
+        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mutableMapOf())
+
         addressDataService.setAddressData(addressDataList)
 
-        val addressDataStringCaptor = captor<String>()
-        verify(mockHttpSession).setAttribute(eq("addressData"), addressDataStringCaptor.capture())
-        Assertions.assertEquals(expectedAddressDataString, addressDataStringCaptor.value)
+        val addressDataStringCaptor = argumentCaptor<JourneyData>()
+        verify(mockJourneyDataService).setJourneyData(addressDataStringCaptor.capture())
+        Assertions.assertEquals(expectedAddressDataString, addressDataStringCaptor.firstValue["address-data"])
     }
 
     @Test
@@ -123,8 +130,8 @@ class AddressDataServiceTests {
         val expectedNewCache = mutableMapOf(5678.toString() to true, uprn.toString() to false)
 
         addressDataService.setCachedAddressRegisteredResult(uprn, false)
-        val addressRegisteredResultCaptor = captor<MutableMap<String, Boolean>>()
+        val addressRegisteredResultCaptor = argumentCaptor<MutableMap<String, Boolean>>()
         verify(mockHttpSession).setAttribute(eq("addressRegisteredResults"), addressRegisteredResultCaptor.capture())
-        Assertions.assertEquals(expectedNewCache, addressRegisteredResultCaptor.value)
+        Assertions.assertEquals(expectedNewCache, addressRegisteredResultCaptor.firstValue)
     }
 }
