@@ -6,7 +6,7 @@ import com.microsoft.playwright.Page.LocatorOptions
 import org.junit.jupiter.api.Assertions.assertEquals
 
 abstract class BaseComponent(
-    private val locator: Locator,
+    protected val locator: Locator,
 ) {
     companion object {
         private fun assertLocatorIsValid(

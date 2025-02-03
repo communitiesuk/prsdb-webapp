@@ -5,7 +5,8 @@ import com.microsoft.playwright.Page
 
 class Form(
     private val page: Page,
-    locator: Locator = page.locator("form"),
+    parentLocator: Locator? = null,
+    locator: Locator = if (parentLocator == null) page.locator("form") else parentLocator.locator("form"),
 ) : BaseComponent(locator) {
     fun getErrorMessage(fieldName: String? = null) =
         getChildComponent(if (fieldName == null) ".govuk-error-message" else "p[id='$fieldName-error']")
@@ -20,7 +21,7 @@ class Form(
 
     fun getTextArea() = getChildComponent("textarea")
 
-    fun getCheckboxes() = Checkboxes(page)
+    fun getCheckboxes(index: Int = 0) = Checkboxes(page, index)
 
     fun getSummaryList() = SummaryList(page)
 

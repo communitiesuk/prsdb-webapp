@@ -11,9 +11,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.ADDRESS_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.CONTACT_INFO_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.LANDLORD_COL_INDEX
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.LA_FILTER_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.LISTED_PROPERTY_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import kotlin.test.assertContains
+import kotlin.test.assertTrue
 
 @Sql("/data-landlord-search.sql")
 class SearchRegisterTests : IntegrationTest() {
@@ -48,7 +50,7 @@ class SearchRegisterTests : IntegrationTest() {
     }
 
     @Test
-    fun `fuzzy search functionality works`() {
+    fun `fuzzy search functionality produces table of matching results`() {
         val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
         searchLandlordRegisterPage.searchBar.search("Alex")
         val resultTable = searchLandlordRegisterPage.getResultTable()
@@ -95,7 +97,7 @@ class SearchRegisterTests : IntegrationTest() {
     }
 
     @Test
-    fun `pagination links all work`(page: Page) {
+    fun `pagination links lead to the intended pages`(page: Page) {
         val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
         searchLandlordRegisterPage.searchBar.search("PRSDB")
 
@@ -110,5 +112,43 @@ class SearchRegisterTests : IntegrationTest() {
         previousPage.getPaginationComponent().getPageNumberLink(2).click()
         assertContains(page.url(), "page=2")
         assertPageIs(page, SearchLandlordRegisterPage::class)
+    }
+
+    @Test
+    fun `filter panel can be toggled and used to refine search results`(page: Page) {
+        val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
+        searchLandlordRegisterPage.searchBar.search("Alex")
+
+        val filter = searchLandlordRegisterPage.getFilter()
+
+        // Toggle filter
+        filter.clickCloseFilterPanel()
+        val exception = assertThrows<AssertionFailedError> { filter.getFilterPanel() }
+        assertContains(
+            exception.message!!,
+            "Expected 1 instance of Locator@.moj-filter-layout >> .moj-filter >> nth=0, found 0",
+        )
+
+        filter.clickShowFilterPanel()
+        assertTrue(filter.getFilterPanel().isVisible)
+
+        // Apply LA filter
+        val laFilter = filter.getFilterCheckboxes(LA_FILTER_INDEX)
+        laFilter.checkCheckbox("true")
+        filter.clickApplyFiltersButton()
+
+        val resultTable = searchLandlordRegisterPage.getResultTable()
+        assertTrue(resultTable.countRows() == 1)
+
+        // Remove LA filter
+        filter.clickRemoveFilterTag("Landlords in my authority")
+        assertTrue(resultTable.countRows() > 1)
+
+        // Clear all filters
+        laFilter.checkCheckbox("true")
+        filter.clickApplyFiltersButton()
+
+        filter.clickClearFiltersLink()
+        assertTrue(resultTable.countRows() > 1)
     }
 }

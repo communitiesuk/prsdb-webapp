@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.getChildComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.getComponent
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Filter
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Pagination
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SearchBar
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Table
@@ -12,6 +13,8 @@ class SearchLandlordRegisterPage(
     page: Page,
 ) : BasePage(page, "/search/landlord") {
     val searchBar = SearchBar(page)
+
+    fun getFilter() = Filter(page)
 
     fun getResultTable() = Table(page)
 
@@ -30,5 +33,7 @@ class SearchLandlordRegisterPage(
         const val ADDRESS_COL_INDEX: Int = 1
         const val CONTACT_INFO_COL_INDEX: Int = 2
         const val LISTED_PROPERTY_COL_INDEX: Int = 3
+
+        const val LA_FILTER_INDEX = 0
     }
 }

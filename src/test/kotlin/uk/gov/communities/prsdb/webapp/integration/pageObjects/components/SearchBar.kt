@@ -7,7 +7,7 @@ class SearchBar(
     private val page: Page,
     locator: Locator = page.locator(".moj-search"),
 ) : BaseComponent(locator) {
-    private val form = Form(page)
+    private val form = Form(page, parentLocator = locator)
     private val searchInput = form.getTextInput()
 
     fun search(query: String) {
