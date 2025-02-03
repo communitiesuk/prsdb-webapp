@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 class PropertyDetailsViewModel(
     private val propertyOwnership: PropertyOwnership,
     private val withChangeLinks: Boolean = true,
+    private val hideNullUprn: Boolean = true,
 ) {
     val address: String = propertyOwnership.property.address.singleLineAddress
 
@@ -55,35 +56,27 @@ class PropertyDetailsViewModel(
                 RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
                 null,
             ),
-            SummaryListRowViewModel(
-                "propertyDetails.propertyRecord.address",
-                address,
-                null,
-            ),
-            SummaryListRowViewModel(
-                "propertyDetails.propertyRecord.uprn",
-                propertyOwnership.property.address.uprn
-                    .toString(),
-                null,
-            ),
-            SummaryListRowViewModel(
-                "propertyDetails.propertyRecord.localAuthority",
-                propertyOwnership.property.address.localAuthority
-                    ?.name,
-                null,
-            ),
-            SummaryListRowViewModel(
-                "propertyDetails.propertyRecord.propertyType",
-                MessageKeyConverter.convert(propertyOwnership.property.propertyBuildType),
-                null,
-            ),
-            SummaryListRowViewModel(
-                "propertyDetails.propertyRecord.ownershipType",
-                MessageKeyConverter.convert(propertyOwnership.ownershipType),
-                toggleChangeLink("#", withChangeLinks),
-            ),
-            getLicensingDetails(propertyOwnership),
         ) +
+            getAddressAndUprn(propertyOwnership, hideNullUprn) +
+            listOf(
+                SummaryListRowViewModel(
+                    "propertyDetails.propertyRecord.localAuthority",
+                    propertyOwnership.property.address.localAuthority
+                        ?.name,
+                    null,
+                ),
+                SummaryListRowViewModel(
+                    "propertyDetails.propertyRecord.propertyType",
+                    MessageKeyConverter.convert(propertyOwnership.property.propertyBuildType),
+                    null,
+                ),
+                SummaryListRowViewModel(
+                    "propertyDetails.propertyRecord.ownershipType",
+                    MessageKeyConverter.convert(propertyOwnership.ownershipType),
+                    toggleChangeLink("#", withChangeLinks),
+                ),
+                getLicensingDetails(propertyOwnership),
+            ) +
             getTenancyDetails(propertyOwnership) +
             listOf(
                 SummaryListRowViewModel(
@@ -139,4 +132,39 @@ class PropertyDetailsViewModel(
                 toggleChangeLink("#", withChangeLinks),
             )
         }
+
+    private fun getAddressAndUprn(
+        propertyOwnership: PropertyOwnership,
+        hideNullUprn: Boolean,
+    ): List<SummaryListRowViewModel> {
+        if (propertyOwnership.property.address.uprn != null) {
+            return listOf(
+                getAddress(propertyOwnership),
+                SummaryListRowViewModel(
+                    "propertyDetails.propertyRecord.uprn",
+                    propertyOwnership.property.address.uprn
+                        .toString(),
+                    null,
+                ),
+            )
+        } else if (hideNullUprn) {
+            return listOf(getAddress(propertyOwnership))
+        } else {
+            return listOf(
+                getAddress(propertyOwnership),
+                SummaryListRowViewModel(
+                    "propertyDetails.propertyRecord.uprn",
+                    "propertyDetails.propertyRecord.uprn.unavailable",
+                    null,
+                ),
+            )
+        }
+    }
+
+    private fun getAddress(propertyOwnership: PropertyOwnership) =
+        SummaryListRowViewModel(
+            "propertyDetails.propertyRecord.address",
+            address,
+            null,
+        )
 }

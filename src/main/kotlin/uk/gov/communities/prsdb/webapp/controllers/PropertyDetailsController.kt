@@ -50,7 +50,12 @@ class PropertyDetailsController(
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Property ownership $propertyOwnershipId is inactive")
         }
 
-        val propertyDetails = PropertyDetailsViewModel(propertyOwnership, withChangeLinks = false)
+        val propertyDetails =
+            PropertyDetailsViewModel(
+                propertyOwnership = propertyOwnership,
+                withChangeLinks = false,
+                hideNullUprn = false,
+            )
 
         model.addAttribute("propertyDetails", propertyDetails)
 
