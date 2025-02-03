@@ -1,7 +1,41 @@
 :root {
     --govuk-colour-red: #d4351c;
+    --govuk-colour-light-grey: #f3f2f1;
 }
 
 .border-color-red {
     border-color: var(--govuk-colour-red);
 }
+
+.prsd-key-details__container {
+    display: flex;
+    background-color: var(--govuk-colour-light-grey);
+    padding: 30px;
+    margin-bottom: 30px;
+}
+
+.prsd-key-details__list {
+    display: flex;
+    width: 100%;
+    justify-content: space-evenly;
+    gap: 16px;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    margin: 0;
+}
+
+.prsd-key-details__column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.prsd-key-details__key {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.prsd-key-values__value {
+    margin: 0;
+}
+
