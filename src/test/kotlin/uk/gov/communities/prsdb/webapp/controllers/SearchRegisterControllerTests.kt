@@ -50,7 +50,7 @@ class SearchRegisterControllerTests(
 
     @Test
     @WithMockUser(roles = ["LA_USER"])
-    fun `searchRegisterController returns 200 for a valid page request`() {
+    fun `searchForLandlords returns 200 for a valid page request`() {
         whenever(landlordService.searchForLandlords("PRSDB", "user", currentPageNumber = 1))
             .thenReturn(
                 PageImpl(
@@ -79,15 +79,15 @@ class SearchRegisterControllerTests(
 
     @Test
     @WithMockUser(roles = ["LA_USER"])
-    fun `SearchRegisterController redirects if the requested page number is less than 1`() {
+    fun `searchForLandlords returns 404 if the requested page number is less than 1`() {
         mvc.get("/search/landlord?query=PRSDB&page=0").andExpect {
-            status { is3xxRedirection() }
+            status { isNotFound() }
         }
     }
 
     @Test
     @WithMockUser(roles = ["LA_USER"])
-    fun `SearchRegisterController redirects if the requested page number is more than the total pages`() {
+    fun `searchForLandlords redirects if the requested page number is more than the total pages`() {
         whenever(landlordService.searchForLandlords("PRSDB", "user", currentPageNumber = 2))
             .thenReturn(
                 PageImpl(

@@ -21,8 +21,8 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createdLoggedInUserModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationEmail
+import uk.gov.communities.prsdb.webapp.models.emailModels.EmailTemplateModel
+import uk.gov.communities.prsdb.webapp.models.emailModels.LocalAuthorityInvitationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService

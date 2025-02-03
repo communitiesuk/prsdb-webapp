@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.dataModels
+package uk.gov.communities.prsdb.webapp.models.viewModels
 
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -6,9 +6,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
-import uk.gov.communities.prsdb.webapp.models.viewModels.SummaryListRowViewModel
 
-class SummaryListRowViewModelTest {
+class SummaryListRowViewModelTests {
     companion object {
         @JvmStatic
         val convertableValues =

@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.viewModels
+package uk.gov.communities.prsdb.webapp.models.emailModels
 
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
@@ -22,7 +22,15 @@ class EmailTemplateModelsTests {
                     "/emails/LocalAuthorityInvitationCancellation.md",
                 ),
                 EmailTemplateTestData(
-                    PropertyRegistrationConfirmationEmail("P-XXX-YYY", "1 Street Name, Town, Country, AB1 2CD", "www.example.com"),
+                    LandlordRegistrationConfirmationEmail("L-CCCC_CCCC", "https://emample.com"),
+                    "/emails/LandlordRegistrationConfirmation.md",
+                ),
+                EmailTemplateTestData(
+                    PropertyRegistrationConfirmationEmail(
+                        "P-XXX-YYY",
+                        "1 Street Name, Town, Country, AB1 2CD",
+                        "www.example.com",
+                    ),
                     "/emails/PropertyRegistrationConfirmation.md",
                 ),
             )

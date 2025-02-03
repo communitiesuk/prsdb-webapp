@@ -28,8 +28,8 @@ import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Compan
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createdLoggedInUserModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.EmailTemplateModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.LocalAuthorityInvitationCancellationEmail
+import uk.gov.communities.prsdb.webapp.models.emailModels.EmailTemplateModel
+import uk.gov.communities.prsdb.webapp.models.emailModels.LocalAuthorityInvitationCancellationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
@@ -69,7 +69,7 @@ class ManageLocalAuthorityUsersControllerTests(
 
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
-    fun `ManageLocalAuthorityUsersController returns 200 for authorized user`() {
+    fun `index returns 200 for authorized user`() {
         val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = LocalAuthority(DEFAULT_LA_ID, "Test Local Authority", "custodianCode")
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
@@ -94,6 +94,23 @@ class ManageLocalAuthorityUsersControllerTests(
             .get("/local-authority/${DEFAULT_LA_ID}/manage-users")
             .andExpect {
                 status { isForbidden() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_ADMIN"])
+    fun `index returns 404 for authorized user accessing a page less than 1`() {
+        val loggedInUserModel = createdLoggedInUserModel()
+        val localAuthority = LocalAuthority(DEFAULT_LA_ID, "Test Local Authority", "custodianCode")
+        whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            .thenReturn(Pair(loggedInUserModel, localAuthority))
+        whenever(localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 0))
+            .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
+
+        mvc
+            .get("/local-authority/$DEFAULT_LA_ID/manage-users?page=0")
+            .andExpect {
+                status { isNotFound() }
             }
     }
 
@@ -154,6 +171,16 @@ class ManageLocalAuthorityUsersControllerTests(
 
         mvc
             .get("/local-authority/$DEFAULT_LA_ID/edit-user/$DEFAULT_LA_USER_ID")
+            .andExpect {
+                status { isNotFound() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_ADMIN"])
+    fun `getEditUserAccessLevelPage returns 404 for admin user specifying a non-number for the user id`() {
+        mvc
+            .get("/local-authority/$DEFAULT_LA_ID/edit-user/not-a-number")
             .andExpect {
                 status { isNotFound() }
             }

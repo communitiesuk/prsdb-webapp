@@ -24,7 +24,7 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneId
 
-class LandlordViewModelTest {
+class LandlordViewModelTests {
     @Test
     fun `Name matches the landlord name`() {
         // Arrange

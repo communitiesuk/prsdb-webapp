@@ -1,12 +1,14 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.validation.constraints.Min
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.util.UriComponentsBuilder
+import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
 import uk.gov.communities.prsdb.webapp.models.wrapperModels.SearchWrapperModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.security.Principal
@@ -21,36 +23,26 @@ class SearchRegisterController(
     fun searchForLandlords(
         model: Model,
         @RequestParam(required = false) query: String?,
-        @RequestParam(value = "page", required = false) page: Int = 1,
+        @RequestParam(value = "page", required = false) @Min(1) page: Int = 1,
         principal: Principal,
+        httpServletRequest: HttpServletRequest,
     ): String {
-        if (!query.isNullOrBlank()) {
-            if (page < 1) {
-                return "redirect:/search/landlord?query=$query"
-            }
+        var totalPages = 0
 
+        if (!query.isNullOrBlank()) {
             val pagedLandlordList =
                 landlordService.searchForLandlords(query, principal.name, currentPageNumber = page - 1)
 
-            if (pagedLandlordList.totalPages in 1..<page) {
+            if (pagedLandlordList.totalPages != 0 && pagedLandlordList.totalPages < page) {
                 return "redirect:/search/landlord?query=$query"
             }
 
-            val urlWithoutPage =
-                UriComponentsBuilder
-                    .newInstance()
-                    .path("/search/landlord")
-                    .queryParam("query", query)
-                    .build()
-                    .toUriString()
+            totalPages = pagedLandlordList.totalPages
 
-            model.addAttribute("unpagedUrl", urlWithoutPage)
             model.addAttribute("searchResults", pagedLandlordList.content)
-            model.addAttribute("totalPages", pagedLandlordList.totalPages)
-            model.addAttribute("currentPage", page)
-        } else {
-            model.addAttribute("totalPages", 0)
         }
+
+        model.addAttribute("paginationViewModel", PaginationViewModel(page, totalPages, httpServletRequest))
 
         model.addAttribute("searchWrapperModel", SearchWrapperModel())
         model.addAttribute("baseLandlordDetailsURL", "/landlord-details")

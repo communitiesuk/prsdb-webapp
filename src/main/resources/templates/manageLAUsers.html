@@ -40,9 +40,7 @@
                 </tr>
                 </tbody>
             </table>
-            <th:block th:if="${totalPages > 1}">
-                <nav th:replace="~{fragments/pagination/pagination :: pagination(${totalPages}, ${currentPage},null)}"></nav>
-            </th:block>
+            <nav th:replace="~{fragments/pagination/pagination :: pagination(${paginationViewModel})}"></nav>
             <div class="govuk-button-group" id="action-buttons">
                 <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/local-authority/{id}/invite-new-user(id=${localAuthority.id})}, #{manageLAUsers.inviteAnotherUserButtonText})}">
                     manageLAUsers.inviteAnotherUserButtonText
