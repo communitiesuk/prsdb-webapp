@@ -28,6 +28,15 @@ class SearchRegisterTests : IntegrationTest() {
     }
 
     @Test
+    fun `results table does not show when empty search query requested`() {
+        val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
+        searchLandlordRegisterPage.searchBar.search("")
+
+        val exception = assertThrows<AssertionFailedError> { searchLandlordRegisterPage.getResultTable() }
+        assertContains(exception.message!!, "Expected 1 instance of Locator@.govuk-table, found 0")
+    }
+
+    @Test
     fun `results table shows after search has been requested`() {
         val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
         searchLandlordRegisterPage.searchBar.search("L-CKSQ-3SX9")
