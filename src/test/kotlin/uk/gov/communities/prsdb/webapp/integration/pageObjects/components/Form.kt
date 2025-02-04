@@ -21,7 +21,7 @@ class Form(
 
     fun getTextArea() = getChildComponent("textarea")
 
-    fun getCheckboxes(index: Int = 0) = Checkboxes(page, index)
+    fun getCheckboxes(label: String? = null) = Checkboxes(page, label)
 
     fun getSummaryList() = SummaryList(page)
 

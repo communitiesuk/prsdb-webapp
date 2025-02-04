@@ -26,7 +26,7 @@ class FilterPanel(
 
     fun clickApplyFiltersButton() = Form(page, parentLocator = locator).submit()
 
-    fun getFilterCheckboxes(index: Int) = Form(page, parentLocator = locator).getCheckboxes(index)
+    fun getFilterCheckboxes(label: String? = null) = Form(page, parentLocator = locator).getCheckboxes(label)
 
     fun clickRemoveFilterTag(filterOption: String) {
         getChildComponent(".moj-filter__tag", Locator.LocatorOptions().setHasText(filterOption)).click()

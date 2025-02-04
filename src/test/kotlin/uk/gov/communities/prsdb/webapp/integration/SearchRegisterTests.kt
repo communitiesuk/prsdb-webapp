@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.ADDRESS_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.CONTACT_INFO_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.LANDLORD_COL_INDEX
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.LA_FILTER_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.LISTED_PROPERTY_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import kotlin.test.assertContains
@@ -142,7 +141,7 @@ class SearchRegisterTests : IntegrationTest() {
         assertTrue(filter.getPanel().isVisible)
 
         // Apply LA filter
-        val laFilter = filter.getFilterCheckboxes(LA_FILTER_INDEX)
+        val laFilter = filter.getFilterCheckboxes("Show landlords operating in my authority")
         laFilter.checkCheckbox("true")
         filter.clickApplyFiltersButton()
 
