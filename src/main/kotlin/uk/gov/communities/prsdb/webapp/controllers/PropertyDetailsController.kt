@@ -59,6 +59,9 @@ class PropertyDetailsController(
 
         model.addAttribute("propertyDetails", propertyDetails)
 
+        // TODO PRSD-647: Replace with link to dashboard
+        model.addAttribute("backUrl", "/")
+
         return "propertyDetailsView"
     }
 }
