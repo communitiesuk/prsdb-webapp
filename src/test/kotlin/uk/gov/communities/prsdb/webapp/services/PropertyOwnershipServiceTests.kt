@@ -86,6 +86,10 @@ class PropertyOwnershipServiceTests {
 
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+
+        // The createdDate passed into the .save function is not the same as the mocked return value as they are set at different times.
+        // Ignore the createdDate field and check that the other values match.
+        expectedPropertyOwnership.createdDate = propertyOwnershipCaptor.value.createdDate
         assertTrue(ReflectionEquals(expectedPropertyOwnership).matches(propertyOwnershipCaptor.value))
     }
 
@@ -130,6 +134,10 @@ class PropertyOwnershipServiceTests {
 
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+
+        // The createdDate passed into the .save function is not the same as the mocked return value as they are set at different times.
+        // Ignore the createdDate field and check that the other values match.
+        expectedPropertyOwnership.createdDate = propertyOwnershipCaptor.value.createdDate
         assertTrue(ReflectionEquals(expectedPropertyOwnership).matches(propertyOwnershipCaptor.value))
     }
 
