@@ -70,6 +70,7 @@ class TaskListTests {
         stepOneCompleted: Boolean,
         stepTwoCompleted: Boolean,
         stepThreeCompleted: Boolean,
+        stepFourCompleted: Boolean,
     ) {
         whenever(mockJourney.steps).thenReturn(
             setOf(
@@ -94,7 +95,7 @@ class TaskListTests {
                 Step(
                     TestStepId.StepFour,
                     mock(),
-                    isSatisfied = { _, _ -> false },
+                    isSatisfied = { _, _ -> stepFourCompleted },
                 ),
             ),
         )
@@ -117,8 +118,9 @@ class TaskListTests {
             // Arrange
             setUpStepsWithStatus(
                 stepOneCompleted = true,
-                stepTwoCompleted = true,
-                stepThreeCompleted = true,
+                stepTwoCompleted = false,
+                stepThreeCompleted = false,
+                stepFourCompleted = false,
             )
 
             val testTaskList =
@@ -133,7 +135,7 @@ class TaskListTests {
 
             // Assert
             assertIterableEquals(
-                listOf("taskList.status.completed", "taskList.status.completed", "taskList.status.notYetStarted"),
+                listOf("taskList.status.completed", "taskList.status.notYetStarted", "taskList.status.cannotStartYet"),
                 viewModel.map { it.status.textKey },
             )
         }
@@ -145,6 +147,7 @@ class TaskListTests {
                 stepOneCompleted = true,
                 stepTwoCompleted = true,
                 stepThreeCompleted = false,
+                stepFourCompleted = false,
             )
 
             val testTaskList =
@@ -160,6 +163,33 @@ class TaskListTests {
             // Assert
             assertIterableEquals(
                 listOf("taskList.status.completed", "taskList.status.inProgress", "taskList.status.cannotStartYet"),
+                viewModel.map { it.status.textKey },
+            )
+        }
+
+        @Test
+        fun `when a task with a null completion step is completed, it is not marked as `() {
+            // Arrange
+            setUpStepsWithStatus(
+                stepOneCompleted = true,
+                stepTwoCompleted = true,
+                stepThreeCompleted = true,
+                stepFourCompleted = true,
+            )
+
+            val testTaskList =
+                TestTaskList(
+                    mockJourney,
+                    mockJourneyDataService,
+                    validator,
+                )
+
+            // Act
+            val viewModel = testTaskList.getTaskListViewModels()
+
+            // Assert
+            assertIterableEquals(
+                listOf("taskList.status.completed", "taskList.status.completed", "taskList.status.notYetStarted"),
                 viewModel.map { it.status.textKey },
             )
         }
