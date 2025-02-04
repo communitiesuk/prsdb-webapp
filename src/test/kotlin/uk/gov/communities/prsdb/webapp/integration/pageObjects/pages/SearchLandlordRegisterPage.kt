@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.getChildComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.getComponent
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Filter
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FilterPanel
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Pagination
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SearchBar
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Table
@@ -14,7 +14,7 @@ class SearchLandlordRegisterPage(
 ) : BasePage(page, "/search/landlord") {
     val searchBar = SearchBar(page)
 
-    fun getFilter() = Filter(page)
+    fun getFilterPanel() = FilterPanel(page)
 
     fun getResultTable() = Table(page)
 

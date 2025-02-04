@@ -128,18 +128,18 @@ class SearchRegisterTests : IntegrationTest() {
         val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
         searchLandlordRegisterPage.searchBar.search("Alex")
 
-        val filter = searchLandlordRegisterPage.getFilter()
+        val filter = searchLandlordRegisterPage.getFilterPanel()
 
         // Toggle filter
         filter.clickCloseFilterPanel()
-        val exception = assertThrows<AssertionFailedError> { filter.getFilterPanel() }
+        val exception = assertThrows<AssertionFailedError> { filter.getPanel() }
         assertContains(
             exception.message!!,
             "Expected 1 instance of Locator@.moj-filter-layout >> .moj-filter >> nth=0, found 0",
         )
 
         filter.clickShowFilterPanel()
-        assertTrue(filter.getFilterPanel().isVisible)
+        assertTrue(filter.getPanel().isVisible)
 
         // Apply LA filter
         val laFilter = filter.getFilterCheckboxes(LA_FILTER_INDEX)

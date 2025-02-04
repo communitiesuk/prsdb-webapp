@@ -3,11 +3,11 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.components
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 
-class Filter(
+class FilterPanel(
     private val page: Page,
     locator: Locator = page.locator(".moj-filter-layout"),
 ) : BaseComponent(locator) {
-    fun getFilterPanel() = getChildComponent(".moj-filter")
+    fun getPanel() = getChildComponent(".moj-filter")
 
     fun clickCloseFilterPanel() {
         getButton(page, "Close filters panel").click()
