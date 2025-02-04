@@ -63,6 +63,9 @@ class PropertyOwnershipService(
         propertyOwnershipRepository
             .findByRegistrationNumber_Number(registrationNumber)
 
+    fun retrievePropertyOwnershipById(propertyOwnershipId: Long): PropertyOwnership? =
+        propertyOwnershipRepository.getReferenceById(propertyOwnershipId)
+
     private fun retrieveAllRegisteredPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
         propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
             baseUserId,

@@ -4,7 +4,13 @@
 <main class="govuk-main-wrapper" id="main-content">
   <div id="page-contents">
     <h2 class="govuk-heading-m" th:text="#{propertyDetails.heading}">propertyDetails.heading</h2>
-
+    <div th:replace="~{fragments/buttons/pageHeaderActions :: pageHeaderActions(${propertyDetails.address}, ~{:: #delete-record-button})}">
+      <th:block id="delete-record-button">
+        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink('delete-record', #{propertyDetails.deleteRecordButton.text})}"></a>
+      </th:block>
+    </div>
+    <div th:replace="~{fragments/keyDetailsList :: keyDetailsList(${propertyDetails.keyDetails})}">
+    </div>
 
     <div th:replace="~{fragments/tabs/tabs :: tabs(~{:: #tabs-content})}" >
       <th:block id="tabs-content">
@@ -19,6 +25,9 @@
 
         <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('property-details', ~{:: #property-details-panel-content})}">
           <th:block id="property-details-panel-content">
+            <h2 class="govuk-heading-m" th:text="#{propertyDetails.heading}">propertyDetails.heading</h2>
+            <p class="govuk-hint" th:text="#{propertyDetails.description}">propertyDetails.description</p>
+            <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.propertyRecord})}" ></dl>
           </th:block>
         </div>
 
