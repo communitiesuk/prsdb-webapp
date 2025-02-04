@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.helpers.URIQueryBuilder
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.LandlordSearchRequestModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.LandlordSearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.searchModels.LandlordSearchViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.searchModels.LandlordFilterPanelViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.security.Principal
 
@@ -60,7 +60,7 @@ class SearchRegisterController(
         model.addAttribute("paginationViewModel", PaginationViewModel(page, totalPages, httpServletRequest))
 
         model.addAttribute("searchRequest", searchRequest)
-        model.addAttribute("searchViewModel", LandlordSearchViewModel(searchRequest, httpServletRequest))
+        model.addAttribute("filterPanelViewModel", LandlordFilterPanelViewModel(searchRequest, httpServletRequest))
 
         model.addAttribute("baseLandlordDetailsURL", "/landlord-details")
         // TODO PRSD-659: add LA property search base URL to model

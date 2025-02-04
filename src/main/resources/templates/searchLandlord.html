@@ -17,7 +17,7 @@
 
         <th:block th:if="${searchResults != null}">
             <div id="filtered-content"
-                 th:replace="~{fragments/filterPanel :: filterPanel(${searchRequest}, ${searchViewModel}, ~{::#filtered-content/content()})}">
+                 th:replace="~{fragments/filterPanel :: filterPanel(${searchRequest}, ${filterPanelViewModel}, ~{::#filtered-content/content()})}">
 
                 <nav th:replace="~{fragments/pagination/pagination :: pagination(${paginationViewModel})}"></nav>
 

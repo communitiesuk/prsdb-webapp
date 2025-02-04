@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.SearchR
 import uk.gov.communities.prsdb.webapp.models.viewModels.CheckboxViewModel
 import kotlin.reflect.full.memberProperties
 
-abstract class SearchViewModel(
+abstract class FilterPanelViewModel(
     val filters: List<FilterViewModel>,
     searchRequestModel: SearchRequestModel,
     httpServletRequest: HttpServletRequest,

@@ -4,10 +4,10 @@ import jakarta.servlet.http.HttpServletRequest
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.LandlordSearchRequestModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.CheckboxViewModel
 
-class LandlordSearchViewModel(
+class LandlordFilterPanelViewModel(
     searchRequestModel: LandlordSearchRequestModel,
     httpServletRequest: HttpServletRequest,
-) : SearchViewModel(
+) : FilterPanelViewModel(
         filters =
             listOf(
                 FilterViewModel(
