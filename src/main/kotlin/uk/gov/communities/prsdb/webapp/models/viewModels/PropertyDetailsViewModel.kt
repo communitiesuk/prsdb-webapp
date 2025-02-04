@@ -121,8 +121,9 @@ class PropertyDetailsViewModel(
             )
         }
 
-    private fun getLicensingDetails(propertyOwnership: PropertyOwnership): SummaryListRowViewModel =
-        if (propertyOwnership.license == null) {
+    private fun getLicensingDetails(propertyOwnership: PropertyOwnership): SummaryListRowViewModel {
+        val license = propertyOwnership.license
+        return if (license == null || license.licenseType == LicensingType.NO_LICENSING) {
             SummaryListRowViewModel(
                 "propertyDetails.propertyRecord.licensingType",
                 MessageKeyConverter.convert(LicensingType.NO_LICENSING),
@@ -133,13 +134,14 @@ class PropertyDetailsViewModel(
             SummaryListRowViewModel(
                 "propertyDetails.propertyRecord.licensingType",
                 listOf(
-                    MessageKeyConverter.convert(propertyOwnership.license!!.licenseType),
-                    propertyOwnership.license!!.licenseNumber,
+                    MessageKeyConverter.convert(license.licenseType),
+                    license.licenseNumber,
                 ),
                 // TODO PRSD-798: Add update link
                 addChangeLink("#"),
             )
         }
+    }
 
     private fun getAddressAndUprn(
         propertyOwnership: PropertyOwnership,
@@ -147,7 +149,7 @@ class PropertyDetailsViewModel(
     ): List<SummaryListRowViewModel> {
         if (propertyOwnership.property.address.uprn != null) {
             return listOf(
-                getAddress(propertyOwnership),
+                getAddress(),
                 SummaryListRowViewModel(
                     "propertyDetails.propertyRecord.uprn",
                     propertyOwnership.property.address.uprn
@@ -156,10 +158,10 @@ class PropertyDetailsViewModel(
                 ),
             )
         } else if (hideNullUprn) {
-            return listOf(getAddress(propertyOwnership))
+            return listOf(getAddress())
         } else {
             return listOf(
-                getAddress(propertyOwnership),
+                getAddress(),
                 SummaryListRowViewModel(
                     "propertyDetails.propertyRecord.uprn",
                     "propertyDetails.propertyRecord.uprn.unavailable",
@@ -169,7 +171,7 @@ class PropertyDetailsViewModel(
         }
     }
 
-    private fun getAddress(propertyOwnership: PropertyOwnership) =
+    private fun getAddress() =
         SummaryListRowViewModel(
             "propertyDetails.propertyRecord.address",
             address,
