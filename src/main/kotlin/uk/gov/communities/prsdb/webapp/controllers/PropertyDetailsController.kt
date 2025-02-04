@@ -29,7 +29,13 @@ class PropertyDetailsController(
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Property ownership $propertyOwnershipId is inactive")
         }
 
-        val propertyDetails = PropertyDetailsViewModel(propertyOwnership)
+        val propertyDetails =
+            PropertyDetailsViewModel(
+                propertyOwnership = propertyOwnership,
+                withChangeLinks = true,
+                hideNullUprn = true,
+                landlordDetailsUrl = "/landlord-details",
+            )
 
         model.addAttribute("propertyDetails", propertyDetails)
         model.addAttribute("deleteRecordLink", "delete-record")
@@ -55,6 +61,7 @@ class PropertyDetailsController(
                 propertyOwnership = propertyOwnership,
                 withChangeLinks = false,
                 hideNullUprn = false,
+                landlordDetailsUrl = "/landlord-details/${propertyOwnership.primaryLandlord.id}",
             )
 
         model.addAttribute("propertyDetails", propertyDetails)

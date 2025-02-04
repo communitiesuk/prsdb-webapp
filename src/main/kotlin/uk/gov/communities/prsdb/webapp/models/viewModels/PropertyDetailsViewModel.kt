@@ -12,6 +12,7 @@ class PropertyDetailsViewModel(
     private val propertyOwnership: PropertyOwnership,
     private val withChangeLinks: Boolean = true,
     private val hideNullUprn: Boolean = true,
+    private val landlordDetailsUrl: String = "/landlord-details",
 ) {
     val address: String = propertyOwnership.property.address.singleLineAddress
 
@@ -34,7 +35,7 @@ class PropertyDetailsViewModel(
             SummaryListRowViewModel(
                 "propertyDetails.keyDetails.registeredLandlord",
                 propertyOwnership.primaryLandlord.name,
-                "/landlord-details",
+                landlordDetailsUrl,
             ),
             SummaryListRowViewModel(
                 "propertyDetails.keyDetails.isTenanted",
