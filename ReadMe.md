@@ -86,11 +86,10 @@ populate the database with seed data.
 
 ### Updating Local Authority Data
 
-The project uses a migration (`V1_10_0__populate_la_table.sql`) to populate the `local_authority` table with data from
-`src/main/resources/db/migrations/data/local_authorities/local_authorities.csv`. If the CSV file is updated, create a
-copy of
-it and call it `local_authorities_V<version number>.csv`, where `version number` is one more than the latest version in
-`src/main/resources/db/migrations/data/local_authorities`.
+The project uses a repeatable migration (`R__populate_la_table.sql`) to populate the `local_authority` table with data 
+from `src/main/resources/db/migrations/data/local_authorities/local_authorities_V<version number>.csv`. To update this 
+data, create a new `local_authorities_V<version number>.csv` file (where `version number` is one more than the latest 
+version) and update `R__populate_la_table.sql` to use it.
 
 ### Mock One Login Oauth2
 
