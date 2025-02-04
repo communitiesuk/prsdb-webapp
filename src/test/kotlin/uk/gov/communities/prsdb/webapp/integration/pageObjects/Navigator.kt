@@ -56,6 +56,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalAuthorityFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import java.time.LocalDate
@@ -264,8 +265,14 @@ class Navigator(
         return createValidPage(page, RegisterPropertyStartPage::class)
     }
 
+    fun goToPropertyRegistrationTaskList(): TaskListPagePropertyRegistration {
+        navigate("register-property/task-list")
+        return createValidPage(page, TaskListPagePropertyRegistration::class)
+    }
+
     fun goToPropertyRegistrationLookupAddressPage(): LookupAddressFormPagePropertyRegistration {
-        navigate("register-property/lookup-address")
+        val taskListPage = goToPropertyRegistrationTaskList()
+        taskListPage.clickRegisterTaskWithName("Add the property address")
         return createValidPage(page, LookupAddressFormPagePropertyRegistration::class)
     }
 
