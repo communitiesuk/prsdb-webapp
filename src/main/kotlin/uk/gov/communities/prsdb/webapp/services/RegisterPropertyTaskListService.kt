@@ -5,20 +5,20 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.tasks.CheckAndSubmitPropertiesTaskList
-import uk.gov.communities.prsdb.webapp.forms.tasks.PropertyRegistrationTaskList
+import uk.gov.communities.prsdb.webapp.forms.tasks.RegisterPropertiesTaskList
 import uk.gov.communities.prsdb.webapp.models.viewModels.RegisterPropertyTaskListViewModel
 
 @Service
 class RegisterPropertyTaskListService(
     private val journeyDataService: JourneyDataService,
-    private val propertyRegistrationTaskList: PropertyRegistrationTaskList,
+    private val registerPropertiesTaskList: RegisterPropertiesTaskList,
     private val checkAndSubmitPropertiesTaskList: CheckAndSubmitPropertiesTaskList,
 ) {
     fun getTaskListPageViewModel(principalName: String): RegisterPropertyTaskListViewModel {
         loadJourneyDataIntoSessionIfNotLoaded(principalName)
 
         return RegisterPropertyTaskListViewModel(
-            propertyRegistrationTaskList.getTaskListViewModels(),
+            registerPropertiesTaskList.getTaskListViewModels(),
             checkAndSubmitPropertiesTaskList.getTaskListViewModels(),
         )
     }

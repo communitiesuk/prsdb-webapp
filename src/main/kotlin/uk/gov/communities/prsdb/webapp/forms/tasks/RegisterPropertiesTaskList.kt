@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.TaskStatusViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 @Component
-class PropertyRegistrationTaskList(
+class RegisterPropertiesTaskList(
     propertyRegistrationJourney: PropertyRegistrationJourney,
     journeyDataService: JourneyDataService,
     validator: Validator,
