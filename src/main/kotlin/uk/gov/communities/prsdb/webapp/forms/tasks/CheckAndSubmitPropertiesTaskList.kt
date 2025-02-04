@@ -24,19 +24,12 @@ class CheckAndSubmitPropertiesTaskList(
                     null,
                 ),
             )
-    // TODO PRSD-589: Add another property
     // TODO PRSD-593: Pay for your properties
 
     override fun getTaskListViewModels() =
         super.getTaskListViewModels() +
-            listOf(
-                TaskListItemViewModel(
-                    "registerProperty.taskList.checkAndSubmit.addAnotherProperty",
-                    TaskStatusViewModel.fromStatus(TaskStatus.CANNOT_START_YET),
-                ),
-                TaskListItemViewModel(
-                    "registerProperty.taskList.checkAndSubmit.payForYourProperties",
-                    TaskStatusViewModel.fromStatus(TaskStatus.CANNOT_START_YET),
-                ),
+            TaskListItemViewModel(
+                "registerProperty.taskList.checkAndSubmit.payForYourProperties",
+                TaskStatusViewModel.fromStatus(TaskStatus.CANNOT_START_YET),
             )
 }
