@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.TaskListItemViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.TaskStatusViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 abstract class TaskList<T : StepId>(
@@ -30,15 +29,7 @@ abstract class TaskList<T : StepId>(
         task: Task<T>,
     ): TaskListItemViewModel {
         val status = getStatusForTask(journeyData, task)
-        return TaskListItemViewModel(
-            task.nameKey,
-            TaskStatusViewModel.fromStatus(status),
-            if (status == TaskStatus.CANNOT_START_YET) {
-                null
-            } else {
-                task.startId.urlPathSegment
-            },
-        )
+        return TaskListItemViewModel.fromTaskAndStatus(task, status)
     }
 
     private fun getStatusForTask(
@@ -77,7 +68,7 @@ abstract class TaskList<T : StepId>(
         return journey.isStepReachable(journeyData, currentStep)
     }
 
-    protected data class Task<T : StepId>(
+    data class Task<T : StepId>(
         val nameKey: String,
         val startId: T,
         val completionId: T?,
