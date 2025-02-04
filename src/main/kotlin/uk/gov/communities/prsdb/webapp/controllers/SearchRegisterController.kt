@@ -30,17 +30,17 @@ class SearchRegisterController(
         searchRequest: LandlordSearchRequestModel,
         @RequestParam(value = "page", required = false) @Min(1) page: Int = 1,
     ): String {
-        if (searchRequest.query?.isBlank() == true) {
+        if (searchRequest.searchTerm?.isBlank() == true) {
             return "redirect:landlord"
         }
 
         var searchResults: List<LandlordSearchResultDataModel>? = null
         var totalPages = 0
 
-        if (searchRequest.query != null) {
+        if (searchRequest.searchTerm != null) {
             val pagedLandlordList =
                 landlordService.searchForLandlords(
-                    searchRequest.query!!,
+                    searchRequest.searchTerm!!,
                     principal.name,
                     searchRequest.useLAFilter,
                     currentPageNumber = page - 1,

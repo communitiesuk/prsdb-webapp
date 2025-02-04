@@ -55,8 +55,8 @@
                             filter.applyButton
                         </button>
 
-                        <input type="hidden" th:field="*{query}" th:value="${searchRequest.query}">
-                        
+                        <input type="hidden" th:field="*{searchTerm}" th:value="${searchRequest.searchTerm}">
+
                         <div class="govuk-form-group" th:each="filter:${searchViewModel.filters}">
                             <fieldset class="govuk-fieldset">
                                 <legend class="govuk-fieldset__legend govuk-fieldset__legend--m"

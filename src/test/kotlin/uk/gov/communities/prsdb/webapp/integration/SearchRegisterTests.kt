@@ -28,7 +28,7 @@ class SearchRegisterTests : IntegrationTest() {
     }
 
     @Test
-    fun `results table does not show when empty search query requested`() {
+    fun `results table does not show when blank search term requested`() {
         val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
         searchLandlordRegisterPage.searchBar.search("")
 
@@ -80,7 +80,7 @@ class SearchRegisterTests : IntegrationTest() {
     @Test
     fun `error shows if search has no results`() {
         val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
-        searchLandlordRegisterPage.searchBar.search("non-matching query")
+        searchLandlordRegisterPage.searchBar.search("non-matching searchTerm")
 
         assertContains(searchLandlordRegisterPage.getErrorMessageText(), "No landlord record found")
     }
@@ -88,7 +88,7 @@ class SearchRegisterTests : IntegrationTest() {
     @Test
     fun `property search link shows if search has no results`(page: Page) {
         val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
-        searchLandlordRegisterPage.searchBar.search("non-matching query")
+        searchLandlordRegisterPage.searchBar.search("non-matching searchTerm")
         searchLandlordRegisterPage.getPropertySearchLink().click()
 
         // TODO PRSD-659: Replace with landlord details page assertion

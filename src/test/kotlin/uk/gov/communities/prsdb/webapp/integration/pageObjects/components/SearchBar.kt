@@ -10,8 +10,8 @@ class SearchBar(
     private val form = Form(page, parentLocator = locator)
     private val searchInput = form.getTextInput()
 
-    fun search(query: String) {
-        searchInput.fill(query)
+    fun search(searchTerm: String) {
+        searchInput.fill(searchTerm)
         form.submit()
     }
 }
