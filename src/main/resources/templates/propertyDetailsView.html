@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html>
-  <th:block id="main-content" th:replace="~{fragments/layout :: layout(#{propertyDetails.title}, ~{::#main-content/content()}, false)}">
+<html id="main-content" th:replace="~{fragments/layout :: layout(#{propertyDetails.title}, ~{::#main-content/content()}, false)}">
   <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
-    <main class="govuk-main-wrapper" id="main-content">
+    <main class="govuk-main-wrapper">
       <div id="page-contents">
         <h2 class="govuk-heading-m" th:text="#{propertyDetails.heading}">propertyDetails.heading</h2>
         <div th:replace="~{fragments/buttons/pageHeaderActions :: pageHeaderActions(${propertyDetails.address}, ~{:: #delete-record-button})}">
@@ -41,5 +40,4 @@
 
       </div>
     </main>
-  </th:block>
 </html>

@@ -75,7 +75,7 @@ class PropertyDetailsControllerTests(
     inner class GetPropertyDetailsLaViewTests {
         @Test
         fun `getPropertyDetailsLaView returns a redirect for an unauthenticated user`() {
-            mvc.get("/view-property-details/1").andExpect {
+            mvc.get("/local-authority/property-details/1").andExpect {
                 status { is3xxRedirection() }
             }
         }
@@ -83,7 +83,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser
         fun `getPropertyDetailsLaView returns 403 for an unauthorized user`() {
-            mvc.get("/view-property-details/1").andExpect {
+            mvc.get("/local-authority/property-details/1").andExpect {
                 status { status { isForbidden() } }
             }
         }
@@ -91,7 +91,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LA_USER"])
         fun `getPropertyDetails returns 404 if the requested property ownership is not found`() {
-            mvc.get("/view-property-details/1").andExpect {
+            mvc.get("/local-authority/property-details/1").andExpect {
                 status { status { isNotFound() } }
             }
         }
@@ -101,7 +101,7 @@ class PropertyDetailsControllerTests(
         fun `getPropertyDetails returns error if the requested property ownership is inactive`() {
             whenever(propertyOwnershipService.retrievePropertyOwnershipById(1))
                 .thenReturn(PropertyOwnership())
-            mvc.get("/view-property-details/1").andExpect {
+            mvc.get("/local-authority/property-details/1").andExpect {
                 status { status { isBadRequest() } }
             }
         }
@@ -116,7 +116,7 @@ class PropertyDetailsControllerTests(
                     propertyOwnership,
                 )
 
-            mvc.get("/view-property-details/1").andExpect {
+            mvc.get("/local-authority/property-details/1").andExpect {
                 status { status { isOk() } }
             }
         }
@@ -131,7 +131,7 @@ class PropertyDetailsControllerTests(
                     propertyOwnership,
                 )
 
-            mvc.get("/view-property-details/1").andExpect {
+            mvc.get("/local-authority/property-details/1").andExpect {
                 status { status { isOk() } }
             }
         }

@@ -39,12 +39,14 @@ class PropertyDetailsController(
 
         model.addAttribute("propertyDetails", propertyDetails)
         model.addAttribute("deleteRecordLink", "delete-record")
+        // TODO PRSD-647: Replace with link to dashboard
+        model.addAttribute("backUrl", "/")
 
         return "propertyDetailsView"
     }
 
     @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
-    @GetMapping("/view-property-details/{propertyOwnershipId}")
+    @GetMapping("local-authority/property-details/{propertyOwnershipId}")
     fun getPropertyDetailsLaView(
         @PathVariable propertyOwnershipId: Long,
         model: Model,
