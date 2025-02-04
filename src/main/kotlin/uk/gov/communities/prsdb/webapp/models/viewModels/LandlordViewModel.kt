@@ -4,7 +4,6 @@ import kotlinx.datetime.toKotlinInstant
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.UPDATE_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.ViewModelOptionsHelper.Companion.toggleChangeLink
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class LandlordViewModel(
@@ -20,12 +19,12 @@ class LandlordViewModel(
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.optionalChoices.legalChanges",
                     "TODO PRSD-746",
-                    toggleChangeLink(null, withChangeLinks),
+                    toggleChangeLink(null),
                 ),
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.optionalChoices.research",
                     "TODO PRSD-746",
-                    toggleChangeLink(null, withChangeLinks),
+                    toggleChangeLink(null),
                 ),
             )
         }
@@ -51,27 +50,27 @@ class LandlordViewModel(
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.name",
                     landlord.name,
-                    toggleChangeLink("$UPDATE_ROUTE/name", withChangeLinks),
+                    toggleChangeLink("$UPDATE_ROUTE/name"),
                 ),
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.dateOfBirth",
                     landlord.dateOfBirth,
-                    toggleChangeLink("$UPDATE_ROUTE/date-of-birth", withChangeLinks),
+                    toggleChangeLink("$UPDATE_ROUTE/date-of-birth"),
                 ),
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.emailAddress",
                     landlord.email,
-                    toggleChangeLink("$UPDATE_ROUTE/email", withChangeLinks),
+                    toggleChangeLink("$UPDATE_ROUTE/email"),
                 ),
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.telephoneNumber",
                     landlord.phoneNumber,
-                    toggleChangeLink("$UPDATE_ROUTE/telephone", withChangeLinks),
+                    toggleChangeLink("$UPDATE_ROUTE/telephone"),
                 ),
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.ukResident",
                     isUkResident,
-                    toggleChangeLink("$UPDATE_ROUTE/country-of-residence", withChangeLinks),
+                    toggleChangeLink("$UPDATE_ROUTE/country-of-residence"),
                 ),
             )
 
@@ -91,17 +90,17 @@ class LandlordViewModel(
             SummaryListRowViewModel(
                 "landlordDetails.personalDetails.country",
                 "TODO: PRSD-742",
-                toggleChangeLink(null, withChangeLinks),
+                toggleChangeLink(null),
             ),
             SummaryListRowViewModel(
                 "landlordDetails.personalDetails.nonUkAddress",
                 landlord.internationalAddress,
-                toggleChangeLink("$UPDATE_ROUTE/address", withChangeLinks),
+                toggleChangeLink("$UPDATE_ROUTE/address"),
             ),
             SummaryListRowViewModel(
                 "landlordDetails.personalDetails.ukAddress",
                 landlord.address.singleLineAddress,
-                toggleChangeLink("$UPDATE_ROUTE/contact-address", withChangeLinks),
+                toggleChangeLink("$UPDATE_ROUTE/contact-address"),
             ),
         )
 
@@ -110,7 +109,14 @@ class LandlordViewModel(
             SummaryListRowViewModel(
                 "landlordDetails.personalDetails.contactAddress",
                 landlord.address.singleLineAddress,
-                toggleChangeLink("$UPDATE_ROUTE/address", withChangeLinks),
+                toggleChangeLink("$UPDATE_ROUTE/address"),
             ),
         )
+
+    private fun toggleChangeLink(link: String?): String? =
+        if (withChangeLinks) {
+            link
+        } else {
+            null
+        }
 }

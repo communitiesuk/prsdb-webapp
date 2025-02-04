@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.ViewModelOptionsHelper.Companion.toggleChangeLink
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
@@ -74,7 +73,7 @@ class PropertyDetailsViewModel(
                     "propertyDetails.propertyRecord.ownershipType",
                     MessageKeyConverter.convert(propertyOwnership.ownershipType),
                     // TODO PRSD-689: Add update link
-                    toggleChangeLink("#", withChangeLinks),
+                    addChangeLink("#"),
                 ),
                 getLicensingDetails(propertyOwnership),
             ) +
@@ -84,7 +83,7 @@ class PropertyDetailsViewModel(
                     "propertyDetails.propertyRecord.landlordType",
                     landlordTypeKey,
                     // TODO PRSD-xxx Add update link
-                    toggleChangeLink("#", withChangeLinks),
+                    addChangeLink("#"),
                 ),
             )
 
@@ -95,19 +94,19 @@ class PropertyDetailsViewModel(
                     "propertyDetails.propertyRecord.occupied",
                     isTenantedKey,
                     // TODO PRSD-799: Add update link
-                    toggleChangeLink("#", withChangeLinks),
+                    addChangeLink("#"),
                 ),
                 SummaryListRowViewModel(
                     "propertyDetails.propertyRecord.numberOfHouseholds",
                     propertyOwnership.currentNumHouseholds,
                     // TODO PRSD-800: Add update link
-                    toggleChangeLink("#", withChangeLinks),
+                    addChangeLink("#"),
                 ),
                 SummaryListRowViewModel(
                     "propertyDetails.propertyRecord.numberOfPeople",
                     propertyOwnership.currentNumTenants,
                     // TODO PRSD-801: Add update link
-                    toggleChangeLink("#", withChangeLinks),
+                    addChangeLink("#"),
                 ),
             )
         } else {
@@ -116,7 +115,7 @@ class PropertyDetailsViewModel(
                     "propertyDetails.propertyRecord.occupied",
                     isTenantedKey,
                     // TODO PRSD-799: Add update link
-                    toggleChangeLink("#", withChangeLinks),
+                    addChangeLink("#"),
                 ),
             )
         }
@@ -127,7 +126,7 @@ class PropertyDetailsViewModel(
                 "propertyDetails.propertyRecord.licensingType",
                 MessageKeyConverter.convert(LicensingType.NO_LICENSING),
                 // TODO PRSD-798: Add update link
-                toggleChangeLink("#", withChangeLinks),
+                addChangeLink("#"),
             )
         } else {
             SummaryListRowViewModel(
@@ -137,7 +136,7 @@ class PropertyDetailsViewModel(
                     propertyOwnership.license!!.licenseNumber,
                 ),
                 // TODO PRSD-798: Add update link
-                toggleChangeLink("#", withChangeLinks),
+                addChangeLink("#"),
             )
         }
 
@@ -175,4 +174,11 @@ class PropertyDetailsViewModel(
             address,
             null,
         )
+
+    private fun addChangeLink(link: String?): String? =
+        if (withChangeLinks) {
+            link
+        } else {
+            null
+        }
 }
