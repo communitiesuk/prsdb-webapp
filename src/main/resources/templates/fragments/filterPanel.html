@@ -64,9 +64,10 @@
                                 </legend>
                                 <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
                                     <div class="govuk-checkboxes__item" th:each="option: ${filter.options}"
-                                         th:with="checkboxInputID=|${filter.category}-${option.valueStr}|">
+                                         th:with="checkboxInputID=|${filter.searchRequestProperty}-${option.valueStr}|">
                                         <input class="govuk-checkboxes__input" type="checkbox"
-                                               th:field="*{__${filter.category}__}" th:value="${option.value}"
+                                               th:field="*{__${filter.searchRequestProperty}__}"
+                                               th:value="${option.value}"
                                                th:id="${checkboxInputID}">
                                         <label class="govuk-label govuk-checkboxes__label"
                                                th:for="${checkboxInputID}"

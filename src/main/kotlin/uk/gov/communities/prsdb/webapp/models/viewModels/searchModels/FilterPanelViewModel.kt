@@ -14,7 +14,7 @@ abstract class FilterPanelViewModel(
     val clearLink =
         URIQueryBuilder
             .fromHTTPServletRequest(httpServletRequest)
-            .removeParams(filters.map { it.category })
+            .removeParams(filters.map { it.searchRequestProperty })
             .build()
             .toUriString()
 
@@ -32,7 +32,7 @@ abstract class FilterPanelViewModel(
 
 class FilterViewModel(
     val headingMsgKey: String,
-    val category: String,
+    val searchRequestProperty: String,
     val options: List<CheckboxViewModel<Any>>,
 ) {
     lateinit var selectedOptions: List<SelectedFilterOptionViewModel>
@@ -44,7 +44,7 @@ class FilterViewModel(
         val selectedOptionRequest =
             searchRequestModel::class
                 .memberProperties
-                .single { it.name == category }
+                .single { it.name == searchRequestProperty }
                 .getter
                 .call(searchRequestModel)
 
@@ -56,12 +56,12 @@ class FilterViewModel(
                     } else {
                         selectedOptionRequest?.equals(it.value) == true
                     }
-                }.map { SelectedFilterOptionViewModel(category, it, httpServletRequest) }
+                }.map { SelectedFilterOptionViewModel(searchRequestProperty, it, httpServletRequest) }
     }
 }
 
 class SelectedFilterOptionViewModel(
-    category: String,
+    searchRequestProperty: String,
     selectedOption: CheckboxViewModel<Any>,
     httpServletRequest: HttpServletRequest,
 ) {
@@ -70,7 +70,7 @@ class SelectedFilterOptionViewModel(
     val removeLink =
         URIQueryBuilder
             .fromHTTPServletRequest(httpServletRequest)
-            .removeParamValue(category, selectedOption.value.toString())
+            .removeParamValue(searchRequestProperty, selectedOption.value.toString())
             .removeParam("page")
             .build()
             .toUriString()
