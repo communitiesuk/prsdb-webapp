@@ -1,8 +1,9 @@
-package uk.gov.communities.prsdb.webapp.models.dataModels
+package uk.gov.communities.prsdb.webapp.models.viewModels
 
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropertyCount
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
-data class LandlordSearchResultDataModel(
+data class LandlordSearchResultViewModel(
     val id: Long,
     val name: String,
     val registrationNumber: String,
@@ -13,7 +14,7 @@ data class LandlordSearchResultDataModel(
 ) {
     companion object {
         fun fromLandlordWithListedPropertyCount(landlordWithListedPropertyCount: LandlordWithListedPropertyCount) =
-            LandlordSearchResultDataModel(
+            LandlordSearchResultViewModel(
                 id = landlordWithListedPropertyCount.landlord.id,
                 name = landlordWithListedPropertyCount.landlord.name,
                 registrationNumber =

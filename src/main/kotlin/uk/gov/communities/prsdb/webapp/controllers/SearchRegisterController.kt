@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.helpers.URIQueryBuilder
-import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.LandlordSearchRequestModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.LandlordSearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchModels.LandlordSearchViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -34,7 +34,7 @@ class SearchRegisterController(
             return "redirect:landlord"
         }
 
-        var searchResults: List<LandlordSearchResultDataModel>? = null
+        var searchResults: List<LandlordSearchResultViewModel>? = null
         var totalPages = 0
 
         if (searchRequest.searchTerm != null) {

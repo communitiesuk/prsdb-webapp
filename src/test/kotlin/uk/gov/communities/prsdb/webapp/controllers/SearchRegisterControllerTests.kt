@@ -10,7 +10,7 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE
-import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.LandlordSearchResultViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import kotlin.test.Test
 
@@ -55,7 +55,7 @@ class SearchRegisterControllerTests(
             .thenReturn(
                 PageImpl(
                     listOf(
-                        LandlordSearchResultDataModel(
+                        LandlordSearchResultViewModel(
                             123.toLong(),
                             "Test name",
                             "L-123ABC",
@@ -91,7 +91,7 @@ class SearchRegisterControllerTests(
         whenever(landlordService.searchForLandlords("PRSDB", "user", currentPageNumber = 2))
             .thenReturn(
                 PageImpl(
-                    emptyList<LandlordSearchResultDataModel>(),
+                    emptyList<LandlordSearchResultViewModel>(),
                     PageRequest.of(
                         2,
                         MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE,
