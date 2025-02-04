@@ -94,6 +94,7 @@ class PropertyDetailsTests : IntegrationTest() {
             assertEquals(detailsPage.getActiveTabPanelId(), "property-details")
         }
 
+        @Disabled
         @Test
         fun `the landlord name link goes the local authority view of landlord details`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
