@@ -12,7 +12,7 @@ class LandlordSearchViewModel(
             listOf(
                 FilterViewModel(
                     headingMsgKey = "landlordSearch.filter.la.heading",
-                    category = "useLAFilter",
+                    category = "restrictToLA",
                     options = listOf(CheckboxViewModel(value = true, labelMsgKey = "landlordSearch.filter.la.label")),
                 ),
             ),

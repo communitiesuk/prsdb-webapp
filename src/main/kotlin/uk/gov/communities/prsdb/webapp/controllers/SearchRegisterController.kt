@@ -42,7 +42,7 @@ class SearchRegisterController(
                 landlordService.searchForLandlords(
                     searchRequest.searchTerm!!,
                     principal.name,
-                    searchRequest.useLAFilter,
+                    searchRequest.restrictToLA,
                     currentPageNumber = page - 1,
                 )
 

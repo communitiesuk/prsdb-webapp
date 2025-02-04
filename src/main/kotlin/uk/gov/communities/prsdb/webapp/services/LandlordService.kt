@@ -67,7 +67,7 @@ class LandlordService(
     fun searchForLandlords(
         searchTerm: String,
         laBaseUserId: String,
-        useLAFilter: Boolean = false,
+        restrictToLA: Boolean = false,
         currentPageNumber: Int = 0,
         pageSize: Int = MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE,
     ): Page<LandlordSearchResultDataModel> {
@@ -76,9 +76,9 @@ class LandlordService(
 
         val landlordPage =
             if (lrn == null) {
-                landlordRepository.searchMatching(searchTerm, laBaseUserId, useLAFilter, pageRequest)
+                landlordRepository.searchMatching(searchTerm, laBaseUserId, restrictToLA, pageRequest)
             } else {
-                landlordRepository.searchMatchingLRN(lrn.number, laBaseUserId, useLAFilter, pageRequest)
+                landlordRepository.searchMatchingLRN(lrn.number, laBaseUserId, restrictToLA, pageRequest)
             }
 
         return PageImpl(
