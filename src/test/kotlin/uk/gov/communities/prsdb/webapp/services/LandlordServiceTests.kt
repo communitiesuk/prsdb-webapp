@@ -11,11 +11,9 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.whenever
-import org.mockito.quality.Strictness
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -35,7 +33,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.LandlordSearchResultVie
 import kotlin.test.assertNull
 
 @ExtendWith(MockitoExtension::class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class LandlordServiceTests {
     @Mock
     private lateinit var mockLandlordRepository: LandlordRepository
