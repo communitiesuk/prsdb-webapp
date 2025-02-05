@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<body th:replace="~{fragments/layout :: layout('Property Search', ~{::body/content()}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+
+    <section>
+
+        <th:block th:replace="~{fragments/searchBar :: searchBar(null,null, ${searchRequest})}">
+        </th:block>
+
+        <th:block th:if="${searchResults != null}">
+            <p th:each="result:${searchResults}" th:text="${result}"></p>
+        </th:block>
+
+    </section>
+
+</main>
+</body>
+</html>
