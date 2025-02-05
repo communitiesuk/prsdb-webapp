@@ -49,6 +49,23 @@ class PropertyDetailsTests : IntegrationTest() {
             assertPageIs(page, LandlordDetailsPage::class)
             Assertions.assertEquals("/landlord-details", URI(page.url()).path)
         }
+
+        @Test
+        fun `the back link returns to the dashboard`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            detailsPage.clickBackLink()
+
+            // TODO: PRSD-647 add link to the dashboard
+            Assertions.assertEquals("/property-details/1", URI(page.url()).path)
+        }
+
+        @Test
+        fun `the delete button redirects to the delete record page`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            detailsPage.deleteButton.click()
+
+            Assertions.assertEquals("/property-details/delete-record", URI(page.url()).path)
+        }
     }
 
     @Nested
@@ -86,6 +103,15 @@ class PropertyDetailsTests : IntegrationTest() {
 
             assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
             Assertions.assertEquals("/landlord-details/1", URI(page.url()).path)
+        }
+
+        @Test
+        fun `the back link returns to the dashboard`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
+            detailsPage.clickBackLink()
+
+            // TODO: PRSD-647 add link to the dashboard
+            Assertions.assertEquals("/local-authority/property-details/1", URI(page.url()).path)
         }
     }
 }

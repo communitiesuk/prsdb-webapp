@@ -23,4 +23,8 @@ abstract class PropertyDetailsBasePage(
     fun clickLandlordNameLink(landlordName: String) {
         getLink(page, landlordName).click()
     }
+
+    fun clickBackLink() {
+        getLink(page, "Back").click()
+    }
 }
