@@ -6,12 +6,12 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.opentest4j.AssertionFailedError
 import org.springframework.test.context.jdbc.Sql
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.ADDRESS_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.CONTACT_INFO_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.LANDLORD_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.LISTED_PROPERTY_COL_INDEX
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import kotlin.test.assertContains
 import kotlin.test.assertTrue
@@ -90,9 +90,7 @@ class SearchRegisterTests : IntegrationTest() {
         searchLandlordRegisterPage.searchBar.search("non-matching searchTerm")
         searchLandlordRegisterPage.getPropertySearchLink().click()
 
-        // TODO PRSD-659: Replace with landlord details page assertion
-        assertPageIs(page, ErrorPage::class)
-        assertContains(page.url(), "/search/property")
+        assertPageIs(page, SearchPropertyRegisterPage::class)
     }
 
     @Test
