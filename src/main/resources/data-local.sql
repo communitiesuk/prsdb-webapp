@@ -195,6 +195,7 @@ SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM pro
 
 INSERT INTO license (id, license_type, license_number)
 VALUES (1, 1, 'L12345678');
+SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
 
 INSERT INTO property_ownership (id, is_active, occupancy_type, landlord_type, ownership_type, current_num_households,
                                 current_num_tenants,
