@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLa
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.CheckAnswersPageLaUserRegistration
@@ -391,5 +392,10 @@ class Navigator(
         return createValidPage(page, LocalAuthorityViewLandlordDetailsPage::class)
     }
 
-    private fun navigate(path: String): Response? = page.navigate("http://localhost:$port/$path")
+    fun goToPropertyDetails(id: Long): PropertyDetailsPage {
+        navigate("property-details/$id")
+        return createValidPage(page, PropertyDetailsPage::class)
+    }
+
+    fun navigate(path: String): Response? = page.navigate("http://localhost:$port/$path")
 }
