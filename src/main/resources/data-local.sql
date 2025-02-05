@@ -202,6 +202,6 @@ VALUES (1, true, 0, 0, 1, 1, 2, 6, 1, 1, '01/15/25'),
        (4, true, 0, 0, 1, 1, 2, 36, 1, 4, '01/15/25'),
        (5, true, 0, 0, 1, 1, 2, 37, 1, 5, '01/15/25'),
        (6, false, 0, 0, 1, 1, 2, 38, 1, 6, '01/15/25'),
-       (7, true, 0, 0, 1, 1, 2, 39, 1, 7, '02/02/25');
+       (7, true, 0, 0, 1, 0, 0, 39, 1, 7, '02/02/25');
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
