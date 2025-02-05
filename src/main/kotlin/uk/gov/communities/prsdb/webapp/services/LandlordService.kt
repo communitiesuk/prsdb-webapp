@@ -13,8 +13,8 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPropertyCountRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.LandlordSearchResultViewModel
 import java.time.LocalDate
 
 @Service
@@ -66,25 +66,25 @@ class LandlordService(
 
     fun searchForLandlords(
         searchTerm: String,
-        laUserId: String,
-        useLAFilter: Boolean = false,
+        laBaseUserId: String,
+        restrictToLA: Boolean = false,
         currentPageNumber: Int = 0,
         pageSize: Int = MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE,
-    ): Page<LandlordSearchResultDataModel> {
+    ): Page<LandlordSearchResultViewModel> {
         val lrn = RegistrationNumberDataModel.parseTypeOrNull(searchTerm, RegistrationNumberType.LANDLORD)
         val pageRequest = PageRequest.of(currentPageNumber, pageSize)
 
         val landlordPage =
             if (lrn == null) {
-                landlordRepository.searchMatching(searchTerm, laUserId, useLAFilter, pageRequest)
+                landlordRepository.searchMatching(searchTerm, laBaseUserId, restrictToLA, pageRequest)
             } else {
-                landlordRepository.searchMatchingLRN(lrn.number, laUserId, useLAFilter, pageRequest)
+                landlordRepository.searchMatchingLRN(lrn.number, laBaseUserId, restrictToLA, pageRequest)
             }
 
         return PageImpl(
             landlordWithListedPropertyCountRepository
                 .findByLandlordIdIn(landlordPage.content.map { it.id })
-                .map { LandlordSearchResultDataModel.fromLandlordWithListedPropertyCount(it) },
+                .map { LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(it) },
             pageRequest,
             landlordPage.totalElements,
         )

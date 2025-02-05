@@ -1,0 +1,103 @@
+<div th:fragment="filterPanel(searchRequest, filterPanelViewModel, filteredContent)"
+     class="moj-filter-layout govuk-!-margin-bottom-6">
+
+    <div class="moj-filter-layout__filter" th:if="${searchRequest.showFilter}">
+        <div class="moj-filter">
+
+            <div class="moj-filter__header">
+                <div class="moj-filter__header-title">
+                    <h2 class="govuk-heading-m" th:text="#{filter.heading}">filter.heading</h2>
+                </div>
+            </div>
+
+            <div class="moj-filter__content">
+
+                <div class="moj-filter__selected">
+
+                    <div class="moj-filter__selected-heading">
+                        <div class="moj-filter__heading-title">
+                            <h2 class="govuk-heading-m" th:text="#{filter.selected.heading}">
+                                filter.selected.heading
+                            </h2>
+                        </div>
+                        <div class="moj-filter__heading-action">
+                            <p>
+                                <a class="govuk-link govuk-link--no-visited-state"
+                                   th:text="#{filter.selected.clearLink}"
+                                   th:href="${filterPanelViewModel.clearLink}">
+                                    filter.selected.clearLink
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+
+                    <th:block th:each="filter:${filterPanelViewModel.filters}">
+                        <h3 class="govuk-heading-s govuk-!-margin-bottom-0"
+                            th:text="#{${filter.headingMsgKey}}"></h3>
+                        <ul class="moj-filter-tags" th:each="selectedOption:${filter.selectedOptions}">
+                            <li>
+                                <a class="moj-filter__tag"
+                                   th:href="${selectedOption.removeLink}">
+                                    <span class="govuk-visually-hidden" th:text="#{filter.selected.remove}">filter.selected.remove</span>
+                                    <span th:remove="tag"
+                                          th:text="${#messages.msgOrNull(selectedOption.labelMsgOrVal) ?: selectedOption.labelMsgOrVal}">
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </th:block>
+                </div>
+
+                <div class="moj-filter__options">
+                    <form method="get" th:action="@{''}" th:object="${searchRequest}">
+
+                        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{filter.applyButton})}">
+                            filter.applyButton
+                        </button>
+
+                        <input type="hidden" th:field="*{searchTerm}" th:value="${searchRequest.searchTerm}">
+
+                        <div class="govuk-form-group" th:each="filter:${filterPanelViewModel.filters}">
+                            <fieldset class="govuk-fieldset">
+                                <legend class="govuk-fieldset__legend govuk-fieldset__legend--m"
+                                        th:text="#{${filter.headingMsgKey}}">
+                                </legend>
+                                <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
+                                    <div class="govuk-checkboxes__item" th:each="option: ${filter.options}"
+                                         th:with="checkboxInputID=|${filter.searchRequestProperty}-${option.valueStr}|">
+                                        <input class="govuk-checkboxes__input" type="checkbox"
+                                               th:field="*{__${filter.searchRequestProperty}__}"
+                                               th:value="${option.value}"
+                                               th:id="${checkboxInputID}">
+                                        <label class="govuk-label govuk-checkboxes__label"
+                                               th:for="${checkboxInputID}"
+                                               th:text="${option.labelMsgKey != null ? #messages.msg(option.labelMsgKey) : option.value}">
+                                        </label>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="moj-filter-layout__content">
+
+        <div class="moj-action-bar">
+            <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(
+                    ${filterPanelViewModel.showFilterLink},
+                    #{${searchRequest.showFilter ? 'filter.closeButton' : 'filter.showButton'}})}">
+                filter.showButton/filter.closeButton
+            </a>
+        </div>
+
+        <div th:replace="${filteredContent}"></div>
+
+    </div>
+
+</div>
