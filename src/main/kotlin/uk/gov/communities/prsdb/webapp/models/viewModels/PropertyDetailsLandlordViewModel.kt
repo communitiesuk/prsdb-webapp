@@ -7,21 +7,19 @@ class PropertyDetailsLandlordViewModel(
     private val landlord: Landlord,
     private val withChangeLinks: Boolean = true,
 ) {
-    val nameRow: SummaryListRowViewModel = formatNameRow()
     val landlordsDetails: List<SummaryListRowViewModel> = formatLandlordDetails()
-
-    private fun formatNameRow(): SummaryListRowViewModel =
-        SummaryListRowViewModel(
-            "landlordDetails.personalDetails.name",
-            landlord.name,
-            toggleChangeLink("$UPDATE_ROUTE/name"),
-        )
 
     private fun formatLandlordDetails(): List<SummaryListRowViewModel> {
         val isUkResident = landlord.internationalAddress == null
 
         val residencyIndependentPersonalDetails =
             listOf(
+                SummaryListRowViewModel(
+                    "landlordDetails.personalDetails.name",
+                    landlord.name,
+                    toggleChangeLink("$UPDATE_ROUTE/name"),
+                    "/landlord-details",
+                ),
                 // TODO PRSD-747 to pass Id verification status (see Figma for design)
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.dateOfBirth",

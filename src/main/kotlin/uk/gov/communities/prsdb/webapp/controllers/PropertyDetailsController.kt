@@ -72,8 +72,6 @@ class PropertyDetailsController(
         // TODO PRSD-647: Replace with link to dashboard
         model.addAttribute("backUrl", "/")
 
-        model.addAttribute("landlordName", landlordViewModel.nameRow)
-        model.addAttribute("landlordDetailsUrl", "/landlord-details")
         model.addAttribute("landlordDetails", landlordViewModel.landlordsDetails)
 
         return "propertyDetailsView"
