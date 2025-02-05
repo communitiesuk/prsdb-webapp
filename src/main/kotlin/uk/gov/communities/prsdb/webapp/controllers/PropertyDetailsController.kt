@@ -1,11 +1,13 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyDetailsLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyDetailsViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -39,6 +41,7 @@ class PropertyDetailsController(
         val landlordViewModel = PropertyDetailsLandlordViewModel(landlord = propertyOwnership.primaryLandlord)
 
         model.addAttribute("propertyDetails", propertyDetails)
+        model.addAttribute("landlordDetails", landlordViewModel.landlordsDetails)
         model.addAttribute("deleteRecordLink", "delete-record")
         // TODO PRSD-647: Replace with link to dashboard
         model.addAttribute("backUrl", "/")
@@ -71,8 +74,6 @@ class PropertyDetailsController(
 
         // TODO PRSD-647: Replace with link to dashboard
         model.addAttribute("backUrl", "/")
-
-        model.addAttribute("landlordDetails", landlordViewModel.landlordsDetails)
 
         return "propertyDetailsView"
     }
