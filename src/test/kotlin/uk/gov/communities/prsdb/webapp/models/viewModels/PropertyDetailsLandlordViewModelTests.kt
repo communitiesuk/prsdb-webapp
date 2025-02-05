@@ -25,15 +25,13 @@ class PropertyDetailsLandlordViewModelTests {
 
         val expectedLandlordDetailsHeaderList =
             listOf(
+                "landlordDetails.personalDetails.name",
                 "landlordDetails.personalDetails.dateOfBirth",
                 "landlordDetails.personalDetails.emailAddress",
                 "propertyDetails.landlordDetails.contactNumber",
                 "landlordDetails.personalDetails.contactAddress",
             )
 
-        val expectedNameHeader = "landlordDetails.personalDetails.name"
-
-        assertEquals(expectedNameHeader, viewModel.nameRow.fieldHeading)
         assertIterableEquals(expectedLandlordDetailsHeaderList, landlordDetailsHeaderList)
     }
 
@@ -53,6 +51,7 @@ class PropertyDetailsLandlordViewModelTests {
 
         val expectedLandlordDetailsHeaderList =
             listOf(
+                "landlordDetails.personalDetails.name",
                 "landlordDetails.personalDetails.dateOfBirth",
                 "landlordDetails.personalDetails.emailAddress",
                 "propertyDetails.landlordDetails.contactNumber",
@@ -60,14 +59,11 @@ class PropertyDetailsLandlordViewModelTests {
                 "landlordDetails.personalDetails.ukAddress",
             )
 
-        val expectedNameHeader = "landlordDetails.personalDetails.name"
-
-        assertEquals(expectedNameHeader, viewModel.nameRow.fieldHeading)
         assertIterableEquals(expectedLandlordDetailsHeaderList, landlordDetailsHeaderList)
     }
 
     @Test
-    fun `nameRow shows the correct name`() {
+    fun `Landlord details shows the correct name`() {
         // Arrange
         val landlordName = "a test name"
         val testLandlord = MockLandlordData.createLandlord(name = landlordName)
@@ -76,7 +72,10 @@ class PropertyDetailsLandlordViewModelTests {
         val viewModel = PropertyDetailsLandlordViewModel(testLandlord)
 
         // Assert
-        val name = viewModel.nameRow.getConvertedFieldValue()
+        val name =
+            viewModel.landlordsDetails
+                .single { it.fieldHeading == "landlordDetails.personalDetails.name" }
+                .getConvertedFieldValue()
 
         assertEquals(name, landlordName)
     }
@@ -197,7 +196,6 @@ class PropertyDetailsLandlordViewModelTests {
         val viewModel = PropertyDetailsLandlordViewModel(testLandlord)
 
         // Assert
-        assertNotNull(viewModel.nameRow.changeUrl)
         for (i in viewModel.landlordsDetails) {
             assertNotNull(i.changeUrl)
         }
@@ -213,7 +211,6 @@ class PropertyDetailsLandlordViewModelTests {
         val viewModel = PropertyDetailsLandlordViewModel(testLandlord, withChangeLinks = false)
 
         // Assert
-        assertNotNull(viewModel.nameRow.changeUrl)
         viewModel.landlordsDetails.forEach { personalDetails -> assertNull(personalDetails.changeUrl) }
         TODO("PRSD-724")
     }
