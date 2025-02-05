@@ -10,6 +10,9 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 
 class PropertyDetailsViewModel(
     private val propertyOwnership: PropertyOwnership,
+    private val withChangeLinks: Boolean = true,
+    private val hideNullUprn: Boolean = true,
+    private val landlordDetailsUrl: String = "/landlord-details",
 ) {
     val address: String = propertyOwnership.property.address.singleLineAddress
 
@@ -32,7 +35,7 @@ class PropertyDetailsViewModel(
             SummaryListRowViewModel(
                 "propertyDetails.keyDetails.registeredLandlord",
                 propertyOwnership.primaryLandlord.name,
-                "/landlord-details",
+                landlordDetailsUrl,
             ),
             SummaryListRowViewModel(
                 "propertyDetails.keyDetails.isTenanted",
@@ -42,107 +45,77 @@ class PropertyDetailsViewModel(
         )
 
     val propertyRecord: List<SummaryListRowViewModel> =
-        listOf(
-            SummaryListRowViewModel(
-                "propertyDetails.propertyRecord.registrationDate",
-                DateTimeHelper.getDateInUK(propertyOwnership.createdDate.toKotlinInstant()),
-                null,
-            ),
-            SummaryListRowViewModel(
-                "propertyDetails.propertyRecord.registrationNumber",
-                RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
-                null,
-            ),
-            SummaryListRowViewModel(
-                "propertyDetails.propertyRecord.address",
-                address,
-                null,
-            ),
-            SummaryListRowViewModel(
-                "propertyDetails.propertyRecord.uprn",
-                propertyOwnership.property.address.uprn
-                    .toString(),
-                null,
-            ),
-            SummaryListRowViewModel(
-                "propertyDetails.propertyRecord.localAuthority",
-                propertyOwnership.property.address.localAuthority
-                    ?.name,
-                null,
-            ),
-            SummaryListRowViewModel(
-                "propertyDetails.propertyRecord.propertyType",
-                MessageKeyConverter.convert(propertyOwnership.property.propertyBuildType),
-                null,
-            ),
-            SummaryListRowViewModel(
-                "propertyDetails.propertyRecord.ownershipType",
-                MessageKeyConverter.convert(propertyOwnership.ownershipType),
-                // TODO PRSD-689: Add update link
-                "#",
-            ),
-            getLicensingDetails(propertyOwnership),
-        ) +
-            getTenancyDetails(propertyOwnership) +
-            listOf(
-                SummaryListRowViewModel(
-                    "propertyDetails.propertyRecord.landlordType",
-                    landlordTypeKey,
-                    // TODO PRSD-xxx Add update link
-                    "#",
-                ),
-            )
-
-    private fun getTenancyDetails(propertyOwnership: PropertyOwnership): List<SummaryListRowViewModel> =
-        if (propertyOwnership.currentNumTenants > 0) {
-            listOf(
-                SummaryListRowViewModel(
-                    "propertyDetails.propertyRecord.occupied",
-                    isTenantedKey,
-                    // TODO PRSD-799: Add update link
-                    "#",
-                ),
-                SummaryListRowViewModel(
-                    "propertyDetails.propertyRecord.numberOfHouseholds",
-                    propertyOwnership.currentNumHouseholds,
+        mutableListOf<SummaryListRowViewModel>()
+            .apply {
+                addRow(
+                    "propertyDetails.propertyRecord.registrationDate",
+                    DateTimeHelper.getDateInUK(propertyOwnership.createdDate.toKotlinInstant()),
+                )
+                addRow(
+                    "propertyDetails.propertyRecord.registrationNumber",
+                    RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
+                )
+                addRow("propertyDetails.propertyRecord.address", address)
+                if (propertyOwnership.property.address.uprn != null) {
+                    addRow(
+                        "propertyDetails.propertyRecord.uprn",
+                        propertyOwnership.property.address.uprn
+                            .toString(),
+                    )
+                } else if (!hideNullUprn) {
+                    addRow("propertyDetails.propertyRecord.uprn", "propertyDetails.propertyRecord.uprn.unavailable")
+                }
+                addRow(
+                    "propertyDetails.propertyRecord.localAuthority",
+                    propertyOwnership.property.address.localAuthority
+                        ?.name,
+                )
+                addRow(
+                    "propertyDetails.propertyRecord.propertyType",
+                    MessageKeyConverter.convert(propertyOwnership.property.propertyBuildType),
+                )
+                addRow(
+                    "propertyDetails.propertyRecord.ownershipType",
+                    MessageKeyConverter.convert(propertyOwnership.ownershipType),
+                    // TODO PRSD-689: Add update link
+                    addChangeLink("#"),
+                )
+                addRow(
+                    "propertyDetails.propertyRecord.licensingType",
+                    propertyOwnership.license?.let {
+                        if (it.licenseType == LicensingType.NO_LICENSING) {
+                            MessageKeyConverter.convert(LicensingType.NO_LICENSING)
+                        } else {
+                            listOf(MessageKeyConverter.convert(it.licenseType), it.licenseNumber)
+                        }
+                    } ?: MessageKeyConverter.convert(LicensingType.NO_LICENSING),
+                    // TODO PRSD-798: Add update link
+                    addChangeLink("#"),
+                )
+                // TODO PRSD-799: Add update link
+                addRow("propertyDetails.propertyRecord.occupied", isTenantedKey, addChangeLink("#"))
+                if (propertyOwnership.currentNumTenants > 0) {
                     // TODO PRSD-800: Add update link
-                    "#",
-                ),
-                SummaryListRowViewModel(
-                    "propertyDetails.propertyRecord.numberOfPeople",
-                    propertyOwnership.currentNumTenants,
+                    addRow("propertyDetails.propertyRecord.numberOfHouseholds", propertyOwnership.currentNumHouseholds, addChangeLink("#"))
                     // TODO PRSD-801: Add update link
-                    "#",
-                ),
-            )
-        } else {
-            listOf(
-                SummaryListRowViewModel(
-                    "propertyDetails.propertyRecord.occupied",
-                    isTenantedKey,
-                    // TODO PRSD-799: Add update link
-                    "#",
-                ),
-            )
-        }
+                    addRow("propertyDetails.propertyRecord.numberOfPeople", propertyOwnership.currentNumTenants, addChangeLink("#"))
+                }
+                // TODO PRSD-xxx Add update link
+                addRow("propertyDetails.propertyRecord.landlordType", landlordTypeKey, addChangeLink("#"))
+            }.toList()
 
-    private fun getLicensingDetails(propertyOwnership: PropertyOwnership): SummaryListRowViewModel =
-        if (propertyOwnership.license == null) {
-            SummaryListRowViewModel(
-                "propertyDetails.propertyRecord.licensingType",
-                MessageKeyConverter.convert(LicensingType.NO_LICENSING),
-                // TODO PRSD-798: Add update link
-                "#",
-            )
+    private fun MutableList<SummaryListRowViewModel>.addRow(
+        key: String,
+        value: Any?,
+        changeLink: String? = null,
+    ) {
+        add(SummaryListRowViewModel(key, value, changeLink))
+    }
+
+    private fun addChangeLink(link: String?): String? =
+        if (withChangeLinks) {
+            link
         } else {
-            SummaryListRowViewModel(
-                "propertyDetails.propertyRecord.licensingType",
-                listOf(
-                    MessageKeyConverter.convert(propertyOwnership.license!!.licenseType),
-                    propertyOwnership.license!!.licenseNumber,
-                ),
-                // TODO PRSD-798: Add update link
-                "#",
-            )
+            null
         }
 }

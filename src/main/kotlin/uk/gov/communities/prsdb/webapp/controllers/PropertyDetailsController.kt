@@ -12,12 +12,12 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyDetailsViewMode
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @Controller
-@RequestMapping("/property-details")
+@RequestMapping
 class PropertyDetailsController(
     val propertyOwnershipService: PropertyOwnershipService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
-    @GetMapping("/{propertyOwnershipId}")
+    @GetMapping("/property-details/{propertyOwnershipId}")
     fun getPropertyDetails(
         @PathVariable propertyOwnershipId: Long,
         model: Model,
@@ -29,9 +29,47 @@ class PropertyDetailsController(
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Property ownership $propertyOwnershipId is inactive")
         }
 
-        val propertyDetails = PropertyDetailsViewModel(propertyOwnership)
+        val propertyDetails =
+            PropertyDetailsViewModel(
+                propertyOwnership = propertyOwnership,
+                withChangeLinks = true,
+                hideNullUprn = true,
+                landlordDetailsUrl = "/landlord-details",
+            )
 
         model.addAttribute("propertyDetails", propertyDetails)
+        model.addAttribute("deleteRecordLink", "delete-record")
+        // TODO PRSD-647: Replace with link to dashboard
+        model.addAttribute("backUrl", "/")
+
+        return "propertyDetailsView"
+    }
+
+    @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
+    @GetMapping("local-authority/property-details/{propertyOwnershipId}")
+    fun getPropertyDetailsLaView(
+        @PathVariable propertyOwnershipId: Long,
+        model: Model,
+    ): String {
+        val propertyOwnership =
+            propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Property ownership $propertyOwnershipId not found")
+        if (!propertyOwnership.isActive) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Property ownership $propertyOwnershipId is inactive")
+        }
+
+        val propertyDetails =
+            PropertyDetailsViewModel(
+                propertyOwnership = propertyOwnership,
+                withChangeLinks = false,
+                hideNullUprn = false,
+                landlordDetailsUrl = "/landlord-details/${propertyOwnership.primaryLandlord.id}",
+            )
+
+        model.addAttribute("propertyDetails", propertyDetails)
+
+        // TODO PRSD-647: Replace with link to dashboard
+        model.addAttribute("backUrl", "/")
 
         return "propertyDetailsView"
     }

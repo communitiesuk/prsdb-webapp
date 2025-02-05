@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.mockObjects
 
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
+import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -26,7 +27,8 @@ class MockLandlordData {
         fun createAddress(
             singleLineAddress: String = "1 Example Road, EG1 2AB",
             localAuthority: LocalAuthority? = createLocalAuthority(),
-        ) = Address(AddressDataModel(singleLineAddress), localAuthority)
+            uprn: Long? = null,
+        ) = Address(AddressDataModel(singleLineAddress = singleLineAddress, uprn = uprn), localAuthority)
 
         fun createLandlord(
             baseUser: OneLoginUser = OneLoginUser(),
@@ -76,43 +78,22 @@ class MockLandlordData {
             primaryLandlord: Landlord = createLandlord(),
             property: Property = createProperty(),
             license: License? = null,
-        ) = PropertyOwnership(
-            occupancyType = occupancyType,
-            landlordType = landlordType,
-            ownershipType = ownershipType,
-            currentNumHouseholds = currentNumHouseholds,
-            currentNumTenants = currentNumTenants,
-            registrationNumber = registrationNumber,
-            primaryLandlord = primaryLandlord,
-            property = property,
-            license = license,
-        )
-
-        fun createMockPropertyOwnership(
-            occupancyType: OccupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
-            landlordType: LandlordType = LandlordType.SOLE,
-            ownershipType: OwnershipType = OwnershipType.FREEHOLD,
-            currentNumHouseholds: Int = 0,
-            currentNumTenants: Int = 0,
-            registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
-            primaryLandlord: Landlord = createLandlord(),
-            property: Property = createProperty(),
-            license: License? = null,
             createdDate: Instant = Instant.now(),
-            isActive: Boolean = true,
         ): PropertyOwnership {
-            val propertyOwnership: PropertyOwnership = mock()
-            whenever(propertyOwnership.occupancyType).thenReturn(occupancyType)
-            whenever(propertyOwnership.landlordType).thenReturn(landlordType)
-            whenever(propertyOwnership.ownershipType).thenReturn(ownershipType)
-            whenever(propertyOwnership.currentNumHouseholds).thenReturn(currentNumHouseholds)
-            whenever(propertyOwnership.currentNumTenants).thenReturn(currentNumTenants)
-            whenever(propertyOwnership.registrationNumber).thenReturn(registrationNumber)
-            whenever(propertyOwnership.primaryLandlord).thenReturn(primaryLandlord)
-            whenever(propertyOwnership.property).thenReturn(property)
-            whenever(propertyOwnership.license).thenReturn(license)
-            whenever(propertyOwnership.createdDate).thenReturn(createdDate)
-            whenever(propertyOwnership.isActive).thenReturn(isActive)
+            val propertyOwnership =
+                PropertyOwnership(
+                    occupancyType = occupancyType,
+                    landlordType = landlordType,
+                    ownershipType = ownershipType,
+                    currentNumHouseholds = currentNumHouseholds,
+                    currentNumTenants = currentNumTenants,
+                    registrationNumber = registrationNumber,
+                    primaryLandlord = primaryLandlord,
+                    property = property,
+                    license = license,
+                )
+
+            ReflectionTestUtils.setField(propertyOwnership, "createdDate", createdDate)
 
             return propertyOwnership
         }
