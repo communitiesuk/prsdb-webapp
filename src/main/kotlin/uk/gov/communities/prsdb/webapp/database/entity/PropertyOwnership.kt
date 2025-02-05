@@ -14,7 +14,6 @@ import jakarta.persistence.TemporalType
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
-import java.time.Instant
 import java.time.OffsetDateTime
 
 @Entity
@@ -91,7 +90,6 @@ class PropertyOwnership(
         property: Property,
         license: License?,
         isActive: Boolean = true,
-        createdDate: Instant = Instant.now(),
     ) : this() {
         this.isActive = isActive
         this.occupancyType = occupancyType
@@ -103,7 +101,6 @@ class PropertyOwnership(
         this.primaryLandlord = primaryLandlord
         this.property = property
         this.license = license
-        this.createdDate = createdDate
     }
 
     constructor(
@@ -118,7 +115,6 @@ class PropertyOwnership(
         primaryLandlord: Landlord,
         property: Property,
         license: License?,
-        createdDate: Instant = Instant.now(),
     ) : this(id) {
         this.isActive = isActive
         this.occupancyType = occupancyType
@@ -130,6 +126,5 @@ class PropertyOwnership(
         this.primaryLandlord = primaryLandlord
         this.property = property
         this.license = license
-        this.createdDate = createdDate
     }
 }

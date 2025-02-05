@@ -15,6 +15,7 @@ class PropertyDetailsViewModelTests {
     fun `Key details are in the correct order`() {
         // Arrange
         val propertyOwnership = createPropertyOwnership()
+
         val expectedHeaderList =
             listOf(
                 "propertyDetails.keyDetails.landlordType",

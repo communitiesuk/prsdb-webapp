@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.mockObjects
 
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
+import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -78,17 +79,23 @@ class MockLandlordData {
             property: Property = createProperty(),
             license: License? = null,
             createdDate: Instant = Instant.now(),
-        ) = PropertyOwnership(
-            occupancyType = occupancyType,
-            landlordType = landlordType,
-            ownershipType = ownershipType,
-            currentNumHouseholds = currentNumHouseholds,
-            currentNumTenants = currentNumTenants,
-            registrationNumber = registrationNumber,
-            primaryLandlord = primaryLandlord,
-            property = property,
-            license = license,
-            createdDate = createdDate,
-        )
+        ): PropertyOwnership {
+            val propertyOwnership =
+                PropertyOwnership(
+                    occupancyType = occupancyType,
+                    landlordType = landlordType,
+                    ownershipType = ownershipType,
+                    currentNumHouseholds = currentNumHouseholds,
+                    currentNumTenants = currentNumTenants,
+                    registrationNumber = registrationNumber,
+                    primaryLandlord = primaryLandlord,
+                    property = property,
+                    license = license,
+                )
+
+            ReflectionTestUtils.setField(propertyOwnership, "createdDate", createdDate)
+
+            return propertyOwnership
+        }
     }
 }
