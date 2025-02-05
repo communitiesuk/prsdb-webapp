@@ -1,13 +1,13 @@
-package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.getLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Tabs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
-class PropertyDetailsPage(
+abstract class PropertyDetailsBasePage(
     page: Page,
-) : BasePage(page, "/property-details") {
+    urlSegment: String,
+) : BasePage(page, urlSegment) {
     val tabs = Tabs(page, 2)
 
     fun getActiveTabPanelId() = tabs.getActiveTabPanelId()
