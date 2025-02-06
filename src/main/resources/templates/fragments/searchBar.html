@@ -1,11 +1,11 @@
-<div class="moj-search govuk-!-margin-bottom-6" th:fragment="searchBar(label, hint, searchWrapperModel)">
-    <form method="get" th:action="@{''}" th:object="${searchWrapperModel}">
+<div class="moj-search govuk-!-margin-bottom-6" th:fragment="searchBar(label, hint, searchRequest)">
+    <form method="get" th:action="@{''}" th:object="${searchRequest}">
         <div class="govuk-form-group">
-            <label class="govuk-label moj-search__label govuk-!-font-weight-bold" th:for="'query'"
+            <label class="govuk-label moj-search__label govuk-!-font-weight-bold" th:for="'searchTerm'"
                    th:text="${label}">
             </label>
             <div id="search-hint" class="govuk-hint moj-search__hint " th:text="${hint}"></div>
-            <input class="govuk-input moj-search__input " type="search" th:field="*{query}"
+            <input class="govuk-input moj-search__input " type="search" th:field="*{searchTerm}"
                    aria-describedby="search-hint">
         </div>
         <button type="submit" class="govuk-button moj-search__button " data-module="govuk-button"

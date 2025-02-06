@@ -1,7 +1,5 @@
 package uk.gov.communities.prsdb.webapp.mockObjects
 
-import org.mockito.Mockito.mock
-import org.mockito.kotlin.whenever
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
@@ -39,19 +37,21 @@ class MockLandlordData {
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 0L),
             internationalAddress: String? = null,
             dateOfBirth: LocalDate? = null,
-            createdAt: Instant = Instant.now(),
+            createdDate: Instant = Instant.now(),
         ): Landlord {
-            val landlord: Landlord = mock()
-            whenever(landlord.baseUser).thenReturn(baseUser)
-            whenever(landlord.name).thenReturn(name)
-            whenever(landlord.email).thenReturn(email)
-            whenever(landlord.phoneNumber).thenReturn(phoneNumber)
-            whenever(landlord.address).thenReturn(address)
-            whenever(landlord.registrationNumber).thenReturn(registrationNumber)
-            whenever(landlord.dateOfBirth).thenReturn(dateOfBirth)
-            whenever(landlord.lastModifiedDate).thenReturn(Instant.now())
-            whenever(landlord.internationalAddress).thenReturn(internationalAddress)
-            whenever(landlord.createdDate).thenReturn(createdAt)
+            val landlord =
+                Landlord(
+                    baseUser = baseUser,
+                    name = name,
+                    email = email,
+                    phoneNumber = phoneNumber,
+                    address = address,
+                    registrationNumber = registrationNumber,
+                    internationalAddress = internationalAddress,
+                    dateOfBirth = dateOfBirth,
+                )
+
+            ReflectionTestUtils.setField(landlord, "createdDate", createdDate)
 
             return landlord
         }

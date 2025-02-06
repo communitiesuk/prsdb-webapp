@@ -1,17 +1,18 @@
-package uk.gov.communities.prsdb.webapp.models.dataModels
+package uk.gov.communities.prsdb.webapp.models.viewModels
 
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropertyCount
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createLandlord
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import kotlin.test.assertEquals
 
-class LandlordSearchResultsDataModelTests {
+class LandlordSearchResultsViewModelTests {
     @Test
-    fun `fromLandlordWithListedPropertyCount returns a corresponding LandlordSearchResultsDataModel`() {
+    fun `fromLandlordWithListedPropertyCount returns a corresponding LandlordSearchResultsViewModel`() {
         val landlord = createLandlord()
         val landlordWithListedPropertyCount = LandlordWithListedPropertyCount(landlord.id, landlord, 3)
-        val expectedLandlordSearchResultDataModel =
-            LandlordSearchResultDataModel(
+        val expectedLandlordSearchResultViewModel =
+            LandlordSearchResultViewModel(
                 id = landlord.id,
                 name = landlord.name,
                 registrationNumber =
@@ -24,10 +25,10 @@ class LandlordSearchResultsDataModelTests {
                 listedPropertyCount = 3,
             )
 
-        val landlordSearchResultDataModel =
-            LandlordSearchResultDataModel
+        val landlordSearchResultViewModel =
+            LandlordSearchResultViewModel
                 .fromLandlordWithListedPropertyCount(landlordWithListedPropertyCount)
 
-        assertEquals(expectedLandlordSearchResultDataModel, landlordSearchResultDataModel)
+        assertEquals(expectedLandlordSearchResultViewModel, landlordSearchResultViewModel)
     }
 }
