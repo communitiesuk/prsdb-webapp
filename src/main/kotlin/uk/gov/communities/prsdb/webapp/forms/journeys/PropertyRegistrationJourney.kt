@@ -69,6 +69,7 @@ class PropertyRegistrationJourney(
         journeyDataService = journeyDataService,
         steps =
             setOf(
+                taskListStep(),
                 lookupAddressStep(),
                 selectAddressStep(addressLookupService, addressDataService, propertyRegistrationService),
                 alreadyRegisteredStep(),
@@ -96,7 +97,6 @@ class PropertyRegistrationJourney(
                     confirmationEmailSender,
                     session,
                 ),
-                taskListStep(),
             ),
     ) {
     companion object {
