@@ -15,40 +15,39 @@ class RegisterPropertiesTaskList(
     journeyDataService: JourneyDataService,
     validator: Validator,
 ) : TaskList<RegisterPropertyStepId>(propertyRegistrationJourney, journeyDataService, validator) {
-    override val taskList: List<Task<RegisterPropertyStepId>>
-        get() =
-            listOf(
-                Task(
-                    "registerProperty.taskList.register.addAddress",
-                    RegisterPropertyStepId.LookupAddress,
-                    RegisterPropertyStepId.PropertyType,
-                ),
-                Task(
-                    "registerProperty.taskList.register.selectType",
-                    RegisterPropertyStepId.PropertyType,
-                    RegisterPropertyStepId.OwnershipType,
-                ),
-                Task(
-                    "registerProperty.taskList.register.selectOwnership",
-                    RegisterPropertyStepId.OwnershipType,
-                    RegisterPropertyStepId.LicensingType,
-                ),
-                Task(
-                    "registerProperty.taskList.register.addLicensing",
-                    RegisterPropertyStepId.LicensingType,
-                    RegisterPropertyStepId.Occupancy,
-                ),
-                Task(
-                    "registerProperty.taskList.register.addTenancyInfo",
-                    RegisterPropertyStepId.Occupancy,
-                    RegisterPropertyStepId.LandlordType,
-                ),
-                Task(
-                    "registerProperty.taskList.register.selectOperation",
-                    RegisterPropertyStepId.LandlordType,
-                    RegisterPropertyStepId.CheckAnswers,
-                ),
-            )
+    override val taskList: List<Task<RegisterPropertyStepId>> =
+        listOf(
+            Task(
+                "registerProperty.taskList.register.addAddress",
+                RegisterPropertyStepId.LookupAddress,
+                RegisterPropertyStepId.PropertyType,
+            ),
+            Task(
+                "registerProperty.taskList.register.selectType",
+                RegisterPropertyStepId.PropertyType,
+                RegisterPropertyStepId.OwnershipType,
+            ),
+            Task(
+                "registerProperty.taskList.register.selectOwnership",
+                RegisterPropertyStepId.OwnershipType,
+                RegisterPropertyStepId.LicensingType,
+            ),
+            Task(
+                "registerProperty.taskList.register.addLicensing",
+                RegisterPropertyStepId.LicensingType,
+                RegisterPropertyStepId.Occupancy,
+            ),
+            Task(
+                "registerProperty.taskList.register.addTenancyInfo",
+                RegisterPropertyStepId.Occupancy,
+                RegisterPropertyStepId.LandlordType,
+            ),
+            Task(
+                "registerProperty.taskList.register.selectOperation",
+                RegisterPropertyStepId.LandlordType,
+                RegisterPropertyStepId.CheckAnswers,
+            ),
+        )
     // TODO PRSD-587 Add Interested parties
 
     override fun getTaskListViewModels(): List<TaskListItemViewModel> =
