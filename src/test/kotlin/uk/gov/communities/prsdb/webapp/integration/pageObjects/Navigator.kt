@@ -79,7 +79,7 @@ class Navigator(
         return createValidPage(page, InviteNewLaUserPage::class)
     }
 
-    fun goToSearchLandlordRegister(): SearchLandlordRegisterPage {
+    fun goToLandlordSearchPage(): SearchLandlordRegisterPage {
         navigate("search/landlord")
         return createValidPage(page, SearchLandlordRegisterPage::class)
     }
