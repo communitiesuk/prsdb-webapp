@@ -33,7 +33,6 @@ class PropertyDetailsTests : IntegrationTest() {
         @Test
         fun `when the landlord details tab is active clicking the property details tab shows property details tab`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
-            println(detailsPage.page.content())
             detailsPage.goToLandlordDetails()
 
             detailsPage.goToPropertyDetails()
@@ -88,7 +87,6 @@ class PropertyDetailsTests : IntegrationTest() {
         @Test
         fun `when the landlord details tab is active clicking the property details tab shows property details tab`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
-            println(detailsPage.page.content())
             detailsPage.goToLandlordDetails()
 
             detailsPage.goToPropertyDetails()
@@ -97,7 +95,7 @@ class PropertyDetailsTests : IntegrationTest() {
         }
 
         @Test
-        fun `the landlord name link goes the landlord view of landlord details`(page: Page) {
+        fun `the landlord name link goes the local authority view of landlord details`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
             detailsPage.clickLandlordNameLink("Alexander Smith")
 
