@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -18,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.RegisteredPropertyViewM
 class PropertyOwnershipService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val registrationNumberService: RegistrationNumberService,
+    private val landlordService: LandlordService,
 ) {
     @Transactional
     fun createPropertyOwnership(
@@ -49,6 +52,26 @@ class PropertyOwnershipService(
         )
     }
 
+    fun getPropertyOwnershipIfAuthorizedUser(
+        propertyOwnershipId: Long,
+        baseUserId: String,
+    ): PropertyOwnership {
+        val propertyOwnership =
+            retrievePropertyOwnershipById(propertyOwnershipId)
+                ?: throw ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Property ownership $propertyOwnershipId not found",
+                )
+
+        val landlordIdFromPrincipal =
+            landlordService.retrieveLandlordIdByBaseUserId(baseUserId)
+
+        if (propertyOwnership.primaryLandlord.id != landlordIdFromPrincipal) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND)
+        }
+        return propertyOwnership
+    }
+
     fun getRegisteredPropertiesForLandlord(baseUserId: String): List<RegisteredPropertyViewModel> =
         retrieveAllRegisteredPropertiesForLandlord(baseUserId).map { propertyOwnership ->
             RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
@@ -64,7 +87,7 @@ class PropertyOwnershipService(
             .findByRegistrationNumber_Number(registrationNumber)
 
     fun retrievePropertyOwnershipById(propertyOwnershipId: Long): PropertyOwnership? =
-        propertyOwnershipRepository.getReferenceById(propertyOwnershipId)
+        propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)
 
     private fun retrieveAllRegisteredPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
         propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(

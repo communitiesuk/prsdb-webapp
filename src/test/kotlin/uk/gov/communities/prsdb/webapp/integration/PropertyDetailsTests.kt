@@ -41,9 +41,20 @@ class PropertyDetailsTests : IntegrationTest() {
         }
 
         @Test
-        fun `the landlord name link goes the landlord view of landlord details`(page: Page) {
+        fun `in the key details section the landlord name link goes the landlord view of landlord details`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
-            detailsPage.clickLandlordNameLink("Alexander Smith")
+            detailsPage.clickLandlordNameLinkFromKeyDetails("Alexander Smith")
+
+            assertPageIs(page, LandlordDetailsPage::class)
+            Assertions.assertEquals("/landlord-details", URI(page.url()).path)
+        }
+
+        @Test
+        fun `in the landlord details section the landlord name link goes the landlord view of landlord details`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            detailsPage.goToLandlordDetails()
+
+            detailsPage.clickLandlordLinkFromLandlordDetails("Alexander Smith")
 
             assertPageIs(page, LandlordDetailsPage::class)
             Assertions.assertEquals("/landlord-details", URI(page.url()).path)
@@ -97,7 +108,7 @@ class PropertyDetailsTests : IntegrationTest() {
         @Test
         fun `the landlord name link goes the local authority view of landlord details`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
-            detailsPage.clickLandlordNameLink("Alexander Smith")
+            detailsPage.clickLandlordNameLinkFromKeyDetails("Alexander Smith")
 
             assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
             Assertions.assertEquals("/landlord-details/1", URI(page.url()).path)

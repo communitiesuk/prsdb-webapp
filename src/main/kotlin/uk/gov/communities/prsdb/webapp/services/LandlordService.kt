@@ -32,6 +32,8 @@ class LandlordService(
         return landlordRepository.findByRegistrationNumber_Number(regNum.number)
     }
 
+    fun retrieveLandlordIdByBaseUserId(baseUserId: String): Long? = landlordRepository.findByBaseUser_Id(baseUserId)?.id
+
     fun retrieveLandlordByBaseUserId(baseUserId: String): Landlord? = landlordRepository.findByBaseUser_Id(baseUserId)
 
     fun retrieveLandlordById(id: Long): Landlord? = landlordRepository.findByIdOrNull(id)

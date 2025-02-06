@@ -72,7 +72,8 @@ abstract class BaseComponent(
         fun getLink(
             page: Page,
             text: String,
-        ) = getComponent(page, ".govuk-link", LocatorOptions().setHasText(text))
+            index: Int = 0,
+        ) = getComponent(page, ".govuk-link", LocatorOptions().setHasText(text), index)
     }
 
     init {

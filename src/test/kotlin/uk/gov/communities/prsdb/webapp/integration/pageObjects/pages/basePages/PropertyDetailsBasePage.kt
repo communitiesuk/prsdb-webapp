@@ -20,8 +20,12 @@ abstract class PropertyDetailsBasePage(
         tabs.goToTab("Property details")
     }
 
-    fun clickLandlordNameLink(landlordName: String) {
-        getLink(page, landlordName).click()
+    fun clickLandlordNameLinkFromKeyDetails(landlordName: String) {
+        getLink(page, landlordName, 0).click()
+    }
+
+    fun clickLandlordLinkFromLandlordDetails(landlordName: String) {
+        getLink(page, landlordName, 1).click()
     }
 
     fun clickBackLink() {

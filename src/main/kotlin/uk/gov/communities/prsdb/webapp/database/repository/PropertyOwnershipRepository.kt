@@ -25,4 +25,6 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
         landlordId: Long,
         status: RegistrationStatus,
     ): List<PropertyOwnership>
+
+    fun findByIdAndIsActiveTrue(id: Long): PropertyOwnership?
 }

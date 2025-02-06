@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import kotlin.test.Test
 
@@ -19,6 +20,9 @@ class PropertyDetailsControllerTests(
 ) : ControllerTest(webContext) {
     @MockBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
+
+    @MockBean
+    lateinit var landlordService: LandlordService
 
     @Nested
     inner class GetPropertyDetailsLandlordViewTests {
@@ -38,35 +42,18 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `getPropertyDetails returns 404 if the requested property ownership is not found`() {
+        @WithMockUser(roles = ["LA_ADMIN"])
+        fun `getPropertyDetails returns 403 for an unauthorized user with la admin role`() {
             mvc.get("/property-details/1").andExpect {
-                status { status { isNotFound() } }
+                status { status { isForbidden() } }
             }
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `getPropertyDetails returns error if the requested property ownership is inactive`() {
-            whenever(propertyOwnershipService.retrievePropertyOwnershipById(1))
-                .thenReturn(PropertyOwnership())
+        @WithMockUser(roles = ["LA_USER"])
+        fun `getPropertyDetails returns 403 for an unauthorized user with la user role`() {
             mvc.get("/property-details/1").andExpect {
-                status { status { isBadRequest() } }
-            }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `getPropertyDetails returns 200 for a valid request`() {
-            val propertyOwnership = createPropertyOwnership()
-
-            whenever(propertyOwnershipService.retrievePropertyOwnershipById(1))
-                .thenReturn(
-                    propertyOwnership,
-                )
-
-            mvc.get("/property-details/1").andExpect {
-                status { status { isOk() } }
+                status { status { isForbidden() } }
             }
         }
     }

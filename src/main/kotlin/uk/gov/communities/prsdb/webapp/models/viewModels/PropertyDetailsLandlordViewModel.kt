@@ -1,57 +1,26 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels
 
-import kotlinx.datetime.toKotlinInstant
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.UPDATE_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
-import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
-class LandlordViewModel(
+class PropertyDetailsLandlordViewModel(
     private val landlord: Landlord,
     private val withChangeLinks: Boolean = true,
 ) {
-    val name: String = landlord.name
+    val landlordsDetails: List<SummaryListRowViewModel> = formatLandlordDetails()
 
-    val consentInformation: List<SummaryListRowViewModel>
-        get() {
-            // TODO PRSD-746 - add user consent information to this page once it is captured (this will need to be passed into the constructor since this is a view model)
-            return listOf(
-                SummaryListRowViewModel(
-                    "landlordDetails.personalDetails.optionalChoices.legalChanges",
-                    "TODO PRSD-746",
-                    toggleChangeLink(null),
-                ),
-                SummaryListRowViewModel(
-                    "landlordDetails.personalDetails.optionalChoices.research",
-                    "TODO PRSD-746",
-                    toggleChangeLink(null),
-                ),
-            )
-        }
-
-    val personalDetails: List<SummaryListRowViewModel> = formatPersonalDetails()
-
-    private fun formatPersonalDetails(): List<SummaryListRowViewModel> {
+    private fun formatLandlordDetails(): List<SummaryListRowViewModel> {
         val isUkResident = landlord.internationalAddress == null
 
         val residencyIndependentPersonalDetails =
             listOf(
                 SummaryListRowViewModel(
-                    "landlordDetails.personalDetails.registrationDate",
-                    DateTimeHelper.getDateInUK(landlord.createdDate.toKotlinInstant()),
-                    null,
-                ),
-                SummaryListRowViewModel(
-                    "landlordDetails.personalDetails.lrn",
-                    RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber),
-                    null,
-                ),
-                // TODO PRSD-747 to pass Id verification status (see Figma for design)
-                SummaryListRowViewModel(
                     "landlordDetails.personalDetails.name",
                     landlord.name,
                     toggleChangeLink("$UPDATE_ROUTE/name"),
+                    "/landlord-details",
                 ),
+                // TODO PRSD-747 to pass Id verification status (see Figma for design)
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.dateOfBirth",
                     landlord.dateOfBirth,
@@ -63,14 +32,9 @@ class LandlordViewModel(
                     toggleChangeLink("$UPDATE_ROUTE/email"),
                 ),
                 SummaryListRowViewModel(
-                    "landlordDetails.personalDetails.telephoneNumber",
+                    "propertyDetails.landlordDetails.contactNumber",
                     landlord.phoneNumber,
                     toggleChangeLink("$UPDATE_ROUTE/telephone"),
-                ),
-                SummaryListRowViewModel(
-                    "landlordDetails.personalDetails.ukResident",
-                    isUkResident,
-                    toggleChangeLink("$UPDATE_ROUTE/country-of-residence"),
                 ),
             )
 
@@ -86,12 +50,6 @@ class LandlordViewModel(
 
     private fun formatNonUkAddressDetails(landlord: Landlord) =
         listOf(
-            // TODO: PRSD-742 to add country as a separate field
-            SummaryListRowViewModel(
-                "landlordDetails.personalDetails.country",
-                "TODO: PRSD-742",
-                toggleChangeLink(null),
-            ),
             SummaryListRowViewModel(
                 "landlordDetails.personalDetails.nonUkAddress",
                 landlord.internationalAddress,
