@@ -114,7 +114,8 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (35, '12/10/24', 0006001003, 0),
        (36, '12/10/24', 0006001004, 0),
        (37, '12/10/24', 0006001005, 0),
-       (38, '12/10/24', 0006001006, 0);
+       (38, '12/10/24', 0006001006, 0),
+       (39, '02/02/25', 0006001007, 0);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -129,7 +130,8 @@ VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 1),
        (8, '09/13/24', '09/13/24', 7, '3 Fake Way', 1),
        (9, '09/13/24', '09/13/24', 8, '4 Imaginary Street', 1),
        (10, '09/13/24', '09/13/24', 9, '5 Pretend Crescent', 1),
-       (11, '09/13/24', '09/13/24', 10, '6 Mythical Place', 1);
+       (11, '09/13/24', '09/13/24', 10, '6 Mythical Place', 1),
+       (12, '09/13/24', '09/13/24', null, '6 Mythical Place', 1);
 
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
@@ -186,7 +188,8 @@ VALUES (1, 1, true, 1, 6),
        (3, 1, true, 1, 8),
        (4, 1, true, 1, 9),
        (5, 1, true, 1, 10),
-       (6, 1, false, 1, 11);
+       (6, 1, false, 1, 11),
+       (7, 1, true, 1, 12);
 
 SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
 
@@ -198,6 +201,7 @@ VALUES (1, true, 0, 0, 1, 1, 2, 6, 1, 1, '01/15/25'),
        (3, true, 0, 0, 1, 1, 2, 35, 4, 3, '01/15/25'),
        (4, true, 0, 0, 1, 1, 2, 36, 1, 4, '01/15/25'),
        (5, true, 0, 0, 1, 1, 2, 37, 1, 5, '01/15/25'),
-       (6, false, 0, 0, 1, 1, 2, 38, 1, 6, '01/15/25');
+       (6, false, 0, 0, 1, 1, 2, 38, 1, 6, '01/15/25'),
+       (7, true, 0, 0, 1, 0, 0, 39, 1, 7, '02/02/25');
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));

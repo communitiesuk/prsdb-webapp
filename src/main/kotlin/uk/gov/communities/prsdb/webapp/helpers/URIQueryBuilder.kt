@@ -49,7 +49,7 @@ class URIQueryBuilder private constructor(
 
     fun removeParamValue(
         name: String,
-        value: Any,
+        value: String,
     ): URIQueryBuilder {
         val currentURI = build()
 

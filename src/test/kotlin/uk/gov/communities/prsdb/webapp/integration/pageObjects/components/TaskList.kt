@@ -5,7 +5,7 @@ import com.microsoft.playwright.Page
 
 class TaskList(
     private val page: Page,
-    val locator: Locator = page.locator(".govuk-task-list"),
+    locator: Locator = page.locator(".govuk-task-list"),
 ) : BaseComponent(locator) {
     fun clickTask(name: String) = getChildComponent("li", Locator.LocatorOptions().setHasText(name)).click()
 

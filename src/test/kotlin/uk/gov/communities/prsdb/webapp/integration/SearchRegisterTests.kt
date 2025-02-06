@@ -14,12 +14,22 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.LISTED_PROPERTY_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import kotlin.test.assertContains
+import kotlin.test.assertTrue
 
 @Sql("/data-landlord-search.sql")
 class SearchRegisterTests : IntegrationTest() {
     @Test
     fun `results table does not show before search has been requested`() {
         val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
+
+        val exception = assertThrows<AssertionFailedError> { searchLandlordRegisterPage.getResultTable() }
+        assertContains(exception.message!!, "Expected 1 instance of Locator@.govuk-table, found 0")
+    }
+
+    @Test
+    fun `results table does not show when blank search term requested`() {
+        val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
+        searchLandlordRegisterPage.searchBar.search("")
 
         val exception = assertThrows<AssertionFailedError> { searchLandlordRegisterPage.getResultTable() }
         assertContains(exception.message!!, "Expected 1 instance of Locator@.govuk-table, found 0")
@@ -48,7 +58,7 @@ class SearchRegisterTests : IntegrationTest() {
     }
 
     @Test
-    fun `fuzzy search functionality works`() {
+    fun `fuzzy search functionality produces table of matching results`() {
         val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
         searchLandlordRegisterPage.searchBar.search("Alex")
         val resultTable = searchLandlordRegisterPage.getResultTable()
@@ -69,7 +79,7 @@ class SearchRegisterTests : IntegrationTest() {
     @Test
     fun `error shows if search has no results`() {
         val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
-        searchLandlordRegisterPage.searchBar.search("non-matching query")
+        searchLandlordRegisterPage.searchBar.search("non-matching searchTerm")
 
         assertContains(searchLandlordRegisterPage.getErrorMessageText(), "No landlord record found")
     }
@@ -77,7 +87,7 @@ class SearchRegisterTests : IntegrationTest() {
     @Test
     fun `property search link shows if search has no results`(page: Page) {
         val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
-        searchLandlordRegisterPage.searchBar.search("non-matching query")
+        searchLandlordRegisterPage.searchBar.search("non-matching searchTerm")
         searchLandlordRegisterPage.getPropertySearchLink().click()
 
         // TODO PRSD-659: Replace with landlord details page assertion
@@ -95,7 +105,7 @@ class SearchRegisterTests : IntegrationTest() {
     }
 
     @Test
-    fun `pagination links all work`(page: Page) {
+    fun `pagination links lead to the intended pages`(page: Page) {
         val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
         searchLandlordRegisterPage.searchBar.search("PRSDB")
 
@@ -110,5 +120,43 @@ class SearchRegisterTests : IntegrationTest() {
         previousPage.getPaginationComponent().getPageNumberLink(2).click()
         assertContains(page.url(), "page=2")
         assertPageIs(page, SearchLandlordRegisterPage::class)
+    }
+
+    @Test
+    fun `filter panel can be toggled and used to refine search results`(page: Page) {
+        val searchLandlordRegisterPage = navigator.goToSearchLandlordRegister()
+        searchLandlordRegisterPage.searchBar.search("Alex")
+
+        val filter = searchLandlordRegisterPage.getFilterPanel()
+
+        // Toggle filter
+        filter.clickCloseFilterPanel()
+        val exception = assertThrows<AssertionFailedError> { filter.getPanel() }
+        assertContains(
+            exception.message!!,
+            "Expected 1 instance of Locator@.moj-filter-layout >> .moj-filter >> nth=0, found 0",
+        )
+
+        filter.clickShowFilterPanel()
+        assertTrue(filter.getPanel().isVisible)
+
+        // Apply LA filter
+        val laFilter = filter.getFilterCheckboxes("Show landlords operating in my authority")
+        laFilter.checkCheckbox("true")
+        filter.clickApplyFiltersButton()
+
+        val resultTable = searchLandlordRegisterPage.getResultTable()
+        assertTrue(resultTable.countRows() == 1)
+
+        // Remove LA filter
+        filter.clickRemoveFilterTag("Landlords in my authority")
+        assertTrue(resultTable.countRows() > 1)
+
+        // Clear all filters
+        laFilter.checkCheckbox("true")
+        filter.clickApplyFiltersButton()
+
+        filter.clickClearFiltersLink()
+        assertTrue(resultTable.countRows() > 1)
     }
 }

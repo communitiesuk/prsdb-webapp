@@ -6,7 +6,7 @@ import com.microsoft.playwright.Page
 class Tabs(
     page: Page,
     numberOfTabs: Int,
-    val locator: Locator = page.locator(".govuk-tabs"),
+    locator: Locator = page.locator(".govuk-tabs"),
 ) : BaseComponent(locator) {
     val tabsList = getChildrenComponents(".govuk-tabs__list >> .govuk-tabs__list-item", numberOfTabs)
 
