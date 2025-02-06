@@ -15,9 +15,9 @@ import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
+import uk.gov.communities.prsdb.webapp.forms.tasks.RegisterPropertyMultiTaskTransaction
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.RegisterPropertyTaskListService
 import java.security.Principal
 
 @PreAuthorize("hasRole('LANDLORD')")
@@ -27,7 +27,7 @@ class RegisterPropertyController(
     private val propertyRegistrationJourney: PropertyRegistrationJourney,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val session: HttpSession,
-    private val journeyLoader: RegisterPropertyTaskListService,
+    private val registerPropertyTransaction: RegisterPropertyMultiTaskTransaction,
 ) {
     @GetMapping
     fun index(model: Model): String {
@@ -57,10 +57,10 @@ class RegisterPropertyController(
         model: Model,
         principal: Principal,
     ): String {
-        val viewModel = journeyLoader.getTaskListPageViewModel(principal.name)
+        val viewModelLists = registerPropertyTransaction.getTaskListPageViewModels(principal.name)
 
-        model.addAttribute("registerTasks", viewModel.registerTasks)
-        model.addAttribute("checkAndSubmitTasks", viewModel.checkAndSubmitTasks)
+        model.addAttribute("registerTasks", viewModelLists[0])
+        model.addAttribute("checkAndSubmitTasks", viewModelLists[1])
 
         return "registerPropertyTaskList"
     }
