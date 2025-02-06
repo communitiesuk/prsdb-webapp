@@ -1,4 +1,4 @@
-<th:block th:fragment="lastModified(lastModifiedBy, lastModifiedDate)"
+<th:block th:fragment="lastModifiedInsetText(lastModifiedBy, lastModifiedDate)"
      th:if="${lastModifiedDate != null}" >
     <div th:replace="~{fragments/warningInsetText :: warningInsetText(~{:: #last-updated-text})}">
         <th:block id="last-updated-text">

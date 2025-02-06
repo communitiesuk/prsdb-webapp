@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import kotlinx.datetime.toKotlinInstant
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
@@ -59,10 +58,7 @@ class LandlordDetailsController(
             landlordService.retrieveLandlordById(id)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Landlord $id not found")
 
-        val lastModifiedDate =
-            DateTimeHelper.getDateInUK(
-                landlord.lastModifiedDate?.toKotlinInstant() ?: landlord.createdDate.toKotlinInstant(),
-            )
+        val lastModifiedDate = DateTimeHelper.getLastModifiedDate(landlord)
 
         val landlordViewModel = LandlordViewModel(landlord = landlord, withChangeLinks = false)
 

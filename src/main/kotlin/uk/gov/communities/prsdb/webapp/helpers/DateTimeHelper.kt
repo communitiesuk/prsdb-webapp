@@ -5,6 +5,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toKotlinInstant
 import kotlinx.datetime.toLocalDateTime
+import uk.gov.communities.prsdb.webapp.database.entity.ModifiableAuditableEntity
 import java.time.Clock
 
 class DateTimeHelper(
@@ -20,5 +21,8 @@ class DateTimeHelper(
             val dateTimeInUK = instant.toLocalDateTime(TimeZone.of("Europe/London"))
             return LocalDate(dateTimeInUK.year, dateTimeInUK.month.value, dateTimeInUK.dayOfMonth)
         }
+
+        fun getLastModifiedDate(entity: ModifiableAuditableEntity): LocalDate =
+            getDateInUK(entity.lastModifiedDate?.toKotlinInstant() ?: entity.createdDate.toKotlinInstant())
     }
 }

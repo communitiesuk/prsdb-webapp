@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import kotlinx.datetime.toKotlinInstant
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
@@ -64,10 +63,7 @@ class PropertyDetailsController(
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Property ownership $propertyOwnershipId is inactive")
         }
 
-        val lastModifiedDate =
-            DateTimeHelper.getDateInUK(
-                propertyOwnership.lastModifiedDate?.toKotlinInstant() ?: propertyOwnership.createdDate.toKotlinInstant(),
-            )
+        val lastModifiedDate = DateTimeHelper.getLastModifiedDate(propertyOwnership)
         val lastModifiedBy = propertyOwnership.primaryLandlord.name
 
         val propertyDetails =

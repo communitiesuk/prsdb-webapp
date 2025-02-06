@@ -7,7 +7,7 @@
 
             <h1 class="govuk-heading-l" th:text="${name}">name</h1>
 
-            <div th:replace="~{fragments/lastModified :: lastModified(${name}, ${lastModifiedDate})}">
+            <div th:replace="~{fragments/lastModifiedInsetText :: lastModifiedInsetText(${name}, ${lastModifiedDate})}">
             </div>
 
             <div th:replace="~{fragments/tabs/tabs :: tabs(~{:: #tabs-content})}" >

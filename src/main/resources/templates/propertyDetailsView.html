@@ -11,7 +11,7 @@
         </div>
         <div th:replace="~{fragments/keyDetailsList :: keyDetailsList(${propertyDetails.keyDetails})}">
         </div>
-        <div th:replace="~{fragments/lastModified :: lastModified(${lastModifiedBy}, ${lastModifiedDate})}">
+        <div th:replace="~{fragments/lastModifiedInsetText :: lastModifiedInsetText(${lastModifiedBy}, ${lastModifiedDate})}">
         </div>
 
         <div th:replace="~{fragments/tabs/tabs :: tabs(~{:: #tabs-content})}" >
