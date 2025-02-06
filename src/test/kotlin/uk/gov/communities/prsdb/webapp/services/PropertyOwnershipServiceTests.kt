@@ -228,14 +228,14 @@ class PropertyOwnershipServiceTests {
     }
 
     @Test
-    fun `searchForProperties returns a corresponding list of PropertySearchResultViewModels (PRN search)`() {
+    fun `searchForProperties returns a single matching property when the search term is a PRN`() {
         val searchPRN = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 123)
-        val expectedPropertyOwnerships = listOf(createPropertyOwnership())
+        val prnMatchingPropertyOwnership = listOf(createPropertyOwnership())
         val expectedSearchResults =
-            expectedPropertyOwnerships.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
+            prnMatchingPropertyOwnership.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
 
         whenever(mockPropertyOwnershipRepository.searchMatchingPRN(searchPRN.number)).thenReturn(
-            expectedPropertyOwnerships,
+            prnMatchingPropertyOwnership,
         )
 
         val searchResults = propertyOwnershipService.searchForProperties(searchPRN.toString())
@@ -244,7 +244,7 @@ class PropertyOwnershipServiceTests {
     }
 
     @Test
-    fun `searchForProperties returns a corresponding list of PropertySearchResultViewModels (UPRN search)`() {
+    fun `searchForProperties returns an exact UPRN match then a collection of fuzzy matches when the search term is a UPRN`() {
         val searchUPRN = "123"
 
         val uprnMatchingPropertyOwnership =
@@ -268,7 +268,7 @@ class PropertyOwnershipServiceTests {
     }
 
     @Test
-    fun `searchForProperties returns a corresponding list of PropertySearchResultViewModels (fuzzy search)`() {
+    fun `searchForProperties returns a collection of fuzzy matches when the search term is not a PRN or UPRN`() {
         val searchTerm = "EG1 2AB"
 
         val expectedPropertyOwnerships = listOf(createPropertyOwnership(), createPropertyOwnership())

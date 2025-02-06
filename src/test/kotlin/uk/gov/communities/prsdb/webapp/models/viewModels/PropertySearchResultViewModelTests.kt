@@ -1,14 +1,14 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels
 
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import kotlin.test.assertEquals
 
 class PropertySearchResultViewModelTests {
     @Test
     fun `fromPropertyOwnership returns a corresponding PropertySearchResultViewModel`() {
-        val propertyOwnership = createPropertyOwnership()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership()
 
         val expectedPropertySearchResultViewModel =
             PropertySearchResultViewModel(
