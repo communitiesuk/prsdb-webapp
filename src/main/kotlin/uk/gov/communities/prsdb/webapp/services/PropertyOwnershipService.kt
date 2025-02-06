@@ -99,11 +99,13 @@ class PropertyOwnershipService(
             if (prn != null) {
                 propertyOwnershipRepository.searchMatchingPRN(prn.number)
             } else {
-                val uprnMatch =
-                    AddressHelper
-                        .parseUprnOrNull(searchTerm)
-                        ?.let { uprn -> propertyOwnershipRepository.searchMatchingUPRN(uprn) } ?: emptyList()
-                uprnMatch + propertyOwnershipRepository.searchMatching(searchTerm)
+                val uprn = AddressHelper.parseUprnOrNull(searchTerm)
+
+                if (uprn != null) {
+                    propertyOwnershipRepository.searchMatchingUPRN(uprn)
+                } else {
+                    propertyOwnershipRepository.searchMatching(searchTerm)
+                }
             }
 
         return matchingProperties.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }

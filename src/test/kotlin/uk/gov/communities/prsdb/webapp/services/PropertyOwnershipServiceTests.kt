@@ -244,22 +244,16 @@ class PropertyOwnershipServiceTests {
     }
 
     @Test
-    fun `searchForProperties returns an exact UPRN match then a collection of fuzzy matches when the search term is a UPRN`() {
+    fun `searchForProperties returns a single matching property when the search term is a UPRN`() {
         val searchUPRN = "123"
 
         val uprnMatchingPropertyOwnership =
             listOf(createPropertyOwnership(property = createProperty(address = createAddress(uprn = searchUPRN.toLong()))))
-        val fuzzyMatchingPropertyOwnerships = listOf(createPropertyOwnership(), createPropertyOwnership())
-
-        val expectedPropertyOwnerships = uprnMatchingPropertyOwnership + fuzzyMatchingPropertyOwnerships
         val expectedSearchResults =
-            expectedPropertyOwnerships.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
+            uprnMatchingPropertyOwnership.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
 
         whenever(mockPropertyOwnershipRepository.searchMatchingUPRN(searchUPRN.toLong())).thenReturn(
             uprnMatchingPropertyOwnership,
-        )
-        whenever(mockPropertyOwnershipRepository.searchMatching(searchUPRN)).thenReturn(
-            fuzzyMatchingPropertyOwnerships,
         )
 
         val searchResults = propertyOwnershipService.searchForProperties(searchUPRN)
