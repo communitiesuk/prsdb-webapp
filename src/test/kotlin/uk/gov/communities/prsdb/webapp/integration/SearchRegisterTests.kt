@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -152,7 +153,7 @@ class SearchRegisterTests : IntegrationTest() {
             filter.clickApplyFiltersButton()
 
             val resultTable = searchLandlordRegisterPage.getResultTable()
-            assertTrue(resultTable.countRows() == 1)
+            assertEquals(1, resultTable.countRows())
 
             // Remove LA filter
             filter.clickRemoveFilterTag("Landlords in my authority")

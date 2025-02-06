@@ -14,7 +14,7 @@ class Table(
         colIndex: Int,
     ) = Companion.getChildComponent(getRow(rowIndex), "td", index = colIndex)
 
-    fun countRows() = locator.locator("tr").count()
+    fun countRows() = locator.locator("tbody").locator("tr").count()
 
     private fun getHeaderRow() = getChildComponent("thead tr")
 
