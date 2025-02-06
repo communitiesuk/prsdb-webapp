@@ -30,6 +30,7 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
 
     fun findByIdAndIsActiveTrue(id: Long): PropertyOwnership?
 
+    // TODO PRSD-660: Add filtering to searchMatchingX queries
     @Query(
         "SELECT po.* " +
             "FROM property_ownership po " +
