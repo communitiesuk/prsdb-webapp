@@ -31,22 +31,19 @@ class SearchRegisterController(
         searchRequest: LandlordSearchRequestModel,
         @RequestParam(value = "page", required = false) @Min(1) page: Int = 1,
     ): String {
-        model.addAttribute("searchRequest", searchRequest)
-        model.addAttribute("filterPanelViewModel", LandlordFilterPanelViewModel(searchRequest, httpServletRequest))
-
-        model.addAttribute("baseLandlordDetailsURL", "/landlord-details")
-        // TODO PRSD-659: add LA property search base URL to model
-        model.addAttribute("propertySearchURL", "property")
-        // TODO PRSD-647: Set backURL to LA landing page
-        model.addAttribute("backURL", "")
-
         if (searchRequest.searchTerm?.isBlank() == true) {
             return "redirect:landlord"
         }
 
+        model.addAttribute("searchRequest", searchRequest)
+        model.addAttribute("filterPanelViewModel", LandlordFilterPanelViewModel(searchRequest, httpServletRequest))
+
+        model.addAttribute("baseLandlordDetailsURL", "/landlord-details")
+
         if (searchRequest.searchTerm == null) {
             return "searchLandlord"
         }
+
         val pagedLandlordList =
             landlordService.searchForLandlords(
                 searchRequest.searchTerm!!,
@@ -63,14 +60,18 @@ class SearchRegisterController(
 
         model.addAttribute("searchResults", pagedLandlordList.content)
         model.addAttribute("paginationViewModel", PaginationViewModel(page, pagedLandlordList.totalPages, httpServletRequest))
+        // TODO PRSD-659: add LA property search base URL to model
+        model.addAttribute("propertySearchURL", "property")
+        // TODO PRSD-647: Set backURL to LA landing page
+        model.addAttribute("backURL", "")
 
         return "searchLandlord"
     }
 
     private fun isPageOutOfBounds(
-        pagedList: Page<LandlordSearchResultViewModel>?,
+        pagedList: Page<LandlordSearchResultViewModel>,
         page: Int,
-    ) = pagedList != null && pagedList.totalPages != 0 && pagedList.totalPages < page
+    ) = pagedList.totalPages != 0 && pagedList.totalPages < page
 
     // TODO PRSD-659: implement property search endpoint
     @GetMapping("/property")
