@@ -14,11 +14,15 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.LANDLORD_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.LISTED_PROPERTY_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.LA_COL_INDEX
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.PROPERTY_COL_INDEX
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.PROPERTY_LANDLORD_COL_INDEX
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.REG_NUM_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import kotlin.test.assertContains
 import kotlin.test.assertTrue
 
-@Sql("/data-landlord-search.sql")
+@Sql("/data-search.sql")
 class SearchRegisterTests : IntegrationTest() {
     @Nested
     inner class LandlordSearchTests {
@@ -60,7 +64,7 @@ class SearchRegisterTests : IntegrationTest() {
             ).containsText("7111111111\nalex.surname@example.com")
 
             assertThat(resultTable.getHeaderCell(LISTED_PROPERTY_COL_INDEX)).containsText("Listed properties")
-            assertThat(resultTable.getCell(0, LISTED_PROPERTY_COL_INDEX)).containsText("3")
+            assertThat(resultTable.getCell(0, LISTED_PROPERTY_COL_INDEX)).containsText("29")
 
             val exception = assertThrows<AssertionFailedError> { searchLandlordRegisterPage.getErrorMessage() }
             assertContains(exception.message!!, "Expected 1 instance of Locator@#no-results >> nth=0, found 0")
@@ -165,6 +169,83 @@ class SearchRegisterTests : IntegrationTest() {
 
             filter.clickClearFiltersLink()
             assertTrue(resultTable.countRows() > 1)
+        }
+    }
+
+    @Nested
+    inner class PropertySearchTests {
+        @Test
+        fun `results table does not show before search has been requested`() {
+            val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
+
+            val exception = assertThrows<AssertionFailedError> { searchPropertyRegisterPage.getResultTable() }
+            assertContains(exception.message!!, "Expected 1 instance of Locator@.govuk-table, found 0")
+        }
+
+        @Test
+        fun `results table does not show when blank search term requested`() {
+            val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
+            searchPropertyRegisterPage.searchBar.search("")
+
+            val exception = assertThrows<AssertionFailedError> { searchPropertyRegisterPage.getResultTable() }
+            assertContains(exception.message!!, "Expected 1 instance of Locator@.govuk-table, found 0")
+        }
+
+        @Test
+        fun `results table shows after (PRN) search has been requested`() {
+            val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
+            searchPropertyRegisterPage.searchBar.search("P-CCCT-GRKQ")
+            val resultTable = searchPropertyRegisterPage.getResultTable()
+
+            assertThat(resultTable.getHeaderCell(PROPERTY_COL_INDEX)).containsText("Property address")
+            assertThat(resultTable.getCell(0, PROPERTY_COL_INDEX)).containsText("11 PRSDB Square, EG1 2AK")
+
+            assertThat(resultTable.getHeaderCell(REG_NUM_COL_INDEX)).containsText("Registration number")
+            assertThat(resultTable.getCell(0, ADDRESS_COL_INDEX)).containsText("P-CCCT-GRKQ")
+
+            assertThat(resultTable.getHeaderCell(LA_COL_INDEX)).containsText("Local authority")
+            assertThat(resultTable.getCell(0, LA_COL_INDEX)).containsText("ISLE OF MAN")
+
+            assertThat(resultTable.getHeaderCell(PROPERTY_LANDLORD_COL_INDEX)).containsText("Registered landlord")
+            assertThat(resultTable.getCell(0, PROPERTY_LANDLORD_COL_INDEX)).containsText("Alexander Smith")
+
+            val exception = assertThrows<AssertionFailedError> { searchPropertyRegisterPage.getErrorMessage() }
+            assertContains(exception.message!!, "Expected 1 instance of Locator@#no-results >> nth=0, found 0")
+        }
+
+        @Test
+        fun `UPRN search produces an exact result`() {
+            val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
+            searchPropertyRegisterPage.searchBar.search("1123456")
+            val resultTable = searchPropertyRegisterPage.getResultTable()
+
+            assertThat(resultTable.getCell(0, PROPERTY_COL_INDEX)).containsText("1, Example Road, EG")
+        }
+
+        @Test
+        fun `Fuzzy search produces table of matching results`(page: Page) {
+            val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
+            searchPropertyRegisterPage.searchBar.search("Way")
+            val resultTable = searchPropertyRegisterPage.getResultTable()
+
+            assertThat(resultTable.getCell(0, PROPERTY_COL_INDEX)).containsText("3 Fake Way")
+            assertThat(resultTable.getCell(1, PROPERTY_COL_INDEX)).containsText("5 Pretend Crescent Way")
+        }
+
+        @Test
+        fun `property link goes to property details page`(page: Page) {
+            val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
+            searchPropertyRegisterPage.searchBar.search("P-C5YY-J34H")
+            searchPropertyRegisterPage.getPropertyLink(rowIndex = 0).click()
+            assertContains(page.url(), "/property-details/1")
+        }
+
+        @Test
+        fun `landlord link goes to landlord details page`(page: Page) {
+            val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
+            searchPropertyRegisterPage.searchBar.search("P-C5YY-J34H")
+            searchPropertyRegisterPage.getLandlordLink(rowIndex = 0).click()
+            assertContains(page.url(), "/landlord-details/1")
         }
     }
 }
