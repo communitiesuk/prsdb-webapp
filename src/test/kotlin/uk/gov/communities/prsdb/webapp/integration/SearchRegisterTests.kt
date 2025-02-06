@@ -247,5 +247,22 @@ class SearchRegisterTests : IntegrationTest() {
             searchPropertyRegisterPage.getLandlordLink(rowIndex = 0).click()
             assertContains(page.url(), "/landlord-details/1")
         }
+
+        @Test
+        fun `error shows if search has no results`() {
+            val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
+            searchPropertyRegisterPage.searchBar.search("non-matching searchTerm")
+
+            assertContains(searchPropertyRegisterPage.getErrorMessageText(), "No property record found")
+        }
+
+        @Test
+        fun `landlord search link shows if search has no results`(page: Page) {
+            val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
+            searchPropertyRegisterPage.searchBar.search("non-matching searchTerm")
+            searchPropertyRegisterPage.getLandlordSearchLink().click()
+
+            assertPageIs(page, SearchLandlordRegisterPage::class)
+        }
     }
 }

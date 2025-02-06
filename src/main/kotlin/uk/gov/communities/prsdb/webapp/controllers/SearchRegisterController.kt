@@ -95,6 +95,7 @@ class SearchRegisterController(
         val searchResults = propertyOwnershipService.searchForProperties(searchRequest.searchTerm!!)
 
         model.addAttribute("searchResults", searchResults)
+        model.addAttribute("landlordSearchURL", "landlord")
         model.addAttribute("baseLandlordDetailsURL", "/landlord-details")
         model.addAttribute("basePropertyDetailsURL", "/property-details")
 
