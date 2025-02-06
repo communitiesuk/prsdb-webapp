@@ -193,15 +193,19 @@ VALUES (1, 1, true, 1, 6),
 
 SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
 
+INSERT INTO license (id, license_type, license_number)
+VALUES (1, 1, 'L12345678');
+SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
+
 INSERT INTO property_ownership (id, is_active, occupancy_type, landlord_type, ownership_type, current_num_households,
                                 current_num_tenants,
-                                registration_number_id, primary_landlord_id, property_id, created_date)
-VALUES (1, true, 0, 0, 1, 1, 2, 6, 1, 1, '01/15/25'),
-       (2, false, 0, 0, 1, 1, 2, 34, 2, 2, '01/15/25'),
-       (3, true, 0, 0, 1, 1, 2, 35, 4, 3, '01/15/25'),
-       (4, true, 0, 0, 1, 1, 2, 36, 1, 4, '01/15/25'),
-       (5, true, 0, 0, 1, 1, 2, 37, 1, 5, '01/15/25'),
-       (6, false, 0, 0, 1, 1, 2, 38, 1, 6, '01/15/25'),
-       (7, true, 0, 0, 1, 0, 0, 39, 1, 7, '02/02/25');
+                                registration_number_id, primary_landlord_id, property_id, created_date, license_id)
+VALUES (1, true, 0, 0, 1, 1, 2, 6, 1, 1, '01/15/25', null),
+       (2, false, 0, 0, 1, 1, 2, 34, 2, 2, '01/15/25', null),
+       (3, true, 0, 0, 1, 1, 2, 35, 4, 3, '01/15/25', null),
+       (4, true, 0, 0, 1, 1, 2, 36, 1, 4, '01/15/25',null),
+       (5, true, 0, 0, 1, 1, 2, 37, 1, 5, '01/15/25', null),
+       (6, false, 0, 0, 1, 1, 2, 38, 1, 6, '01/15/25', null),
+       (7, true, 0, 0, 1, 0, 0, 39, 1, 7, '02/02/25', 1);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
