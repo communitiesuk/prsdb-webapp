@@ -13,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.Landlor
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.PropertySearchRequestModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.LandlordSearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchModels.LandlordFilterPanelViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -81,11 +80,11 @@ class SearchRegisterController(
         model: Model,
         searchRequest: PropertySearchRequestModel,
     ): String {
-        var searchResults: List<PropertySearchResultViewModel>? = null
-
-        if (searchRequest.searchTerm != null) {
-            searchResults = propertyOwnershipService.searchForProperties(searchRequest.searchTerm!!)
+        if (searchRequest.searchTerm == null) {
+            return "searchProperty"
         }
+
+        val searchResults = propertyOwnershipService.searchForProperties(searchRequest.searchTerm!!)
 
         model.addAttribute("searchRequest", searchRequest)
         model.addAttribute("searchResults", searchResults)
