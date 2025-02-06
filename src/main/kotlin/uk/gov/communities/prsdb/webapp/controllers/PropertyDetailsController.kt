@@ -28,7 +28,7 @@ class PropertyDetailsController(
         principal: Principal,
     ): String {
         val propertyOwnership =
-            propertyOwnershipService.getPropertyOwnershipByIdForPrincipal(propertyOwnershipId, principal.name)
+            propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, principal.name)
 
         val propertyDetails =
             PropertyDetailsViewModel(

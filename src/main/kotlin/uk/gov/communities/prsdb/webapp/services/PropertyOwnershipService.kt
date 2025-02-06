@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.viewModels.RegisteredPropertyViewModel
 
 @Service
@@ -53,9 +52,9 @@ class PropertyOwnershipService(
         )
     }
 
-    fun getPropertyOwnershipByIdForPrincipal(
+    fun getPropertyOwnershipIfAuthorizedUser(
         propertyOwnershipId: Long,
-        principalName: String,
+        baseUserId: String,
     ): PropertyOwnership {
         val propertyOwnership =
             retrievePropertyOwnershipById(propertyOwnershipId)
@@ -65,8 +64,7 @@ class PropertyOwnershipService(
                 )
 
         val landlordIdFromPrincipal =
-            landlordService.retrieveLandlordIdByBaseUserId(principalName)
-                ?: throw PrsdbWebException("User $principalName is not registered as a landlord")
+            landlordService.retrieveLandlordIdByBaseUserId(baseUserId)
 
         if (propertyOwnership.primaryLandlord.id != landlordIdFromPrincipal) {
             throw ResponseStatusException(HttpStatus.NOT_FOUND)
