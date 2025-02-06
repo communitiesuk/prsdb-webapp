@@ -32,7 +32,10 @@
             </div>
 
             <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('landlord-details', ~{:: #landlord-details-panel-content})}">
-              <th:block id="landlord-details-panel-content">
+          <th:block id="landlord-details-panel-content">
+            <h2 class="govuk-heading-m" th:text="#{propertyDetails.landlordDetails.registeredLandlord.heading}">propertyDetails.landlordDetails.registeredLandlord.heading</h2>
+            <p class="govuk-hint" th:text="#{propertyDetails.landlordDetails.registeredLandlord.hint}">propertyDetails.landlordDetails.registeredLandlord.hint</p>
+            <dl th:replace="~{fragments/summaryList :: summaryList(${landlordDetails})}"></dl>
               </th:block>
             </div>
           </th:block>

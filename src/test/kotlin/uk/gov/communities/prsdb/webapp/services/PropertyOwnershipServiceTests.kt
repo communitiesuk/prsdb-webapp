@@ -40,6 +40,9 @@ class PropertyOwnershipServiceTests {
     @Mock
     private lateinit var mockRegistrationNumberService: RegistrationNumberService
 
+    @Mock
+    private lateinit var mockLandlordService: LandlordService
+
     @InjectMocks
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 

@@ -9,6 +9,7 @@ data class SummaryListRowViewModel(
     val fieldHeading: String,
     val fieldValue: Any?,
     val changeUrl: String?,
+    val valueUrl: String? = null,
 ) {
     fun getConvertedFieldValue(): Any? =
         if (fieldValue is List<*>) {
