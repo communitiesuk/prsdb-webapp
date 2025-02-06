@@ -31,33 +31,6 @@ class SearchRegisterController(
         searchRequest: LandlordSearchRequestModel,
         @RequestParam(value = "page", required = false) @Min(1) page: Int = 1,
     ): String {
-        if (searchRequest.searchTerm?.isBlank() == true) {
-            return "redirect:landlord"
-        }
-
-        val pagedLandlordList =
-            if (searchRequest.searchTerm != null) {
-                landlordService.searchForLandlords(
-                    searchRequest.searchTerm!!,
-                    principal.name,
-                    searchRequest.restrictToLA,
-                    currentPageNumber = page - 1,
-                )
-            } else {
-                null
-            }
-
-        if (isPageOutOfBounds(pagedLandlordList, page)) {
-            return "redirect:${
-                URIQueryBuilder.fromHTTPServletRequest(httpServletRequest).removeParam("page").build().toUriString()
-            }"
-        }
-
-        model.addAttribute("searchResults", pagedLandlordList?.content)
-        pagedLandlordList?.totalPages?.let {
-            model.addAttribute("paginationViewModel", PaginationViewModel(page, pagedLandlordList.totalPages, httpServletRequest))
-        }
-
         model.addAttribute("searchRequest", searchRequest)
         model.addAttribute("filterPanelViewModel", LandlordFilterPanelViewModel(searchRequest, httpServletRequest))
 
@@ -66,6 +39,30 @@ class SearchRegisterController(
         model.addAttribute("propertySearchURL", "property")
         // TODO PRSD-647: Set backURL to LA landing page
         model.addAttribute("backURL", "")
+
+        if (searchRequest.searchTerm?.isBlank() == true) {
+            return "redirect:landlord"
+        }
+
+        if (searchRequest.searchTerm == null) {
+            return "searchLandlord"
+        }
+        val pagedLandlordList =
+            landlordService.searchForLandlords(
+                searchRequest.searchTerm!!,
+                principal.name,
+                searchRequest.restrictToLA,
+                currentPageNumber = page - 1,
+            )
+
+        if (isPageOutOfBounds(pagedLandlordList, page)) {
+            return "redirect:${
+                URIQueryBuilder.fromHTTPServletRequest(httpServletRequest).removeParam("page").build().toUriString()
+            }"
+        }
+
+        model.addAttribute("searchResults", pagedLandlordList.content)
+        model.addAttribute("paginationViewModel", PaginationViewModel(page, pagedLandlordList.totalPages, httpServletRequest))
 
         return "searchLandlord"
     }
