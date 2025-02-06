@@ -1,16 +1,53 @@
 <!DOCTYPE html>
 <html>
-<body th:replace="~{fragments/layout :: layout('Property Search', ~{::body/content()}, false)}">
+<body th:replace="~{fragments/layout :: layout(#{propertySearch.title}, ~{::body/content()}, false)}">
+<a th:replace="~{fragments/forms/backLink :: backLink(${backURL})}">backLink</a>
 <main class="govuk-main-wrapper" id="main-content">
+
+    <header>
+        <h1 class="govuk-heading-l" th:text="#{propertySearch.heading}">propertySearch.heading</h1>
+        <div class="govuk-hint" th:text="#{propertySearch.hint}">propertySearch.hint</div>
+    </header>
 
     <section>
 
-        <th:block th:replace="~{fragments/searchBar :: searchBar(null,null, ${searchRequest})}">
+        <th:block th:replace="~{fragments/searchBar :: searchBar(
+            #{propertySearch.searchBar.label}, #{propertySearch.searchBar.hint}, ${searchRequest})}">
         </th:block>
 
         <th:block th:if="${searchResults != null}">
-            <p th:each="result:${searchResults}" th:text="${result}"></p>
+            <table th:replace="~{fragments/tables/table :: table(
+                            ${ {'propertySearch.table.heading.address','propertySearch.table.heading.prn','propertySearch.table.heading.la', 'propertySearch.table.heading.landlord'} },
+                            ~{::tbody},
+                            #{propertySearch.table.heading}
+                        )}">
+                <tbody class="govuk-table__body">
+                <tr class="govuk_table__row" th:each="property: ${searchResults}">
+                    <td class="govuk-table__cell govuk-!-width-one-quarter">
+                        <a class="govuk-link" th:href="@{${basePropertyDetailsURL + '/' + property.id}}"
+                           th:text="${property.address}">
+                        </a>
+                    </td>
+                    <td class="govuk-table__cell govuk-!-width-one-quarter"
+                        th:text="${property.registrationNumber}">
+                    </td>
+                    <td class="govuk-table__cell govuk-!-width-one-quarter"
+                        th:text="${property.localAuthority}">
+                    </td>
+                    <td class="govuk-table__cell govuk-!-width-one-quarter">
+                        <a class="govuk-link" th:href="@{${baseLandlordDetailsURL + '/' + property.landlord.id}}"
+                           th:text="${property.landlord.name}">
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </th:block>
+
+        <details id="details-content"
+                 th:replace="~{fragments/details :: details(#{propertySearch.details.heading},~{::#details-content/content()})}">
+            <div class="govuk-details__text" th:text="#{propertySearch.details.body}">propertySearch.details.body</div>
+        </details>
 
     </section>
 

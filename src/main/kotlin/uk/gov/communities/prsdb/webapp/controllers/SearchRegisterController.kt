@@ -40,8 +40,8 @@ class SearchRegisterController(
 
         model.addAttribute("searchRequest", searchRequest)
         model.addAttribute("filterPanelViewModel", LandlordFilterPanelViewModel(searchRequest, httpServletRequest))
-
-        model.addAttribute("baseLandlordDetailsURL", "/landlord-details")
+        // TODO PRSD-647: Set backURL to LA landing page
+        model.addAttribute("backURL", "")
 
         if (searchRequest.searchTerm == null) {
             return "searchLandlord"
@@ -63,10 +63,9 @@ class SearchRegisterController(
 
         model.addAttribute("searchResults", pagedLandlordList.content)
         model.addAttribute("paginationViewModel", PaginationViewModel(page, pagedLandlordList.totalPages, httpServletRequest))
+        model.addAttribute("baseLandlordDetailsURL", "/landlord-details")
         // TODO PRSD-659: add LA property search base URL to model
         model.addAttribute("propertySearchURL", "property")
-        // TODO PRSD-647: Set backURL to LA landing page
-        model.addAttribute("backURL", "")
 
         return "searchLandlord"
     }
@@ -76,20 +75,29 @@ class SearchRegisterController(
         page: Int,
     ) = pagedList.totalPages != 0 && pagedList.totalPages < page
 
-    // TODO PRSD-659: implement property search endpoint
     @GetMapping("/property")
     fun searchForProperties(
         model: Model,
         searchRequest: PropertySearchRequestModel,
     ): String {
+        if (searchRequest.searchTerm?.isBlank() == true) {
+            return "redirect:property"
+        }
+
+        model.addAttribute("searchRequest", searchRequest)
+        // TODO PRSD-647: Set backURL to LA landing page
+        model.addAttribute("backURL", "")
+
         if (searchRequest.searchTerm == null) {
             return "searchProperty"
         }
 
         val searchResults = propertyOwnershipService.searchForProperties(searchRequest.searchTerm!!)
 
-        model.addAttribute("searchRequest", searchRequest)
         model.addAttribute("searchResults", searchResults)
+        model.addAttribute("baseLandlordDetailsURL", "/landlord-details")
+        model.addAttribute("basePropertyDetailsURL", "/property-details")
+
         return "searchProperty"
     }
 }
