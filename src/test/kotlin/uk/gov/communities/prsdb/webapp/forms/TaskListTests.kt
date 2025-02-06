@@ -168,7 +168,7 @@ class TaskListTests {
         }
 
         @Test
-        fun `when a task with a null completion step is completed, it is not marked as `() {
+        fun `when all steps are completed for a task with a null completion step, it is marked as in progress`() {
             // Arrange
             setUpStepsWithStatus(
                 stepOneCompleted = true,
@@ -189,7 +189,7 @@ class TaskListTests {
 
             // Assert
             assertIterableEquals(
-                listOf("taskList.status.completed", "taskList.status.completed", "taskList.status.notYetStarted"),
+                listOf("taskList.status.completed", "taskList.status.completed", "taskList.status.inProgress"),
                 viewModel.map { it.status.textKey },
             )
         }
