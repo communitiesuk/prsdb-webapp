@@ -62,7 +62,10 @@ class SearchRegisterController(
         }
 
         model.addAttribute("searchResults", pagedLandlordList.content)
-        model.addAttribute("paginationViewModel", PaginationViewModel(page, pagedLandlordList.totalPages, httpServletRequest))
+        model.addAttribute(
+            "paginationViewModel",
+            PaginationViewModel(page, pagedLandlordList.totalPages, httpServletRequest),
+        )
         model.addAttribute("baseLandlordDetailsURL", "/landlord-details")
         // TODO PRSD-659: add LA property search base URL to model
         model.addAttribute("propertySearchURL", "property")
@@ -97,7 +100,7 @@ class SearchRegisterController(
         model.addAttribute("searchResults", searchResults)
         model.addAttribute("landlordSearchURL", "landlord")
         model.addAttribute("baseLandlordDetailsURL", "/landlord-details")
-        model.addAttribute("basePropertyDetailsURL", "/property-details")
+        model.addAttribute("basePropertyDetailsURL", "/local-authority/property-details")
 
         return "searchProperty"
     }
