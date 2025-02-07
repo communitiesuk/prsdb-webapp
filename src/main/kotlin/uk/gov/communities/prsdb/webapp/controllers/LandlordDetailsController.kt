@@ -7,9 +7,14 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
+import uk.gov.communities.prsdb.webapp.forms.journeys.UpdateDetailsJourney
+import uk.gov.communities.prsdb.webapp.forms.steps.UpdateDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.LandlordViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
@@ -23,6 +28,7 @@ class LandlordDetailsController(
     val landlordService: LandlordService,
     val addressDataService: AddressDataService,
     val propertyOwnershipService: PropertyOwnershipService,
+    val updateDetailsJourney: UpdateDetailsJourney,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping
@@ -48,6 +54,33 @@ class LandlordDetailsController(
 
         return "landlordDetailsView"
     }
+
+    @PreAuthorize("hasRole('LANDLORD')")
+    @GetMapping("update/email")
+    fun getUpdateEmail(
+        model: Model,
+        principal: Principal,
+    ): String =
+        updateDetailsJourney.populateModelAndGetViewName(
+            UpdateDetailsStepId.UpdateEmail,
+            model,
+            null,
+        )
+
+    @PreAuthorize("hasRole('LANDLORD')")
+    @PostMapping("update/email")
+    fun submitUpdateEmail(
+        @RequestParam formData: PageData,
+        model: Model,
+        principal: Principal,
+    ): String =
+        updateDetailsJourney.updateJourneyDataAndGetViewNameOrRedirect(
+            UpdateDetailsStepId.UpdateEmail,
+            formData,
+            model,
+            null,
+            principal,
+        )
 
     @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
     @GetMapping("/{id}")
