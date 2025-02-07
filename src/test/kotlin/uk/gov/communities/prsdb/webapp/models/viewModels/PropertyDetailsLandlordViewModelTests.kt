@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertIterableEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData
@@ -201,7 +200,6 @@ class PropertyDetailsLandlordViewModelTests {
         }
     }
 
-    @Disabled
     @Test
     fun `LandlordViewModel returns all rows without change links`() {
         // Arrange
@@ -212,6 +210,5 @@ class PropertyDetailsLandlordViewModelTests {
 
         // Assert
         viewModel.landlordsDetails.forEach { personalDetails -> assertNull(personalDetails.changeUrl) }
-        TODO("PRSD-724")
     }
 }

@@ -8,7 +8,6 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -76,20 +75,10 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LA_USER"])
-        fun `getPropertyDetails returns 404 if the requested property ownership is not found`() {
-            mvc.get("/local-authority/property-details/1").andExpect {
-                status { status { isNotFound() } }
-            }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LA_USER"])
-        fun `getPropertyDetails returns error if the requested property ownership is inactive`() {
-            whenever(propertyOwnershipService.retrievePropertyOwnershipById(1))
-                .thenReturn(PropertyOwnership())
-            mvc.get("/local-authority/property-details/1").andExpect {
-                status { status { isBadRequest() } }
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails returns 403 for an unauthorized user with only the landlord role`() {
+            mvc.get("/property-details/1").andExpect {
+                status { status { isForbidden() } }
             }
         }
 
@@ -98,7 +87,7 @@ class PropertyDetailsControllerTests(
         fun `getPropertyDetails returns 200 for a valid request from an LA user`() {
             val propertyOwnership = createPropertyOwnership()
 
-            whenever(propertyOwnershipService.retrievePropertyOwnershipById(1))
+            whenever(propertyOwnershipService.getPropertyOwnership(1))
                 .thenReturn(
                     propertyOwnership,
                 )
@@ -113,7 +102,7 @@ class PropertyDetailsControllerTests(
         fun `getPropertyDetails returns 200 for a valid request from an LA admin`() {
             val propertyOwnership = createPropertyOwnership()
 
-            whenever(propertyOwnershipService.retrievePropertyOwnershipById(1))
+            whenever(propertyOwnershipService.getPropertyOwnership(1))
                 .thenReturn(
                     propertyOwnership,
                 )

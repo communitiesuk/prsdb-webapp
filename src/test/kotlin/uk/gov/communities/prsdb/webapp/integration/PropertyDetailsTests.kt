@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
@@ -107,9 +108,22 @@ class PropertyDetailsTests : IntegrationTest() {
         }
 
         @Test
-        fun `the landlord name link goes the local authority view of landlord details`(page: Page) {
+        fun `in the key details section the landlord name link goes the local authority view of landlord details`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
             detailsPage.clickLandlordNameLinkFromKeyDetails("Alexander Smith")
+
+            assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
+            Assertions.assertEquals("/landlord-details/1", URI(page.url()).path)
+        }
+
+        // TODO PRSD-724 enable this test
+        @Disabled
+        @Test
+        fun `in the landlord details section the landlord name link goes the local authority view of landlord details`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
+            detailsPage.goToLandlordDetails()
+
+            detailsPage.clickLandlordLinkFromLandlordDetails("Alexander Smith")
 
             assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
             Assertions.assertEquals("/landlord-details/1", URI(page.url()).path)

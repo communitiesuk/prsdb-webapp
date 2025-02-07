@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.InjectMocks
@@ -17,6 +18,8 @@ import org.mockito.kotlin.whenever
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -224,6 +227,32 @@ class PropertyOwnershipServiceTests {
 
             assertTrue(result.size == 2)
             assertEquals(expectedResults, result)
+        }
+    }
+
+    @Nested
+    inner class GetPropertyOwnership {
+        @Test
+        fun `throws not found error if an active property ownership does not exist`() {
+            val invalidId: Long = 1
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(invalidId)).thenReturn(null)
+
+            val errorThrown =
+                assertThrows<ResponseStatusException> {
+                    propertyOwnershipService.getPropertyOwnership(invalidId)
+                }
+            assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
+        }
+
+        @Test
+        fun `returns the property ownership when found`() {
+            val propertyOwnership = createPropertyOwnership()
+
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            val result = propertyOwnershipService.getPropertyOwnership(propertyOwnership.id)
+
+            assertEquals(result, propertyOwnership)
         }
     }
 
