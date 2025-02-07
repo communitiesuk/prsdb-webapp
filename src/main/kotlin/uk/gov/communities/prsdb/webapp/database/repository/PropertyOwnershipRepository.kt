@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.database.repository
 
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
@@ -40,7 +42,8 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
     )
     fun searchMatchingPRN(
         @Param("searchPRN") searchPRN: Long,
-    ): List<PropertyOwnership>
+        pageable: Pageable,
+    ): Page<PropertyOwnership>
 
     @Query(
         "SELECT po.* " +
@@ -52,7 +55,8 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
     )
     fun searchMatchingUPRN(
         @Param("searchUPRN") searchUPRN: Long,
-    ): List<PropertyOwnership>
+        pageable: Pageable,
+    ): Page<PropertyOwnership>
 
     @Query(
         "SELECT po.* " +
@@ -65,5 +69,6 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
     )
     fun searchMatching(
         @Param("searchTerm") searchTerm: String,
-    ): List<PropertyOwnership>
+        pageable: Pageable,
+    ): Page<PropertyOwnership>
 }

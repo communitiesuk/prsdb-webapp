@@ -6,13 +6,17 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor.captor
-import org.mockito.ArgumentMatchers.any
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -74,7 +78,7 @@ class PropertyOwnershipServiceTests {
         whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)).thenReturn(
             registrationNumber,
         )
-        whenever(mockPropertyOwnershipRepository.save(any(PropertyOwnership::class.java))).thenReturn(
+        whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenReturn(
             expectedPropertyOwnership,
         )
 
@@ -119,7 +123,7 @@ class PropertyOwnershipServiceTests {
         whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)).thenReturn(
             registrationNumber,
         )
-        whenever(mockPropertyOwnershipRepository.save(any(PropertyOwnership::class.java))).thenReturn(
+        whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenReturn(
             expectedPropertyOwnership,
         )
 
@@ -234,13 +238,32 @@ class PropertyOwnershipServiceTests {
         val expectedSearchResults =
             prnMatchingPropertyOwnership.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
 
-        whenever(mockPropertyOwnershipRepository.searchMatchingPRN(searchPRN.number)).thenReturn(
-            prnMatchingPropertyOwnership,
+        whenever(mockPropertyOwnershipRepository.searchMatchingPRN(eq(searchPRN.number), pageable = any())).thenReturn(
+            PageImpl(prnMatchingPropertyOwnership),
         )
 
         val searchResults = propertyOwnershipService.searchForProperties(searchPRN.toString())
 
-        assertEquals(expectedSearchResults, searchResults)
+        assertEquals(expectedSearchResults, searchResults.content)
+    }
+
+    @Test
+    fun `searchForProperties returns no results when the search term is a non-property registration number`() {
+        val nonPropertyRegNum = RegistrationNumberDataModel(RegistrationNumberType.LANDLORD, 123)
+
+        whenever(
+            mockPropertyOwnershipRepository.searchMatching(eq(nonPropertyRegNum.toString()), pageable = any()),
+        ).thenReturn(
+            Page.empty(),
+        )
+
+        val searchResults = propertyOwnershipService.searchForProperties(nonPropertyRegNum.toString())
+
+        verify(mockPropertyOwnershipRepository, never()).searchMatchingPRN(
+            eq(nonPropertyRegNum.number),
+            pageable = any(),
+        )
+        assertEquals(emptyList<PropertySearchResultViewModel>(), searchResults.content)
     }
 
     @Test
@@ -252,13 +275,18 @@ class PropertyOwnershipServiceTests {
         val expectedSearchResults =
             uprnMatchingPropertyOwnership.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
 
-        whenever(mockPropertyOwnershipRepository.searchMatchingUPRN(searchUPRN.toLong())).thenReturn(
-            uprnMatchingPropertyOwnership,
+        whenever(
+            mockPropertyOwnershipRepository.searchMatchingUPRN(
+                eq(searchUPRN.toLong()),
+                pageable = any(),
+            ),
+        ).thenReturn(
+            PageImpl(uprnMatchingPropertyOwnership),
         )
 
         val searchResults = propertyOwnershipService.searchForProperties(searchUPRN)
 
-        assertEquals(expectedSearchResults, searchResults)
+        assertEquals(expectedSearchResults, searchResults.content)
     }
 
     @Test
@@ -269,12 +297,12 @@ class PropertyOwnershipServiceTests {
         val expectedSearchResults =
             fuzzyMatchingPropertyOwnerships.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
 
-        whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm)).thenReturn(
-            fuzzyMatchingPropertyOwnerships,
+        whenever(mockPropertyOwnershipRepository.searchMatching(eq(searchTerm), pageable = any())).thenReturn(
+            PageImpl(fuzzyMatchingPropertyOwnerships),
         )
 
         val searchResults = propertyOwnershipService.searchForProperties(searchTerm)
 
-        assertEquals(expectedSearchResults, searchResults)
+        assertEquals(expectedSearchResults, searchResults.content)
     }
 }
