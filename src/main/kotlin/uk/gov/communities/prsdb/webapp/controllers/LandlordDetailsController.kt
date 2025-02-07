@@ -14,7 +14,6 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.UpdateDetailsJourney
-import uk.gov.communities.prsdb.webapp.forms.steps.UpdateDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.LandlordViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
@@ -56,26 +55,28 @@ class LandlordDetailsController(
     }
 
     @PreAuthorize("hasRole('LANDLORD')")
-    @GetMapping("update/email")
+    @GetMapping("update/{stepName}")
     fun getUpdateEmail(
+        @PathVariable("stepName") stepName: String,
         model: Model,
         principal: Principal,
     ): String =
         updateDetailsJourney.populateModelAndGetViewName(
-            UpdateDetailsStepId.UpdateEmail,
+            updateDetailsJourney.getStepId(stepName),
             model,
             null,
         )
 
     @PreAuthorize("hasRole('LANDLORD')")
-    @PostMapping("update/email")
+    @PostMapping("update/{stepName}")
     fun submitUpdateEmail(
+        @PathVariable("stepName") stepName: String,
         @RequestParam formData: PageData,
         model: Model,
         principal: Principal,
     ): String =
         updateDetailsJourney.updateJourneyDataAndGetViewNameOrRedirect(
-            UpdateDetailsStepId.UpdateEmail,
+            updateDetailsJourney.getStepId(stepName),
             formData,
             model,
             null,

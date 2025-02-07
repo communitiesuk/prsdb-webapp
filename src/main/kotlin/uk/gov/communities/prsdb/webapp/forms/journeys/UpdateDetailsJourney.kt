@@ -9,10 +9,12 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import java.util.Optional
 
 @Component
 class UpdateDetailsJourney(
@@ -74,9 +76,28 @@ class UpdateDetailsJourney(
     }
 
     private fun handleChangeSubmitAndRedirect(journeyData: JourneyData): String {
-        val emailData = JourneyDataHelper.getPageData(journeyData, UpdateDetailsStepId.UpdateEmail.urlPathSegment)
-        val email = emailData!!["emailAddress"] as String
-        val landlord = landlordService.updateLandlordEmailForBaseUserId(SecurityContextHolder.getContext().authentication.name, email)
+        val landlordUpdate =
+            LandlordUpdateModel(
+                email =
+                    if (journeyData.containsKey(UpdateDetailsStepId.UpdateEmail.urlPathSegment)) {
+                        Optional.of(
+                            JourneyDataHelper.getFieldStringValue(
+                                journeyData,
+                                UpdateDetailsStepId.UpdateEmail.urlPathSegment,
+                                "emailAddress",
+                            )!!,
+                        )
+                    } else {
+                        Optional.empty()
+                    },
+            )
+
+        landlordService.updateLandlordEmailForBaseUserId(
+            SecurityContextHolder.getContext().authentication.name,
+            landlordUpdate,
+        )
+
+        journeyDataService.deleteJourneyData()
 
         return "/landlord-details"
     }

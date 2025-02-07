@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPropertyCountRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.LandlordSearchResultViewModel
 import java.time.LocalDate
@@ -65,15 +66,16 @@ class LandlordService(
         )
     }
 
+    @Transactional
     fun updateLandlordEmailForBaseUserId(
         baseUserId: String,
-        email: String,
+        landlordUpdate: LandlordUpdateModel,
     ): Landlord {
-        val ll = retrieveLandlordByBaseUserId(baseUserId)
+        val landlordEntity = retrieveLandlordByBaseUserId(baseUserId)!!
 
-        ll!!.email = email
+        landlordUpdate.email.ifPresent { landlordEntity.email = it }
 
-        return ll
+        return landlordEntity
     }
 
     fun searchForLandlords(
