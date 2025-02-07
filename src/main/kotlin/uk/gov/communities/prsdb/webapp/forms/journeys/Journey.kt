@@ -109,7 +109,7 @@ abstract class Journey<T : StepId>(
         return "redirect:$redirectUrl"
     }
 
-    fun isStepReachable(
+    open fun isStepReachable(
         journeyData: JourneyData,
         targetStep: Step<T>,
         targetSubPageNumber: Int? = null,
@@ -120,7 +120,7 @@ abstract class Journey<T : StepId>(
         return getPrevStep(journeyData, targetStep, targetSubPageNumber) != null
     }
 
-    private fun getPrevStep(
+    protected open fun getPrevStep(
         journeyData: JourneyData,
         targetStep: Step<T>,
         targetSubPageNumber: Int?,

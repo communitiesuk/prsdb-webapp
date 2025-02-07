@@ -29,7 +29,6 @@ class Landlord() : ModifiableAuditableEntity() {
 
     @Column(nullable = false)
     lateinit var email: String
-        private set
 
     @Column(nullable = false)
     lateinit var phoneNumber: String
