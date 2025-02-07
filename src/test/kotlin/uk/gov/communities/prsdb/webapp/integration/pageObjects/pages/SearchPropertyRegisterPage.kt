@@ -11,6 +11,8 @@ class SearchPropertyRegisterPage(
 
     fun getLandlordLink(rowIndex: Int) = getChildComponent(getResultTable().getCell(rowIndex, PROPERTY_LANDLORD_COL_INDEX), "a")
 
+    fun getLandlordSearchLink() = getChildComponent(getErrorMessage(), "a")
+
     companion object {
         const val PROPERTY_COL_INDEX: Int = 0
         const val REG_NUM_COL_INDEX: Int = 1

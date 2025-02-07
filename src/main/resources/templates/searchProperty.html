@@ -16,6 +16,7 @@
         </th:block>
 
         <th:block th:if="${searchResults != null}">
+
             <table th:replace="~{fragments/tables/table :: table(
                             ${ {'propertySearch.table.heading.address','propertySearch.table.heading.prn','propertySearch.table.heading.la', 'propertySearch.table.heading.landlord'} },
                             ~{::tbody},
@@ -42,6 +43,20 @@
                 </tr>
                 </tbody>
             </table>
+
+            <div th:if="${searchResults.size() == 0}"
+                 class="govuk-!-text-align-centre govuk-!-margin-bottom-6" id="no-results">
+                <h1 class="govuk-heading-l" th:text="#{propertySearch.error.heading}">
+                    propertySearch.error.heading
+                </h1>
+                <div class="govuk-hint">
+                    <span th:remove="tag" th:text="#{propertySearch.error.hint.beforeLink}">propertySearch.error.hint.beforeLink</span>
+                    <a class="govuk-link" th:href="@{${landlordSearchURL}}"
+                       th:text="#{propertySearch.error.hint.link}">propertySearch.error.hint.link
+                    </a>
+                </div>
+            </div>
+
         </th:block>
 
         <details id="details-content"
