@@ -14,6 +14,9 @@ import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RegisteredPropertyViewModel
 
 @Service
@@ -88,6 +91,22 @@ class PropertyOwnershipService(
 
     fun retrievePropertyOwnershipById(propertyOwnershipId: Long): PropertyOwnership? =
         propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)
+
+    fun searchForProperties(searchTerm: String): List<PropertySearchResultViewModel> {
+        val prn = RegistrationNumberDataModel.parseTypeOrNull(searchTerm, RegistrationNumberType.PROPERTY)
+        val uprn = AddressHelper.parseUprnOrNull(searchTerm)
+
+        val matchingProperties =
+            if (prn != null) {
+                propertyOwnershipRepository.searchMatchingPRN(prn.number)
+            } else if (uprn != null) {
+                propertyOwnershipRepository.searchMatchingUPRN(uprn)
+            } else {
+                propertyOwnershipRepository.searchMatching(searchTerm)
+            }
+
+        return matchingProperties.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
+    }
 
     private fun retrieveAllRegisteredPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
         propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(

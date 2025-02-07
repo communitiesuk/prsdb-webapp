@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.cr
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createProperty
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RegisteredPropertyViewModel
 
 @ExtendWith(MockitoExtension::class)
@@ -224,5 +225,56 @@ class PropertyOwnershipServiceTests {
             assertTrue(result.size == 2)
             assertEquals(expectedResults, result)
         }
+    }
+
+    @Test
+    fun `searchForProperties returns a single matching property when the search term is a PRN`() {
+        val searchPRN = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 123)
+        val prnMatchingPropertyOwnership = listOf(createPropertyOwnership())
+        val expectedSearchResults =
+            prnMatchingPropertyOwnership.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
+
+        whenever(mockPropertyOwnershipRepository.searchMatchingPRN(searchPRN.number)).thenReturn(
+            prnMatchingPropertyOwnership,
+        )
+
+        val searchResults = propertyOwnershipService.searchForProperties(searchPRN.toString())
+
+        assertEquals(expectedSearchResults, searchResults)
+    }
+
+    @Test
+    fun `searchForProperties returns a single matching property when the search term is a UPRN`() {
+        val searchUPRN = "123"
+
+        val uprnMatchingPropertyOwnership =
+            listOf(createPropertyOwnership(property = createProperty(address = createAddress(uprn = searchUPRN.toLong()))))
+        val expectedSearchResults =
+            uprnMatchingPropertyOwnership.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
+
+        whenever(mockPropertyOwnershipRepository.searchMatchingUPRN(searchUPRN.toLong())).thenReturn(
+            uprnMatchingPropertyOwnership,
+        )
+
+        val searchResults = propertyOwnershipService.searchForProperties(searchUPRN)
+
+        assertEquals(expectedSearchResults, searchResults)
+    }
+
+    @Test
+    fun `searchForProperties returns a collection of fuzzy matches when the search term is not a PRN or UPRN`() {
+        val searchTerm = "EG1 2AB"
+
+        val fuzzyMatchingPropertyOwnerships = listOf(createPropertyOwnership(), createPropertyOwnership())
+        val expectedSearchResults =
+            fuzzyMatchingPropertyOwnerships.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
+
+        whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm)).thenReturn(
+            fuzzyMatchingPropertyOwnerships,
+        )
+
+        val searchResults = propertyOwnershipService.searchForProperties(searchTerm)
+
+        assertEquals(expectedSearchResults, searchResults)
     }
 }
