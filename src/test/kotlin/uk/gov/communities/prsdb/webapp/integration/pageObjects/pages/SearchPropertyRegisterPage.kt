@@ -1,8 +1,22 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.getChildComponent
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.SearchRegisterBasePage
 
 class SearchPropertyRegisterPage(
     page: Page,
-) : BasePage(page, "/search/property")
+) : SearchRegisterBasePage(page, "/search/property") {
+    fun getPropertyLink(rowIndex: Int) = getChildComponent(getResultTable().getCell(rowIndex, PROPERTY_COL_INDEX), "a")
+
+    fun getLandlordLink(rowIndex: Int) = getChildComponent(getResultTable().getCell(rowIndex, PROPERTY_LANDLORD_COL_INDEX), "a")
+
+    fun getLandlordSearchLink() = getChildComponent(getErrorMessage(), "a")
+
+    companion object {
+        const val PROPERTY_COL_INDEX: Int = 0
+        const val REG_NUM_COL_INDEX: Int = 1
+        const val LA_COL_INDEX: Int = 2
+        const val PROPERTY_LANDLORD_COL_INDEX: Int = 3
+    }
+}
