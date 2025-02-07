@@ -17,6 +17,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -311,5 +312,35 @@ class PropertyOwnershipServiceTests {
         val searchResults = propertyOwnershipService.searchForProperties(searchTerm)
 
         assertEquals(expectedSearchResults, searchResults.content)
+    }
+
+    @Test
+    fun `searchForProperties returns the requested page of properties`() {
+        val searchTerm = "searchTerm"
+        val pageSize = 25
+        val matchingProperties = (1..40).map { MockLandlordData.createPropertyOwnership() }
+
+        val pageNumber1 = 0
+        val pageRequest1 = PageRequest.of(pageNumber1, pageSize)
+        val matchingPropertiesPage1 = matchingProperties.subList(0, pageSize)
+        val expectedPage1SearchResults =
+            matchingPropertiesPage1.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
+
+        val pageNumber2 = 1
+        val pageRequest2 = PageRequest.of(pageNumber2, pageSize)
+        val matchingPropertiesPage2 = matchingProperties.subList(pageSize, matchingProperties.size)
+        val expectedPage2SearchResults =
+            matchingPropertiesPage2.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
+
+        whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm, pageable = pageRequest1))
+            .thenReturn(PageImpl(matchingPropertiesPage1))
+        whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm, pageable = pageRequest2))
+            .thenReturn(PageImpl(matchingPropertiesPage2))
+
+        val searchResults1 = propertyOwnershipService.searchForProperties(searchTerm, pageNumber1)
+        val searchResults2 = propertyOwnershipService.searchForProperties(searchTerm, pageNumber2)
+
+        assertEquals(expectedPage1SearchResults, searchResults1.content)
+        assertEquals(expectedPage2SearchResults, searchResults2.content)
     }
 }
