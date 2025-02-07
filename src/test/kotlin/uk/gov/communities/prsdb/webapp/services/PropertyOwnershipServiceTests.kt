@@ -265,12 +265,12 @@ class PropertyOwnershipServiceTests {
     fun `searchForProperties returns a collection of fuzzy matches when the search term is not a PRN or UPRN`() {
         val searchTerm = "EG1 2AB"
 
-        val expectedPropertyOwnerships = listOf(createPropertyOwnership(), createPropertyOwnership())
+        val fuzzyMatchingPropertyOwnerships = listOf(createPropertyOwnership(), createPropertyOwnership())
         val expectedSearchResults =
-            expectedPropertyOwnerships.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
+            fuzzyMatchingPropertyOwnerships.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
 
         whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm)).thenReturn(
-            expectedPropertyOwnerships,
+            fuzzyMatchingPropertyOwnerships,
         )
 
         val searchResults = propertyOwnershipService.searchForProperties(searchTerm)
