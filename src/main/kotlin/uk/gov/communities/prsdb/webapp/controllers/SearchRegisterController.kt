@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.constraints.Min
+import org.springframework.data.domain.Page
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -37,35 +38,31 @@ class SearchRegisterController(
             return "redirect:landlord"
         }
 
-        var searchResults: List<LandlordSearchResultViewModel>? = null
-        var totalPages = 0
-
-        if (searchRequest.searchTerm != null) {
-            val pagedLandlordList =
-                landlordService.searchForLandlords(
-                    searchRequest.searchTerm!!,
-                    principal.name,
-                    searchRequest.restrictToLA,
-                    currentPageNumber = page - 1,
-                )
-
-            if (pagedLandlordList.totalPages != 0 && pagedLandlordList.totalPages < page) {
-                return "redirect:${
-                    URIQueryBuilder.fromHTTPServletRequest(httpServletRequest).removeParam("page").build().toUriString()
-                }"
-            }
-
-            searchResults = pagedLandlordList.content
-            totalPages = pagedLandlordList.totalPages
-        }
-
-        model.addAttribute("searchResults", searchResults)
-        model.addAttribute("paginationViewModel", PaginationViewModel(page, totalPages, httpServletRequest))
-
         model.addAttribute("searchRequest", searchRequest)
         model.addAttribute("filterPanelViewModel", LandlordFilterPanelViewModel(searchRequest, httpServletRequest))
 
         model.addAttribute("baseLandlordDetailsURL", "/landlord-details")
+
+        if (searchRequest.searchTerm == null) {
+            return "searchLandlord"
+        }
+
+        val pagedLandlordList =
+            landlordService.searchForLandlords(
+                searchRequest.searchTerm!!,
+                principal.name,
+                searchRequest.restrictToLA,
+                currentPageNumber = page - 1,
+            )
+
+        if (isPageOutOfBounds(pagedLandlordList, page)) {
+            return "redirect:${
+                URIQueryBuilder.fromHTTPServletRequest(httpServletRequest).removeParam("page").build().toUriString()
+            }"
+        }
+
+        model.addAttribute("searchResults", pagedLandlordList.content)
+        model.addAttribute("paginationViewModel", PaginationViewModel(page, pagedLandlordList.totalPages, httpServletRequest))
         // TODO PRSD-659: add LA property search base URL to model
         model.addAttribute("propertySearchURL", "property")
         // TODO PRSD-647: Set backURL to LA landing page
@@ -73,6 +70,11 @@ class SearchRegisterController(
 
         return "searchLandlord"
     }
+
+    private fun isPageOutOfBounds(
+        pagedList: Page<LandlordSearchResultViewModel>,
+        page: Int,
+    ) = pagedList.totalPages != 0 && pagedList.totalPages < page
 
     // TODO PRSD-659: implement property search endpoint
     @GetMapping("/property")
