@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Co
 import uk.gov.communities.prsdb.webapp.forms.pages.AlreadyRegisteredPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationCheckAnswersPage
+import uk.gov.communities.prsdb.webapp.forms.pages.RegisterPropertyTaskListPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
@@ -66,10 +67,11 @@ class PropertyRegistrationJourney(
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
-    override val initialStepId = RegisterPropertyStepId.LookupAddress
+    override val initialStepId = RegisterPropertyStepId.TaskList
 
     override val steps =
         setOf(
+            taskListStep(),
             lookupAddressStep(),
             selectAddressStep(addressLookupService, addressDataService, propertyRegistrationService),
             alreadyRegisteredStep(),
@@ -97,6 +99,13 @@ class PropertyRegistrationJourney(
                 confirmationEmailSender,
                 session,
             ),
+        )
+
+    private fun taskListStep() =
+        Step(
+            id = RegisterPropertyStepId.TaskList,
+            page = RegisterPropertyTaskListPage(),
+            nextAction = { _, _ -> Pair(RegisterPropertyStepId.LookupAddress, null) },
         )
 
     private fun lookupAddressStep() =

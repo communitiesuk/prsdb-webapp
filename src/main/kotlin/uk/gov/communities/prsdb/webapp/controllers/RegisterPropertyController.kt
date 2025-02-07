@@ -13,12 +13,10 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
+import uk.gov.communities.prsdb.webapp.forms.tasks.RegisterPropertyMultiTaskTransaction
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.TaskListItemViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.TaskStatusViewModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -29,6 +27,7 @@ class RegisterPropertyController(
     private val propertyRegistrationJourney: PropertyRegistrationJourney,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val session: HttpSession,
+    private val registerPropertyTransaction: RegisterPropertyMultiTaskTransaction,
 ) {
     @GetMapping
     fun index(model: Model): String {
@@ -54,39 +53,15 @@ class RegisterPropertyController(
         )
 
     @GetMapping("/task-list")
-    fun getTaskList(model: Model): String {
-        val registerTaskList =
-            listOf(
-                TaskListItemViewModel(
-                    "registerProperty.taskList.register.addAddress",
-                    TaskStatusViewModel.fromStatus(TaskStatus.COMPLETED),
-                    "https:www.google.com",
-                ),
-                TaskListItemViewModel(
-                    "registerProperty.taskList.register.selectType",
-                    TaskStatusViewModel.fromStatus(TaskStatus.IN_PROGRESS),
-                    "https:www.google.com",
-                ),
-                TaskListItemViewModel(
-                    "registerProperty.taskList.register.selectOwnership",
-                    TaskStatusViewModel.fromStatus(TaskStatus.NOT_YET_STARTED),
-                    "https:www.google.com",
-                ),
-                TaskListItemViewModel(
-                    "registerProperty.taskList.register.addLicensing",
-                    TaskStatusViewModel.fromStatus(TaskStatus.CANNOT_START_YET),
-                ),
-            )
-        val checkAndSubmitTaskList =
-            listOf(
-                TaskListItemViewModel(
-                    "registerProperty.taskList.checkAndSubmit.checkAnswers",
-                    TaskStatusViewModel.fromStatus(TaskStatus.CANNOT_START_YET),
-                ),
-            )
+    fun getTaskList(
+        model: Model,
+        principal: Principal,
+    ): String {
+        val viewModelLists = registerPropertyTransaction.getTaskListPageViewModels(principal.name)
 
-        model.addAttribute("registerTasks", registerTaskList)
-        model.addAttribute("checkAndSubmitTasks", checkAndSubmitTaskList)
+        // TODO PRSD-600: Pass this list directly to the template and update the template to represent a list of sections
+        model.addAttribute("registerTasks", viewModelLists[0])
+        model.addAttribute("checkAndSubmitTasks", viewModelLists[1])
 
         return "registerPropertyTaskList"
     }
