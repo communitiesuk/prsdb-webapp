@@ -66,6 +66,17 @@ class LandlordService(
         )
     }
 
+    fun updateLandlordEmailForBaseUserId(
+        baseUserId: String,
+        email: String,
+    ): Landlord {
+        val ll = retrieveLandlordByBaseUserId(baseUserId)
+
+        ll!!.email = email
+
+        return ll
+    }
+
     fun searchForLandlords(
         searchTerm: String,
         laBaseUserId: String,
