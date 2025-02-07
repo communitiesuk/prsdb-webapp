@@ -64,7 +64,7 @@ class SearchRegisterTests : IntegrationTest() {
             ).containsText("7111111111\nalex.surname@example.com")
 
             assertThat(resultTable.getHeaderCell(LISTED_PROPERTY_COL_INDEX)).containsText("Listed properties")
-            assertThat(resultTable.getCell(0, LISTED_PROPERTY_COL_INDEX)).containsText("29")
+            assertThat(resultTable.getCell(0, LISTED_PROPERTY_COL_INDEX)).containsText("30")
 
             val exception = assertThrows<AssertionFailedError> { searchLandlordRegisterPage.getErrorMessage() }
             assertContains(exception.message!!, "Expected 1 instance of Locator@#no-results >> nth=0, found 0")
@@ -263,6 +263,35 @@ class SearchRegisterTests : IntegrationTest() {
             searchPropertyRegisterPage.getLandlordSearchLink().click()
 
             assertPageIs(page, SearchLandlordRegisterPage::class)
+        }
+
+        @Test
+        fun `pagination component does not show if there is only one page of results`(page: Page) {
+            val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
+            searchPropertyRegisterPage.searchBar.search("Way")
+
+            val exception = assertThrows<AssertionFailedError> { searchPropertyRegisterPage.getPaginationComponent() }
+            assertContains(exception.message!!, "Expected 1 instance of Locator@.govuk-pagination >> nth=0, found 0")
+        }
+
+        @Test
+        fun `pagination links lead to the intended pages`(page: Page) {
+            val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
+            searchPropertyRegisterPage.searchBar.search("PRSDB")
+
+            println(searchPropertyRegisterPage.getResultTable().countRows())
+
+            searchPropertyRegisterPage.getPaginationComponent().getNextLink().click()
+            assertContains(page.url(), "page=2")
+            val nextPage = assertPageIs(page, SearchPropertyRegisterPage::class)
+
+            nextPage.getPaginationComponent().getPreviousLink().click()
+            assertContains(page.url(), "page=1")
+            val previousPage = assertPageIs(page, SearchPropertyRegisterPage::class)
+
+            previousPage.getPaginationComponent().getPageNumberLink(2).click()
+            assertContains(page.url(), "page=2")
+            assertPageIs(page, SearchPropertyRegisterPage::class)
         }
     }
 }
