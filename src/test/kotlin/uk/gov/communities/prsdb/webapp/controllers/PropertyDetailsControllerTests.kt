@@ -77,7 +77,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `getPropertyDetails returns 403 for an unauthorized user with only the landlord role`() {
-            mvc.get("/property-details/1").andExpect {
+            mvc.get("/local-authority/property-details/1").andExpect {
                 status { status { isForbidden() } }
             }
         }
