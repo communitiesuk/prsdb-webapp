@@ -51,12 +51,12 @@ class PropertyDetailsLandlordViewModel(
     private fun formatNonUkAddressDetails(landlord: Landlord) =
         listOf(
             SummaryListRowViewModel(
-                "landlordDetails.personalDetails.nonUkAddress",
+                "propertyDetails.landlordDetails.addressOutsideEnglandOrWales",
                 landlord.internationalAddress,
                 toggleChangeLink("$UPDATE_ROUTE/address"),
             ),
             SummaryListRowViewModel(
-                "landlordDetails.personalDetails.ukAddress",
+                "propertyDetails.landlordDetails.contactAddressInEnglandOrWales",
                 landlord.address.singleLineAddress,
                 toggleChangeLink("$UPDATE_ROUTE/contact-address"),
             ),
