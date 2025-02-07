@@ -1,14 +1,12 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import kotlinx.datetime.toKotlinInstant
-import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyDetailsLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyDetailsViewModel
@@ -57,12 +55,7 @@ class PropertyDetailsController(
         @PathVariable propertyOwnershipId: Long,
         model: Model,
     ): String {
-        val propertyOwnership =
-            propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Property ownership $propertyOwnershipId not found")
-        if (!propertyOwnership.isActive) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Property ownership $propertyOwnershipId is inactive")
-        }
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
 
         val lastModifiedDate = DateTimeHelper.getDateInUK(propertyOwnership.getMostRecentlyUpdated().toKotlinInstant())
         val lastModifiedBy = propertyOwnership.primaryLandlord.name
@@ -75,9 +68,12 @@ class PropertyDetailsController(
                 landlordDetailsUrl = "/landlord-details/${propertyOwnership.primaryLandlord.id}",
             )
 
+        val landlordViewModel = PropertyDetailsLandlordViewModel(landlord = propertyOwnership.primaryLandlord, withChangeLinks = false)
+
         model.addAttribute("propertyDetails", propertyDetails)
         model.addAttribute("lastModifiedDate", lastModifiedDate)
         model.addAttribute("lastModifiedBy", lastModifiedBy)
+        model.addAttribute("landlordDetails", landlordViewModel.landlordsDetails)
 
         // TODO PRSD-647: Replace with link to dashboard
         model.addAttribute("backUrl", "/")

@@ -62,12 +62,7 @@ class PropertyOwnershipService(
         propertyOwnershipId: Long,
         baseUserId: String,
     ): PropertyOwnership {
-        val propertyOwnership =
-            retrievePropertyOwnershipById(propertyOwnershipId)
-                ?: throw ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Property ownership $propertyOwnershipId not found",
-                )
+        val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
 
         val landlordIdFromPrincipal =
             landlordService.retrieveLandlordIdByBaseUserId(baseUserId)
@@ -75,6 +70,17 @@ class PropertyOwnershipService(
         if (propertyOwnership.primaryLandlord.id != landlordIdFromPrincipal) {
             throw ResponseStatusException(HttpStatus.NOT_FOUND)
         }
+        return propertyOwnership
+    }
+
+    fun getPropertyOwnership(propertyOwnershipId: Long): PropertyOwnership {
+        val propertyOwnership =
+            retrievePropertyOwnershipById(propertyOwnershipId)
+                ?: throw ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Property ownership $propertyOwnershipId not found",
+                )
+
         return propertyOwnership
     }
 
@@ -92,7 +98,7 @@ class PropertyOwnershipService(
         propertyOwnershipRepository
             .findByRegistrationNumber_Number(registrationNumber)
 
-    fun retrievePropertyOwnershipById(propertyOwnershipId: Long): PropertyOwnership? =
+    private fun retrievePropertyOwnershipById(propertyOwnershipId: Long): PropertyOwnership? =
         propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)
 
     fun searchForProperties(
