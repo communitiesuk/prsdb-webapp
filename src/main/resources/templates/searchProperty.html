@@ -17,6 +17,8 @@
 
         <th:block th:if="${searchResults != null}">
 
+            <nav th:replace="~{fragments/pagination/pagination :: pagination(${paginationViewModel})}"></nav>
+
             <table th:replace="~{fragments/tables/table :: table(
                             ${ {'propertySearch.table.heading.address','propertySearch.table.heading.prn','propertySearch.table.heading.la', 'propertySearch.table.heading.landlord'} },
                             ~{::tbody},
@@ -56,6 +58,8 @@
                     </a>
                 </div>
             </div>
+
+            <nav th:replace="~{fragments/pagination/pagination :: pagination(${paginationViewModel})}"></nav>
 
         </th:block>
 
