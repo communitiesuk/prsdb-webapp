@@ -54,8 +54,8 @@ class PropertyDetailsLandlordViewModelTests {
                 "landlordDetails.personalDetails.dateOfBirth",
                 "landlordDetails.personalDetails.emailAddress",
                 "propertyDetails.landlordDetails.contactNumber",
-                "landlordDetails.personalDetails.nonUkAddress",
-                "landlordDetails.personalDetails.ukAddress",
+                "propertyDetails.landlordDetails.addressOutsideEnglandOrWales",
+                "propertyDetails.landlordDetails.contactAddressInEnglandOrWales",
             )
 
         assertIterableEquals(expectedLandlordDetailsHeaderList, landlordDetailsHeaderList)
@@ -160,7 +160,7 @@ class PropertyDetailsLandlordViewModelTests {
         // Assert
         val addressString =
             viewModel.landlordsDetails
-                .single { it.fieldHeading == "landlordDetails.personalDetails.nonUkAddress" }
+                .single { it.fieldHeading == "propertyDetails.landlordDetails.addressOutsideEnglandOrWales" }
                 .getConvertedFieldValue()
         assertEquals(addressString, oneLineAddress)
     }
@@ -181,7 +181,7 @@ class PropertyDetailsLandlordViewModelTests {
         // Assert
         val addressString =
             viewModel.landlordsDetails
-                .single { it.fieldHeading == "landlordDetails.personalDetails.ukAddress" }
+                .single { it.fieldHeading == "propertyDetails.landlordDetails.contactAddressInEnglandOrWales" }
                 .getConvertedFieldValue()
         assertEquals(addressString, oneLineAddress)
     }
@@ -210,5 +210,23 @@ class PropertyDetailsLandlordViewModelTests {
 
         // Assert
         viewModel.landlordsDetails.forEach { personalDetails -> assertNull(personalDetails.changeUrl) }
+    }
+
+    @Test
+    fun `Landlord details returns valueUrl for name row`() {
+        // Arrange
+        val landlordDetailsUrl = "test-url"
+        val testLandlord = MockLandlordData.createLandlord()
+
+        // Act
+        val viewModel = PropertyDetailsLandlordViewModel(testLandlord, landlordDetailsUrl = landlordDetailsUrl)
+
+        // Assert
+        val returnedLandlordDetailsUrl =
+            viewModel.landlordsDetails
+                .single { it.fieldHeading == "landlordDetails.personalDetails.name" }
+                .valueUrl
+
+        assertEquals(returnedLandlordDetailsUrl, landlordDetailsUrl)
     }
 }

@@ -38,7 +38,12 @@ class PropertyDetailsController(
                 landlordDetailsUrl = "/landlord-details",
             )
 
-        val landlordViewModel = PropertyDetailsLandlordViewModel(landlord = propertyOwnership.primaryLandlord)
+        val landlordViewModel =
+            PropertyDetailsLandlordViewModel(
+                landlord = propertyOwnership.primaryLandlord,
+                withChangeLinks = true,
+                landlordDetailsUrl = "/landlord-details",
+            )
 
         model.addAttribute("propertyDetails", propertyDetails)
         model.addAttribute("landlordDetails", landlordViewModel.landlordsDetails)
@@ -68,7 +73,12 @@ class PropertyDetailsController(
                 landlordDetailsUrl = "/landlord-details/${propertyOwnership.primaryLandlord.id}",
             )
 
-        val landlordViewModel = PropertyDetailsLandlordViewModel(landlord = propertyOwnership.primaryLandlord, withChangeLinks = false)
+        val landlordViewModel =
+            PropertyDetailsLandlordViewModel(
+                landlord = propertyOwnership.primaryLandlord,
+                withChangeLinks = false,
+                landlordDetailsUrl = "/landlord-details/${propertyOwnership.primaryLandlord.id}",
+            )
 
         model.addAttribute("propertyDetails", propertyDetails)
         model.addAttribute("lastModifiedDate", lastModifiedDate)
