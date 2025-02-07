@@ -7,19 +7,12 @@ class TaskList(
     private val page: Page,
     locator: Locator = page.locator(".govuk-task-list"),
 ) : BaseComponent(locator) {
-    fun clickTask(name: String) = getChildComponent("li", Locator.LocatorOptions().setHasText(name)).click()
-
-    fun clickFirstActionableTask() =
-        locator
-            .locator("li")
-            .getByText("In progress")
-            .or(
-                locator
-                    .locator("li")
-                    .getByText("Not yet started"),
-            ).nth(0)
-            .click()
+    fun clickTask(name: String) = getTask(name).click()
 
     fun getTaskStatus(name: String): String =
-        getChildComponent("li", Locator.LocatorOptions().setHasText(name)).locator(".govuk-task-list__status").textContent()
+        Companion
+            .getChildComponent(getTask(name), ".govuk-task-list__status")
+            .textContent()
+
+    private fun getTask(name: String) = getChildComponent("li", Locator.LocatorOptions().setHasText(name))
 }

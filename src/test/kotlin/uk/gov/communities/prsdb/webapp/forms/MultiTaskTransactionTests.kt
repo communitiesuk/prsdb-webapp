@@ -20,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.forms.tasks.TaskList
 import uk.gov.communities.prsdb.webapp.models.viewModels.TaskListItemViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.TaskStatusViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import kotlin.test.assertIs
 
 class MultiTaskTransactionTests {
     @Mock
@@ -80,8 +79,9 @@ class MultiTaskTransactionTests {
             // Assert
             val captor = argumentCaptor<JourneyData>()
             verify(journeyDataService).setJourneyData(captor.capture())
-            assertIs<MutableMap<*, *>>(
-                captor.firstValue[testUrlSegment],
+            assertEquals(
+                captor.allValues.single()[testUrlSegment],
+                mutableMapOf<String, Any?>(),
             )
 
             verify(journeyDataService, never()).loadJourneyDataIntoSession(any())
@@ -101,7 +101,7 @@ class MultiTaskTransactionTests {
             // Assert
             val captor = argumentCaptor<Long>()
             verify(journeyDataService).loadJourneyDataIntoSession(captor.capture())
-            assertEquals(contextId, captor.firstValue)
+            assertEquals(contextId, captor.allValues.single())
 
             verify(journeyDataService, never()).setJourneyData(any())
         }
