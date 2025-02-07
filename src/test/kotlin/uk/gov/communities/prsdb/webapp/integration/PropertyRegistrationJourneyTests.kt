@@ -39,6 +39,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalAuthorityFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -92,6 +93,10 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
         assertThat(registerPropertyStartPage.heading).containsText("Enter your property details")
         registerPropertyStartPage.startButton.click()
+        val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        // Task list page (part of the journey to support redirects)
+        taskListPage.clickRegisterTaskWithName("Add the property address")
         val addressLookupPage = assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
 
         // Address lookup step - render page
@@ -204,6 +209,37 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         // TODO PRSD-670: Replace with dashboard page
         assertEquals("/", URI(page.url()).path)
+    }
+
+    @Nested
+    inner class TaskListStep {
+        @Test
+        fun `Completing preceding steps will show a task as not yet started and completed steps as complete`(page: Page) {
+            navigator.goToPropertyRegistrationOccupancyPage()
+            val taskListPage = navigator.goToPropertyRegistrationTaskList()
+            taskListPage.taskHasStatus("Add the property address", "Complete")
+            taskListPage.taskHasStatus("Select the type of property", "Complete")
+            taskListPage.taskHasStatus("Select the ownership type", "Complete")
+            taskListPage.taskHasStatus("Add any property licensing information", "Complete")
+            taskListPage.taskHasStatus("Add any tenancy and household information", "Not yet started")
+            taskListPage.taskHasStatus("Select the type of property", "Cannot start yet")
+            taskListPage.taskHasStatus("Select how you're operating for this property", "Cannot start yet")
+            taskListPage.taskHasStatus("Add any interested parties or additional landlords", "Cannot start yet")
+        }
+
+        @Test
+        fun `Completing first step of a task will show a task as in progress and completed steps as complete`(page: Page) {
+            navigator.goToPropertyRegistrationHmoAdditionalLicencePage()
+            val taskListPage = navigator.goToPropertyRegistrationTaskList()
+            taskListPage.taskHasStatus("Add the property address", "Complete")
+            taskListPage.taskHasStatus("Select the type of property", "Complete")
+            taskListPage.taskHasStatus("Select the ownership type", "Complete")
+            taskListPage.taskHasStatus("Add any property licensing information", "In progress")
+            taskListPage.taskHasStatus("Add any tenancy and household information", "Cannot start yet")
+            taskListPage.taskHasStatus("Select the type of property", "Cannot start yet")
+            taskListPage.taskHasStatus("Select how you're operating for this property", "Cannot start yet")
+            taskListPage.taskHasStatus("Add any interested parties or additional landlords", "Cannot start yet")
+        }
     }
 
     @Nested
