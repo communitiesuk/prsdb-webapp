@@ -3,21 +3,24 @@ package uk.gov.communities.prsdb.webapp.forms.tasks
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
-import uk.gov.communities.prsdb.webapp.models.viewModels.TaskListItemViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.TaskSectionViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 abstract class MultiTaskTransaction<T : StepId>(
     private val journeyDataService: JourneyDataService,
 ) {
-    protected abstract val taskLists: List<TaskList<T>>
+    protected abstract val taskLists: List<TransactionSection<T>>
     protected abstract val journeyType: JourneyType
     protected abstract val taskListUrlSegment: String
 
-    fun getTaskListPageViewModels(principalName: String): List<List<TaskListItemViewModel>> {
+    fun getTaskListSections(principalName: String): List<TaskSectionViewModel> {
         loadJourneyDataIntoSessionIfNotLoaded(principalName)
 
         return taskLists.map {
-            it.getTaskListViewModels()
+            TaskSectionViewModel(
+                it.headingKey,
+                it.sectionTasks.getTaskListViewModels(),
+            )
         }
     }
 
@@ -41,4 +44,9 @@ abstract class MultiTaskTransaction<T : StepId>(
         data[taskListUrlSegment] = mutableMapOf<String, Any>()
         journeyDataService.setJourneyData(data)
     }
+
+    data class TransactionSection<T : StepId>(
+        val headingKey: String,
+        val sectionTasks: TaskList<T>,
+    )
 }

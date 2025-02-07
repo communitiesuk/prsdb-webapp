@@ -57,11 +57,9 @@ class RegisterPropertyController(
         model: Model,
         principal: Principal,
     ): String {
-        val viewModelLists = registerPropertyTransaction.getTaskListPageViewModels(principal.name)
+        val listOfSections = registerPropertyTransaction.getTaskListSections(principal.name)
 
-        // TODO PRSD-600: Pass this list directly to the template and update the template to represent a list of sections
-        model.addAttribute("registerTasks", viewModelLists[0])
-        model.addAttribute("checkAndSubmitTasks", viewModelLists[1])
+        model.addAttribute("registerPropertyTaskSections", listOfSections)
 
         return "registerPropertyTaskList"
     }
