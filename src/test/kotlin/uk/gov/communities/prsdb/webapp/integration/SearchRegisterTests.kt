@@ -237,7 +237,7 @@ class SearchRegisterTests : IntegrationTest() {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("P-C5YY-J34H")
             searchPropertyRegisterPage.getPropertyLink(rowIndex = 0).click()
-            assertContains(page.url(), "/property-details/1")
+            assertContains(page.url(), "/local-authority/property-details/1")
         }
 
         @Test
