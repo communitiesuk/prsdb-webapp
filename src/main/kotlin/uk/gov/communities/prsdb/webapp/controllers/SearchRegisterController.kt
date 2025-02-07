@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.helpers.URIQueryBuilder
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.LandlordSearchRequestModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.PropertySearchRequestModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.LandlordSearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchModels.LandlordFilterPanelViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
 @Controller
@@ -22,6 +24,7 @@ import java.security.Principal
 @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
 class SearchRegisterController(
     private val landlordService: LandlordService,
+    private val propertyOwnershipService: PropertyOwnershipService,
 ) {
     @GetMapping("/landlord")
     fun searchForLandlords(
@@ -75,5 +78,18 @@ class SearchRegisterController(
 
     // TODO PRSD-659: implement property search endpoint
     @GetMapping("/property")
-    fun searchForProperties() = "error/404"
+    fun searchForProperties(
+        model: Model,
+        searchRequest: PropertySearchRequestModel,
+    ): String {
+        if (searchRequest.searchTerm == null) {
+            return "searchProperty"
+        }
+
+        val searchResults = propertyOwnershipService.searchForProperties(searchRequest.searchTerm!!)
+
+        model.addAttribute("searchRequest", searchRequest)
+        model.addAttribute("searchResults", searchResults)
+        return "searchProperty"
+    }
 }

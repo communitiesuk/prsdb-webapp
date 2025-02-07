@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.database.repository
 
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 
@@ -27,4 +29,41 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
     ): List<PropertyOwnership>
 
     fun findByIdAndIsActiveTrue(id: Long): PropertyOwnership?
+
+    // TODO PRSD-660: Add filtering to searchMatchingX queries
+    @Query(
+        "SELECT po.* " +
+            "FROM property_ownership po " +
+            "JOIN registration_number r ON po.registration_number_id = r.id " +
+            "WHERE po.is_active AND r.number = :searchPRN",
+        nativeQuery = true,
+    )
+    fun searchMatchingPRN(
+        @Param("searchPRN") searchPRN: Long,
+    ): List<PropertyOwnership>
+
+    @Query(
+        "SELECT po.* " +
+            "FROM property_ownership po " +
+            "JOIN property p ON po.property_id = p.id " +
+            "JOIN address a ON p.address_id = a.id " +
+            "WHERE po.is_active AND a.uprn = :searchUPRN",
+        nativeQuery = true,
+    )
+    fun searchMatchingUPRN(
+        @Param("searchUPRN") searchUPRN: Long,
+    ): List<PropertyOwnership>
+
+    @Query(
+        "SELECT po.* " +
+            "FROM property_ownership po " +
+            "JOIN property p ON po.property_id = p.id " +
+            "JOIN address a ON p.address_id = a.id " +
+            "WHERE po.is_active AND a.single_line_address %> :searchTerm " +
+            "ORDER BY a.single_line_address <->> :searchTerm",
+        nativeQuery = true,
+    )
+    fun searchMatching(
+        @Param("searchTerm") searchTerm: String,
+    ): List<PropertyOwnership>
 }

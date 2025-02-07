@@ -12,6 +12,7 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.models.viewModels.LandlordSearchResultViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import kotlin.test.Test
 
 @WebMvcTest(SearchRegisterController::class)
@@ -20,6 +21,9 @@ class SearchRegisterControllerTests(
 ) : ControllerTest(webContext) {
     @MockBean
     private lateinit var landlordService: LandlordService
+
+    @MockBean
+    private lateinit var propertyOwnershipService: PropertyOwnershipService
 
     @Test
     fun `SearchRegisterController returns a redirect for unauthenticated user`() {
