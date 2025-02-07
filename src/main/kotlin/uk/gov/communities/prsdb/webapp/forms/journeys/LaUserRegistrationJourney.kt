@@ -21,17 +21,18 @@ class LaUserRegistrationJourney(
     invitationService: LocalAuthorityInvitationService,
 ) : Journey<RegisterLaUserStepId>(
         journeyType = JourneyType.LA_USER_REGISTRATION,
-        initialStepId = RegisterLaUserStepId.LandingPage,
         validator = validator,
         journeyDataService = journeyDataService,
-        steps =
-            setOf(
-                landingPageStep(),
-                registerUserStep(),
-                emailStep(),
-                checkAnswersStep(invitationService),
-            ),
     ) {
+    override val initialStepId: RegisterLaUserStepId = RegisterLaUserStepId.LandingPage
+    override val steps: Set<Step<RegisterLaUserStepId>> =
+        setOf(
+            landingPageStep(),
+            registerUserStep(),
+            emailStep(),
+            checkAnswersStep(invitationService),
+        )
+
     companion object {
         private fun landingPageStep() =
             Step(

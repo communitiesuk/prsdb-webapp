@@ -49,29 +49,30 @@ class LandlordRegistrationJourney(
     emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
 ) : Journey<LandlordRegistrationStepId>(
         journeyType = JourneyType.LANDLORD_REGISTRATION,
-        initialStepId = LandlordRegistrationStepId.VerifyIdentity,
         validator = validator,
         journeyDataService = journeyDataService,
-        steps =
-            setOf(
-                verifyIdentityStep(),
-                nameStep(),
-                dateOfBirthStep(),
-                confirmIdentityStep(),
-                emailStep(),
-                phoneNumberStep(),
-                countryOfResidenceStep(),
-                lookupAddressStep(),
-                selectAddressStep(addressLookupService, addressDataService),
-                manualAddressStep(),
-                internationalAddressStep(),
-                lookupContactAddressStep(),
-                selectContactAddressStep(addressLookupService, addressDataService),
-                manualContactAddressStep(),
-                checkAnswersStep(addressDataService),
-                declarationStep(journeyDataService, landlordService, addressDataService, emailNotificationService),
-            ),
     ) {
+    override val initialStepId = LandlordRegistrationStepId.VerifyIdentity
+    override val steps =
+        setOf(
+            verifyIdentityStep(),
+            nameStep(),
+            dateOfBirthStep(),
+            confirmIdentityStep(),
+            emailStep(),
+            phoneNumberStep(),
+            countryOfResidenceStep(),
+            lookupAddressStep(),
+            selectAddressStep(addressLookupService, addressDataService),
+            manualAddressStep(),
+            internationalAddressStep(),
+            lookupContactAddressStep(),
+            selectContactAddressStep(addressLookupService, addressDataService),
+            manualContactAddressStep(),
+            checkAnswersStep(addressDataService),
+            declarationStep(journeyDataService, landlordService, addressDataService, emailNotificationService),
+        )
+
     companion object {
         private fun verifyIdentityStep() =
             Step(

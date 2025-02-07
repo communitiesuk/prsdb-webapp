@@ -63,40 +63,42 @@ class PropertyRegistrationJourney(
     confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
 ) : Journey<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
-        initialStepId = RegisterPropertyStepId.LookupAddress,
         validator = validator,
         journeyDataService = journeyDataService,
-        steps =
-            setOf(
-                lookupAddressStep(),
-                selectAddressStep(addressLookupService, addressDataService, propertyRegistrationService),
-                alreadyRegisteredStep(),
-                manualAddressStep(),
-                localAuthorityStep(localAuthorityService),
-                propertyTypeStep(),
-                ownershipTypeStep(),
-                occupancyStep(),
-                numberOfHouseholdsStep(),
-                numberOfPeopleStep(),
-                licensingTypeStep(),
-                selectiveLicenceStep(),
-                hmoMandatoryLicenceStep(),
-                hmoAdditionalLicenceStep(),
-                landlordTypeStep(),
-                checkAnswersStep(
-                    addressDataService,
-                    localAuthorityService,
-                ),
-                declarationStep(
-                    journeyDataService,
-                    propertyRegistrationService,
-                    addressDataService,
-                    landlordService,
-                    confirmationEmailSender,
-                    session,
-                ),
-            ),
     ) {
+    override val initialStepId = RegisterPropertyStepId.LookupAddress
+
+    override val steps =
+        setOf(
+            lookupAddressStep(),
+            selectAddressStep(addressLookupService, addressDataService, propertyRegistrationService),
+            alreadyRegisteredStep(),
+            manualAddressStep(),
+            localAuthorityStep(localAuthorityService),
+            propertyTypeStep(),
+            ownershipTypeStep(),
+            occupancyStep(),
+            numberOfHouseholdsStep(),
+            numberOfPeopleStep(),
+            licensingTypeStep(),
+            selectiveLicenceStep(),
+            hmoMandatoryLicenceStep(),
+            hmoAdditionalLicenceStep(),
+            landlordTypeStep(),
+            checkAnswersStep(
+                addressDataService,
+                localAuthorityService,
+            ),
+            declarationStep(
+                journeyDataService,
+                propertyRegistrationService,
+                addressDataService,
+                landlordService,
+                confirmationEmailSender,
+                session,
+            ),
+        )
+
     companion object {
         private fun lookupAddressStep() =
             Step(

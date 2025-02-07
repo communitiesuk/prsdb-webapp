@@ -16,11 +16,12 @@ import java.util.Optional
 
 abstract class Journey<T : StepId>(
     private val journeyType: JourneyType,
-    val steps: Set<Step<T>>,
-    val initialStepId: T,
     val validator: Validator,
     val journeyDataService: JourneyDataService,
 ) {
+    abstract val initialStepId: T
+    abstract val steps: Set<Step<T>>
+
     fun getStepId(stepName: String): StepId {
         val step = steps.singleOrNull { step -> step.id.urlPathSegment == stepName }
         if (step == null) {
