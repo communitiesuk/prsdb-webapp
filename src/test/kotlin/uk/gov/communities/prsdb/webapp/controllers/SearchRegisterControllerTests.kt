@@ -58,7 +58,7 @@ class SearchRegisterControllerTests(
     @Test
     @WithMockUser(roles = ["LA_USER"])
     fun `searchForLandlords returns 200 for a valid page request`() {
-        whenever(landlordService.searchForLandlords("PRSDB", "user", currentPageNumber = 1))
+        whenever(landlordService.searchForLandlords("PRSDB", "user", requestedPageIndex = 1))
             .thenReturn(
                 PageImpl(
                     listOf(
@@ -95,7 +95,7 @@ class SearchRegisterControllerTests(
     @Test
     @WithMockUser(roles = ["LA_USER"])
     fun `searchForLandlords redirects if the requested page number is more than the total pages`() {
-        whenever(landlordService.searchForLandlords("PRSDB", "user", currentPageNumber = 2))
+        whenever(landlordService.searchForLandlords("PRSDB", "user", requestedPageIndex = 2))
             .thenReturn(
                 PageImpl(
                     emptyList<LandlordSearchResultViewModel>(),
@@ -115,7 +115,7 @@ class SearchRegisterControllerTests(
     @Test
     @WithMockUser(roles = ["LA_USER"])
     fun `searchForProperties returns 200 for a valid page request`() {
-        whenever(propertyOwnershipService.searchForProperties("PRSDB", currentPageNumber = 1))
+        whenever(propertyOwnershipService.searchForProperties("PRSDB", requestedPageIndex = 1))
             .thenReturn(
                 PageImpl(
                     listOf(PropertySearchResultViewModel.fromPropertyOwnership(MockLandlordData.createPropertyOwnership())),
@@ -140,7 +140,7 @@ class SearchRegisterControllerTests(
     @Test
     @WithMockUser(roles = ["LA_USER"])
     fun `searchForProperties redirects if the requested page number is more than the total pages`() {
-        whenever(propertyOwnershipService.searchForProperties("PRSDB", currentPageNumber = 2))
+        whenever(propertyOwnershipService.searchForProperties("PRSDB", requestedPageIndex = 2))
             .thenReturn(
                 PageImpl(
                     emptyList<PropertySearchResultViewModel>(),

@@ -97,12 +97,12 @@ class PropertyOwnershipService(
 
     fun searchForProperties(
         searchTerm: String,
-        currentPageNumber: Int = 0,
+        requestedPageIndex: Int = 0,
         pageSize: Int = MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE,
     ): Page<PropertySearchResultViewModel> {
         val prn = RegistrationNumberDataModel.parseTypeOrNull(searchTerm, RegistrationNumberType.PROPERTY)
         val uprn = AddressHelper.parseUprnOrNull(searchTerm)
-        val pageRequest = PageRequest.of(currentPageNumber, pageSize)
+        val pageRequest = PageRequest.of(requestedPageIndex, pageSize)
 
         val matchingProperties =
             if (prn != null) {

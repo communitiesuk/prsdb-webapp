@@ -51,7 +51,7 @@ class SearchRegisterController(
                 searchRequest.searchTerm!!,
                 principal.name,
                 searchRequest.restrictToLA,
-                currentPageNumber = page - 1,
+                requestedPageIndex = page - 1,
             )
 
         if (isPageOutOfBounds(pagedLandlordList, page)) {
@@ -90,7 +90,7 @@ class SearchRegisterController(
         }
 
         val pagedSearchResults =
-            propertyOwnershipService.searchForProperties(searchRequest.searchTerm!!, currentPageNumber = page - 1)
+            propertyOwnershipService.searchForProperties(searchRequest.searchTerm!!, requestedPageIndex = page - 1)
 
         if (isPageOutOfBounds(pagedSearchResults, page)) {
             return getRedirectForPageOutOfBounds(httpServletRequest)

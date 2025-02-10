@@ -320,14 +320,14 @@ class PropertyOwnershipServiceTests {
         val pageSize = 25
         val matchingProperties = (1..40).map { MockLandlordData.createPropertyOwnership() }
 
-        val pageNumber1 = 0
-        val pageRequest1 = PageRequest.of(pageNumber1, pageSize)
+        val pageIndex1 = 0
+        val pageRequest1 = PageRequest.of(pageIndex1, pageSize)
         val matchingPropertiesPage1 = matchingProperties.subList(0, pageSize)
         val expectedPage1SearchResults =
             matchingPropertiesPage1.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
 
-        val pageNumber2 = 1
-        val pageRequest2 = PageRequest.of(pageNumber2, pageSize)
+        val pageIndex2 = 1
+        val pageRequest2 = PageRequest.of(pageIndex2, pageSize)
         val matchingPropertiesPage2 = matchingProperties.subList(pageSize, matchingProperties.size)
         val expectedPage2SearchResults =
             matchingPropertiesPage2.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
@@ -337,8 +337,8 @@ class PropertyOwnershipServiceTests {
         whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm, pageable = pageRequest2))
             .thenReturn(PageImpl(matchingPropertiesPage2))
 
-        val searchResults1 = propertyOwnershipService.searchForProperties(searchTerm, pageNumber1)
-        val searchResults2 = propertyOwnershipService.searchForProperties(searchTerm, pageNumber2)
+        val searchResults1 = propertyOwnershipService.searchForProperties(searchTerm, pageIndex1)
+        val searchResults2 = propertyOwnershipService.searchForProperties(searchTerm, pageIndex2)
 
         assertEquals(expectedPage1SearchResults, searchResults1.content)
         assertEquals(expectedPage2SearchResults, searchResults2.content)
