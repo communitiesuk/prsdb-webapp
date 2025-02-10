@@ -1,7 +1,7 @@
 INSERT INTO one_login_user (id, name, email, created_date, last_modified_date)
 VALUES ('urn:fdc:gov.uk:2022:ABCDE', 'Bob T Builder', 'bobthebuilder@test.com', '09/13/24', '09/13/24'),
        ('urn:fdc:gov.uk:2022:FGHIJ', 'Anne Other', 'Anne.Other@example.com', '09/13/24', '09/13/24'),
-       ('urn:fdc:gov.uk:2022:KLMNO', 'Ford Prefect', 'Ford.Prefect@example.com', '10/07/24', '10/07/24'),
+       ('urn:fdc:gov.uk:2022:KLMNO', 'Ford Prefect', 'Ford.Prefect@test.com', '10/07/24', '10/07/24'),
        ('urn:fdc:gov.uk:2022:UVWXY', 'Mock User', 'test@example.com', '10/14/24', '10/14/24'),
        ('urn:fdc:gov.uk:2022:PQRST', 'Arthur Dent', 'Arthur.Dent@example.com', '10/09/24', '10/09/24'),
        ('urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', 'Jasmin Conterio',
@@ -41,40 +41,9 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', 'Bob T Builder', 'bobthebuilder@test.com', 
        ('urn:fdc:gov.uk:2022:Y', '', '', '01/15/25', '01/15/25'),
        ('urn:fdc:gov.uk:2022:Z', '', '', '01/15/25', '01/15/25');
 
-INSERT INTO landlord_user (subject_identifier, phone_number, date_of_birth, created_date, last_modified_date)
-VALUES ('urn:fdc:gov.uk:2022:ABCDE', '07712345678', '01/01/00', '09/13/24', '09/13/24'),
-       ('urn:fdc:gov.uk:2022:FGHIJ', '07811111111', '11/23/98', '09/13/24', '09/13/24'),
-       ('urn:fdc:gov.uk:2022:UVWXY', '01406946277', '06/16/84', '10/14/24', '10/14/24'),
-       ('urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', '01223456789', '02/01/00', '10/09/24',
-        '10/09/24'),
-       ('urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', '01223456789', '02/01/00', '10/02/24',
-        '10/02/24'),
-       ('urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', '01223456789', '03/05/00', '10/15/24',
-        '10/09/24');
-
 INSERT INTO local_authority_user (subject_identifier, is_manager, local_authority_id, created_date, last_modified_date,
                                   name, email)
-VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 1, '10/07/24', '10/07/24', 'Ford Prefect', 'Ford.Prefect@test.com'),
-       ('urn:fdc:gov.uk:2022:UVWXY', true, 1, '10/14/24', '10/14/24', 'Mock User', 'test@example.com'),
-       ('urn:fdc:gov.uk:2022:PQRST', false, 1, '10/09/24', '10/09/24', 'Arthur Dent', 'Arthur.Dent@test.com'),
-       ('urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', true, 1, '10/09/24', '10/09/24',
-        'Jasmin Conterio',
-        'jasmin.conterio@softwire.com'),
-       ('urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', true, 1, '10/02/24', '10/02/24',
-        'Isobel Ibironke',
-        'isobel.ibironke@softwire.com'),
-       ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', true, 1, '10/15/24', '10/15/24',
-        'PRSDB LA Admin',
-        'Team-PRSDB+laadmin@softwire.com'),
-       ('urn:fdc:gov.uk:2022:cgVX2oJWKHMwzm8Gzx25CSoVXixVS0rw32Sar4Om8vQ', false, 1, '10/15/24', '10/15/24',
-        'PRSDB La User',
-        'Team-PRSDB+lauser@softwire.com');
-
-INSERT INTO local_authority_invitation (invited_email, inviting_authority_id, token)
-VALUES ('invited.user@example.com', 1, gen_random_uuid()),
-       ('user.invited@example.com', 1, gen_random_uuid()),
-       ('further.user@example.com', 1, gen_random_uuid()),
-       ('another.user@example.com', 1, gen_random_uuid());
+VALUES ('urn:fdc:gov.uk:2022:UVWXY', true, 1, '10/14/24', '10/14/24', 'Mock User', 'test@example.com');
 
 INSERT INTO registration_number (id, created_date, number, type)
 VALUES (1, '09/13/24', 2001001001, 1),
@@ -140,9 +109,9 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (61, '12/10/24', 0006001029, 0),
        (62, '12/10/24', 0006001030, 0),
        (63, '12/10/24', 0006001031, 0),
-       (64, '12/10/24', 0006001032, 0);
+       (64, '12/10/24', 0006001032, 0),
+       (65, '12/10/24', 0006001033, 0);
 
-SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
 INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id)
 VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 1),
@@ -154,7 +123,7 @@ VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 1),
        (7, '09/13/24', '09/13/24', 6, '2 Fictional Road', 1),
        (8, '09/13/24', '09/13/24', 7, '3 Fake Way', 1),
        (9, '09/13/24', '09/13/24', 8, '4 Imaginary Street', 1),
-       (10, '09/13/24', '09/13/24', 9, '5 Pretend Crescent', 1),
+       (10, '09/13/24', '09/13/24', 9, '5 Pretend Crescent Way', 1),
        (11, '09/13/24', '09/13/24', 10, '6 Mythical Place', 1),
        (12, '09/13/24', '09/13/24', null, '6 Mythical Place', 1),
        (13, '05/02/25', '05/02/25', 1013, '1 PRSDB Square, EG1 2AA', 1),
@@ -181,9 +150,8 @@ VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 1),
        (34, '05/02/25', '05/02/25', 1034, '22 PRSDB Square, EG1 2AV', 1),
        (35, '05/02/25', '05/02/25', 1035, '23 PRSDB Square, EG1 2AW', 1),
        (36, '05/02/25', '05/02/25', 1036, '24 PRSDB Square, EG1 2AX', 1),
-       (37, '05/02/25', '05/02/25', 1037, '25 PRSDB Square, EG1 2AY', 1);
-
-SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
+       (37, '05/02/25', '05/02/25', 1037, '25 PRSDB Square, EG1 2AY', 1),
+       (38, '05/02/25', '05/02/25', 1038, '26 PRSDB Square, EG1 2AZ', 1);
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
                       is_active, phone_number, subject_identifier, name, email)
@@ -194,10 +162,11 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:f
        (3, '09/13/24', '09/13/24', 3, 3, '07/13/1997', true, 07111111111, 'urn:fdc:gov.uk:2022:PQRST',
         'Evan Alexandrescu', 'unrelatedemail@test.com'),
        (4, '09/13/24', '09/13/24', 4, 4, '06/13/1989', true, 07111111111,
-        'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', 'Tobias Evans', 'tobyevans@example.com'),
+        'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', 'Tobias Evans PRSDB',
+        'tobyevans@test.com'),
        (5, '09/13/24', '09/13/24', 5, 5, '05/13/1950', true, 07111111111,
-        'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', 'Margaret Mary Smith',
-        'mm.smith@example.com'),
+        'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', 'Margaret Mary Smith PRSDB',
+        'mm.smith@test.com'),
        (6, '12/19/24', '12/19/24', 7, 5, '06/13/1989', true, 07111111111,
         'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', 'PRSDB Landlord',
         'Team-PRSDB+landlord@softwire.com'),
@@ -229,8 +198,6 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:f
        (31, '01/15/25', '01/15/25', 31, 5, '06/13/1989', true, 0, 'urn:fdc:gov.uk:2022:X', 'PRSDB', 'test@example.com'),
        (32, '01/15/25', '01/15/25', 32, 5, '06/13/1989', true, 0, 'urn:fdc:gov.uk:2022:Y', 'PRSDB', 'test@example.com'),
        (33, '01/15/25', '01/15/25', 33, 5, '06/13/1989', true, 0, 'urn:fdc:gov.uk:2022:Z', 'PRSDB', 'test@example.com');
-
-SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
 INSERT INTO property (id, status, is_active, property_build_type, address_id)
 VALUES (1, 1, true, 1, 6),
@@ -264,14 +231,8 @@ VALUES (1, 1, true, 1, 6),
        (29, 1, true, 1, 34),
        (30, 1, true, 1, 35),
        (31, 1, true, 1, 36),
-       (32, 1, true, 1, 37);
-
-SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
-
-INSERT INTO license (id, license_type, license_number)
-VALUES (1, 1, 'L12345678');
-
-SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
+       (32, 1, true, 1, 37),
+       (33, 1, true, 1, 38);
 
 INSERT INTO property_ownership (id, is_active, occupancy_type, landlord_type, ownership_type, current_num_households,
                                 current_num_tenants,
@@ -282,6 +243,7 @@ VALUES (1, true, 0, 0, 1, 1, 2, 6, 1, 1, '01/15/25'),
        (4, true, 0, 0, 1, 1, 2, 36, 1, 4, '01/15/25'),
        (5, true, 0, 0, 1, 1, 2, 37, 1, 5, '01/15/25'),
        (6, false, 0, 0, 1, 1, 2, 38, 1, 6, '01/15/25'),
+       (7, true, 0, 0, 1, 0, 0, 39, 1, 7, '02/02/25'),
        (8, true, 0, 0, 1, 0, 0, 40, 1, 8, '05/02/25'),
        (9, true, 0, 0, 1, 0, 0, 41, 1, 9, '05/02/25'),
        (10, true, 0, 0, 1, 0, 0, 42, 1, 10, '05/02/25'),
@@ -306,17 +268,5 @@ VALUES (1, true, 0, 0, 1, 1, 2, 6, 1, 1, '01/15/25'),
        (29, true, 0, 0, 1, 0, 0, 61, 1, 29, '05/02/25'),
        (30, true, 0, 0, 1, 0, 0, 62, 1, 30, '05/02/25'),
        (31, true, 0, 0, 1, 0, 0, 63, 1, 31, '05/02/25'),
-       (32, true, 0, 0, 1, 0, 0, 64, 1, 32, '05/02/25');
-
-INSERT INTO property_ownership (id, is_active, occupancy_type, landlord_type, ownership_type, current_num_households,
-                                current_num_tenants,
-                                registration_number_id, primary_landlord_id, property_id, created_date, last_modified_date, license_id)
-VALUES (1, true, 0, 0, 1, 1, 2, 6, 1, 1, '01/15/25', '02/02/25', null),
-       (2, false, 0, 0, 1, 1, 2, 34, 2, 2, '01/15/25', '01/15/25', null),
-       (3, true, 0, 0, 1, 1, 2, 35, 4, 3, '01/15/25', '01/15/25',  null),
-       (4, true, 0, 0, 1, 1, 2, 36, 1, 4, '01/15/25', '01/15/25', null),
-       (5, true, 0, 0, 1, 1, 2, 37, 1, 5, '01/15/25', '01/15/25', null),
-       (6, false, 0, 0, 1, 1, 2, 38, 1, 6, '01/15/25', '01/15/25', null),
-       (7, true, 0, 0, 1, 0, 0, 39, 1, 7, '02/02/25','02/02/25',  1);
-
-SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
+       (32, true, 0, 0, 1, 0, 0, 64, 1, 32, '05/02/25'),
+       (33, true, 0, 0, 1, 0, 0, 65, 1, 33, '05/02/25');

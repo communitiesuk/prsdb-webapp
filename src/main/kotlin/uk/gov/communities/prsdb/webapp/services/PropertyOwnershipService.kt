@@ -1,9 +1,12 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -14,6 +17,9 @@ import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RegisteredPropertyViewModel
 
 @Service
@@ -88,6 +94,27 @@ class PropertyOwnershipService(
 
     fun retrievePropertyOwnershipById(propertyOwnershipId: Long): PropertyOwnership? =
         propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)
+
+    fun searchForProperties(
+        searchTerm: String,
+        requestedPageIndex: Int = 0,
+        pageSize: Int = MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE,
+    ): Page<PropertySearchResultViewModel> {
+        val prn = RegistrationNumberDataModel.parseTypeOrNull(searchTerm, RegistrationNumberType.PROPERTY)
+        val uprn = AddressHelper.parseUprnOrNull(searchTerm)
+        val pageRequest = PageRequest.of(requestedPageIndex, pageSize)
+
+        val matchingProperties =
+            if (prn != null) {
+                propertyOwnershipRepository.searchMatchingPRN(prn.number, pageRequest)
+            } else if (uprn != null) {
+                propertyOwnershipRepository.searchMatchingUPRN(uprn, pageRequest)
+            } else {
+                propertyOwnershipRepository.searchMatching(searchTerm, pageRequest)
+            }
+
+        return matchingProperties.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
+    }
 
     private fun retrieveAllRegisteredPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
         propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(

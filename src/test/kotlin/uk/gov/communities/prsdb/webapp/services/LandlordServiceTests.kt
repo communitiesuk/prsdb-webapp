@@ -153,9 +153,9 @@ class LandlordServiceTests {
     fun `searchForLandlords returns a corresponding list of LandlordSearchResultViewModels`() {
         val searchTerm = "searchTerm"
         val laUserBaseId = "laUserBaseId"
-        val currentPageNumber = 0
+        val requestedPageNumber = 0
         val pageSize = 25
-        val pageRequest = PageRequest.of(currentPageNumber, pageSize)
+        val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
 
         val matchingLandlords = mutableListOf<Landlord>()
         val matchingLandlordsWithListedPropertyCount = mutableListOf<LandlordWithListedPropertyCount>()
@@ -182,7 +182,7 @@ class LandlordServiceTests {
             landlordService.searchForLandlords(
                 searchTerm,
                 laUserBaseId,
-                currentPageNumber = currentPageNumber,
+                requestedPageIndex = requestedPageNumber,
                 pageSize = pageSize,
             )
 
@@ -195,9 +195,9 @@ class LandlordServiceTests {
         val searchLRN =
             RegistrationNumberDataModel.parseTypeOrNull(searchTerm, RegistrationNumberType.LANDLORD)!!.number
         val laUserBaseId = "laUserBaseId"
-        val currentPageNumber = 0
+        val requestedPageIndex = 0
         val pageSize = 25
-        val pageRequest = PageRequest.of(currentPageNumber, pageSize)
+        val pageRequest = PageRequest.of(requestedPageIndex, pageSize)
         val matchingLandlord = listOf(createLandlord())
         val matchingLandlordWithListedPropertyCount =
             listOf(LandlordWithListedPropertyCount(matchingLandlord[0].id, matchingLandlord[0], 0))
@@ -218,7 +218,7 @@ class LandlordServiceTests {
             landlordService.searchForLandlords(
                 searchTerm,
                 laUserBaseId,
-                currentPageNumber = currentPageNumber,
+                requestedPageIndex = requestedPageIndex,
                 pageSize = pageSize,
             )
 
@@ -229,9 +229,9 @@ class LandlordServiceTests {
     fun `searchForLandlords returns no results when given a non-landlord registration number`() {
         val searchTerm = "P-CCCC-CCCC"
         val laUserBaseId = "laUserBaseId"
-        val currentPageNumber = 0
+        val requestedPageIndex = 0
         val pageSize = 25
-        val expectedPageRequest = PageRequest.of(currentPageNumber, pageSize)
+        val expectedPageRequest = PageRequest.of(requestedPageIndex, pageSize)
         val expectedSearchResults = emptyList<LandlordSearchResultViewModel>()
 
         whenever(
@@ -242,7 +242,7 @@ class LandlordServiceTests {
             landlordService.searchForLandlords(
                 searchTerm,
                 laUserBaseId,
-                currentPageNumber = currentPageNumber,
+                requestedPageIndex = requestedPageIndex,
                 pageSize = pageSize,
             )
 
@@ -254,9 +254,9 @@ class LandlordServiceTests {
     fun `searchForLandlords returns no results when given a searchTerm that has no LRN or fuzzy search matches`() {
         val searchTerm = "non-matching searchTerm"
         val laUserBaseId = "laUserBaseId"
-        val currentPageNumber = 0
+        val requestedPageIndex = 0
         val pageSize = 25
-        val expectedPageRequest = PageRequest.of(currentPageNumber, pageSize)
+        val expectedPageRequest = PageRequest.of(requestedPageIndex, pageSize)
         val expectedSearchResults = emptyList<LandlordSearchResultViewModel>()
 
         whenever(
@@ -267,7 +267,7 @@ class LandlordServiceTests {
             landlordService.searchForLandlords(
                 searchTerm,
                 laUserBaseId,
-                currentPageNumber = currentPageNumber,
+                requestedPageIndex = requestedPageIndex,
                 pageSize = pageSize,
             )
 
@@ -295,8 +295,8 @@ class LandlordServiceTests {
             )
         }
 
-        val pageNumber1 = 0
-        val pageRequest1 = PageRequest.of(pageNumber1, pageSize)
+        val pageIndex1 = 0
+        val pageRequest1 = PageRequest.of(pageIndex1, pageSize)
         val matchingLandlordsPage1 = matchingLandlords.subList(0, pageSize)
         val matchingLandlordsWithListedPropertiesPage1 = matchingLandlordsWithListedPropertyCount.subList(0, pageSize)
         val expectedFormattedSearchResultsPage1 =
@@ -306,8 +306,8 @@ class LandlordServiceTests {
                 )
             }
 
-        val pageNumber2 = 1
-        val pageRequest2 = PageRequest.of(pageNumber2, pageSize)
+        val pageIndex2 = 1
+        val pageRequest2 = PageRequest.of(pageIndex2, pageSize)
         val matchingLandlordsPage2 = matchingLandlords.subList(pageSize, 40)
         val matchingLandlordsWithListedPropertiesPage2 = matchingLandlordsWithListedPropertyCount.subList(pageSize, 40)
         val expectedFormattedSearchResultsPage2 =
@@ -330,14 +330,14 @@ class LandlordServiceTests {
             landlordService.searchForLandlords(
                 searchTerm,
                 laUserBaseId,
-                currentPageNumber = pageNumber1,
+                requestedPageIndex = pageIndex1,
                 pageSize = pageSize,
             )
         val searchResults2 =
             landlordService.searchForLandlords(
                 searchTerm,
                 laUserBaseId,
-                currentPageNumber = pageNumber2,
+                requestedPageIndex = pageIndex2,
                 pageSize = pageSize,
             )
 

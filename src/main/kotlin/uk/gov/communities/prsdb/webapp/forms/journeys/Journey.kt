@@ -16,11 +16,12 @@ import java.util.Optional
 
 abstract class Journey<T : StepId>(
     private val journeyType: JourneyType,
-    val steps: Set<Step<T>>,
-    val initialStepId: T,
-    val validator: Validator,
-    val journeyDataService: JourneyDataService,
+    protected val validator: Validator,
+    protected val journeyDataService: JourneyDataService,
 ) {
+    abstract val initialStepId: T
+    abstract val steps: Set<Step<T>>
+
     fun getStepId(stepName: String): StepId {
         val step = steps.singleOrNull { step -> step.id.urlPathSegment == stepName }
         if (step == null) {
@@ -44,7 +45,7 @@ abstract class Journey<T : StepId>(
                 HttpStatus.NOT_FOUND,
                 "Step ${stepId.urlPathSegment} not valid for journey ${journeyType.urlPathSegment}",
             )
-        if (!isReachable(journeyData, requestedStep, subPageNumber)) {
+        if (!isStepReachable(journeyData, requestedStep, subPageNumber)) {
             return "redirect:/${journeyType.urlPathSegment}/${initialStepId.urlPathSegment}"
         }
         val prevStepDetails = getPrevStep(journeyData, requestedStep, subPageNumber)
@@ -101,10 +102,10 @@ abstract class Journey<T : StepId>(
         return "redirect:$redirectUrl"
     }
 
-    private fun isReachable(
+    fun isStepReachable(
         journeyData: JourneyData,
         targetStep: Step<T>,
-        targetSubPageNumber: Int?,
+        targetSubPageNumber: Int? = null,
     ): Boolean {
         // Initial page is always reachable
         if (targetStep.id == initialStepId) return true

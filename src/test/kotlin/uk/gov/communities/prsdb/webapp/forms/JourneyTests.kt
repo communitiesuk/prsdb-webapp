@@ -60,11 +60,11 @@ class JourneyTests {
 
     class TestJourney(
         journeyType: JourneyType,
-        steps: Set<Step<TestStepId>>,
-        initialStepId: TestStepId,
+        override val steps: Set<Step<TestStepId>>,
+        override val initialStepId: TestStepId,
         validator: Validator,
         journeyDataService: JourneyDataService,
-    ) : Journey<TestStepId>(journeyType, steps, initialStepId, validator, journeyDataService)
+    ) : Journey<TestStepId>(journeyType, validator, journeyDataService)
 
     class TestFormModel : FormModel {
         @NotNull
@@ -441,7 +441,7 @@ class JourneyTests {
 
             // Assert
             verify(spiedOnPage).populateModelAndGetTemplateName(
-                testJourney.validator,
+                validator,
                 model,
                 pageDataStepFour,
                 TestStepId.StepThree.urlPathSegment,

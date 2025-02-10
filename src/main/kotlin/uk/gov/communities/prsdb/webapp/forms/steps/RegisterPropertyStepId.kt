@@ -4,6 +4,7 @@ enum class RegisterPropertyStepId(
     override val urlPathSegment: String,
 ) : StepId {
     PlaceholderPage("placeholder"),
+    TaskList("task-list"),
     LookupAddress("lookup-address"),
     SelectAddress("select-address"),
     ManualAddress("manual-address"),

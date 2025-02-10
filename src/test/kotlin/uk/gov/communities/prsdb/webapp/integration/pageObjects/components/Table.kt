@@ -5,18 +5,22 @@ import com.microsoft.playwright.Page
 
 class Table(
     page: Page,
-    locator: Locator = page.locator(".govuk-table"),
+    locator: Locator = getLocator(page),
 ) : BaseComponent(locator) {
-    fun getHeaderCell(colIndex: Int) = Companion.getChildComponent(getHeaderRow(), "th", index = colIndex)
+    fun getHeaderCell(colIndex: Int) = getChildComponent(getHeaderRow(), "th", index = colIndex)
 
     fun getCell(
         rowIndex: Int,
         colIndex: Int,
-    ) = Companion.getChildComponent(getRow(rowIndex), "td", index = colIndex)
+    ) = getChildComponent(getRow(rowIndex), "td", index = colIndex)
 
-    fun countRows() = locator.locator("tr").count()
+    fun countRows() = locator.locator("tbody").locator("tr").count()
 
     private fun getHeaderRow() = getChildComponent("thead tr")
 
     private fun getRow(index: Int) = getChildComponent("tbody tr", index = index)
+
+    companion object {
+        fun getLocator(page: Page): Locator = page.locator(".govuk-table")
+    }
 }

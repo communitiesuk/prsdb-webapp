@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUse
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalAuthorityView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.CheckAnswersPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
@@ -58,6 +59,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalAuthorityFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import java.time.LocalDate
@@ -79,9 +81,14 @@ class Navigator(
         return createValidPage(page, InviteNewLaUserPage::class)
     }
 
-    fun goToSearchLandlordRegister(): SearchLandlordRegisterPage {
+    fun goToLandlordSearchPage(): SearchLandlordRegisterPage {
         navigate("search/landlord")
         return createValidPage(page, SearchLandlordRegisterPage::class)
+    }
+
+    fun goToPropertySearchPage(): SearchPropertyRegisterPage {
+        navigate("search/property")
+        return createValidPage(page, SearchPropertyRegisterPage::class)
     }
 
     fun goToLandlordRegistrationConfirmIdentityFormPage(): ConfirmIdentityFormPageLandlordRegistration {
@@ -266,8 +273,14 @@ class Navigator(
         return createValidPage(page, RegisterPropertyStartPage::class)
     }
 
+    fun goToPropertyRegistrationTaskList(): TaskListPagePropertyRegistration {
+        navigate("register-property/task-list")
+        return createValidPage(page, TaskListPagePropertyRegistration::class)
+    }
+
     fun goToPropertyRegistrationLookupAddressPage(): LookupAddressFormPagePropertyRegistration {
-        navigate("register-property/lookup-address")
+        val taskListPage = goToPropertyRegistrationTaskList()
+        taskListPage.clickRegisterTaskWithName("Add the property address")
         return createValidPage(page, LookupAddressFormPagePropertyRegistration::class)
     }
 
