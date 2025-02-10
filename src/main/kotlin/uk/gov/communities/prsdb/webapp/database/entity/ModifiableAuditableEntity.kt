@@ -14,7 +14,7 @@ abstract class ModifiableAuditableEntity :
     Serializable {
     @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(insertable = false)
-    var lastModifiedDate: Instant? = null
+    @Column
+    var lastModifiedDate: Instant = createdDate
         private set
 }
