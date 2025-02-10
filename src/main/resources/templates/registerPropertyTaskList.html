@@ -12,7 +12,7 @@
             <p class="govuk-body" th:text="#{registerProperty.taskList.subtitle}">registerProperty.taskList.subtitle</p>
         </header>
         <section th:each="section, iteratorStatus: ${registerPropertyTaskSections}">
-            <div th:replace="~{fragments/taskList/sectionTaskList :: sectionTaskList(${section}, ${iteratorStatus.index} + 1, 'register-property-task')}"></div>
+            <div th:replace="~{fragments/taskList/sectionTaskList :: sectionTaskList(${section}, ${iteratorStatus.count}, 'register-property-task')}"></div>
         </section>
     </th:block>
 </main>
