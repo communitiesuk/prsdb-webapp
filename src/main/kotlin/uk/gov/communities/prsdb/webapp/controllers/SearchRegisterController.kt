@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.helpers.URIQueryBuilder
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.LandlordSearchRequestModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.PropertySearchRequestModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.LandlordSearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchModels.LandlordFilterPanelViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -52,13 +51,11 @@ class SearchRegisterController(
                 searchRequest.searchTerm!!,
                 principal.name,
                 searchRequest.restrictToLA,
-                currentPageNumber = page - 1,
+                requestedPageIndex = page - 1,
             )
 
         if (isPageOutOfBounds(pagedLandlordList, page)) {
-            return "redirect:${
-                URIQueryBuilder.fromHTTPServletRequest(httpServletRequest).removeParam("page").build().toUriString()
-            }"
+            return getRedirectForPageOutOfBounds(httpServletRequest)
         }
 
         model.addAttribute("searchResults", pagedLandlordList.content)
@@ -73,15 +70,12 @@ class SearchRegisterController(
         return "searchLandlord"
     }
 
-    private fun isPageOutOfBounds(
-        pagedList: Page<LandlordSearchResultViewModel>,
-        page: Int,
-    ) = pagedList.totalPages != 0 && pagedList.totalPages < page
-
     @GetMapping("/property")
     fun searchForProperties(
         model: Model,
+        httpServletRequest: HttpServletRequest,
         searchRequest: PropertySearchRequestModel,
+        @RequestParam(value = "page", required = false) @Min(1) page: Int = 1,
     ): String {
         if (searchRequest.searchTerm?.isBlank() == true) {
             return "redirect:property"
@@ -95,13 +89,32 @@ class SearchRegisterController(
             return "searchProperty"
         }
 
-        val searchResults = propertyOwnershipService.searchForProperties(searchRequest.searchTerm!!)
+        val pagedSearchResults =
+            propertyOwnershipService.searchForProperties(searchRequest.searchTerm!!, requestedPageIndex = page - 1)
 
-        model.addAttribute("searchResults", searchResults)
-        model.addAttribute("landlordSearchURL", "landlord")
+        if (isPageOutOfBounds(pagedSearchResults, page)) {
+            return getRedirectForPageOutOfBounds(httpServletRequest)
+        }
+
+        model.addAttribute("searchResults", pagedSearchResults.content)
+        model.addAttribute(
+            "paginationViewModel",
+            PaginationViewModel(page, pagedSearchResults.totalPages, httpServletRequest),
+        )
         model.addAttribute("baseLandlordDetailsURL", "/landlord-details")
         model.addAttribute("basePropertyDetailsURL", "/local-authority/property-details")
+        model.addAttribute("landlordSearchURL", "landlord")
 
         return "searchProperty"
     }
+
+    private fun isPageOutOfBounds(
+        pagedList: Page<out Any>,
+        page: Int,
+    ) = pagedList.totalPages != 0 && pagedList.totalPages < page
+
+    private fun getRedirectForPageOutOfBounds(httpServletRequest: HttpServletRequest) =
+        "redirect:${
+            URIQueryBuilder.fromHTTPServletRequest(httpServletRequest).removeParam("page").build().toUriString()
+        }"
 }

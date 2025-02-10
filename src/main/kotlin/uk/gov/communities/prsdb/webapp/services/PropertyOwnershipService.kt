@@ -1,9 +1,12 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -92,17 +95,22 @@ class PropertyOwnershipService(
     fun retrievePropertyOwnershipById(propertyOwnershipId: Long): PropertyOwnership? =
         propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)
 
-    fun searchForProperties(searchTerm: String): List<PropertySearchResultViewModel> {
+    fun searchForProperties(
+        searchTerm: String,
+        requestedPageIndex: Int = 0,
+        pageSize: Int = MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE,
+    ): Page<PropertySearchResultViewModel> {
         val prn = RegistrationNumberDataModel.parseTypeOrNull(searchTerm, RegistrationNumberType.PROPERTY)
         val uprn = AddressHelper.parseUprnOrNull(searchTerm)
+        val pageRequest = PageRequest.of(requestedPageIndex, pageSize)
 
         val matchingProperties =
             if (prn != null) {
-                propertyOwnershipRepository.searchMatchingPRN(prn.number)
+                propertyOwnershipRepository.searchMatchingPRN(prn.number, pageRequest)
             } else if (uprn != null) {
-                propertyOwnershipRepository.searchMatchingUPRN(uprn)
+                propertyOwnershipRepository.searchMatchingUPRN(uprn, pageRequest)
             } else {
-                propertyOwnershipRepository.searchMatching(searchTerm)
+                propertyOwnershipRepository.searchMatching(searchTerm, pageRequest)
             }
 
         return matchingProperties.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }

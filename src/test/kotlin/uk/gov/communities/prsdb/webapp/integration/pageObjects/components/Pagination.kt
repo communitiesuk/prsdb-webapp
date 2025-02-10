@@ -5,7 +5,7 @@ import com.microsoft.playwright.Page
 
 class Pagination(
     private val page: Page,
-    locator: Locator = page.locator(".govuk-pagination").first(),
+    locator: Locator = getLocator(page),
 ) : BaseComponent(locator) {
     fun getPreviousLink() = getLinkWithText("Previous")
 
@@ -18,4 +18,8 @@ class Pagination(
     fun getNextLink() = getLinkWithText("Next")
 
     private fun getLinkWithText(text: String) = getChildComponent(".govuk-pagination__link", Locator.LocatorOptions().setHasText(text))
+
+    companion object {
+        fun getLocator(page: Page) = page.locator(".govuk-pagination").first()
+    }
 }

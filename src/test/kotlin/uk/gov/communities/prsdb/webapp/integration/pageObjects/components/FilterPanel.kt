@@ -7,7 +7,7 @@ class FilterPanel(
     private val page: Page,
     locator: Locator = page.locator(".moj-filter-layout"),
 ) : BaseComponent(locator) {
-    fun getPanel() = getChildComponent(".moj-filter")
+    fun getPanel(isVisible: Boolean = true) = if (isVisible) getChildComponent(".moj-filter") else locator.locator(".moj-filter")
 
     fun clickCloseFilterPanel() {
         getButton(page, "Close filters panel").click()
