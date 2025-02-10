@@ -17,50 +17,60 @@
 
         <th:block th:if="${searchResults != null}">
 
-            <nav th:replace="~{fragments/pagination/pagination :: pagination(${paginationViewModel})}"></nav>
+            <div id="filtered-content"
+                 th:replace="~{fragments/filterPanel :: filterPanel(${searchRequest}, ${filterPanelViewModel}, ~{::#filtered-content/content()})}">
 
-            <table th:replace="~{fragments/tables/table :: table(
+                <nav th:replace="~{fragments/pagination/pagination :: pagination(${paginationViewModel})}"></nav>
+
+                <div id="scrollable-content"
+                     th:replace="~{fragments/layouts/scrollablePane :: scrollablePane(~{::#scrollable-content/content()})}">
+
+                    <table th:replace="~{fragments/tables/table :: table(
                             ${ {'propertySearch.table.heading.address','propertySearch.table.heading.prn','propertySearch.table.heading.la', 'propertySearch.table.heading.landlord'} },
                             ~{::tbody},
                             #{propertySearch.table.heading}
                         )}">
-                <tbody class="govuk-table__body">
-                <tr class="govuk_table__row" th:each="property: ${searchResults}">
-                    <td class="govuk-table__cell govuk-!-width-one-quarter">
-                        <a class="govuk-link" th:href="@{${basePropertyDetailsURL + '/' + property.id}}"
-                           th:text="${property.address}">
-                        </a>
-                    </td>
-                    <td class="govuk-table__cell govuk-!-width-one-quarter"
-                        th:text="${property.registrationNumber}">
-                    </td>
-                    <td class="govuk-table__cell govuk-!-width-one-quarter"
-                        th:text="${property.localAuthority}">
-                    </td>
-                    <td class="govuk-table__cell govuk-!-width-one-quarter">
-                        <a class="govuk-link" th:href="@{${baseLandlordDetailsURL + '/' + property.landlord.id}}"
-                           th:text="${property.landlord.name}">
-                        </a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+                        <tbody class="govuk-table__body">
+                        <tr class="govuk_table__row" th:each="property: ${searchResults}">
+                            <td class="govuk-table__cell govuk-!-width-one-quarter">
+                                <a class="govuk-link" th:href="@{${basePropertyDetailsURL + '/' + property.id}}"
+                                   th:text="${property.address}">
+                                </a>
+                            </td>
+                            <td class="govuk-table__cell govuk-!-width-one-quarter"
+                                th:text="${property.registrationNumber}">
+                            </td>
+                            <td class="govuk-table__cell govuk-!-width-one-quarter"
+                                th:text="${property.localAuthority}">
+                            </td>
+                            <td class="govuk-table__cell govuk-!-width-one-quarter">
+                                <a class="govuk-link"
+                                   th:href="@{${baseLandlordDetailsURL + '/' + property.landlord.id}}"
+                                   th:text="${property.landlord.name}">
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
 
-            <div th:if="${searchResults.size() == 0}"
-                 class="govuk-!-text-align-centre govuk-!-margin-bottom-6" id="no-results">
-                <h1 class="govuk-heading-l" th:text="#{propertySearch.error.heading}">
-                    propertySearch.error.heading
-                </h1>
-                <div class="govuk-hint">
-                    <span th:remove="tag" th:text="#{propertySearch.error.hint.beforeLink}">propertySearch.error.hint.beforeLink</span>
-                    <a class="govuk-link" th:href="@{${landlordSearchURL}}"
-                       th:text="#{propertySearch.error.hint.link}">propertySearch.error.hint.link
-                    </a>
+                    <div th:if="${searchResults.size() == 0}"
+                         class="govuk-!-text-align-centre govuk-!-margin-bottom-6" id="no-results">
+                        <h1 class="govuk-heading-l" th:text="#{propertySearch.error.heading}">
+                            propertySearch.error.heading
+                        </h1>
+                        <div class="govuk-hint">
+                            <span th:remove="tag" th:text="#{propertySearch.error.hint.beforeLink}">propertySearch.error.hint.beforeLink</span>
+                            <a class="govuk-link" th:href="@{${landlordSearchURL}}"
+                               th:text="#{propertySearch.error.hint.link}">propertySearch.error.hint.link
+                            </a>
+                        </div>
+                    </div>
+
                 </div>
+
+                <nav th:replace="~{fragments/pagination/pagination :: pagination(${paginationViewModel})}"></nav>
+
             </div>
-
-            <nav th:replace="~{fragments/pagination/pagination :: pagination(${paginationViewModel})}"></nav>
-
         </th:block>
 
         <details id="details-content"

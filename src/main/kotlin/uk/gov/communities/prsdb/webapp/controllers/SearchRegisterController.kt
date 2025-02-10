@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.Landlor
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.PropertySearchRequestModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.filterPanelModels.LandlordFilterPanelViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.filterPanelModels.PropertyFilterPanelViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -73,6 +74,7 @@ class SearchRegisterController(
     @GetMapping("/property")
     fun searchForProperties(
         model: Model,
+        principal: Principal,
         httpServletRequest: HttpServletRequest,
         searchRequest: PropertySearchRequestModel,
         @RequestParam(value = "page", required = false) @Min(1) page: Int = 1,
@@ -82,6 +84,7 @@ class SearchRegisterController(
         }
 
         model.addAttribute("searchRequest", searchRequest)
+        model.addAttribute("filterPanelViewModel", PropertyFilterPanelViewModel(searchRequest, httpServletRequest))
         // TODO PRSD-647: Set backURL to LA landing page
         model.addAttribute("backURL", "")
 
@@ -90,7 +93,12 @@ class SearchRegisterController(
         }
 
         val pagedSearchResults =
-            propertyOwnershipService.searchForProperties(searchRequest.searchTerm!!, requestedPageIndex = page - 1)
+            propertyOwnershipService.searchForProperties(
+                searchRequest.searchTerm!!,
+                principal.name,
+                searchRequest.restrictToLA,
+                requestedPageIndex = page - 1,
+            )
 
         if (isPageOutOfBounds(pagedSearchResults, page)) {
             return getRedirectForPageOutOfBounds(httpServletRequest)

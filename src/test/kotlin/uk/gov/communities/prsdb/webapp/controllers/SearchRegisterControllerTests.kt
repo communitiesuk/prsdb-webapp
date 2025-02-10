@@ -115,14 +115,19 @@ class SearchRegisterControllerTests(
     @Test
     @WithMockUser(roles = ["LA_USER"])
     fun `searchForProperties returns 200 for a valid page request`() {
-        whenever(propertyOwnershipService.searchForProperties("PRSDB", requestedPageIndex = 1))
-            .thenReturn(
-                PageImpl(
-                    listOf(PropertySearchResultViewModel.fromPropertyOwnership(MockLandlordData.createPropertyOwnership())),
-                    PageRequest.of(1, MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE),
-                    2,
-                ),
-            )
+        whenever(
+            propertyOwnershipService.searchForProperties(
+                searchTerm = "PRSDB",
+                laBaseUserId = "user",
+                requestedPageIndex = 1,
+            ),
+        ).thenReturn(
+            PageImpl(
+                listOf(PropertySearchResultViewModel.fromPropertyOwnership(MockLandlordData.createPropertyOwnership())),
+                PageRequest.of(1, MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE),
+                2,
+            ),
+        )
 
         mvc.get("/search/property?searchTerm=PRSDB&page=2").andExpect {
             status { isOk() }
@@ -140,14 +145,19 @@ class SearchRegisterControllerTests(
     @Test
     @WithMockUser(roles = ["LA_USER"])
     fun `searchForProperties redirects if the requested page number is more than the total pages`() {
-        whenever(propertyOwnershipService.searchForProperties("PRSDB", requestedPageIndex = 2))
-            .thenReturn(
-                PageImpl(
-                    emptyList<PropertySearchResultViewModel>(),
-                    PageRequest.of(2, MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE),
-                    1,
-                ),
-            )
+        whenever(
+            propertyOwnershipService.searchForProperties(
+                searchTerm = "PRSDB",
+                laBaseUserId = "user",
+                requestedPageIndex = 2,
+            ),
+        ).thenReturn(
+            PageImpl(
+                emptyList<PropertySearchResultViewModel>(),
+                PageRequest.of(2, MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE),
+                1,
+            ),
+        )
 
         mvc.get("/search/property?searchTerm=PRSDB&page=3").andExpect {
             status { is3xxRedirection() }
