@@ -9,12 +9,12 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.emailUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
-import java.util.Optional
 
 @Component
 class UpdateDetailsJourney(
@@ -78,18 +78,7 @@ class UpdateDetailsJourney(
     private fun handleChangeSubmitAndRedirect(journeyData: JourneyData): String {
         val landlordUpdate =
             LandlordUpdateModel(
-                email =
-                    if (journeyData.containsKey(UpdateDetailsStepId.UpdateEmail.urlPathSegment)) {
-                        Optional.of(
-                            JourneyDataHelper.getFieldStringValue(
-                                journeyData,
-                                UpdateDetailsStepId.UpdateEmail.urlPathSegment,
-                                "emailAddress",
-                            )!!,
-                        )
-                    } else {
-                        Optional.empty()
-                    },
+                email = journeyData.emailUpdateIfPresent(),
             )
 
         landlordService.updateLandlordEmailForBaseUserId(
