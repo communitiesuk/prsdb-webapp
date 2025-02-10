@@ -109,7 +109,8 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (61, '12/10/24', 0006001029, 0),
        (62, '12/10/24', 0006001030, 0),
        (63, '12/10/24', 0006001031, 0),
-       (64, '12/10/24', 0006001032, 0);
+       (64, '12/10/24', 0006001032, 0),
+       (65, '12/10/24', 0006001033, 0);
 
 
 INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id)
@@ -149,7 +150,8 @@ VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 1),
        (34, '05/02/25', '05/02/25', 1034, '22 PRSDB Square, EG1 2AV', 1),
        (35, '05/02/25', '05/02/25', 1035, '23 PRSDB Square, EG1 2AW', 1),
        (36, '05/02/25', '05/02/25', 1036, '24 PRSDB Square, EG1 2AX', 1),
-       (37, '05/02/25', '05/02/25', 1037, '25 PRSDB Square, EG1 2AY', 1);
+       (37, '05/02/25', '05/02/25', 1037, '25 PRSDB Square, EG1 2AY', 1),
+       (38, '05/02/25', '05/02/25', 1038, '26 PRSDB Square, EG1 2AZ', 1);
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
                       is_active, phone_number, subject_identifier, name, email)
@@ -229,7 +231,8 @@ VALUES (1, 1, true, 1, 6),
        (29, 1, true, 1, 34),
        (30, 1, true, 1, 35),
        (31, 1, true, 1, 36),
-       (32, 1, true, 1, 37);
+       (32, 1, true, 1, 37),
+       (33, 1, true, 1, 38);
 
 INSERT INTO property_ownership (id, is_active, occupancy_type, landlord_type, ownership_type, current_num_households,
                                 current_num_tenants,
@@ -265,4 +268,5 @@ VALUES (1, true, 0, 0, 1, 1, 2, 6, 1, 1, '01/15/25'),
        (29, true, 0, 0, 1, 0, 0, 61, 1, 29, '05/02/25'),
        (30, true, 0, 0, 1, 0, 0, 62, 1, 30, '05/02/25'),
        (31, true, 0, 0, 1, 0, 0, 63, 1, 31, '05/02/25'),
-       (32, true, 0, 0, 1, 0, 0, 64, 1, 32, '05/02/25');
+       (32, true, 0, 0, 1, 0, 0, 64, 1, 32, '05/02/25'),
+       (33, true, 0, 0, 1, 0, 0, 65, 1, 33, '05/02/25');

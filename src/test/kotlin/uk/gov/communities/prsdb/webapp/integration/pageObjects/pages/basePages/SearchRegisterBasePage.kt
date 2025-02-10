@@ -17,9 +17,13 @@ abstract class SearchRegisterBasePage(
 
     fun getResultTable() = Table(page)
 
+    fun getHiddenResultTable() = Table.getLocator(page)
+
     fun getPaginationComponent() = Pagination(page)
+
+    fun getHiddenPaginationComponent() = Pagination.getLocator(page)
 
     fun getErrorMessageText() = getErrorMessage().innerText()
 
-    fun getErrorMessage() = getComponent(page, "#no-results")
+    fun getErrorMessage(isVisible: Boolean = true) = if (isVisible) getComponent(page, "#no-results") else page.locator("#no-results")
 }

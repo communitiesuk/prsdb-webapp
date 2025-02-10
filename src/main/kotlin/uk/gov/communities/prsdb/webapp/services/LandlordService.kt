@@ -70,11 +70,11 @@ class LandlordService(
         searchTerm: String,
         laBaseUserId: String,
         restrictToLA: Boolean = false,
-        currentPageNumber: Int = 0,
+        requestedPageIndex: Int = 0,
         pageSize: Int = MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE,
     ): Page<LandlordSearchResultViewModel> {
         val lrn = RegistrationNumberDataModel.parseTypeOrNull(searchTerm, RegistrationNumberType.LANDLORD)
-        val pageRequest = PageRequest.of(currentPageNumber, pageSize)
+        val pageRequest = PageRequest.of(requestedPageIndex, pageSize)
 
         val landlordPage =
             if (lrn == null) {
