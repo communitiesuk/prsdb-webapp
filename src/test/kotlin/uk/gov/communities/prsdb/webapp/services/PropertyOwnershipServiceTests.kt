@@ -11,7 +11,6 @@ import org.mockito.Mock
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -231,15 +230,25 @@ class PropertyOwnershipServiceTests {
     @Test
     fun `searchForProperties returns a single matching property when the search term is a PRN`() {
         val searchPRN = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 123)
+        val laBaseUserId = "id"
+        val pageRequest = PageRequest.of(1, 10)
         val prnMatchingPropertyOwnership = listOf(MockLandlordData.createPropertyOwnership())
         val expectedSearchResults =
             prnMatchingPropertyOwnership.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
 
-        whenever(mockPropertyOwnershipRepository.searchMatchingPRN(eq(searchPRN.number), pageable = any())).thenReturn(
+        whenever(
+            mockPropertyOwnershipRepository.searchMatchingPRN(searchPRN.number, laBaseUserId, pageable = pageRequest),
+        ).thenReturn(
             PageImpl(prnMatchingPropertyOwnership),
         )
 
-        val searchResults = propertyOwnershipService.searchForProperties(searchPRN.toString())
+        val searchResults =
+            propertyOwnershipService.searchForProperties(
+                searchPRN.toString(),
+                laBaseUserId,
+                requestedPageIndex = pageRequest.pageNumber,
+                pageSize = pageRequest.pageSize,
+            )
 
         assertEquals(expectedSearchResults, searchResults.content)
     }
@@ -247,18 +256,31 @@ class PropertyOwnershipServiceTests {
     @Test
     fun `searchForProperties returns no results when the search term is a non-property registration number`() {
         val nonPropertyRegNum = RegistrationNumberDataModel(RegistrationNumberType.LANDLORD, 123)
+        val laBaseUserId = "id"
+        val pageRequest = PageRequest.of(1, 10)
 
         whenever(
-            mockPropertyOwnershipRepository.searchMatching(eq(nonPropertyRegNum.toString()), pageable = any()),
+            mockPropertyOwnershipRepository.searchMatching(
+                nonPropertyRegNum.toString(),
+                laBaseUserId,
+                pageable = pageRequest,
+            ),
         ).thenReturn(
             Page.empty(),
         )
 
-        val searchResults = propertyOwnershipService.searchForProperties(nonPropertyRegNum.toString())
+        val searchResults =
+            propertyOwnershipService.searchForProperties(
+                nonPropertyRegNum.toString(),
+                laBaseUserId,
+                requestedPageIndex = pageRequest.pageNumber,
+                pageSize = pageRequest.pageSize,
+            )
 
         verify(mockPropertyOwnershipRepository, never()).searchMatchingPRN(
-            eq(nonPropertyRegNum.number),
-            pageable = any(),
+            nonPropertyRegNum.number,
+            laBaseUserId,
+            pageable = pageRequest,
         )
         assertEquals(emptyList<PropertySearchResultViewModel>(), searchResults.content)
     }
@@ -266,6 +288,8 @@ class PropertyOwnershipServiceTests {
     @Test
     fun `searchForProperties returns a single matching property when the search term is a UPRN`() {
         val searchUPRN = "123"
+        val laBaseUserId = "id"
+        val pageRequest = PageRequest.of(1, 10)
 
         val uprnMatchingPropertyOwnership =
             listOf(
@@ -284,14 +308,21 @@ class PropertyOwnershipServiceTests {
 
         whenever(
             mockPropertyOwnershipRepository.searchMatchingUPRN(
-                eq(searchUPRN.toLong()),
-                pageable = any(),
+                searchUPRN.toLong(),
+                laBaseUserId,
+                pageable = pageRequest,
             ),
         ).thenReturn(
             PageImpl(uprnMatchingPropertyOwnership),
         )
 
-        val searchResults = propertyOwnershipService.searchForProperties(searchUPRN)
+        val searchResults =
+            propertyOwnershipService.searchForProperties(
+                searchUPRN,
+                laBaseUserId,
+                requestedPageIndex = pageRequest.pageNumber,
+                pageSize = pageRequest.pageSize,
+            )
 
         assertEquals(expectedSearchResults, searchResults.content)
     }
@@ -299,17 +330,27 @@ class PropertyOwnershipServiceTests {
     @Test
     fun `searchForProperties returns a collection of fuzzy matches when the search term is not a PRN or UPRN`() {
         val searchTerm = "EG1 2AB"
+        val laBaseUserId = "id"
+        val pageRequest = PageRequest.of(1, 10)
 
         val fuzzyMatchingPropertyOwnerships =
             listOf(MockLandlordData.createPropertyOwnership(), MockLandlordData.createPropertyOwnership())
         val expectedSearchResults =
             fuzzyMatchingPropertyOwnerships.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
 
-        whenever(mockPropertyOwnershipRepository.searchMatching(eq(searchTerm), pageable = any())).thenReturn(
+        whenever(
+            mockPropertyOwnershipRepository.searchMatching(searchTerm, laBaseUserId, pageable = pageRequest),
+        ).thenReturn(
             PageImpl(fuzzyMatchingPropertyOwnerships),
         )
 
-        val searchResults = propertyOwnershipService.searchForProperties(searchTerm)
+        val searchResults =
+            propertyOwnershipService.searchForProperties(
+                searchTerm,
+                laBaseUserId,
+                requestedPageIndex = pageRequest.pageNumber,
+                pageSize = pageRequest.pageSize,
+            )
 
         assertEquals(expectedSearchResults, searchResults.content)
     }
@@ -317,6 +358,7 @@ class PropertyOwnershipServiceTests {
     @Test
     fun `searchForProperties returns the requested page of properties`() {
         val searchTerm = "searchTerm"
+        val laBaseUserId = "id"
         val pageSize = 25
         val matchingProperties = (1..40).map { MockLandlordData.createPropertyOwnership() }
 
@@ -332,13 +374,15 @@ class PropertyOwnershipServiceTests {
         val expectedPage2SearchResults =
             matchingPropertiesPage2.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
 
-        whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm, pageable = pageRequest1))
+        whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm, laBaseUserId, pageable = pageRequest1))
             .thenReturn(PageImpl(matchingPropertiesPage1))
-        whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm, pageable = pageRequest2))
+        whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm, laBaseUserId, pageable = pageRequest2))
             .thenReturn(PageImpl(matchingPropertiesPage2))
 
-        val searchResults1 = propertyOwnershipService.searchForProperties(searchTerm, pageIndex1)
-        val searchResults2 = propertyOwnershipService.searchForProperties(searchTerm, pageIndex2)
+        val searchResults1 =
+            propertyOwnershipService.searchForProperties(searchTerm, laBaseUserId, requestedPageIndex = pageIndex1)
+        val searchResults2 =
+            propertyOwnershipService.searchForProperties(searchTerm, laBaseUserId, requestedPageIndex = pageIndex2)
 
         assertEquals(expectedPage1SearchResults, searchResults1.content)
         assertEquals(expectedPage2SearchResults, searchResults2.content)
