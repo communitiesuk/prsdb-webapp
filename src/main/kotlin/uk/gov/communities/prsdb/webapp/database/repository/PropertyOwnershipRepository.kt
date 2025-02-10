@@ -32,16 +32,18 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
 
     fun findByIdAndIsActiveTrue(id: Long): PropertyOwnership?
 
-    // TODO PRSD-660: Add filtering to searchMatchingX queries
     @Query(
         "SELECT po.* " +
             "FROM property_ownership po " +
             "JOIN registration_number r ON po.registration_number_id = r.id " +
-            "WHERE po.is_active AND r.number = :searchPRN",
+            "WHERE po.is_active AND r.number = :searchPRN " +
+            LA_FILTER,
         nativeQuery = true,
     )
     fun searchMatchingPRN(
         @Param("searchPRN") searchPRN: Long,
+        @Param("laUserBaseId") laUserBaseId: String,
+        @Param("restrictToLA") restrictToLA: Boolean = false,
         pageable: Pageable,
     ): Page<PropertyOwnership>
 
@@ -50,11 +52,14 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
             "FROM property_ownership po " +
             "JOIN property p ON po.property_id = p.id " +
             "JOIN address a ON p.address_id = a.id " +
-            "WHERE po.is_active AND a.uprn = :searchUPRN",
+            "WHERE po.is_active AND a.uprn = :searchUPRN " +
+            LA_FILTER,
         nativeQuery = true,
     )
     fun searchMatchingUPRN(
         @Param("searchUPRN") searchUPRN: Long,
+        @Param("laUserBaseId") laUserBaseId: String,
+        @Param("restrictToLA") restrictToLA: Boolean = false,
         pageable: Pageable,
     ): Page<PropertyOwnership>
 
@@ -64,11 +69,26 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
             "JOIN property p ON po.property_id = p.id " +
             "JOIN address a ON p.address_id = a.id " +
             "WHERE po.is_active AND a.single_line_address %> :searchTerm " +
+            LA_FILTER +
             "ORDER BY a.single_line_address <->> :searchTerm",
         nativeQuery = true,
     )
     fun searchMatching(
         @Param("searchTerm") searchTerm: String,
+        @Param("laUserBaseId") laUserBaseId: String,
+        @Param("restrictToLA") restrictToLA: Boolean = false,
         pageable: Pageable,
     ): Page<PropertyOwnership>
+
+    companion object {
+        // Determines whether the property's address is in the LA user's LA
+        private const val LA_FILTER =
+            """
+            AND (a.local_authority_id = (SELECT la.id 
+                                         FROM local_authority la
+                                         JOIN local_authority_user lau ON la.id = lau.local_authority_id
+                                         WHERE lau.subject_identifier = :laUserBaseId)
+                 OR NOT :restrictToLA) 
+            """
+    }
 }
