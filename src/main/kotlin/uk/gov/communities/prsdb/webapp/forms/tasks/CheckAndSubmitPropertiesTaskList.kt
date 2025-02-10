@@ -20,7 +20,6 @@ class CheckAndSubmitPropertiesTaskList(
             Task(
                 "registerProperty.taskList.checkAndSubmit.checkAnswers",
                 RegisterPropertyStepId.CheckAnswers,
-                null,
             ),
         )
     // TODO PRSD-593: Pay for your properties

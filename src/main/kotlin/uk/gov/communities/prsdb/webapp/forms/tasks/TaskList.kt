@@ -36,21 +36,17 @@ abstract class TaskList<T : StepId>(
         journeyData: JourneyData,
         task: Task<T>,
     ): TaskStatus =
-        if (isStepWithIdReachable(journeyData, task.completionId)) {
+        if (task.stepIds.all { isStepWithIdComplete(journeyData, it) }) {
             TaskStatus.COMPLETED
+        } else if (isStepWithIdComplete(journeyData, task.startId)) {
+            TaskStatus.IN_PROGRESS
+        } else if (isStepWithIdReachable(journeyData, task.startId)) {
+            TaskStatus.NOT_YET_STARTED
         } else {
-            if (isStepWithIdReachable(journeyData, task.startId)) {
-                if (isNextStepReachableFromId(journeyData, task.startId)) {
-                    TaskStatus.IN_PROGRESS
-                } else {
-                    TaskStatus.NOT_YET_STARTED
-                }
-            } else {
-                TaskStatus.CANNOT_START_YET
-            }
+            TaskStatus.CANNOT_START_YET
         }
 
-    private fun isNextStepReachableFromId(
+    private fun isStepWithIdComplete(
         journeyData: JourneyData,
         id: T,
     ): Boolean {
@@ -71,6 +67,6 @@ abstract class TaskList<T : StepId>(
     data class Task<T : StepId>(
         val nameKey: String,
         val startId: T,
-        val completionId: T?,
+        val stepIds: Set<T> = setOf(startId),
     )
 }

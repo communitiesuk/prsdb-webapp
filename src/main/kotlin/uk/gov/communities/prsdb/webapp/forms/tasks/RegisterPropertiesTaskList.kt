@@ -20,32 +20,44 @@ class RegisterPropertiesTaskList(
             Task(
                 "registerProperty.taskList.register.addAddress",
                 RegisterPropertyStepId.LookupAddress,
-                RegisterPropertyStepId.PropertyType,
+                setOf(
+                    RegisterPropertyStepId.LookupAddress,
+                    RegisterPropertyStepId.SelectAddress,
+                    RegisterPropertyStepId.ManualAddress,
+                    RegisterPropertyStepId.AlreadyRegistered,
+                    RegisterPropertyStepId.LocalAuthority,
+                ),
             ),
             Task(
                 "registerProperty.taskList.register.selectType",
                 RegisterPropertyStepId.PropertyType,
-                RegisterPropertyStepId.OwnershipType,
             ),
             Task(
                 "registerProperty.taskList.register.selectOwnership",
                 RegisterPropertyStepId.OwnershipType,
-                RegisterPropertyStepId.LicensingType,
             ),
             Task(
                 "registerProperty.taskList.register.addLicensing",
                 RegisterPropertyStepId.LicensingType,
-                RegisterPropertyStepId.Occupancy,
+                setOf(
+                    RegisterPropertyStepId.LicensingType,
+                    RegisterPropertyStepId.HmoMandatoryLicence,
+                    RegisterPropertyStepId.HmoAdditionalLicence,
+                    RegisterPropertyStepId.SelectiveLicence,
+                ),
             ),
             Task(
                 "registerProperty.taskList.register.addTenancyInfo",
                 RegisterPropertyStepId.Occupancy,
-                RegisterPropertyStepId.LandlordType,
+                setOf(
+                    RegisterPropertyStepId.Occupancy,
+                    RegisterPropertyStepId.NumberOfHouseholds,
+                    RegisterPropertyStepId.NumberOfPeople,
+                ),
             ),
             Task(
                 "registerProperty.taskList.register.selectOperation",
                 RegisterPropertyStepId.LandlordType,
-                RegisterPropertyStepId.CheckAnswers,
             ),
         )
     // TODO PRSD-587 Add Interested parties
