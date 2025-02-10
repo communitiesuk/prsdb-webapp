@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.viewModels.searchModels
+package uk.gov.communities.prsdb.webapp.models.viewModels.filterPanelModels
 
 import jakarta.servlet.http.HttpServletRequest
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.LandlordSearchRequestModel
