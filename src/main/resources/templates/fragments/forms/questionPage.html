@@ -6,9 +6,9 @@
         <main class="govuk-main-wrapper">
             <div id="page-content"
                  th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
-                <p th:replace="~{fragments/sectionHeader :: sectionHeader(${sectionHeaderInfo})}" ></p>
                 <form th:action="@{''}" method="post" novalidate th:object="${formModel}">
                     <div th:replace="~{fragments/forms/errorSummary :: errorSummary()}">Error Summary</div>
+                    <p th:replace="~{fragments/sectionHeader :: sectionHeader(${sectionHeaderInfo})}" ></p>
                     <th:block th:replace="${formContent}"></th:block>
                 </form>
             </div>
