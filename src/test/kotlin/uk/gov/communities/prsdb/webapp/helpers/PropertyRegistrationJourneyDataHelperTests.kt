@@ -10,6 +10,16 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataExtensions.getAddress
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataExtensions.getCustomPropertyType
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataExtensions.getIsOccupied
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataExtensions.getLandlordType
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataExtensions.getLicenseNumber
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataExtensions.getLicensingType
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataExtensions.getNumberOfHouseholds
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataExtensions.getNumberOfTenants
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataExtensions.getOwnershipType
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataExtensions.getPropertyType
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -40,8 +50,7 @@ class PropertyRegistrationJourneyDataHelperTests {
         whenever(mockAddressDataService.getAddressData(selectedAddress)).thenReturn(expectedAddressDataModel)
 
         val addressDataModel =
-            PropertyRegistrationJourneyDataHelper.getAddress(
-                mockJourneyData,
+            mockJourneyData.getAddress(
                 mockAddressDataService,
             )
 
@@ -71,8 +80,7 @@ class PropertyRegistrationJourneyDataHelperTests {
         )
 
         val addressDataModel =
-            PropertyRegistrationJourneyDataHelper.getAddress(
-                mockJourneyData,
+            mockJourneyData.getAddress(
                 mockAddressDataService,
             )
         assertEquals(expectedAddressDataModel, addressDataModel)
@@ -83,7 +91,7 @@ class PropertyRegistrationJourneyDataHelperTests {
         val expectedPropertyType = PropertyType.DETACHED_HOUSE
         val mockJourneyData = journeyDataBuilder.withPropertyType(expectedPropertyType).build()
 
-        val propertyType = PropertyRegistrationJourneyDataHelper.getPropertyType(mockJourneyData)
+        val propertyType = mockJourneyData.getPropertyType()
 
         assertEquals(expectedPropertyType, propertyType)
     }
@@ -93,7 +101,7 @@ class PropertyRegistrationJourneyDataHelperTests {
         val expectedPropertyType = "End terrace"
         val mockJourneyData = journeyDataBuilder.withPropertyType(PropertyType.OTHER, expectedPropertyType).build()
 
-        val customPropertyType = PropertyRegistrationJourneyDataHelper.getCustomPropertyType(mockJourneyData)
+        val customPropertyType = mockJourneyData.getCustomPropertyType()
 
         assertEquals(expectedPropertyType, customPropertyType)
     }
@@ -103,7 +111,7 @@ class PropertyRegistrationJourneyDataHelperTests {
         val expectedOwnershipType = OwnershipType.FREEHOLD
         val mockJourneyData = journeyDataBuilder.withOwnershipType(expectedOwnershipType).build()
 
-        val ownershipType = PropertyRegistrationJourneyDataHelper.getOwnershipType(mockJourneyData)
+        val ownershipType = mockJourneyData.getOwnershipType()
 
         assertEquals(expectedOwnershipType, ownershipType)
     }
@@ -113,7 +121,7 @@ class PropertyRegistrationJourneyDataHelperTests {
         val expectedLandlordType = LandlordType.SOLE
         val mockJourneyData = journeyDataBuilder.withLandlordType(expectedLandlordType).build()
 
-        val landlordType = PropertyRegistrationJourneyDataHelper.getLandlordType(mockJourneyData)
+        val landlordType = mockJourneyData.getLandlordType()
 
         assertEquals(expectedLandlordType, landlordType)
     }
@@ -122,7 +130,7 @@ class PropertyRegistrationJourneyDataHelperTests {
     fun `getIsOccupied returns true if the property is occupied`() {
         val mockJourneyData = journeyDataBuilder.withTenants(households = 1, people = 1).build()
 
-        val isOccupied = PropertyRegistrationJourneyDataHelper.getIsOccupied(mockJourneyData)!!
+        val isOccupied = mockJourneyData.getIsOccupied()!!
 
         assertTrue(isOccupied)
     }
@@ -131,7 +139,7 @@ class PropertyRegistrationJourneyDataHelperTests {
     fun `getIsOccupied returns false if the property is not occupied`() {
         val mockJourneyData = journeyDataBuilder.withNoTenants().build()
 
-        val isOccupied = PropertyRegistrationJourneyDataHelper.getIsOccupied(mockJourneyData)!!
+        val isOccupied = mockJourneyData.getIsOccupied()!!
 
         assertFalse(isOccupied)
     }
@@ -141,7 +149,7 @@ class PropertyRegistrationJourneyDataHelperTests {
         val expectedNumberOfHouseholds = 2
         val mockJourneyData = journeyDataBuilder.withTenants(expectedNumberOfHouseholds, people = 1).build()
 
-        val numberOfHouseholds = PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(mockJourneyData)
+        val numberOfHouseholds = mockJourneyData.getNumberOfHouseholds()
 
         assertEquals(expectedNumberOfHouseholds, numberOfHouseholds)
     }
@@ -151,7 +159,7 @@ class PropertyRegistrationJourneyDataHelperTests {
         val expectedNumberOfHouseholds = 0
         val mockJourneyData = journeyDataBuilder.withTenants(expectedNumberOfHouseholds, people = 1).build()
 
-        val numberOfHouseholds = PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(mockJourneyData)
+        val numberOfHouseholds = mockJourneyData.getNumberOfHouseholds()
 
         assertEquals(expectedNumberOfHouseholds, numberOfHouseholds)
     }
@@ -161,7 +169,7 @@ class PropertyRegistrationJourneyDataHelperTests {
         val expectedNumberOfTenants = 2
         val mockJourneyData = journeyDataBuilder.withTenants(households = 1, expectedNumberOfTenants).build()
 
-        val numberOfTenants = PropertyRegistrationJourneyDataHelper.getNumberOfTenants(mockJourneyData)
+        val numberOfTenants = mockJourneyData.getNumberOfTenants()
 
         assertEquals(expectedNumberOfTenants, numberOfTenants)
     }
@@ -171,7 +179,7 @@ class PropertyRegistrationJourneyDataHelperTests {
         val expectedNumberOfTenants = 0
         val mockJourneyData = journeyDataBuilder.withTenants(households = 1, expectedNumberOfTenants).build()
 
-        val numberOfTenants = PropertyRegistrationJourneyDataHelper.getNumberOfTenants(mockJourneyData)
+        val numberOfTenants = mockJourneyData.getNumberOfTenants()
 
         assertEquals(expectedNumberOfTenants, numberOfTenants)
     }
@@ -181,7 +189,7 @@ class PropertyRegistrationJourneyDataHelperTests {
         val expectedLicensingType = LicensingType.SELECTIVE_LICENCE
         val mockJourneyData = journeyDataBuilder.withLicensingType(expectedLicensingType).build()
 
-        val licensingType = PropertyRegistrationJourneyDataHelper.getLicensingType(mockJourneyData)
+        val licensingType = mockJourneyData.getLicensingType()
 
         assertEquals(expectedLicensingType, licensingType)
     }
@@ -192,7 +200,7 @@ class PropertyRegistrationJourneyDataHelperTests {
         val mockJourneyData =
             journeyDataBuilder.withLicensingType(LicensingType.SELECTIVE_LICENCE, expectedLicenseNumber).build()
 
-        val licenseNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(mockJourneyData)
+        val licenseNumber = mockJourneyData.getLicenseNumber()
 
         assertEquals(expectedLicenseNumber, licenseNumber)
     }
@@ -203,7 +211,7 @@ class PropertyRegistrationJourneyDataHelperTests {
         val mockJourneyData =
             journeyDataBuilder.withLicensingType(LicensingType.HMO_MANDATORY_LICENCE, expectedLicenseNumber).build()
 
-        val licenseNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(mockJourneyData)
+        val licenseNumber = mockJourneyData.getLicenseNumber()
 
         assertEquals(expectedLicenseNumber, licenseNumber)
     }
@@ -214,7 +222,7 @@ class PropertyRegistrationJourneyDataHelperTests {
         val mockJourneyData =
             journeyDataBuilder.withLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE, expectedLicenseNumber).build()
 
-        val licenseNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(mockJourneyData)
+        val licenseNumber = mockJourneyData.getLicenseNumber()
 
         assertEquals(expectedLicenseNumber, licenseNumber)
     }
@@ -224,7 +232,7 @@ class PropertyRegistrationJourneyDataHelperTests {
         val expectedLicenseNumber = ""
         val mockJourneyData = journeyDataBuilder.withLicensingType(LicensingType.NO_LICENSING).build()
 
-        val licenseNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(mockJourneyData)
+        val licenseNumber = mockJourneyData.getLicenseNumber()
 
         assertEquals(expectedLicenseNumber, licenseNumber)
     }

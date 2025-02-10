@@ -6,7 +6,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
-import uk.gov.communities.prsdb.webapp.helpers.LaUserRegistrationJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.LaUserRegistrationJourneyDataExtensions.getEmail
+import uk.gov.communities.prsdb.webapp.helpers.LaUserRegistrationJourneyDataExtensions.getName
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
@@ -45,12 +46,12 @@ class LaUserRegistrationCheckAnswersPage(
                 ),
                 SummaryListRowViewModel(
                     "registerLaUser.checkAnswers.rowHeading.name",
-                    LaUserRegistrationJourneyDataHelper.getName(journeyData),
+                    journeyData.getName(),
                     "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Name.urlPathSegment}",
                 ),
                 SummaryListRowViewModel(
                     "registerLaUser.checkAnswers.rowHeading.email",
-                    LaUserRegistrationJourneyDataHelper.getEmail(journeyData),
+                    journeyData.getEmail(),
                     "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Email.urlPathSegment}",
                 ),
             ),

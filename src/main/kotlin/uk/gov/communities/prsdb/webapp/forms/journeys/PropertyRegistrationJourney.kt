@@ -22,7 +22,16 @@ import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataExtensions.getAddress
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataExtensions.getIsOccupied
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataExtensions.getLandlordType
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataExtensions.getLicenseNumber
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataExtensions.getLicensingType
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataExtensions.getNumberOfHouseholds
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataExtensions.getNumberOfTenants
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataExtensions.getOwnershipType
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataExtensions.getPropertyType
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataExtensions.isManualAddressChosen
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.formModels.DeclarationFormModel
@@ -542,7 +551,7 @@ class PropertyRegistrationJourney(
     )
 
     private fun occupancyNextAction(journeyData: JourneyData): Pair<RegisterPropertyStepId, Int?> =
-        if (PropertyRegistrationJourneyDataHelper.getIsOccupied(journeyData)!!) {
+        if (journeyData.getIsOccupied()!!) {
             Pair(RegisterPropertyStepId.NumberOfHouseholds, null)
         } else {
             Pair(RegisterPropertyStepId.LandlordType, null)
@@ -553,11 +562,11 @@ class PropertyRegistrationJourney(
         addressDataService: AddressDataService,
         propertyRegistrationService: PropertyRegistrationService,
     ): Pair<RegisterPropertyStepId, Int?> =
-        if (PropertyRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
+        if (journeyData.isManualAddressChosen()) {
             Pair(RegisterPropertyStepId.ManualAddress, null)
         } else {
             val selectedAddress =
-                PropertyRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!
+                journeyData.getAddress(addressDataService)!!
             val selectedAddressData = addressDataService.getAddressData(selectedAddress.singleLineAddress)!!
             if (selectedAddressData.uprn != null &&
                 propertyRegistrationService.getIsAddressRegistered(selectedAddressData.uprn)
@@ -569,7 +578,7 @@ class PropertyRegistrationJourney(
         }
 
     private fun licensingTypeNextAction(journeyData: JourneyData): Pair<RegisterPropertyStepId, Int?> =
-        when (PropertyRegistrationJourneyDataHelper.getLicensingType(journeyData)!!) {
+        when (journeyData.getLicensingType()!!) {
             LicensingType.SELECTIVE_LICENCE -> Pair(RegisterPropertyStepId.SelectiveLicence, null)
             LicensingType.HMO_MANDATORY_LICENCE -> Pair(RegisterPropertyStepId.HmoMandatoryLicence, null)
             LicensingType.HMO_ADDITIONAL_LICENCE -> Pair(RegisterPropertyStepId.HmoAdditionalLicence, null)
@@ -586,18 +595,18 @@ class PropertyRegistrationJourney(
         session: HttpSession,
     ): String {
         try {
-            val address = PropertyRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!
+            val address = journeyData.getAddress(addressDataService)!!
             val baseUserId = SecurityContextHolder.getContext().authentication.name
             val propertyRegistrationNumber =
                 propertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(
                     address = address,
-                    propertyType = PropertyRegistrationJourneyDataHelper.getPropertyType(journeyData)!!,
-                    licenseType = PropertyRegistrationJourneyDataHelper.getLicensingType(journeyData)!!,
-                    licenceNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(journeyData)!!,
-                    landlordType = PropertyRegistrationJourneyDataHelper.getLandlordType(journeyData)!!,
-                    ownershipType = PropertyRegistrationJourneyDataHelper.getOwnershipType(journeyData)!!,
-                    numberOfHouseholds = PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(journeyData),
-                    numberOfPeople = PropertyRegistrationJourneyDataHelper.getNumberOfTenants(journeyData),
+                    propertyType = journeyData.getPropertyType()!!,
+                    licenseType = journeyData.getLicensingType()!!,
+                    licenceNumber = journeyData.getLicenseNumber()!!,
+                    landlordType = journeyData.getLandlordType()!!,
+                    ownershipType = journeyData.getOwnershipType()!!,
+                    numberOfHouseholds = journeyData.getNumberOfHouseholds(),
+                    numberOfPeople = journeyData.getNumberOfTenants(),
                     baseUserId = baseUserId,
                 )
 

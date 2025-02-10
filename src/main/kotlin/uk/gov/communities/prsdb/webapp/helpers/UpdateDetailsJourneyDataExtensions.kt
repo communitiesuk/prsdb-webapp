@@ -7,8 +7,7 @@ import java.util.Optional
 fun JourneyData.emailUpdateIfPresent() =
     if (this.containsKey(UpdateDetailsStepId.UpdateEmail.urlPathSegment)) {
         Optional.of(
-            JourneyDataHelper.getFieldStringValue(
-                this,
+            getFieldStringValue(
                 UpdateDetailsStepId.UpdateEmail.urlPathSegment,
                 "emailAddress",
             )!!,

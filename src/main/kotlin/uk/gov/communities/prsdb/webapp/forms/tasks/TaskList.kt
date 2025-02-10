@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.forms.journeys.Journey
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
-import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.getPageData
 import uk.gov.communities.prsdb.webapp.models.viewModels.TaskListItemViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
@@ -55,7 +55,7 @@ abstract class TaskList<T : StepId>(
         id: T,
     ): Boolean {
         val currentStep = steps.single { it.id == id }
-        val pageData = JourneyDataHelper.getPageData(journeyData, currentStep.name)
+        val pageData = journeyData.getPageData(currentStep.name)
         return pageData != null && currentStep.isSatisfied(validator, pageData)
     }
 

@@ -4,7 +4,7 @@ import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
-import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.getLookupAddressHouseNameOrNumberAndPostcode
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosDividerViewModel
@@ -31,8 +31,7 @@ class SelectAddressPage(
         journeyData!!
 
         val (houseNameOrNumber, postcode) =
-            JourneyDataHelper.getLookupAddressHouseNameOrNumberAndPostcode(
-                journeyData,
+            journeyData.getLookupAddressHouseNameOrNumberAndPostcode(
                 lookupAddressPathSegment,
             )!!
 

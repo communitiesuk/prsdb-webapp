@@ -16,7 +16,15 @@ import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.VerifyIdentityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataExtensions.getAddress
+import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataExtensions.getDOB
+import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataExtensions.getEmail
+import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataExtensions.getInternationalAddress
+import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataExtensions.getLivesInUK
+import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataExtensions.getName
+import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataExtensions.getPhoneNumber
+import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataExtensions.isIdentityVerified
+import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataExtensions.isManualAddressChosen
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.formModels.CheckAnswersFormModel
@@ -78,7 +86,7 @@ class LandlordRegistrationJourney(
             id = LandlordRegistrationStepId.VerifyIdentity,
             page = VerifyIdentityPage(),
             nextAction = { journeyData, _ ->
-                if (LandlordRegistrationJourneyDataHelper.isIdentityVerified(journeyData)) {
+                if (journeyData.isIdentityVerified()) {
                     Pair(LandlordRegistrationStepId.ConfirmIdentity, null)
                 } else {
                     Pair(LandlordRegistrationStepId.Name, null)
@@ -433,21 +441,21 @@ class LandlordRegistrationJourney(
     )
 
     private fun countryOfResidenceNextAction(journeyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
-        if (LandlordRegistrationJourneyDataHelper.getLivesInUK(journeyData)!!) {
+        if (journeyData.getLivesInUK()!!) {
             Pair(LandlordRegistrationStepId.LookupAddress, null)
         } else {
             Pair(LandlordRegistrationStepId.InternationalAddress, null)
         }
 
     private fun selectAddressNextAction(journeyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
-        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
+        if (journeyData.isManualAddressChosen()) {
             Pair(LandlordRegistrationStepId.ManualAddress, null)
         } else {
             Pair(LandlordRegistrationStepId.CheckAnswers, null)
         }
 
     private fun selectContactAddressNextAction(journeyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
-        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData, isContactAddress = true)
+        if (journeyData.isManualAddressChosen(isContactAddress = true)
         ) {
             Pair(LandlordRegistrationStepId.ManualContactAddress, null)
         } else {
@@ -464,14 +472,12 @@ class LandlordRegistrationJourney(
         val landlord =
             landlordService.createLandlord(
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
-                name = LandlordRegistrationJourneyDataHelper.getName(journeyData)!!,
-                email = LandlordRegistrationJourneyDataHelper.getEmail(journeyData)!!,
-                phoneNumber = LandlordRegistrationJourneyDataHelper.getPhoneNumber(journeyData)!!,
-                addressDataModel =
-                    LandlordRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!,
-                internationalAddress =
-                    LandlordRegistrationJourneyDataHelper.getInternationalAddress(journeyData),
-                dateOfBirth = LandlordRegistrationJourneyDataHelper.getDOB(journeyData)!!,
+                name = journeyData.getName()!!,
+                email = journeyData.getEmail()!!,
+                phoneNumber = journeyData.getPhoneNumber()!!,
+                addressDataModel = journeyData.getAddress(addressDataService)!!,
+                internationalAddress = journeyData.getInternationalAddress(),
+                dateOfBirth = journeyData.getDOB()!!,
             )
 
         emailNotificationService.sendEmail(

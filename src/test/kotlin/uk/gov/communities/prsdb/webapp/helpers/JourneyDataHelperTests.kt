@@ -33,7 +33,7 @@ class JourneyDataHelperTests {
         val mockJourneyData = journeyDataBuilder.withManualAddress(addressLineOne, townOrCity, postcode).build()
         val expectedAddressDataModel = AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode)
 
-        val addressDataModel = JourneyDataHelper.getManualAddress(mockJourneyData, "manual-address")
+        val addressDataModel = mockJourneyData.getManualAddress("manual-address")
 
         assertEquals(expectedAddressDataModel, addressDataModel)
     }
@@ -54,7 +54,7 @@ class JourneyDataHelperTests {
                 localAuthorityId = localAuthority.id,
             )
 
-        val addressDataModel = JourneyDataHelper.getManualAddress(mockJourneyData, "manual-address", "local-authority")
+        val addressDataModel = mockJourneyData.getManualAddress("manual-address", "local-authority")
 
         assertEquals(expectedAddressDataModel, addressDataModel)
     }
@@ -69,8 +69,7 @@ class JourneyDataHelperTests {
                 .build()
 
         val (houseNameOrNumber, postcode) =
-            JourneyDataHelper.getLookupAddressHouseNameOrNumberAndPostcode(
-                mockJourneyData,
+            mockJourneyData.getLookupAddressHouseNameOrNumberAndPostcode(
                 "lookup-address",
             )!!
 
@@ -92,7 +91,7 @@ class JourneyDataHelperTests {
                 )
 
             // Act
-            val pageData = JourneyDataHelper.getPageData(journeyData, pageName, null)
+            val pageData = journeyData.getPageData(pageName, null)
 
             // Assert
             assertEquals(pageData?.get(key), value)
@@ -105,7 +104,7 @@ class JourneyDataHelperTests {
             val journeyData: JourneyData = mutableMapOf()
 
             // Act
-            val pageData = JourneyDataHelper.getPageData(journeyData, pageName, null)
+            val pageData = journeyData.getPageData(pageName, null)
 
             // Assert
             assertNull(pageData)
@@ -124,7 +123,7 @@ class JourneyDataHelperTests {
                 )
 
             // Act
-            val subPageData = JourneyDataHelper.getPageData(journeyData, pageName, subPageNumber)
+            val subPageData = journeyData.getPageData(pageName, subPageNumber)
 
             // Assert
             assertEquals(subPageData?.get(key), value)
@@ -138,7 +137,7 @@ class JourneyDataHelperTests {
             val journeyData: JourneyData = mutableMapOf(pageName to mutableMapOf<String, Any>())
 
             // Act
-            val subPageData = JourneyDataHelper.getPageData(journeyData, pageName, subPageNumber)
+            val subPageData = journeyData.getPageData(pageName, subPageNumber)
 
             // Assert
             assertNull(subPageData)

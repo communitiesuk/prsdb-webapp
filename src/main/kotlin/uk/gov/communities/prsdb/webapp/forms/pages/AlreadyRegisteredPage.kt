@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
-import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.getFieldStringValue
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
 import kotlin.reflect.KClass
 
@@ -22,7 +22,7 @@ class AlreadyRegisteredPage(
     ): String {
         model.addAttribute(
             "singleLineAddress",
-            JourneyDataHelper.getFieldStringValue(journeyData!!, selectedAddressPathSegment, "address"),
+            journeyData!!.getFieldStringValue(selectedAddressPathSegment, "address"),
         )
 
         return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)

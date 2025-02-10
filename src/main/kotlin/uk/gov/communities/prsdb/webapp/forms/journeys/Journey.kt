@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
-import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.getPageData
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import java.security.Principal
 import java.util.Optional
@@ -51,7 +51,7 @@ abstract class Journey<T : StepId>(
         val prevStepDetails = getPrevStep(journeyData, requestedStep, subPageNumber)
         val prevStepUrl = getPrevStepUrl(prevStepDetails?.step, prevStepDetails?.subPageNumber)
         val pageData =
-            submittedPageData ?: JourneyDataHelper.getPageData(journeyData, requestedStep.name, subPageNumber)
+            submittedPageData ?: journeyData.getPageData(requestedStep.name, subPageNumber)
         return requestedStep.page.populateModelAndGetTemplateName(
             validator,
             model,
@@ -125,12 +125,12 @@ abstract class Journey<T : StepId>(
         var currentSubPageNumber: Int? = null
         val filteredJourneyData: JourneyData = mutableMapOf()
         while (!(currentStep.id == targetStep.id && currentSubPageNumber == targetSubPageNumber)) {
-            val pageData = JourneyDataHelper.getPageData(journeyData, currentStep.name, currentSubPageNumber)
+            val pageData = journeyData.getPageData(currentStep.name, currentSubPageNumber)
             if (pageData == null || !currentStep.isSatisfied(validator, pageData)) return null
 
             // This stores journeyData for only the journey path the user is on
             // and excludes user data for pages in the journey that belong to a different path
-            val stepData = JourneyDataHelper.getPageData(journeyData, currentStep.name, null)
+            val stepData = journeyData.getPageData(currentStep.name, null)
             filteredJourneyData[currentStep.name] = stepData
 
             val (nextStepId, nextSubPageNumber) =
