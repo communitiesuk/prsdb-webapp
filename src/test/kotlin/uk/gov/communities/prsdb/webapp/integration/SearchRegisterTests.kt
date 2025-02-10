@@ -5,8 +5,6 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
-import org.opentest4j.AssertionFailedError
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.ADDRESS_COL_INDEX
@@ -30,8 +28,7 @@ class SearchRegisterTests : IntegrationTest() {
         fun `results table does not show before search has been requested`() {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
 
-            val exception = assertThrows<AssertionFailedError> { searchLandlordRegisterPage.getResultTable() }
-            assertContains(exception.message!!, "Expected 1 instance of Locator@.govuk-table, found 0")
+            assertTrue(searchLandlordRegisterPage.getHiddenResultTable().isHidden)
         }
 
         @Test
@@ -39,8 +36,7 @@ class SearchRegisterTests : IntegrationTest() {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
             searchLandlordRegisterPage.searchBar.search("")
 
-            val exception = assertThrows<AssertionFailedError> { searchLandlordRegisterPage.getResultTable() }
-            assertContains(exception.message!!, "Expected 1 instance of Locator@.govuk-table, found 0")
+            assertTrue(searchLandlordRegisterPage.getHiddenResultTable().isHidden)
         }
 
         @Test
@@ -57,17 +53,13 @@ class SearchRegisterTests : IntegrationTest() {
 
             assertThat(resultTable.getHeaderCell(CONTACT_INFO_COL_INDEX)).containsText("Contact information")
             assertThat(
-                resultTable.getCell(
-                    0,
-                    CONTACT_INFO_COL_INDEX,
-                ),
+                resultTable.getCell(0, CONTACT_INFO_COL_INDEX),
             ).containsText("7111111111\nalex.surname@example.com")
 
             assertThat(resultTable.getHeaderCell(LISTED_PROPERTY_COL_INDEX)).containsText("Listed properties")
             assertThat(resultTable.getCell(0, LISTED_PROPERTY_COL_INDEX)).containsText("30")
 
-            val exception = assertThrows<AssertionFailedError> { searchLandlordRegisterPage.getErrorMessage() }
-            assertContains(exception.message!!, "Expected 1 instance of Locator@#no-results >> nth=0, found 0")
+            assertTrue(searchLandlordRegisterPage.getErrorMessage(isVisible = false).isHidden)
         }
 
         @Test
@@ -86,6 +78,7 @@ class SearchRegisterTests : IntegrationTest() {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
             searchLandlordRegisterPage.searchBar.search("L-CKSQ-3SX9")
             searchLandlordRegisterPage.getLandlordLink(rowIndex = 0).click()
+
             assertContains(page.url(), "/landlord-details/1")
         }
 
@@ -111,8 +104,7 @@ class SearchRegisterTests : IntegrationTest() {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
             searchLandlordRegisterPage.searchBar.search("Alex")
 
-            val exception = assertThrows<AssertionFailedError> { searchLandlordRegisterPage.getPaginationComponent() }
-            assertContains(exception.message!!, "Expected 1 instance of Locator@.govuk-pagination >> nth=0, found 0")
+            assertTrue(searchLandlordRegisterPage.getHiddenPaginationComponent().isHidden)
         }
 
         @Test
@@ -142,11 +134,7 @@ class SearchRegisterTests : IntegrationTest() {
 
             // Toggle filter
             filter.clickCloseFilterPanel()
-            val exception = assertThrows<AssertionFailedError> { filter.getPanel() }
-            assertContains(
-                exception.message!!,
-                "Expected 1 instance of Locator@.moj-filter-layout >> .moj-filter >> nth=0, found 0",
-            )
+            assertTrue(filter.getPanel(isVisible = false).isHidden)
 
             filter.clickShowFilterPanel()
             assertTrue(filter.getPanel().isVisible)
@@ -178,8 +166,7 @@ class SearchRegisterTests : IntegrationTest() {
         fun `results table does not show before search has been requested`() {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
 
-            val exception = assertThrows<AssertionFailedError> { searchPropertyRegisterPage.getResultTable() }
-            assertContains(exception.message!!, "Expected 1 instance of Locator@.govuk-table, found 0")
+            assertTrue(searchPropertyRegisterPage.getHiddenResultTable().isHidden)
         }
 
         @Test
@@ -187,8 +174,7 @@ class SearchRegisterTests : IntegrationTest() {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("")
 
-            val exception = assertThrows<AssertionFailedError> { searchPropertyRegisterPage.getResultTable() }
-            assertContains(exception.message!!, "Expected 1 instance of Locator@.govuk-table, found 0")
+            assertTrue(searchPropertyRegisterPage.getHiddenResultTable().isHidden)
         }
 
         @Test
@@ -209,8 +195,7 @@ class SearchRegisterTests : IntegrationTest() {
             assertThat(resultTable.getHeaderCell(PROPERTY_LANDLORD_COL_INDEX)).containsText("Registered landlord")
             assertThat(resultTable.getCell(0, PROPERTY_LANDLORD_COL_INDEX)).containsText("Alexander Smith")
 
-            val exception = assertThrows<AssertionFailedError> { searchPropertyRegisterPage.getErrorMessage() }
-            assertContains(exception.message!!, "Expected 1 instance of Locator@#no-results >> nth=0, found 0")
+            assertTrue(searchPropertyRegisterPage.getErrorMessage(isVisible = false).isHidden)
         }
 
         @Test
@@ -237,6 +222,7 @@ class SearchRegisterTests : IntegrationTest() {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("P-C5YY-J34H")
             searchPropertyRegisterPage.getPropertyLink(rowIndex = 0).click()
+
             assertContains(page.url(), "/local-authority/property-details/1")
         }
 
@@ -245,6 +231,7 @@ class SearchRegisterTests : IntegrationTest() {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("P-C5YY-J34H")
             searchPropertyRegisterPage.getLandlordLink(rowIndex = 0).click()
+
             assertContains(page.url(), "/landlord-details/1")
         }
 
@@ -270,16 +257,13 @@ class SearchRegisterTests : IntegrationTest() {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("Way")
 
-            val exception = assertThrows<AssertionFailedError> { searchPropertyRegisterPage.getPaginationComponent() }
-            assertContains(exception.message!!, "Expected 1 instance of Locator@.govuk-pagination >> nth=0, found 0")
+            assertTrue(searchPropertyRegisterPage.getHiddenPaginationComponent().isHidden)
         }
 
         @Test
         fun `pagination links lead to the intended pages`(page: Page) {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("PRSDB")
-
-            println(searchPropertyRegisterPage.getResultTable().countRows())
 
             searchPropertyRegisterPage.getPaginationComponent().getNextLink().click()
             assertContains(page.url(), "page=2")
