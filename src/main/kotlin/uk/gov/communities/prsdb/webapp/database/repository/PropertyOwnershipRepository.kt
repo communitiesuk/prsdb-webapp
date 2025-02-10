@@ -84,10 +84,15 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
         // Determines whether the property's address is in the LA user's LA
         private const val LA_FILTER =
             """
-            AND (a.local_authority_id = (SELECT la.id 
-                                         FROM local_authority la
-                                         JOIN local_authority_user lau ON la.id = lau.local_authority_id
-                                         WHERE lau.subject_identifier = :laUserBaseId)
+            AND ((SELECT a.local_authority_id 
+                  FROM property p 
+                  JOIN address a ON p.address_id = a.id 
+                  WHERE po.property_id = p.id)
+                 =
+                 (SELECT la.id 
+                  FROM local_authority la
+                  JOIN local_authority_user lau ON la.id = lau.local_authority_id
+                  WHERE lau.subject_identifier = :laUserBaseId)
                  OR NOT :restrictToLA) 
             """
     }
