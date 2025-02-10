@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Nested
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -9,7 +11,6 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createPropertyOwnership
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import kotlin.test.Test
 
@@ -19,9 +20,6 @@ class PropertyDetailsControllerTests(
 ) : ControllerTest(webContext) {
     @MockBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
-
-    @MockBean
-    lateinit var landlordService: LandlordService
 
     @Nested
     inner class GetPropertyDetailsLandlordViewTests {
@@ -55,6 +53,21 @@ class PropertyDetailsControllerTests(
                 status { status { isForbidden() } }
             }
         }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails returns 200 for a valid request from a landlord`() {
+            val propertyOwnership = createPropertyOwnership()
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(1), any()))
+                .thenReturn(
+                    propertyOwnership,
+                )
+
+            mvc.get("/property-details/1").andExpect {
+                status { status { isOk() } }
+            }
+        }
     }
 
     @Nested
@@ -76,7 +89,7 @@ class PropertyDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["LANDLORD"])
-        fun `getPropertyDetails returns 403 for an unauthorized user with only the landlord role`() {
+        fun `getPropertyDetailsLaView returns 403 for an unauthorized user with only the landlord role`() {
             mvc.get("/local-authority/property-details/1").andExpect {
                 status { status { isForbidden() } }
             }
@@ -84,10 +97,10 @@ class PropertyDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["LA_USER"])
-        fun `getPropertyDetails returns 200 for a valid request from an LA user`() {
+        fun `getPropertyDetailsLaView returns 200 for a valid request from an LA user`() {
             val propertyOwnership = createPropertyOwnership()
 
-            whenever(propertyOwnershipService.getPropertyOwnership(1))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(1), any()))
                 .thenReturn(
                     propertyOwnership,
                 )
@@ -99,10 +112,10 @@ class PropertyDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
-        fun `getPropertyDetails returns 200 for a valid request from an LA admin`() {
+        fun `getPropertyDetailsLaView returns 200 for a valid request from an LA admin`() {
             val propertyOwnership = createPropertyOwnership()
 
-            whenever(propertyOwnershipService.getPropertyOwnership(1))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(1), any()))
                 .thenReturn(
                     propertyOwnership,
                 )

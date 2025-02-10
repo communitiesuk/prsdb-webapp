@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyDetailsLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyDetailsViewModel
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -18,7 +17,6 @@ import java.security.Principal
 @RequestMapping
 class PropertyDetailsController(
     val propertyOwnershipService: PropertyOwnershipService,
-    val landlordService: LandlordService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping("/property-details/{propertyOwnershipId}")
@@ -59,8 +57,10 @@ class PropertyDetailsController(
     fun getPropertyDetailsLaView(
         @PathVariable propertyOwnershipId: Long,
         model: Model,
+        principal: Principal,
     ): String {
-        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
+        val propertyOwnership =
+            propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, principal.name)
 
         val lastModifiedDate = DateTimeHelper.getDateInUK(propertyOwnership.getMostRecentlyUpdated().toKotlinInstant())
         val lastModifiedBy = propertyOwnership.primaryLandlord.name
