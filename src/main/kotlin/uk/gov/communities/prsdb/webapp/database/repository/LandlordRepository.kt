@@ -53,10 +53,9 @@ interface LandlordRepository : JpaRepository<Landlord?, Long?> {
                           JOIN address a ON p.address_id = a.id
                           JOIN local_authority la ON a.local_authority_id = la.id
                           JOIN local_authority_user lau ON la.id = lau.local_authority_id
-                          JOIN one_login_user ol ON lau.subject_identifier = ol.id
                           WHERE l.id = po.primary_landlord_id 
                           AND po.is_active 
-                          AND ol.id = :laUserBaseId)
+                          AND lau.subject_identifier = :laUserBaseId)
                   OR NOT :restrictToLA) 
             """
     }
