@@ -7,7 +7,7 @@
 <!--/*@thymesVar id="detailMainText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="detailAdditionalContent" type="java.util.Map"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl})}">
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <form id="form-content" th:remove="tag">
     <fieldset id="fieldset-content"
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'licenceNumber', #{${fieldSetHeading}}, null)}">
