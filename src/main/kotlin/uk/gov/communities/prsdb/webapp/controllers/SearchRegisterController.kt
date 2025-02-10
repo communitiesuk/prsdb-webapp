@@ -54,7 +54,9 @@ class SearchRegisterController(
                 currentPageNumber = page - 1,
             )
 
-        getRedirectIfPageOutOfBounds(pagedLandlordList, page, httpServletRequest)?.let { redirect -> return redirect }
+        if (isPageOutOfBounds(pagedLandlordList, page)) {
+            return getRedirectForPageOutOfBounds(httpServletRequest)
+        }
 
         model.addAttribute("searchResults", pagedLandlordList.content)
         model.addAttribute(
@@ -90,7 +92,9 @@ class SearchRegisterController(
         val pagedSearchResults =
             propertyOwnershipService.searchForProperties(searchRequest.searchTerm!!, currentPageNumber = page - 1)
 
-        getRedirectIfPageOutOfBounds(pagedSearchResults, page, httpServletRequest)?.let { redirect -> return redirect }
+        if (isPageOutOfBounds(pagedSearchResults, page)) {
+            return getRedirectForPageOutOfBounds(httpServletRequest)
+        }
 
         model.addAttribute("searchResults", pagedSearchResults.content)
         model.addAttribute(
@@ -104,15 +108,13 @@ class SearchRegisterController(
         return "searchProperty"
     }
 
-    private fun getRedirectIfPageOutOfBounds(
+    private fun isPageOutOfBounds(
         pagedList: Page<out Any>,
         page: Int,
-        httpServletRequest: HttpServletRequest,
-    ) = if (pagedList.totalPages != 0 && pagedList.totalPages < page) {
+    ) = pagedList.totalPages != 0 && pagedList.totalPages < page
+
+    private fun getRedirectForPageOutOfBounds(httpServletRequest: HttpServletRequest) =
         "redirect:${
             URIQueryBuilder.fromHTTPServletRequest(httpServletRequest).removeParam("page").build().toUriString()
         }"
-    } else {
-        null
-    }
 }
