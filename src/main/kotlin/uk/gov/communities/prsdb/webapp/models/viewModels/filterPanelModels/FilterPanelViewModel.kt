@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest
 import uk.gov.communities.prsdb.webapp.helpers.URIQueryBuilder
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.SearchRequestModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.CheckboxViewModel
+import kotlin.properties.Delegates
 import kotlin.reflect.full.memberProperties
 
 abstract class FilterPanelViewModel(
@@ -25,8 +26,11 @@ abstract class FilterPanelViewModel(
             .build()
             .toUriString()
 
+    var noFiltersSelected by Delegates.notNull<Boolean>()
+
     init {
         filters.forEach { it.initializeSelectedOptions(searchRequestModel, httpServletRequest) }
+        noFiltersSelected = filters.all { it.selectedOptions.isEmpty() }
     }
 }
 

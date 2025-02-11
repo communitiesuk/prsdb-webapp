@@ -20,7 +20,8 @@
                                 filter.selected.heading
                             </h2>
                         </div>
-                        <div class="moj-filter__heading-action govuk-!-margin-bottom-4">
+                        <div class="moj-filter__heading-action govuk-!-margin-bottom-4"
+                             th:if="${!filterPanelViewModel.noFiltersSelected}">
                             <p>
                                 <a class="govuk-link govuk-link--no-visited-state"
                                    th:text="#{filter.selected.clearLink}"
@@ -46,6 +47,10 @@
                             </li>
                         </ul>
                     </th:block>
+
+                    <p class="govuk-body" th:if="${filterPanelViewModel.noFiltersSelected}"
+                       th:text="#{filter.selected.noneSelectedText}">filter.selected.noneSelectedText</p>
+
                 </div>
 
                 <div class="moj-filter__options">
