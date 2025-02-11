@@ -13,5 +13,5 @@ class ConfirmationPagePropertyRegistration(
     private val detailTable = Table(page)
     val registrationNumberText: String = detailTable.getCell(0, 1).innerText()
 
-    fun clickGoToDashboard() = clickButton(BaseComponent.getButton(page, "Go to Dashboard"))
+    fun clickGoToDashboard() = clickComponent(BaseComponent.getButton(page, "Go to Dashboard"))
 }
