@@ -26,7 +26,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.RegisteredPropertyViewM
 class PropertyOwnershipService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val registrationNumberService: RegistrationNumberService,
-    private val localAuthorityUserService: LocalAuthorityUserService,
+    private val localAuthorityDataService: LocalAuthorityDataService,
 ) {
     @Transactional
     fun createPropertyOwnership(
@@ -64,7 +64,7 @@ class PropertyOwnershipService(
     ): PropertyOwnership {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
 
-        val isLocalAuthority = localAuthorityUserService.getIsLocalAuthorityUser(baseUserId)
+        val isLocalAuthority = localAuthorityDataService.getIsLocalAuthorityUser(baseUserId)
 
         val isPrimaryLandlord = getIsPrimaryLandlord(propertyOwnership, baseUserId)
 

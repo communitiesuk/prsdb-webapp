@@ -47,7 +47,7 @@ class PropertyOwnershipServiceTests {
     private lateinit var mockRegistrationNumberService: RegistrationNumberService
 
     @Mock
-    private lateinit var mockLocalAuthorityUserService: LocalAuthorityUserService
+    private lateinit var mockLocalAuthorityDataService: LocalAuthorityDataService
 
     @InjectMocks
     private lateinit var propertyOwnershipService: PropertyOwnershipService
@@ -271,7 +271,7 @@ class PropertyOwnershipServiceTests {
 
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
 
-            whenever(mockLocalAuthorityUserService.getIsLocalAuthorityUser(principalName)).thenReturn(true)
+            whenever(mockLocalAuthorityDataService.getIsLocalAuthorityUser(principalName)).thenReturn(true)
 
             val result = propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnership.id, principalName)
 
@@ -285,7 +285,7 @@ class PropertyOwnershipServiceTests {
 
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
 
-            whenever(mockLocalAuthorityUserService.getIsLocalAuthorityUser(principalName)).thenReturn(false)
+            whenever(mockLocalAuthorityDataService.getIsLocalAuthorityUser(principalName)).thenReturn(false)
 
             val result = propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnership.id, principalName)
 
