@@ -6,20 +6,20 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.whenever
 import org.springframework.test.util.ReflectionTestUtils
-import uk.gov.communities.prsdb.webapp.database.entity.LandlordUser
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
 
 class UserRolesServiceTests {
-    private lateinit var landlordRepository: LandlordUserRepository
+    private lateinit var landlordRepository: LandlordRepository
     private lateinit var localAuthorityUserRepository: LocalAuthorityUserRepository
     private lateinit var userRolesService: UserRolesService
 
     @BeforeEach
     fun setup() {
-        landlordRepository = Mockito.mock(LandlordUserRepository::class.java)
+        landlordRepository = Mockito.mock(LandlordRepository::class.java)
         localAuthorityUserRepository = Mockito.mock(LocalAuthorityUserRepository::class.java)
         userRolesService = UserRolesService(landlordRepository, localAuthorityUserRepository)
     }
@@ -35,7 +35,7 @@ class UserRolesServiceTests {
     fun `getRolesForSubjectId returns ROLE_LANDLORD for a landlord user`() {
         // Arrange
         val baseUser = createOneLoginUser("Test User 1")
-        val user = LandlordUser()
+        val user = Landlord()
         ReflectionTestUtils.setField(user, "baseUser", baseUser)
         whenever(landlordRepository.findByBaseUser_Id("test-user-1"))
             .thenReturn(user)
