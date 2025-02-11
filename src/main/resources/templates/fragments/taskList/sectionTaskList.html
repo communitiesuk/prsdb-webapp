@@ -1,5 +1,5 @@
-<th:block th:fragment="sectionTaskList(section, sectionNumber, transactionName)">
-    <h2 class="govuk-heading-m" th:text="|${sectionNumber}.  #{${section.sectionHeadingKey}}|">sectionNumber + sectionHeading</h2>
+<th:block th:fragment="sectionTaskList(section, transactionName)">
+    <h2 class="govuk-heading-m" th:text="|${section.sectionNumber}.  #{${section.sectionHeadingKey}}|">sectionNumber + sectionHeading</h2>
     <ul class="govuk-task-list">
         <th:block th:each="task, iteratorStatus: ${section.tasks}" th:with="taskListItemId=${transactionName} + '-' + ${sectionNumber} + '-' + ${iteratorStatus.count}">
             <li th:replace="~{fragments/taskList/taskListItem :: taskListItem(${task}, ${taskListItemId})}"></li>
