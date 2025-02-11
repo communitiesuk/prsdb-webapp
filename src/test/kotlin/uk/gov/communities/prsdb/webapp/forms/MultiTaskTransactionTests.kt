@@ -16,8 +16,10 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.tasks.MultiTaskTransaction
+import uk.gov.communities.prsdb.webapp.forms.tasks.MultiTaskTransaction.TransactionSection
 import uk.gov.communities.prsdb.webapp.forms.tasks.TaskList
 import uk.gov.communities.prsdb.webapp.models.viewModels.TaskListItemViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.TaskSectionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.TaskStatusViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
@@ -36,7 +38,7 @@ class MultiTaskTransactionTests {
         journeyDataService: JourneyDataService,
         override val journeyType: JourneyType,
         override val taskListUrlSegment: String,
-        override val taskLists: List<TaskList<TestStepId>> = listOf(),
+        override val taskLists: List<TransactionSection<TestStepId>> = listOf(),
     ) : MultiTaskTransaction<TestStepId>(journeyDataService)
 
     @BeforeEach
@@ -49,8 +51,16 @@ class MultiTaskTransactionTests {
     fun `getTaskListPageViewModels returns, in a list, the TaskListViewModels produced by its taskLists `() {
         val principalName = "principalName"
         val firstMock = mock<TaskList<TestStepId>>()
+        val firstName = "first name"
         val secondMock = mock<TaskList<TestStepId>>()
-        val transaction = TestMultiTaskTransaction(journeyDataService, testJourneyType, testUrlSegment, listOf(firstMock, secondMock))
+        val secondName = "second name"
+        val transaction =
+            TestMultiTaskTransaction(
+                journeyDataService,
+                testJourneyType,
+                testUrlSegment,
+                listOf(TransactionSection(firstName, firstMock), TransactionSection(secondName, secondMock)),
+            )
 
         val firstList = listOf(TaskListItemViewModel("a string value", TaskStatusViewModel("text for status")))
         val secondList = listOf(TaskListItemViewModel("a different string value", TaskStatusViewModel("status text", "class")))
@@ -58,10 +68,13 @@ class MultiTaskTransactionTests {
         whenever(secondMock.getTaskListViewModels()).thenReturn(secondList)
 
         // Act
-        val taskViewModelListList = transaction.getTaskListPageViewModels(principalName)
+        val taskSectionViewModelList = transaction.getTaskListSections(principalName)
 
         // Assert
-        assertIterableEquals(listOf(firstList, secondList), taskViewModelListList)
+        assertIterableEquals(
+            listOf(TaskSectionViewModel(firstName, firstList), TaskSectionViewModel(secondName, secondList)),
+            taskSectionViewModelList,
+        )
     }
 
     @Nested
@@ -74,7 +87,7 @@ class MultiTaskTransactionTests {
             whenever(journeyDataService.getContextId(principalName, testJourneyType)).thenReturn(null)
 
             // Act
-            transaction.getTaskListPageViewModels(principalName)
+            transaction.getTaskListSections(principalName)
 
             // Assert
             val captor = argumentCaptor<JourneyData>()
@@ -96,7 +109,7 @@ class MultiTaskTransactionTests {
             whenever(journeyDataService.getContextId(principalName, testJourneyType)).thenReturn(contextId)
 
             // Act
-            transaction.getTaskListPageViewModels(principalName)
+            transaction.getTaskListSections(principalName)
 
             // Assert
             val captor = argumentCaptor<Long>()
@@ -113,7 +126,7 @@ class MultiTaskTransactionTests {
             whenever(journeyDataService.getJourneyDataFromSession()).thenReturn(mutableMapOf("anything" to "Anything else"))
 
             // Act
-            transaction.getTaskListPageViewModels(principalName)
+            transaction.getTaskListSections(principalName)
 
             // Assert
             verify(journeyDataService, never()).setJourneyData(any())

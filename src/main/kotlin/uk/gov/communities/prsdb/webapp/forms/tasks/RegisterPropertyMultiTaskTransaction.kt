@@ -11,7 +11,11 @@ class RegisterPropertyMultiTaskTransaction(
     registerPropertiesTaskList: RegisterPropertiesTaskList,
     checkAndSubmitPropertiesTaskList: CheckAndSubmitPropertiesTaskList,
 ) : MultiTaskTransaction<RegisterPropertyStepId>(journeyDataService) {
-    override val taskLists: List<TaskList<RegisterPropertyStepId>> = listOf(registerPropertiesTaskList, checkAndSubmitPropertiesTaskList)
+    override val taskLists =
+        listOf(
+            TransactionSection("registerProperty.taskList.register.heading", registerPropertiesTaskList),
+            TransactionSection("registerProperty.taskList.checkAndSubmit.heading", checkAndSubmitPropertiesTaskList),
+        )
     override val journeyType: JourneyType = JourneyType.PROPERTY_REGISTRATION
     override val taskListUrlSegment: String = RegisterPropertyStepId.TaskList.urlPathSegment
 }
