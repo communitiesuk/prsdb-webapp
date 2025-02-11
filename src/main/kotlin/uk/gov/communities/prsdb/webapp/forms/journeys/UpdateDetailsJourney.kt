@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.emailUpdateIfPresent
+import uk.gov.communities.prsdb.webapp.helpers.getEmailUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NoInputFormModel
@@ -67,8 +67,8 @@ class UpdateDetailsJourney(
         targetStep: Step<UpdateDetailsStepId>,
         targetSubPageNumber: Int?,
     ): StepDetails<UpdateDetailsStepId>? {
-        // This stores journeyData for only the journey path the user is on
-        // and excludes user data for pages in the journey that belong to a different path
+        // This stores journeyData for only the page the user is on
+        // and excludes user data for other pages in the journey
         val stepData = JourneyDataHelper.getPageData(journeyData, targetStep.name)
         val filteredJourneyData = mutableMapOf<String, Any?>(targetStep.name to stepData)
 
@@ -78,7 +78,7 @@ class UpdateDetailsJourney(
     private fun handleChangeSubmitAndRedirect(journeyData: JourneyData): String {
         val landlordUpdate =
             LandlordUpdateModel(
-                email = journeyData.emailUpdateIfPresent(),
+                email = journeyData.getEmailUpdateIfPresent(),
             )
 
         landlordService.updateLandlordEmailForBaseUserId(

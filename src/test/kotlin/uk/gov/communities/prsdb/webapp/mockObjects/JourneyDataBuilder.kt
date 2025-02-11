@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.UpdateDetailsStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
@@ -307,6 +308,11 @@ class JourneyDataBuilder(
             )
         journeyData[LandlordRegistrationStepId.InternationalAddress.urlPathSegment] =
             mutableMapOf("internationalAddress" to internationalAddress)
+        return this
+    }
+
+    fun withEmailAddressUpdate(newEmail: String): JourneyDataBuilder {
+        journeyData[UpdateDetailsStepId.UpdateEmail.urlPathSegment] = mutableMapOf("emailAddress" to newEmail)
         return this
     }
 }
