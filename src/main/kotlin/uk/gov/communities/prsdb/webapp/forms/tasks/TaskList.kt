@@ -36,7 +36,7 @@ abstract class TaskList<T : StepId>(
         journeyData: JourneyData,
         task: Task<T>,
     ): TaskStatus =
-        if (task.stepIds.all { isStepWithIdComplete(journeyData, it) }) {
+        if (areAllStepsWithinTaskComplete(journeyData, task)) {
             TaskStatus.COMPLETED
         } else if (isStepWithIdComplete(journeyData, task.startingStepId)) {
             TaskStatus.IN_PROGRESS
@@ -54,6 +54,26 @@ abstract class TaskList<T : StepId>(
         val pageData = JourneyDataHelper.getPageData(journeyData, currentStep.name)
         return pageData != null && currentStep.isSatisfied(validator, pageData)
     }
+
+    private fun areAllStepsWithinTaskComplete(
+        journeyData: JourneyData,
+        task: Task<T>,
+    ): Boolean {
+        var currentStepId: T? = task.startingStepId
+        while (currentStepId != null && currentStepId in task.stepIds) {
+            if (isStepWithIdComplete(journeyData, currentStepId)) {
+                currentStepId = nextStepId(currentStepId, journeyData)
+            } else {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun nextStepId(
+        currentStepId: T,
+        journeyData: JourneyData,
+    ) = steps.single { it.id == currentStepId }.nextAction(journeyData, null).first
 
     private fun isStepWithIdReachable(
         journeyData: JourneyData,
