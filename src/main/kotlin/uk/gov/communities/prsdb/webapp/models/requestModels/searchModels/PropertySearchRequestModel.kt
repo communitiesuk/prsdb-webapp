@@ -1,3 +1,5 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.searchModels
 
-class PropertySearchRequestModel : SearchRequestModel()
+class PropertySearchRequestModel : SearchRequestModel() {
+    var restrictToLA: Boolean = false
+}

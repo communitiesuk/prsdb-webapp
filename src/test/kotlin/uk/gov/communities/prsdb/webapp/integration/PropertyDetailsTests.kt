@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -121,6 +122,13 @@ class PropertyDetailsTests : IntegrationTest() {
 
             // TODO: PRSD-647 add link to the dashboard
             Assertions.assertEquals("/local-authority/property-details/1", URI(page.url()).path)
+        }
+
+        @Test
+        fun `loading the landlord details page shows the last time the landlords record was updated`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
+
+            assertThat(detailsPage.insetText.spanText).containsText("updated these details on")
         }
     }
 }

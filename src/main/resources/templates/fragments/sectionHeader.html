@@ -1,0 +1,7 @@
+<p th:fragment="sectionHeader(sectionHeaderInfo)"
+   th:if="${sectionHeaderInfo} != null"
+    class="govuk-hint govuk-!-margin-top-0"
+    th:text="#{sectionHeader.sectionXofY(${sectionHeaderInfo.sectionNumber}, ${sectionHeaderInfo.totalSections})}
+    +#{${sectionHeaderInfo.sectionNameKey}}">
+    Section X of Y - sectionName
+</p>
