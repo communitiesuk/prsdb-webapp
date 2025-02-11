@@ -26,7 +26,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.RegisteredPropertyViewM
 class PropertyOwnershipService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val registrationNumberService: RegistrationNumberService,
-    private val landlordService: LandlordService,
+    private val localAuthorityDataService: LocalAuthorityDataService,
 ) {
     @Transactional
     fun createPropertyOwnership(
@@ -62,21 +62,33 @@ class PropertyOwnershipService(
         propertyOwnershipId: Long,
         baseUserId: String,
     ): PropertyOwnership {
-        val propertyOwnership =
-            retrievePropertyOwnershipById(propertyOwnershipId)
-                ?: throw ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Property ownership $propertyOwnershipId not found",
-                )
+        val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
 
-        val landlordIdFromPrincipal =
-            landlordService.retrieveLandlordIdByBaseUserId(baseUserId)
+        val isLocalAuthority = localAuthorityDataService.getIsLocalAuthorityUser(baseUserId)
 
-        if (propertyOwnership.primaryLandlord.id != landlordIdFromPrincipal) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND)
+        val isPrimaryLandlord = getIsPrimaryLandlord(propertyOwnership, baseUserId)
+
+        if (!isLocalAuthority && !isPrimaryLandlord) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Property ownership $propertyOwnershipId not found",
+            )
         }
+
         return propertyOwnership
     }
+
+    private fun getPropertyOwnership(propertyOwnershipId: Long): PropertyOwnership =
+        retrievePropertyOwnershipById(propertyOwnershipId)
+            ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Property ownership $propertyOwnershipId not found",
+            )
+
+    private fun getIsPrimaryLandlord(
+        propertyOwnership: PropertyOwnership,
+        baseUserId: String,
+    ): Boolean = propertyOwnership.primaryLandlord.baseUser.id == baseUserId
 
     fun getRegisteredPropertiesForLandlord(baseUserId: String): List<RegisteredPropertyViewModel> =
         retrieveAllRegisteredPropertiesForLandlord(baseUserId).map { propertyOwnership ->
@@ -92,7 +104,7 @@ class PropertyOwnershipService(
         propertyOwnershipRepository
             .findByRegistrationNumber_Number(registrationNumber)
 
-    fun retrievePropertyOwnershipById(propertyOwnershipId: Long): PropertyOwnership? =
+    private fun retrievePropertyOwnershipById(propertyOwnershipId: Long): PropertyOwnership? =
         propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)
 
     fun searchForProperties(

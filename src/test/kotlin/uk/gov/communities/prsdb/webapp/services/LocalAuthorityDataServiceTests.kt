@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -330,5 +331,24 @@ class LocalAuthorityDataServiceTests {
         val localAuthorityUserCaptor = captor<LocalAuthorityUser>()
         verify(localAuthorityUserRepository).save(localAuthorityUserCaptor.capture())
         assertTrue(ReflectionEquals(expectedNewUser).matches(localAuthorityUserCaptor.value))
+    }
+
+    @Test
+    fun `getIsLocalAuthorityUser returns true when the user is a local authority user`() {
+        val localAuthorityUser = createLocalAuthorityUser(createOneLoginUser(), createLocalAuthority())
+        val baseUserId = localAuthorityUser.baseUser.id
+
+        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(localAuthorityUser)
+
+        assertTrue(localAuthorityDataService.getIsLocalAuthorityUser(baseUserId))
+    }
+
+    @Test
+    fun `getIsLocalAuthorityUser returns false when the user is not a local authority user`() {
+        val baseUserId = "not-an-la-user"
+
+        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
+
+        assertFalse(localAuthorityDataService.getIsLocalAuthorityUser(baseUserId))
     }
 }
