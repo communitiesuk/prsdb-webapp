@@ -34,9 +34,9 @@ class TaskListTests {
         override val taskList: List<Task<TestStepId>>
             get() =
                 listOf(
-                    Task("task 1", TestStepId.StepOne, TestStepId.StepTwo),
-                    Task("task 2", TestStepId.StepTwo, TestStepId.StepFour),
-                    Task("task 3", TestStepId.StepFour, null),
+                    Task("task 1", TestStepId.StepOne, setOf(TestStepId.StepOne)),
+                    Task("task 2", TestStepId.StepTwo, setOf(TestStepId.StepTwo, TestStepId.StepThree)),
+                    Task("task 3", TestStepId.StepFour, setOf(TestStepId.StepFour)),
                 )
     }
 
@@ -168,7 +168,7 @@ class TaskListTests {
         }
 
         @Test
-        fun `when all steps are completed for a task with a null completion step, it is marked as in progress`() {
+        fun `when all steps are completed for a task , it is marked as complete`() {
             // Arrange
             setUpStepsWithStatus(
                 stepOneCompleted = true,
@@ -189,7 +189,7 @@ class TaskListTests {
 
             // Assert
             assertIterableEquals(
-                listOf("taskList.status.completed", "taskList.status.completed", "taskList.status.inProgress"),
+                listOf("taskList.status.completed", "taskList.status.completed", "taskList.status.completed"),
                 viewModel.map { it.status.textKey },
             )
         }
