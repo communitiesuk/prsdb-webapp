@@ -64,7 +64,7 @@ class PropertyDetailsController(
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Property ownership $propertyOwnershipId is inactive")
         }
 
-        val lastModifiedDate = DateTimeHelper.getDateInUK(propertyOwnership.lastModifiedDate.toKotlinInstant())
+        val lastModifiedDate = DateTimeHelper.getDateInUK(propertyOwnership.getMostRecentlyUpdated().toKotlinInstant())
         val lastModifiedBy = propertyOwnership.primaryLandlord.name
 
         val propertyDetails =

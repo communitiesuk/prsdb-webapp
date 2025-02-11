@@ -59,7 +59,7 @@ class LandlordDetailsController(
             landlordService.retrieveLandlordById(id)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Landlord $id not found")
 
-        val lastModifiedDate = DateTimeHelper.getDateInUK(landlord.lastModifiedDate.toKotlinInstant())
+        val lastModifiedDate = DateTimeHelper.getDateInUK(landlord.getMostRecentlyUpdated().toKotlinInstant())
 
         val landlordViewModel = LandlordViewModel(landlord = landlord, withChangeLinks = false)
 
