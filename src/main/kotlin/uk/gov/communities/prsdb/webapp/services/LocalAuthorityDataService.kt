@@ -123,4 +123,6 @@ class LocalAuthorityDataService(
             ),
         )
     }
+
+    fun getIsLocalAuthorityUser(baseUserId: String): Boolean = localAuthorityUserRepository.findByBaseUser_Id(baseUserId) != null
 }

@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
+import uk.gov.communities.prsdb.webapp.helpers.extenstions.addRow
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class PropertyDetailsViewModel(
@@ -78,7 +79,8 @@ class PropertyDetailsViewModel(
                     "propertyDetails.propertyRecord.ownershipType",
                     MessageKeyConverter.convert(propertyOwnership.ownershipType),
                     // TODO PRSD-689: Add update link
-                    addChangeLink("#"),
+                    "#",
+                    withChangeLinks,
                 )
                 addRow(
                     "propertyDetails.propertyRecord.licensingType",
@@ -90,32 +92,23 @@ class PropertyDetailsViewModel(
                         }
                     } ?: MessageKeyConverter.convert(LicensingType.NO_LICENSING),
                     // TODO PRSD-798: Add update link
-                    addChangeLink("#"),
+                    "#",
+                    withChangeLinks,
                 )
                 // TODO PRSD-799: Add update link
-                addRow("propertyDetails.propertyRecord.occupied", isTenantedKey, addChangeLink("#"))
+                addRow("propertyDetails.propertyRecord.occupied", isTenantedKey, "#", withChangeLinks)
                 if (propertyOwnership.currentNumTenants > 0) {
                     // TODO PRSD-800: Add update link
-                    addRow("propertyDetails.propertyRecord.numberOfHouseholds", propertyOwnership.currentNumHouseholds, addChangeLink("#"))
+                    addRow(
+                        "propertyDetails.propertyRecord.numberOfHouseholds",
+                        propertyOwnership.currentNumHouseholds,
+                        "#",
+                        withChangeLinks,
+                    )
                     // TODO PRSD-801: Add update link
-                    addRow("propertyDetails.propertyRecord.numberOfPeople", propertyOwnership.currentNumTenants, addChangeLink("#"))
+                    addRow("propertyDetails.propertyRecord.numberOfPeople", propertyOwnership.currentNumTenants, "#", withChangeLinks)
                 }
                 // TODO PRSD-xxx Add update link
-                addRow("propertyDetails.propertyRecord.landlordType", landlordTypeKey, addChangeLink("#"))
+                addRow("propertyDetails.propertyRecord.landlordType", landlordTypeKey, "#", withChangeLinks)
             }.toList()
-
-    private fun MutableList<SummaryListRowViewModel>.addRow(
-        key: String,
-        value: Any?,
-        changeLink: String? = null,
-    ) {
-        add(SummaryListRowViewModel(key, value, changeLink))
-    }
-
-    private fun addChangeLink(link: String?): String? =
-        if (withChangeLinks) {
-            link
-        } else {
-            null
-        }
 }
