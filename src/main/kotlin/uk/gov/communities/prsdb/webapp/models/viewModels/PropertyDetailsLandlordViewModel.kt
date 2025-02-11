@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels
 
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.UPDATE_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.helpers.extenstions.addRow
 
 class PropertyDetailsLandlordViewModel(
     private val landlord: Landlord,
@@ -17,6 +18,7 @@ class PropertyDetailsLandlordViewModel(
                     "landlordDetails.personalDetails.name",
                     landlord.name,
                     "$UPDATE_ROUTE/name",
+                    withChangeLinks,
                     landlordDetailsUrl,
                 )
                 // TODO PRSD-747 to pass Id verification status (see Figma for design)
@@ -24,44 +26,40 @@ class PropertyDetailsLandlordViewModel(
                     "landlordDetails.personalDetails.dateOfBirth",
                     landlord.dateOfBirth,
                     "$UPDATE_ROUTE/date-of-birth",
+                    withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.emailAddress",
                     landlord.email,
                     "$UPDATE_ROUTE/email",
+                    withChangeLinks,
                 )
                 addRow(
                     "propertyDetails.landlordDetails.contactNumber",
                     landlord.phoneNumber,
                     "$UPDATE_ROUTE/telephone",
+                    withChangeLinks,
                 )
                 if (isUkResident) {
                     addRow(
                         "landlordDetails.personalDetails.contactAddress",
                         landlord.address.singleLineAddress,
                         "$UPDATE_ROUTE/address",
+                        withChangeLinks,
                     )
                 } else {
                     addRow(
                         "propertyDetails.landlordDetails.addressOutsideEnglandOrWales",
                         landlord.internationalAddress,
                         "$UPDATE_ROUTE/address",
+                        withChangeLinks,
                     )
                     addRow(
                         "propertyDetails.landlordDetails.contactAddressInEnglandOrWales",
                         landlord.address.singleLineAddress,
                         "$UPDATE_ROUTE/contact-address",
+                        withChangeLinks,
                     )
                 }
             }.toList()
-
-    private fun MutableList<SummaryListRowViewModel>.addRow(
-        key: String,
-        value: Any?,
-        changeLink: String? = null,
-        valueUrl: String? = null,
-    ) {
-        val changeLinkOrNull = if (withChangeLinks) changeLink else null
-        add(SummaryListRowViewModel(key, value, changeLinkOrNull, valueUrl))
-    }
 }

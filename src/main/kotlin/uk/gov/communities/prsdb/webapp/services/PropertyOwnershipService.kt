@@ -69,7 +69,10 @@ class PropertyOwnershipService(
         val isPrimaryLandlord = getIsPrimaryLandlord(propertyOwnership, baseUserId)
 
         if (!isLocalAuthority && !isPrimaryLandlord) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND)
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Property ownership $propertyOwnershipId not found",
+            )
         }
 
         return propertyOwnership
