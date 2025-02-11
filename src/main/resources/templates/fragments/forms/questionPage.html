@@ -1,4 +1,4 @@
-<th:block th:fragment="questionPage(title, formModel, formContent, backUrl)">
+<th:block th:fragment="questionPage(title, formModel, formContent, backUrl, sectionHeaderInfo)">
     <th:block id="main-content"
               th:replace="~{fragments/layout :: layout(${title}, ~{::#main-content/content()}, ${#fields.hasErrors('${formModel.*}')})}">
         <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back
@@ -8,6 +8,7 @@
                  th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
                 <form th:action="@{''}" method="post" novalidate th:object="${formModel}">
                     <div th:replace="~{fragments/forms/errorSummary :: errorSummary()}">Error Summary</div>
+                    <p th:replace="~{fragments/sectionHeader :: sectionHeader(${sectionHeaderInfo})}" ></p>
                     <th:block th:replace="${formContent}"></th:block>
                 </form>
             </div>
