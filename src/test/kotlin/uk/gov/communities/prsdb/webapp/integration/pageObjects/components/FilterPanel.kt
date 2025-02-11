@@ -9,27 +9,15 @@ class FilterPanel(
 ) : BaseComponent(locator) {
     fun getPanel(isVisible: Boolean = true) = if (isVisible) getChildComponent(".moj-filter") else locator.locator(".moj-filter")
 
-    fun clickCloseFilterPanel() {
-        getButton(page, "Close filters panel").click()
-        page.waitForLoadState()
-    }
+    fun getCloseFilterPanelButton() = getButton(page, "Close filters panel")
 
-    fun clickShowFilterPanel() {
-        getButton(page, "Show filters panel").click()
-        page.waitForLoadState()
-    }
+    fun getShowFilterPanel() = getButton(page, "Show filters panel")
 
-    fun clickClearFiltersLink() {
-        getLink(page, "Clear filters").click()
-        page.waitForLoadState()
-    }
+    fun getClearFiltersLink() = getLink(page, "Clear filters")
 
     fun clickApplyFiltersButton() = Form(page, parentLocator = locator).submit()
 
     fun getFilterCheckboxes(label: String? = null) = Form(page, parentLocator = locator).getCheckboxes(label)
 
-    fun clickRemoveFilterTag(filterOption: String) {
-        getChildComponent(".moj-filter__tag", Locator.LocatorOptions().setHasText(filterOption)).click()
-        page.waitForLoadState()
-    }
+    fun getRemoveFilterTag(filterOption: String) = getChildComponent(".moj-filter__tag", Locator.LocatorOptions().setHasText(filterOption))
 }

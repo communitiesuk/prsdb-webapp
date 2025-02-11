@@ -133,10 +133,10 @@ class SearchRegisterTests : IntegrationTest() {
             val filter = searchLandlordRegisterPage.getFilterPanel()
 
             // Toggle filter
-            filter.clickCloseFilterPanel()
+            searchLandlordRegisterPage.clickComponent(filter.getCloseFilterPanelButton())
             assertTrue(filter.getPanel(isVisible = false).isHidden)
 
-            filter.clickShowFilterPanel()
+            searchLandlordRegisterPage.clickComponent(filter.getShowFilterPanel())
             assertTrue(filter.getPanel().isVisible)
 
             // Apply LA filter
@@ -148,14 +148,14 @@ class SearchRegisterTests : IntegrationTest() {
             assertEquals(1, resultTable.countRows())
 
             // Remove LA filter
-            filter.clickRemoveFilterTag("Landlords in my authority")
+            searchLandlordRegisterPage.clickComponent(filter.getRemoveFilterTag("Landlords in my authority"))
             assertTrue(resultTable.countRows() > 1)
 
             // Clear all filters
             laFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
-            filter.clickClearFiltersLink()
+            searchLandlordRegisterPage.clickComponent(filter.getClearFiltersLink())
             assertTrue(resultTable.countRows() > 1)
         }
     }
@@ -286,10 +286,10 @@ class SearchRegisterTests : IntegrationTest() {
             val filter = searchPropertyRegisterPage.getFilterPanel()
 
             // Toggle filter
-            filter.clickCloseFilterPanel()
+            searchPropertyRegisterPage.clickComponent(filter.getCloseFilterPanelButton())
             assertTrue(filter.getPanel(isVisible = false).isHidden)
 
-            filter.clickShowFilterPanel()
+            searchPropertyRegisterPage.clickComponent(filter.getShowFilterPanel())
             assertTrue(filter.getPanel().isVisible)
 
             // Apply LA filter
@@ -301,14 +301,14 @@ class SearchRegisterTests : IntegrationTest() {
             assertEquals(1, resultTable.countRows())
 
             // Remove LA filter
-            filter.clickRemoveFilterTag("Properties in my authority")
+            searchPropertyRegisterPage.clickComponent(filter.getRemoveFilterTag("Properties in my authority"))
             assertTrue(resultTable.countRows() > 1)
 
             // Clear all filters
             laFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
-            filter.clickClearFiltersLink()
+            searchPropertyRegisterPage.clickComponent(filter.getClearFiltersLink())
             assertTrue(resultTable.countRows() > 1)
         }
     }
