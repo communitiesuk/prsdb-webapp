@@ -28,11 +28,11 @@ class RegisterPropertiesTaskList(
                     RegisterPropertyStepId.LocalAuthority,
                 ),
             ),
-            Task(
+            Task.withOneStep(
                 "registerProperty.taskList.register.selectType",
                 RegisterPropertyStepId.PropertyType,
             ),
-            Task(
+            Task.withOneStep(
                 "registerProperty.taskList.register.selectOwnership",
                 RegisterPropertyStepId.OwnershipType,
             ),
@@ -55,7 +55,7 @@ class RegisterPropertiesTaskList(
                     RegisterPropertyStepId.NumberOfPeople,
                 ),
             ),
-            Task(
+            Task.withOneStep(
                 "registerProperty.taskList.register.selectOperation",
                 RegisterPropertyStepId.LandlordType,
             ),

@@ -67,6 +67,13 @@ abstract class TaskList<T : StepId>(
     data class Task<T : StepId>(
         val nameKey: String,
         val startId: T,
-        val stepIds: Set<T> = setOf(startId),
-    )
+        val stepIds: Set<T>,
+    ) {
+        companion object {
+            fun <T : StepId> withOneStep(
+                nameKey: String,
+                startId: T,
+            ) = Task(nameKey, startId, setOf(startId))
+        }
+    }
 }
