@@ -97,6 +97,8 @@ class PropertyOwnershipService(
 
     fun searchForProperties(
         searchTerm: String,
+        laBaseUserId: String,
+        restrictToLA: Boolean = false,
         requestedPageIndex: Int = 0,
         pageSize: Int = MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE,
     ): Page<PropertySearchResultViewModel> {
@@ -106,11 +108,11 @@ class PropertyOwnershipService(
 
         val matchingProperties =
             if (prn != null) {
-                propertyOwnershipRepository.searchMatchingPRN(prn.number, pageRequest)
+                propertyOwnershipRepository.searchMatchingPRN(prn.number, laBaseUserId, restrictToLA, pageRequest)
             } else if (uprn != null) {
-                propertyOwnershipRepository.searchMatchingUPRN(uprn, pageRequest)
+                propertyOwnershipRepository.searchMatchingUPRN(uprn, laBaseUserId, restrictToLA, pageRequest)
             } else {
-                propertyOwnershipRepository.searchMatching(searchTerm, pageRequest)
+                propertyOwnershipRepository.searchMatching(searchTerm, laBaseUserId, restrictToLA, pageRequest)
             }
 
         return matchingProperties.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }

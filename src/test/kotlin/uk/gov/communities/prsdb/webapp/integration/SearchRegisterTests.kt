@@ -277,5 +277,39 @@ class SearchRegisterTests : IntegrationTest() {
             assertContains(page.url(), "page=2")
             assertPageIs(page, SearchPropertyRegisterPage::class)
         }
+
+        @Test
+        fun `filter panel can be toggled and used to refine search results`(page: Page) {
+            val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
+            searchPropertyRegisterPage.searchBar.search("Way")
+
+            val filter = searchPropertyRegisterPage.getFilterPanel()
+
+            // Toggle filter
+            filter.clickCloseFilterPanel()
+            assertTrue(filter.getPanel(isVisible = false).isHidden)
+
+            filter.clickShowFilterPanel()
+            assertTrue(filter.getPanel().isVisible)
+
+            // Apply LA filter
+            val laFilter = filter.getFilterCheckboxes("Show properties in my authority")
+            laFilter.checkCheckbox("true")
+            filter.clickApplyFiltersButton()
+
+            val resultTable = searchPropertyRegisterPage.getResultTable()
+            assertEquals(1, resultTable.countRows())
+
+            // Remove LA filter
+            filter.clickRemoveFilterTag("Properties in my authority")
+            assertTrue(resultTable.countRows() > 1)
+
+            // Clear all filters
+            laFilter.checkCheckbox("true")
+            filter.clickApplyFiltersButton()
+
+            filter.clickClearFiltersLink()
+            assertTrue(resultTable.countRows() > 1)
+        }
     }
 }
