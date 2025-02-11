@@ -3,7 +3,9 @@ package uk.gov.communities.prsdb.webapp.helpers.converters
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.PropertyRegistrationSection
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.forms.tasks.SectionId
 
 class MessageKeyConverter {
     companion object {
@@ -19,8 +21,18 @@ class MessageKeyConverter {
                 is OwnershipType -> convertOwnershipType(enum)
                 is LicensingType -> convertLicensingType(enum)
                 is LandlordType -> convertLandlordType(enum)
+                is PropertyRegistrationSection -> convertPropertyRegistrationSection(enum)
                 else -> throw NotImplementedError(
                     "Was not able to convert Enum as ${this::class.simpleName} does not have a conversion for ${enum::class.simpleName}",
+                )
+            }
+
+        fun convert(sectionId: SectionId): String =
+            when (sectionId) {
+                is PropertyRegistrationSection -> convertPropertyRegistrationSection(sectionId)
+                else -> throw NotImplementedError(
+                    "Was not able to convert SectionId as ${this::class.simpleName} " +
+                        "does not have a conversion for ${sectionId::class.simpleName}",
                 )
             }
 
@@ -52,6 +64,12 @@ class MessageKeyConverter {
                 PropertyType.SEMI_DETACHED_HOUSE -> "forms.propertyType.radios.option.semiDetachedHouse.label"
                 PropertyType.TERRACED_HOUSE -> "forms.propertyType.radios.option.terracedHouse.label"
                 PropertyType.FLAT -> "forms.propertyType.radios.option.flat.label"
+            }
+
+        private fun convertPropertyRegistrationSection(propertyRegistrationSection: PropertyRegistrationSection): String =
+            when (propertyRegistrationSection) {
+                PropertyRegistrationSection.PROPERTY_DETAILS -> "registerProperty.taskList.register.heading"
+                PropertyRegistrationSection.CHECK_AND_SUBMIT -> "registerProperty.taskList.checkAndSubmit.heading"
             }
     }
 }
