@@ -32,7 +32,7 @@
                     </div>
 
                     <th:block th:each="filter:${filterPanelViewModel.filters}">
-                        <h3 class="govuk-heading-s govuk-!-margin-bottom-0"
+                        <h3 class="govuk-heading-s govuk-!-margin-bottom-0" th:if="${!filter.selectedOptions.isEmpty()}"
                             th:text="#{${filter.headingMsgKey}}"></h3>
                         <ul class="moj-filter-tags" th:each="selectedOption:${filter.selectedOptions}">
                             <li>
