@@ -20,7 +20,7 @@ data class TaskListItemViewModel(
                 if (status == TaskStatus.CANNOT_START_YET) {
                     null
                 } else {
-                    task.startId.urlPathSegment
+                    task.startingStepId.urlPathSegment
                 },
             )
     }

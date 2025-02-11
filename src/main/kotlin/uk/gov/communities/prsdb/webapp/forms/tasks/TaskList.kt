@@ -38,9 +38,9 @@ abstract class TaskList<T : StepId>(
     ): TaskStatus =
         if (task.stepIds.all { isStepWithIdComplete(journeyData, it) }) {
             TaskStatus.COMPLETED
-        } else if (isStepWithIdComplete(journeyData, task.startId)) {
+        } else if (isStepWithIdComplete(journeyData, task.startingStepId)) {
             TaskStatus.IN_PROGRESS
-        } else if (isStepWithIdReachable(journeyData, task.startId)) {
+        } else if (isStepWithIdReachable(journeyData, task.startingStepId)) {
             TaskStatus.NOT_YET_STARTED
         } else {
             TaskStatus.CANNOT_START_YET
@@ -66,7 +66,7 @@ abstract class TaskList<T : StepId>(
 
     data class Task<T : StepId>(
         val nameKey: String,
-        val startId: T,
+        val startingStepId: T,
         val stepIds: Set<T>,
     ) {
         companion object {
