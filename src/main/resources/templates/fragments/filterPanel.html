@@ -95,7 +95,7 @@
 
         <div class="moj-action-bar">
             <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(
-                    ${filterPanelViewModel.showFilterLink},
+                    ${filterPanelViewModel.toggleLink},
                     #{${searchRequest.showFilter ? 'filter.closeButton' : 'filter.showButton'}})}">
                 filter.showButton/filter.closeButton
             </a>

@@ -15,11 +15,11 @@ abstract class FilterPanelViewModel(
     val clearLink =
         URIQueryBuilder
             .fromHTTPServletRequest(httpServletRequest)
-            .removeParams(filters.map { it.searchRequestProperty })
+            .removeParams(searchRequestModel.getFilterPropertyNameValuePairs().map { it.first })
             .build()
             .toUriString()
 
-    val showFilterLink =
+    val toggleLink =
         URIQueryBuilder
             .fromHTTPServletRequest(httpServletRequest)
             .updateParam("showFilter", !searchRequestModel.showFilter)
