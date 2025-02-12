@@ -17,6 +17,7 @@ import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -611,7 +612,7 @@ class JourneyTests {
         }
 
         @Test
-        fun `saves the journey data when saveAfterSubmit is set on the step`() {
+        fun `saves the journey data when saveAfterSubmit is set to true on the step`() {
             // Arrange
             val testJourney =
                 TestJourney(
@@ -672,6 +673,67 @@ class JourneyTests {
             assertIs<PageData>(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment]!!)
             val resultPageData = objectToStringKeyedMap(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment])
             assertEquals("testPropertyValue", resultPageData?.get("testProperty"))
+        }
+
+        @Test
+        fun `does not save the journey data when saveAfterSubmit is set to false on the step`() {
+            // Arrange
+            val testJourney =
+                TestJourney(
+                    JourneyType.LANDLORD_REGISTRATION,
+                    initialStepId = TestStepId.StepOne,
+                    journeyDataService = mockJourneyDataService,
+                    validator = validator,
+                    steps =
+                        setOf(
+                            Step(
+                                TestStepId.StepOne,
+                                page =
+                                    Page(
+                                        TestFormModel::class,
+                                        "stepOneTemplate",
+                                        mutableMapOf("testKey" to "testValue"),
+                                    ),
+                                nextAction = { _, _ -> Pair(TestStepId.StepTwo, null) },
+                                saveAfterSubmit = false,
+                            ),
+                            Step(
+                                TestStepId.StepTwo,
+                                page =
+                                    Page(
+                                        TestFormModel::class,
+                                        "stepTwoTemplate",
+                                        mutableMapOf("anotherTestKey" to "anotherTestValue"),
+                                    ),
+                            ),
+                        ),
+                )
+            val model = BindingAwareModelMap()
+            val principal = Principal { "testPrincipalId" }
+            val pageData: PageData = mutableMapOf("testProperty" to "testPropertyValue")
+            val journeyData: JourneyData = mutableMapOf()
+
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
+
+            // Act
+            val result =
+                testJourney.updateJourneyDataAndGetViewNameOrRedirect(
+                    TestStepId.StepOne,
+                    pageData,
+                    model,
+                    null,
+                    principal,
+                )
+            val journeyDataCaptor = argumentCaptor<JourneyData>()
+
+            // Assert
+            verify(mockJourneyDataService, never()).saveJourneyData(
+                anyLong(),
+                journeyDataCaptor.capture(),
+                eq(JourneyType.LANDLORD_REGISTRATION),
+                eq(principal),
+            )
+            assertEquals("redirect:/${REGISTER_LANDLORD_JOURNEY_URL}/${TestStepId.StepTwo.urlPathSegment}", result)
         }
 
         @Test
