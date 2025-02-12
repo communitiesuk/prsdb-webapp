@@ -23,8 +23,8 @@ import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.RegisterPropertyMultiTaskTransaction
+import uk.gov.communities.prsdb.webapp.helpers.JourneySectionHelper.Companion.getSectionHeaderInfoForStep
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.formModels.DeclarationFormModel
@@ -45,7 +45,6 @@ import uk.gov.communities.prsdb.webapp.models.formModels.SelectiveLicenceFormMod
 import uk.gov.communities.prsdb.webapp.models.viewModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosDividerViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -107,22 +106,6 @@ class PropertyRegistrationJourney(
             ),
         )
 
-    private fun getSectionHeaderInfoForStep(stepId: RegisterPropertyStepId): SectionHeaderViewModel? {
-        registerPropertyTransaction.getSectionForStep(stepId)?.let {
-            try {
-                MessageKeyConverter.convert(it)
-            } catch (e: NotImplementedError) {
-                return null
-            }
-            return SectionHeaderViewModel(
-                MessageKeyConverter.convert(it),
-                it.sectionNumber,
-                registerPropertyTransaction.taskLists.size,
-            )
-        }
-        return null
-    }
-
     private fun taskListStep() =
         Step(
             id = RegisterPropertyStepId.TaskList,
@@ -147,7 +130,8 @@ class PropertyRegistrationJourney(
                             "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
                             "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
                             "submitButtonText" to "forms.buttons.saveAndContinue",
-                            "sectionHeaderInfo" to getSectionHeaderInfoForStep(RegisterPropertyStepId.LookupAddress),
+                            "sectionHeaderInfo" to
+                                getSectionHeaderInfoForStep(RegisterPropertyStepId.LookupAddress, registerPropertyTransaction),
                         ),
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.SelectAddress, null) },
@@ -171,7 +155,8 @@ class PropertyRegistrationJourney(
                         "searchAgainUrl" to
                             "/$REGISTER_PROPERTY_JOURNEY_URL/" +
                             RegisterPropertyStepId.LookupAddress.urlPathSegment,
-                        "sectionHeaderInfo" to getSectionHeaderInfoForStep(RegisterPropertyStepId.SelectAddress),
+                        "sectionHeaderInfo" to
+                            getSectionHeaderInfoForStep(RegisterPropertyStepId.SelectAddress, registerPropertyTransaction),
                     ),
                 lookupAddressPathSegment = RegisterPropertyStepId.LookupAddress.urlPathSegment,
                 addressLookupService = addressLookupService,
@@ -222,7 +207,8 @@ class PropertyRegistrationJourney(
                             "countyLabel" to "forms.manualAddress.county.label",
                             "postcodeLabel" to "forms.manualAddress.postcode.label",
                             "submitButtonText" to "forms.buttons.saveAndContinue",
-                            "sectionHeaderInfo" to getSectionHeaderInfoForStep(RegisterPropertyStepId.ManualAddress),
+                            "sectionHeaderInfo" to
+                                getSectionHeaderInfoForStep(RegisterPropertyStepId.ManualAddress, registerPropertyTransaction),
                         ),
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.LocalAuthority, null) },
@@ -239,7 +225,8 @@ class PropertyRegistrationJourney(
                             "fieldSetHeading" to "forms.selectLocalAuthority.fieldSetHeading",
                             "fieldSetHint" to "forms.selectLocalAuthority.fieldSetHint",
                             "selectLabel" to "forms.selectLocalAuthority.select.label",
-                            "sectionHeaderInfo" to getSectionHeaderInfoForStep(RegisterPropertyStepId.LocalAuthority),
+                            "sectionHeaderInfo" to
+                                getSectionHeaderInfoForStep(RegisterPropertyStepId.LocalAuthority, registerPropertyTransaction),
                         ),
                     localAuthorityService = localAuthorityService,
                 ),
@@ -286,7 +273,8 @@ class PropertyRegistrationJourney(
                                         conditionalFragment = "customPropertyTypeInput",
                                     ),
                                 ),
-                            "sectionHeaderInfo" to getSectionHeaderInfoForStep(RegisterPropertyStepId.PropertyType),
+                            "sectionHeaderInfo" to
+                                getSectionHeaderInfoForStep(RegisterPropertyStepId.PropertyType, registerPropertyTransaction),
                         ),
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.OwnershipType, null) },
@@ -316,7 +304,8 @@ class PropertyRegistrationJourney(
                                         hintMsgKey = "forms.ownershipType.radios.option.leasehold.hint",
                                     ),
                                 ),
-                            "sectionHeaderInfo" to getSectionHeaderInfoForStep(RegisterPropertyStepId.OwnershipType),
+                            "sectionHeaderInfo" to
+                                getSectionHeaderInfoForStep(RegisterPropertyStepId.OwnershipType, registerPropertyTransaction),
                         ),
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.LicensingType, null) },
@@ -346,7 +335,8 @@ class PropertyRegistrationJourney(
                                         hintMsgKey = "forms.occupancy.radios.option.no.hint",
                                     ),
                                 ),
-                            "sectionHeaderInfo" to getSectionHeaderInfoForStep(RegisterPropertyStepId.Occupancy),
+                            "sectionHeaderInfo" to
+                                getSectionHeaderInfoForStep(RegisterPropertyStepId.Occupancy, registerPropertyTransaction),
                         ),
                 ),
             nextAction = { journeyData, _ -> occupancyNextAction(journeyData) },
@@ -364,7 +354,8 @@ class PropertyRegistrationJourney(
                             "title" to "registerProperty.title",
                             "fieldSetHeading" to "forms.numberOfHouseholds.fieldSetHeading",
                             "label" to "forms.numberOfHouseholds.label",
-                            "sectionHeaderInfo" to getSectionHeaderInfoForStep(RegisterPropertyStepId.NumberOfHouseholds),
+                            "sectionHeaderInfo" to
+                                getSectionHeaderInfoForStep(RegisterPropertyStepId.NumberOfHouseholds, registerPropertyTransaction),
                         ),
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.NumberOfPeople, null) },
@@ -383,7 +374,8 @@ class PropertyRegistrationJourney(
                             "fieldSetHeading" to "forms.numberOfPeople.fieldSetHeading",
                             "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
                             "label" to "forms.numberOfPeople.label",
-                            "sectionHeaderInfo" to getSectionHeaderInfoForStep(RegisterPropertyStepId.NumberOfPeople),
+                            "sectionHeaderInfo" to
+                                getSectionHeaderInfoForStep(RegisterPropertyStepId.NumberOfPeople, registerPropertyTransaction),
                         ),
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.LandlordType, null) },
@@ -414,7 +406,8 @@ class PropertyRegistrationJourney(
                                         hintMsgKey = "forms.landlordType.radios.option.joint.hint",
                                     ),
                                 ),
-                            "sectionHeaderInfo" to getSectionHeaderInfoForStep(RegisterPropertyStepId.LandlordType),
+                            "sectionHeaderInfo" to
+                                getSectionHeaderInfoForStep(RegisterPropertyStepId.LandlordType, registerPropertyTransaction),
                         ),
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
@@ -455,7 +448,8 @@ class PropertyRegistrationJourney(
                                         labelMsgKey = "forms.licensingType.radios.option.noLicensing.label",
                                     ),
                                 ),
-                            "sectionHeaderInfo" to getSectionHeaderInfoForStep(RegisterPropertyStepId.LicensingType),
+                            "sectionHeaderInfo" to
+                                getSectionHeaderInfoForStep(RegisterPropertyStepId.LicensingType, registerPropertyTransaction),
                         ),
                 ),
             nextAction = { journeyData, _ -> licensingTypeNextAction(journeyData) },
@@ -475,7 +469,8 @@ class PropertyRegistrationJourney(
                             "label" to "forms.selectiveLicence.label",
                             "detailSummary" to "forms.selectiveLicence.detail.summary",
                             "detailMainText" to "forms.selectiveLicence.detail.text",
-                            "sectionHeaderInfo" to getSectionHeaderInfoForStep(RegisterPropertyStepId.SelectiveLicence),
+                            "sectionHeaderInfo" to
+                                getSectionHeaderInfoForStep(RegisterPropertyStepId.SelectiveLicence, registerPropertyTransaction),
                         ),
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
@@ -501,7 +496,8 @@ class PropertyRegistrationJourney(
                                     "bulletTwo" to "forms.hmoMandatoryLicence.detail.bullet.two",
                                     "text" to "forms.hmoMandatoryLicence.detail.paragraph.two",
                                 ),
-                            "sectionHeaderInfo" to getSectionHeaderInfoForStep(RegisterPropertyStepId.HmoMandatoryLicence),
+                            "sectionHeaderInfo" to
+                                getSectionHeaderInfoForStep(RegisterPropertyStepId.HmoMandatoryLicence, registerPropertyTransaction),
                         ),
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
@@ -521,7 +517,8 @@ class PropertyRegistrationJourney(
                             "label" to "forms.hmoAdditionalLicence.label",
                             "detailSummary" to "forms.hmoAdditionalLicence.detail.summary",
                             "detailMainText" to "forms.hmoAdditionalLicence.detail.text",
-                            "sectionHeaderInfo" to getSectionHeaderInfoForStep(RegisterPropertyStepId.HmoAdditionalLicence),
+                            "sectionHeaderInfo" to
+                                getSectionHeaderInfoForStep(RegisterPropertyStepId.HmoAdditionalLicence, registerPropertyTransaction),
                         ),
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
@@ -536,7 +533,7 @@ class PropertyRegistrationJourney(
             PropertyRegistrationCheckAnswersPage(
                 addressDataService,
                 localAuthorityService,
-                getSectionHeaderInfoForStep(RegisterPropertyStepId.CheckAnswers),
+                getSectionHeaderInfoForStep(RegisterPropertyStepId.CheckAnswers, registerPropertyTransaction),
             ),
         nextAction = { _, _ -> Pair(RegisterPropertyStepId.Declaration, null) },
     )
@@ -567,7 +564,7 @@ class PropertyRegistrationJourney(
                                 ),
                             ),
                         "submitButtonText" to "forms.buttons.confirmAndCompleteRegistration",
-                        "sectionHeaderInfo" to getSectionHeaderInfoForStep(RegisterPropertyStepId.Declaration),
+                        "sectionHeaderInfo" to getSectionHeaderInfoForStep(RegisterPropertyStepId.Declaration, registerPropertyTransaction),
                     ),
             ),
         handleSubmitAndRedirect = { journeyData, _ ->
