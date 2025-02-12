@@ -22,8 +22,6 @@ import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.forms.tasks.CheckAndSubmitPropertiesTaskList
-import uk.gov.communities.prsdb.webapp.forms.tasks.RegisterPropertiesTaskList
 import uk.gov.communities.prsdb.webapp.forms.tasks.RegisterPropertyMultiTaskTransaction
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
@@ -73,11 +71,7 @@ class PropertyRegistrationJourney(
         journeyDataService = journeyDataService,
     ) {
     private val registerPropertyTransaction =
-        RegisterPropertyMultiTaskTransaction(
-            journeyDataService,
-            RegisterPropertiesTaskList(this, journeyDataService, validator),
-            CheckAndSubmitPropertiesTaskList(this, journeyDataService, validator),
-        )
+        RegisterPropertyMultiTaskTransaction(journeyDataService, this, validator)
 
     override val initialStepId = RegisterPropertyStepId.TaskList
 
