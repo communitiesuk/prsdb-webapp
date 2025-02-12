@@ -102,7 +102,7 @@ abstract class Journey<T : StepId>(
         return "redirect:$redirectUrl"
     }
 
-    open fun isStepReachable(
+    fun isStepReachable(
         journeyData: JourneyData,
         targetStep: Step<T>,
         targetSubPageNumber: Int? = null,
