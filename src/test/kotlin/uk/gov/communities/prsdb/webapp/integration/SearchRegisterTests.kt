@@ -163,6 +163,23 @@ class SearchRegisterTests : IntegrationTest() {
             assertTrue(filter.getNoFiltersSelectedText().isVisible)
             assertTrue(resultTable.countRows() > 1)
         }
+
+        @Test
+        fun `selected filters persist across searches`(page: Page) {
+            // Search
+            val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
+            searchLandlordRegisterPage.searchBar.search("Alex")
+
+            // Apply LA filter
+            val filter = searchLandlordRegisterPage.getFilterPanel()
+            val laFilter = filter.getFilterCheckboxes("Show landlords operating in my authority")
+            laFilter.checkCheckbox("true")
+            filter.clickApplyFiltersButton()
+
+            // Search again
+            searchLandlordRegisterPage.searchBar.search("PRSD")
+            assertTrue(filter.getRemoveFilterTag("Landlords in my authority").isVisible)
+        }
     }
 
     @Nested
@@ -320,6 +337,23 @@ class SearchRegisterTests : IntegrationTest() {
             assertTrue(filter.getClearFiltersLink(isVisible = false).isHidden)
             assertTrue(filter.getNoFiltersSelectedText().isVisible)
             assertTrue(resultTable.countRows() > 1)
+        }
+
+        @Test
+        fun `selected filters persist across searches`(page: Page) {
+            // Search
+            val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
+            searchPropertyRegisterPage.searchBar.search("Way")
+
+            // Apply LA filter
+            val filter = searchPropertyRegisterPage.getFilterPanel()
+            val laFilter = filter.getFilterCheckboxes("Show properties in my authority")
+            laFilter.checkCheckbox("true")
+            filter.clickApplyFiltersButton()
+
+            // Search again
+            searchPropertyRegisterPage.searchBar.search("PRSD")
+            assertTrue(filter.getRemoveFilterTag("Properties in my authority").isVisible)
         }
     }
 }
