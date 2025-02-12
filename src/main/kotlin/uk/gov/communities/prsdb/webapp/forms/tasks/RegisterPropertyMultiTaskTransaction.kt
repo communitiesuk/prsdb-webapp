@@ -12,7 +12,7 @@ class RegisterPropertyMultiTaskTransaction(
     journeyDataService: JourneyDataService,
     propertyRegistrationJourney: PropertyRegistrationJourney,
     validator: Validator,
-) : MultiTaskTransaction<RegisterPropertyStepId, PropertyRegistrationSectionId>(journeyDataService) {
+) : MultiTaskTransaction<RegisterPropertyStepId>(journeyDataService) {
     public override val taskLists =
         listOf(
             TransactionSection(

@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.viewModels.TaskSectionViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
-abstract class MultiTaskTransaction<T : StepId, E : SectionId>(
+abstract class MultiTaskTransaction<T : StepId>(
     private val journeyDataService: JourneyDataService,
 ) {
     protected abstract val taskLists: List<TransactionSection<T>>
