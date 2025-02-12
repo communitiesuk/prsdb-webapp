@@ -2,12 +2,13 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.components
 
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.Page.LocatorOptions
 
 class FilterPanel(
     private val page: Page,
     locator: Locator = page.locator(".moj-filter-layout"),
 ) : BaseComponent(locator) {
-    fun getPanel(isVisible: Boolean = true) = if (isVisible) getChildComponent(".moj-filter") else locator.locator(".moj-filter")
+    fun getPanel(isVisible: Boolean = true) = getChildComponent(".moj-filter", isVisible = isVisible)
 
     fun getCloseFilterPanelButton() = getButton(page, "Close filters panel")
 
