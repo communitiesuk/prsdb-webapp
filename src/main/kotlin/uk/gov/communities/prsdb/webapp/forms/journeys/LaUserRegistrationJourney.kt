@@ -46,6 +46,7 @@ class LaUserRegistrationJourney(
                         ),
                 ),
             nextAction = { _, _ -> Pair(RegisterLaUserStepId.Name, null) },
+            saveAfterSubmit = false,
         )
 
     private fun registerUserStep() =
@@ -66,6 +67,7 @@ class LaUserRegistrationJourney(
                         ),
                 ),
             nextAction = { _, _ -> Pair(RegisterLaUserStepId.Email, null) },
+            saveAfterSubmit = false,
         )
 
     private fun emailStep() =
@@ -85,6 +87,7 @@ class LaUserRegistrationJourney(
                         ),
                 ),
             nextAction = { _, _ -> Pair(RegisterLaUserStepId.CheckAnswers, null) },
+            saveAfterSubmit = false,
         )
 
     private fun checkAnswersStep(invitationService: LocalAuthorityInvitationService) =
@@ -103,5 +106,6 @@ class LaUserRegistrationJourney(
                     invitationService,
                 ),
             handleSubmitAndRedirect = { _, _ -> "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/success" },
+            saveAfterSubmit = false,
         )
 }
