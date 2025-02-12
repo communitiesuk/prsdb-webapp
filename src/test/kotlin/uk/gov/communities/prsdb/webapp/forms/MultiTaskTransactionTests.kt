@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.tasks.MultiTaskTransaction
 import uk.gov.communities.prsdb.webapp.forms.tasks.MultiTaskTransaction.TransactionSection
+import uk.gov.communities.prsdb.webapp.forms.tasks.PropertyRegistrationSectionId
 import uk.gov.communities.prsdb.webapp.forms.tasks.TaskList
 import uk.gov.communities.prsdb.webapp.models.viewModels.TaskListItemViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.TaskSectionViewModel
@@ -51,15 +52,15 @@ class MultiTaskTransactionTests {
     fun `getTaskListPageViewModels returns, in a list, the TaskListViewModels produced by its taskLists `() {
         val principalName = "principalName"
         val firstMock = mock<TaskList<TestStepId>>()
-        val firstName = "first name"
+        val firstSectionId = PropertyRegistrationSectionId.PROPERTY_DETAILS
         val secondMock = mock<TaskList<TestStepId>>()
-        val secondName = "second name"
+        val secondSectionId = PropertyRegistrationSectionId.CHECK_AND_SUBMIT
         val transaction =
             TestMultiTaskTransaction(
                 journeyDataService,
                 testJourneyType,
                 testUrlSegment,
-                listOf(TransactionSection(firstName, firstMock), TransactionSection(secondName, secondMock)),
+                listOf(TransactionSection(firstSectionId, firstMock), TransactionSection(secondSectionId, secondMock)),
             )
 
         val firstList = listOf(TaskListItemViewModel("a string value", TaskStatusViewModel("text for status")))
@@ -72,7 +73,10 @@ class MultiTaskTransactionTests {
 
         // Assert
         assertIterableEquals(
-            listOf(TaskSectionViewModel(firstName, firstList), TaskSectionViewModel(secondName, secondList)),
+            listOf(
+                TaskSectionViewModel("registerProperty.taskList.register.heading", 1, firstList),
+                TaskSectionViewModel("registerProperty.taskList.checkAndSubmit.heading", 2, secondList),
+            ),
             taskSectionViewModelList,
         )
     }
