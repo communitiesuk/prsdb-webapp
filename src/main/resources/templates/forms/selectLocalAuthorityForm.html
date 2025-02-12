@@ -5,7 +5,7 @@
 <!--/*@thymesVar id="selectOptions" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="selectLabel" type="java.lang.Object"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl})}">
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
     <fieldset id="fieldset-content"
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'localAuthorityId', #{${fieldSetHeading}}, #{${fieldSetHint}})}">

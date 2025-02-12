@@ -36,21 +36,17 @@ abstract class TaskList<T : StepId>(
         journeyData: JourneyData,
         task: Task<T>,
     ): TaskStatus =
-        if (isStepWithIdReachable(journeyData, task.completionId)) {
+        if (areAllStepsWithinTaskComplete(journeyData, task)) {
             TaskStatus.COMPLETED
+        } else if (isStepWithIdComplete(journeyData, task.startingStepId)) {
+            TaskStatus.IN_PROGRESS
+        } else if (isStepWithIdReachable(journeyData, task.startingStepId)) {
+            TaskStatus.NOT_YET_STARTED
         } else {
-            if (isStepWithIdReachable(journeyData, task.startId)) {
-                if (isNextStepReachableFromId(journeyData, task.startId)) {
-                    TaskStatus.IN_PROGRESS
-                } else {
-                    TaskStatus.NOT_YET_STARTED
-                }
-            } else {
-                TaskStatus.CANNOT_START_YET
-            }
+            TaskStatus.CANNOT_START_YET
         }
 
-    private fun isNextStepReachableFromId(
+    private fun isStepWithIdComplete(
         journeyData: JourneyData,
         id: T,
     ): Boolean {
@@ -58,6 +54,26 @@ abstract class TaskList<T : StepId>(
         val pageData = JourneyDataHelper.getPageData(journeyData, currentStep.name)
         return pageData != null && currentStep.isSatisfied(validator, pageData)
     }
+
+    private fun areAllStepsWithinTaskComplete(
+        journeyData: JourneyData,
+        task: Task<T>,
+    ): Boolean {
+        var currentStepId: T? = task.startingStepId
+        while (currentStepId != null && currentStepId in task.stepIds) {
+            if (isStepWithIdComplete(journeyData, currentStepId)) {
+                currentStepId = nextStepId(currentStepId, journeyData)
+            } else {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun nextStepId(
+        currentStepId: T,
+        journeyData: JourneyData,
+    ) = steps.single { it.id == currentStepId }.nextAction(journeyData, null).first
 
     private fun isStepWithIdReachable(
         journeyData: JourneyData,
@@ -70,7 +86,14 @@ abstract class TaskList<T : StepId>(
 
     data class Task<T : StepId>(
         val nameKey: String,
-        val startId: T,
-        val completionId: T?,
-    )
+        val startingStepId: T,
+        val stepIds: Set<T>,
+    ) {
+        companion object {
+            fun <T : StepId> withOneStep(
+                nameKey: String,
+                startId: T,
+            ) = Task(nameKey, startId, setOf(startId))
+        }
+    }
 }

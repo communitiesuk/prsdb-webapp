@@ -6,7 +6,7 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
 
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl})}">
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
     <th:block id="fieldset-content"
               th:replace="~{fragments/forms/dateInput :: dateInput('date', 'day', 'month', 'year', #{${fieldSetHeading}}, #{${fieldSetHint}})}">

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -106,9 +107,20 @@ class PropertyDetailsTests : IntegrationTest() {
         }
 
         @Test
-        fun `the landlord name link goes the local authority view of landlord details`(page: Page) {
+        fun `in the key details section the landlord name link goes the local authority view of landlord details`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
             detailsPage.clickLandlordNameLinkFromKeyDetails("Alexander Smith")
+
+            assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
+            Assertions.assertEquals("/landlord-details/1", URI(page.url()).path)
+        }
+
+        @Test
+        fun `in the landlord details section the landlord name link goes the local authority view of landlord details`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
+            detailsPage.goToLandlordDetails()
+
+            detailsPage.clickLandlordLinkFromLandlordDetails("Alexander Smith")
 
             assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
             Assertions.assertEquals("/landlord-details/1", URI(page.url()).path)
@@ -121,6 +133,13 @@ class PropertyDetailsTests : IntegrationTest() {
 
             // TODO: PRSD-647 add link to the dashboard
             Assertions.assertEquals("/local-authority/property-details/1", URI(page.url()).path)
+        }
+
+        @Test
+        fun `loading the landlord details page shows the last time the landlords record was updated`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
+
+            assertThat(detailsPage.insetText.spanText).containsText("updated these details on")
         }
     }
 }

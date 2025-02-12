@@ -17,10 +17,9 @@ class CheckAndSubmitPropertiesTaskList(
 ) : TaskList<RegisterPropertyStepId>(propertyRegistrationJourney, journeyDataService, validator) {
     override val taskList: List<Task<RegisterPropertyStepId>> =
         listOf(
-            Task(
+            Task.withOneStep(
                 "registerProperty.taskList.checkAndSubmit.checkAnswers",
                 RegisterPropertyStepId.CheckAnswers,
-                null,
             ),
         )
     // TODO PRSD-593: Pay for your properties

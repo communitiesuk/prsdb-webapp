@@ -1,12 +1,12 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.stereotype.Service
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
 
 @Service
 class UserRolesService(
-    val landlordRepository: LandlordUserRepository,
+    val landlordRepository: LandlordRepository,
     val localAuthorityUserRepository: LocalAuthorityUserRepository,
 ) {
     fun getRolesForSubjectId(subjectId: String): List<String> {

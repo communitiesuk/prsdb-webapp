@@ -4,7 +4,7 @@
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}},${formModel}, ~{::#form-content},${backUrl})}">
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}},${formModel}, ~{::#form-content},${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
     <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
         <h1 class="govuk-fieldset__heading" th:text="#{forms.checkAnswers.heading}">forms.checkAnswers.heading</h1>

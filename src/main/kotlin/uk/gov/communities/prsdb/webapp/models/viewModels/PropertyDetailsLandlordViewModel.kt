@@ -2,79 +2,64 @@ package uk.gov.communities.prsdb.webapp.models.viewModels
 
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.UPDATE_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.helpers.extenstions.addRow
 
 class PropertyDetailsLandlordViewModel(
     private val landlord: Landlord,
     private val withChangeLinks: Boolean = true,
+    private val landlordDetailsUrl: String = "/landlord-details",
 ) {
-    val landlordsDetails: List<SummaryListRowViewModel> = formatLandlordDetails()
+    private val isUkResident = landlord.internationalAddress == null
 
-    private fun formatLandlordDetails(): List<SummaryListRowViewModel> {
-        val isUkResident = landlord.internationalAddress == null
-
-        val residencyIndependentPersonalDetails =
-            listOf(
-                SummaryListRowViewModel(
+    val landlordsDetails: List<SummaryListRowViewModel> =
+        mutableListOf<SummaryListRowViewModel>()
+            .apply {
+                addRow(
                     "landlordDetails.personalDetails.name",
                     landlord.name,
-                    toggleChangeLink("$UPDATE_ROUTE/name"),
-                    "/landlord-details",
-                ),
+                    "$UPDATE_ROUTE/name",
+                    withChangeLinks,
+                    landlordDetailsUrl,
+                )
                 // TODO PRSD-747 to pass Id verification status (see Figma for design)
-                SummaryListRowViewModel(
+                addRow(
                     "landlordDetails.personalDetails.dateOfBirth",
                     landlord.dateOfBirth,
-                    toggleChangeLink("$UPDATE_ROUTE/date-of-birth"),
-                ),
-                SummaryListRowViewModel(
+                    "$UPDATE_ROUTE/date-of-birth",
+                    withChangeLinks,
+                )
+                addRow(
                     "landlordDetails.personalDetails.emailAddress",
                     landlord.email,
-                    toggleChangeLink("$UPDATE_ROUTE/email"),
-                ),
-                SummaryListRowViewModel(
+                    "$UPDATE_ROUTE/email",
+                    withChangeLinks,
+                )
+                addRow(
                     "propertyDetails.landlordDetails.contactNumber",
                     landlord.phoneNumber,
-                    toggleChangeLink("$UPDATE_ROUTE/telephone"),
-                ),
-            )
-
-        val residencyPersonalDetails =
-            if (isUkResident) {
-                formatUkAddressDetails(landlord)
-            } else {
-                formatNonUkAddressDetails(landlord)
-            }
-
-        return residencyIndependentPersonalDetails + residencyPersonalDetails
-    }
-
-    private fun formatNonUkAddressDetails(landlord: Landlord) =
-        listOf(
-            SummaryListRowViewModel(
-                "landlordDetails.personalDetails.nonUkAddress",
-                landlord.internationalAddress,
-                toggleChangeLink("$UPDATE_ROUTE/address"),
-            ),
-            SummaryListRowViewModel(
-                "landlordDetails.personalDetails.ukAddress",
-                landlord.address.singleLineAddress,
-                toggleChangeLink("$UPDATE_ROUTE/contact-address"),
-            ),
-        )
-
-    private fun formatUkAddressDetails(landlord: Landlord) =
-        listOf(
-            SummaryListRowViewModel(
-                "landlordDetails.personalDetails.contactAddress",
-                landlord.address.singleLineAddress,
-                toggleChangeLink("$UPDATE_ROUTE/address"),
-            ),
-        )
-
-    private fun toggleChangeLink(link: String?): String? =
-        if (withChangeLinks) {
-            link
-        } else {
-            null
-        }
+                    "$UPDATE_ROUTE/telephone",
+                    withChangeLinks,
+                )
+                if (isUkResident) {
+                    addRow(
+                        "landlordDetails.personalDetails.contactAddress",
+                        landlord.address.singleLineAddress,
+                        "$UPDATE_ROUTE/address",
+                        withChangeLinks,
+                    )
+                } else {
+                    addRow(
+                        "propertyDetails.landlordDetails.addressOutsideEnglandOrWales",
+                        landlord.internationalAddress,
+                        "$UPDATE_ROUTE/address",
+                        withChangeLinks,
+                    )
+                    addRow(
+                        "propertyDetails.landlordDetails.contactAddressInEnglandOrWales",
+                        landlord.address.singleLineAddress,
+                        "$UPDATE_ROUTE/contact-address",
+                        withChangeLinks,
+                    )
+                }
+            }.toList()
 }
