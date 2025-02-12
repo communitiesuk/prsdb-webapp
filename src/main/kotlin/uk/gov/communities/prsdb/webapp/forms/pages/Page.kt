@@ -14,7 +14,7 @@ import kotlin.reflect.full.createInstance
 open class Page(
     private val formModel: KClass<out FormModel>,
     private val templateName: String,
-    private val content: Map<String, Any>,
+    private val content: Map<String, Any?>,
 ) {
     open fun populateModelAndGetTemplateName(
         validator: Validator,

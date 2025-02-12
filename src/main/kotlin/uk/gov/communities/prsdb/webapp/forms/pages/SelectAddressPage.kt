@@ -16,7 +16,7 @@ import kotlin.reflect.KClass
 class SelectAddressPage(
     formModel: KClass<out FormModel>,
     templateName: String,
-    content: Map<String, Any>,
+    content: Map<String, Any?>,
     private val lookupAddressPathSegment: String,
     private val addressLookupService: AddressLookupService,
     private val addressDataService: AddressDataService,
