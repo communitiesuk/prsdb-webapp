@@ -676,7 +676,7 @@ class JourneyTests {
         }
 
         @Test
-        fun `saves the journey data when saveAfterSubmit is set to false on the step`() {
+        fun `does not save the journey data when saveAfterSubmit is set to false on the step`() {
             // Arrange
             val testJourney =
                 TestJourney(
