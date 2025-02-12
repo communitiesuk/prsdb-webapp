@@ -144,11 +144,14 @@ class SearchRegisterTests : IntegrationTest() {
             laFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
+            val laFilterSelectedHeadingText = filter.getSelectedHeadings(expectedCount = 1).first().innerText()
+            assertContains(laFilterSelectedHeadingText, "Show landlords operating in my authority")
             val resultTable = searchLandlordRegisterPage.getResultTable()
             assertEquals(1, resultTable.countRows())
 
             // Remove LA filter
             searchLandlordRegisterPage.clickComponent(filter.getRemoveFilterTag("Landlords in my authority"))
+            assertTrue(filter.getSelectedHeadings(expectedCount = 0).isEmpty())
             assertTrue(resultTable.countRows() > 1)
 
             // Clear all filters
@@ -156,6 +159,8 @@ class SearchRegisterTests : IntegrationTest() {
             filter.clickApplyFiltersButton()
 
             searchLandlordRegisterPage.clickComponent(filter.getClearFiltersLink())
+            assertTrue(filter.getClearFiltersLink(isVisible = false).isHidden)
+            assertTrue(filter.getNoFiltersSelectedText().isVisible)
             assertTrue(resultTable.countRows() > 1)
         }
     }
@@ -297,11 +302,14 @@ class SearchRegisterTests : IntegrationTest() {
             laFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
+            val laFilterSelectedHeadingText = filter.getSelectedHeadings(expectedCount = 1).first().innerText()
+            assertContains(laFilterSelectedHeadingText, "Show properties in my authority")
             val resultTable = searchPropertyRegisterPage.getResultTable()
             assertEquals(1, resultTable.countRows())
 
             // Remove LA filter
             searchPropertyRegisterPage.clickComponent(filter.getRemoveFilterTag("Properties in my authority"))
+            assertTrue(filter.getSelectedHeadings(expectedCount = 0).isEmpty())
             assertTrue(resultTable.countRows() > 1)
 
             // Clear all filters
@@ -309,6 +317,8 @@ class SearchRegisterTests : IntegrationTest() {
             filter.clickApplyFiltersButton()
 
             searchPropertyRegisterPage.clickComponent(filter.getClearFiltersLink())
+            assertTrue(filter.getClearFiltersLink(isVisible = false).isHidden)
+            assertTrue(filter.getNoFiltersSelectedText().isVisible)
             assertTrue(resultTable.countRows() > 1)
         }
     }

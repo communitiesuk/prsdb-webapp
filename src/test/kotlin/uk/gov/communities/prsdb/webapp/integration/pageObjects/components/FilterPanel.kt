@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.components
 
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
-import com.microsoft.playwright.Page.LocatorOptions
 
 class FilterPanel(
     private val page: Page,
@@ -14,7 +13,11 @@ class FilterPanel(
 
     fun getShowFilterPanel() = getButton(page, "Show filters panel")
 
-    fun getClearFiltersLink() = getLink(page, "Clear filters")
+    fun getClearFiltersLink(isVisible: Boolean = true) = getLink(page, "Clear filters", isVisible = isVisible)
+
+    fun getSelectedHeadings(expectedCount: Int) = getChildrenComponents(".moj-filter__selected >> h3", expectedCount)
+
+    fun getNoFiltersSelectedText() = getChildComponent(".moj-filter__selected", Locator.LocatorOptions().setHasText("No filters selected"))
 
     fun clickApplyFiltersButton() = Form(page, parentLocator = locator).submit()
 
