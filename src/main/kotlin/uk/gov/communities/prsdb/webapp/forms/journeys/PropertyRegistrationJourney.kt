@@ -22,7 +22,11 @@ import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.forms.tasks.CheckAndSubmitPropertiesTaskList
+import uk.gov.communities.prsdb.webapp.forms.tasks.RegisterPropertiesTaskList
+import uk.gov.communities.prsdb.webapp.forms.tasks.RegisterPropertyMultiTaskTransaction
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.formModels.DeclarationFormModel
@@ -68,6 +72,13 @@ class PropertyRegistrationJourney(
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
+    private val registerPropertyTransaction =
+        RegisterPropertyMultiTaskTransaction(
+            journeyDataService,
+            RegisterPropertiesTaskList(this, journeyDataService, validator),
+            CheckAndSubmitPropertiesTaskList(this, journeyDataService, validator),
+        )
+
     override val initialStepId = RegisterPropertyStepId.TaskList
 
     override val steps =
@@ -102,6 +113,22 @@ class PropertyRegistrationJourney(
             ),
         )
 
+    private fun getSectionHeaderInfoForStep(stepId: RegisterPropertyStepId): SectionHeaderViewModel? {
+        registerPropertyTransaction.getSectionForStep(stepId)?.let {
+            try {
+                MessageKeyConverter.convert(it)
+            } catch (e: NotImplementedError) {
+                return null
+            }
+            return SectionHeaderViewModel(
+                MessageKeyConverter.convert(it),
+                it.sectionNumber,
+                registerPropertyTransaction.taskLists.size,
+            )
+        }
+        return null
+    }
+
     private fun taskListStep() =
         Step(
             id = RegisterPropertyStepId.TaskList,
@@ -109,29 +136,34 @@ class PropertyRegistrationJourney(
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.LookupAddress, null) },
         )
 
-    private fun lookupAddressStep() =
-        Step(
+    private fun lookupAddressStep(): Step<RegisterPropertyStepId> {
+        val content =
+            mutableMapOf<String, Any>(
+                "title" to "registerProperty.title",
+                "fieldSetHeading" to "forms.lookupAddress.propertyRegistration.fieldSetHeading",
+                "fieldSetHint" to "forms.lookupAddress.fieldSetHint",
+                "postcodeLabel" to "forms.lookupAddress.postcode.label",
+                "postcodeHint" to "forms.lookupAddress.postcode.hint",
+                "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
+                "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
+                "submitButtonText" to "forms.buttons.saveAndContinue",
+            )
+
+        getSectionHeaderInfoForStep(RegisterPropertyStepId.LookupAddress)?.let {
+            content.put("sectionHeaderInfo", it)
+        }
+
+        return Step(
             id = RegisterPropertyStepId.LookupAddress,
             page =
                 Page(
                     formModel = LookupAddressFormModel::class,
                     templateName = "forms/lookupAddressForm",
-                    content =
-                        mapOf(
-                            "title" to "registerProperty.title",
-                            "fieldSetHeading" to "forms.lookupAddress.propertyRegistration.fieldSetHeading",
-                            "fieldSetHint" to "forms.lookupAddress.fieldSetHint",
-                            "postcodeLabel" to "forms.lookupAddress.postcode.label",
-                            "postcodeHint" to "forms.lookupAddress.postcode.hint",
-                            "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
-                            "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
-                            "submitButtonText" to "forms.buttons.saveAndContinue",
-                            "sectionHeaderInfo" to
-                                SectionHeaderViewModel("registerProperty.taskList.register.heading", 1, 3),
-                        ),
+                    content = content,
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.SelectAddress, null) },
         )
+    }
 
     private fun selectAddressStep(
         addressLookupService: AddressLookupService,

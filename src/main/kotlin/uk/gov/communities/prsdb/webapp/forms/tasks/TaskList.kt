@@ -64,6 +64,12 @@ abstract class TaskList<T : StepId>(
         return journey.isStepReachable(journeyData, currentStep)
     }
 
+    fun isStepInTaskList(stepId: T): Boolean {
+        val stepsInTaskList = taskList.flatMap { task -> task.stepIds }.toSet()
+
+        return stepId in stepsInTaskList
+    }
+
     data class Task<T : StepId>(
         val nameKey: String,
         val startingStepId: T,

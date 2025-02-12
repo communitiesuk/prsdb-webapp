@@ -26,6 +26,15 @@ abstract class MultiTaskTransaction<T : StepId, E : SectionId>(
         }
     }
 
+    fun getSectionForStep(stepId: T): SectionId? {
+        taskLists.forEach { taskList ->
+            if (taskList.sectionTasks.isStepInTaskList(stepId)) {
+                return taskList.sectionId
+            }
+        }
+        return null
+    }
+
     private fun loadJourneyDataIntoSessionIfNotLoaded(principalName: String) {
         val data = journeyDataService.getJourneyDataFromSession()
         if (data.isEmpty()) {
