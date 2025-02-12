@@ -217,28 +217,26 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         fun `Completing preceding steps will show a task as not yet started and completed steps as complete`(page: Page) {
             navigator.goToPropertyRegistrationOccupancyPage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
-            taskListPage.taskHasStatus("Add the property address", "Complete")
-            taskListPage.taskHasStatus("Select the type of property", "Complete")
-            taskListPage.taskHasStatus("Select the ownership type", "Complete")
-            taskListPage.taskHasStatus("Add any property licensing information", "Complete")
-            taskListPage.taskHasStatus("Add any tenancy and household information", "Not yet started")
-            taskListPage.taskHasStatus("Select the type of property", "Cannot start yet")
-            taskListPage.taskHasStatus("Select how you're operating for this property", "Cannot start yet")
-            taskListPage.taskHasStatus("Add any interested parties or additional landlords", "Cannot start yet")
+            assert(taskListPage.taskHasStatus("Add the property address", "Complete"))
+            assert(taskListPage.taskHasStatus("Select the type of property", "Complete"))
+            assert(taskListPage.taskHasStatus("Select the ownership type", "Complete"))
+            assert(taskListPage.taskHasStatus("Add any property licensing information", "Complete"))
+            assert(taskListPage.taskHasStatus("Add any tenancy and household information", "Not yet started"))
+            assert(taskListPage.taskHasStatus("Select how you're operating for this property", "Cannot start yet"))
+            assert(taskListPage.taskHasStatus("Add any interested parties or additional landlords", "Cannot start yet"))
         }
 
         @Test
         fun `Completing first step of a task will show a task as in progress and completed steps as complete`(page: Page) {
             navigator.goToPropertyRegistrationHmoAdditionalLicencePage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
-            taskListPage.taskHasStatus("Add the property address", "Complete")
-            taskListPage.taskHasStatus("Select the type of property", "Complete")
-            taskListPage.taskHasStatus("Select the ownership type", "Complete")
-            taskListPage.taskHasStatus("Add any property licensing information", "In progress")
-            taskListPage.taskHasStatus("Add any tenancy and household information", "Cannot start yet")
-            taskListPage.taskHasStatus("Select the type of property", "Cannot start yet")
-            taskListPage.taskHasStatus("Select how you're operating for this property", "Cannot start yet")
-            taskListPage.taskHasStatus("Add any interested parties or additional landlords", "Cannot start yet")
+            assert(taskListPage.taskHasStatus("Add the property address", "Complete"))
+            assert(taskListPage.taskHasStatus("Select the type of property", "Complete"))
+            assert(taskListPage.taskHasStatus("Select the ownership type", "Complete"))
+            assert(taskListPage.taskHasStatus("Add any property licensing information", "In progress"))
+            assert(taskListPage.taskHasStatus("Add any tenancy and household information", "Cannot start yet"))
+            assert(taskListPage.taskHasStatus("Select how you're operating for this property", "Cannot start yet"))
+            assert(taskListPage.taskHasStatus("Add any interested parties or additional landlords", "Cannot start yet"))
         }
     }
 
