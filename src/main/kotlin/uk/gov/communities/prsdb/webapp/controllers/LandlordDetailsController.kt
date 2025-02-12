@@ -30,16 +30,32 @@ class LandlordDetailsController(
     val updateDetailsJourney: UpdateDetailsJourney,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
+    @GetMapping("update/details")
+    fun getUpdateUserLandlordDetails(
+        model: Model,
+        principal: Principal,
+    ): String {
+        updateDetailsJourney.initialiseJourneyDataIfNotInitialised(principal.name)
+        return getLandlordDetailsPage(model, principal, includeChangeLinks = true)
+    }
+
+    @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping
     fun getUserLandlordDetails(
         model: Model,
         principal: Principal,
+    ): String = getLandlordDetailsPage(model, principal, includeChangeLinks = false)
+
+    private fun getLandlordDetailsPage(
+        model: Model,
+        principal: Principal,
+        includeChangeLinks: Boolean,
     ): String {
         val landlord =
             landlordService.retrieveLandlordByBaseUserId(principal.name)
                 ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
 
-        val landlordViewModel = LandlordViewModel(landlord)
+        val landlordViewModel = LandlordViewModel(landlord, includeChangeLinks)
 
         model.addAttribute("name", landlordViewModel.name)
         model.addAttribute("landlord", landlordViewModel)
@@ -112,6 +128,6 @@ class LandlordDetailsController(
     }
 
     companion object {
-        const val UPDATE_ROUTE = "landlord-details/update"
+        const val UPDATE_ROUTE = "/landlord-details/update"
     }
 }
