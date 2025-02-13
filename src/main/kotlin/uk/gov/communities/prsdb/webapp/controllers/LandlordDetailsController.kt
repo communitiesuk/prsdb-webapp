@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.UpdateDetailsJourney
+import uk.gov.communities.prsdb.webapp.forms.journeys.UpdateLandlordDetailsJourney
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.LandlordViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
@@ -27,7 +27,7 @@ class LandlordDetailsController(
     val landlordService: LandlordService,
     val addressDataService: AddressDataService,
     val propertyOwnershipService: PropertyOwnershipService,
-    val updateDetailsJourney: UpdateDetailsJourney,
+    val updateDetailsJourney: UpdateLandlordDetailsJourney,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping("update/details")
