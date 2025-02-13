@@ -21,7 +21,7 @@
                             </h2>
                         </div>
                         <div class="moj-filter__heading-action govuk-!-margin-bottom-4"
-                             th:if="${!filterPanelViewModel.noFiltersSelected}">
+                             th:unless="${filterPanelViewModel.noFiltersSelected}">
                             <p>
                                 <a class="govuk-link govuk-link--no-visited-state"
                                    th:text="#{filter.selected.clearLink}"
@@ -33,8 +33,9 @@
                     </div>
 
                     <th:block th:each="filter:${filterPanelViewModel.filters}">
-                        <h3 class="govuk-heading-s govuk-!-margin-bottom-0" th:if="${!filter.selectedOptions.isEmpty()}"
-                            th:text="#{${filter.headingMsgKey}}"></h3>
+                        <h3 class="govuk-heading-s govuk-!-margin-bottom-0"
+                            th:unless="${filter.selectedOptions.isEmpty()}" th:text="#{${filter.headingMsgKey}}">
+                        </h3>
                         <ul class="moj-filter-tags" th:each="selectedOption:${filter.selectedOptions}">
                             <li>
                                 <a class="moj-filter__tag"
