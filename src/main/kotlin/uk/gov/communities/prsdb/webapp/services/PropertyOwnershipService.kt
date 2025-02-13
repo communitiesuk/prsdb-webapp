@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -111,6 +112,7 @@ class PropertyOwnershipService(
         searchTerm: String,
         laBaseUserId: String,
         restrictToLA: Boolean = false,
+        restrictToLicenses: List<LicensingType> = LicensingType.entries,
         requestedPageIndex: Int = 0,
         pageSize: Int = MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE,
     ): Page<PropertySearchResultViewModel> {
@@ -120,11 +122,29 @@ class PropertyOwnershipService(
 
         val matchingProperties =
             if (prn != null) {
-                propertyOwnershipRepository.searchMatchingPRN(prn.number, laBaseUserId, restrictToLA, pageRequest)
+                propertyOwnershipRepository.searchMatchingPRN(
+                    prn.number,
+                    laBaseUserId,
+                    restrictToLA,
+                    restrictToLicenses,
+                    pageRequest,
+                )
             } else if (uprn != null) {
-                propertyOwnershipRepository.searchMatchingUPRN(uprn, laBaseUserId, restrictToLA, pageRequest)
+                propertyOwnershipRepository.searchMatchingUPRN(
+                    uprn,
+                    laBaseUserId,
+                    restrictToLA,
+                    restrictToLicenses,
+                    pageRequest,
+                )
             } else {
-                propertyOwnershipRepository.searchMatching(searchTerm, laBaseUserId, restrictToLA, pageRequest)
+                propertyOwnershipRepository.searchMatching(
+                    searchTerm,
+                    laBaseUserId,
+                    restrictToLA,
+                    restrictToLicenses,
+                    pageRequest,
+                )
             }
 
         return matchingProperties.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
