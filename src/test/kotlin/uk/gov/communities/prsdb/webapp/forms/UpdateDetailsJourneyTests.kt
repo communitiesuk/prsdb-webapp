@@ -21,7 +21,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.UpdateDetailsJourney
+import uk.gov.communities.prsdb.webapp.forms.journeys.UpdateLandlordDetailsJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateDetailsStepId
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -57,7 +57,7 @@ class UpdateDetailsJourneyTests {
         fun `throws not found exception when step is missing`() {
             // Arrange
             val testJourney =
-                UpdateDetailsJourney(
+                UpdateLandlordDetailsJourney(
                     journeyDataService = mockJourneyDataService,
                     validator = validator,
                     landlordService = mock(),
@@ -73,7 +73,7 @@ class UpdateDetailsJourneyTests {
             // Arrange
             val testJourney =
 
-                UpdateDetailsJourney(
+                UpdateLandlordDetailsJourney(
                     journeyDataService = mockJourneyDataService,
                     validator = validator,
                     landlordService = mock(),
@@ -87,7 +87,7 @@ class UpdateDetailsJourneyTests {
         fun `returns redirect when earlier step has validation errors`() {
             // Arrange
             val testJourney =
-                UpdateDetailsJourney(
+                UpdateLandlordDetailsJourney(
                     journeyDataService = mockJourneyDataService,
                     validator = validator,
                     landlordService = mock(),
@@ -103,7 +103,7 @@ class UpdateDetailsJourneyTests {
         fun `returns populated model and template name when step is reachable`() {
             // Arrange
             val testJourney =
-                UpdateDetailsJourney(
+                UpdateLandlordDetailsJourney(
                     journeyDataService = mockJourneyDataService,
                     validator = validator,
                     landlordService = mock(),
@@ -148,7 +148,7 @@ class UpdateDetailsJourneyTests {
         fun `populateModelAndGetViewName returns populateModelAndGetTemplateName with filteredJourneyData as a parameter`() {
             // Arrange
             val testJourney =
-                UpdateDetailsJourney(
+                UpdateLandlordDetailsJourney(
                     journeyDataService = mockJourneyDataService,
                     validator = validator,
                     landlordService = mockLandlordService,

@@ -19,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 
 @Component
-class UpdateDetailsJourney(
+class UpdateLandlordDetailsJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     val landlordService: LandlordService,
@@ -96,7 +96,7 @@ class UpdateDetailsJourney(
             landlordUpdate,
         )
 
-        journeyDataService.deleteJourneyData()
+        journeyDataService.clearJourneyDataFromSession()
 
         return "/landlord-details"
     }
