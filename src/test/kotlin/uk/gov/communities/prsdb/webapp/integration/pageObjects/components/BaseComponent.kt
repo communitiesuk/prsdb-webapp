@@ -25,9 +25,10 @@ abstract class BaseComponent(
             locatorStr: String,
             locatorOptions: LocatorOptions? = null,
             index: Int = 0,
+            isVisible: Boolean = true,
         ): Locator {
             val component = page.locator(locatorStr, locatorOptions).nth(index)
-            assertLocatorIsValid(component)
+            assertLocatorIsValid(component, expectedLocatorCount = if (isVisible) 1 else 0)
             return component
         }
 
@@ -36,9 +37,10 @@ abstract class BaseComponent(
             locatorStr: String,
             locatorOptions: Locator.LocatorOptions? = null,
             index: Int = 0,
+            isVisible: Boolean = true,
         ): Locator {
             val component = parentLocator.locator(locatorStr, locatorOptions).nth(index)
-            assertLocatorIsValid(component)
+            assertLocatorIsValid(component, expectedLocatorCount = if (isVisible) 1 else 0)
             return component
         }
 
@@ -73,7 +75,8 @@ abstract class BaseComponent(
             page: Page,
             text: String,
             index: Int = 0,
-        ) = getComponent(page, ".govuk-link", LocatorOptions().setHasText(text), index)
+            isVisible: Boolean = true,
+        ) = getComponent(page, ".govuk-link", LocatorOptions().setHasText(text), index, isVisible)
     }
 
     init {
@@ -90,5 +93,6 @@ abstract class BaseComponent(
         locatorStr: String,
         locatorOptions: Locator.LocatorOptions? = null,
         index: Int = 0,
-    ): Locator = Companion.getChildComponent(locator, locatorStr, locatorOptions, index)
+        isVisible: Boolean = true,
+    ): Locator = Companion.getChildComponent(locator, locatorStr, locatorOptions, index, isVisible)
 }

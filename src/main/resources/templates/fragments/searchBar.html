@@ -1,5 +1,6 @@
 <div class="moj-search govuk-!-margin-bottom-6" th:fragment="searchBar(label, hint, searchRequest)">
     <form method="get" th:action="@{''}" th:object="${searchRequest}">
+
         <div class="govuk-form-group">
             <label class="govuk-label moj-search__label govuk-!-font-weight-bold" th:for="'searchTerm'"
                    th:text="${label}">
@@ -8,6 +9,10 @@
             <input class="govuk-input moj-search__input " type="search" th:field="*{searchTerm}"
                    aria-describedby="search-hint">
         </div>
+
+        <input type="hidden" th:each="filterProp:${searchRequest.getFilterPropertyNameValuePairs()}"
+               th:field="*{__${filterProp.first}__}" th:value="${filterProp.second}">
+
         <button type="submit" class="govuk-button moj-search__button " data-module="govuk-button"
                 th:text="#{searchButtonText}">
         </button>

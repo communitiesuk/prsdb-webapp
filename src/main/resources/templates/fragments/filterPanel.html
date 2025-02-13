@@ -20,7 +20,8 @@
                                 filter.selected.heading
                             </h2>
                         </div>
-                        <div class="moj-filter__heading-action govuk-!-margin-bottom-4">
+                        <div class="moj-filter__heading-action govuk-!-margin-bottom-4"
+                             th:unless="${filterPanelViewModel.noFiltersSelected}">
                             <p>
                                 <a class="govuk-link govuk-link--no-visited-state"
                                    th:text="#{filter.selected.clearLink}"
@@ -33,7 +34,8 @@
 
                     <th:block th:each="filter:${filterPanelViewModel.filters}">
                         <h3 class="govuk-heading-s govuk-!-margin-bottom-0"
-                            th:text="#{${filter.headingMsgKey}}"></h3>
+                            th:unless="${filter.selectedOptions.isEmpty()}" th:text="#{${filter.headingMsgKey}}">
+                        </h3>
                         <ul class="moj-filter-tags" th:each="selectedOption:${filter.selectedOptions}">
                             <li>
                                 <a class="moj-filter__tag"
@@ -46,6 +48,10 @@
                             </li>
                         </ul>
                     </th:block>
+
+                    <p class="govuk-body" th:if="${filterPanelViewModel.noFiltersSelected}"
+                       th:text="#{filter.selected.noneSelectedText}">filter.selected.noneSelectedText</p>
+
                 </div>
 
                 <div class="moj-filter__options">
@@ -90,7 +96,7 @@
 
         <div class="moj-action-bar">
             <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(
-                    ${filterPanelViewModel.showFilterLink},
+                    ${filterPanelViewModel.toggleLink},
                     #{${searchRequest.showFilter ? 'filter.closeButton' : 'filter.showButton'}})}">
                 filter.showButton/filter.closeButton
             </a>

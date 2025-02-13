@@ -33,7 +33,7 @@ abstract class BasePage(
         ) = createValidPage(page, expectedPageClass)
     }
 
-    fun clickButton(locator: Locator) {
+    fun clickComponent(locator: Locator) {
         locator.click()
         page.waitForLoadState()
     }

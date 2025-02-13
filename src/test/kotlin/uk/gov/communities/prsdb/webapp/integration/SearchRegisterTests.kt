@@ -133,10 +133,10 @@ class SearchRegisterTests : IntegrationTest() {
             val filter = searchLandlordRegisterPage.getFilterPanel()
 
             // Toggle filter
-            filter.clickCloseFilterPanel()
+            searchLandlordRegisterPage.clickComponent(filter.getCloseFilterPanelButton())
             assertTrue(filter.getPanel(isVisible = false).isHidden)
 
-            filter.clickShowFilterPanel()
+            searchLandlordRegisterPage.clickComponent(filter.getShowFilterPanel())
             assertTrue(filter.getPanel().isVisible)
 
             // Apply LA filter
@@ -144,19 +144,41 @@ class SearchRegisterTests : IntegrationTest() {
             laFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
+            val laFilterSelectedHeadingText = filter.getSelectedHeadings(expectedCount = 1).first().innerText()
+            assertContains(laFilterSelectedHeadingText, "Show landlords operating in my authority")
             val resultTable = searchLandlordRegisterPage.getResultTable()
             assertEquals(1, resultTable.countRows())
 
             // Remove LA filter
-            filter.clickRemoveFilterTag("Landlords in my authority")
+            searchLandlordRegisterPage.clickComponent(filter.getRemoveFilterTag("Landlords in my authority"))
+            assertTrue(filter.getSelectedHeadings(expectedCount = 0).isEmpty())
             assertTrue(resultTable.countRows() > 1)
 
             // Clear all filters
             laFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
-            filter.clickClearFiltersLink()
+            searchLandlordRegisterPage.clickComponent(filter.getClearFiltersLink())
+            assertTrue(filter.getClearFiltersLink(isVisible = false).isHidden)
+            assertTrue(filter.getNoFiltersSelectedText().isVisible)
             assertTrue(resultTable.countRows() > 1)
+        }
+
+        @Test
+        fun `selected filters persist across searches`(page: Page) {
+            // Search
+            val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
+            searchLandlordRegisterPage.searchBar.search("Alex")
+
+            // Apply LA filter
+            val filter = searchLandlordRegisterPage.getFilterPanel()
+            val laFilter = filter.getFilterCheckboxes("Show landlords operating in my authority")
+            laFilter.checkCheckbox("true")
+            filter.clickApplyFiltersButton()
+
+            // Search again
+            searchLandlordRegisterPage.searchBar.search("PRSD")
+            assertTrue(filter.getRemoveFilterTag("Landlords in my authority").isVisible)
         }
     }
 
@@ -286,10 +308,10 @@ class SearchRegisterTests : IntegrationTest() {
             val filter = searchPropertyRegisterPage.getFilterPanel()
 
             // Toggle filter
-            filter.clickCloseFilterPanel()
+            searchPropertyRegisterPage.clickComponent(filter.getCloseFilterPanelButton())
             assertTrue(filter.getPanel(isVisible = false).isHidden)
 
-            filter.clickShowFilterPanel()
+            searchPropertyRegisterPage.clickComponent(filter.getShowFilterPanel())
             assertTrue(filter.getPanel().isVisible)
 
             // Apply LA filter
@@ -297,19 +319,41 @@ class SearchRegisterTests : IntegrationTest() {
             laFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
+            val laFilterSelectedHeadingText = filter.getSelectedHeadings(expectedCount = 1).first().innerText()
+            assertContains(laFilterSelectedHeadingText, "Show properties in my authority")
             val resultTable = searchPropertyRegisterPage.getResultTable()
             assertEquals(1, resultTable.countRows())
 
             // Remove LA filter
-            filter.clickRemoveFilterTag("Properties in my authority")
+            searchPropertyRegisterPage.clickComponent(filter.getRemoveFilterTag("Properties in my authority"))
+            assertTrue(filter.getSelectedHeadings(expectedCount = 0).isEmpty())
             assertTrue(resultTable.countRows() > 1)
 
             // Clear all filters
             laFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
-            filter.clickClearFiltersLink()
+            searchPropertyRegisterPage.clickComponent(filter.getClearFiltersLink())
+            assertTrue(filter.getClearFiltersLink(isVisible = false).isHidden)
+            assertTrue(filter.getNoFiltersSelectedText().isVisible)
             assertTrue(resultTable.countRows() > 1)
+        }
+
+        @Test
+        fun `selected filters persist across searches`(page: Page) {
+            // Search
+            val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
+            searchPropertyRegisterPage.searchBar.search("Way")
+
+            // Apply LA filter
+            val filter = searchPropertyRegisterPage.getFilterPanel()
+            val laFilter = filter.getFilterCheckboxes("Show properties in my authority")
+            laFilter.checkCheckbox("true")
+            filter.clickApplyFiltersButton()
+
+            // Search again
+            searchPropertyRegisterPage.searchBar.search("PRSD")
+            assertTrue(filter.getRemoveFilterTag("Properties in my authority").isVisible)
         }
     }
 }
