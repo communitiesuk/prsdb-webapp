@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
-import java.util.Optional
 import kotlin.test.assertEquals
 
 class UpdateDetailsJourneyDataExtensionsTests {
@@ -22,7 +21,7 @@ class UpdateDetailsJourneyDataExtensionsTests {
 
         val emailUpdate = testJourneyData.getEmailUpdateIfPresent()
 
-        assertEquals(Optional.of(newEmail), emailUpdate)
+        assertEquals(newEmail, emailUpdate)
     }
 
     @Test
@@ -31,6 +30,6 @@ class UpdateDetailsJourneyDataExtensionsTests {
 
         val emailUpdate = testJourneyData.getEmailUpdateIfPresent()
 
-        assertEquals(Optional.empty(), emailUpdate)
+        assertEquals(null, emailUpdate)
     }
 }
