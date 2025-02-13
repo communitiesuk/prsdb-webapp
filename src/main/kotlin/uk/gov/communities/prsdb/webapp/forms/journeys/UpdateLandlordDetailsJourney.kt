@@ -91,7 +91,7 @@ class UpdateLandlordDetailsJourney(
                 email = journeyData.getEmailUpdateIfPresent(),
             )
 
-        landlordService.updateLandlordEmailForBaseUserId(
+        landlordService.updateLandlordForBaseUserId(
             SecurityContextHolder.getContext().authentication.name,
             landlordUpdate,
         )

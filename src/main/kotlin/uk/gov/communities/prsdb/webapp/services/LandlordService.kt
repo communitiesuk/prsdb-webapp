@@ -68,13 +68,13 @@ class LandlordService(
     }
 
     @Transactional
-    fun updateLandlordEmailForBaseUserId(
+    fun updateLandlordForBaseUserId(
         baseUserId: String,
         landlordUpdate: LandlordUpdateModel,
     ): Landlord {
         val landlordEntity = retrieveLandlordByBaseUserId(baseUserId)!!
 
-        landlordUpdate.email.ifPresent { landlordEntity.email = it }
+        landlordUpdate.email?.let { landlordEntity.email = it }
 
         return landlordEntity
     }
