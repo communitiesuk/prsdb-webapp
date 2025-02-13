@@ -5,10 +5,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.mockito.Mock
 import org.mockito.Mockito.mock
-import org.mockito.kotlin.any
-import org.mockito.kotlin.isNull
 import org.mockito.kotlin.whenever
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.journeys.Journey
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
@@ -20,31 +19,32 @@ class TaskListTests {
     enum class TestStepId(
         override val urlPathSegment: String,
     ) : StepId {
-        StepOne("step1"),
-        StepTwo("step2"),
-        StepThree("step3"),
-        StepFour("step4"),
+        SimpleTaskOne("step1"),
+        TwoStepTaskPartOne("step2a"),
+        TwoStepTaskPartTwo("step2b"),
+        SimpleTaskTwo("step3"),
+        MultiPathTaskStart("step4start"),
+        MultiPathTaskMainline("step4path1"),
+        MultiPathTaskAlternateRoutePartOne("step4path2a"),
+        MultiPathTaskAlternateRoutePartTwo("step4path2b"),
     }
 
     class TestTaskList(
         journey: Journey<TestStepId>,
         journeyDataService: JourneyDataService,
         validator: Validator,
-    ) : TaskList<TestStepId>(journey, journeyDataService, validator) {
-        override val taskList: List<Task<TestStepId>>
-            get() =
-                listOf(
-                    Task("task 1", TestStepId.StepOne, setOf(TestStepId.StepOne)),
-                    Task("task 2", TestStepId.StepTwo, setOf(TestStepId.StepTwo, TestStepId.StepThree)),
-                    Task("task 3", TestStepId.StepFour, setOf(TestStepId.StepFour)),
-                )
-    }
+        override val taskList: List<Task<TestStepId>>,
+    ) : TaskList<TestStepId>(journey, journeyDataService, validator)
+
+    class TestJourney(
+        validator: Validator,
+        journeyDataService: JourneyDataService,
+        override val initialStepId: TestStepId,
+        override val steps: Set<Step<TestStepId>>,
+    ) : Journey<TestStepId>(JourneyType.PROPERTY_REGISTRATION, validator, journeyDataService)
 
     @Mock
     lateinit var mockJourneyDataService: JourneyDataService
-
-    @Mock
-    lateinit var mockJourney: Journey<TestStepId>
 
     @Mock
     lateinit var validator: Validator
@@ -52,82 +52,240 @@ class TaskListTests {
     @BeforeEach
     fun setup() {
         mockJourneyDataService = mock()
-        mockJourney = mock()
         validator = mock()
-
-        // Ensure form data for each page is never null
-        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(
-            mutableMapOf(
-                "step1" to mutableMapOf<String, String>(),
-                "step2" to mutableMapOf<String, String>(),
-                "step3" to mutableMapOf<String, String>(),
-                "step4" to mutableMapOf<String, String>(),
-            ),
-        )
     }
 
-    private fun setUpStepsWithStatus(
-        stepOneCompleted: Boolean,
-        stepTwoCompleted: Boolean,
-        stepThreeCompleted: Boolean,
-        stepFourCompleted: Boolean,
-    ) {
-        whenever(mockJourney.steps).thenReturn(
-            setOf(
-                Step(
-                    TestStepId.StepOne,
-                    mock(),
-                    isSatisfied = { _, _ -> stepOneCompleted },
-                    nextAction = { _, _ -> Pair(TestStepId.StepTwo, null) },
+    @Nested
+    inner class MultiPathJourneyTests {
+        @BeforeEach
+        fun setup() {
+            // Ensure form data for each page is never null
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(
+                mutableMapOf(
+                    "step1" to mutableMapOf<String, String>(),
+                    "step2a" to mutableMapOf<String, String>(),
+                    "step2b" to mutableMapOf<String, String>(),
+                    "step3" to mutableMapOf<String, String>(),
+                    "step4start" to mutableMapOf<String, String>(),
+                    "step4path1" to mutableMapOf<String, String>(),
+                    "step4path2a" to mutableMapOf<String, String>(),
+                    "step4path2b" to mutableMapOf<String, String>(),
                 ),
-                Step(
-                    TestStepId.StepTwo,
-                    mock(),
-                    isSatisfied = { _, _ -> stepTwoCompleted },
-                    nextAction = { _, _ -> Pair(TestStepId.StepThree, null) },
-                ),
-                Step(
-                    TestStepId.StepThree,
-                    mock(),
-                    isSatisfied = { _, _ -> stepThreeCompleted },
-                    nextAction = { _, _ -> Pair(TestStepId.StepFour, null) },
-                ),
-                Step(
-                    TestStepId.StepFour,
-                    mock(),
-                    isSatisfied = { _, _ -> stepFourCompleted },
-                ),
-            ),
-        )
+            )
+        }
 
-        whenever(mockJourney.isStepReachable(any(), any(), isNull())).thenAnswer { invocation ->
-            val stepArgument = invocation.arguments[1] as Step<TestStepId>
-            when (stepArgument.id) {
-                TestStepId.StepOne -> true
-                TestStepId.StepTwo -> stepOneCompleted
-                TestStepId.StepThree -> stepTwoCompleted
-                TestStepId.StepFour -> stepThreeCompleted
-            }
+        fun getMultiPathTestTaskListWithMainlineCompleted(useMainline: Boolean): TestTaskList {
+            val journey =
+                TestJourney(
+                    validator,
+                    mockJourneyDataService,
+                    TestStepId.SimpleTaskOne,
+                    setOf(
+                        Step(
+                            TestStepId.SimpleTaskOne,
+                            mock(),
+                            isSatisfied = { _, _ -> true },
+                            nextAction = { _, _ -> Pair(TestStepId.MultiPathTaskStart, null) },
+                        ),
+                        Step(
+                            TestStepId.MultiPathTaskStart,
+                            mock(),
+                            isSatisfied = { _, _ -> true },
+                            nextAction = {
+                                    _,
+                                    _,
+                                ->
+                                Pair(
+                                    if (useMainline) TestStepId.MultiPathTaskMainline else TestStepId.MultiPathTaskAlternateRoutePartOne,
+                                    null,
+                                )
+                            },
+                        ),
+                        Step(
+                            TestStepId.MultiPathTaskMainline,
+                            mock(),
+                            isSatisfied = { _, _ -> true },
+                            nextAction = { _, _ -> Pair(TestStepId.TwoStepTaskPartOne, null) },
+                        ),
+                        Step(
+                            TestStepId.MultiPathTaskAlternateRoutePartOne,
+                            mock(),
+                            isSatisfied = { _, _ -> false },
+                            nextAction = { _, _ -> Pair(TestStepId.MultiPathTaskAlternateRoutePartTwo, null) },
+                        ),
+                        Step(
+                            TestStepId.MultiPathTaskAlternateRoutePartTwo,
+                            mock(),
+                            isSatisfied = { _, _ -> false },
+                            nextAction = { _, _ -> Pair(TestStepId.TwoStepTaskPartOne, null) },
+                        ),
+                        Step(
+                            TestStepId.TwoStepTaskPartOne,
+                            mock(),
+                            isSatisfied = { _, _ -> true },
+                            nextAction = { _, _ -> Pair(TestStepId.TwoStepTaskPartTwo, null) },
+                        ),
+                        Step(
+                            TestStepId.TwoStepTaskPartTwo,
+                            mock(),
+                            isSatisfied = { _, _ -> true },
+                            nextAction = { _, _ -> Pair(TestStepId.SimpleTaskTwo, null) },
+                        ),
+                        Step(
+                            TestStepId.SimpleTaskTwo,
+                            mock(),
+                            isSatisfied = { _, _ -> false },
+                        ),
+                    ),
+                )
+
+            return TestTaskList(
+                journey,
+                mockJourneyDataService,
+                validator,
+                listOf(
+                    TaskList.Task("task 1", TestStepId.SimpleTaskOne, setOf(TestStepId.SimpleTaskOne)),
+                    TaskList.Task(
+                        "multi-path task",
+                        TestStepId.MultiPathTaskStart,
+                        setOf(
+                            TestStepId.MultiPathTaskStart,
+                            TestStepId.MultiPathTaskMainline,
+                            TestStepId.MultiPathTaskAlternateRoutePartOne,
+                            TestStepId.MultiPathTaskAlternateRoutePartTwo,
+                        ),
+                    ),
+                    TaskList.Task(
+                        "task 2",
+                        TestStepId.TwoStepTaskPartOne,
+                        setOf(TestStepId.TwoStepTaskPartOne, TestStepId.TwoStepTaskPartTwo),
+                    ),
+                    TaskList.Task("task 3", TestStepId.SimpleTaskTwo, setOf(TestStepId.SimpleTaskTwo)),
+                ),
+            )
+        }
+
+        @Suppress("ktlint:standard:max-line-length")
+        @Test
+        fun `when the mainline of a journey is followed and the journey is using the mainline, all filled in tasks tasks show as completed`() {
+            // Arrange
+            val testTaskList = getMultiPathTestTaskListWithMainlineCompleted(useMainline = true)
+
+            // Act
+            val viewModel = testTaskList.getTaskListViewModels()
+
+            // Assert
+            assertIterableEquals(
+                listOf(
+                    "taskList.status.completed",
+                    "taskList.status.completed",
+                    "taskList.status.completed",
+                    "taskList.status.notYetStarted",
+                ),
+                viewModel.map { it.status.textKey },
+            )
+        }
+
+        @Suppress("ktlint:standard:max-line-length")
+        @Test
+        fun `when the mainline of a journey is followed and the journey is using the alternate route, tasks after the bifurcation are unreachable`() {
+            // Arrange
+            val testTaskList = getMultiPathTestTaskListWithMainlineCompleted(useMainline = false)
+
+            // Act
+            val viewModel = testTaskList.getTaskListViewModels()
+
+            // Assert
+            assertIterableEquals(
+                listOf(
+                    "taskList.status.completed",
+                    "taskList.status.inProgress",
+                    "taskList.status.cannotStartYet",
+                    "taskList.status.cannotStartYet",
+                ),
+                viewModel.map { it.status.textKey },
+            )
         }
     }
 
     @Nested
-    inner class GetStepIdTests {
+    inner class SinglePathJourneyTests {
+        @BeforeEach
+        fun setup() {
+            // Ensure form data for each page is never null
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(
+                mutableMapOf(
+                    "step1" to mutableMapOf<String, String>(),
+                    "step2a" to mutableMapOf<String, String>(),
+                    "step2b" to mutableMapOf<String, String>(),
+                    "step3" to mutableMapOf<String, String>(),
+                ),
+            )
+        }
+
+        fun getLinearTestTaskList(
+            simpleTaskOneCompleted: Boolean,
+            twoStepTaskPartOneCompleted: Boolean,
+            twoStepTaskPartTwoCompleted: Boolean,
+            simpleTaskTwoCompleted: Boolean,
+        ): TestTaskList {
+            val journey =
+                TestJourney(
+                    validator,
+                    mockJourneyDataService,
+                    TestStepId.SimpleTaskOne,
+                    setOf(
+                        Step(
+                            TestStepId.SimpleTaskOne,
+                            mock(),
+                            isSatisfied = { _, _ -> simpleTaskOneCompleted },
+                            nextAction = { _, _ -> Pair(TestStepId.TwoStepTaskPartOne, null) },
+                        ),
+                        Step(
+                            TestStepId.TwoStepTaskPartOne,
+                            mock(),
+                            isSatisfied = { _, _ -> twoStepTaskPartOneCompleted },
+                            nextAction = { _, _ -> Pair(TestStepId.TwoStepTaskPartTwo, null) },
+                        ),
+                        Step(
+                            TestStepId.TwoStepTaskPartTwo,
+                            mock(),
+                            isSatisfied = { _, _ -> twoStepTaskPartTwoCompleted },
+                            nextAction = { _, _ -> Pair(TestStepId.SimpleTaskTwo, null) },
+                        ),
+                        Step(
+                            TestStepId.SimpleTaskTwo,
+                            mock(),
+                            isSatisfied = { _, _ -> simpleTaskTwoCompleted },
+                        ),
+                    ),
+                )
+
+            return TestTaskList(
+                journey,
+                mockJourneyDataService,
+                validator,
+                listOf(
+                    TaskList.Task("task 1", TestStepId.SimpleTaskOne, setOf(TestStepId.SimpleTaskOne)),
+                    TaskList.Task(
+                        "task 2",
+                        TestStepId.TwoStepTaskPartOne,
+                        setOf(TestStepId.TwoStepTaskPartOne, TestStepId.TwoStepTaskPartTwo),
+                    ),
+                    TaskList.Task("task 3", TestStepId.SimpleTaskTwo, setOf(TestStepId.SimpleTaskTwo)),
+                ),
+            )
+        }
+
         @Test
         fun `when a task is exactly finished, the next task is marked not yet started`() {
             // Arrange
-            setUpStepsWithStatus(
-                stepOneCompleted = true,
-                stepTwoCompleted = false,
-                stepThreeCompleted = false,
-                stepFourCompleted = false,
-            )
-
             val testTaskList =
-                TestTaskList(
-                    mockJourney,
-                    mockJourneyDataService,
-                    validator,
+                getLinearTestTaskList(
+                    simpleTaskOneCompleted = true,
+                    twoStepTaskPartOneCompleted = false,
+                    twoStepTaskPartTwoCompleted = false,
+                    simpleTaskTwoCompleted = false,
                 )
 
             // Act
@@ -143,18 +301,12 @@ class TaskListTests {
         @Test
         fun `when a task is partially completed, it is marked in progress`() {
             // Arrange
-            setUpStepsWithStatus(
-                stepOneCompleted = true,
-                stepTwoCompleted = true,
-                stepThreeCompleted = false,
-                stepFourCompleted = false,
-            )
-
             val testTaskList =
-                TestTaskList(
-                    mockJourney,
-                    mockJourneyDataService,
-                    validator,
+                getLinearTestTaskList(
+                    simpleTaskOneCompleted = true,
+                    twoStepTaskPartOneCompleted = true,
+                    twoStepTaskPartTwoCompleted = false,
+                    simpleTaskTwoCompleted = false,
                 )
 
             // Act
@@ -170,18 +322,12 @@ class TaskListTests {
         @Test
         fun `when all steps are completed for a task , it is marked as complete`() {
             // Arrange
-            setUpStepsWithStatus(
-                stepOneCompleted = true,
-                stepTwoCompleted = true,
-                stepThreeCompleted = true,
-                stepFourCompleted = true,
-            )
-
             val testTaskList =
-                TestTaskList(
-                    mockJourney,
-                    mockJourneyDataService,
-                    validator,
+                getLinearTestTaskList(
+                    simpleTaskOneCompleted = true,
+                    twoStepTaskPartOneCompleted = true,
+                    twoStepTaskPartTwoCompleted = true,
+                    simpleTaskTwoCompleted = true,
                 )
 
             // Act
