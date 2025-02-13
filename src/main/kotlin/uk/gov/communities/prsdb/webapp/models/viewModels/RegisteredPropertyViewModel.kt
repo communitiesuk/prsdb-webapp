@@ -9,7 +9,7 @@ data class RegisteredPropertyViewModel(
     val address: String,
     val registrationNumber: String,
     val localAuthorityName: String,
-    val propertyLicence: String,
+    val licenseTypeMessageKey: String,
     val isTenantedMessageKey: String,
 ) {
     companion object {
@@ -24,7 +24,7 @@ data class RegisteredPropertyViewModel(
                 localAuthorityName =
                     propertyOwnership.property.address.localAuthority!!
                         .name,
-                propertyLicence = MessageKeyConverter.convert(propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING),
+                licenseTypeMessageKey = MessageKeyConverter.convert(propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING),
                 isTenantedMessageKey = MessageKeyConverter.convert(propertyOwnership.currentNumTenants > 0),
             )
     }

@@ -88,7 +88,7 @@ class RegisteredPropertyViewModelTests {
 
         val result = RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
 
-        assertEquals(result.propertyLicence, expectedDisplayName)
+        assertEquals(result.licenseTypeMessageKey, expectedDisplayName)
     }
 
     @Test
@@ -97,6 +97,6 @@ class RegisteredPropertyViewModelTests {
 
         val result = RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
 
-        assertEquals(result.propertyLicence, "forms.checkPropertyAnswers.propertyDetails.noLicensing")
+        assertEquals(result.licenseTypeMessageKey, "forms.checkPropertyAnswers.propertyDetails.noLicensing")
     }
 }
