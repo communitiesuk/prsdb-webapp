@@ -21,7 +21,6 @@ class MessageKeyConverter {
                 is OwnershipType -> convertOwnershipType(enum)
                 is LicensingType -> convertLicensingType(enum)
                 is LandlordType -> convertLandlordType(enum)
-                is PropertyRegistrationSectionId -> convertPropertyRegistrationSection(enum)
                 else -> throw NotImplementedError(
                     "Was not able to convert Enum as ${this::class.simpleName} does not have a conversion for ${enum::class.simpleName}",
                 )
