@@ -10,4 +10,6 @@ class SelectLocalAuthorityFormPagePropertyRegistration(
 ) : FormBasePage(
         page,
         "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.LocalAuthority.urlPathSegment}",
-    )
+    ) {
+    val sectionHeader = form.getSectionHeader()
+}

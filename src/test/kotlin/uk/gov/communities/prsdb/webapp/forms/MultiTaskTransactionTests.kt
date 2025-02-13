@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertIterableEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -17,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.tasks.MultiTaskTransaction
 import uk.gov.communities.prsdb.webapp.forms.tasks.MultiTaskTransaction.TransactionSection
+import uk.gov.communities.prsdb.webapp.forms.tasks.PropertyRegistrationSectionId
 import uk.gov.communities.prsdb.webapp.forms.tasks.TaskList
 import uk.gov.communities.prsdb.webapp.models.viewModels.TaskListItemViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.TaskSectionViewModel
@@ -32,7 +34,9 @@ class MultiTaskTransactionTests {
 
     enum class TestStepId(
         override val urlPathSegment: String,
-    ) : StepId
+    ) : StepId {
+        FirstStep("step-1"),
+    }
 
     class TestMultiTaskTransaction(
         journeyDataService: JourneyDataService,
@@ -51,15 +55,15 @@ class MultiTaskTransactionTests {
     fun `getTaskListPageViewModels returns, in a list, the TaskListViewModels produced by its taskLists `() {
         val principalName = "principalName"
         val firstMock = mock<TaskList<TestStepId>>()
-        val firstName = "first name"
+        val firstSectionId = PropertyRegistrationSectionId.PROPERTY_DETAILS
         val secondMock = mock<TaskList<TestStepId>>()
-        val secondName = "second name"
+        val secondSectionId = PropertyRegistrationSectionId.CHECK_AND_SUBMIT
         val transaction =
             TestMultiTaskTransaction(
                 journeyDataService,
                 testJourneyType,
                 testUrlSegment,
-                listOf(TransactionSection(firstName, firstMock), TransactionSection(secondName, secondMock)),
+                listOf(TransactionSection(firstSectionId, firstMock), TransactionSection(secondSectionId, secondMock)),
             )
 
         val firstList = listOf(TaskListItemViewModel("a string value", TaskStatusViewModel("text for status")))
@@ -72,9 +76,90 @@ class MultiTaskTransactionTests {
 
         // Assert
         assertIterableEquals(
-            listOf(TaskSectionViewModel(firstName, firstList), TaskSectionViewModel(secondName, secondList)),
+            listOf(
+                TaskSectionViewModel("registerProperty.taskList.register.heading", 1, firstList),
+                TaskSectionViewModel("registerProperty.taskList.checkAndSubmit.heading", 2, secondList),
+            ),
             taskSectionViewModelList,
         )
+    }
+
+    @Nested
+    inner class GetSectionForStepTests {
+        @Test
+        fun `getSectionForStep returns the section the step appears in`() {
+            val firstSectionId = PropertyRegistrationSectionId.PROPERTY_DETAILS
+            val firstTaskListMock = mock<TaskList<TestStepId>>()
+            whenever(firstTaskListMock.isStepInTaskList(TestStepId.FirstStep)).thenReturn(false)
+
+            val secondSectionId = PropertyRegistrationSectionId.PROPERTY_DETAILS
+            val secondTaskListMock = mock<TaskList<TestStepId>>()
+            whenever(secondTaskListMock.isStepInTaskList(TestStepId.FirstStep)).thenReturn(true)
+
+            val transaction =
+                TestMultiTaskTransaction(
+                    journeyDataService,
+                    testJourneyType,
+                    testUrlSegment,
+                    listOf(TransactionSection(firstSectionId, firstTaskListMock), TransactionSection(secondSectionId, secondTaskListMock)),
+                )
+
+            // Act
+            val sectionContainingStep = transaction.getSectionForStep(TestStepId.FirstStep)
+
+            // Assert
+            assertEquals(secondSectionId, sectionContainingStep)
+        }
+
+        @Test
+        fun `getSectionForStep returns the first section the step appears in`() {
+            val firstSectionId = PropertyRegistrationSectionId.PROPERTY_DETAILS
+            val firstTaskListMock = mock<TaskList<TestStepId>>()
+            whenever(firstTaskListMock.isStepInTaskList(TestStepId.FirstStep)).thenReturn(true)
+
+            val secondSectionId = PropertyRegistrationSectionId.PROPERTY_DETAILS
+            val secondTaskListMock = mock<TaskList<TestStepId>>()
+            whenever(secondTaskListMock.isStepInTaskList(TestStepId.FirstStep)).thenReturn(true)
+
+            val transaction =
+                TestMultiTaskTransaction(
+                    journeyDataService,
+                    testJourneyType,
+                    testUrlSegment,
+                    listOf(TransactionSection(firstSectionId, firstTaskListMock), TransactionSection(secondSectionId, secondTaskListMock)),
+                )
+
+            // Act
+            val sectionContainingStep = transaction.getSectionForStep(TestStepId.FirstStep)
+
+            // Assert
+            assertEquals(firstSectionId, sectionContainingStep)
+        }
+
+        @Test
+        fun `getSectionForStep returns null if the step is not in any section`() {
+            val firstSectionId = PropertyRegistrationSectionId.PROPERTY_DETAILS
+            val firstTaskListMock = mock<TaskList<TestStepId>>()
+            whenever(firstTaskListMock.isStepInTaskList(TestStepId.FirstStep)).thenReturn(false)
+
+            val secondSectionId = PropertyRegistrationSectionId.PROPERTY_DETAILS
+            val secondTaskListMock = mock<TaskList<TestStepId>>()
+            whenever(secondTaskListMock.isStepInTaskList(TestStepId.FirstStep)).thenReturn(false)
+
+            val transaction =
+                TestMultiTaskTransaction(
+                    journeyDataService,
+                    testJourneyType,
+                    testUrlSegment,
+                    listOf(TransactionSection(firstSectionId, firstTaskListMock), TransactionSection(secondSectionId, secondTaskListMock)),
+                )
+
+            // Act
+            val sectionContainingStep = transaction.getSectionForStep(TestStepId.FirstStep)
+
+            // Assert
+            assertNull(sectionContainingStep)
+        }
     }
 
     @Nested

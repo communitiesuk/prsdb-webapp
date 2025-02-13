@@ -4,6 +4,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.forms.tasks.PropertyRegistrationSectionId
+import uk.gov.communities.prsdb.webapp.forms.tasks.SectionId
 
 class MessageKeyConverter {
     companion object {
@@ -21,6 +23,15 @@ class MessageKeyConverter {
                 is LandlordType -> convertLandlordType(enum)
                 else -> throw NotImplementedError(
                     "Was not able to convert Enum as ${this::class.simpleName} does not have a conversion for ${enum::class.simpleName}",
+                )
+            }
+
+        fun convert(sectionId: SectionId): String =
+            when (sectionId) {
+                is PropertyRegistrationSectionId -> convertPropertyRegistrationSection(sectionId)
+                else -> throw NotImplementedError(
+                    "Was not able to convert SectionId as ${this::class.simpleName} " +
+                        "does not have a conversion for ${sectionId::class.simpleName}",
                 )
             }
 
@@ -52,6 +63,12 @@ class MessageKeyConverter {
                 PropertyType.SEMI_DETACHED_HOUSE -> "forms.propertyType.radios.option.semiDetachedHouse.label"
                 PropertyType.TERRACED_HOUSE -> "forms.propertyType.radios.option.terracedHouse.label"
                 PropertyType.FLAT -> "forms.propertyType.radios.option.flat.label"
+            }
+
+        private fun convertPropertyRegistrationSection(propertyRegistrationSectionId: PropertyRegistrationSectionId): String =
+            when (propertyRegistrationSectionId) {
+                PropertyRegistrationSectionId.PROPERTY_DETAILS -> "registerProperty.taskList.register.heading"
+                PropertyRegistrationSectionId.CHECK_AND_SUBMIT -> "registerProperty.taskList.checkAndSubmit.heading"
             }
     }
 }

@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 
 class SelectLocalAuthorityPage(
-    content: Map<String, Any>,
+    content: Map<String, Any?>,
     private val localAuthorityService: LocalAuthorityService,
 ) : Page(
         formModel = SelectLocalAuthorityFormModel::class,

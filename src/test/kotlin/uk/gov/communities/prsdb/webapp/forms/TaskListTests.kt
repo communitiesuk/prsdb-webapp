@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.forms
 
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertIterableEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.mockito.Mock
@@ -24,6 +26,7 @@ class TaskListTests {
         StepTwo("step2"),
         StepThree("step3"),
         StepFour("step4"),
+        NotInTaskList("notInTaskList"),
     }
 
     class TestTaskList(
@@ -107,6 +110,7 @@ class TaskListTests {
                 TestStepId.StepTwo -> stepOneCompleted
                 TestStepId.StepThree -> stepTwoCompleted
                 TestStepId.StepFour -> stepThreeCompleted
+                TestStepId.NotInTaskList -> false
             }
         }
     }
@@ -192,6 +196,33 @@ class TaskListTests {
                 listOf("taskList.status.completed", "taskList.status.completed", "taskList.status.completed"),
                 viewModel.map { it.status.textKey },
             )
+        }
+    }
+
+    @Nested
+    inner class IsStepInTaskListTests {
+        @Test
+        fun `isStepInTaskList returns true if the stepId is in the task list`() {
+            val testTaskList =
+                TestTaskList(
+                    mockJourney,
+                    mockJourneyDataService,
+                    validator,
+                )
+
+            assertTrue(testTaskList.isStepInTaskList(TestStepId.StepOne))
+        }
+
+        @Test
+        fun `isStepInTaskList returns false if the stepId is not in the task list`() {
+            val testTaskList =
+                TestTaskList(
+                    mockJourney,
+                    mockJourneyDataService,
+                    validator,
+                )
+
+            assertFalse(testTaskList.isStepInTaskList(TestStepId.NotInTaskList))
         }
     }
 }

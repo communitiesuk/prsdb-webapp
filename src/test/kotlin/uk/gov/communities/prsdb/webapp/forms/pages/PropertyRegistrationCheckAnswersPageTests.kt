@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
@@ -36,7 +37,7 @@ class PropertyRegistrationCheckAnswersPageTests {
     fun setup() {
         addressService = mock()
         localAuthorityService = mock()
-        page = PropertyRegistrationCheckAnswersPage(addressService, localAuthorityService)
+        page = PropertyRegistrationCheckAnswersPage(addressService, localAuthorityService, SectionHeaderViewModel("First Section", 1, 2))
         validator = mock()
         whenever(validator.supports(any<Class<*>>())).thenReturn(true)
         model = ExtendedModelMap()

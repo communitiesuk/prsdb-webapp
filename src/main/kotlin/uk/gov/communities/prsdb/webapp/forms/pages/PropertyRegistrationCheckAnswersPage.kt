@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
@@ -16,12 +17,14 @@ import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHe
 class PropertyRegistrationCheckAnswersPage(
     private val addressDataService: AddressDataService,
     private val localAuthorityService: LocalAuthorityService,
+    sectionHeaderInfo: SectionHeaderViewModel?,
 ) : Page(
         NoInputFormModel::class,
         "forms/propertyRegistrationCheckAnswersForm",
         mapOf(
             "title" to "registerProperty.title",
             "submitButtonText" to "forms.buttons.saveAndContinue",
+            "sectionHeaderInfo" to sectionHeaderInfo,
         ),
     ) {
     override fun populateModelAndGetTemplateName(

@@ -10,4 +10,6 @@ class HmoMandatoryLicenceFormPagePropertyRegistration(
 ) : LicenceNumberFormPage(
         page,
         "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment}",
-    )
+    ) {
+    val sectionHeader = form.getSectionHeader()
+}

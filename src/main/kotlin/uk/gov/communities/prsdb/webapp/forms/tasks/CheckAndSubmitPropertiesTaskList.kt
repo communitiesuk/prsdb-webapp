@@ -21,6 +21,10 @@ class CheckAndSubmitPropertiesTaskList(
                 "registerProperty.taskList.checkAndSubmit.checkAnswers",
                 RegisterPropertyStepId.CheckAnswers,
             ),
+            Task.withOneStep(
+                "registerProperty.taskList.checkAndSubmit.declaration",
+                RegisterPropertyStepId.Declaration,
+            ),
         )
     // TODO PRSD-593: Pay for your properties
 

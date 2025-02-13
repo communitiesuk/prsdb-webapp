@@ -7,4 +7,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.F
 
 class CheckAnswersPagePropertyRegistration(
     page: Page,
-) : FormBasePage(page, "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.CheckAnswers.urlPathSegment}")
+) : FormBasePage(page, "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.CheckAnswers.urlPathSegment}") {
+    val sectionHeader = form.getSectionHeader()
+}

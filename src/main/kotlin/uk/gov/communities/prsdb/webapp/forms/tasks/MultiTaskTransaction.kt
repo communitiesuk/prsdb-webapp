@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.tasks
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
+import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.viewModels.TaskSectionViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
@@ -18,10 +19,20 @@ abstract class MultiTaskTransaction<T : StepId>(
 
         return taskLists.map {
             TaskSectionViewModel(
-                it.headingKey,
+                MessageKeyConverter.convert(it.sectionId),
+                it.sectionId.sectionNumber,
                 it.sectionTasks.getTaskListViewModels(),
             )
         }
+    }
+
+    fun getSectionForStep(stepId: T): SectionId? {
+        taskLists.forEach { taskList ->
+            if (taskList.sectionTasks.isStepInTaskList(stepId)) {
+                return taskList.sectionId
+            }
+        }
+        return null
     }
 
     private fun loadJourneyDataIntoSessionIfNotLoaded(principalName: String) {
@@ -46,7 +57,7 @@ abstract class MultiTaskTransaction<T : StepId>(
     }
 
     data class TransactionSection<T : StepId>(
-        val headingKey: String,
+        val sectionId: SectionId,
         val sectionTasks: TaskList<T>,
     )
 }
