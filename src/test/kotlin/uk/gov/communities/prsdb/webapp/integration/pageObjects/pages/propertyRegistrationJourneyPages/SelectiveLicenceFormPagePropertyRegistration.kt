@@ -10,4 +10,6 @@ class SelectiveLicenceFormPagePropertyRegistration(
 ) : LicenceNumberFormPage(
         page,
         "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.SelectiveLicence.urlPathSegment}",
-    )
+    ) {
+    val sectionHeader = form.getSectionHeader()
+}

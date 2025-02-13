@@ -12,4 +12,5 @@ class PropertyTypeFormPagePropertyRegistration(
         "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.PropertyType.urlPathSegment}",
     ) {
     val customPropertyTypeInput = form.getTextInput("customPropertyType")
+    val sectionHeader = form.getSectionHeader()
 }

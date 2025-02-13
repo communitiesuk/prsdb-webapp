@@ -10,4 +10,6 @@ class ManualAddressFormPagePropertyRegistration(
 ) : ManualAddressFormPage(
         page,
         "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.ManualAddress.urlPathSegment}",
-    )
+    ) {
+    val sectionHeader = form.getSectionHeader()
+}

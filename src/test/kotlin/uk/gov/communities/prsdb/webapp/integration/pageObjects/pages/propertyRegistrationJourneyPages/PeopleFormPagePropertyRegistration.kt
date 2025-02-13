@@ -12,4 +12,5 @@ class PeopleFormPagePropertyRegistration(
         "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.NumberOfPeople.urlPathSegment}",
     ) {
     val peopleInput = form.getTextInput("numberOfPeople")
+    val sectionHeader = form.getSectionHeader()
 }

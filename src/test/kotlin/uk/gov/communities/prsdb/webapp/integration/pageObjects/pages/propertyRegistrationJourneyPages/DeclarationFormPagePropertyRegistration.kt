@@ -9,4 +9,5 @@ class DeclarationFormPagePropertyRegistration(
     page: Page,
 ) : FormBasePage(page, "$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.Declaration.urlPathSegment}") {
     val checkbox = form.getCheckboxes().getCheckbox("true")
+    val sectionHeader = form.getSectionHeader()
 }

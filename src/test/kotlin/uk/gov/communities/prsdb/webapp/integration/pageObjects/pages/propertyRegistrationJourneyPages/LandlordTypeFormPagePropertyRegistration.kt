@@ -10,4 +10,6 @@ class LandlordTypeFormPagePropertyRegistration(
 ) : FormBasePage(
         page,
         "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.LandlordType.urlPathSegment}",
-    )
+    ) {
+    val sectionHeader = form.getSectionHeader()
+}

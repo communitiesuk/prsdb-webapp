@@ -10,4 +10,6 @@ class OwnershipTypeFormPagePropertyRegistration(
 ) : FormBasePage(
         page,
         "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.OwnershipType.urlPathSegment}",
-    )
+    ) {
+    val sectionHeader = form.getSectionHeader()
+}

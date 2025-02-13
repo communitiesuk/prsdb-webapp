@@ -10,4 +10,6 @@ class LookupAddressFormPagePropertyRegistration(
 ) : LookupAddressFormPage(
         page,
         "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.LookupAddress.urlPathSegment}",
-    )
+    ) {
+    val sectionHeader = form.getSectionHeader()
+}

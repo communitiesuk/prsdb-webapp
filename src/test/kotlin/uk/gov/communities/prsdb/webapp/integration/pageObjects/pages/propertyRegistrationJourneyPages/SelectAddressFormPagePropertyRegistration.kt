@@ -10,4 +10,6 @@ class SelectAddressFormPagePropertyRegistration(
 ) : SelectAddressFormPage(
         page,
         "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.SelectAddress.urlPathSegment}",
-    )
+    ) {
+    val sectionHeader = form.getSectionHeader()
+}

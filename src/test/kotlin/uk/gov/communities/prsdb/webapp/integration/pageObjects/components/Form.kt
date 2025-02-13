@@ -25,6 +25,8 @@ class Form(
 
     fun getSummaryList() = SummaryList(page)
 
+    fun getSectionHeader() = getChildComponent("#section-header")
+
     fun submit() {
         getSubmitButton().click()
         page.waitForLoadState()
