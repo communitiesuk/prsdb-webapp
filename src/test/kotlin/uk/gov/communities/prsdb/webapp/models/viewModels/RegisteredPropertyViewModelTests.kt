@@ -29,7 +29,7 @@ class RegisteredPropertyViewModelTests {
                 .fromRegistrationNumber(
                     registrationNumber,
                 ).toString()
-        val expectedPropertyLicence = "Not Licenced"
+        val expectedPropertyLicence = "forms.checkPropertyAnswers.propertyDetails.noLicensing"
         val expectedIsTenantedMessageKey = "commonText.no"
 
         val propertyOwnership =
@@ -73,10 +73,10 @@ class RegisteredPropertyViewModelTests {
 
     @ParameterizedTest
     @CsvSource(
-        "SELECTIVE_LICENCE,Selective licence",
-        "HMO_MANDATORY_LICENCE,HMO licence",
-        "HMO_ADDITIONAL_LICENCE,Additional licence",
-        "NO_LICENSING,Not Licenced",
+        "SELECTIVE_LICENCE,forms.licensingType.radios.option.selectiveLicence.label",
+        "HMO_MANDATORY_LICENCE,forms.licensingType.radios.option.hmoMandatory.label",
+        "HMO_ADDITIONAL_LICENCE,forms.licensingType.radios.option.hmoAdditional.label",
+        "NO_LICENSING,forms.checkPropertyAnswers.propertyDetails.noLicensing",
     )
     fun `Returns correct licensing display name for licence`(
         licensingType: LicensingType,
@@ -88,7 +88,7 @@ class RegisteredPropertyViewModelTests {
 
         val result = RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
 
-        assertEquals(result.propertyLicence, expectedDisplayName)
+        assertEquals(result.licenseTypeMessageKey, expectedDisplayName)
     }
 
     @Test
@@ -97,6 +97,6 @@ class RegisteredPropertyViewModelTests {
 
         val result = RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
 
-        assertEquals(result.propertyLicence, "Not Licenced")
+        assertEquals(result.licenseTypeMessageKey, "forms.checkPropertyAnswers.propertyDetails.noLicensing")
     }
 }
