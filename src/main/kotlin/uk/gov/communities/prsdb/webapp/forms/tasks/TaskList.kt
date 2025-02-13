@@ -36,14 +36,14 @@ abstract class TaskList<T : StepId>(
         journeyData: JourneyData,
         task: Task<T>,
     ): TaskStatus =
-        if (areAllStepsWithinTaskComplete(journeyData, task)) {
-            TaskStatus.COMPLETED
-        } else if (isStepWithIdComplete(journeyData, task.startingStepId)) {
-            TaskStatus.IN_PROGRESS
-        } else if (isStepWithIdReachable(journeyData, task.startingStepId)) {
-            TaskStatus.NOT_YET_STARTED
-        } else {
+        if (!isStepWithIdReachable(journeyData, task.startingStepId)) {
             TaskStatus.CANNOT_START_YET
+        } else if (!isStepWithIdComplete(journeyData, task.startingStepId)) {
+            TaskStatus.NOT_YET_STARTED
+        } else if (!areAllStepsWithinTaskComplete(journeyData, task)) {
+            TaskStatus.IN_PROGRESS
+        } else {
+            TaskStatus.COMPLETED
         }
 
     private fun isStepWithIdComplete(
