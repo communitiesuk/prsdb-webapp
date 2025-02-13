@@ -159,7 +159,7 @@ class PropertyOwnershipServiceTests {
         private val expectedLocalAuthority = localAuthority.name
         private val expectedRegistrationNumber =
             RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString()
-        private val expectedPropertyLicence = "None"
+        private val expectedPropertyLicence = "forms.checkPropertyAnswers.propertyDetails.noLicensing"
         private val expectedIsTenantedMessageKey = "commonText.no"
 
         private val propertyOwnership1 =
