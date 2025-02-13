@@ -29,7 +29,7 @@ class RegisteredPropertyViewModelTests {
                 .fromRegistrationNumber(
                     registrationNumber,
                 ).toString()
-        val expectedPropertyLicence = "Not Licenced"
+        val expectedPropertyLicence = "None"
         val expectedIsTenantedMessageKey = "commonText.no"
 
         val propertyOwnership =
@@ -74,9 +74,9 @@ class RegisteredPropertyViewModelTests {
     @ParameterizedTest
     @CsvSource(
         "SELECTIVE_LICENCE,Selective licence",
-        "HMO_MANDATORY_LICENCE,HMO licence",
-        "HMO_ADDITIONAL_LICENCE,Additional licence",
-        "NO_LICENSING,Not Licenced",
+        "HMO_MANDATORY_LICENCE,HMO mandatory licence",
+        "HMO_ADDITIONAL_LICENCE,HMO additional licence",
+        "NO_LICENSING,None",
     )
     fun `Returns correct licensing display name for licence`(
         licensingType: LicensingType,
@@ -97,6 +97,6 @@ class RegisteredPropertyViewModelTests {
 
         val result = RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
 
-        assertEquals(result.propertyLicence, "Not Licenced")
+        assertEquals(result.propertyLicence, "None")
     }
 }
