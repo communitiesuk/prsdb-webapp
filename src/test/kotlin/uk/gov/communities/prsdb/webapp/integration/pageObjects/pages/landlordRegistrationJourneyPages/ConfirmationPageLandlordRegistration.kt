@@ -13,5 +13,5 @@ class ConfirmationPageLandlordRegistration(
     private val confirmationBanner = BaseComponent.getConfirmationPageBanner(page)
     val registrationNumberText: String = getChildComponent(confirmationBanner, "strong").innerText()
 
-    fun clickGoToDashboard() = clickButton(BaseComponent.getButton(page, "Go to Dashboard"))
+    fun clickGoToDashboard() = clickComponent(BaseComponent.getButton(page, "Go to Dashboard"))
 }
