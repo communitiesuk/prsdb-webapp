@@ -153,7 +153,7 @@ class URIQueryBuilderTests {
 
     @Test
     fun `removeParamValue returns the updated URI (multi-value param)`() {
-        mockHTTPServletRequest.queryString = "name1=value1a&name1=value1b&&name2=value2"
+        mockHTTPServletRequest.queryString = "name1=value1a&name1=value1b&name2=value2"
         val expectedUpdatedURI = "${mockHTTPServletRequest.requestURI}?name2=value2&name1=value1b"
 
         val updatedURI =
