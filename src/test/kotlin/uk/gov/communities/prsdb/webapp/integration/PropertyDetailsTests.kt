@@ -73,7 +73,7 @@ class PropertyDetailsTests : IntegrationTest() {
         @Test
         fun `the delete button redirects to the delete record page`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
-            detailsPage.deleteButton.click()
+            detailsPage.deleteButton.clickAndWait()
 
             Assertions.assertEquals("/property-details/delete-record", URI(page.url()).path)
         }

@@ -92,7 +92,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         // Start page (not a journey step, but it is how the user accesses the journey)
         val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
         assertThat(registerPropertyStartPage.heading).containsText("Enter your property details")
-        registerPropertyStartPage.startButton.click()
+        registerPropertyStartPage.startButton.clickAndWait()
         val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
 
         // Task list page (part of the journey to support redirects)
@@ -205,7 +205,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
 
         // go to dashboard
-        confirmationPage.clickGoToDashboard()
+        confirmationPage.goToDashboardButton.clickAndWait()
 
         // TODO PRSD-670: Replace with dashboard page
         assertEquals("/", URI(page.url()).path)

@@ -29,7 +29,7 @@ class CancelLaUserInvitationTests : IntegrationTest() {
 
         // The success page confirms the user is deleted
         assertThat(successPage.confirmationBanner).containsText("You've cancelled invited.user@example.com's invitation from ISLE OF MAN")
-        successPage.returnButton.click()
+        successPage.returnButton.clickAndWait()
         manageUsersPage = assertPageIs(page, ManageLaUsersPage::class)
 
         // The invited user is no longer in the table

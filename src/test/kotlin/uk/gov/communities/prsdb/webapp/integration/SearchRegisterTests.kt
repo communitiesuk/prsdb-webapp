@@ -134,10 +134,10 @@ class SearchRegisterTests : IntegrationTest() {
             val filter = searchLandlordRegisterPage.getFilterPanel()
 
             // Toggle filter
-            searchLandlordRegisterPage.clickComponent(filter.getCloseFilterPanelButton())
+            filter.getCloseFilterPanelButton().clickAndWait()
             assertTrue(filter.getPanel().isHidden)
 
-            searchLandlordRegisterPage.clickComponent(filter.getShowFilterPanel())
+            filter.getShowFilterPanel().clickAndWait()
             assertTrue(filter.getPanel().isVisible)
 
             // Apply LA filter
@@ -318,10 +318,10 @@ class SearchRegisterTests : IntegrationTest() {
 
             // Toggle filter
             val filter = searchPropertyRegisterPage.getFilterPanel()
-            searchPropertyRegisterPage.clickComponent(filter.getCloseFilterPanelButton())
+            filter.getCloseFilterPanelButton().clickAndWait()
             assertTrue(filter.getPanel().isHidden)
 
-            searchPropertyRegisterPage.clickComponent(filter.getShowFilterPanel())
+            filter.getShowFilterPanel().clickAndWait()
             assertTrue(filter.getPanel().isVisible)
 
             // Apply LA filter

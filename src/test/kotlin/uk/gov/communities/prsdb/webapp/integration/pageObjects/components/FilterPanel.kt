@@ -9,9 +9,9 @@ class FilterPanel(
 ) : BaseComponent(locator) {
     fun getPanel() = getChildComponent(".moj-filter")
 
-    fun getCloseFilterPanelButton() = getButton(page, "Close filters panel")
+    fun getCloseFilterPanelButton() = Button.byText(page, "Close filters panel")
 
-    fun getShowFilterPanel() = getButton(page, "Show filters panel")
+    fun getShowFilterPanel() = Button.byText(page, "Show filters panel")
 
     fun getClearFiltersLink() = getLink(page, "Clear filters")
 

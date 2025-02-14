@@ -3,11 +3,15 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.components
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.Page.LocatorOptions
+import com.microsoft.playwright.assertions.LocatorAssertions
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 
 abstract class BaseComponent(
     protected val locator: Locator,
 ) {
     companion object {
+        fun assertThat(component: BaseComponent): LocatorAssertions = assertThat(component.locator)
+
         // TODO PRSD-884 Delete
         fun getComponent(
             page: Page,
@@ -50,11 +54,6 @@ abstract class BaseComponent(
         fun getSubHeading(page: Page) = getComponent(page, "main header p")
 
         fun getConfirmationPageBanner(page: Page) = getComponent(page, ".govuk-panel--confirmation")
-
-        fun getButton(
-            page: Page,
-            text: String? = null,
-        ) = getComponent(page, ".govuk-button", if (text == null) null else LocatorOptions().setHasText(text))
 
         fun getLink(
             page: Page,
