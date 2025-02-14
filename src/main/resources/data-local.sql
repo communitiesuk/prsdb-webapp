@@ -179,9 +179,9 @@ VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 1),
        (32, '05/02/25', '05/02/25', 1032, '20 PRSDB Square, EG1 2AT', 1),
        (33, '05/02/25', '05/02/25', 1033, '21 PRSDB Square, EG1 2AU', 1),
        (34, '05/02/25', '05/02/25', 1034, '22 PRSDB Square, EG1 2AV', 1),
-       (35, '05/02/25', '05/02/25', 1035, '23 PRSDB Square, EG1 2AW', 1),
-       (36, '05/02/25', '05/02/25', 1036, '24 PRSDB Square, EG1 2AX', 1),
-       (37, '05/02/25', '05/02/25', 1037, '25 PRSDB Square, EG1 2AY', 1);
+       (35, '05/02/25', '05/02/25', 1035, '23 PRSDB Square, EG1 2AW', 2),
+       (36, '05/02/25', '05/02/25', 1036, '24 PRSDB Square, EG1 2AX', 2),
+       (37, '05/02/25', '05/02/25', 1037, '25 PRSDB Square, EG1 2AY', 2);
 
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
@@ -269,20 +269,28 @@ VALUES (1, 1, true, 1, 6),
 SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
 
 INSERT INTO license (id, license_type, license_number)
-VALUES (1, 1, 'L12345678');
+VALUES (1, 1, 'L12345678'),
+       (2, 2, 'L12345678'),
+       (3, 3, 'L12345678'),
+       (4, 1, 'L12345678'),
+       (5, 2, 'L12345678'),
+       (6, 3, 'L12345678'),
+       (7, 0, 'L12345678'),
+       (8, 0, 'L12345678');
 
 SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
 
 INSERT INTO property_ownership (id, is_active, occupancy_type, landlord_type, ownership_type, current_num_households,
                                 current_num_tenants,
-                                registration_number_id, primary_landlord_id, property_id, created_date, last_modified_date, license_id)
+                                registration_number_id, primary_landlord_id, property_id, created_date,
+                                last_modified_date, license_id)
 VALUES (1, true, 0, 0, 1, 1, 2, 6, 1, 1, '01/15/25', '02/02/25', null),
        (2, false, 0, 0, 1, 1, 2, 34, 2, 2, '01/15/25', '01/15/25', null),
        (3, true, 0, 0, 1, 1, 2, 35, 4, 3, '01/15/25', '01/15/25', null),
        (4, true, 0, 0, 1, 1, 2, 36, 1, 4, '01/15/25', '01/15/25', null),
        (5, true, 0, 0, 1, 1, 2, 37, 1, 5, '01/15/25', '01/15/25', null),
        (6, false, 0, 0, 1, 1, 2, 38, 1, 6, '01/15/25', '01/15/25', null),
-       (7, true, 0, 0, 1, 0, 0, 39, 1, 7, '02/02/25','02/02/25',  1),
+       (7, true, 0, 0, 1, 0, 0, 39, 1, 7, '02/02/25', '02/02/25', 1),
        (8, true, 0, 0, 1, 0, 0, 40, 1, 8, '05/02/25', '01/15/25', null),
        (9, true, 0, 0, 1, 0, 0, 41, 1, 9, '05/02/25', '01/15/25', null),
        (10, true, 0, 0, 1, 0, 0, 42, 1, 10, '05/02/25', '01/15/25', null),
@@ -301,12 +309,12 @@ VALUES (1, true, 0, 0, 1, 1, 2, 6, 1, 1, '01/15/25', '02/02/25', null),
        (23, true, 0, 0, 1, 0, 0, 55, 1, 23, '05/02/25', '01/15/25', null),
        (24, true, 0, 0, 1, 0, 0, 56, 1, 24, '05/02/25', '01/15/25', null),
        (25, true, 0, 0, 1, 0, 0, 57, 1, 25, '05/02/25', '01/15/25', null),
-       (26, true, 0, 0, 1, 0, 0, 58, 1, 26, '05/02/25', '01/15/25', null),
-       (27, true, 0, 0, 1, 0, 0, 59, 1, 27, '05/02/25', '01/15/25', null),
-       (28, true, 0, 0, 1, 0, 0, 60, 1, 28, '05/02/25', '01/15/25', null),
-       (29, true, 0, 0, 1, 0, 0, 61, 1, 29, '05/02/25', '01/15/25', null),
-       (30, true, 0, 0, 1, 0, 0, 62, 1, 30, '05/02/25', '01/15/25', null),
-       (31, true, 0, 0, 1, 0, 0, 63, 1, 31, '05/02/25', '01/15/25', null),
-       (32, true, 0, 0, 1, 0, 0, 64, 1, 32, '05/02/25', '01/15/25', null);
+       (26, true, 0, 0, 1, 0, 0, 58, 1, 26, '05/02/25', '01/15/25', 2),
+       (27, true, 0, 0, 1, 0, 0, 59, 1, 27, '05/02/25', '01/15/25', 3),
+       (28, true, 0, 0, 1, 0, 0, 60, 1, 28, '05/02/25', '01/15/25', 4),
+       (29, true, 0, 0, 1, 0, 0, 61, 1, 29, '05/02/25', '01/15/25', 5),
+       (30, true, 0, 0, 1, 0, 0, 62, 1, 30, '05/02/25', '01/15/25', 6),
+       (31, true, 0, 0, 1, 0, 0, 63, 1, 31, '05/02/25', '01/15/25', 7),
+       (32, true, 0, 0, 1, 0, 0, 64, 1, 32, '05/02/25', '01/15/25', 8);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));

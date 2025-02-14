@@ -11,5 +11,11 @@ abstract class SearchRequestModel {
         this::class
             .memberProperties
             .filterNot { it.name in listOf("searchTerm", "showFilter") }
-            .map { Pair(it.name, it.getter.call(this)) }
+            .map { property ->
+                when (val value = property.getter.call(this)) {
+                    null -> emptyList()
+                    is Collection<*> -> value.map { singleValue -> Pair(property.name, singleValue) }
+                    else -> listOf(Pair(property.name, value))
+                }
+            }.flatten()
 }
