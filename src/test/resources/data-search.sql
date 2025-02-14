@@ -154,7 +154,7 @@ VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 1),
        (38, '05/02/25', '05/02/25', 1038, '26 PRSDB Square, EG1 2AZ', 1);
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
-                      is_active, phone_number, subject_identifier, name, email, non_england_or_wales_address)
+                      is_active, phone_number, subject_identifier, name, email, country_of_residence)
 VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:fdc:gov.uk:2022:UVWXY',
         'Alexander Smith', 'alex.surname@example.com', 'England and Wales'),
        (2, '09/13/24', '09/13/24', 2, 2, '08/13/2001', true, 07111111111, 'urn:fdc:gov.uk:2022:ABCDE',
