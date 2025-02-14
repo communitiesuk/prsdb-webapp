@@ -18,8 +18,8 @@ class FilterPanelViewModelTests {
     enum class TestFilterOptions { One, Two, Three }
 
     class TestSearchRequestModel : SearchRequestModel() {
-        var filter1: Boolean = false
-        var filter2: List<TestFilterOptions> = emptyList()
+        var filter1: Boolean? = null
+        var filter2: List<TestFilterOptions>? = null
     }
 
     class TestFilterPanelViewModel(
@@ -61,8 +61,11 @@ class FilterPanelViewModelTests {
 
     @Test
     fun `clearLink removes all filters`() {
+        searchRequestModel.filter1 = true
+        searchRequestModel.filter2 = listOf(TestFilterOptions.One, TestFilterOptions.Two)
+
         mockHttpServletRequest.queryString =
-            "showFilter=${searchRequestModel.showFilter}&filter1=true&&filter2=One&filter2=Two"
+            "showFilter=${searchRequestModel.showFilter}&filter1=true&filter2=One&filter2=Two"
         val expectedClearFiltersLink =
             "${mockHttpServletRequest.requestURI}?showFilter=${searchRequestModel.showFilter}"
 
