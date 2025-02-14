@@ -44,10 +44,6 @@ abstract class BaseComponent(
             return component.all()
         }
 
-        fun getHeading(page: Page) = getComponent(page, "main header h1")
-
-        fun getSubHeading(page: Page) = getComponent(page, "main header p")
-
         fun getConfirmationPageBanner(page: Page) = getComponent(page, ".govuk-panel--confirmation")
     }
 
