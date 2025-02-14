@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
+import org.springframework.ui.ExtendedModelMap
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
@@ -14,6 +15,8 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyTask
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
+import uk.gov.communities.prsdb.webapp.forms.tasks.TaskListPage
+import uk.gov.communities.prsdb.webapp.models.viewModels.TaskSectionViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import kotlin.test.Test
 
@@ -36,7 +39,17 @@ class TaskListTests {
         journeyDataService: JourneyDataService,
         override val initialStepId: TestStepId,
         override val sections: List<JourneySection<TestStepId>>,
-    ) : Journey<TestStepId>(JourneyType.PROPERTY_REGISTRATION, validator, journeyDataService)
+    ) : Journey<TestStepId>(JourneyType.PROPERTY_REGISTRATION, validator, journeyDataService) {
+        override val taskListPage: TaskListPage<TestStepId>?
+            get() =
+                TaskListPage(
+                    "title",
+                    "heading",
+                    "subtitle",
+                    "TODO()",
+                    sections,
+                ) { task, journeyData -> getTaskStatus(task, journeyData) }
+    }
 
     @Mock
     lateinit var mockJourneyDataService: JourneyDataService
@@ -154,9 +167,12 @@ class TaskListTests {
         fun `when a multi route task is completed along a one route, that task and subsequent filled in tasks show as completed`() {
             // Arrange
             val testJourney = getMultiPathJourneyWithMainlineCompleted(useMainline = true)
+            val model = ExtendedModelMap()
 
             // Act
-            val viewModel = testJourney.getJourneyTaskListViewModel().first().tasks
+            testJourney.getTaskListView(model)
+            val sections = model["taskSections"] as List<TaskSectionViewModel>
+            val taskList = sections.first().tasks
 
             // Assert
             assertIterableEquals(
@@ -166,7 +182,7 @@ class TaskListTests {
                     "taskList.status.completed",
                     "taskList.status.notYetStarted",
                 ),
-                viewModel.map { it.status.textKey },
+                taskList.map { it.status.textKey },
             )
         }
 
@@ -175,9 +191,12 @@ class TaskListTests {
         fun `when a multi route task that was previously completed is instead progressed along an alternate incomplete route, any subsequent tasks become unreachable`() {
             // Arrange
             val testJourney = getMultiPathJourneyWithMainlineCompleted(useMainline = false)
+            val model = ExtendedModelMap()
 
             // Act
-            val viewModel = testJourney.getJourneyTaskListViewModel().first().tasks
+            testJourney.getTaskListView(model)
+            val sections = model["taskSections"] as List<TaskSectionViewModel>
+            val taskList = sections.first().tasks
 
             // Assert
             assertIterableEquals(
@@ -187,7 +206,7 @@ class TaskListTests {
                     "taskList.status.cannotStartYet",
                     "taskList.status.cannotStartYet",
                 ),
-                viewModel.map { it.status.textKey },
+                taskList.map { it.status.textKey },
             )
         }
     }
@@ -251,14 +270,17 @@ class TaskListTests {
                     twoStepTaskStatus = TaskStatus.NOT_YET_STARTED,
                     simpleTaskTwoCompleted = false,
                 )
+            val model = ExtendedModelMap()
 
             // Act
-            val viewModel = testJourney.getJourneyTaskListViewModel().first().tasks
+            testJourney.getTaskListView(model)
+            val sections = model["taskSections"] as List<TaskSectionViewModel>
+            val taskList = sections.first().tasks
 
             // Assert
             assertIterableEquals(
                 listOf("taskList.status.completed", "taskList.status.notYetStarted", "taskList.status.cannotStartYet"),
-                viewModel.map { it.status.textKey },
+                taskList.map { it.status.textKey },
             )
         }
 
@@ -271,14 +293,17 @@ class TaskListTests {
                     twoStepTaskStatus = TaskStatus.IN_PROGRESS,
                     simpleTaskTwoCompleted = false,
                 )
+            val model = ExtendedModelMap()
 
             // Act
-            val viewModel = testJourney.getJourneyTaskListViewModel().first().tasks
+            testJourney.getTaskListView(model)
+            val sections = model["taskSections"] as List<TaskSectionViewModel>
+            val taskList = sections.first().tasks
 
             // Assert
             assertIterableEquals(
                 listOf("taskList.status.completed", "taskList.status.inProgress", "taskList.status.cannotStartYet"),
-                viewModel.map { it.status.textKey },
+                taskList.map { it.status.textKey },
             )
         }
 
@@ -291,14 +316,17 @@ class TaskListTests {
                     twoStepTaskStatus = TaskStatus.COMPLETED,
                     simpleTaskTwoCompleted = true,
                 )
+            val model = ExtendedModelMap()
 
             // Act
-            val viewModel = testJourney.getJourneyTaskListViewModel().first().tasks
+            testJourney.getTaskListView(model)
+            val sections = model["taskSections"] as List<TaskSectionViewModel>
+            val taskList = sections.first().tasks
 
             // Assert
             assertIterableEquals(
                 listOf("taskList.status.completed", "taskList.status.completed", "taskList.status.completed"),
-                viewModel.map { it.status.textKey },
+                taskList.map { it.status.textKey },
             )
         }
     }

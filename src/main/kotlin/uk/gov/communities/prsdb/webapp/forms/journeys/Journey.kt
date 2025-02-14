@@ -10,9 +10,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
+import uk.gov.communities.prsdb.webapp.forms.tasks.TaskListPage
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
-import uk.gov.communities.prsdb.webapp.models.viewModels.TaskListItemViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.TaskSectionViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import java.security.Principal
 import java.util.Optional
@@ -27,6 +26,11 @@ abstract class Journey<T : StepId>(
         get() = sections.flatMap { section -> section.tasks }.flatMap { task -> task.steps }.toSet()
 
     abstract val sections: List<JourneySection<T>>
+
+    open val taskListPage: TaskListPage<T>? = null
+
+    open val unreachableStepRedirect
+        get() = "/${journeyType.urlPathSegment}/${initialStepId.urlPathSegment}"
 
     fun getStepId(stepName: String): StepId {
         val step = steps.singleOrNull { step -> step.id.urlPathSegment == stepName }
@@ -52,7 +56,7 @@ abstract class Journey<T : StepId>(
                 "Step ${stepId.urlPathSegment} not valid for journey ${journeyType.urlPathSegment}",
             )
         if (!isStepReachable(journeyData, requestedStep, subPageNumber)) {
-            return "redirect:/${journeyType.urlPathSegment}/${initialStepId.urlPathSegment}"
+            return "redirect:$unreachableStepRedirect"
         }
         val prevStepDetails = getPrevStep(journeyData, requestedStep, subPageNumber)
         val prevStepUrl = getPrevStepUrl(prevStepDetails?.step, prevStepDetails?.subPageNumber)
@@ -106,6 +110,11 @@ abstract class Journey<T : StepId>(
                 .build(true)
                 .toUriString()
         return "redirect:$redirectUrl"
+    }
+
+    fun getTaskListView(model: Model): String {
+        val journeyData = journeyDataService.getJourneyDataFromSession()
+        return taskListPage?.populateModelAndGetTemplateName(model, journeyData) ?: "error/500"
     }
 
     fun isStepReachable(
@@ -182,25 +191,7 @@ abstract class Journey<T : StepId>(
 
     open fun oneTimeInitialisation(journeyData: JourneyData) {}
 
-    fun getJourneyTaskListViewModel(): List<TaskSectionViewModel> =
-        sections.mapNotNull { section ->
-            section.headingKey?.let {
-                TaskSectionViewModel(
-                    it,
-                    section.tasks.mapNotNull { task ->
-                        task.nameKey?.let {
-                            TaskListItemViewModel.fromTaskDetails(
-                                it,
-                                getTaskStatus(task, journeyDataService.getJourneyDataFromSession()),
-                                task.startingStepId,
-                            )
-                        }
-                    },
-                )
-            }
-        }
-
-    private fun getTaskStatus(
+    fun getTaskStatus(
         task: JourneyTask<T>,
         journeyData: JourneyData,
     ): TaskStatus =

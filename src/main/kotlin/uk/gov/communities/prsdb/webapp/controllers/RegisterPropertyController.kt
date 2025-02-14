@@ -15,7 +15,6 @@ import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -32,7 +31,7 @@ class RegisterPropertyController(
     fun index(model: Model): String {
         model.addAttribute(
             "registerPropertyInitialStep",
-            "/$REGISTER_PROPERTY_JOURNEY_URL/${propertyRegistrationJourney.initialStepId.urlPathSegment}",
+            "/$REGISTER_PROPERTY_JOURNEY_URL/task-list",
         )
         model.addAttribute("backUrl", "/")
 
@@ -58,11 +57,7 @@ class RegisterPropertyController(
     ): String {
         propertyRegistrationJourney.initialiseJourneyDataIfNotInitialised(principal.name)
 
-        return propertyRegistrationJourney.populateModelAndGetViewName(
-            RegisterPropertyStepId.TaskList,
-            model,
-            null,
-        )
+        return propertyRegistrationJourney.getTaskListView(model)
     }
 
     @PostMapping("/{stepName}")

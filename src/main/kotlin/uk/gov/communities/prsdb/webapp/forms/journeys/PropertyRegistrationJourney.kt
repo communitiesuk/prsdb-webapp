@@ -17,11 +17,11 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Co
 import uk.gov.communities.prsdb.webapp.forms.pages.AlreadyRegisteredPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationCheckAnswersPage
-import uk.gov.communities.prsdb.webapp.forms.pages.RegisterPropertyTaskListPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.forms.tasks.TaskListPage
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.emailModels.PropertyRegistrationConfirmationEmail
@@ -68,14 +68,26 @@ class PropertyRegistrationJourney(
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
-    override val initialStepId = RegisterPropertyStepId.TaskList
+    override val initialStepId = RegisterPropertyStepId.LookupAddress
+
+    override val unreachableStepRedirect
+        get() = "/${JourneyType.PROPERTY_REGISTRATION.urlPathSegment}/task-list"
 
     override val sections =
         listOf(
-            JourneySection.withOneStep(taskListStep()),
             JourneySection(registerPropertyTaskList(), "registerProperty.taskList.register.heading"),
             JourneySection(checkAndSubmitPropertiesTaskList(), "registerProperty.taskList.checkAndSubmit.heading"),
         )
+
+    override val taskListPage
+        get() =
+            TaskListPage(
+                "registerProperty.title",
+                "registerProperty.taskList.heading",
+                "registerProperty.taskList.subtitle",
+                "register-property-task",
+                sections,
+            ) { task, journeyData -> getTaskStatus(task, journeyData) }
 
     private fun registerPropertyTaskList(): List<JourneyTask<RegisterPropertyStepId>> =
         listOf(
@@ -151,13 +163,6 @@ class PropertyRegistrationJourney(
                 numberOfPeopleStep(),
             ),
             "registerProperty.taskList.register.addTenancyInfo",
-        )
-
-    private fun taskListStep() =
-        Step(
-            id = RegisterPropertyStepId.TaskList,
-            page = RegisterPropertyTaskListPage { getJourneyTaskListViewModel() },
-            nextAction = { _, _ -> Pair(RegisterPropertyStepId.LookupAddress, null) },
         )
 
     private fun lookupAddressStep() =
