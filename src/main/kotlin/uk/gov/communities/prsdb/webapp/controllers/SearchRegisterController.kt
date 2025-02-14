@@ -52,7 +52,7 @@ class SearchRegisterController(
             landlordService.searchForLandlords(
                 searchRequest.searchTerm!!,
                 principal.name,
-                searchRequest.restrictToLA,
+                searchRequest.restrictToLA ?: false,
                 requestedPageIndex = page - 1,
             )
 
@@ -97,8 +97,8 @@ class SearchRegisterController(
             propertyOwnershipService.searchForProperties(
                 searchRequest.searchTerm!!,
                 principal.name,
-                searchRequest.restrictToLA,
-                searchRequest.restrictToLicenses.ifEmpty { LicensingType.entries },
+                searchRequest.restrictToLA ?: false,
+                searchRequest.restrictToLicenses ?: LicensingType.entries,
                 requestedPageIndex = page - 1,
             )
 
