@@ -4,14 +4,15 @@ import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.Page.LocatorOptions
 
-class Button(
+class Link(
     override val locator: Locator,
 ) : BaseComponent(locator),
     ClickAndWaitable {
     companion object {
         fun byText(
             page: Page,
-            text: String? = null,
-        ): Button = Button(page.locator(".govuk-button", if (text == null) null else LocatorOptions().setHasText(text)))
+            text: String,
+            index: Int = 0,
+        ): Button = Button(page.locator(".govuk-link", LocatorOptions().setHasText(text)).nth(index))
     }
 }

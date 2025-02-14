@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.getLink
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Tabs
 
 abstract class PropertyDetailsBasePage(
@@ -20,15 +20,9 @@ abstract class PropertyDetailsBasePage(
         tabs.goToTab("Property details")
     }
 
-    fun clickLandlordNameLinkFromKeyDetails(landlordName: String) {
-        getLink(page, landlordName, 0).click()
-    }
+    fun getLandlordNameLinkFromKeyDetails(landlordName: String) = Link.byText(page, landlordName, 0)
 
-    fun clickLandlordLinkFromLandlordDetails(landlordName: String) {
-        getLink(page, landlordName, 1).click()
-    }
+    fun getLandlordLinkFromLandlordDetails(landlordName: String) = Link.byText(page, landlordName, 1)
 
-    fun clickBackLink() {
-        getLink(page, "Back").click()
-    }
+    val backLink = Link.byText(page, "Back")
 }

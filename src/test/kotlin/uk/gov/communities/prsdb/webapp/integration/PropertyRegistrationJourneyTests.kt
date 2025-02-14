@@ -263,7 +263,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Clicking Search Again navigates to the previous step`(page: Page) {
             val selectAddressPage = navigator.goToPropertyRegistrationSelectAddressPage()
-            selectAddressPage.searchAgain.click()
+            selectAddressPage.searchAgain.clickAndWait()
             assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
         }
 

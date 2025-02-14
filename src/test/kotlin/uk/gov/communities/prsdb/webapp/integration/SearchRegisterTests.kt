@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.ADDRESS_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.CONTACT_INFO_COL_INDEX
@@ -159,8 +160,8 @@ class SearchRegisterTests : IntegrationTest() {
             laFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
-            searchLandlordRegisterPage.clickComponent(filter.getClearFiltersLink())
-            assertTrue(filter.getClearFiltersLink().isHidden)
+            filter.clearFiltersLink.clickAndWait()
+            assertThat(filter.clearFiltersLink).isHidden()
             assertTrue(filter.getNoFiltersSelectedText().isVisible)
             assertTrue(resultTable.countRows() > 1)
         }
@@ -353,8 +354,8 @@ class SearchRegisterTests : IntegrationTest() {
             assertEquals(expectedPropertyWithSelectiveOrNoLicenseCount, resultTable.countRows())
 
             // Clear all filters
-            searchPropertyRegisterPage.clickComponent(filter.getClearFiltersLink())
-            assertTrue(filter.getClearFiltersLink().isHidden)
+            filter.clearFiltersLink.clickAndWait()
+            assertThat(filter.clearFiltersLink).isHidden()
             assertTrue(filter.getNoFiltersSelectedText().isVisible)
             assertEquals(expectedMatchingPropertyCount, resultTable.countRows())
         }

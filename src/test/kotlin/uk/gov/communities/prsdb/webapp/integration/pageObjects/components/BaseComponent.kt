@@ -7,7 +7,7 @@ import com.microsoft.playwright.assertions.LocatorAssertions
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 
 abstract class BaseComponent(
-    protected val locator: Locator,
+    protected open val locator: Locator,
 ) {
     companion object {
         fun assertThat(component: BaseComponent): LocatorAssertions = assertThat(component.locator)
@@ -54,12 +54,6 @@ abstract class BaseComponent(
         fun getSubHeading(page: Page) = getComponent(page, "main header p")
 
         fun getConfirmationPageBanner(page: Page) = getComponent(page, ".govuk-panel--confirmation")
-
-        fun getLink(
-            page: Page,
-            text: String,
-            index: Int = 0,
-        ) = getComponent(page, ".govuk-link", LocatorOptions().setHasText(text), index)
     }
 
     protected fun getChildrenComponents(

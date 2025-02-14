@@ -13,7 +13,7 @@ class FilterPanel(
 
     fun getShowFilterPanel() = Button.byText(page, "Show filters panel")
 
-    fun getClearFiltersLink() = getLink(page, "Clear filters")
+    val clearFiltersLink = Link.byText(page, "Clear filters")
 
     fun getSelectedHeadings() = getChildrenComponents(".moj-filter__selected >> h3")
 
