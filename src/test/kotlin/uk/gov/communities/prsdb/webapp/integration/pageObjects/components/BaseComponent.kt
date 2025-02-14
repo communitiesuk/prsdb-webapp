@@ -44,11 +44,6 @@ abstract class BaseComponent(
             return component.all()
         }
 
-        fun getSection(
-            page: Page,
-            index: Int = 0,
-        ) = getComponent(page, "section", index = index)
-
         fun getHeading(page: Page) = getComponent(page, "main header h1")
 
         fun getSubHeading(page: Page) = getComponent(page, "main header p")
