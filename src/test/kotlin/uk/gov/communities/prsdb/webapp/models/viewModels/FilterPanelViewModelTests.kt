@@ -62,7 +62,7 @@ class FilterPanelViewModelTests {
     @Test
     fun `clearLink removes all filters`() {
         mockHttpServletRequest.queryString =
-            "showFilter=${searchRequestModel.showFilter}&_filter1=on&filter1=true&_filter2=on&filter2=One&filter2=Two"
+            "showFilter=${searchRequestModel.showFilter}&filter1=true&&filter2=One&filter2=Two"
         val expectedClearFiltersLink =
             "${mockHttpServletRequest.requestURI}?showFilter=${searchRequestModel.showFilter}"
 
@@ -144,8 +144,8 @@ class FilterPanelViewModelTests {
     fun `SelectedFilterOptionViewModel generates the selected option's remove link`() {
         val searchRequestProperty = "filter"
         val selectedOption: CheckboxViewModel<Any> = CheckboxViewModel(value = "value")
-        mockHttpServletRequest.queryString = "_filter=on&filter=value&filter=otherValue&page=2"
-        val expectedRemoveLink = "${mockHttpServletRequest.requestURI}?_filter=on&filter=otherValue"
+        mockHttpServletRequest.queryString = "filter=value&filter=otherValue&page=2"
+        val expectedRemoveLink = "${mockHttpServletRequest.requestURI}?filter=otherValue"
 
         val selectedFilterOptionViewModel =
             SelectedFilterOptionViewModel(searchRequestProperty, selectedOption, mockHttpServletRequest)
