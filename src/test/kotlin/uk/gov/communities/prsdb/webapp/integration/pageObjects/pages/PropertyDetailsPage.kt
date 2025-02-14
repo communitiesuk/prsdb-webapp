@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 class PropertyDetailsPage(
     page: Page,
 ) : BasePage(page, "/property-details") {
-    val tabs = Tabs(page, 2)
+    val tabs = Tabs(page)
 
     fun getActiveTabPanelId() = tabs.getActiveTabPanelId()
 

@@ -8,7 +8,7 @@ abstract class PropertyDetailsBasePage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
-    val tabs = Tabs(page, 2)
+    val tabs = Tabs(page)
 
     fun getActiveTabPanelId() = tabs.getActiveTabPanelId()
 
