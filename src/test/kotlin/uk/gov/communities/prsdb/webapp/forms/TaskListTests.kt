@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertIterableEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -172,7 +173,7 @@ class TaskListTests {
             // Act
             testJourney.getTaskListView(model)
             val sections = model["taskSections"] as List<TaskSectionViewModel>
-            val taskList = sections.first().tasks
+            val taskList = sections.single().tasks
 
             // Assert
             assertIterableEquals(
@@ -196,7 +197,7 @@ class TaskListTests {
             // Act
             testJourney.getTaskListView(model)
             val sections = model["taskSections"] as List<TaskSectionViewModel>
-            val taskList = sections.first().tasks
+            val taskList = sections.single().tasks
 
             // Assert
             assertIterableEquals(
@@ -213,19 +214,6 @@ class TaskListTests {
 
     @Nested
     inner class SinglePathJourneyTests {
-        @BeforeEach
-        fun setup() {
-            // Ensure form data for each page is never null
-            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(
-                mutableMapOf(
-                    "step1" to mutableMapOf<String, String>(),
-                    "step2a" to mutableMapOf<String, String>(),
-                    "step2b" to mutableMapOf<String, String>(),
-                    "step3" to mutableMapOf<String, String>(),
-                ),
-            )
-        }
-
         fun getLinearTestJourney(
             simpleTaskOneCompleted: Boolean,
             twoStepTaskStatus: TaskStatus,
@@ -275,7 +263,7 @@ class TaskListTests {
             // Act
             testJourney.getTaskListView(model)
             val sections = model["taskSections"] as List<TaskSectionViewModel>
-            val taskList = sections.first().tasks
+            val taskList = sections.single().tasks
 
             // Assert
             assertIterableEquals(
@@ -298,7 +286,7 @@ class TaskListTests {
             // Act
             testJourney.getTaskListView(model)
             val sections = model["taskSections"] as List<TaskSectionViewModel>
-            val taskList = sections.first().tasks
+            val taskList = sections.single().tasks
 
             // Assert
             assertIterableEquals(
@@ -321,12 +309,92 @@ class TaskListTests {
             // Act
             testJourney.getTaskListView(model)
             val sections = model["taskSections"] as List<TaskSectionViewModel>
-            val taskList = sections.first().tasks
+            val taskList = sections.single().tasks
 
             // Assert
             assertIterableEquals(
                 listOf("taskList.status.completed", "taskList.status.completed", "taskList.status.completed"),
                 taskList.map { it.status.textKey },
+            )
+        }
+    }
+
+    @Nested
+    inner class UntitledStagesJourneyTests {
+        fun getTestJourneyWithUntitledStages() =
+            TestJourney(
+                validator,
+                mockJourneyDataService,
+                TestStepId.SimpleTaskOne,
+                listOf(
+                    JourneySection(
+                        listOf(
+                            JourneyTask.withOneStep(
+                                Step(
+                                    TestStepId.SimpleTaskOne,
+                                    mock(),
+                                    isSatisfied = { _, _ -> true },
+                                    nextAction = { _, _ -> Pair(TestStepId.TwoStepTaskPartOne, null) },
+                                ),
+                                "task 1",
+                            ),
+                        ),
+                    ),
+                    JourneySection(
+                        listOf(
+                            getTwoStepTask(TaskStatus.IN_PROGRESS),
+                            JourneyTask.withOneStep(
+                                Step(
+                                    TestStepId.SimpleTaskTwo,
+                                    mock(),
+                                    isSatisfied = { _, _ -> true },
+                                ),
+                            ),
+                        ),
+                        "Section key",
+                    ),
+                    JourneySection(
+                        listOf(),
+                        "Second empty section",
+                    ),
+                ),
+            )
+
+        @Test
+        fun `untitled sections are not added to the view model, even if their tasks have titles`() {
+            // Arrange
+            val testJourney = getTestJourneyWithUntitledStages()
+            val model = ExtendedModelMap()
+
+            // Act
+            testJourney.getTaskListView(model)
+            val sections = model["taskSections"] as List<TaskSectionViewModel>
+
+            // Assert
+            assertEquals(
+                testJourney.sections.filter { section -> section.headingKey != null }.size,
+                sections.size,
+            )
+        }
+
+        @Test
+        fun `untitled tasks are not added to the view model`() {
+            // Arrange
+            val testJourney = getTestJourneyWithUntitledStages()
+            val model = ExtendedModelMap()
+
+            // Act
+            testJourney.getTaskListView(model)
+            val sections = model["taskSections"] as List<TaskSectionViewModel>
+            val taskList = sections.first().tasks
+
+            // Assert
+            assertEquals(
+                testJourney.sections[1]
+                    .tasks
+                    .filter { task -> task.nameKey != null }
+                    .size,
+                taskList.size,
             )
         }
     }
