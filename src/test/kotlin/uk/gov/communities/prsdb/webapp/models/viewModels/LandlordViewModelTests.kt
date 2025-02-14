@@ -40,7 +40,7 @@ class LandlordViewModelTests {
     @Test
     fun `UK based landlord personal details are in the correct order`() {
         // Arrange
-        val testLandlord = MockLandlordData.createLandlord(internationalAddress = null)
+        val testLandlord = MockLandlordData.createLandlord(nonEnglandOrWalesAddress = null)
 
         // Act
         val viewModel = LandlordViewModel(testLandlord)
@@ -68,7 +68,7 @@ class LandlordViewModelTests {
         // Arrange
         val testLandlord =
             MockLandlordData.createLandlord(
-                internationalAddress = "1600 Pennsylvania Avenue, Washington DC, United States of America",
+                nonEnglandOrWalesAddress = "1600 Pennsylvania Avenue, Washington DC, United States of America",
             )
 
         // Act
@@ -215,9 +215,11 @@ class LandlordViewModelTests {
         // Arrange
         val testLandlord =
             if (isUkResident) {
-                MockLandlordData.createLandlord(internationalAddress = null)
+                MockLandlordData.createLandlord(nonEnglandOrWalesAddress = null)
             } else {
-                MockLandlordData.createLandlord(internationalAddress = "1600 Pennsylvania Avenue, Washington DC, United States of America")
+                MockLandlordData.createLandlord(
+                    nonEnglandOrWalesAddress = "1600 Pennsylvania Avenue, Washington DC, United States of America",
+                )
             }
 
         // Act
@@ -254,7 +256,7 @@ class LandlordViewModelTests {
         // Arrange
         val testLandlord =
             MockLandlordData.createLandlord(
-                internationalAddress = "1600 Pennsylvania Avenue, Washington DC, United States of America",
+                nonEnglandOrWalesAddress = "1600 Pennsylvania Avenue, Washington DC, United States of America",
             )
 
         // Act
@@ -273,7 +275,7 @@ class LandlordViewModelTests {
     fun `Non UK landlord personal details shows the residency address`() {
         // Arrange
         val oneLineAddress = "A test address"
-        val testLandlord = MockLandlordData.createLandlord(internationalAddress = oneLineAddress)
+        val testLandlord = MockLandlordData.createLandlord(nonEnglandOrWalesAddress = oneLineAddress)
 
         // Act
         val viewModel = LandlordViewModel(testLandlord)
@@ -293,7 +295,7 @@ class LandlordViewModelTests {
         val testLandlord =
             MockLandlordData.createLandlord(
                 address = Address(AddressDataModel(oneLineAddress)),
-                internationalAddress = "1600 Pennsylvania Avenue, Washington DC, United States of America",
+                nonEnglandOrWalesAddress = "1600 Pennsylvania Avenue, Washington DC, United States of America",
             )
 
         // Act

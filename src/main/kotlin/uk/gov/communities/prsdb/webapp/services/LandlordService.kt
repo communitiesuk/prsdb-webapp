@@ -45,7 +45,8 @@ class LandlordService(
         email: String,
         phoneNumber: String,
         addressDataModel: AddressDataModel,
-        internationalAddress: String? = null,
+        countryOfResidence: String,
+        nonEnglandOrWalesAddress: String? = null,
         dateOfBirth: LocalDate? = null,
     ): Landlord {
         val baseUser = oneLoginUserRepository.getReferenceById(baseUserId)
@@ -60,7 +61,8 @@ class LandlordService(
                 phoneNumber,
                 address,
                 registrationNumber,
-                internationalAddress,
+                countryOfResidence,
+                nonEnglandOrWalesAddress,
                 dateOfBirth,
             ),
         )

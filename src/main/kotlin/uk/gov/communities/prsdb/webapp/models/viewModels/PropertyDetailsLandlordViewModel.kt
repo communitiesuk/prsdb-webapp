@@ -9,7 +9,7 @@ class PropertyDetailsLandlordViewModel(
     private val withChangeLinks: Boolean = true,
     private val landlordDetailsUrl: String = "/landlord-details",
 ) {
-    private val isUkResident = landlord.internationalAddress == null
+    private val isUkResident = landlord.nonEnglandOrWalesAddress == null
 
     val landlordsDetails: List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
@@ -50,7 +50,7 @@ class PropertyDetailsLandlordViewModel(
                 } else {
                     addRow(
                         "propertyDetails.landlordDetails.addressOutsideEnglandOrWales",
-                        landlord.internationalAddress,
+                        landlord.nonEnglandOrWalesAddress,
                         "$UPDATE_ROUTE/address",
                         withChangeLinks,
                     )

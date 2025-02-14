@@ -35,7 +35,8 @@ class MockLandlordData {
             phoneNumber: String = "07123456789",
             address: Address = createAddress(),
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 0L),
-            internationalAddress: String? = null,
+            countryOfResidence: String = "England or Wales",
+            nonEnglandOrWalesAddress: String? = null,
             dateOfBirth: LocalDate? = null,
             createdDate: Instant = Instant.now(),
         ): Landlord {
@@ -47,7 +48,8 @@ class MockLandlordData {
                     phoneNumber = phoneNumber,
                     address = address,
                     registrationNumber = registrationNumber,
-                    internationalAddress = internationalAddress,
+                    countryOfResidence = countryOfResidence,
+                    nonEnglandOrWalesAddress = nonEnglandOrWalesAddress,
                     dateOfBirth = dateOfBirth,
                 )
 

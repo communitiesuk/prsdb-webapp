@@ -122,6 +122,7 @@ class LandlordServiceTests {
                 "07123456789",
                 address,
                 registrationNumber,
+                "England or Wales",
                 null,
                 null,
             )
@@ -140,6 +141,7 @@ class LandlordServiceTests {
                 "example@email.com",
                 "07123456789",
                 addressDataModel,
+                "England or Wales",
             )
 
         val landlordCaptor = captor<Landlord>()

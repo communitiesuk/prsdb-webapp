@@ -32,7 +32,7 @@ class LandlordViewModel(
     val personalDetails: List<SummaryListRowViewModel> = formatPersonalDetails()
 
     private fun formatPersonalDetails(): List<SummaryListRowViewModel> {
-        val isUkResident = landlord.internationalAddress == null
+        val isUkResident = landlord.nonEnglandOrWalesAddress == null
 
         val residencyIndependentPersonalDetails =
             listOf(
@@ -94,7 +94,7 @@ class LandlordViewModel(
             ),
             SummaryListRowViewModel(
                 "landlordDetails.personalDetails.nonUkAddress",
-                landlord.internationalAddress,
+                landlord.nonEnglandOrWalesAddress,
                 toggleChangeLink("$UPDATE_ROUTE/address"),
             ),
             SummaryListRowViewModel(

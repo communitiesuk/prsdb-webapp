@@ -43,7 +43,11 @@ class Landlord() : ModifiableAuditableEntity() {
     lateinit var address: Address
         private set
 
-    var internationalAddress: String? = null
+    @Column(nullable = false)
+    lateinit var countryOfResidence: String
+        private set
+
+    var nonEnglandOrWalesAddress: String? = null
         private set
 
     var dateOfBirth: LocalDate? = null
@@ -69,7 +73,8 @@ class Landlord() : ModifiableAuditableEntity() {
         phoneNumber: String,
         address: Address,
         registrationNumber: RegistrationNumber,
-        internationalAddress: String?,
+        countryOfResidence: String,
+        nonEnglandOrWalesAddress: String?,
         dateOfBirth: LocalDate?,
     ) : this() {
         this.baseUser = baseUser
@@ -78,7 +83,8 @@ class Landlord() : ModifiableAuditableEntity() {
         this.phoneNumber = phoneNumber
         this.address = address
         this.registrationNumber = registrationNumber
-        this.internationalAddress = internationalAddress
+        this.countryOfResidence = countryOfResidence
+        this.nonEnglandOrWalesAddress = nonEnglandOrWalesAddress
         this.dateOfBirth = dateOfBirth
         this.isActive = true
     }

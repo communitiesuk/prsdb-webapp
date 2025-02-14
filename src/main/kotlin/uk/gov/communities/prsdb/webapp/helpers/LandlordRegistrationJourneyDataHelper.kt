@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
+import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
@@ -152,5 +153,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             journeyData: JourneyData,
             isContactAddress: Boolean = false,
         ) = getSelectedAddress(journeyData, isContactAddress) == MANUAL_ADDRESS_CHOSEN
+
+        fun getCountryOfResidence(journeyData: JourneyData): String = getNonUKCountryOfResidence(journeyData) ?: ENGLAND_OR_WALES
     }
 }
