@@ -47,7 +47,6 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
         @Param("restrictToLA") restrictToLA: Boolean = false,
         @Param("restrictToLicenses") restrictToLicenses: Collection<LicensingType> = LicensingType.entries,
         pageable: Pageable,
-        @Param("noLicenseType") noLicenseType: LicensingType = LicensingType.NO_LICENSING,
     ): Page<PropertyOwnership>
 
     @Query(
@@ -65,7 +64,6 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
         @Param("restrictToLA") restrictToLA: Boolean = false,
         @Param("restrictToLicenses") restrictToLicenses: Collection<LicensingType> = LicensingType.entries,
         pageable: Pageable,
-        @Param("noLicenseType") noLicenseType: LicensingType = LicensingType.NO_LICENSING,
     ): Page<PropertyOwnership>
 
     @Query(
@@ -84,10 +82,12 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
         @Param("restrictToLA") restrictToLA: Boolean = false,
         @Param("restrictToLicenses") restrictToLicenses: Collection<LicensingType> = LicensingType.entries,
         pageable: Pageable,
-        @Param("noLicenseType") noLicenseType: LicensingType = LicensingType.NO_LICENSING,
     ): Page<PropertyOwnership>
 
     companion object {
+        private const val NO_LICENCE_TYPE =
+            "#{T(uk.gov.communities.prsdb.webapp.constants.enums.LicensingType).NO_LICENSING}"
+
         // Determines whether the property's address is in the LA user's LA
         private const val LA_FILTER =
             """
@@ -109,7 +109,8 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
                   FROM license l
                   WHERE po.license_id = l.id)
                  IN :restrictToLicenses
-                 OR po.license_id IS NULL AND :noLicenseType IN :restrictToLicenses)
+                 OR po.license_id IS NULL 
+                    AND :${NO_LICENCE_TYPE} IN :restrictToLicenses)
             """
 
         private const val FILTERS = LA_FILTER + LICENSE_FILTER
