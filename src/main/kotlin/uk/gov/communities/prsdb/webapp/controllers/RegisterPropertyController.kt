@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
-import uk.gov.communities.prsdb.webapp.forms.tasks.RegisterPropertyMultiTaskTransaction
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -27,7 +27,6 @@ class RegisterPropertyController(
     private val propertyRegistrationJourney: PropertyRegistrationJourney,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val session: HttpSession,
-    private val registerPropertyTransaction: RegisterPropertyMultiTaskTransaction,
 ) {
     @GetMapping
     fun index(model: Model): String {
@@ -57,11 +56,13 @@ class RegisterPropertyController(
         model: Model,
         principal: Principal,
     ): String {
-        val listOfSections = registerPropertyTransaction.getTaskListSections(principal.name)
+        propertyRegistrationJourney.initialiseJourneyDataIfNotInitialised(principal.name)
 
-        model.addAttribute("registerPropertyTaskSections", listOfSections)
-
-        return "registerPropertyTaskList"
+        return propertyRegistrationJourney.populateModelAndGetViewName(
+            RegisterPropertyStepId.TaskList,
+            model,
+            null,
+        )
     }
 
     @PostMapping("/{stepName}")

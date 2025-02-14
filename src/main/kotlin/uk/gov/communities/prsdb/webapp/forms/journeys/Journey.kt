@@ -6,10 +6,13 @@ import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.models.viewModels.TaskListItemViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.TaskSectionViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import java.security.Principal
 import java.util.Optional
@@ -20,7 +23,10 @@ abstract class Journey<T : StepId>(
     protected val journeyDataService: JourneyDataService,
 ) {
     abstract val initialStepId: T
-    abstract val steps: Set<Step<T>>
+    val steps: Set<Step<T>>
+        get() = sections.flatMap { section -> section.tasks }.flatMap { task -> task.steps }.toSet()
+
+    abstract val sections: List<JourneySection<T>>
 
     fun getStepId(stepName: String): StepId {
         val step = steps.singleOrNull { step -> step.id.urlPathSegment == stepName }
@@ -157,4 +163,55 @@ abstract class Journey<T : StepId>(
             .build(true)
             .toUriString()
     }
+
+    fun initialiseJourneyDataIfNotInitialised(principalName: String) {
+        val data = journeyDataService.getJourneyDataFromSession()
+        if (data.isEmpty()) {
+            /* TODO PRSD-589 Currently this looks the context up from the database,
+                takes the id, then passes the id to another method which retrieves it
+                from the database. When this is reworked, we should just pass the whole
+                context to an overload of journeyDataService.loadJourneyDataIntoSession().*/
+            val contextId = journeyDataService.getContextId(principalName, journeyType)
+            if (contextId == null) {
+                oneTimeInitialisation(data)
+            } else {
+                journeyDataService.loadJourneyDataIntoSession(contextId)
+            }
+        }
+    }
+
+    open fun oneTimeInitialisation(journeyData: JourneyData) {}
+
+    fun getJourneyTaskListViewModel(): List<TaskSectionViewModel> =
+        sections.mapNotNull { section ->
+            section.headingKey?.let {
+                TaskSectionViewModel(
+                    it,
+                    section.tasks.mapNotNull { task ->
+                        task.nameKey?.let {
+                            TaskListItemViewModel.fromTaskDetails(
+                                it,
+                                getTaskStatus(task, journeyDataService.getJourneyDataFromSession()),
+                                task.startingStepId,
+                            )
+                        }
+                    },
+                )
+            }
+        }
+
+    private fun getTaskStatus(
+        task: JourneyTask<T>,
+        journeyData: JourneyData,
+    ): TaskStatus =
+        if (isStepReachable(journeyData, task.steps.single { it.id == task.startingStepId })) {
+            task.getTaskStatus(journeyData, validator)
+        } else {
+            TaskStatus.CANNOT_START_YET
+        }
+
+    protected fun <T : StepId> unitarySetOfSteps(
+        initialStepId: T,
+        steps: Set<Step<T>>,
+    ): List<JourneySection<T>> = listOf(JourneySection.withOneTask(JourneyTask(initialStepId, steps)))
 }
