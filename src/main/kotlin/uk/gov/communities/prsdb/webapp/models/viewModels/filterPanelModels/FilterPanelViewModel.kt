@@ -62,6 +62,8 @@ class FilterViewModel(
                     }
                 }.map { SelectedFilterOptionViewModel(searchRequestProperty, it, httpServletRequest) }
     }
+
+    fun isOptionSelected(option: CheckboxViewModel<Any>) = selectedOptions.any { it.value == option.value }
 }
 
 class SelectedFilterOptionViewModel(
@@ -71,10 +73,12 @@ class SelectedFilterOptionViewModel(
 ) {
     val labelMsgOrVal = selectedOption.labelMsgKey ?: selectedOption.valueStr
 
+    val value = selectedOption.value
+
     val removeLink =
         URIQueryBuilder
             .fromHTTPServletRequest(httpServletRequest)
-            .removeParamValue(searchRequestProperty, selectedOption.value.toString())
+            .removeParamValue(searchRequestProperty, value.toString())
             .removeParam("page")
             .build()
             .toUriString()

@@ -11,7 +11,7 @@
         </div>
 
         <input type="hidden" th:each="filterProp:${searchRequest.getFilterPropertyNameValuePairs()}"
-               th:field="*{__${filterProp.first}__}" th:value="${filterProp.second}">
+               th:name="${filterProp.first}" th:value="${filterProp.second}">
 
         <button type="submit" class="govuk-button moj-search__button " data-module="govuk-button"
                 th:text="#{searchButtonText}">

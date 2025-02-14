@@ -72,9 +72,10 @@
                                     <div class="govuk-checkboxes__item" th:each="option: ${filter.options}"
                                          th:with="checkboxInputID=|${filter.searchRequestProperty}-${option.valueStr}|">
                                         <input class="govuk-checkboxes__input" type="checkbox"
-                                               th:field="*{__${filter.searchRequestProperty}__}"
+                                               th:name="${filter.searchRequestProperty}"
                                                th:value="${option.value}"
-                                               th:id="${checkboxInputID}">
+                                               th:id="${checkboxInputID}"
+                                               th:checked="${filter.isOptionSelected(option)}">
                                         <label class="govuk-label govuk-checkboxes__label"
                                                th:for="${checkboxInputID}"
                                                th:text="${option.labelMsgKey != null ? #messages.msg(option.labelMsgKey) : option.value}">
