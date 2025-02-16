@@ -57,7 +57,7 @@ class RegisterPropertyController(
     ): String {
         propertyRegistrationJourney.initialiseJourneyDataIfNotInitialised(principal.name)
 
-        return propertyRegistrationJourney.getTaskListView(model)
+        return propertyRegistrationJourney.populateModelAndGetTaskListViewName(model)
     }
 
     @PostMapping("/{stepName}")

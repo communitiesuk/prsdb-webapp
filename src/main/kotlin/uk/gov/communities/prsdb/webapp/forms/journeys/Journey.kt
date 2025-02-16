@@ -112,9 +112,9 @@ abstract class Journey<T : StepId>(
         return "redirect:$redirectUrl"
     }
 
-    fun getTaskListView(model: Model): String {
+    fun populateModelAndGetTaskListViewName(model: Model): String {
         val journeyData = journeyDataService.getJourneyDataFromSession()
-        return taskListPage?.populateModelAndGetTemplateName(model, journeyData) ?: "error/500"
+        return taskListPage?.populateModelAndGetTaskListViewName(model, journeyData) ?: "error/500"
     }
 
     fun isStepReachable(

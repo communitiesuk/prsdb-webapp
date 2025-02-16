@@ -10,26 +10,26 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.TaskListItemViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.TaskSectionViewModel
 
 class TaskListPage<T : StepId>(
-    val titleKey: String,
-    val headingKey: String,
-    val subtitleKey: String,
-    val rootId: String,
-    val sections: List<JourneySection<T>>,
+    private val titleKey: String,
+    private val headingKey: String,
+    private val subtitleKey: String,
+    private val rootId: String,
+    private val sections: List<JourneySection<T>>,
     val getTaskStatus: (task: JourneyTask<T>, journeyData: JourneyData) -> TaskStatus,
 ) {
-    fun populateModelAndGetTemplateName(
+    fun populateModelAndGetTaskListViewName(
         model: Model,
         journeyData: JourneyData,
     ): String {
         val sectionViewModels =
             sections.mapNotNull { section ->
-                section.headingKey?.let {
+                section.headingKey?.let { headingKey ->
                     TaskSectionViewModel(
-                        it,
+                        headingKey,
                         section.tasks.mapNotNull { task ->
-                            task.nameKey?.let {
+                            task.nameKey?.let { nameKey ->
                                 TaskListItemViewModel.fromTaskDetails(
-                                    it,
+                                    nameKey,
                                     getTaskStatus(task, journeyData),
                                     task.startingStepId,
                                 )

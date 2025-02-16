@@ -171,7 +171,7 @@ class TaskListTests {
             val model = ExtendedModelMap()
 
             // Act
-            testJourney.getTaskListView(model)
+            testJourney.populateModelAndGetTaskListViewName(model)
             val sections = model["taskSections"] as List<TaskSectionViewModel>
             val taskList = sections.single().tasks
 
@@ -195,7 +195,7 @@ class TaskListTests {
             val model = ExtendedModelMap()
 
             // Act
-            testJourney.getTaskListView(model)
+            testJourney.populateModelAndGetTaskListViewName(model)
             val sections = model["taskSections"] as List<TaskSectionViewModel>
             val taskList = sections.single().tasks
 
@@ -261,7 +261,7 @@ class TaskListTests {
             val model = ExtendedModelMap()
 
             // Act
-            testJourney.getTaskListView(model)
+            testJourney.populateModelAndGetTaskListViewName(model)
             val sections = model["taskSections"] as List<TaskSectionViewModel>
             val taskList = sections.single().tasks
 
@@ -284,7 +284,7 @@ class TaskListTests {
             val model = ExtendedModelMap()
 
             // Act
-            testJourney.getTaskListView(model)
+            testJourney.populateModelAndGetTaskListViewName(model)
             val sections = model["taskSections"] as List<TaskSectionViewModel>
             val taskList = sections.single().tasks
 
@@ -307,7 +307,7 @@ class TaskListTests {
             val model = ExtendedModelMap()
 
             // Act
-            testJourney.getTaskListView(model)
+            testJourney.populateModelAndGetTaskListViewName(model)
             val sections = model["taskSections"] as List<TaskSectionViewModel>
             val taskList = sections.single().tasks
 
@@ -367,7 +367,7 @@ class TaskListTests {
             val model = ExtendedModelMap()
 
             // Act
-            testJourney.getTaskListView(model)
+            testJourney.populateModelAndGetTaskListViewName(model)
             val sections = model["taskSections"] as List<TaskSectionViewModel>
 
             // Assert
@@ -384,7 +384,7 @@ class TaskListTests {
             val model = ExtendedModelMap()
 
             // Act
-            testJourney.getTaskListView(model)
+            testJourney.populateModelAndGetTaskListViewName(model)
             val sections = model["taskSections"] as List<TaskSectionViewModel>
             val taskList = sections.first().tasks
 
