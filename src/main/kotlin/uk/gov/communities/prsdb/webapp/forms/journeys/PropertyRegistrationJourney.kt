@@ -17,11 +17,11 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Co
 import uk.gov.communities.prsdb.webapp.forms.pages.AlreadyRegisteredPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationCheckAnswersPage
-import uk.gov.communities.prsdb.webapp.forms.pages.RegisterPropertyTaskListPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.forms.tasks.TaskListPage
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.emailModels.PropertyRegistrationConfirmationEmail
@@ -56,57 +56,113 @@ import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 class PropertyRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
-    addressLookupService: AddressLookupService,
-    addressDataService: AddressDataService,
-    propertyRegistrationService: PropertyRegistrationService,
-    localAuthorityService: LocalAuthorityService,
-    landlordService: LandlordService,
-    session: HttpSession,
-    confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
+    val addressLookupService: AddressLookupService,
+    val addressDataService: AddressDataService,
+    val propertyRegistrationService: PropertyRegistrationService,
+    val localAuthorityService: LocalAuthorityService,
+    val landlordService: LandlordService,
+    val session: HttpSession,
+    val confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
 ) : Journey<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
-    override val initialStepId = RegisterPropertyStepId.TaskList
+    override val initialStepId = RegisterPropertyStepId.LookupAddress
 
-    override val steps =
-        setOf(
-            taskListStep(),
-            lookupAddressStep(),
-            selectAddressStep(addressLookupService, addressDataService, propertyRegistrationService),
-            alreadyRegisteredStep(),
-            manualAddressStep(),
-            localAuthorityStep(localAuthorityService),
-            propertyTypeStep(),
-            ownershipTypeStep(),
-            occupancyStep(),
-            numberOfHouseholdsStep(),
-            numberOfPeopleStep(),
-            licensingTypeStep(),
-            selectiveLicenceStep(),
-            hmoMandatoryLicenceStep(),
-            hmoAdditionalLicenceStep(),
-            landlordTypeStep(),
-            checkAnswersStep(
-                addressDataService,
-                localAuthorityService,
+    override val unreachableStepRedirect
+        get() = "/${JourneyType.PROPERTY_REGISTRATION.urlPathSegment}/task-list"
+
+    override val sections =
+        listOf(
+            JourneySection(registerPropertyTaskList(), "registerProperty.taskList.register.heading"),
+            JourneySection(checkAndSubmitPropertiesTaskList(), "registerProperty.taskList.checkAndSubmit.heading"),
+        )
+
+    override val taskListPage
+        get() =
+            TaskListPage(
+                "registerProperty.title",
+                "registerProperty.taskList.heading",
+                "registerProperty.taskList.subtitle",
+                "register-property-task",
+                sections,
+            ) { task, journeyData -> getTaskStatus(task, journeyData) }
+
+    private fun registerPropertyTaskList(): List<JourneyTask<RegisterPropertyStepId>> =
+        listOf(
+            addressTask(),
+            JourneyTask.withOneStep(
+                propertyTypeStep(),
+                "registerProperty.taskList.register.selectType",
             ),
-            declarationStep(
-                journeyDataService,
-                propertyRegistrationService,
-                addressDataService,
-                landlordService,
-                confirmationEmailSender,
-                session,
+            JourneyTask.withOneStep(
+                ownershipTypeStep(),
+                "registerProperty.taskList.register.selectOwnership",
+            ),
+            licensingTask(),
+            occupancyTask(),
+            JourneyTask.withOneStep(
+                landlordTypeStep(),
+                "registerProperty.taskList.register.selectOperation",
             ),
         )
 
-    private fun taskListStep() =
-        Step(
-            id = RegisterPropertyStepId.TaskList,
-            page = RegisterPropertyTaskListPage(),
-            nextAction = { _, _ -> Pair(RegisterPropertyStepId.LookupAddress, null) },
+    private fun checkAndSubmitPropertiesTaskList(): List<JourneyTask<RegisterPropertyStepId>> =
+        listOf(
+            JourneyTask.withOneStep(
+                checkAnswersStep(
+                    addressDataService,
+                    localAuthorityService,
+                ),
+                "registerProperty.taskList.checkAndSubmit.checkAnswers",
+            ),
+            JourneyTask.withOneStep(
+                declarationStep(
+                    journeyDataService,
+                    propertyRegistrationService,
+                    addressDataService,
+                    landlordService,
+                    confirmationEmailSender,
+                    session,
+                ),
+            ),
+        )
+
+    private fun addressTask() =
+        JourneyTask(
+            RegisterPropertyStepId.LookupAddress,
+            setOf(
+                lookupAddressStep(),
+                selectAddressStep(addressLookupService, addressDataService, propertyRegistrationService),
+                alreadyRegisteredStep(),
+                manualAddressStep(),
+                localAuthorityStep(localAuthorityService),
+            ),
+            "registerProperty.taskList.register.addAddress",
+        )
+
+    private fun licensingTask() =
+        JourneyTask(
+            RegisterPropertyStepId.LicensingType,
+            setOf(
+                licensingTypeStep(),
+                selectiveLicenceStep(),
+                hmoMandatoryLicenceStep(),
+                hmoAdditionalLicenceStep(),
+            ),
+            "registerProperty.taskList.register.addLicensing",
+        )
+
+    private fun occupancyTask() =
+        JourneyTask(
+            RegisterPropertyStepId.Occupancy,
+            setOf(
+                occupancyStep(),
+                numberOfHouseholdsStep(),
+                numberOfPeopleStep(),
+            ),
+            "registerProperty.taskList.register.addTenancyInfo",
         )
 
     private fun lookupAddressStep() =
@@ -621,5 +677,12 @@ class PropertyRegistrationJourney(
         } catch (exception: EntityExistsException) {
             return RegisterPropertyStepId.AlreadyRegistered.urlPathSegment
         }
+    }
+
+    override fun oneTimeInitialisation(journeyData: JourneyData) = addTaskListStepDataToJourneyData(journeyData)
+
+    private fun addTaskListStepDataToJourneyData(journeyData: JourneyData) {
+        journeyData[RegisterPropertyStepId.TaskList.urlPathSegment] = mutableMapOf<String, Any>()
+        journeyDataService.setJourneyData(journeyData)
     }
 }

@@ -223,7 +223,6 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             assert(taskListPage.taskHasStatus("Add any property licensing information", "Complete"))
             assert(taskListPage.taskHasStatus("Add any tenancy and household information", "Not yet started"))
             assert(taskListPage.taskHasStatus("Select how you're operating for this property", "Cannot start yet"))
-            assert(taskListPage.taskHasStatus("Add any interested parties or additional landlords", "Cannot start yet"))
         }
 
         @Test
@@ -236,7 +235,6 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             assert(taskListPage.taskHasStatus("Add any property licensing information", "In progress"))
             assert(taskListPage.taskHasStatus("Add any tenancy and household information", "Cannot start yet"))
             assert(taskListPage.taskHasStatus("Select how you're operating for this property", "Cannot start yet"))
-            assert(taskListPage.taskHasStatus("Add any interested parties or additional landlords", "Cannot start yet"))
         }
     }
 

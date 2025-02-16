@@ -1,18 +1,21 @@
-<!--/*@thymesVar id="registerPropertyTaskSections" type="List<TaskSectionViewModel>"*/-->
+<!--/*@thymesVar id="taskSections" type="List<TaskSectionViewModel>"*/-->
+<!--/*@thymesVar id="pageHeading" type="String"*/-->
+<!--/*@thymesVar id="subtitle" type="String"*/-->
+<!--/*@thymesVar id="rootTaskId" type="String"*/-->
 <!DOCTYPE html>
 <html>
-<body th:replace="~{fragments/layout :: layout(#{registerProperty.title}, ~{::body/content()}, false)}">
+<body th:replace="~{fragments/layout :: layout(#{${title}}, ~{::body/content()}, false)}">
 <main class="govuk-main-wrapper" id="main-content">
     <th:block id="page-contents"
               th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <header id="header">
-            <h1 class="govuk-heading-l" th:text="#{registerProperty.taskList.heading}">
+            <h1 class="govuk-heading-l" th:text="#{${pageHeading}}">
                 registerProperty.taskList.heading
             </h1>
-            <p class="govuk-body" th:text="#{registerProperty.taskList.subtitle}">registerProperty.taskList.subtitle</p>
+            <p class="govuk-body" th:text="#{${subtitle}}"></p>
         </header>
-        <section th:each="section, iteratorStatus: ${registerPropertyTaskSections}">
-            <div th:replace="~{fragments/taskList/sectionTaskList :: sectionTaskList(${section}, ${iteratorStatus.count}, 'register-property-task')}"></div>
+        <section th:each="section, iteratorStatus: ${taskSections}">
+            <div th:replace="~{fragments/taskList/sectionTaskList :: sectionTaskList(${section}, ${iteratorStatus.count}, ${rootTaskId})}"></div>
         </section>
     </th:block>
 </main>
