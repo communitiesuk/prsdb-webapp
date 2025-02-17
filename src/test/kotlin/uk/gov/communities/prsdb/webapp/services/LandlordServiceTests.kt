@@ -17,6 +17,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
@@ -122,7 +123,7 @@ class LandlordServiceTests {
                 "07123456789",
                 address,
                 registrationNumber,
-                "England or Wales",
+                ENGLAND_OR_WALES,
                 null,
                 null,
             )
@@ -141,7 +142,7 @@ class LandlordServiceTests {
                 "example@email.com",
                 "07123456789",
                 addressDataModel,
-                "England or Wales",
+                ENGLAND_OR_WALES,
             )
 
         val landlordCaptor = captor<Landlord>()

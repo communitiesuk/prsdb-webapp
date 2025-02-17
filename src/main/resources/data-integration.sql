@@ -37,7 +37,7 @@ INSERT INTO landlord (id, created_date, last_modified_date, registration_number_
                       is_active, phone_number, subject_identifier, name, email, country_of_residence)
 VALUES (1, '10/15/24', '10/15/24', 1, 1, '05/13/1950', true, 07111111111,
         'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', 'PRSDB Landlord',
-        'Team-PRSDB+landlord@softwire.com', 'Barbados');
+        'Team-PRSDB+landlord@softwire.com', 'England or Wales');
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
