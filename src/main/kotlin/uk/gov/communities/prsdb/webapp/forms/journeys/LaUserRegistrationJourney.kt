@@ -27,7 +27,7 @@ class LaUserRegistrationJourney(
     final override val initialStepId: RegisterLaUserStepId = RegisterLaUserStepId.LandingPage
 
     override val sections =
-        getAsOneSectionWithOneTask(
+        createSingleSectionWithSingleTaskFromSteps(
             initialStepId,
             setOf(
                 landingPageStep(),

@@ -56,7 +56,7 @@ class LandlordRegistrationJourney(
 
     override val sections =
         // TODO PRSD-859 - these should be arranged into an appropriate set of sections/tasks
-        getAsOneSectionWithOneTask(
+        createSingleSectionWithSingleTaskFromSteps(
             initialStepId,
             setOf(
                 verifyIdentityStep(),
