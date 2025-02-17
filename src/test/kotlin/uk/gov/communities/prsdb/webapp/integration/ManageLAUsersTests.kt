@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.springframework.test.context.jdbc.Sql
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.ACCESS_LEVEL_COL_INDEX
@@ -41,7 +42,7 @@ class ManageLAUsersTests : IntegrationTest() {
     @Test
     fun `invite button goes to invite new user page`(page: Page) {
         val managePage = navigator.goToManageLaUsers(localAuthorityId)
-        managePage.inviteAnotherUserButton.click()
+        managePage.inviteAnotherUserButton.clickAndWait()
         assertPageIs(page, InviteNewLaUserPage::class)
     }
 

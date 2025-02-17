@@ -108,8 +108,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         )
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
-        assertEquals(createdLandlordRegNum.toString(), confirmationPage.registrationNumberText)
-        confirmationPage.clickGoToDashboard()
+        assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
+        confirmationPage.goToDashboardButton.clickAndWait()
 
         // TODO PRSD-670: Replace with dashboard page
         assertEquals("/", URI(page.url()).path)
@@ -166,8 +166,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         )
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
-        assertEquals(createdLandlordRegNum.toString(), confirmationPage.registrationNumberText)
-        confirmationPage.clickGoToDashboard()
+        assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
+        confirmationPage.goToDashboardButton.clickAndWait()
 
         // TODO PRSD-670: Replace with dashboard page
         assertEquals("/", URI(page.url()).path)
@@ -231,8 +231,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         )
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
-        assertEquals(createdLandlordRegNum.toString(), confirmationPage.registrationNumberText)
-        confirmationPage.clickGoToDashboard()
+        assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
+        confirmationPage.goToDashboardButton.clickAndWait()
 
         // TODO PRSD-670: Replace with dashboard page
         assertEquals("/", URI(page.url()).path)
@@ -302,8 +302,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         )
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
-        assertEquals(createdLandlordRegNum.toString(), confirmationPage.registrationNumberText)
-        confirmationPage.clickGoToDashboard()
+        assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
+        confirmationPage.goToDashboardButton.clickAndWait()
 
         // TODO PRSD-670: Replace with dashboard page
         assertEquals("/", URI(page.url()).path)
@@ -544,7 +544,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Clicking Search Again navigates to the previous step`(page: Page) {
             val selectAddressPage = navigator.goToLandlordRegistrationSelectAddressPage()
-            selectAddressPage.searchAgain.click()
+            selectAddressPage.searchAgain.clickAndWait()
             assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
         }
     }
@@ -603,7 +603,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Clicking Search Again navigates to the previous step`(page: Page) {
             val selectContactAddressPage = navigator.goToLandlordRegistrationSelectContactAddressPage()
-            selectContactAddressPage.searchAgain.click()
+            selectContactAddressPage.searchAgain.clickAndWait()
             assertPageIs(page, LookupContactAddressFormPageLandlordRegistration::class)
         }
     }

@@ -7,15 +7,15 @@ class FilterPanel(
     private val page: Page,
     locator: Locator = page.locator(".moj-filter-layout"),
 ) : BaseComponent(locator) {
-    fun getPanel(isVisible: Boolean = true) = getChildComponent(".moj-filter", isVisible = isVisible)
+    fun getPanel() = getChildComponent(".moj-filter")
 
-    fun getCloseFilterPanelButton() = getButton(page, "Close filters panel")
+    fun getCloseFilterPanelButton() = Button.byText(page, "Close filters panel")
 
-    fun getShowFilterPanel() = getButton(page, "Show filters panel")
+    fun getShowFilterPanel() = Button.byText(page, "Show filters panel")
 
-    fun getClearFiltersLink(isVisible: Boolean = true) = getLink(page, "Clear filters", isVisible = isVisible)
+    val clearFiltersLink = Link.byText(page, "Clear filters")
 
-    fun getSelectedHeadings(expectedCount: Int) = getChildrenComponents(".moj-filter__selected >> h3", expectedCount)
+    fun getSelectedHeadings() = getChildrenComponents(".moj-filter__selected >> h3")
 
     fun getNoFiltersSelectedText() = getChildComponent(".moj-filter__selected", Locator.LocatorOptions().setHasText("No filters selected"))
 
