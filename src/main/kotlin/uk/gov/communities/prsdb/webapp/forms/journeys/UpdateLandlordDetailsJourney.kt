@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
-import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -53,7 +52,7 @@ class UpdateLandlordDetailsJourney(
                             "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> redirectToSessionPage() },
+            handleSubmitAndRedirect = { _, _ -> getRedirectToUpdateSessionPage() },
             nextAction = { _, _ -> Pair(UpdateDetailsStepId.ChangeDetailsSession, null) },
             saveAfterSubmit = false,
         )
@@ -102,23 +101,19 @@ class UpdateLandlordDetailsJourney(
         return "/landlord-details"
     }
 
-    private fun redirectToSessionPage(): String =
-        UriComponentsBuilder
-            .newInstance()
-            .path("/${JourneyType.UPDATE_DETAILS.urlPathSegment}/${UpdateDetailsStepId.ChangeDetailsSession.urlPathSegment}")
-            .build(true)
-            .toUriString()
+    private fun getRedirectToUpdateSessionPage(): String =
+        "/${JourneyType.UPDATE_DETAILS.urlPathSegment}/${UpdateDetailsStepId.ChangeDetailsSession.urlPathSegment}"
 
     fun initialiseJourneyDataIfNotInitialised(landlordId: String) {
         val journeyData = journeyDataService.getJourneyDataFromSession()
         if (journeyData[originalLandlordJourneyDataKey] == null) {
             val landlord = landlordService.retrieveLandlordByBaseUserId(landlordId)!!
-            journeyData[originalLandlordJourneyDataKey] = journeyDataFromLandlord(landlord)
+            journeyData[originalLandlordJourneyDataKey] = createOriginalLandlordJourneyData(landlord)
             journeyDataService.setJourneyData(journeyData)
         }
     }
 
-    private fun journeyDataFromLandlord(landlord: Landlord): JourneyData =
+    private fun createOriginalLandlordJourneyData(landlord: Landlord): JourneyData =
         mutableMapOf(
             UpdateDetailsStepId.UpdateEmail.urlPathSegment to mutableMapOf("emailAddress" to landlord.email),
         )
