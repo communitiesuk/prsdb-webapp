@@ -6,7 +6,6 @@ import jakarta.validation.Validation
 import jakarta.validation.ValidatorFactory
 import jakarta.validation.constraints.NotNull
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -14,10 +13,8 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
@@ -71,12 +68,6 @@ class JourneyTests {
         journeyDataService: JourneyDataService,
     ) : Journey<TestStepId>(journeyType, validator, journeyDataService) {
         override val sections: List<JourneySection<TestStepId>> = createSingleSectionWithSingleTaskFromSteps(initialStepId, steps)
-
-        var initialisationCount = 0
-
-        override fun oneTimeInitialisation(journeyData: JourneyData) {
-            initialisationCount++
-        }
     }
 
     class TestFormModel : FormModel {
@@ -841,117 +832,6 @@ class JourneyTests {
                     principal,
                 )
             }
-        }
-    }
-
-    @Nested
-    inner class JourneyDataManipulationTests {
-        @Test
-        fun `when there is no journey data in the session or the database, one-time intialisation is called`() {
-            val principalName = "principalName"
-            val testJourney =
-                TestJourney(
-                    JourneyType.LANDLORD_REGISTRATION,
-                    initialStepId = TestStepId.StepOne,
-                    journeyDataService = mockJourneyDataService,
-                    validator = validator,
-                    steps =
-                        setOf(
-                            Step(
-                                TestStepId.StepOne,
-                                page =
-                                    Page(
-                                        TestFormModel::class,
-                                        "stepOneTemplate",
-                                        mutableMapOf("testKey" to "testValue"),
-                                    ),
-                                nextAction = { _, _ -> Pair(null, null) },
-                            ),
-                        ),
-                )
-
-            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mutableMapOf())
-            whenever(mockJourneyDataService.getContextId(principalName, JourneyType.LANDLORD_REGISTRATION)).thenReturn(null)
-            val initialInitialisationCount = testJourney.initialisationCount
-
-            // Act
-            testJourney.initialiseJourneyDataIfNotInitialised(principalName)
-
-            // Assert
-            assertEquals(initialInitialisationCount + 1, testJourney.initialisationCount)
-        }
-
-        @Test
-        fun `when the journey data is not in the session it will be loaded into the session from the database`() {
-            val principalName = "principalName"
-            val contextId = 67L
-            val testJourney =
-                TestJourney(
-                    JourneyType.LANDLORD_REGISTRATION,
-                    initialStepId = TestStepId.StepOne,
-                    journeyDataService = mockJourneyDataService,
-                    validator = validator,
-                    steps =
-                        setOf(
-                            Step(
-                                TestStepId.StepOne,
-                                page =
-                                    Page(
-                                        TestFormModel::class,
-                                        "stepOneTemplate",
-                                        mutableMapOf("testKey" to "testValue"),
-                                    ),
-                                nextAction = { _, _ -> Pair(null, null) },
-                            ),
-                        ),
-                )
-            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mutableMapOf())
-            whenever(mockJourneyDataService.getContextId(principalName, JourneyType.LANDLORD_REGISTRATION)).thenReturn(contextId)
-            val initialInitialisationCount = testJourney.initialisationCount
-
-            // Act
-            testJourney.initialiseJourneyDataIfNotInitialised(principalName)
-
-            // Assert
-            val captor = argumentCaptor<Long>()
-            verify(mockJourneyDataService).loadJourneyDataIntoSession(captor.capture())
-            Assertions.assertEquals(contextId, captor.allValues.single())
-
-            assertEquals(initialInitialisationCount, testJourney.initialisationCount)
-        }
-
-        @Test
-        fun `when the journey data is already in the session, journey data is not loaded and the journey is not reinitialised`() {
-            val principalName = "principalName"
-            val testJourney =
-                TestJourney(
-                    JourneyType.LANDLORD_REGISTRATION,
-                    initialStepId = TestStepId.StepOne,
-                    journeyDataService = mockJourneyDataService,
-                    validator = validator,
-                    steps =
-                        setOf(
-                            Step(
-                                TestStepId.StepOne,
-                                page =
-                                    Page(
-                                        TestFormModel::class,
-                                        "stepOneTemplate",
-                                        mutableMapOf("testKey" to "testValue"),
-                                    ),
-                                nextAction = { _, _ -> Pair(null, null) },
-                            ),
-                        ),
-                )
-            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mutableMapOf("anything" to "Anything else"))
-            val initialInitialisationCount = testJourney.initialisationCount
-
-            // Act
-            testJourney.initialiseJourneyDataIfNotInitialised(principalName)
-
-            // Assert
-            assertEquals(initialInitialisationCount, testJourney.initialisationCount)
-            verify(mockJourneyDataService, Mockito.never()).loadJourneyDataIntoSession(any())
         }
     }
 }

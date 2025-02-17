@@ -686,16 +686,9 @@ class PropertyRegistrationJourney(
                 from the database. When this is reworked, we should just pass the whole
                 context to an overload of journeyDataService.loadJourneyDataIntoSession().*/
             val contextId = journeyDataService.getContextId(principalName, journeyType)
-            if (contextId == null) {
-                addTaskListStepDataToJourneyData(data)
-            } else {
+            if (contextId != null) {
                 journeyDataService.loadJourneyDataIntoSession(contextId)
             }
         }
-    }
-
-    private fun addTaskListStepDataToJourneyData(journeyData: JourneyData) {
-        journeyData[RegisterPropertyStepId.TaskList.urlPathSegment] = mutableMapOf<String, Any>()
-        journeyDataService.setJourneyData(journeyData)
     }
 }
