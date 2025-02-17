@@ -25,7 +25,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUserOrInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
-import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_ID
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_USER_ID
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
@@ -45,7 +44,7 @@ class LocalAuthorityDataServiceTests {
     private lateinit var localAuthorityUserOrInvitationRepository: LocalAuthorityUserOrInvitationRepository
 
     @Mock
-    private lateinit var oneLoginUserRepository: OneLoginUserRepository
+    private lateinit var oneLoginUserService: OneLoginUserService
 
     @InjectMocks
     private lateinit var localAuthorityDataService: LocalAuthorityDataService
@@ -317,17 +316,21 @@ class LocalAuthorityDataServiceTests {
         // Arrange
         val baseUser = createOneLoginUser()
         val localAuthority = createLocalAuthority()
-        val expectedNewUser =
-            LocalAuthorityUser(baseUser, false, localAuthority, "Sample Name", "sample.name@example.com")
-        whenever(oneLoginUserRepository.getReferenceById(baseUser.id)).thenReturn(baseUser)
+        val newLocalAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority, isManager = false)
+        whenever(oneLoginUserService.findOrCreate1LUser(baseUser.id)).thenReturn(baseUser)
 
         // Act
-        localAuthorityDataService.registerNewUser(baseUser.id, localAuthority, "Sample Name", "sample.name@example.com")
+        localAuthorityDataService.registerNewUser(
+            baseUser.id,
+            localAuthority,
+            newLocalAuthorityUser.name,
+            newLocalAuthorityUser.email,
+        )
 
         // Assert
         val localAuthorityUserCaptor = captor<LocalAuthorityUser>()
         verify(localAuthorityUserRepository).save(localAuthorityUserCaptor.capture())
-        assertTrue(ReflectionEquals(expectedNewUser).matches(localAuthorityUserCaptor.value))
+        assertTrue(ReflectionEquals(newLocalAuthorityUser, "id").matches(localAuthorityUserCaptor.value))
     }
 
     @Test
