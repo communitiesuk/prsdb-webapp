@@ -86,11 +86,16 @@ populate the database with seed data.
 
 ### Updating Local Authority Data
 
-The project uses a migration (`V1_10_0__populate_la_table.sql`) to populate the `local_authority` table with data from
-`src/main/resources/db/migrations/data/local_authorities/local_authorities.csv`. If the CSV file is updated, create a
+The project uses migrations to populate the `local_authority` table with data from
+`src/main/resources/data/local_authorities/local_authorities.csv`. If the CSV file is updated, create a
 copy of
 it and call it `local_authorities_V<version number>.csv`, where `version number` is one more than the latest version in
-`src/main/resources/db/migrations/data/local_authorities`.
+`src/main/resources/db/migrations/data/local_authorities`. Then run the utility script to generate the sql for a new
+migration by:
+
+- `cd`ing into the `/scripts` folder
+- running `node run generate_la_migration.js`
+- using the output in `/scripts/output/draft_upsert_local_authorities.sql` to create your new migration
 
 ### Mock One Login Oauth2
 
