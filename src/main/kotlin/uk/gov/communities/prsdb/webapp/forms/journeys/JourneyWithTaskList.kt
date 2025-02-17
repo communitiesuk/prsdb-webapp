@@ -4,7 +4,7 @@ import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
-import uk.gov.communities.prsdb.webapp.forms.tasks.TaskListPage
+import uk.gov.communities.prsdb.webapp.forms.tasks.TaskListViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 abstract class JourneyWithTaskList<T : StepId>(
@@ -12,7 +12,7 @@ abstract class JourneyWithTaskList<T : StepId>(
     validator: Validator,
     journeyDataService: JourneyDataService,
 ) : Journey<T>(journeyType, validator, journeyDataService) {
-    abstract val taskListPage: TaskListPage<T>
+    abstract val taskListFactory: TaskListViewModelFactory<T>
     abstract val taskListUrlSegment: String
 
     final override val unreachableStepRedirect
@@ -20,6 +20,7 @@ abstract class JourneyWithTaskList<T : StepId>(
 
     fun populateModelAndGetTaskListViewName(model: Model): String {
         val journeyData = journeyDataService.getJourneyDataFromSession()
-        return taskListPage?.populateModelAndGetTaskListViewName(model, journeyData) ?: "error/500"
+        model.addAttribute("taskListViewModel", taskListFactory.getTaskListViewModel(journeyData))
+        return "taskList"
     }
 }

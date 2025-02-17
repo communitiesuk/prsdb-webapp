@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyTask
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyWithTaskList
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
-import uk.gov.communities.prsdb.webapp.forms.tasks.TaskListPage
+import uk.gov.communities.prsdb.webapp.forms.tasks.TaskListViewModelFactory
 import uk.gov.communities.prsdb.webapp.models.viewModels.TaskSectionViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import kotlin.test.Test
@@ -41,9 +41,9 @@ class TaskListTests {
         override val initialStepId: TestStepId,
         override val sections: List<JourneySection<TestStepId>>,
     ) : JourneyWithTaskList<TestStepId>(JourneyType.PROPERTY_REGISTRATION, validator, journeyDataService) {
-        override val taskListPage: TaskListPage<TestStepId>
+        override val taskListFactory: TaskListViewModelFactory<TestStepId>
             get() =
-                TaskListPage(
+                TaskListViewModelFactory(
                     "title",
                     "heading",
                     "subtitle",

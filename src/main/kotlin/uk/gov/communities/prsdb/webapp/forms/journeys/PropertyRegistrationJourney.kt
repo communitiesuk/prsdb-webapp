@@ -21,7 +21,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.forms.tasks.TaskListPage
+import uk.gov.communities.prsdb.webapp.forms.tasks.TaskListViewModelFactory
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.emailModels.PropertyRegistrationConfirmationEmail
@@ -78,15 +78,14 @@ class PropertyRegistrationJourney(
             JourneySection(checkAndSubmitPropertiesTasks(), "registerProperty.taskList.checkAndSubmit.heading"),
         )
 
-    override val taskListPage
-        get() =
-            TaskListPage(
-                "registerProperty.title",
-                "registerProperty.taskList.heading",
-                "registerProperty.taskList.subtitle",
-                "register-property-task",
-                sections,
-            ) { task, journeyData -> getTaskStatus(task, journeyData) }
+    override val taskListFactory =
+        TaskListViewModelFactory(
+            "registerProperty.title",
+            "registerProperty.taskList.heading",
+            "registerProperty.taskList.subtitle",
+            "register-property-task",
+            sections,
+        ) { task, journeyData -> getTaskStatus(task, journeyData) }
 
     private fun registerPropertyTasks(): List<JourneyTask<RegisterPropertyStepId>> =
         listOf(

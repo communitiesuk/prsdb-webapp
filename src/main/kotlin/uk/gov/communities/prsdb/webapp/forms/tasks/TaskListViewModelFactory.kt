@@ -1,15 +1,15 @@
 package uk.gov.communities.prsdb.webapp.forms.tasks
 
-import org.springframework.ui.Model
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyTask
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.models.viewModels.TaskListItemViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.TaskListViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.TaskSectionViewModel
 
-class TaskListPage<T : StepId>(
+class TaskListViewModelFactory<T : StepId>(
     private val titleKey: String,
     private val headingKey: String,
     private val subtitleKey: String,
@@ -17,10 +17,7 @@ class TaskListPage<T : StepId>(
     private val sections: List<JourneySection<T>>,
     val getTaskStatus: (task: JourneyTask<T>, journeyData: JourneyData) -> TaskStatus,
 ) {
-    fun populateModelAndGetTaskListViewName(
-        model: Model,
-        journeyData: JourneyData,
-    ): String {
+    fun getTaskListViewModel(journeyData: JourneyData): TaskListViewModel {
         val sectionViewModels =
             sections.mapNotNull { section ->
                 section.headingKey?.let { headingKey ->
@@ -38,11 +35,7 @@ class TaskListPage<T : StepId>(
                     )
                 }
             }
-        model.addAttribute("title", titleKey)
-        model.addAttribute("pageHeading", headingKey)
-        model.addAttribute("subtitle", subtitleKey)
-        model.addAttribute("rootTaskId", rootId)
-        model.addAttribute("taskSections", sectionViewModels)
-        return "registerPropertyTaskList"
+
+        return TaskListViewModel(titleKey, headingKey, subtitleKey, rootId, sectionViewModels)
     }
 }
