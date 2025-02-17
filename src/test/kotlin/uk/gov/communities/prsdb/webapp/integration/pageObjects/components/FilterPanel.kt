@@ -4,24 +4,25 @@ import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 
 class FilterPanel(
-    private val page: Page,
-    locator: Locator = page.locator(".moj-filter-layout"),
-) : BaseComponent(locator) {
+    parentLocator: Locator,
+) : BaseComponent(parentLocator.locator(".moj-filter-layout")) {
+    constructor(page: Page) : this(page.locator("html"))
+
     fun getPanel() = getChildComponent(".moj-filter")
 
-    fun getCloseFilterPanelButton() = Button.byText(page, "Close filters panel")
+    fun getCloseFilterPanelButton() = Button.byText(locator, "Close filters panel")
 
-    fun getShowFilterPanel() = Button.byText(page, "Show filters panel")
+    fun getShowFilterPanel() = Button.byText(locator, "Show filters panel")
 
-    val clearFiltersLink = Link.byText(page, "Clear filters")
+    val clearFiltersLink = Link.byText(locator, "Clear filters")
 
     fun getSelectedHeadings() = getChildrenComponents(".moj-filter__selected >> h3")
 
     fun getNoFiltersSelectedText() = getChildComponent(".moj-filter__selected", Locator.LocatorOptions().setHasText("No filters selected"))
 
-    fun clickApplyFiltersButton() = Form(page, parentLocator = locator).submit()
+    fun clickApplyFiltersButton() = Form(locator).submit()
 
-    fun getFilterCheckboxes(label: String? = null) = Form(page, parentLocator = locator).getCheckboxes(label)
+    fun getFilterCheckboxes(label: String? = null) = Form(locator).getCheckboxes(label)
 
     fun getRemoveFilterTag(filterOption: String) = getChildComponent(".moj-filter__tag", Locator.LocatorOptions().setHasText(filterOption))
 }

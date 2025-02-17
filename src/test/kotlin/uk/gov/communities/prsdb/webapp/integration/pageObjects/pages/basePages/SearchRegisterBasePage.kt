@@ -17,11 +17,7 @@ abstract class SearchRegisterBasePage(
 
     fun getResultTable() = Table(page)
 
-    fun getHiddenResultTable() = Table.getLocator(page)
-
     fun getPaginationComponent() = Pagination(page)
-
-    fun getHiddenPaginationComponent() = Pagination.getLocator(page)
 
     fun getErrorMessageText() = getErrorMessage().innerText()
 

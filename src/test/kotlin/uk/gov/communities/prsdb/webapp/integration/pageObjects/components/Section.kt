@@ -8,8 +8,13 @@ class Section(
 ) : BaseComponent(locator) {
     companion object {
         fun byTestId(
+            parentLocator: Locator,
+            testId: String,
+        ): Section = Section(parentLocator.locator("section[data-testid=\"$testId\"]"))
+
+        fun byTestId(
             page: Page,
             testId: String,
-        ): Section = Section(page.locator("section[data-testid=\"$testId\"]"))
+        ): Section = byTestId(page.locator("html"), testId)
     }
 }

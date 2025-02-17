@@ -4,9 +4,10 @@ import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 
 class SummaryList(
-    page: Page,
-    locator: Locator = page.locator(".govuk-summary-list"),
-) : BaseComponent(locator) {
+    parentLocator: Locator,
+) : BaseComponent(parentLocator.locator(".govuk-summary-list")) {
+    constructor(page: Page) : this(page.locator("html"))
+
     fun getRowKey(rowIndex: Int) = Companion.getChildComponent(getRow(rowIndex), ".govuk-summary-list__key")
 
     fun getRowValue(rowIndex: Int) = Companion.getChildComponent(getRow(rowIndex), ".govuk-summary-list__value")

@@ -4,9 +4,10 @@ import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 
 class Table(
-    page: Page,
-    locator: Locator = getLocator(page),
-) : BaseComponent(locator) {
+    parentLocator: Locator,
+) : BaseComponent(parentLocator.locator(".govuk-table")) {
+    constructor(page: Page) : this(page.locator("html"))
+
     fun getHeaderCell(colIndex: Int) = getChildComponent(getHeaderRow(), "th", index = colIndex)
 
     fun getCell(
@@ -19,8 +20,4 @@ class Table(
     private fun getHeaderRow() = getChildComponent("thead tr")
 
     private fun getRow(index: Int) = getChildComponent("tbody tr", index = index)
-
-    companion object {
-        fun getLocator(page: Page): Locator = page.locator(".govuk-table")
-    }
 }

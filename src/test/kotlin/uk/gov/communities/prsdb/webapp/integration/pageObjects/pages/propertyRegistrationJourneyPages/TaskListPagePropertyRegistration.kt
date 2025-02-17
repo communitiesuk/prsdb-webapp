@@ -11,8 +11,8 @@ class TaskListPagePropertyRegistration(
         page,
         "/$REGISTER_PROPERTY_JOURNEY_URL/task-list",
     ) {
-    private val registerTasks = TaskList(page, page.locator(".govuk-task-list").nth(0))
-    private val checkAndSubmitTasks = TaskList(page, page.locator(".govuk-task-list").nth(1))
+    private val registerTasks = TaskList.byIndex(page, 0)
+    private val checkAndSubmitTasks = TaskList.byIndex(page, 1)
 
     fun clickRegisterTaskWithName(name: String) = registerTasks.clickTask(name)
 

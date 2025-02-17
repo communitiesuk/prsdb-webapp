@@ -4,9 +4,10 @@ import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 
 class Tabs(
-    page: Page,
-    locator: Locator = page.locator(".govuk-tabs"),
-) : BaseComponent(locator) {
+    parentLocator: Locator,
+) : BaseComponent(parentLocator.locator(".govuk-tabs")) {
+    constructor(page: Page) : this(page.locator("html"))
+
     val tabsList = getChildrenComponents(".govuk-tabs__list >> .govuk-tabs__list-item")
 
     val tabPanels = getChildrenComponents(".govuk-tabs__panel")

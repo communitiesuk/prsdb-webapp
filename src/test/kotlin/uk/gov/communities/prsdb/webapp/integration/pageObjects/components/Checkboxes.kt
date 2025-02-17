@@ -1,17 +1,19 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.components
 
 import com.microsoft.playwright.Locator
+import com.microsoft.playwright.Locator.LocatorOptions
 import com.microsoft.playwright.Page
-import com.microsoft.playwright.Page.LocatorOptions
 
 class Checkboxes(
-    private val page: Page,
+    parentLocator: Locator,
     label: String? = null,
-    locator: Locator =
-        page
+) : BaseComponent(
+        parentLocator
             .locator(".govuk-form-group", LocatorOptions().setHasText(label))
             .locator(".govuk-checkboxes"),
-) : BaseComponent(locator) {
+    ) {
+    constructor(page: Page, label: String? = null) : this(page.locator("html"), label)
+
     fun getCheckbox(value: String) = getChildComponent("input[value='$value']")
 
     fun checkCheckbox(value: String) = getCheckbox(value).check()

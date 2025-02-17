@@ -30,7 +30,7 @@ class SearchRegisterTests : IntegrationTest() {
         fun `results table does not show before search has been requested`() {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
 
-            assertTrue(searchLandlordRegisterPage.getHiddenResultTable().isHidden)
+            assertThat(searchLandlordRegisterPage.getResultTable()).isHidden()
         }
 
         @Test
@@ -38,7 +38,7 @@ class SearchRegisterTests : IntegrationTest() {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
             searchLandlordRegisterPage.searchBar.search("")
 
-            assertTrue(searchLandlordRegisterPage.getHiddenResultTable().isHidden)
+            assertThat(searchLandlordRegisterPage.getResultTable()).isHidden()
         }
 
         @Test
@@ -106,7 +106,7 @@ class SearchRegisterTests : IntegrationTest() {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
             searchLandlordRegisterPage.searchBar.search("Alex")
 
-            assertTrue(searchLandlordRegisterPage.getHiddenPaginationComponent().isHidden)
+            assertThat(searchLandlordRegisterPage.getPaginationComponent()).isHidden()
         }
 
         @Test
@@ -190,7 +190,7 @@ class SearchRegisterTests : IntegrationTest() {
         fun `results table does not show before search has been requested`() {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
 
-            assertTrue(searchPropertyRegisterPage.getHiddenResultTable().isHidden)
+            assertThat(searchPropertyRegisterPage.getResultTable()).isHidden()
         }
 
         @Test
@@ -198,7 +198,7 @@ class SearchRegisterTests : IntegrationTest() {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("")
 
-            assertTrue(searchPropertyRegisterPage.getHiddenResultTable().isHidden)
+            assertThat(searchPropertyRegisterPage.getResultTable()).isHidden()
         }
 
         @Test
@@ -281,7 +281,7 @@ class SearchRegisterTests : IntegrationTest() {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("Way")
 
-            assertTrue(searchPropertyRegisterPage.getHiddenPaginationComponent().isHidden)
+            assertThat(searchPropertyRegisterPage.getPaginationComponent()).isHidden()
         }
 
         @Test

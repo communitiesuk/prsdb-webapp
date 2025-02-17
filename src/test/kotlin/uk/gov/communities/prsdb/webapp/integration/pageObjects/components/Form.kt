@@ -4,30 +4,30 @@ import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 
 class Form(
-    private val page: Page,
-    parentLocator: Locator? = null,
-    locator: Locator = if (parentLocator == null) page.locator("form") else parentLocator.locator("form"),
-) : BaseComponent(locator) {
+    parentLocator: Locator,
+) : BaseComponent(parentLocator.locator("form")) {
+    constructor(page: Page) : this(page.locator("html"))
+
     fun getErrorMessage(fieldName: String? = null) =
         getChildComponent(if (fieldName == null) ".govuk-error-message" else "p[id='$fieldName-error']")
 
     fun getTextInput(fieldName: String? = null): Locator = getChildComponent("input${if (fieldName == null) "" else "[name='$fieldName']"}")
 
-    fun getRadios() = Radios(page)
+    fun getRadios() = Radios(locator)
 
     fun getFieldsetHeading() = getChildComponent(".govuk-fieldset__heading")
 
-    fun getSelect() = Select(page)
+    fun getSelect() = Select(locator)
 
     fun getTextArea() = getChildComponent("textarea")
 
-    fun getCheckboxes(label: String? = null) = Checkboxes(page, label)
+    fun getCheckboxes(label: String? = null) = Checkboxes(locator, label)
 
-    fun getSummaryList() = SummaryList(page)
+    fun getSummaryList() = SummaryList(locator)
 
     fun submit() {
         getSubmitButton().click()
-        page.waitForLoadState()
+        locator.page().waitForLoadState()
     }
 
     private fun getSubmitButton() = getChildComponent("button[type='submit']")
