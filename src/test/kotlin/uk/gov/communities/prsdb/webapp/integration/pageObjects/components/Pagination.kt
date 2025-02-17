@@ -8,15 +8,20 @@ class Pagination(
 ) : BaseComponent(parentLocator.locator(".govuk-pagination").first()) {
     constructor(page: Page) : this(page.locator("html"))
 
-    fun getPreviousLink() = getLinkWithText("Previous")
+    val previousLink = getLinkWithText("Previous")
 
-    fun getCurrentPageNumberLinkText(): String =
-        getChildComponent("a[aria-current='page']")
-            .innerText()
+    val currentPageNumberLinkText: String
+        get() = locator.locator("a[aria-current='page']").innerText()
 
     fun getPageNumberLink(pageNumber: Int) = getLinkWithText(pageNumber.toString())
 
-    fun getNextLink() = getLinkWithText("Next")
+    val nextLink = getLinkWithText("Next")
 
-    private fun getLinkWithText(text: String) = getChildComponent(".govuk-pagination__link", Locator.LocatorOptions().setHasText(text))
+    private fun getLinkWithText(text: String) =
+        PaginationLink(locator.locator(".govuk-pagination__link", Locator.LocatorOptions().setHasText(text)))
+
+    class PaginationLink(
+        override val locator: Locator,
+    ) : BaseComponent(locator),
+        ClickAndWaitable
 }

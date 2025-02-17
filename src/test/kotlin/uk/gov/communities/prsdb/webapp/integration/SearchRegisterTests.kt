@@ -114,15 +114,15 @@ class SearchRegisterTests : IntegrationTest() {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
             searchLandlordRegisterPage.searchBar.search("PRSDB")
 
-            searchLandlordRegisterPage.getPaginationComponent().getNextLink().click()
+            searchLandlordRegisterPage.getPaginationComponent().nextLink.clickAndWait()
             assertContains(page.url(), "page=2")
             val nextPage = assertPageIs(page, SearchLandlordRegisterPage::class)
 
-            nextPage.getPaginationComponent().getPreviousLink().click()
+            nextPage.getPaginationComponent().previousLink.clickAndWait()
             assertContains(page.url(), "page=1")
             val previousPage = assertPageIs(page, SearchLandlordRegisterPage::class)
 
-            previousPage.getPaginationComponent().getPageNumberLink(2).click()
+            previousPage.getPaginationComponent().getPageNumberLink(2).clickAndWait()
             assertContains(page.url(), "page=2")
             assertPageIs(page, SearchLandlordRegisterPage::class)
         }
@@ -289,15 +289,15 @@ class SearchRegisterTests : IntegrationTest() {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("PRSDB")
 
-            searchPropertyRegisterPage.getPaginationComponent().getNextLink().click()
+            searchPropertyRegisterPage.getPaginationComponent().nextLink.clickAndWait()
             assertContains(page.url(), "page=2")
             val nextPage = assertPageIs(page, SearchPropertyRegisterPage::class)
 
-            nextPage.getPaginationComponent().getPreviousLink().click()
+            nextPage.getPaginationComponent().previousLink.clickAndWait()
             assertContains(page.url(), "page=1")
             val previousPage = assertPageIs(page, SearchPropertyRegisterPage::class)
 
-            previousPage.getPaginationComponent().getPageNumberLink(2).click()
+            previousPage.getPaginationComponent().getPageNumberLink(2).clickAndWait()
             assertContains(page.url(), "page=2")
             assertPageIs(page, SearchPropertyRegisterPage::class)
         }
