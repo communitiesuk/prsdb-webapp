@@ -32,7 +32,7 @@ class LandlordViewModel(
     val personalDetails: List<SummaryListRowViewModel> = formatPersonalDetails()
 
     private fun formatPersonalDetails(): List<SummaryListRowViewModel> {
-        val isUkResident = landlord.nonEnglandOrWalesAddress == null
+        val isEnglandOrWalesResident = landlord.isEnglandOrWalesResident()
 
         val residencyIndependentPersonalDetails =
             listOf(
@@ -69,28 +69,27 @@ class LandlordViewModel(
                 ),
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.ukResident",
-                    isUkResident,
+                    isEnglandOrWalesResident,
                     toggleChangeLink("$UPDATE_ROUTE/country-of-residence"),
                 ),
             )
 
         val residencyPersonalDetails =
-            if (isUkResident) {
-                formatUkAddressDetails(landlord)
+            if (isEnglandOrWalesResident) {
+                formatEnglandOrWalesResidentAddressDetails(landlord)
             } else {
-                formatNonUkAddressDetails(landlord)
+                formatNonEnglandOrWalesResidentAddressDetails(landlord)
             }
 
         return residencyIndependentPersonalDetails + residencyPersonalDetails
     }
 
-    private fun formatNonUkAddressDetails(landlord: Landlord) =
+    private fun formatNonEnglandOrWalesResidentAddressDetails(landlord: Landlord) =
         listOf(
-            // TODO: PRSD-742 to add country as a separate field
             SummaryListRowViewModel(
                 "landlordDetails.personalDetails.country",
-                "TODO: PRSD-742",
-                toggleChangeLink(null),
+                landlord.countryOfResidence,
+                toggleChangeLink("$UPDATE_ROUTE/country-of-residence"),
             ),
             SummaryListRowViewModel(
                 "landlordDetails.personalDetails.nonUkAddress",
@@ -104,7 +103,7 @@ class LandlordViewModel(
             ),
         )
 
-    private fun formatUkAddressDetails(landlord: Landlord) =
+    private fun formatEnglandOrWalesResidentAddressDetails(landlord: Landlord) =
         listOf(
             SummaryListRowViewModel(
                 "landlordDetails.personalDetails.contactAddress",

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.mockObjects
 
 import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -35,7 +36,7 @@ class MockLandlordData {
             phoneNumber: String = "07123456789",
             address: Address = createAddress(),
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 0L),
-            countryOfResidence: String = "England or Wales",
+            countryOfResidence: String = ENGLAND_OR_WALES,
             nonEnglandOrWalesAddress: String? = null,
             dateOfBirth: LocalDate? = null,
             createdDate: Instant = Instant.now(),

@@ -9,6 +9,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
+import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import java.time.LocalDate
 
 @Entity
@@ -88,4 +89,6 @@ class Landlord() : ModifiableAuditableEntity() {
         this.dateOfBirth = dateOfBirth
         this.isActive = true
     }
+
+    fun isEnglandOrWalesResident(): Boolean = countryOfResidence == ENGLAND_OR_WALES
 }
