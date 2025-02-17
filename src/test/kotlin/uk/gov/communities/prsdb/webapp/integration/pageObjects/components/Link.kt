@@ -13,6 +13,6 @@ class Link(
             page: Page,
             text: String,
             index: Int = 0,
-        ): Button = Button(page.locator(".govuk-link", LocatorOptions().setHasText(text)).nth(index))
+        ): Link = Link(page.locator(".govuk-link", LocatorOptions().setHasText(text)).nth(index))
     }
 }

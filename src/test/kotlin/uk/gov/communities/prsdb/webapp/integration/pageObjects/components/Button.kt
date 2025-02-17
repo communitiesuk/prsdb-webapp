@@ -9,9 +9,26 @@ class Button(
 ) : BaseComponent(locator),
     ClickAndWaitable {
     companion object {
+        fun default(page: Page) = factory(page, null)
+
         fun byText(
             page: Page,
-            text: String? = null,
-        ): Button = Button(page.locator(".govuk-button", if (text == null) null else LocatorOptions().setHasText(text)))
+            text: String,
+        ): Button = factory(page, text)
+
+        private fun factory(
+            page: Page,
+            text: String?,
+        ): Button =
+            Button(
+                page.locator(
+                    ".govuk-button",
+                    if (text == null) {
+                        null
+                    } else {
+                        LocatorOptions().setHasText(text)
+                    },
+                ),
+            )
     }
 }

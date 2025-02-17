@@ -9,5 +9,5 @@ class DeleteLaUserSuccessPage(
     page: Page,
 ) : BasePage(page, "/delete-user/success") {
     val confirmationBanner = ConfirmationBanner(page)
-    val returnButton = Button.byText(page)
+    val returnButton = Button.default(page)
 }

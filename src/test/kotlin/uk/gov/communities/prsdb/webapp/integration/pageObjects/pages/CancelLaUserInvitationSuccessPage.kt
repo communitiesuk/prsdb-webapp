@@ -9,5 +9,5 @@ class CancelLaUserInvitationSuccessPage(
     page: Page,
 ) : BasePage(page, "/cancel-invitation/success") {
     val confirmationBanner = ConfirmationBanner(page)
-    val returnButton = Button.byText(page)
+    val returnButton = Button.default(page)
 }
