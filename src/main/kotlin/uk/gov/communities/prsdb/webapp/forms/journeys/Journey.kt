@@ -6,6 +6,7 @@ import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
@@ -20,7 +21,13 @@ abstract class Journey<T : StepId>(
     protected val journeyDataService: JourneyDataService,
 ) {
     abstract val initialStepId: T
-    abstract val steps: Set<Step<T>>
+    val steps: Set<Step<T>>
+        get() = sections.flatMap { section -> section.tasks }.flatMap { task -> task.steps }.toSet()
+
+    abstract val sections: List<JourneySection<T>>
+
+    open val unreachableStepRedirect
+        get() = "/${journeyType.urlPathSegment}/${initialStepId.urlPathSegment}"
 
     fun getStepId(stepName: String): StepId {
         val step = steps.singleOrNull { step -> step.id.urlPathSegment == stepName }
@@ -46,7 +53,7 @@ abstract class Journey<T : StepId>(
                 "Step ${stepId.urlPathSegment} not valid for journey ${journeyType.urlPathSegment}",
             )
         if (!isStepReachable(journeyData, requestedStep, subPageNumber)) {
-            return "redirect:/${journeyType.urlPathSegment}/${initialStepId.urlPathSegment}"
+            return "redirect:$unreachableStepRedirect"
         }
         val prevStepDetails = getPrevStep(journeyData, requestedStep, subPageNumber)
         val prevStepUrl = getPrevStepUrl(prevStepDetails?.step, prevStepDetails?.subPageNumber)
@@ -157,4 +164,17 @@ abstract class Journey<T : StepId>(
             .build(true)
             .toUriString()
     }
+
+    fun getTaskStatus(
+        task: JourneyTask<T>,
+        journeyData: JourneyData,
+    ): TaskStatus {
+        val canTaskBeStarted = isStepReachable(journeyData, task.steps.single { it.id == task.startingStepId })
+        return task.getTaskStatus(journeyData, validator, canTaskBeStarted)
+    }
+
+    protected fun <T : StepId> createSingleSectionWithSingleTaskFromSteps(
+        initialStepId: T,
+        steps: Set<Step<T>>,
+    ): List<JourneySection<T>> = listOf(JourneySection.withOneTask(JourneyTask(initialStepId, steps)))
 }

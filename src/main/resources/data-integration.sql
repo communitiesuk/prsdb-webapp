@@ -34,10 +34,10 @@ VALUES (1, '10/15/24', '10/15/24', 1, '1 Fictional Road', 1),
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
-                      is_active, phone_number, subject_identifier, name, email)
+                      is_active, phone_number, subject_identifier, name, email, country_of_residence)
 VALUES (1, '10/15/24', '10/15/24', 1, 1, '05/13/1950', true, 07111111111,
         'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', 'PRSDB Landlord',
-        'Team-PRSDB+landlord@softwire.com');
+        'Team-PRSDB+landlord@softwire.com', 'England or Wales');
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
