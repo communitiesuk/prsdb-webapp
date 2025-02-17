@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.components
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 
-class Form(
+open class Form(
     parentLocator: Locator,
 ) : BaseComponent(parentLocator.locator("form")) {
     constructor(page: Page) : this(page.locator("html"))
@@ -15,7 +15,7 @@ class Form(
 
     fun getRadios() = Radios(locator)
 
-    fun getFieldsetHeading() = getChildComponent(".govuk-fieldset__heading")
+    fun getFieldsetHeading() = FieldsetHeading(locator)
 
     fun getSelect() = Select(locator)
 
@@ -25,10 +25,13 @@ class Form(
 
     fun getSummaryList() = SummaryList(locator)
 
-    fun submit() {
-        getSubmitButton().click()
-        locator.page().waitForLoadState()
-    }
+    fun submit() = SubmitButton(locator).clickAndWait()
 
-    private fun getSubmitButton() = getChildComponent("button[type='submit']")
+    class FieldsetHeading(
+        parentLocator: Locator,
+    ) : BaseComponent(parentLocator.locator(".govuk-fieldset__heading"))
+
+    class SubmitButton(
+        parentLocator: Locator,
+    ) : Button(parentLocator.locator("button[type='submit']"))
 }

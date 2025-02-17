@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.components
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 
-class Button(
+open class Button(
     override val locator: Locator,
 ) : BaseComponent(locator),
     ClickAndWaitable {
