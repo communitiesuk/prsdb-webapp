@@ -10,7 +10,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
-import uk.gov.communities.prsdb.webapp.forms.tasks.TaskListPage
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import java.security.Principal
@@ -26,8 +25,6 @@ abstract class Journey<T : StepId>(
         get() = sections.flatMap { section -> section.tasks }.flatMap { task -> task.steps }.toSet()
 
     abstract val sections: List<JourneySection<T>>
-
-    open val taskListPage: TaskListPage<T>? = null
 
     open val unreachableStepRedirect
         get() = "/${journeyType.urlPathSegment}/${initialStepId.urlPathSegment}"
@@ -110,11 +107,6 @@ abstract class Journey<T : StepId>(
                 .build(true)
                 .toUriString()
         return "redirect:$redirectUrl"
-    }
-
-    fun populateModelAndGetTaskListViewName(model: Model): String {
-        val journeyData = journeyDataService.getJourneyDataFromSession()
-        return taskListPage?.populateModelAndGetTaskListViewName(model, journeyData) ?: "error/500"
     }
 
     fun isStepReachable(

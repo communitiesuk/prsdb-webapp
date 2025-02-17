@@ -63,15 +63,14 @@ class PropertyRegistrationJourney(
     val landlordService: LandlordService,
     val session: HttpSession,
     val confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
-) : Journey<RegisterPropertyStepId>(
+) : JourneyWithTaskList<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
     override val initialStepId = RegisterPropertyStepId.LookupAddress
 
-    override val unreachableStepRedirect
-        get() = "/${JourneyType.PROPERTY_REGISTRATION.urlPathSegment}/task-list"
+    override val taskListUrlSegment: String = "task-list"
 
     override val sections =
         listOf(

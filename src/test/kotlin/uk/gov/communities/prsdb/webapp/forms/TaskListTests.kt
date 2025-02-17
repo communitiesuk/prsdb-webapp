@@ -11,9 +11,9 @@ import org.springframework.ui.ExtendedModelMap
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
-import uk.gov.communities.prsdb.webapp.forms.journeys.Journey
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyTask
+import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyWithTaskList
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.tasks.TaskListPage
@@ -40,8 +40,8 @@ class TaskListTests {
         journeyDataService: JourneyDataService,
         override val initialStepId: TestStepId,
         override val sections: List<JourneySection<TestStepId>>,
-    ) : Journey<TestStepId>(JourneyType.PROPERTY_REGISTRATION, validator, journeyDataService) {
-        override val taskListPage: TaskListPage<TestStepId>?
+    ) : JourneyWithTaskList<TestStepId>(JourneyType.PROPERTY_REGISTRATION, validator, journeyDataService) {
+        override val taskListPage: TaskListPage<TestStepId>
             get() =
                 TaskListPage(
                     "title",
@@ -50,6 +50,8 @@ class TaskListTests {
                     "TODO()",
                     sections,
                 ) { task, journeyData -> getTaskStatus(task, journeyData) }
+        override val taskListUrlSegment: String
+            get() = TODO("Not yet implemented")
     }
 
     @Mock
