@@ -49,3 +49,4 @@ notify-template-tests.run.xml
 
 ### Built assets ###
 /dist
+/scripts/output

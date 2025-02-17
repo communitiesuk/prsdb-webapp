@@ -5,6 +5,7 @@
 # exclude source files
 gradle
 src
+scripts
 # exclude build binaries
 build/*
 bin/*
