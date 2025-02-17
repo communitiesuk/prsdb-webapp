@@ -168,12 +168,10 @@ abstract class Journey<T : StepId>(
     fun getTaskStatus(
         task: JourneyTask<T>,
         journeyData: JourneyData,
-    ): TaskStatus =
-        if (isStepReachable(journeyData, task.steps.single { it.id == task.startingStepId })) {
-            task.getTaskStatus(journeyData, validator)
-        } else {
-            TaskStatus.CANNOT_START_YET
-        }
+    ): TaskStatus {
+        val canTaskBeStarted = isStepReachable(journeyData, task.steps.single { it.id == task.startingStepId })
+        return task.getTaskStatus(journeyData, validator, canTaskBeStarted)
+    }
 
     protected fun <T : StepId> createSingleSectionWithSingleTaskFromSteps(
         initialStepId: T,
