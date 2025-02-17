@@ -69,12 +69,21 @@ class UpdateLandlordDetailsJourney(
         targetStep: Step<UpdateDetailsStepId>,
         targetSubPageNumber: Int?,
     ): StepDetails<UpdateDetailsStepId>? {
-        val updatedLandlordData = JourneyDataHelper.getPageData(journeyData, originalLandlordJourneyDataKey)!!
-        for (key in journeyData.keys) {
-            updatedLandlordData[key] = journeyData[key]
-        }
+        val originalLandlordData = JourneyDataHelper.getPageData(journeyData, originalLandlordJourneyDataKey)!!
+        val updatedLandlordData = getUpdatedLandlordData(journeyData, originalLandlordData)
 
         return super.getPrevStep(updatedLandlordData, targetStep, targetSubPageNumber)
+    }
+
+    private fun getUpdatedLandlordData(
+        journeyData: JourneyData,
+        landlordData: PageData,
+    ): JourneyData {
+        // For any fields where the data is updated, replace the original value with the new value
+        for (key in journeyData.keys) {
+            landlordData[key] = journeyData[key]
+        }
+        return landlordData
     }
 
     private fun submitAllChanges(journeyData: JourneyData): String {
