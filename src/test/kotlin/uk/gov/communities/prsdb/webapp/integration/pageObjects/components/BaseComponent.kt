@@ -43,8 +43,6 @@ abstract class BaseComponent(
             val component = parentLocator.locator(locatorStr, locatorOptions)
             return component.all()
         }
-
-        fun getConfirmationPageBanner(page: Page) = getComponent(page, ".govuk-panel--confirmation")
     }
 
     protected fun getChildrenComponents(

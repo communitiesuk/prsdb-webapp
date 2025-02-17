@@ -108,7 +108,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         )
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
-        assertEquals(createdLandlordRegNum.toString(), confirmationPage.registrationNumberText)
+        assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
         confirmationPage.goToDashboardButton.clickAndWait()
 
         // TODO PRSD-670: Replace with dashboard page
@@ -166,7 +166,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         )
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
-        assertEquals(createdLandlordRegNum.toString(), confirmationPage.registrationNumberText)
+        assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
         confirmationPage.goToDashboardButton.clickAndWait()
 
         // TODO PRSD-670: Replace with dashboard page
@@ -231,7 +231,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         )
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
-        assertEquals(createdLandlordRegNum.toString(), confirmationPage.registrationNumberText)
+        assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
         confirmationPage.goToDashboardButton.clickAndWait()
 
         // TODO PRSD-670: Replace with dashboard page
@@ -302,7 +302,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         )
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
-        assertEquals(createdLandlordRegNum.toString(), confirmationPage.registrationNumberText)
+        assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
         confirmationPage.goToDashboardButton.clickAndWait()
 
         // TODO PRSD-670: Replace with dashboard page
