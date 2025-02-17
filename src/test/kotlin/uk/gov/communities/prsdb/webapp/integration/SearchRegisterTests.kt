@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.ADDRESS_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.CONTACT_INFO_COL_INDEX
@@ -60,7 +61,7 @@ class SearchRegisterTests : IntegrationTest() {
             assertThat(resultTable.getHeaderCell(LISTED_PROPERTY_COL_INDEX)).containsText("Listed properties")
             assertThat(resultTable.getCell(0, LISTED_PROPERTY_COL_INDEX)).containsText("30")
 
-            assertTrue(searchLandlordRegisterPage.getErrorMessage(isVisible = false).isHidden)
+            assertTrue(searchLandlordRegisterPage.getErrorMessage().isHidden)
         }
 
         @Test
@@ -134,10 +135,10 @@ class SearchRegisterTests : IntegrationTest() {
             val filter = searchLandlordRegisterPage.getFilterPanel()
 
             // Toggle filter
-            searchLandlordRegisterPage.clickComponent(filter.getCloseFilterPanelButton())
-            assertTrue(filter.getPanel(isVisible = false).isHidden)
+            filter.getCloseFilterPanelButton().clickAndWait()
+            assertTrue(filter.getPanel().isHidden)
 
-            searchLandlordRegisterPage.clickComponent(filter.getShowFilterPanel())
+            filter.getShowFilterPanel().clickAndWait()
             assertTrue(filter.getPanel().isVisible)
 
             // Apply LA filter
@@ -145,22 +146,22 @@ class SearchRegisterTests : IntegrationTest() {
             laFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
-            val laFilterSelectedHeadingText = filter.getSelectedHeadings(expectedCount = 1).first().innerText()
+            val laFilterSelectedHeadingText = filter.getSelectedHeadings().first().innerText()
             assertContains(laFilterSelectedHeadingText, "Show landlords operating in my authority")
             val resultTable = searchLandlordRegisterPage.getResultTable()
             assertEquals(1, resultTable.countRows())
 
             // Remove LA filter
             searchLandlordRegisterPage.clickComponent(filter.getRemoveFilterTag("Landlords in my authority"))
-            assertTrue(filter.getSelectedHeadings(expectedCount = 0).isEmpty())
+            assertTrue(filter.getSelectedHeadings().isEmpty())
             assertTrue(resultTable.countRows() > 1)
 
             // Clear all filters
             laFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
-            searchLandlordRegisterPage.clickComponent(filter.getClearFiltersLink())
-            assertTrue(filter.getClearFiltersLink(isVisible = false).isHidden)
+            filter.clearFiltersLink.clickAndWait()
+            assertThat(filter.clearFiltersLink).isHidden()
             assertTrue(filter.getNoFiltersSelectedText().isVisible)
             assertTrue(resultTable.countRows() > 1)
         }
@@ -218,7 +219,7 @@ class SearchRegisterTests : IntegrationTest() {
             assertThat(resultTable.getHeaderCell(PROPERTY_LANDLORD_COL_INDEX)).containsText("Registered landlord")
             assertThat(resultTable.getCell(0, PROPERTY_LANDLORD_COL_INDEX)).containsText("Alexander Smith")
 
-            assertTrue(searchPropertyRegisterPage.getErrorMessage(isVisible = false).isHidden)
+            assertTrue(searchPropertyRegisterPage.getErrorMessage().isHidden)
         }
 
         @Test
@@ -318,10 +319,10 @@ class SearchRegisterTests : IntegrationTest() {
 
             // Toggle filter
             val filter = searchPropertyRegisterPage.getFilterPanel()
-            searchPropertyRegisterPage.clickComponent(filter.getCloseFilterPanelButton())
-            assertTrue(filter.getPanel(isVisible = false).isHidden)
+            filter.getCloseFilterPanelButton().clickAndWait()
+            assertTrue(filter.getPanel().isHidden)
 
-            searchPropertyRegisterPage.clickComponent(filter.getShowFilterPanel())
+            filter.getShowFilterPanel().clickAndWait()
             assertTrue(filter.getPanel().isVisible)
 
             // Apply LA filter
@@ -329,7 +330,7 @@ class SearchRegisterTests : IntegrationTest() {
             laFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
-            val laFilterSelectedHeadingText = filter.getSelectedHeadings(expectedCount = 1)[0].innerText()
+            val laFilterSelectedHeadingText = filter.getSelectedHeadings()[0].innerText()
             assertContains(laFilterSelectedHeadingText, "Show properties in my authority")
             assertEquals(expectedPropertyInLACount, resultTable.countRows())
 
@@ -338,7 +339,7 @@ class SearchRegisterTests : IntegrationTest() {
             licenseFilter.checkCheckbox(LicensingType.SELECTIVE_LICENCE.name)
             filter.clickApplyFiltersButton()
 
-            val licenseFilterSelectedHeadingText = filter.getSelectedHeadings(expectedCount = 2)[1].innerText()
+            val licenseFilterSelectedHeadingText = filter.getSelectedHeadings()[1].innerText()
             assertContains(licenseFilterSelectedHeadingText, "Property licence")
             assertEquals(expectedPropertyInLAWithSelectiveLicenseCount, resultTable.countRows())
 
@@ -349,12 +350,12 @@ class SearchRegisterTests : IntegrationTest() {
 
             // Remove LA filter
             searchPropertyRegisterPage.clickComponent(filter.getRemoveFilterTag("Properties in my authority"))
-            assertEquals(1, filter.getSelectedHeadings(expectedCount = 1).size)
+            assertEquals(1, filter.getSelectedHeadings().size)
             assertEquals(expectedPropertyWithSelectiveOrNoLicenseCount, resultTable.countRows())
 
             // Clear all filters
-            searchPropertyRegisterPage.clickComponent(filter.getClearFiltersLink())
-            assertTrue(filter.getClearFiltersLink(isVisible = false).isHidden)
+            filter.clearFiltersLink.clickAndWait()
+            assertThat(filter.clearFiltersLink).isHidden()
             assertTrue(filter.getNoFiltersSelectedText().isVisible)
             assertEquals(expectedMatchingPropertyCount, resultTable.countRows())
         }

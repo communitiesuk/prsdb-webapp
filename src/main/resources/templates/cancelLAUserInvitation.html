@@ -7,7 +7,7 @@
         <header id="header">
             <h1 class="govuk-heading-l" th:text="#{cancelLAUserInvitation.heading}">cancelLAUserInvitation.heading</h1>
         </header>
-        <section>
+        <section data-testid="user-details-section">
             <p class="govuk-body">
                 <strong th:text="#{cancelLAUserInvitation.emailLabel}+':'">cancelLAUserInvitation.emailLabel:</strong>
                 <span th:text="${email}" th:remove="tag">email</span>

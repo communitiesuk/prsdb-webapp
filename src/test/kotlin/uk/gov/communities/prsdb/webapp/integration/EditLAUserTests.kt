@@ -4,6 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ConfirmDeleteLaUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLaUserSuccessPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLaUserPage
@@ -54,7 +55,7 @@ class EditLAUserTests : IntegrationTest() {
         val editUserPage = assertPageIs(page, EditLaUserPage::class)
 
         // Delete the user
-        editUserPage.removeAccountButton.click()
+        editUserPage.removeAccountButton.clickAndWait()
         val confirmDeletePage = assertPageIs(page, ConfirmDeleteLaUserPage::class)
         assertThat(confirmDeletePage.userDetailsSection).containsText("Arthur Dent")
         // TODO PRSD-405: fix when LA users have email addresses
@@ -64,7 +65,7 @@ class EditLAUserTests : IntegrationTest() {
 
         // The success page confirms the user is deleted
         assertThat(successPage.confirmationBanner).containsText("You've removed Arthur Dent's account from ISLE OF MAN")
-        successPage.returnButton.click()
+        successPage.returnButton.clickAndWait()
         manageUsersPage = assertPageIs(page, ManageLaUsersPage::class)
 
         // The user is no longer in the table
