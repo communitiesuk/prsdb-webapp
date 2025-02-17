@@ -22,6 +22,7 @@ class Step<T : StepId>(
             null,
         )
     },
+    val displaySectionHeader: Boolean = false,
     val saveAfterSubmit: Boolean = true,
 ) {
     val name: String = id.urlPathSegment

@@ -7,10 +7,12 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import java.security.Principal
 import java.util.Optional
@@ -59,6 +61,9 @@ abstract class Journey<T : StepId>(
         val prevStepUrl = getPrevStepUrl(prevStepDetails?.step, prevStepDetails?.subPageNumber)
         val pageData =
             submittedPageData ?: JourneyDataHelper.getPageData(journeyData, requestedStep.name, subPageNumber)
+
+        addSectionHeaderToModel(requestedStep, model)
+
         return requestedStep.page.populateModelAndGetTemplateName(
             validator,
             model,
@@ -66,6 +71,26 @@ abstract class Journey<T : StepId>(
             prevStepUrl,
             prevStepDetails?.filteredJourneyData,
         )
+    }
+
+    private fun addSectionHeaderToModel(
+        step: Step<T>,
+        model: Model,
+    ) {
+        if (step.displaySectionHeader) {
+            val sectionContainingStep = sections.first { it.isStepInTaskList(step.id) }
+            if (sectionContainingStep.headingKey == null) {
+                throw PrsdbWebException("Section heading requested but heading message key not found")
+            }
+            model.addAttribute(
+                "sectionHeaderInfo",
+                SectionHeaderViewModel(
+                    sectionContainingStep.headingKey,
+                    sections.indexOf(sectionContainingStep) + 1,
+                    sections.size,
+                ),
+            )
+        }
     }
 
     fun updateJourneyDataAndGetViewNameOrRedirect(

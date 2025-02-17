@@ -42,7 +42,6 @@ import uk.gov.communities.prsdb.webapp.models.formModels.SelectiveLicenceFormMod
 import uk.gov.communities.prsdb.webapp.models.viewModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosDividerViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -178,11 +177,10 @@ class PropertyRegistrationJourney(
                             "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
                             "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
                             "submitButtonText" to "forms.buttons.saveAndContinue",
-                            "sectionHeaderInfo" to
-                                SectionHeaderViewModel("registerProperty.taskList.register.heading", 1, 3),
                         ),
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.SelectAddress, null) },
+            displaySectionHeader = true,
         )
 
     private fun selectAddressStep(
