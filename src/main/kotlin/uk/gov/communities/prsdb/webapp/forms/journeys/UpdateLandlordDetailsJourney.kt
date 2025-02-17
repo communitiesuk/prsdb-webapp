@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.getEmailUpdateIfPresent
+import uk.gov.communities.prsdb.webapp.helpers.UpdateLandlordDetailsJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NoInputFormModel
@@ -80,7 +80,7 @@ class UpdateLandlordDetailsJourney(
     private fun submitAllChanges(journeyData: JourneyData): String {
         val landlordUpdate =
             LandlordUpdateModel(
-                email = journeyData.getEmailUpdateIfPresent(),
+                email = UpdateLandlordDetailsJourneyDataHelper.getEmailUpdateIfPresent(journeyData),
             )
 
         landlordService.updateLandlordForBaseUserId(
