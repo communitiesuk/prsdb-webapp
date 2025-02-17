@@ -43,15 +43,14 @@ class TaskListTests {
     ) : JourneyWithTaskList<TestStepId>(JourneyType.PROPERTY_REGISTRATION, validator, journeyDataService) {
         override val taskListFactory: TaskListViewModelFactory<TestStepId>
             get() =
-                TaskListViewModelFactory(
+                getTaskListViewModelFactory(
                     "title",
                     "heading",
                     "subtitle",
                     "TODO()",
-                    sections,
-                ) { task, journeyData -> getTaskStatus(task, journeyData) }
+                )
         override val taskListUrlSegment: String
-            get() = TODO("Not yet implemented")
+            get() = "any-url-segment"
     }
 
     @Mock

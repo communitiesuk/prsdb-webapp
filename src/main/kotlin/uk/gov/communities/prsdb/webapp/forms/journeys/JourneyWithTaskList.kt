@@ -23,4 +23,17 @@ abstract class JourneyWithTaskList<T : StepId>(
         model.addAttribute("taskListViewModel", taskListFactory.getTaskListViewModel(journeyData))
         return "taskList"
     }
+
+    protected fun getTaskListViewModelFactory(
+        titleKey: String,
+        headingKey: String,
+        subtitleKey: String,
+        rootId: String,
+    ) = TaskListViewModelFactory(
+        "registerProperty.title",
+        "registerProperty.taskList.heading",
+        "registerProperty.taskList.subtitle",
+        "register-property-task",
+        sections,
+    ) { task, journeyData -> getTaskStatus(task, journeyData) }
 }
