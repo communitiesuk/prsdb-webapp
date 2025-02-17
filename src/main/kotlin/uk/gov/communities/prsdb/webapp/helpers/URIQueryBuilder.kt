@@ -13,8 +13,6 @@ class URIQueryBuilder private constructor(
                     .fromUriString(httpServletRequest.requestURI)
                     .query(httpServletRequest.queryString),
             )
-
-        private fun getHiddenParam(name: String) = "_$name"
     }
 
     fun build() = uriComponentsBuilder.encode().build()
@@ -36,9 +34,7 @@ class URIQueryBuilder private constructor(
     }
 
     fun removeParam(name: String): URIQueryBuilder {
-        uriComponentsBuilder
-            .replaceQueryParam(name)
-            .replaceQueryParam(getHiddenParam(name))
+        uriComponentsBuilder.replaceQueryParam(name)
         return this
     }
 

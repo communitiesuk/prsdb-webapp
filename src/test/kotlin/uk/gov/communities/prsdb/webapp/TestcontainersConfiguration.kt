@@ -6,17 +6,12 @@ import org.springframework.context.annotation.Bean
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
-import org.testcontainers.utility.MountableFile
 
 @TestConfiguration(proxyBeanMethods = false)
 class TestcontainersConfiguration {
     @Bean
     @ServiceConnection
-    fun postgresContainer(): PostgreSQLContainer<*> =
-        PostgreSQLContainer(DockerImageName.parse("postgres:latest")).withCopyFileToContainer(
-            MountableFile.forClasspathResource("db/migrations/data/local_authorities/local_authorities.csv"),
-            "/data/local_authorities.csv",
-        )
+    fun postgresContainer(): PostgreSQLContainer<*> = PostgreSQLContainer(DockerImageName.parse("postgres:latest"))
 
     @Bean
     @ServiceConnection(name = "redis")

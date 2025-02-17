@@ -9,6 +9,7 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.helpers.URIQueryBuilder
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.LandlordSearchRequestModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.PropertySearchRequestModel
@@ -51,7 +52,7 @@ class SearchRegisterController(
             landlordService.searchForLandlords(
                 searchRequest.searchTerm!!,
                 principal.name,
-                searchRequest.restrictToLA,
+                searchRequest.restrictToLA ?: false,
                 requestedPageIndex = page - 1,
             )
 
@@ -96,7 +97,8 @@ class SearchRegisterController(
             propertyOwnershipService.searchForProperties(
                 searchRequest.searchTerm!!,
                 principal.name,
-                searchRequest.restrictToLA,
+                searchRequest.restrictToLA ?: false,
+                searchRequest.restrictToLicenses ?: LicensingType.entries,
                 requestedPageIndex = page - 1,
             )
 

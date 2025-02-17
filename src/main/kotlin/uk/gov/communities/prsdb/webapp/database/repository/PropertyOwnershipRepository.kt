@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 
@@ -37,13 +38,14 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
             "FROM property_ownership po " +
             "JOIN registration_number r ON po.registration_number_id = r.id " +
             "WHERE po.is_active AND r.number = :searchPRN " +
-            LA_FILTER,
+            FILTERS,
         nativeQuery = true,
     )
     fun searchMatchingPRN(
         @Param("searchPRN") searchPRN: Long,
         @Param("laUserBaseId") laUserBaseId: String,
         @Param("restrictToLA") restrictToLA: Boolean = false,
+        @Param("restrictToLicenses") restrictToLicenses: Collection<LicensingType> = LicensingType.entries,
         pageable: Pageable,
     ): Page<PropertyOwnership>
 
@@ -53,13 +55,14 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
             "JOIN property p ON po.property_id = p.id " +
             "JOIN address a ON p.address_id = a.id " +
             "WHERE po.is_active AND a.uprn = :searchUPRN " +
-            LA_FILTER,
+            FILTERS,
         nativeQuery = true,
     )
     fun searchMatchingUPRN(
         @Param("searchUPRN") searchUPRN: Long,
         @Param("laUserBaseId") laUserBaseId: String,
         @Param("restrictToLA") restrictToLA: Boolean = false,
+        @Param("restrictToLicenses") restrictToLicenses: Collection<LicensingType> = LicensingType.entries,
         pageable: Pageable,
     ): Page<PropertyOwnership>
 
@@ -69,7 +72,7 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
             "JOIN property p ON po.property_id = p.id " +
             "JOIN address a ON p.address_id = a.id " +
             "WHERE po.is_active AND a.single_line_address %> :searchTerm " +
-            LA_FILTER +
+            FILTERS +
             "ORDER BY a.single_line_address <->> :searchTerm",
         nativeQuery = true,
     )
@@ -77,10 +80,14 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
         @Param("searchTerm") searchTerm: String,
         @Param("laUserBaseId") laUserBaseId: String,
         @Param("restrictToLA") restrictToLA: Boolean = false,
+        @Param("restrictToLicenses") restrictToLicenses: Collection<LicensingType> = LicensingType.entries,
         pageable: Pageable,
     ): Page<PropertyOwnership>
 
     companion object {
+        private const val NO_LICENCE_TYPE =
+            "#{T(uk.gov.communities.prsdb.webapp.constants.enums.LicensingType).NO_LICENSING}"
+
         // Determines whether the property's address is in the LA user's LA
         private const val LA_FILTER =
             """
@@ -95,5 +102,17 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
                   WHERE lau.subject_identifier = :laUserBaseId)
                  OR NOT :restrictToLA) 
             """
+
+        private const val LICENSE_FILTER =
+            """
+            AND ((SELECT l.license_type 
+                  FROM license l
+                  WHERE po.license_id = l.id)
+                 IN :restrictToLicenses
+                 OR po.license_id IS NULL 
+                    AND :${NO_LICENCE_TYPE} IN :restrictToLicenses)
+            """
+
+        private const val FILTERS = LA_FILTER + LICENSE_FILTER
     }
 }
