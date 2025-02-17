@@ -52,25 +52,30 @@ class LandlordRegistrationJourney(
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
-    override val initialStepId = LandlordRegistrationStepId.VerifyIdentity
-    override val steps =
-        setOf(
-            verifyIdentityStep(),
-            nameStep(),
-            dateOfBirthStep(),
-            confirmIdentityStep(),
-            emailStep(),
-            phoneNumberStep(),
-            countryOfResidenceStep(),
-            lookupAddressStep(),
-            selectAddressStep(addressLookupService, addressDataService),
-            manualAddressStep(),
-            internationalAddressStep(),
-            lookupContactAddressStep(),
-            selectContactAddressStep(addressLookupService, addressDataService),
-            manualContactAddressStep(),
-            checkAnswersStep(addressDataService),
-            declarationStep(journeyDataService, landlordService, addressDataService, emailNotificationService),
+    final override val initialStepId = LandlordRegistrationStepId.VerifyIdentity
+
+    override val sections =
+        // TODO PRSD-859 - these should be arranged into an appropriate set of sections/tasks
+        createSingleSectionWithSingleTaskFromSteps(
+            initialStepId,
+            setOf(
+                verifyIdentityStep(),
+                nameStep(),
+                dateOfBirthStep(),
+                confirmIdentityStep(),
+                emailStep(),
+                phoneNumberStep(),
+                countryOfResidenceStep(),
+                lookupAddressStep(),
+                selectAddressStep(addressLookupService, addressDataService),
+                manualAddressStep(),
+                internationalAddressStep(),
+                lookupContactAddressStep(),
+                selectContactAddressStep(addressLookupService, addressDataService),
+                manualContactAddressStep(),
+                checkAnswersStep(addressDataService),
+                declarationStep(journeyDataService, landlordService, addressDataService, emailNotificationService),
+            ),
         )
 
     private fun verifyIdentityStep() =

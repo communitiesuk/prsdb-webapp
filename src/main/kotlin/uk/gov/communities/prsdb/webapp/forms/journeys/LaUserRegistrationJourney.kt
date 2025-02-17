@@ -24,13 +24,17 @@ class LaUserRegistrationJourney(
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
-    override val initialStepId: RegisterLaUserStepId = RegisterLaUserStepId.LandingPage
-    override val steps: Set<Step<RegisterLaUserStepId>> =
-        setOf(
-            landingPageStep(),
-            registerUserStep(),
-            emailStep(),
-            checkAnswersStep(invitationService),
+    final override val initialStepId: RegisterLaUserStepId = RegisterLaUserStepId.LandingPage
+
+    override val sections =
+        createSingleSectionWithSingleTaskFromSteps(
+            initialStepId,
+            setOf(
+                landingPageStep(),
+                registerUserStep(),
+                emailStep(),
+                checkAnswersStep(invitationService),
+            ),
         )
 
     private fun landingPageStep() =

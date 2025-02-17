@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Co
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
-import uk.gov.communities.prsdb.webapp.forms.tasks.RegisterPropertyMultiTaskTransaction
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
@@ -31,9 +30,6 @@ class RegisterPropertyControllerTests(
 
     @MockBean
     lateinit var propertyOwnershipService: PropertyOwnershipService
-
-    @MockBean
-    lateinit var registrationTaskListService: RegisterPropertyMultiTaskTransaction
 
     @BeforeEach
     fun setupMocks() {

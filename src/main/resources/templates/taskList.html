@@ -1,0 +1,23 @@
+<!--/*@thymesVar id="taskSections" type="List<TaskSectionViewModel>"*/-->
+<!--/*@thymesVar id="pageHeading" type="String"*/-->
+<!--/*@thymesVar id="subtitle" type="String"*/-->
+<!--/*@thymesVar id="rootTaskId" type="String"*/-->
+<!DOCTYPE html>
+<html>
+<body th:replace="~{fragments/layout :: layout(#{${taskListViewModel.title}}, ~{::body/content()}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <th:block id="page-contents"
+              th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <header id="header">
+            <h1 class="govuk-heading-l" th:text="#{${taskListViewModel.pageHeading}}">
+                registerProperty.taskList.heading
+            </h1>
+            <p class="govuk-body" th:text="#{${taskListViewModel.subtitle}}"></p>
+        </header>
+        <section th:each="section, iteratorStatus: ${taskListViewModel.taskSections}">
+            <div th:replace="~{fragments/taskList/sectionTaskList :: sectionTaskList(${section}, ${iteratorStatus.count}, ${taskListViewModel.rootTaskId})}"></div>
+        </section>
+    </th:block>
+</main>
+</body>
+</html>
