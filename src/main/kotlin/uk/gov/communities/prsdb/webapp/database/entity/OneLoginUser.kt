@@ -6,4 +6,4 @@ import jakarta.persistence.Id
 @Entity
 class OneLoginUser(
     @Id val id: String = "",
-) : ModifiableAuditableEntity()
+) : AuditableEntity()
