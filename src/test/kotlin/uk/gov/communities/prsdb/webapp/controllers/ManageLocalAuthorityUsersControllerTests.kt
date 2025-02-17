@@ -24,8 +24,8 @@ import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Compan
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthorityUser
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createOneLoginUser
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createdLoggedInUserModel
+import uk.gov.communities.prsdb.webapp.mockObjects.MockOneLoginUserData.Companion.createOneLoginUser
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.emailModels.EmailTemplateModel
@@ -216,7 +216,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .thenReturn(
                 LocalAuthorityUserDataModel(
                     DEFAULT_LA_USER_ID,
-                    baseUser.name,
+                    localAuthorityUser.name,
                     localAuthority.name,
                     localAuthorityUser.isManager,
                 ),
@@ -286,7 +286,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .thenReturn(
                 LocalAuthorityUserDataModel(
                     DEFAULT_LA_USER_ID,
-                    baseUser.name,
+                    localAuthorityUser.name,
                     localAuthority.name,
                     localAuthorityUser.isManager,
                 ),
@@ -330,7 +330,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .thenReturn(
                 LocalAuthorityUserDataModel(
                     DEFAULT_LA_USER_ID,
-                    baseUser.name,
+                    localAuthorityUser.name,
                     localAuthority.name,
                     localAuthorityUser.isManager,
                 ),

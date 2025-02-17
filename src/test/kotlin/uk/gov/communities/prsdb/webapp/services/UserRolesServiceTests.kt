@@ -5,12 +5,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.whenever
-import org.springframework.test.util.ReflectionTestUtils
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
-import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData
+import uk.gov.communities.prsdb.webapp.mockObjects.MockOneLoginUserData
 
 class UserRolesServiceTests {
     private lateinit var landlordRepository: LandlordRepository
@@ -24,24 +23,16 @@ class UserRolesServiceTests {
         userRolesService = UserRolesService(landlordRepository, localAuthorityUserRepository)
     }
 
-    fun createOneLoginUser(username: String): OneLoginUser {
-        val user = OneLoginUser()
-        ReflectionTestUtils.setField(user, "name", username)
-        ReflectionTestUtils.setField(user, "id", username.lowercase().replace(" ", "-"))
-        return user
-    }
-
     @Test
     fun `getRolesForSubjectId returns ROLE_LANDLORD for a landlord user`() {
         // Arrange
-        val baseUser = createOneLoginUser("Test User 1")
-        val user = Landlord()
-        ReflectionTestUtils.setField(user, "baseUser", baseUser)
-        whenever(landlordRepository.findByBaseUser_Id("test-user-1"))
+        val baseUser = MockOneLoginUserData.createOneLoginUser()
+        val user = MockLandlordData.createLandlord(baseUser)
+        whenever(landlordRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
-        val roles = userRolesService.getRolesForSubjectId("test-user-1")
+        val roles = userRolesService.getRolesForSubjectId(baseUser.id)
 
         // Assert
         Assertions.assertEquals(1, roles.size)
@@ -51,15 +42,14 @@ class UserRolesServiceTests {
     @Test
     fun `getRolesForSubjectId returns ROLE_LA_ADMIN for a local authority manager`() {
         // Arrange
-        val baseUser = createOneLoginUser("Test User 1")
-        val user = LocalAuthorityUser()
-        ReflectionTestUtils.setField(user, "baseUser", baseUser)
-        ReflectionTestUtils.setField(user, "isManager", true)
-        whenever(localAuthorityUserRepository.findByBaseUser_Id("test-user-1"))
+        val baseUser = MockOneLoginUserData.createOneLoginUser()
+        val user = MockLocalAuthorityData.createLocalAuthorityUser(baseUser, isManager = true)
+
+        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
-        val roles = userRolesService.getRolesForSubjectId("test-user-1")
+        val roles = userRolesService.getRolesForSubjectId(baseUser.id)
 
         // Assert
         Assertions.assertEquals(2, roles.size)
@@ -70,15 +60,14 @@ class UserRolesServiceTests {
     @Test
     fun `getRolesForSubjectId returns ROLE_LA_USER for a standard local authority user`() {
         // Arrange
-        val baseUser = createOneLoginUser("Test User 1")
-        val user = LocalAuthorityUser()
-        ReflectionTestUtils.setField(user, "baseUser", baseUser)
-        ReflectionTestUtils.setField(user, "isManager", false)
-        whenever(localAuthorityUserRepository.findByBaseUser_Id("test-user-1"))
+        val baseUser = MockOneLoginUserData.createOneLoginUser()
+        val user = MockLocalAuthorityData.createLocalAuthorityUser(baseUser, isManager = false)
+
+        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
-        val roles = userRolesService.getRolesForSubjectId("test-user-1")
+        val roles = userRolesService.getRolesForSubjectId(baseUser.id)
 
         // Assert
         Assertions.assertEquals(1, roles.size)
