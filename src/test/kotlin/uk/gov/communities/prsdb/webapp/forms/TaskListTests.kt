@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyWithTaskList
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.tasks.TaskListViewModelFactory
-import uk.gov.communities.prsdb.webapp.models.viewModels.TaskSectionViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.TaskListViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import kotlin.test.Test
 
@@ -174,8 +174,8 @@ class TaskListTests {
 
             // Act
             testJourney.populateModelAndGetTaskListViewName(model)
-            val sections = model["taskSections"] as List<TaskSectionViewModel>
-            val taskList = sections.single().tasks
+            val viewModel = model["taskListViewModel"] as TaskListViewModel
+            val taskList = viewModel.taskSections.single().tasks
 
             // Assert
             assertIterableEquals(
@@ -198,8 +198,8 @@ class TaskListTests {
 
             // Act
             testJourney.populateModelAndGetTaskListViewName(model)
-            val sections = model["taskSections"] as List<TaskSectionViewModel>
-            val taskList = sections.single().tasks
+            val viewModel = model["taskListViewModel"] as TaskListViewModel
+            val taskList = viewModel.taskSections.single().tasks
 
             // Assert
             assertIterableEquals(
@@ -264,8 +264,8 @@ class TaskListTests {
 
             // Act
             testJourney.populateModelAndGetTaskListViewName(model)
-            val sections = model["taskSections"] as List<TaskSectionViewModel>
-            val taskList = sections.single().tasks
+            val viewModel = model["taskListViewModel"] as TaskListViewModel
+            val taskList = viewModel.taskSections.single().tasks
 
             // Assert
             assertIterableEquals(
@@ -287,8 +287,8 @@ class TaskListTests {
 
             // Act
             testJourney.populateModelAndGetTaskListViewName(model)
-            val sections = model["taskSections"] as List<TaskSectionViewModel>
-            val taskList = sections.single().tasks
+            val viewModel = model["taskListViewModel"] as TaskListViewModel
+            val taskList = viewModel.taskSections.single().tasks
 
             // Assert
             assertIterableEquals(
@@ -310,8 +310,8 @@ class TaskListTests {
 
             // Act
             testJourney.populateModelAndGetTaskListViewName(model)
-            val sections = model["taskSections"] as List<TaskSectionViewModel>
-            val taskList = sections.single().tasks
+            val viewModel = model["taskListViewModel"] as TaskListViewModel
+            val taskList = viewModel.taskSections.single().tasks
 
             // Assert
             assertIterableEquals(
@@ -370,7 +370,8 @@ class TaskListTests {
 
             // Act
             testJourney.populateModelAndGetTaskListViewName(model)
-            val sections = model["taskSections"] as List<TaskSectionViewModel>
+            val viewModel = model["taskListViewModel"] as TaskListViewModel
+            val sections = viewModel.taskSections
 
             // Assert
             assertEquals(
@@ -387,8 +388,8 @@ class TaskListTests {
 
             // Act
             testJourney.populateModelAndGetTaskListViewName(model)
-            val sections = model["taskSections"] as List<TaskSectionViewModel>
-            val taskList = sections.first().tasks
+            val viewModel = model["taskListViewModel"] as TaskListViewModel
+            val taskList = viewModel.taskSections.first().tasks
 
             // Assert
             assertEquals(
