@@ -11,3 +11,5 @@ val internationalPlaceNameCSVFiles =
     )
 
 val INTERNATIONAL_PLACE_NAMES = DataLoader.loadPlaceNames(internationalPlaceNameCSVFiles)
+
+const val ENGLAND_OR_WALES = "England or Wales"

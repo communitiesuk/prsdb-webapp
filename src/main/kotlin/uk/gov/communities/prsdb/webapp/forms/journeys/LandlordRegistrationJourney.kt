@@ -474,7 +474,8 @@ class LandlordRegistrationJourney(
                 phoneNumber = LandlordRegistrationJourneyDataHelper.getPhoneNumber(journeyData)!!,
                 addressDataModel =
                     LandlordRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!,
-                internationalAddress =
+                countryOfResidence = LandlordRegistrationJourneyDataHelper.getCountryOfResidence(journeyData),
+                nonEnglandOrWalesAddress =
                     LandlordRegistrationJourneyDataHelper.getInternationalAddress(journeyData),
                 dateOfBirth = LandlordRegistrationJourneyDataHelper.getDOB(journeyData)!!,
             )

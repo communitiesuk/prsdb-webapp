@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
+import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
@@ -40,7 +41,7 @@ class LandlordViewModelTests {
     @Test
     fun `UK based landlord personal details are in the correct order`() {
         // Arrange
-        val testLandlord = MockLandlordData.createLandlord(internationalAddress = null)
+        val testLandlord = MockLandlordData.createLandlord(nonEnglandOrWalesAddress = null)
 
         // Act
         val viewModel = LandlordViewModel(testLandlord)
@@ -68,7 +69,8 @@ class LandlordViewModelTests {
         // Arrange
         val testLandlord =
             MockLandlordData.createLandlord(
-                internationalAddress = "1600 Pennsylvania Avenue, Washington DC, United States of America",
+                nonEnglandOrWalesAddress = "1600 Pennsylvania Avenue, Washington DC, United States of America",
+                countryOfResidence = "USA",
             )
 
         // Act
@@ -211,13 +213,16 @@ class LandlordViewModelTests {
 
     @ParameterizedTest
     @ValueSource(booleans = [true, false])
-    fun `Landlord personal details shows the correct residency`(isUkResident: Boolean) {
+    fun `Landlord personal details shows the correct residency`(isEnglandOrWalesResident: Boolean) {
         // Arrange
         val testLandlord =
-            if (isUkResident) {
-                MockLandlordData.createLandlord(internationalAddress = null)
+            if (isEnglandOrWalesResident) {
+                MockLandlordData.createLandlord(nonEnglandOrWalesAddress = null, countryOfResidence = ENGLAND_OR_WALES)
             } else {
-                MockLandlordData.createLandlord(internationalAddress = "1600 Pennsylvania Avenue, Washington DC, United States of America")
+                MockLandlordData.createLandlord(
+                    nonEnglandOrWalesAddress = "1600 Pennsylvania Avenue, Washington DC, United States of America",
+                    countryOfResidence = "USA",
+                )
             }
 
         // Act
@@ -228,7 +233,7 @@ class LandlordViewModelTests {
             viewModel.personalDetails
                 .single { it.fieldHeading == "landlordDetails.personalDetails.ukResident" }
                 .fieldValue
-        assertEquals(displayedResidency, isUkResident)
+        assertEquals(displayedResidency, isEnglandOrWalesResident)
     }
 
     @Test
@@ -249,12 +254,12 @@ class LandlordViewModelTests {
     }
 
     @Test
-    @Disabled
-    fun `Non UK landlord personal details shows the correct country of residency`() {
+    fun `Non England or Wales resident landlord personal details shows the correct country of residency`() {
         // Arrange
+        val countryOfResidence = "Barbados"
         val testLandlord =
             MockLandlordData.createLandlord(
-                internationalAddress = "1600 Pennsylvania Avenue, Washington DC, United States of America",
+                countryOfResidence = countryOfResidence,
             )
 
         // Act
@@ -266,14 +271,14 @@ class LandlordViewModelTests {
                 .single { it.fieldHeading == "landlordDetails.personalDetails.country" }
                 .getConvertedFieldValue()
 
-        TODO("PRSD-742")
+        assertEquals(country, countryOfResidence)
     }
 
     @Test
     fun `Non UK landlord personal details shows the residency address`() {
         // Arrange
         val oneLineAddress = "A test address"
-        val testLandlord = MockLandlordData.createLandlord(internationalAddress = oneLineAddress)
+        val testLandlord = MockLandlordData.createLandlord(nonEnglandOrWalesAddress = oneLineAddress, countryOfResidence = "USA")
 
         // Act
         val viewModel = LandlordViewModel(testLandlord)
@@ -293,7 +298,8 @@ class LandlordViewModelTests {
         val testLandlord =
             MockLandlordData.createLandlord(
                 address = Address(AddressDataModel(oneLineAddress)),
-                internationalAddress = "1600 Pennsylvania Avenue, Washington DC, United States of America",
+                nonEnglandOrWalesAddress = "1600 Pennsylvania Avenue, Washington DC, United States of America",
+                countryOfResidence = "USA",
             )
 
         // Act
