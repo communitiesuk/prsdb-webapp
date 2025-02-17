@@ -70,7 +70,7 @@ class JourneyTests {
         validator: Validator,
         journeyDataService: JourneyDataService,
     ) : Journey<TestStepId>(journeyType, validator, journeyDataService) {
-        override val sections: List<JourneySection<TestStepId>> = unitarySetOfSteps(initialStepId, steps)
+        override val sections: List<JourneySection<TestStepId>> = getAsOneSectionWithOneTask(initialStepId, steps)
 
         var initialisationCount = 0
 

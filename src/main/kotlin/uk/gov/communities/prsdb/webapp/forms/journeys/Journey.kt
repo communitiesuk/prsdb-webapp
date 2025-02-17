@@ -175,7 +175,7 @@ abstract class Journey<T : StepId>(
             TaskStatus.CANNOT_START_YET
         }
 
-    protected fun <T : StepId> unitarySetOfSteps(
+    protected fun <T : StepId> getAsOneSectionWithOneTask(
         initialStepId: T,
         steps: Set<Step<T>>,
     ): List<JourneySection<T>> = listOf(JourneySection.withOneTask(JourneyTask(initialStepId, steps)))

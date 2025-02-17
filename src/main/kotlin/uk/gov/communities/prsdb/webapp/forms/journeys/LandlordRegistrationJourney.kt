@@ -55,7 +55,8 @@ class LandlordRegistrationJourney(
     final override val initialStepId = LandlordRegistrationStepId.VerifyIdentity
 
     override val sections =
-        unitarySetOfSteps(
+        // TODO PRSD-859 - these should be arranged into an appropriate set of sections/tasks
+        getAsOneSectionWithOneTask(
             initialStepId,
             setOf(
                 verifyIdentityStep(),
