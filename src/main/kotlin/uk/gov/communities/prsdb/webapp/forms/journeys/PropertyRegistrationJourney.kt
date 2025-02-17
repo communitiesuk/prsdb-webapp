@@ -17,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Co
 import uk.gov.communities.prsdb.webapp.forms.pages.AlreadyRegisteredPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationCheckAnswersPage
-import uk.gov.communities.prsdb.webapp.forms.pages.RegisterPropertyTaskListPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
@@ -56,57 +55,110 @@ import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 class PropertyRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
-    addressLookupService: AddressLookupService,
-    addressDataService: AddressDataService,
-    propertyRegistrationService: PropertyRegistrationService,
-    localAuthorityService: LocalAuthorityService,
-    landlordService: LandlordService,
-    session: HttpSession,
-    confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
-) : Journey<RegisterPropertyStepId>(
+    val addressLookupService: AddressLookupService,
+    val addressDataService: AddressDataService,
+    val propertyRegistrationService: PropertyRegistrationService,
+    val localAuthorityService: LocalAuthorityService,
+    val landlordService: LandlordService,
+    val session: HttpSession,
+    val confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
+) : JourneyWithTaskList<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
-    override val initialStepId = RegisterPropertyStepId.TaskList
+    override val initialStepId = RegisterPropertyStepId.LookupAddress
 
-    override val steps =
-        setOf(
-            taskListStep(),
-            lookupAddressStep(),
-            selectAddressStep(addressLookupService, addressDataService, propertyRegistrationService),
-            alreadyRegisteredStep(),
-            manualAddressStep(),
-            localAuthorityStep(localAuthorityService),
-            propertyTypeStep(),
-            ownershipTypeStep(),
-            occupancyStep(),
-            numberOfHouseholdsStep(),
-            numberOfPeopleStep(),
-            licensingTypeStep(),
-            selectiveLicenceStep(),
-            hmoMandatoryLicenceStep(),
-            hmoAdditionalLicenceStep(),
-            landlordTypeStep(),
-            checkAnswersStep(
-                addressDataService,
-                localAuthorityService,
+    override val taskListUrlSegment: String = "task-list"
+
+    override val sections =
+        listOf(
+            JourneySection(registerPropertyTasks(), "registerProperty.taskList.register.heading"),
+            JourneySection(checkAndSubmitPropertiesTasks(), "registerProperty.taskList.checkAndSubmit.heading"),
+        )
+
+    override val taskListFactory =
+        getTaskListViewModelFactory(
+            "registerProperty.title",
+            "registerProperty.taskList.heading",
+            "registerProperty.taskList.subtitle",
+            "register-property-task",
+        )
+
+    private fun registerPropertyTasks(): List<JourneyTask<RegisterPropertyStepId>> =
+        listOf(
+            addressTask(),
+            JourneyTask.withOneStep(
+                propertyTypeStep(),
+                "registerProperty.taskList.register.selectType",
             ),
-            declarationStep(
-                journeyDataService,
-                propertyRegistrationService,
-                addressDataService,
-                landlordService,
-                confirmationEmailSender,
-                session,
+            JourneyTask.withOneStep(
+                ownershipTypeStep(),
+                "registerProperty.taskList.register.selectOwnership",
+            ),
+            licensingTask(),
+            occupancyTask(),
+            JourneyTask.withOneStep(
+                landlordTypeStep(),
+                "registerProperty.taskList.register.selectOperation",
             ),
         )
 
-    private fun taskListStep() =
-        Step(
-            id = RegisterPropertyStepId.TaskList,
-            page = RegisterPropertyTaskListPage(),
-            nextAction = { _, _ -> Pair(RegisterPropertyStepId.LookupAddress, null) },
+    private fun checkAndSubmitPropertiesTasks(): List<JourneyTask<RegisterPropertyStepId>> =
+        listOf(
+            JourneyTask.withOneStep(
+                checkAnswersStep(
+                    addressDataService,
+                    localAuthorityService,
+                ),
+                "registerProperty.taskList.checkAndSubmit.checkAnswers",
+            ),
+            JourneyTask.withOneStep(
+                declarationStep(
+                    journeyDataService,
+                    propertyRegistrationService,
+                    addressDataService,
+                    landlordService,
+                    confirmationEmailSender,
+                    session,
+                ),
+            ),
+        )
+
+    private fun addressTask() =
+        JourneyTask(
+            RegisterPropertyStepId.LookupAddress,
+            setOf(
+                lookupAddressStep(),
+                selectAddressStep(addressLookupService, addressDataService, propertyRegistrationService),
+                alreadyRegisteredStep(),
+                manualAddressStep(),
+                localAuthorityStep(localAuthorityService),
+            ),
+            "registerProperty.taskList.register.addAddress",
+        )
+
+    private fun licensingTask() =
+        JourneyTask(
+            RegisterPropertyStepId.LicensingType,
+            setOf(
+                licensingTypeStep(),
+                selectiveLicenceStep(),
+                hmoMandatoryLicenceStep(),
+                hmoAdditionalLicenceStep(),
+            ),
+            "registerProperty.taskList.register.addLicensing",
+        )
+
+    private fun occupancyTask() =
+        JourneyTask(
+            RegisterPropertyStepId.Occupancy,
+            setOf(
+                occupancyStep(),
+                numberOfHouseholdsStep(),
+                numberOfPeopleStep(),
+            ),
+            "registerProperty.taskList.register.addTenancyInfo",
         )
 
     private fun lookupAddressStep() =
@@ -620,6 +672,20 @@ class PropertyRegistrationJourney(
             return CONFIRMATION_PAGE_PATH_SEGMENT
         } catch (exception: EntityExistsException) {
             return RegisterPropertyStepId.AlreadyRegistered.urlPathSegment
+        }
+    }
+
+    fun initialiseJourneyDataIfNotInitialised(principalName: String) {
+        val data = journeyDataService.getJourneyDataFromSession()
+        if (data.isEmpty()) {
+            /* TODO PRSD-589 Currently this looks the context up from the database,
+                takes the id, then passes the id to another method which retrieves it
+                from the database. When this is reworked, we should just pass the whole
+                context to an overload of journeyDataService.loadJourneyDataIntoSession().*/
+            val contextId = journeyDataService.getContextId(principalName, journeyType)
+            if (contextId != null) {
+                journeyDataService.loadJourneyDataIntoSession(contextId)
+            }
         }
     }
 }

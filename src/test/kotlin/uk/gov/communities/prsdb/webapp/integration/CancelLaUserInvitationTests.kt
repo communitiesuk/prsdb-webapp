@@ -4,6 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLaUserInvitationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLaUserInvitationSuccessPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage
@@ -29,7 +30,7 @@ class CancelLaUserInvitationTests : IntegrationTest() {
 
         // The success page confirms the user is deleted
         assertThat(successPage.confirmationBanner).containsText("You've cancelled invited.user@example.com's invitation from ISLE OF MAN")
-        successPage.returnButton.click()
+        successPage.returnButton.clickAndWait()
         manageUsersPage = assertPageIs(page, ManageLaUsersPage::class)
 
         // The invited user is no longer in the table

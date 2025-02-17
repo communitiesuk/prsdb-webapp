@@ -92,7 +92,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         // Start page (not a journey step, but it is how the user accesses the journey)
         val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
         assertThat(registerPropertyStartPage.heading).containsText("Enter your property details")
-        registerPropertyStartPage.startButton.click()
+        registerPropertyStartPage.startButton.clickAndWait()
         val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
 
         // Task list page (part of the journey to support redirects)
@@ -205,7 +205,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
 
         // go to dashboard
-        confirmationPage.clickGoToDashboard()
+        confirmationPage.goToDashboardButton.clickAndWait()
 
         // TODO PRSD-670: Replace with dashboard page
         assertEquals("/", URI(page.url()).path)
@@ -223,7 +223,6 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             assert(taskListPage.taskHasStatus("Add any property licensing information", "Complete"))
             assert(taskListPage.taskHasStatus("Add any tenancy and household information", "Not yet started"))
             assert(taskListPage.taskHasStatus("Select how you're operating for this property", "Cannot start yet"))
-            assert(taskListPage.taskHasStatus("Add any interested parties or additional landlords", "Cannot start yet"))
         }
 
         @Test
@@ -236,7 +235,6 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             assert(taskListPage.taskHasStatus("Add any property licensing information", "In progress"))
             assert(taskListPage.taskHasStatus("Add any tenancy and household information", "Cannot start yet"))
             assert(taskListPage.taskHasStatus("Select how you're operating for this property", "Cannot start yet"))
-            assert(taskListPage.taskHasStatus("Add any interested parties or additional landlords", "Cannot start yet"))
         }
     }
 
@@ -263,7 +261,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Clicking Search Again navigates to the previous step`(page: Page) {
             val selectAddressPage = navigator.goToPropertyRegistrationSelectAddressPage()
-            selectAddressPage.searchAgain.click()
+            selectAddressPage.searchAgain.clickAndWait()
             assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
         }
 

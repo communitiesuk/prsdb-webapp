@@ -25,5 +25,5 @@ abstract class SearchRegisterBasePage(
 
     fun getErrorMessageText() = getErrorMessage().innerText()
 
-    fun getErrorMessage(isVisible: Boolean = true) = getComponent(page, "#no-results", isVisible = isVisible)
+    fun getErrorMessage() = getComponent(page, "#no-results")
 }

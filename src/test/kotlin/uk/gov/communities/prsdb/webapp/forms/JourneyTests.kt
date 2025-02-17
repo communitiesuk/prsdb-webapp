@@ -33,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.forms.journeys.Journey
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.journeys.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -61,11 +62,13 @@ class JourneyTests {
 
     class TestJourney(
         journeyType: JourneyType,
-        override val steps: Set<Step<TestStepId>>,
+        steps: Set<Step<TestStepId>>,
         override val initialStepId: TestStepId,
         validator: Validator,
         journeyDataService: JourneyDataService,
-    ) : Journey<TestStepId>(journeyType, validator, journeyDataService)
+    ) : Journey<TestStepId>(journeyType, validator, journeyDataService) {
+        override val sections: List<JourneySection<TestStepId>> = createSingleSectionWithSingleTaskFromSteps(initialStepId, steps)
+    }
 
     class TestFormModel : FormModel {
         @NotNull

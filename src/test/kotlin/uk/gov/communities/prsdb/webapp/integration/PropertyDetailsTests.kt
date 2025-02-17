@@ -44,7 +44,7 @@ class PropertyDetailsTests : IntegrationTest() {
         @Test
         fun `in the key details section the landlord name link goes the landlord view of landlord details`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
-            detailsPage.clickLandlordNameLinkFromKeyDetails("Alexander Smith")
+            detailsPage.getLandlordNameLinkFromKeyDetails("Alexander Smith").clickAndWait()
 
             assertPageIs(page, LandlordDetailsPage::class)
             Assertions.assertEquals("/landlord-details", URI(page.url()).path)
@@ -55,7 +55,7 @@ class PropertyDetailsTests : IntegrationTest() {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
             detailsPage.goToLandlordDetails()
 
-            detailsPage.clickLandlordLinkFromLandlordDetails("Alexander Smith")
+            detailsPage.getLandlordLinkFromLandlordDetails("Alexander Smith").clickAndWait()
 
             assertPageIs(page, LandlordDetailsPage::class)
             Assertions.assertEquals("/landlord-details", URI(page.url()).path)
@@ -64,7 +64,7 @@ class PropertyDetailsTests : IntegrationTest() {
         @Test
         fun `the back link returns to the dashboard`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
-            detailsPage.clickBackLink()
+            detailsPage.backLink.clickAndWait()
 
             // TODO: PRSD-647 add link to the dashboard
             Assertions.assertEquals("/property-details/1", URI(page.url()).path)
@@ -73,7 +73,7 @@ class PropertyDetailsTests : IntegrationTest() {
         @Test
         fun `the delete button redirects to the delete record page`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
-            detailsPage.deleteButton.click()
+            detailsPage.deleteButton.clickAndWait()
 
             Assertions.assertEquals("/property-details/delete-record", URI(page.url()).path)
         }
@@ -109,7 +109,7 @@ class PropertyDetailsTests : IntegrationTest() {
         @Test
         fun `in the key details section the landlord name link goes the local authority view of landlord details`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
-            detailsPage.clickLandlordNameLinkFromKeyDetails("Alexander Smith")
+            detailsPage.getLandlordNameLinkFromKeyDetails("Alexander Smith").clickAndWait()
 
             assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
             Assertions.assertEquals("/landlord-details/1", URI(page.url()).path)
@@ -120,7 +120,7 @@ class PropertyDetailsTests : IntegrationTest() {
             val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
             detailsPage.goToLandlordDetails()
 
-            detailsPage.clickLandlordLinkFromLandlordDetails("Alexander Smith")
+            detailsPage.getLandlordLinkFromLandlordDetails("Alexander Smith").clickAndWait()
 
             assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
             Assertions.assertEquals("/landlord-details/1", URI(page.url()).path)
@@ -129,7 +129,7 @@ class PropertyDetailsTests : IntegrationTest() {
         @Test
         fun `the back link returns to the dashboard`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
-            detailsPage.clickBackLink()
+            detailsPage.backLink.clickAndWait()
 
             // TODO: PRSD-647 add link to the dashboard
             Assertions.assertEquals("/local-authority/property-details/1", URI(page.url()).path)

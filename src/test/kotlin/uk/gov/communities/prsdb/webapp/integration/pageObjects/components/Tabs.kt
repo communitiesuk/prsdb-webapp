@@ -5,12 +5,11 @@ import com.microsoft.playwright.Page
 
 class Tabs(
     page: Page,
-    numberOfTabs: Int,
     locator: Locator = page.locator(".govuk-tabs"),
 ) : BaseComponent(locator) {
-    val tabsList = getChildrenComponents(".govuk-tabs__list >> .govuk-tabs__list-item", numberOfTabs)
+    val tabsList = getChildrenComponents(".govuk-tabs__list >> .govuk-tabs__list-item")
 
-    val tabPanels = getChildrenComponents(".govuk-tabs__panel", numberOfTabs)
+    val tabPanels = getChildrenComponents(".govuk-tabs__panel")
 
     var hiddenPanels = tabPanels.filter { it.isHidden }
 
