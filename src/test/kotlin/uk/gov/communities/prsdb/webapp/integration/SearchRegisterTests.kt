@@ -47,18 +47,18 @@ class SearchRegisterTests : IntegrationTest() {
             searchLandlordRegisterPage.searchBar.search("L-CKSQ-3SX9")
             val resultTable = searchLandlordRegisterPage.getResultTable()
 
-            assertThat(resultTable.getHeaderCell(LANDLORD_COL_INDEX)).containsText("Landlord")
+            assertThat(resultTable.headerRow.getCell(LANDLORD_COL_INDEX)).containsText("Landlord")
             assertThat(resultTable.getCell(0, LANDLORD_COL_INDEX)).containsText("Alexander Smith\nL-CKSQ-3SX9")
 
-            assertThat(resultTable.getHeaderCell(ADDRESS_COL_INDEX)).containsText("Contact address")
+            assertThat(resultTable.headerRow.getCell(ADDRESS_COL_INDEX)).containsText("Contact address")
             assertThat(resultTable.getCell(0, ADDRESS_COL_INDEX)).containsText("1 Fictional Road")
 
-            assertThat(resultTable.getHeaderCell(CONTACT_INFO_COL_INDEX)).containsText("Contact information")
+            assertThat(resultTable.headerRow.getCell(CONTACT_INFO_COL_INDEX)).containsText("Contact information")
             assertThat(
                 resultTable.getCell(0, CONTACT_INFO_COL_INDEX),
             ).containsText("7111111111\nalex.surname@example.com")
 
-            assertThat(resultTable.getHeaderCell(LISTED_PROPERTY_COL_INDEX)).containsText("Listed properties")
+            assertThat(resultTable.headerRow.getCell(LISTED_PROPERTY_COL_INDEX)).containsText("Listed properties")
             assertThat(resultTable.getCell(0, LISTED_PROPERTY_COL_INDEX)).containsText("30")
 
             assertTrue(searchLandlordRegisterPage.getErrorMessage().isHidden)
@@ -149,12 +149,12 @@ class SearchRegisterTests : IntegrationTest() {
             val laFilterSelectedHeadingText = filter.getSelectedHeadings().first().innerText()
             assertContains(laFilterSelectedHeadingText, "Show landlords operating in my authority")
             val resultTable = searchLandlordRegisterPage.getResultTable()
-            assertEquals(1, resultTable.countRows())
+            assertEquals(1, resultTable.rows.count())
 
             // Remove LA filter
             searchLandlordRegisterPage.clickComponent(filter.getRemoveFilterTag("Landlords in my authority"))
             assertTrue(filter.getSelectedHeadings().isEmpty())
-            assertTrue(resultTable.countRows() > 1)
+            assertTrue(resultTable.rows.count() > 1)
 
             // Clear all filters
             laFilter.checkCheckbox("true")
@@ -163,7 +163,7 @@ class SearchRegisterTests : IntegrationTest() {
             filter.clearFiltersLink.clickAndWait()
             assertThat(filter.clearFiltersLink).isHidden()
             assertTrue(filter.getNoFiltersSelectedText().isVisible)
-            assertTrue(resultTable.countRows() > 1)
+            assertTrue(resultTable.rows.count() > 1)
         }
 
         @Test
@@ -207,16 +207,16 @@ class SearchRegisterTests : IntegrationTest() {
             searchPropertyRegisterPage.searchBar.search("P-CCCT-GRKQ")
             val resultTable = searchPropertyRegisterPage.getResultTable()
 
-            assertThat(resultTable.getHeaderCell(PROPERTY_COL_INDEX)).containsText("Property address")
+            assertThat(resultTable.headerRow.getCell(PROPERTY_COL_INDEX)).containsText("Property address")
             assertThat(resultTable.getCell(0, PROPERTY_COL_INDEX)).containsText("11 PRSDB Square, EG1 2AK")
 
-            assertThat(resultTable.getHeaderCell(REG_NUM_COL_INDEX)).containsText("Registration number")
+            assertThat(resultTable.headerRow.getCell(REG_NUM_COL_INDEX)).containsText("Registration number")
             assertThat(resultTable.getCell(0, ADDRESS_COL_INDEX)).containsText("P-CCCT-GRKQ")
 
-            assertThat(resultTable.getHeaderCell(LA_COL_INDEX)).containsText("Local authority")
+            assertThat(resultTable.headerRow.getCell(LA_COL_INDEX)).containsText("Local authority")
             assertThat(resultTable.getCell(0, LA_COL_INDEX)).containsText("ISLE OF MAN")
 
-            assertThat(resultTable.getHeaderCell(PROPERTY_LANDLORD_COL_INDEX)).containsText("Registered landlord")
+            assertThat(resultTable.headerRow.getCell(PROPERTY_LANDLORD_COL_INDEX)).containsText("Registered landlord")
             assertThat(resultTable.getCell(0, PROPERTY_LANDLORD_COL_INDEX)).containsText("Alexander Smith")
 
             assertTrue(searchPropertyRegisterPage.getErrorMessage().isHidden)
@@ -315,7 +315,7 @@ class SearchRegisterTests : IntegrationTest() {
             searchPropertyRegisterPage.searchBar.search("Way")
 
             val resultTable = searchPropertyRegisterPage.getResultTable()
-            assertEquals(expectedMatchingPropertyCount, resultTable.countRows())
+            assertEquals(expectedMatchingPropertyCount, resultTable.rows.count())
 
             // Toggle filter
             val filter = searchPropertyRegisterPage.getFilterPanel()
@@ -332,7 +332,7 @@ class SearchRegisterTests : IntegrationTest() {
 
             val laFilterSelectedHeadingText = filter.getSelectedHeadings()[0].innerText()
             assertContains(laFilterSelectedHeadingText, "Show properties in my authority")
-            assertEquals(expectedPropertyInLACount, resultTable.countRows())
+            assertEquals(expectedPropertyInLACount, resultTable.rows.count())
 
             // Apply Selective license filter
             val licenseFilter = filter.getFilterCheckboxes("Property licence")
@@ -341,23 +341,23 @@ class SearchRegisterTests : IntegrationTest() {
 
             val licenseFilterSelectedHeadingText = filter.getSelectedHeadings()[1].innerText()
             assertContains(licenseFilterSelectedHeadingText, "Property licence")
-            assertEquals(expectedPropertyInLAWithSelectiveLicenseCount, resultTable.countRows())
+            assertEquals(expectedPropertyInLAWithSelectiveLicenseCount, resultTable.rows.count())
 
             // Apply No license filter
             licenseFilter.checkCheckbox(LicensingType.NO_LICENSING.name)
             filter.clickApplyFiltersButton()
-            assertEquals(expectedPropertyInLAWithSelectiveOrNoLicenseCount, resultTable.countRows())
+            assertEquals(expectedPropertyInLAWithSelectiveOrNoLicenseCount, resultTable.rows.count())
 
             // Remove LA filter
             searchPropertyRegisterPage.clickComponent(filter.getRemoveFilterTag("Properties in my authority"))
             assertEquals(1, filter.getSelectedHeadings().size)
-            assertEquals(expectedPropertyWithSelectiveOrNoLicenseCount, resultTable.countRows())
+            assertEquals(expectedPropertyWithSelectiveOrNoLicenseCount, resultTable.rows.count())
 
             // Clear all filters
             filter.clearFiltersLink.clickAndWait()
             assertThat(filter.clearFiltersLink).isHidden()
             assertTrue(filter.getNoFiltersSelectedText().isVisible)
-            assertEquals(expectedMatchingPropertyCount, resultTable.countRows())
+            assertEquals(expectedMatchingPropertyCount, resultTable.rows.count())
         }
 
         @Test

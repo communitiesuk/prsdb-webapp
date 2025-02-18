@@ -25,10 +25,10 @@ class LandlordDetailTests : IntegrationTest() {
             detailsPage.goToRegisteredProperties()
 
             assertEquals(detailsPage.getActiveTabPanelId(), "registered-properties")
-            assertThat(detailsPage.table.getHeaderCell(0)).containsText("Property address")
-            assertThat(detailsPage.table.getHeaderCell(1)).containsText("Local authority")
-            assertThat(detailsPage.table.getHeaderCell(2)).containsText("Property licence")
-            assertThat(detailsPage.table.getHeaderCell(3)).containsText("Tenanted")
+            assertThat(detailsPage.table.headerRow.getCell(0)).containsText("Property address")
+            assertThat(detailsPage.table.headerRow.getCell(1)).containsText("Local authority")
+            assertThat(detailsPage.table.headerRow.getCell(2)).containsText("Property licence")
+            assertThat(detailsPage.table.headerRow.getCell(3)).containsText("Tenanted")
         }
     }
 
@@ -48,11 +48,11 @@ class LandlordDetailTests : IntegrationTest() {
             detailsPage.goToRegisteredProperties()
 
             assertEquals(detailsPage.getActiveTabPanelId(), "registered-properties")
-            assertThat(detailsPage.table.getHeaderCell(0)).containsText("Property address")
-            assertThat(detailsPage.table.getHeaderCell(1)).containsText("Registration number")
-            assertThat(detailsPage.table.getHeaderCell(2)).containsText("Local authority")
-            assertThat(detailsPage.table.getHeaderCell(3)).containsText("Licensing type")
-            assertThat(detailsPage.table.getHeaderCell(4)).containsText("Tenanted")
+            assertThat(detailsPage.table.headerRow.getCell(0)).containsText("Property address")
+            assertThat(detailsPage.table.headerRow.getCell(1)).containsText("Registration number")
+            assertThat(detailsPage.table.headerRow.getCell(2)).containsText("Local authority")
+            assertThat(detailsPage.table.headerRow.getCell(3)).containsText("Licensing type")
+            assertThat(detailsPage.table.headerRow.getCell(4)).containsText("Tenanted")
         }
 
         @Test

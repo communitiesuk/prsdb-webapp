@@ -23,9 +23,9 @@ class ManageLAUsersTests : IntegrationTest() {
         val managePage = navigator.goToManageLaUsers(localAuthorityId)
 
         // Header
-        assertThat(managePage.table.getHeaderCell(USERNAME_COL_INDEX)).containsText("Username")
-        assertThat(managePage.table.getHeaderCell(ACCESS_LEVEL_COL_INDEX)).containsText("Access level")
-        assertThat(managePage.table.getHeaderCell(ACCOUNT_STATUS_COL_INDEX)).containsText("Account status")
+        assertThat(managePage.table.headerRow.getCell(USERNAME_COL_INDEX)).containsText("Username")
+        assertThat(managePage.table.headerRow.getCell(ACCESS_LEVEL_COL_INDEX)).containsText("Access level")
+        assertThat(managePage.table.headerRow.getCell(ACCOUNT_STATUS_COL_INDEX)).containsText("Account status")
 
         // Arthur Dent Row
         assertThat(managePage.table.getCell(0, USERNAME_COL_INDEX)).containsText("Arthur Dent")
