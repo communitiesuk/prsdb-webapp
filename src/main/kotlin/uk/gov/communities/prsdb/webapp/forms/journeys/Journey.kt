@@ -74,7 +74,7 @@ abstract class Journey<T : StepId>(
         )
     }
 
-    private fun getSectionHeaderInfo(step: Step<T>): SectionHeaderViewModel? {
+    fun getSectionHeaderInfo(step: Step<T>): SectionHeaderViewModel? {
         if (step.displaySectionHeader) {
             val sectionContainingStep = sections.first { it.isStepInTaskList(step.id) }
             if (sectionContainingStep.headingKey == null) {
