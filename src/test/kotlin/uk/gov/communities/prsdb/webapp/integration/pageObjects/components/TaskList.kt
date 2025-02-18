@@ -18,11 +18,20 @@ class TaskList(
         ) = byIndex(page.locator("html"), index)
     }
 
-    fun clickTask(name: String) = getTask(name).click()
+    fun getTask(name: String) = Task.byName(locator, name)
 
-    fun getTaskStatus(name: String): String =
-        getChildComponent(getTask(name), ".govuk-task-list__status")
-            .textContent()
+    class Task(
+        override val locator: Locator,
+    ) : BaseComponent(locator),
+        ClickAndWaitable {
+        companion object {
+            fun byName(
+                parentLocator: Locator,
+                name: String,
+            ) = Task(parentLocator.locator("li", Locator.LocatorOptions().setHasText(name)))
+        }
 
-    private fun getTask(name: String) = getChildComponent("li", Locator.LocatorOptions().setHasText(name))
+        val statusText: String
+            get() = locator.locator(".govuk-task-list__status").textContent()
+    }
 }
