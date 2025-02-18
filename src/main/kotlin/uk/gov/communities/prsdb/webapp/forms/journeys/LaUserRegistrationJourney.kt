@@ -1,17 +1,23 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
+import jakarta.servlet.http.HttpSession
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.pages.LaUserRegistrationCheckAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.helpers.LaUserRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 
 @Component
@@ -19,6 +25,8 @@ class LaUserRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     invitationService: LocalAuthorityInvitationService,
+    localAuthorityDataService: LocalAuthorityDataService,
+    session: HttpSession,
 ) : Journey<RegisterLaUserStepId>(
         journeyType = JourneyType.LA_USER_REGISTRATION,
         validator = validator,
@@ -33,7 +41,7 @@ class LaUserRegistrationJourney(
                 landingPageStep(),
                 registerUserStep(),
                 emailStep(),
-                checkAnswersStep(invitationService),
+                checkAnswersStep(journeyDataService, invitationService, localAuthorityDataService, session),
             ),
         )
 
@@ -94,22 +102,62 @@ class LaUserRegistrationJourney(
             saveAfterSubmit = false,
         )
 
-    private fun checkAnswersStep(invitationService: LocalAuthorityInvitationService) =
-        Step(
-            id = RegisterLaUserStepId.CheckAnswers,
-            page =
-                LaUserRegistrationCheckAnswersPage(
-                    formModel = CheckAnswersFormModel::class,
-                    templateName = "forms/checkAnswersForm",
-                    content =
-                        mapOf(
-                            "title" to "registerLAUser.title",
-                            "summaryName" to "registerLaUser.checkAnswers.summaryName",
-                            "submitButtonText" to "forms.buttons.confirm",
-                        ),
-                    invitationService,
-                ),
-            handleSubmitAndRedirect = { _, _ -> "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/success" },
-            saveAfterSubmit = false,
-        )
+    private fun checkAnswersStep(
+        journeyDataService: JourneyDataService,
+        invitationService: LocalAuthorityInvitationService,
+        localAuthorityDataService: LocalAuthorityDataService,
+        session: HttpSession,
+    ) = Step(
+        id = RegisterLaUserStepId.CheckAnswers,
+        page =
+            LaUserRegistrationCheckAnswersPage(
+                formModel = CheckAnswersFormModel::class,
+                templateName = "forms/checkAnswersForm",
+                content =
+                    mapOf(
+                        "title" to "registerLAUser.title",
+                        "summaryName" to "registerLaUser.checkAnswers.summaryName",
+                        "submitButtonText" to "forms.buttons.confirm",
+                    ),
+                invitationService,
+            ),
+        handleSubmitAndRedirect = { journeyData, _ ->
+            checkAnswersHandleSubmitAndRedirect(
+                journeyData,
+                journeyDataService,
+                invitationService,
+                localAuthorityDataService,
+                session,
+            )
+        },
+        saveAfterSubmit = false,
+    )
+
+    private fun checkAnswersHandleSubmitAndRedirect(
+        journeyData: JourneyData,
+        journeyDataService: JourneyDataService,
+        invitationService: LocalAuthorityInvitationService,
+        localAuthorityDataService: LocalAuthorityDataService,
+        session: HttpSession,
+    ): String {
+        val token = invitationService.getTokenFromSession()!!
+
+        val localAuthorityUserID =
+            localAuthorityDataService.registerUserAndReturnID(
+                baseUserId = SecurityContextHolder.getContext().authentication.name,
+                localAuthority = invitationService.getAuthorityForToken(token),
+                name = LaUserRegistrationJourneyDataHelper.getName(journeyData)!!,
+                email = LaUserRegistrationJourneyDataHelper.getEmail(journeyData)!!,
+            )
+
+        val invitation = invitationService.getInvitationFromToken(token)
+        invitationService.deleteInvitation(invitation)
+        invitationService.clearTokenFromSession()
+
+        journeyDataService.clearJourneyDataFromSession()
+
+        session.setAttribute(LA_USER_ID, localAuthorityUserID)
+
+        return CONFIRMATION_PAGE_PATH_SEGMENT
+    }
 }
