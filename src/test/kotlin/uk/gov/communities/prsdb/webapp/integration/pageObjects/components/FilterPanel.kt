@@ -8,21 +8,28 @@ class FilterPanel(
 ) : BaseComponent(parentLocator.locator(".moj-filter-layout")) {
     constructor(page: Page) : this(page.locator("html"))
 
-    fun getPanel() = getChildComponent(".moj-filter")
+    val panel: Locator = locator.locator(".moj-filter")
 
-    fun getCloseFilterPanelButton() = Button.byText(locator, "Close filters panel")
+    val closeFilterPanelButton = Button.byText(locator, "Close filters panel")
 
-    fun getShowFilterPanel() = Button.byText(locator, "Show filters panel")
+    val showFilterPanelButton = Button.byText(locator, "Show filters panel")
 
     val clearFiltersLink = Link.byText(locator, "Clear filters")
 
-    fun getSelectedHeadings() = getChildrenComponents(".moj-filter__selected >> h3")
+    val selectedHeadings: Locator = locator.locator(".moj-filter__selected >> h3")
 
-    fun getNoFiltersSelectedText() = getChildComponent(".moj-filter__selected", Locator.LocatorOptions().setHasText("No filters selected"))
+    val noFiltersSelectedTextNode: Locator =
+        locator.locator(
+            ".moj-filter__selected",
+            Locator.LocatorOptions().setHasText("No filters selected"),
+        )
 
-    fun clickApplyFiltersButton() = Form(locator).submit()
+    private val form = Form(locator)
 
-    fun getFilterCheckboxes(label: String? = null) = Form(locator).getCheckboxes(label)
+    fun clickApplyFiltersButton() = form.submit()
 
-    fun getRemoveFilterTag(filterOption: String) = getChildComponent(".moj-filter__tag", Locator.LocatorOptions().setHasText(filterOption))
+    fun getFilterCheckboxes(label: String? = null) = form.getCheckboxes(label)
+
+    fun getRemoveFilterTag(filterOption: String): Locator =
+        locator.locator(".moj-filter__tag", Locator.LocatorOptions().setHasText(filterOption))
 }
