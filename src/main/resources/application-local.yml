@@ -35,6 +35,8 @@ spring:
       host: localhost
       port: 6379
       password: notarealpassword
+      ssl:
+        enabled: false
 
 one-login:
   jwt:
