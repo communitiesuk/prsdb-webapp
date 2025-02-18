@@ -114,7 +114,7 @@ class LocalAuthorityDataService(
         localAuthority: LocalAuthority,
         name: String,
         email: String,
-    ) : Long {
+    ): Long {
         val localAuthorityUser =
             localAuthorityUserRepository.save(
                 LocalAuthorityUser(
