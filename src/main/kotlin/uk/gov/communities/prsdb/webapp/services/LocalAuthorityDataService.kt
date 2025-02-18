@@ -106,21 +106,24 @@ class LocalAuthorityDataService(
     }
 
     @Transactional
-    fun registerNewUser(
+    fun registerUserAndReturnID(
         baseUserId: String,
         localAuthority: LocalAuthority,
         name: String,
         email: String,
-    ) {
-        localAuthorityUserRepository.save(
-            LocalAuthorityUser(
-                baseUser = oneLoginUserService.findOrCreate1LUser(baseUserId),
-                isManager = false,
-                localAuthority = localAuthority,
-                name = name,
-                email = email,
-            ),
-        )
+    ) : Long {
+        val localAuthorityUser =
+            localAuthorityUserRepository.save(
+                LocalAuthorityUser(
+                    baseUser = oneLoginUserService.findOrCreate1LUser(baseUserId),
+                    isManager = false,
+                    localAuthority = localAuthority,
+                    name = name,
+                    email = email,
+                ),
+            )
+
+        return localAuthorityUser.id
     }
 
     fun getIsLocalAuthorityUser(baseUserId: String): Boolean = localAuthorityUserRepository.findByBaseUser_Id(baseUserId) != null
