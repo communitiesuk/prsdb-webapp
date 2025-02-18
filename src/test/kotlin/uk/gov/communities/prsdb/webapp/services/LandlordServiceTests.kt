@@ -26,7 +26,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPropertyCountRepository
-import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -39,7 +38,7 @@ class LandlordServiceTests {
     private lateinit var mockLandlordRepository: LandlordRepository
 
     @Mock
-    private lateinit var mockOneLoginUserRepository: OneLoginUserRepository
+    private lateinit var mockOneLoginUserService: OneLoginUserService
 
     @Mock
     private lateinit var mockLandlordWithListedPropertyCountRepository: LandlordWithListedPropertyCountRepository
@@ -128,7 +127,7 @@ class LandlordServiceTests {
                 null,
             )
 
-        whenever(mockOneLoginUserRepository.getReferenceById(baseUserId)).thenReturn(baseUser)
+        whenever(mockOneLoginUserService.findOrCreate1LUser(baseUserId)).thenReturn(baseUser)
         whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
         whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD)).thenReturn(
             registrationNumber,

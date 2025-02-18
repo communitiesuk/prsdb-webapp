@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPropertyCountRepository
-import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.LandlordSearchResultViewModel
@@ -20,7 +19,7 @@ import java.time.LocalDate
 @Service
 class LandlordService(
     private val landlordRepository: LandlordRepository,
-    private val oneLoginUserRepository: OneLoginUserRepository,
+    private val oneLoginUserService: OneLoginUserService,
     private val landlordWithListedPropertyCountRepository: LandlordWithListedPropertyCountRepository,
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
@@ -31,8 +30,6 @@ class LandlordService(
         }
         return landlordRepository.findByRegistrationNumber_Number(regNum.number)
     }
-
-    fun retrieveLandlordIdByBaseUserId(baseUserId: String): Long? = landlordRepository.findByBaseUser_Id(baseUserId)?.id
 
     fun retrieveLandlordByBaseUserId(baseUserId: String): Landlord? = landlordRepository.findByBaseUser_Id(baseUserId)
 
@@ -49,7 +46,7 @@ class LandlordService(
         nonEnglandOrWalesAddress: String? = null,
         dateOfBirth: LocalDate? = null,
     ): Landlord {
-        val baseUser = oneLoginUserRepository.getReferenceById(baseUserId)
+        val baseUser = oneLoginUserService.findOrCreate1LUser(baseUserId)
         val address = addressService.findOrCreateAddress(addressDataModel)
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD)
 
