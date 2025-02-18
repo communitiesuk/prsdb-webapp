@@ -10,16 +10,17 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.web.context.WebApplicationContext
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
-import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
-import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
@@ -40,9 +41,6 @@ class RegisterLAUserControllerTests(
 
     @MockBean
     lateinit var localAuthorityDataService: LocalAuthorityDataService
-
-    @MockBean
-    lateinit var localAuthorityUserRepository: LocalAuthorityUserRepository
 
     @BeforeEach
     fun setupMocks() {
@@ -104,57 +102,45 @@ class RegisterLAUserControllerTests(
 
     @Test
     @WithMockUser
-    fun `submitRegistration calls registerNewUser with journeyData values from the session`() {
-        // Arrange
-        val journeyData: JourneyData =
-            mutableMapOf(
-                "name" to mutableMapOf("name" to "Test Username"),
-                "email" to mutableMapOf("emailAddress" to "test@example.com"),
-            )
-        whenever(journeyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
+    fun `getConfirmation returns 200 if an LA user has been registered`() {
+        val laUserId = 0L
+        val localAuthority = MockLocalAuthorityData.createLocalAuthority()
 
-        val localAuthority = createLocalAuthority()
-        whenever(invitationService.getAuthorityForToken("token123")).thenReturn(localAuthority)
+        whenever(localAuthorityDataService.getLocalAuthorityOrNullFromUserID(laUserId)).thenReturn(localAuthority)
 
-        // Act
-        mvc.get("/register-local-authority-user/success").andExpect {
-            status { isOk() }
-        }
-
-        // Assert
-        verify(localAuthorityDataService).registerNewUser(
-            "user",
-            localAuthority,
-            "Test Username",
-            "test@example.com",
-        )
+        mvc
+            .perform(
+                MockMvcRequestBuilders
+                    .get("/$REGISTER_LA_USER_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT")
+                    .sessionAttr(LA_USER_ID, laUserId),
+            ).andExpect(MockMvcResultMatchers.status().isOk())
     }
 
     @Test
     @WithMockUser
-    fun `submitRegistration calls deleteInvitation and clears data from the session`() {
-        // Arrange
-        val journeyData: JourneyData =
-            mutableMapOf(
-                "name" to mutableMapOf("name" to "Test Username"),
-                "email" to mutableMapOf("emailAddress" to "test@example.com"),
-            )
-        whenever(journeyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
+    fun `getConfirmation returns 400 if there's no LA user ID in session`() {
+        val laUserId = 0L
+        val localAuthority = MockLocalAuthorityData.createLocalAuthority()
 
-        val localAuthority = LocalAuthority(1, "Local Authority 1", "custodian code")
-        whenever(invitationService.getAuthorityForToken("token123")).thenReturn(localAuthority)
+        whenever(localAuthorityDataService.getLocalAuthorityOrNullFromUserID(laUserId)).thenReturn(localAuthority)
 
-        val invitation = LocalAuthorityInvitation()
-        whenever(invitationService.getInvitationFromToken("token123")).thenReturn(invitation)
+        mvc
+            .get("/$REGISTER_LA_USER_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT")
+            .andExpect { status { isBadRequest() } }
+    }
 
-        // Act
-        mvc.get("/register-local-authority-user/success").andExpect {
-            status { isOk() }
-        }
+    @Test
+    @WithMockUser
+    fun `getConfirmation returns 400 if the LA user ID in session is not valid`() {
+        val laUserId = 0L
 
-        // Assert
-        verify(invitationService).deleteInvitation(invitation)
-        verify(invitationService).clearTokenFromSession()
-        verify(journeyDataService).clearJourneyDataFromSession()
+        whenever(localAuthorityDataService.getLocalAuthorityOrNullFromUserID(laUserId)).thenReturn(null)
+
+        mvc
+            .perform(
+                MockMvcRequestBuilders
+                    .get("/$REGISTER_LA_USER_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT")
+                    .sessionAttr(LA_USER_ID, laUserId),
+            ).andExpect(MockMvcResultMatchers.status().isBadRequest)
     }
 }
