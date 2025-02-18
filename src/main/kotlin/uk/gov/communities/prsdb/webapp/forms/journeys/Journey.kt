@@ -62,7 +62,7 @@ abstract class Journey<T : StepId>(
         val pageData =
             submittedPageData ?: JourneyDataHelper.getPageData(journeyData, requestedStep.name, subPageNumber)
 
-        addSectionHeaderToModel(requestedStep, model)
+        val sectionHeaderInfo = getSectionHeaderInfo(requestedStep)
 
         return requestedStep.page.populateModelAndGetTemplateName(
             validator,
@@ -70,27 +70,23 @@ abstract class Journey<T : StepId>(
             pageData,
             prevStepUrl,
             prevStepDetails?.filteredJourneyData,
+            sectionHeaderInfo,
         )
     }
 
-    private fun addSectionHeaderToModel(
-        step: Step<T>,
-        model: Model,
-    ) {
+    private fun getSectionHeaderInfo(step: Step<T>): SectionHeaderViewModel? {
         if (step.displaySectionHeader) {
             val sectionContainingStep = sections.first { it.isStepInTaskList(step.id) }
             if (sectionContainingStep.headingKey == null) {
                 throw PrsdbWebException("Section heading requested but heading message key not found")
             }
-            model.addAttribute(
-                "sectionHeaderInfo",
-                SectionHeaderViewModel(
-                    sectionContainingStep.headingKey,
-                    sections.indexOf(sectionContainingStep) + 1,
-                    sections.size,
-                ),
+            return SectionHeaderViewModel(
+                sectionContainingStep.headingKey,
+                sections.indexOf(sectionContainingStep) + 1,
+                sections.size,
             )
         }
+        return null
     }
 
     fun updateJourneyDataAndGetViewNameOrRedirect(

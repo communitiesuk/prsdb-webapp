@@ -8,6 +8,7 @@ import org.springframework.web.bind.WebDataBinder
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
@@ -40,6 +41,20 @@ open class Page(
         prevStepUrl: String?,
         journeyData: JourneyData?,
     ): String = populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)
+
+    open fun populateModelAndGetTemplateName(
+        validator: Validator,
+        model: Model,
+        pageData: Map<String, Any?>?,
+        prevStepUrl: String?,
+        journeyData: JourneyData?,
+        sectionHeaderInfo: SectionHeaderViewModel? = null,
+    ): String {
+        if (sectionHeaderInfo != null) {
+            model.addAttribute("sectionHeaderInfo", sectionHeaderInfo)
+        }
+        return populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData)
+    }
 
     open fun isSatisfied(
         validator: Validator,
