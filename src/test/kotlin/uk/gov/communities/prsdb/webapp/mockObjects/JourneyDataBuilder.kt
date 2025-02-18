@@ -276,37 +276,37 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withInternationalAndSelectedContactAddress(
+    fun withOutsideEnglandOrWalesAndSelectedContactAddress(
         countryOfResidence: String,
-        internationalAddress: String,
+        outsideEnglandOrWalesAddress: String,
         selectedAddress: String,
     ): JourneyDataBuilder =
         this
-            .withInternationalAddress(countryOfResidence, internationalAddress)
+            .withOutsideEnglandOrWalesAddress(countryOfResidence, outsideEnglandOrWalesAddress)
             .withSelectedAddress(selectedAddress, localAuthority = createLocalAuthority(), isContactAddress = true)
 
-    fun withInternationalAndManualContactAddress(
+    fun withOutsideEnglandOrWalesAndManualContactAddress(
         countryOfResidence: String,
-        internationalAddress: String,
+        outsideEnglandOrWalesAddress: String,
         addressLineOne: String,
         townOrCity: String,
         postcode: String,
     ): JourneyDataBuilder =
         this
-            .withInternationalAddress(countryOfResidence, internationalAddress)
+            .withOutsideEnglandOrWalesAddress(countryOfResidence, outsideEnglandOrWalesAddress)
             .withManualAddress(addressLineOne, townOrCity, postcode, isContactAddress = true)
 
-    private fun withInternationalAddress(
+    private fun withOutsideEnglandOrWalesAddress(
         countryOfResidence: String,
-        internationalAddress: String,
+        outsideEnglandOrWalesAddress: String,
     ): JourneyDataBuilder {
         journeyData[LandlordRegistrationStepId.CountryOfResidence.urlPathSegment] =
             mutableMapOf(
                 "livesInEnglandOrWales" to false,
                 "countryOfResidence" to countryOfResidence,
             )
-        journeyData[LandlordRegistrationStepId.InternationalAddress.urlPathSegment] =
-            mutableMapOf("internationalAddress" to internationalAddress)
+        journeyData[LandlordRegistrationStepId.OutsideEnglandOrWalesAddress.urlPathSegment] =
+            mutableMapOf("outsideEnglandOrWalesAddress" to outsideEnglandOrWalesAddress)
         return this
     }
 }

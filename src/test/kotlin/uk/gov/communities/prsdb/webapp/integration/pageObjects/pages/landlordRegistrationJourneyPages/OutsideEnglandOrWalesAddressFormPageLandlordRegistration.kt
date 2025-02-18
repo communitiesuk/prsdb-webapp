@@ -5,11 +5,11 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.FormBasePage
 
-class InternationalAddressFormPageLandlordRegistration(
+class OutsideEnglandOrWalesAddressFormPageLandlordRegistration(
     page: Page,
 ) : FormBasePage(
         page,
-        "/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.InternationalAddress.urlPathSegment}",
+        "/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.OutsideEnglandOrWalesAddress.urlPathSegment}",
     ) {
     val textAreaInput = form.getTextArea()
 }

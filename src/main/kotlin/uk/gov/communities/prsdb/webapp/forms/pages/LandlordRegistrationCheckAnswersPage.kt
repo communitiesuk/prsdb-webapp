@@ -74,7 +74,7 @@ class LandlordRegistrationCheckAnswersPage(
         val livesInEnglandOrWales = LandlordRegistrationJourneyDataHelper.getLivesInEnglandOrWales(journeyData)!!
 
         return getLivesInEnglandOrWalesFormData(livesInEnglandOrWales) +
-            (if (!livesInEnglandOrWales) getInternationalAddressFormData(journeyData) else emptyList()) +
+            (if (!livesInEnglandOrWales) getOutsideEnglandOrWalesAddressFormData(journeyData) else emptyList()) +
             getContactAddressFormData(journeyData, addressDataService, livesInEnglandOrWales)
     }
 
@@ -87,17 +87,17 @@ class LandlordRegistrationCheckAnswersPage(
             ),
         )
 
-    private fun getInternationalAddressFormData(journeyData: JourneyData): List<SummaryListRowViewModel> =
+    private fun getOutsideEnglandOrWalesAddressFormData(journeyData: JourneyData): List<SummaryListRowViewModel> =
         listOf(
             SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence",
-                LandlordRegistrationJourneyDataHelper.getNonUKCountryOfResidence(journeyData)!!,
+                LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesCountryOfResidence(journeyData)!!,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
             ),
             SummaryListRowViewModel(
-                "registerAsALandlord.checkAnswers.rowHeading.contactAddressOutsideUK",
-                LandlordRegistrationJourneyDataHelper.getInternationalAddress(journeyData)!!,
-                LandlordRegistrationStepId.InternationalAddress.urlPathSegment,
+                "registerAsALandlord.checkAnswers.rowHeading.outsideEnglandOrWalesContactAddress",
+                LandlordRegistrationJourneyDataHelper.getOutsideEnglandOrWalesAddress(journeyData)!!,
+                LandlordRegistrationStepId.OutsideEnglandOrWalesAddress.urlPathSegment,
             ),
         )
 
@@ -110,7 +110,7 @@ class LandlordRegistrationCheckAnswersPage(
             if (livesInEnglandOrWales) {
                 "registerAsALandlord.checkAnswers.rowHeading.contactAddress"
             } else {
-                "registerAsALandlord.checkAnswers.rowHeading.ukContactAddress"
+                "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress"
             },
             LandlordRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!.singleLineAddress,
             getContactAddressChangeURLPathSegment(journeyData, livesInEnglandOrWales),

@@ -65,7 +65,7 @@ class LandlordViewModelTests {
     }
 
     @Test
-    fun `Non-UK based landlord personal details are in the correct order`() {
+    fun `Non England or Wales landlord personal details are in the correct order`() {
         // Arrange
         val testLandlord =
             MockLandlordData.createLandlord(
@@ -89,8 +89,8 @@ class LandlordViewModelTests {
                 "landlordDetails.personalDetails.telephoneNumber",
                 "landlordDetails.personalDetails.englandOrWalesResident",
                 "landlordDetails.personalDetails.country",
-                "landlordDetails.personalDetails.nonUkAddress",
-                "landlordDetails.personalDetails.ukAddress",
+                "landlordDetails.personalDetails.nonEnglandOrWalesAddress",
+                "landlordDetails.personalDetails.englandOrWalesAddress",
             )
 
         assertIterableEquals(expectedHeaderList, headerList)
@@ -275,7 +275,7 @@ class LandlordViewModelTests {
     }
 
     @Test
-    fun `Non UK landlord personal details shows the residency address`() {
+    fun `Non England or Wales landlord personal details shows the residency address`() {
         // Arrange
         val oneLineAddress = "A test address"
         val testLandlord = MockLandlordData.createLandlord(nonEnglandOrWalesAddress = oneLineAddress, countryOfResidence = "USA")
@@ -286,13 +286,13 @@ class LandlordViewModelTests {
         // Assert
         val addressString =
             viewModel.personalDetails
-                .single { it.fieldHeading == "landlordDetails.personalDetails.nonUkAddress" }
+                .single { it.fieldHeading == "landlordDetails.personalDetails.nonEnglandOrWalesAddress" }
                 .getConvertedFieldValue()
         assertEquals(addressString, oneLineAddress)
     }
 
     @Test
-    fun `Non UK landlord personal details shows the correct England or Wales contact address`() {
+    fun `Non England or Wales landlord personal details shows the correct England or Wales contact address`() {
         // Arrange
         val oneLineAddress = "A test address"
         val testLandlord =
@@ -308,7 +308,7 @@ class LandlordViewModelTests {
         // Assert
         val addressString =
             viewModel.personalDetails
-                .single { it.fieldHeading == "landlordDetails.personalDetails.ukAddress" }
+                .single { it.fieldHeading == "landlordDetails.personalDetails.englandOrWalesAddress" }
                 .getConvertedFieldValue()
         assertEquals(addressString, oneLineAddress)
     }

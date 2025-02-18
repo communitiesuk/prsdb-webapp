@@ -3,9 +3,9 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_ADDRESS_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_PLACE_NAMES
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.constants.OUTSIDE_ENGLAND_OR_WALES_ADDRESS_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
@@ -24,10 +24,10 @@ import uk.gov.communities.prsdb.webapp.models.formModels.CountryOfResidenceFormM
 import uk.gov.communities.prsdb.webapp.models.formModels.DateOfBirthFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.DeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
-import uk.gov.communities.prsdb.webapp.models.formModels.InternationalAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.OutsideEnglandOrWalesAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.CheckboxViewModel
@@ -69,7 +69,7 @@ class LandlordRegistrationJourney(
                 lookupAddressStep(),
                 selectAddressStep(addressLookupService, addressDataService),
                 manualAddressStep(),
-                internationalAddressStep(),
+                outsideEnglandOrWalesAddressStep(),
                 lookupContactAddressStep(),
                 selectContactAddressStep(addressLookupService, addressDataService),
                 manualContactAddressStep(),
@@ -295,20 +295,20 @@ class LandlordRegistrationJourney(
             saveAfterSubmit = false,
         )
 
-    private fun internationalAddressStep() =
+    private fun outsideEnglandOrWalesAddressStep() =
         Step(
-            id = LandlordRegistrationStepId.InternationalAddress,
+            id = LandlordRegistrationStepId.OutsideEnglandOrWalesAddress,
             page =
                 Page(
-                    formModel = InternationalAddressFormModel::class,
-                    templateName = "forms/internationalAddressForm",
+                    formModel = OutsideEnglandOrWalesAddressFormModel::class,
+                    templateName = "forms/outsideEnglandOrWalesAddressForm",
                     content =
                         mapOf(
                             "title" to "registerAsALandlord.title",
-                            "fieldSetHeading" to "forms.internationalAddress.fieldSetHeading",
-                            "fieldSetHint" to "forms.internationalAddress.fieldSetHint",
-                            "label" to "forms.internationalAddress.label",
-                            "limit" to INTERNATIONAL_ADDRESS_MAX_LENGTH,
+                            "fieldSetHeading" to "forms.outsideEnglandOrWalesAddress.fieldSetHeading",
+                            "fieldSetHint" to "forms.outsideEnglandOrWalesAddress.fieldSetHint",
+                            "label" to "forms.outsideEnglandOrWalesAddress.label",
+                            "limit" to OUTSIDE_ENGLAND_OR_WALES_ADDRESS_MAX_LENGTH,
                             "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),
@@ -441,7 +441,7 @@ class LandlordRegistrationJourney(
         if (LandlordRegistrationJourneyDataHelper.getLivesInEnglandOrWales(journeyData)!!) {
             Pair(LandlordRegistrationStepId.LookupAddress, null)
         } else {
-            Pair(LandlordRegistrationStepId.InternationalAddress, null)
+            Pair(LandlordRegistrationStepId.OutsideEnglandOrWalesAddress, null)
         }
 
     private fun selectAddressNextAction(journeyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
@@ -476,7 +476,7 @@ class LandlordRegistrationJourney(
                     LandlordRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!,
                 countryOfResidence = LandlordRegistrationJourneyDataHelper.getCountryOfResidence(journeyData),
                 nonEnglandOrWalesAddress =
-                    LandlordRegistrationJourneyDataHelper.getInternationalAddress(journeyData),
+                    LandlordRegistrationJourneyDataHelper.getOutsideEnglandOrWalesAddress(journeyData),
                 dateOfBirth = LandlordRegistrationJourneyDataHelper.getDOB(journeyData)!!,
             )
 

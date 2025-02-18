@@ -67,28 +67,34 @@ class LandlordRegistrationJourneyDataHelperTests {
     }
 
     @Test
-    fun `getNonUKCountryOfResidence returns the corresponding country`() {
+    fun `getNonEnglandOrWalesCountryOfResidence returns the corresponding country`() {
         val expectedCountryOfResidence = "US"
         val mockJourneyData =
             journeyDataBuilder
-                .withInternationalAndSelectedContactAddress(
+                .withOutsideEnglandOrWalesAndSelectedContactAddress(
                     expectedCountryOfResidence,
-                    "international address",
+                    "test address",
                     "selected address",
                 ).build()
 
-        val nonUKCountryOfResidence = LandlordRegistrationJourneyDataHelper.getNonUKCountryOfResidence(mockJourneyData)
+        val getNonEnglandOrWalesCountryOfResidence =
+            LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesCountryOfResidence(
+                mockJourneyData,
+            )
 
-        assertEquals(expectedCountryOfResidence, nonUKCountryOfResidence)
+        assertEquals(expectedCountryOfResidence, getNonEnglandOrWalesCountryOfResidence)
     }
 
     @Test
-    fun `getNonUKCountryOfResidence returns null if the user lives in the UK`() {
+    fun `getNonEnglandOrWalesCountryOfResidence returns null if the user lives in the UK`() {
         val mockJourneyData = journeyDataBuilder.build()
 
-        val nonUKCountryOfResidence = LandlordRegistrationJourneyDataHelper.getNonUKCountryOfResidence(mockJourneyData)
+        val getNonEnglandOrWalesCountryOfResidence =
+            LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesCountryOfResidence(
+                mockJourneyData,
+            )
 
-        assertNull(nonUKCountryOfResidence)
+        assertNull(getNonEnglandOrWalesCountryOfResidence)
     }
 
     @ParameterizedTest(name = "when isEnglandOrWalesResident = {0}")
@@ -97,9 +103,9 @@ class LandlordRegistrationJourneyDataHelperTests {
         val selectedAddress = "1 Example Address, EG1 2AB"
         val mockJourneyData =
             journeyDataBuilder
-                .withInternationalAndSelectedContactAddress(
+                .withOutsideEnglandOrWalesAndSelectedContactAddress(
                     "countryOfResidence",
-                    "international address",
+                    "test address",
                     selectedAddress,
                 ).build()
         val expectedAddressDataModel = AddressDataModel(selectedAddress)
@@ -119,9 +125,9 @@ class LandlordRegistrationJourneyDataHelperTests {
         val postcode = "EG1 2AB"
         val mockJourneyData =
             journeyDataBuilder
-                .withInternationalAndManualContactAddress(
+                .withOutsideEnglandOrWalesAndManualContactAddress(
                     "countryofResidence",
-                    "international address",
+                    "test address",
                     addressLineOne,
                     townOrCity,
                     postcode,
