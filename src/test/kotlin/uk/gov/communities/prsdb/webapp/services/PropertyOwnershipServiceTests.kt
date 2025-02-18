@@ -34,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData
+import uk.gov.communities.prsdb.webapp.mockObjects.MockOneLoginUserData
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RegisteredPropertyViewModel
@@ -250,7 +251,9 @@ class PropertyOwnershipServiceTests {
         fun `throws not found error if user is not primary landlord or an la user`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             val principalName = "not-the-landlord"
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
 
             val errorThrown =
                 assertThrows<ResponseStatusException> {
@@ -264,16 +267,19 @@ class PropertyOwnershipServiceTests {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             val localAuthorityUser =
                 MockLocalAuthorityData.createLocalAuthorityUser(
-                    MockLocalAuthorityData.createOneLoginUser("not-the-landlord"),
+                    MockOneLoginUserData.createOneLoginUser("not-the-landlord"),
                     MockLocalAuthorityData.createLocalAuthority(),
                 )
             val principalName = localAuthorityUser.baseUser.id
 
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
 
             whenever(mockLocalAuthorityDataService.getIsLocalAuthorityUser(principalName)).thenReturn(true)
 
-            val result = propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnership.id, principalName)
+            val result =
+                propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnership.id, principalName)
 
             assertEquals(result, propertyOwnership)
         }
@@ -283,11 +289,14 @@ class PropertyOwnershipServiceTests {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             val principalName = propertyOwnership.primaryLandlord.baseUser.id
 
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
 
             whenever(mockLocalAuthorityDataService.getIsLocalAuthorityUser(principalName)).thenReturn(false)
 
-            val result = propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnership.id, principalName)
+            val result =
+                propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnership.id, principalName)
 
             assertEquals(result, propertyOwnership)
         }
