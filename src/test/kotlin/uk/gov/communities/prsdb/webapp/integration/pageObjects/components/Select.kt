@@ -8,7 +8,7 @@ class Select(
 ) : BaseComponent(parentLocator.locator(".autocomplete__wrapper")) {
     constructor(page: Page) : this(page.locator("html"))
 
-    val autocompleteInput = getChildComponent("input")
+    val autocompleteInput = locator.locator("input")
 
-    fun selectValue(value: String) = getChildComponent("li", Locator.LocatorOptions().setHasText(value)).click()
+    fun selectValue(value: String) = locator.locator("li", Locator.LocatorOptions().setHasText(value)).click()
 }

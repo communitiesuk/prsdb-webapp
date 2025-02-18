@@ -8,11 +8,16 @@ class SearchBar(
 ) : BaseComponent(parentLocator.locator(".moj-search")) {
     constructor(page: Page) : this(page.locator("html"))
 
-    private val form = Form(locator)
-    private val searchInput = form.getTextInput()
+    private val form = SearchBarForm(locator)
 
     fun search(searchTerm: String) {
-        searchInput.fill(searchTerm)
+        form.searchInput.fill(searchTerm)
         form.submit()
+    }
+
+    class SearchBarForm(
+        parentLocator: Locator,
+    ) : Form(parentLocator) {
+        val searchInput: Locator = locator.locator("input#searchTerm")
     }
 }

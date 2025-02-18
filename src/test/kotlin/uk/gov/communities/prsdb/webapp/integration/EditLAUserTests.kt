@@ -24,7 +24,7 @@ class EditLAUserTests : IntegrationTest() {
         assertThat(manageUsersPage.table.getCell(0, ACCESS_LEVEL_COL_INDEX)).containsText("Basic")
 
         // Editing the user shows Arthur Dent's page
-        manageUsersPage.getChangeLink(rowIndex = 0).click()
+        manageUsersPage.getChangeLink(rowIndex = 0).clickAndWait()
         var editUserPage = assertPageIs(page, EditLaUserPage::class)
         assertThat(editUserPage.name).containsText("Arthur Dent")
         // TODO PRSD-405: fix when LA users have email addresses
@@ -41,7 +41,7 @@ class EditLAUserTests : IntegrationTest() {
         assertThat(manageUsersPage.table.getCell(0, ACCESS_LEVEL_COL_INDEX)).containsText("Admin")
 
         // The user's page also now defaults to admin
-        manageUsersPage.getChangeLink(rowIndex = 0).click()
+        manageUsersPage.getChangeLink(rowIndex = 0).clickAndWait()
         editUserPage = assertPageIs(page, EditLaUserPage::class)
         assertEquals("true", editUserPage.isManagerRadios.getSelectedValue())
     }
@@ -51,7 +51,7 @@ class EditLAUserTests : IntegrationTest() {
         // Edit Arthur Dent
         var manageUsersPage = navigator.goToManageLaUsers(1)
         assertThat(manageUsersPage.table.getCell(0, USERNAME_COL_INDEX)).containsText("Arthur Dent")
-        manageUsersPage.getChangeLink(rowIndex = 0).click()
+        manageUsersPage.getChangeLink(rowIndex = 0).clickAndWait()
         val editUserPage = assertPageIs(page, EditLaUserPage::class)
 
         // Delete the user

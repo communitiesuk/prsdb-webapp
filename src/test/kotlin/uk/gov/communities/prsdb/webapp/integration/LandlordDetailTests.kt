@@ -5,6 +5,7 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import kotlin.test.assertEquals
 
 @Sql("/data-local.sql")
@@ -59,7 +60,7 @@ class LandlordDetailTests : IntegrationTest() {
         fun `loading the landlord details page shows the last time the landlords record was updated`(page: Page) {
             val detailsPage = navigator.goToLandlordDetailsAsALocalAuthorityUser(1)
 
-            assertThat(detailsPage.insetText.spanText).containsText("updated these details on")
+            assertThat(detailsPage.insetText).containsText("updated these details on")
         }
     }
 }

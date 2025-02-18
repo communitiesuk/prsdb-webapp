@@ -8,10 +8,10 @@ open class Form(
 ) : BaseComponent(parentLocator.locator("form")) {
     constructor(page: Page) : this(page.locator("html"))
 
-    fun getErrorMessage(fieldName: String? = null) =
-        getChildComponent(if (fieldName == null) ".govuk-error-message" else "p[id='$fieldName-error']")
+    fun getErrorMessage(fieldName: String? = null): Locator =
+        locator.locator(if (fieldName == null) ".govuk-error-message" else "p[id='$fieldName-error']")
 
-    fun getTextInput(fieldName: String? = null): Locator = getChildComponent("input${if (fieldName == null) "" else "[name='$fieldName']"}")
+    fun getTextInput(fieldName: String? = null): Locator = locator.locator("input${if (fieldName == null) "" else "[name='$fieldName']"}")
 
     fun getRadios() = Radios(locator)
 
@@ -19,7 +19,7 @@ open class Form(
 
     fun getSelect() = Select(locator)
 
-    fun getTextArea() = getChildComponent("textarea")
+    fun getTextArea(): Locator = locator.locator("textarea")
 
     fun getCheckboxes(label: String? = null) = Checkboxes(locator, label)
 

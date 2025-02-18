@@ -79,7 +79,7 @@ class SearchRegisterTests : IntegrationTest() {
         fun `landlord link goes to landlord details page`(page: Page) {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
             searchLandlordRegisterPage.searchBar.search("L-CKSQ-3SX9")
-            searchLandlordRegisterPage.getLandlordLink(rowIndex = 0).click()
+            searchLandlordRegisterPage.getLandlordLink(rowIndex = 0).clickAndWait()
 
             assertContains(page.url(), "/landlord-details/1")
         }
@@ -96,7 +96,7 @@ class SearchRegisterTests : IntegrationTest() {
         fun `property search link shows if search has no results`(page: Page) {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
             searchLandlordRegisterPage.searchBar.search("non-matching searchTerm")
-            searchLandlordRegisterPage.getPropertySearchLink().click()
+            searchLandlordRegisterPage.getPropertySearchLink().clickAndWait()
 
             assertPageIs(page, SearchPropertyRegisterPage::class)
         }
@@ -245,7 +245,7 @@ class SearchRegisterTests : IntegrationTest() {
         fun `property link goes to property details page`(page: Page) {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("P-C5YY-J34H")
-            searchPropertyRegisterPage.getPropertyLink(rowIndex = 0).click()
+            searchPropertyRegisterPage.getPropertyLink(rowIndex = 0).clickAndWait()
 
             assertContains(page.url(), "/local-authority/property-details/1")
         }
@@ -254,7 +254,7 @@ class SearchRegisterTests : IntegrationTest() {
         fun `landlord link goes to landlord details page`(page: Page) {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("P-C5YY-J34H")
-            searchPropertyRegisterPage.getLandlordLink(rowIndex = 0).click()
+            searchPropertyRegisterPage.getLandlordLink(rowIndex = 0).clickAndWait()
 
             assertContains(page.url(), "/landlord-details/1")
         }
@@ -271,7 +271,7 @@ class SearchRegisterTests : IntegrationTest() {
         fun `landlord search link shows if search has no results`(page: Page) {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("non-matching searchTerm")
-            searchPropertyRegisterPage.getLandlordSearchLink().click()
+            searchPropertyRegisterPage.getLandlordSearchLink().clickAndWait()
 
             assertPageIs(page, SearchLandlordRegisterPage::class)
         }

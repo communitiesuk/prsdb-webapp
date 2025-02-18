@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -139,7 +140,7 @@ class PropertyDetailsTests : IntegrationTest() {
         fun `loading the landlord details page shows the last time the landlords record was updated`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
 
-            assertThat(detailsPage.insetText.spanText).containsText("updated these details on")
+            assertThat(detailsPage.insetText).containsText("updated these details on")
         }
     }
 }

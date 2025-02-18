@@ -8,7 +8,7 @@ class Radios(
 ) : BaseComponent(parentLocator.locator(".govuk-radios")) {
     constructor(page: Page) : this(page.locator("html"))
 
-    fun getSelectedValue(): String = getChildComponent("input:checked").getAttribute("value")
+    fun getSelectedValue(): String = locator.locator("input:checked").getAttribute("value")
 
     fun <E : Enum<E>> selectValue(value: E) {
         val radio = getRadio(value.name)
@@ -19,5 +19,5 @@ class Radios(
         getRadio(value).check()
     }
 
-    private fun getRadio(value: String) = getChildComponent("input[value='$value']")
+    private fun getRadio(value: String) = locator.locator("input[value='$value']")
 }

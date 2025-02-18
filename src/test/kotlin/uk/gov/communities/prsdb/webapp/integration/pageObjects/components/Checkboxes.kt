@@ -14,7 +14,7 @@ class Checkboxes(
     ) {
     constructor(page: Page, label: String? = null) : this(page.locator("html"), label)
 
-    fun getCheckbox(value: String) = getChildComponent("input[value='$value']")
+    fun getCheckbox(value: String): Locator = locator.locator("input[value='$value']")
 
     fun checkCheckbox(value: String) = getCheckbox(value).check()
 }

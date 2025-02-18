@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
+import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.getComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FilterPanel
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Pagination
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SearchBar
@@ -21,5 +21,5 @@ abstract class SearchRegisterBasePage(
 
     fun getErrorMessageText() = getErrorMessage().innerText()
 
-    fun getErrorMessage() = getComponent(page, "#no-results")
+    fun getErrorMessage(): Locator = page.locator("#no-results")
 }

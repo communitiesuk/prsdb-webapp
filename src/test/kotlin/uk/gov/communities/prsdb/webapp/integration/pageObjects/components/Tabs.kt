@@ -8,17 +8,17 @@ open class Tabs(
 ) : BaseComponent(parentLocator.locator(".govuk-tabs")) {
     constructor(page: Page) : this(page.locator("html"))
 
-    val tabsList = getChildrenComponents(".govuk-tabs__list >> .govuk-tabs__list-item")
+    val tabsList = locator.locator(".govuk-tabs__list >> .govuk-tabs__list-item")
 
-    val tabPanels = getChildrenComponents(".govuk-tabs__panel")
+    val tabPanels = locator.locator(".govuk-tabs__panel")
 
     val activePanel
-        get() = tabPanels.find { it.isVisible }
+        get() = tabPanels.all().find { it.isVisible }
 
     val activeTabPanelId
         get() = activePanel?.getAttribute("id")
 
     fun goToTab(tabName: String) {
-        tabsList.single { it.textContent().trim() == tabName.trim() }.click()
+        tabsList.all().single { it.textContent().trim() == tabName.trim() }.click()
     }
 }

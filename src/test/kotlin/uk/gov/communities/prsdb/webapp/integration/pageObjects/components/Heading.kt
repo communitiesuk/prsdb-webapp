@@ -4,7 +4,11 @@ import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 
 class Heading(
-    parentLocator: Locator,
-) : BaseComponent(parentLocator.locator("main header h1")) {
-    constructor(page: Page) : this(page.locator("html"))
+    locator: Locator,
+) : BaseComponent(locator) {
+    companion object {
+        fun default(page: Page) = default(page.locator("html"))
+
+        fun default(parentLocator: Locator) = Heading(parentLocator.locator("main header h1"))
+    }
 }
