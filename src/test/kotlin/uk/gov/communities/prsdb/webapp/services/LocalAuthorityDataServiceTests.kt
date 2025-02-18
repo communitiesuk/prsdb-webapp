@@ -26,13 +26,11 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUserOrInvit
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_1L_USER_NAME
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_ID
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_USER_ID
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthorityUser
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createOneLoginUser
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.get1LID
+import uk.gov.communities.prsdb.webapp.mockObjects.MockOneLoginUserData.Companion.createOneLoginUser
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import java.util.Optional
@@ -58,21 +56,21 @@ class LocalAuthorityDataServiceTests {
         val baseUser = createOneLoginUser()
         val localAuthority = createLocalAuthority()
         val localAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority)
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(get1LID(DEFAULT_1L_USER_NAME)))
+        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(localAuthorityUser)
 
         // Act
         val (returnedUserModel, returnedLocalAuthority) =
             localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
                 DEFAULT_LA_ID,
-                get1LID(DEFAULT_1L_USER_NAME),
+                baseUser.id,
             )
 
         // Assert
         Assertions.assertEquals(
             LocalAuthorityUserDataModel(
                 localAuthorityUser.id,
-                baseUser.name + "_LA",
+                localAuthorityUser.name,
                 localAuthority.name,
                 localAuthorityUser.isManager,
             ),
@@ -91,7 +89,7 @@ class LocalAuthorityDataServiceTests {
         assertThrows<AccessDeniedException> {
             localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
                 DEFAULT_LA_ID,
-                get1LID(DEFAULT_1L_USER_NAME),
+                createOneLoginUser().id,
             )
         }
     }
@@ -102,14 +100,14 @@ class LocalAuthorityDataServiceTests {
         val baseUser = createOneLoginUser()
         val localAuthority = createLocalAuthority()
         val localAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority)
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(get1LID(DEFAULT_1L_USER_NAME)))
+        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(localAuthorityUser)
 
         // Act and Assert
         assertThrows<AccessDeniedException> {
             localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
                 DEFAULT_LA_ID - 1,
-                get1LID(DEFAULT_1L_USER_NAME),
+                baseUser.id,
             )
         }
     }
@@ -123,7 +121,7 @@ class LocalAuthorityDataServiceTests {
         val expectedLocalAuthorityUserDataModel =
             LocalAuthorityUserDataModel(
                 DEFAULT_LA_USER_ID,
-                baseUser.name + "_LA",
+                localAuthorityUser.name,
                 localAuthority.name,
                 localAuthorityUser.isManager,
             )
@@ -317,15 +315,14 @@ class LocalAuthorityDataServiceTests {
     @Test
     fun `registerNewUser adds a new user to local_authority_user`() {
         // Arrange
-        val baseUser = createOneLoginUser(DEFAULT_1L_USER_NAME)
-        val baseUserId = get1LID(DEFAULT_1L_USER_NAME)
+        val baseUser = createOneLoginUser()
         val localAuthority = createLocalAuthority()
         val expectedNewUser =
             LocalAuthorityUser(baseUser, false, localAuthority, "Sample Name", "sample.name@example.com")
-        whenever(oneLoginUserRepository.getReferenceById(baseUserId)).thenReturn(baseUser)
+        whenever(oneLoginUserRepository.getReferenceById(baseUser.id)).thenReturn(baseUser)
 
         // Act
-        localAuthorityDataService.registerNewUser(baseUserId, localAuthority, "Sample Name", "sample.name@example.com")
+        localAuthorityDataService.registerNewUser(baseUser.id, localAuthority, "Sample Name", "sample.name@example.com")
 
         // Assert
         val localAuthorityUserCaptor = captor<LocalAuthorityUser>()
