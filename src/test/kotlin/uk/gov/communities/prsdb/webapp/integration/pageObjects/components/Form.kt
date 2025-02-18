@@ -11,6 +11,8 @@ class Form(
     fun getErrorMessage(fieldName: String? = null) =
         getChildComponent(if (fieldName == null) ".govuk-error-message" else "p[id='$fieldName-error']")
 
+    fun getSectionHeader() = getChildComponent("#section-header")
+
     fun getTextInput(fieldName: String? = null): Locator = getChildComponent("input${if (fieldName == null) "" else "[name='$fieldName']"}")
 
     fun getRadios() = Radios(page)

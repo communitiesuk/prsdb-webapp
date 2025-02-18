@@ -2,6 +2,7 @@
    th:if="${sectionHeaderInfo} != null"
     class="govuk-hint govuk-!-margin-top-0"
     th:text="#{sectionHeader.sectionXofY(${sectionHeaderInfo.sectionNumber}, ${sectionHeaderInfo.totalSections})}
-    +#{${sectionHeaderInfo.sectionNameKey}}">
+    +#{${sectionHeaderInfo.sectionNameKey}}"
+    id="section-header">
     Section X of Y - sectionName
 </p>
