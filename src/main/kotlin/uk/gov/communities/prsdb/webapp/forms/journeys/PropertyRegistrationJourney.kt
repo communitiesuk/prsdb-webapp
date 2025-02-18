@@ -179,8 +179,8 @@ class PropertyRegistrationJourney(
                             "submitButtonText" to "forms.buttons.saveAndContinue",
                         ),
                 ),
-            nextAction = { _, _ -> Pair(RegisterPropertyStepId.SelectAddress, null) },
             displaySectionHeader = true,
+            nextAction = { _, _ -> Pair(RegisterPropertyStepId.SelectAddress, null) },
         )
 
     private fun selectAddressStep(
@@ -206,6 +206,7 @@ class PropertyRegistrationJourney(
                 addressLookupService = addressLookupService,
                 addressDataService = addressDataService,
             ),
+        displaySectionHeader = true,
         nextAction = { journeyData, _ ->
             selectAddressNextAction(
                 journeyData,
@@ -253,6 +254,7 @@ class PropertyRegistrationJourney(
                             "submitButtonText" to "forms.buttons.saveAndContinue",
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.LocalAuthority, null) },
         )
 
@@ -270,6 +272,7 @@ class PropertyRegistrationJourney(
                         ),
                     localAuthorityService = localAuthorityService,
                 ),
+            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.PropertyType, null) },
         )
 
@@ -315,6 +318,7 @@ class PropertyRegistrationJourney(
                                 ),
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.OwnershipType, null) },
         )
 
@@ -344,6 +348,7 @@ class PropertyRegistrationJourney(
                                 ),
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.LicensingType, null) },
         )
 
@@ -373,6 +378,7 @@ class PropertyRegistrationJourney(
                                 ),
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { journeyData, _ -> occupancyNextAction(journeyData) },
         )
 
@@ -390,6 +396,7 @@ class PropertyRegistrationJourney(
                             "label" to "forms.numberOfHouseholds.label",
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.NumberOfPeople, null) },
         )
 
@@ -408,6 +415,7 @@ class PropertyRegistrationJourney(
                             "label" to "forms.numberOfPeople.label",
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.LandlordType, null) },
         )
 
@@ -438,6 +446,7 @@ class PropertyRegistrationJourney(
                                 ),
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
         )
 
@@ -478,6 +487,7 @@ class PropertyRegistrationJourney(
                                 ),
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { journeyData, _ -> licensingTypeNextAction(journeyData) },
         )
 
@@ -497,6 +507,7 @@ class PropertyRegistrationJourney(
                             "detailMainText" to "forms.selectiveLicence.detail.text",
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
         )
 
@@ -522,6 +533,7 @@ class PropertyRegistrationJourney(
                                 ),
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
         )
 
@@ -541,6 +553,7 @@ class PropertyRegistrationJourney(
                             "detailMainText" to "forms.hmoAdditionalLicence.detail.text",
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
         )
 
@@ -550,6 +563,7 @@ class PropertyRegistrationJourney(
     ) = Step(
         id = RegisterPropertyStepId.CheckAnswers,
         page = PropertyRegistrationCheckAnswersPage(addressDataService, localAuthorityService),
+        displaySectionHeader = true,
         nextAction = { _, _ -> Pair(RegisterPropertyStepId.Declaration, null) },
     )
 
@@ -581,6 +595,7 @@ class PropertyRegistrationJourney(
                         "submitButtonText" to "forms.buttons.confirmAndCompleteRegistration",
                     ),
             ),
+        displaySectionHeader = true,
         handleSubmitAndRedirect = { journeyData, _ ->
             checkAnswersSubmitAndRedirect(
                 journeyData,

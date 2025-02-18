@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
@@ -30,6 +31,7 @@ class PropertyRegistrationCheckAnswersPage(
         pageData: Map<String, Any?>?,
         prevStepUrl: String?,
         journeyData: JourneyData?,
+        sectionHeaderInfo: SectionHeaderViewModel?,
     ): String {
         journeyData!!
         val propertyName = getPropertyName(journeyData)
@@ -38,7 +40,7 @@ class PropertyRegistrationCheckAnswersPage(
         model.addAttribute("propertyDetails", propertyDetails)
         model.addAttribute("propertyName", propertyName)
         model.addAttribute("showUprnDetail", !DataHelper.isManualAddressChosen(journeyData))
-        return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData)
+        return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData, sectionHeaderInfo)
     }
 
     private fun getPropertyName(journeyData: JourneyData) = DataHelper.getAddress(journeyData, addressDataService)!!.singleLineAddress
