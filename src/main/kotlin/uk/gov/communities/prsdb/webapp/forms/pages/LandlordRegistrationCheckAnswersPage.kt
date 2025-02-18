@@ -81,7 +81,7 @@ class LandlordRegistrationCheckAnswersPage(
     private fun getLivesInUKFormData(livesInUK: Boolean): List<SummaryListRowViewModel> =
         listOf(
             SummaryListRowViewModel(
-                "registerAsALandlord.checkAnswers.rowHeading.ukResident",
+                "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesResident",
                 livesInUK,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
             ),

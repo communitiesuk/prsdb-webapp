@@ -68,7 +68,7 @@ class LandlordViewModel(
                     toggleChangeLink("$UPDATE_ROUTE/telephone"),
                 ),
                 SummaryListRowViewModel(
-                    "landlordDetails.personalDetails.ukResident",
+                    "landlordDetails.personalDetails.englandOrWalesResident",
                     isEnglandOrWalesResident,
                     toggleChangeLink("$UPDATE_ROUTE/country-of-residence"),
                 ),

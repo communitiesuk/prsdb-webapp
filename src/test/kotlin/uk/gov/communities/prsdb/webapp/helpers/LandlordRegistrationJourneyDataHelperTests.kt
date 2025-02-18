@@ -91,9 +91,9 @@ class LandlordRegistrationJourneyDataHelperTests {
         assertNull(nonUKCountryOfResidence)
     }
 
-    @ParameterizedTest(name = "when livesInUK = {0}")
+    @ParameterizedTest(name = "when isEnglandOrWalesResident = {0}")
     @ValueSource(booleans = [true, false])
-    fun `getAddress returns the corresponding selected address`(livesInUK: Boolean) {
+    fun `getAddress returns the corresponding selected address`(isEnglandOrWalesResident: Boolean) {
         val selectedAddress = "1 Example Address, EG1 2AB"
         val mockJourneyData =
             journeyDataBuilder
@@ -111,9 +111,9 @@ class LandlordRegistrationJourneyDataHelperTests {
         assertEquals(expectedAddressDataModel, addressDataModel)
     }
 
-    @ParameterizedTest(name = "when livesInUK = {0}")
+    @ParameterizedTest(name = "when isEnglandOrWalesResident = {0}")
     @ValueSource(booleans = [true, false])
-    fun `getAddress returns the corresponding manual address`(livesInUK: Boolean) {
+    fun `getAddress returns the corresponding manual address`(isEnglandOrWalesResident: Boolean) {
         val addressLineOne = "1 Example Address"
         val townOrCity = "Townville"
         val postcode = "EG1 2AB"

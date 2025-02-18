@@ -67,7 +67,9 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     }
 
     @Test
-    fun `User can navigate the whole journey if pages are correctly filled in (verified, UK resident, selected address)`(page: Page) {
+    fun `User can navigate the whole journey if pages are correctly filled in (verified, England or Wales resident, selected address)`(
+        page: Page,
+    ) {
         val confirmIdentityPage = navigator.goToLandlordRegistrationConfirmIdentityFormPage()
         confirmIdentityPage.form.submit()
 
@@ -117,7 +119,9 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     }
 
     @Test
-    fun `User can navigate the whole journey if pages are correctly filled in (verified, UK resident, manual address)`(page: Page) {
+    fun `User can navigate the whole journey if pages are correctly filled in (verified, England or Wales resident, manual address)`(
+        page: Page,
+    ) {
         val confirmIdentityPage = navigator.goToLandlordRegistrationConfirmIdentityFormPage()
         confirmIdentityPage.form.submit()
 

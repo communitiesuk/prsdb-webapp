@@ -39,7 +39,7 @@ class LandlordViewModelTests {
     }
 
     @Test
-    fun `UK based landlord personal details are in the correct order`() {
+    fun `England or Wales resident landlord personal details are in the correct order`() {
         // Arrange
         val testLandlord = MockLandlordData.createLandlord(nonEnglandOrWalesAddress = null)
 
@@ -57,7 +57,7 @@ class LandlordViewModelTests {
                 "landlordDetails.personalDetails.dateOfBirth",
                 "landlordDetails.personalDetails.emailAddress",
                 "landlordDetails.personalDetails.telephoneNumber",
-                "landlordDetails.personalDetails.ukResident",
+                "landlordDetails.personalDetails.englandOrWalesResident",
                 "landlordDetails.personalDetails.contactAddress",
             )
 
@@ -87,7 +87,7 @@ class LandlordViewModelTests {
                 "landlordDetails.personalDetails.dateOfBirth",
                 "landlordDetails.personalDetails.emailAddress",
                 "landlordDetails.personalDetails.telephoneNumber",
-                "landlordDetails.personalDetails.ukResident",
+                "landlordDetails.personalDetails.englandOrWalesResident",
                 "landlordDetails.personalDetails.country",
                 "landlordDetails.personalDetails.nonUkAddress",
                 "landlordDetails.personalDetails.ukAddress",
@@ -231,13 +231,13 @@ class LandlordViewModelTests {
         // Assert
         val displayedResidency =
             viewModel.personalDetails
-                .single { it.fieldHeading == "landlordDetails.personalDetails.ukResident" }
+                .single { it.fieldHeading == "landlordDetails.personalDetails.englandOrWalesResident" }
                 .fieldValue
         assertEquals(displayedResidency, isEnglandOrWalesResident)
     }
 
     @Test
-    fun `UK landlord personal details shows the correct contact address`() {
+    fun `England or Wales  landlord personal details shows the correct contact address`() {
         // Arrange
         val oneLineAddress = "A test address"
         val testLandlord = MockLandlordData.createLandlord(address = Address(AddressDataModel(oneLineAddress)))

@@ -12,7 +12,7 @@ import java.time.LocalDate
 
 class PropertyDetailsLandlordViewModelTests {
     @Test
-    fun `UK based landlord details are present and in the correct order`() {
+    fun `England or Wales resident landlord details are present and in the correct order`() {
         // Arrange
         val testLandlord = MockLandlordData.createLandlord(nonEnglandOrWalesAddress = null)
 
@@ -133,7 +133,7 @@ class PropertyDetailsLandlordViewModelTests {
     }
 
     @Test
-    fun `UK landlord details shows the correct contact address`() {
+    fun `England or Wales landlord details shows the correct contact address`() {
         // Arrange
         val oneLineAddress = "A test address"
         val testLandlord = MockLandlordData.createLandlord(address = Address(AddressDataModel(oneLineAddress)))

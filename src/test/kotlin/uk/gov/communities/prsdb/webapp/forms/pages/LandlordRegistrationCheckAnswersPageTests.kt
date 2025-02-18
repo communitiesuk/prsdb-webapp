@@ -147,12 +147,12 @@ class LandlordRegistrationCheckAnswersPageTests {
 
         assertEquals(
             SummaryListRowViewModel(
-                "registerAsALandlord.checkAnswers.rowHeading.ukResident",
+                "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesResident",
                 true,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
             ),
             formData.single {
-                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.ukResident"
+                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesResident"
             },
         )
     }
