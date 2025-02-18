@@ -167,7 +167,7 @@ class PropertyDetailsLandlordViewModelTests {
     }
 
     @Test
-    fun `Non UK landlord details shows the correct UK contact address`() {
+    fun `Non UK landlord details shows the correct England or Wales contact address`() {
         // Arrange
         val oneLineAddress = "A test address"
         val testLandlord =
