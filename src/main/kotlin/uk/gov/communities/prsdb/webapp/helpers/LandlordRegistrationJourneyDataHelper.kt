@@ -74,15 +74,15 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
                 "phoneNumber",
             )
 
-        fun getLivesInUK(journeyData: JourneyData) =
+        fun getLivesInEnglandOrWales(journeyData: JourneyData) =
             getFieldBooleanValue(
                 journeyData,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
-                "livesInUK",
+                "livesInEnglandOrWales",
             )
 
         fun getNonUKCountryOfResidence(journeyData: JourneyData) =
-            if (getLivesInUK(journeyData) == true) {
+            if (getLivesInEnglandOrWales(journeyData) == true) {
                 null
             } else {
                 getFieldStringValue(
@@ -96,12 +96,12 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             journeyData: JourneyData,
             addressDataService: AddressDataService,
         ): AddressDataModel? {
-            val livesInUK = getLivesInUK(journeyData) ?: return null
+            val livesInEnglandOrWales = getLivesInEnglandOrWales(journeyData) ?: return null
 
-            return if (isManualAddressChosen(journeyData, !livesInUK)) {
-                getManualAddress(journeyData, !livesInUK)
+            return if (isManualAddressChosen(journeyData, !livesInEnglandOrWales)) {
+                getManualAddress(journeyData, !livesInEnglandOrWales)
             } else {
-                val selectedAddress = getSelectedAddress(journeyData, !livesInUK) ?: return null
+                val selectedAddress = getSelectedAddress(journeyData, !livesInEnglandOrWales) ?: return null
                 addressDataService.getAddressData(selectedAddress)
             }
         }

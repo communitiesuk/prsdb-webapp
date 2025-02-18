@@ -438,7 +438,7 @@ class LandlordRegistrationJourney(
     )
 
     private fun countryOfResidenceNextAction(journeyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
-        if (LandlordRegistrationJourneyDataHelper.getLivesInUK(journeyData)!!) {
+        if (LandlordRegistrationJourneyDataHelper.getLivesInEnglandOrWales(journeyData)!!) {
             Pair(LandlordRegistrationStepId.LookupAddress, null)
         } else {
             Pair(LandlordRegistrationStepId.InternationalAddress, null)

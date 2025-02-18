@@ -92,7 +92,7 @@ class JourneyDataBuilder(
                     ),
                 LandlordRegistrationStepId.Email.urlPathSegment to mutableMapOf("emailAddress" to "test@example.com"),
                 LandlordRegistrationStepId.PhoneNumber.urlPathSegment to mutableMapOf("phoneNumber" to "07123456789"),
-                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment to mutableMapOf("livesInUK" to true),
+                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment to mutableMapOf("livesInEnglandOrWales" to true),
                 LandlordRegistrationStepId.SelectAddress.urlPathSegment to mutableMapOf("address" to DEFAULT_ADDRESS),
             )
 
@@ -302,7 +302,7 @@ class JourneyDataBuilder(
     ): JourneyDataBuilder {
         journeyData[LandlordRegistrationStepId.CountryOfResidence.urlPathSegment] =
             mutableMapOf(
-                "livesInUK" to false,
+                "livesInEnglandOrWales" to false,
                 "countryOfResidence" to countryOfResidence,
             )
         journeyData[LandlordRegistrationStepId.InternationalAddress.urlPathSegment] =

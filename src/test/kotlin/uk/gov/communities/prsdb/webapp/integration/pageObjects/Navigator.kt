@@ -197,12 +197,16 @@ class Navigator(
     }
 
     fun goToLandlordRegistrationCheckAnswersPage(
-        livesInUK: Boolean = true,
+        livesInEnglandOrWales: Boolean = true,
         isManualAddressChosen: Boolean = false,
     ): CheckAnswersPageLandlordRegistration {
         if (isManualAddressChosen) {
             val manualAddressPage =
-                if (livesInUK) goToLandlordRegistrationManualAddressPage() else goToLandlordRegistrationManualContactAddressPage()
+                if (livesInEnglandOrWales) {
+                    goToLandlordRegistrationManualAddressPage()
+                } else {
+                    goToLandlordRegistrationManualContactAddressPage()
+                }
             manualAddressPage.addressLineOneInput.fill("1 Example Road")
             manualAddressPage.townOrCityInput.fill("Townville")
             manualAddressPage.postcodeInput.fill("EG1 2AB")
@@ -210,7 +214,11 @@ class Navigator(
             return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
         } else {
             val selectAddressPage =
-                if (livesInUK) goToLandlordRegistrationSelectAddressPage() else goToLandlordRegistrationSelectContactAddressPage()
+                if (livesInEnglandOrWales) {
+                    goToLandlordRegistrationSelectAddressPage()
+                } else {
+                    goToLandlordRegistrationSelectContactAddressPage()
+                }
             selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
             selectAddressPage.form.submit()
             return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
