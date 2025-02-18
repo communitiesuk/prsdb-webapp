@@ -55,28 +55,68 @@ class LandlordRegistrationJourney(
     final override val initialStepId = LandlordRegistrationStepId.VerifyIdentity
 
     override val sections =
-        // TODO PRSD-859 - these should be arranged into an appropriate set of sections/tasks
-        createSingleSectionWithSingleTaskFromSteps(
-            initialStepId,
+        listOf(
+            JourneySection(privacyNoticeTasks(), "registerAsALandlord.section.privacyNotice.heading"),
+            JourneySection(
+                registerDetailsTasks(addressLookupService, addressDataService),
+                "registerAsALandlord.section.yourDetails.heading",
+            ),
+            JourneySection(
+                checkAndSubmitDetailsTasks(addressDataService, landlordService, emailNotificationService),
+                "registerAsALandlord.section.checkAndSubmit.heading",
+            ),
+        )
+
+    private fun privacyNoticeTasks(): List<JourneyTask<LandlordRegistrationStepId>> = emptyList()
+
+    private fun registerDetailsTasks(
+        addressLookupService: AddressLookupService,
+        addressDataService: AddressDataService,
+    ): List<JourneyTask<LandlordRegistrationStepId>> =
+        listOf(
+            identityTask(),
+            JourneyTask.withOneStep(emailStep()),
+            JourneyTask.withOneStep(phoneNumberStep()),
+            JourneyTask.withOneStep(countryOfResidenceStep()),
+            landlordAddressesTask(addressLookupService, addressDataService),
+        )
+
+    private fun checkAndSubmitDetailsTasks(
+        addressDataService: AddressDataService,
+        landlordService: LandlordService,
+        emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
+    ): List<JourneyTask<LandlordRegistrationStepId>> =
+        listOf(
+            JourneyTask.withOneStep(checkAnswersStep(addressDataService)),
+            JourneyTask.withOneStep(declarationStep(journeyDataService, landlordService, addressDataService, emailNotificationService)),
+        )
+
+    private fun identityTask() =
+        JourneyTask<LandlordRegistrationStepId>(
+            LandlordRegistrationStepId.VerifyIdentity,
             setOf(
                 verifyIdentityStep(),
                 nameStep(),
                 dateOfBirthStep(),
                 confirmIdentityStep(),
-                emailStep(),
-                phoneNumberStep(),
-                countryOfResidenceStep(),
-                lookupAddressStep(),
-                selectAddressStep(addressLookupService, addressDataService),
-                manualAddressStep(),
-                internationalAddressStep(),
-                lookupContactAddressStep(),
-                selectContactAddressStep(addressLookupService, addressDataService),
-                manualContactAddressStep(),
-                checkAnswersStep(addressDataService),
-                declarationStep(journeyDataService, landlordService, addressDataService, emailNotificationService),
             ),
         )
+
+    private fun landlordAddressesTask(
+        addressLookupService: AddressLookupService,
+        addressDataService: AddressDataService,
+    ) = JourneyTask(
+        LandlordRegistrationStepId.LookupAddress,
+        setOf(
+            lookupAddressStep(),
+            selectAddressStep(addressLookupService, addressDataService),
+            manualAddressStep(),
+            internationalAddressStep(),
+            lookupContactAddressStep(),
+            selectContactAddressStep(addressLookupService, addressDataService),
+            manualContactAddressStep(),
+        ),
+    )
 
     private fun verifyIdentityStep() =
         Step(
@@ -109,6 +149,7 @@ class LandlordRegistrationJourney(
                             "backUrl" to "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}",
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.DateOfBirth, null) },
             saveAfterSubmit = false,
         )
@@ -128,6 +169,7 @@ class LandlordRegistrationJourney(
                             "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Email, null) },
             saveAfterSubmit = false,
         )
@@ -145,6 +187,7 @@ class LandlordRegistrationJourney(
                             "submitButtonText" to "forms.buttons.confirmAndContinue",
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Email, null) },
             saveAfterSubmit = false,
         )
@@ -165,6 +208,7 @@ class LandlordRegistrationJourney(
                             "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.PhoneNumber, null) },
             saveAfterSubmit = false,
         )
@@ -186,6 +230,7 @@ class LandlordRegistrationJourney(
                             "hint" to "forms.phoneNumber.hint",
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CountryOfResidence, null) },
             saveAfterSubmit = false,
         )
@@ -218,6 +263,7 @@ class LandlordRegistrationJourney(
                                 ),
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { journeyData, _ -> countryOfResidenceNextAction(journeyData) },
             saveAfterSubmit = false,
         )
@@ -241,6 +287,7 @@ class LandlordRegistrationJourney(
                             "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.SelectAddress, null) },
             saveAfterSubmit = false,
         )
@@ -267,6 +314,7 @@ class LandlordRegistrationJourney(
                 addressLookupService = addressLookupService,
                 addressDataService = addressDataService,
             ),
+        displaySectionHeader = true,
         nextAction = { journeyData, _ -> selectAddressNextAction(journeyData) },
         saveAfterSubmit = false,
     )
@@ -291,6 +339,7 @@ class LandlordRegistrationJourney(
                             "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CheckAnswers, null) },
             saveAfterSubmit = false,
         )
@@ -312,6 +361,7 @@ class LandlordRegistrationJourney(
                             "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.LookupContactAddress, null) },
             saveAfterSubmit = false,
         )
@@ -334,6 +384,7 @@ class LandlordRegistrationJourney(
                             "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.SelectContactAddress, null) },
             saveAfterSubmit = false,
         )
@@ -360,6 +411,7 @@ class LandlordRegistrationJourney(
                 addressLookupService = addressLookupService,
                 addressDataService = addressDataService,
             ),
+        displaySectionHeader = true,
         nextAction = { journeyData, _ ->
             selectContactAddressNextAction(
                 journeyData,
@@ -387,6 +439,7 @@ class LandlordRegistrationJourney(
                             "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),
+            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CheckAnswers, null) },
             saveAfterSubmit = false,
         )
@@ -396,6 +449,7 @@ class LandlordRegistrationJourney(
             id = LandlordRegistrationStepId.CheckAnswers,
             page = LandlordRegistrationCheckAnswersPage(addressDataService),
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Declaration, null) },
+            displaySectionHeader = true,
             saveAfterSubmit = false,
         )
 
@@ -425,6 +479,7 @@ class LandlordRegistrationJourney(
                         "submitButtonText" to "forms.buttons.confirmAndCompleteRegistration",
                     ),
             ),
+        displaySectionHeader = true,
         handleSubmitAndRedirect = { journeyData, _ ->
             declarationHandleSubmitAndRedirect(
                 journeyData,
