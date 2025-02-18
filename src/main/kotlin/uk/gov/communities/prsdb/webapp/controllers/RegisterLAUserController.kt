@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import jakarta.servlet.http.HttpSession
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -7,11 +9,11 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
@@ -25,6 +27,7 @@ class RegisterLAUserController(
     var invitationService: LocalAuthorityInvitationService,
     var journeyDataService: JourneyDataService,
     var localAuthorityDataService: LocalAuthorityDataService,
+    var session: HttpSession,
 ) {
     @GetMapping
     fun acceptInvitation(
@@ -39,7 +42,7 @@ class RegisterLAUserController(
             return "redirect:${REGISTER_LA_USER_JOURNEY_URL}/${laUserRegistrationJourney.initialStepId.urlPathSegment}"
         }
 
-        return "redirect:${REGISTER_LA_USER_JOURNEY_URL}/invalid-link"
+        return REDIRECT_FOR_INVALID_TOKEN
     }
 
     @GetMapping("/{stepName}")
@@ -49,10 +52,7 @@ class RegisterLAUserController(
         model: Model,
     ): String {
         val token = invitationService.getTokenFromSession()
-        if (token == null || !invitationService.tokenIsValid(token)) {
-            invitationService.clearTokenFromSession()
-            return "redirect:invalid-link"
-        }
+        if (token == null || !invitationService.tokenIsValid(token)) return REDIRECT_FOR_INVALID_TOKEN
 
         return laUserRegistrationJourney.populateModelAndGetViewName(
             laUserRegistrationJourney.getStepId(stepName),
@@ -77,10 +77,34 @@ class RegisterLAUserController(
             principal,
         )
 
-    @GetMapping("/invalid-link")
+    @GetMapping("/$CONFIRMATION_PAGE_PATH_SEGMENT")
+    fun getConfirmation(
+        model: Model,
+        principal: Principal,
+    ): String {
+        val localAuthorityUserID =
+            session.getAttribute(LA_USER_ID)?.toString()?.toLong()
+                ?: throw ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "$LA_USER_ID was not found in the session",
+                )
+
+        val localAuthority =
+            localAuthorityDataService.getLocalAuthorityOrNullFromUserID(localAuthorityUserID)
+                ?: throw ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "No LA user with ID $localAuthorityUserID was found in the database",
+                )
+
+        model.addAttribute("localAuthority", localAuthority.name)
+
+        return "registerLAUserSuccess"
+    }
+
+    @GetMapping("/$INVALID_LINK_PAGE_PATH_SEGMENT")
     fun invalidToken(model: Model): String = "invalidLaInvitationLink"
 
-    fun prePopulateJourneyData(token: String) {
+    private fun prePopulateJourneyData(token: String) {
         val journeyData = journeyDataService.getJourneyDataFromSession()
 
         val emailStep = laUserRegistrationJourney.steps.singleOrNull { step -> step.id == RegisterLaUserStepId.Email }
@@ -90,35 +114,10 @@ class RegisterLAUserController(
         journeyDataService.setJourneyData(journeyData)
     }
 
-    @GetMapping("/success")
-    fun submitRegistration(
-        model: Model,
-        principal: Principal,
-    ): String {
-        val token = invitationService.getTokenFromSession()
-        if (token == null || !invitationService.tokenIsValid(token)) {
-            invitationService.clearTokenFromSession()
-            return "redirect:invalid-link"
-        }
-        val localAuthority = invitationService.getAuthorityForToken(token)
+    companion object {
+        const val CONFIRMATION_PAGE_PATH_SEGMENT = "confirmation"
+        const val INVALID_LINK_PAGE_PATH_SEGMENT = "invalid-link"
 
-        val journeyData = journeyDataService.getJourneyDataFromSession()
-        val name = objectToStringKeyedMap(journeyData["name"])?.get("name").toString()
-        val email = objectToStringKeyedMap(journeyData["email"])?.get("emailAddress").toString()
-
-        if (name == "null" || email == "null") {
-            throw(PrsdbWebException("The form has not been fully completed"))
-        }
-
-        localAuthorityDataService.registerNewUser(principal.name, localAuthority, name, email)
-
-        val invitation = invitationService.getInvitationFromToken(token)
-        invitationService.deleteInvitation(invitation)
-        invitationService.clearTokenFromSession()
-        journeyDataService.clearJourneyDataFromSession()
-
-        model.addAttribute("localAuthority", localAuthority.name)
-
-        return "registerLAUserSuccess"
+        private const val REDIRECT_FOR_INVALID_TOKEN = "redirect:$INVALID_LINK_PAGE_PATH_SEGMENT"
     }
 }
