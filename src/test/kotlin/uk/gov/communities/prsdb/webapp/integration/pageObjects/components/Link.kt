@@ -9,6 +9,8 @@ class Link(
 ) : BaseComponent(locator),
     ClickAndWaitable {
     companion object {
+        fun default(parentLocator: Locator) = Link(parentLocator.locator(".govuk-link"))
+
         fun byText(
             parentLocator: Locator,
             text: String,

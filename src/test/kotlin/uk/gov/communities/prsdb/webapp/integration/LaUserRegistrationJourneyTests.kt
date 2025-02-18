@@ -123,14 +123,16 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Change Name link navigates to the name step`(page: Page) {
             val checkAnswersPage = navigator.goToLaUserRegistrationCheckAnswersPage()
-            checkAnswersPage.changeNameLink.click()
+            checkAnswersPage.form.summaryList.nameRow
+                .clickActionLinkAndWait()
             assertPageIs(page, NameFormPageLaUserRegistration::class)
         }
 
         @Test
         fun `Change Email link navigates to the email step`(page: Page) {
             val checkAnswersPage = navigator.goToLaUserRegistrationCheckAnswersPage()
-            checkAnswersPage.changeEmailLink.click()
+            checkAnswersPage.form.summaryList.emailRow
+                .clickActionLinkAndWait()
             assertPageIs(page, EmailFormPageLaUserRegistration::class)
         }
 
