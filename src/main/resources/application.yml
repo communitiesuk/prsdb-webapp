@@ -34,6 +34,8 @@ spring:
       host: ${ELASTICACHE_URL}
       port: ${ELASTICACHE_PORT}
       password: ${ELASTICACHE_PASSWORD}
+      ssl:
+        enabled: true
 
   mvc.format.date: "d MMMM yyyy"
 
