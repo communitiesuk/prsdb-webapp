@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -13,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
-import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 
@@ -21,7 +21,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataM
 class LocalAuthorityDataService(
     val localAuthorityUserRepository: LocalAuthorityUserRepository,
     val localAuthorityUserOrInvitationRepository: LocalAuthorityUserOrInvitationRepository,
-    val oneLoginUserRepository: OneLoginUserRepository,
+    val oneLoginUserService: OneLoginUserService,
 ) {
     fun getUserAndLocalAuthorityIfAuthorizedUser(
         localAuthorityId: Int,
@@ -105,17 +105,16 @@ class LocalAuthorityDataService(
         localAuthorityUserRepository.deleteById(localAuthorityUserId)
     }
 
+    @Transactional
     fun registerNewUser(
         baseUserId: String,
         localAuthority: LocalAuthority,
         name: String,
         email: String,
     ) {
-        val oneLoginUser = oneLoginUserRepository.getReferenceById(baseUserId)
-
         localAuthorityUserRepository.save(
             LocalAuthorityUser(
-                baseUser = oneLoginUser,
+                baseUser = oneLoginUserService.findOrCreate1LUser(baseUserId),
                 isManager = false,
                 localAuthority = localAuthority,
                 name = name,
