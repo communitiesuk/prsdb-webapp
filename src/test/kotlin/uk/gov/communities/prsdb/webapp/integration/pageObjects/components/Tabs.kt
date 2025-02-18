@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.components
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 
-class Tabs(
+open class Tabs(
     parentLocator: Locator,
 ) : BaseComponent(parentLocator.locator(".govuk-tabs")) {
     constructor(page: Page) : this(page.locator("html"))
@@ -12,15 +12,13 @@ class Tabs(
 
     val tabPanels = getChildrenComponents(".govuk-tabs__panel")
 
-    var hiddenPanels = tabPanels.filter { it.isHidden }
+    val activePanel
+        get() = tabPanels.find { it.isVisible }
 
-    var activePanel = tabPanels.find { it.isVisible }
-
-    fun getActiveTabPanelId() = activePanel?.getAttribute("id")
+    val activeTabPanelId
+        get() = activePanel?.getAttribute("id")
 
     fun goToTab(tabName: String) {
         tabsList.single { it.textContent().trim() == tabName.trim() }.click()
-        hiddenPanels = tabPanels.filter { it.isHidden }
-        activePanel = tabPanels.find { it.isVisible }
     }
 }

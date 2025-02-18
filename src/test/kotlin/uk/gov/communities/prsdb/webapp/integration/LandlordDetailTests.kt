@@ -15,16 +15,16 @@ class LandlordDetailTests : IntegrationTest() {
         fun `the landlord details page loads with the landlords personal details tab selected by default`(page: Page) {
             val detailsPage = navigator.goToLandlordDetails()
 
-            assertEquals(detailsPage.getActiveTabPanelId(), "personal-details")
+            assertEquals(detailsPage.tabs.activeTabPanelId, "personal-details")
         }
 
         @Test
         fun `loading the landlord details page and selecting properties shows the registered properties table`(page: Page) {
             val detailsPage = navigator.goToLandlordDetails()
 
-            detailsPage.goToRegisteredProperties()
+            detailsPage.tabs.goToRegisteredProperties()
 
-            assertEquals(detailsPage.getActiveTabPanelId(), "registered-properties")
+            assertEquals(detailsPage.tabs.activeTabPanelId, "registered-properties")
             assertThat(detailsPage.table.headerRow.getCell(0)).containsText("Property address")
             assertThat(detailsPage.table.headerRow.getCell(1)).containsText("Local authority")
             assertThat(detailsPage.table.headerRow.getCell(2)).containsText("Property licence")
@@ -38,16 +38,16 @@ class LandlordDetailTests : IntegrationTest() {
         fun `the landlord details page loads with the landlords personal details tab selected by default`(page: Page) {
             val detailsPage = navigator.goToLandlordDetailsAsALocalAuthorityUser(1)
 
-            assertEquals(detailsPage.getActiveTabPanelId(), "personal-details")
+            assertEquals(detailsPage.tabs.activeTabPanelId, "personal-details")
         }
 
         @Test
         fun `loading the landlord details page and selecting properties shows landlord's registered properties table`(page: Page) {
             val detailsPage = navigator.goToLandlordDetailsAsALocalAuthorityUser(1)
 
-            detailsPage.goToRegisteredProperties()
+            detailsPage.tabs.goToRegisteredProperties()
 
-            assertEquals(detailsPage.getActiveTabPanelId(), "registered-properties")
+            assertEquals(detailsPage.tabs.activeTabPanelId, "registered-properties")
             assertThat(detailsPage.table.headerRow.getCell(0)).containsText("Property address")
             assertThat(detailsPage.table.headerRow.getCell(1)).containsText("Registration number")
             assertThat(detailsPage.table.headerRow.getCell(2)).containsText("Local authority")

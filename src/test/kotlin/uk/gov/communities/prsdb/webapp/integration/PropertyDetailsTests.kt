@@ -20,25 +20,25 @@ class PropertyDetailsTests : IntegrationTest() {
         fun `the property details page loads with the property details tab selected by default`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
 
-            assertEquals(detailsPage.getActiveTabPanelId(), "property-details")
+            assertEquals(detailsPage.tabs.activeTabPanelId, "property-details")
         }
 
         @Test
         fun `loading the landlord details page and clicking landlord details tab shows the landlords details tab`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
-            detailsPage.goToLandlordDetails()
+            detailsPage.tabs.goToLandlordDetails()
 
-            assertEquals(detailsPage.getActiveTabPanelId(), "landlord-details")
+            assertEquals(detailsPage.tabs.activeTabPanelId, "landlord-details")
         }
 
         @Test
         fun `when the landlord details tab is active clicking the property details tab shows property details tab`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
-            detailsPage.goToLandlordDetails()
+            detailsPage.tabs.goToLandlordDetails()
 
-            detailsPage.goToPropertyDetails()
+            detailsPage.tabs.goToPropertyDetails()
 
-            assertEquals(detailsPage.getActiveTabPanelId(), "property-details")
+            assertEquals(detailsPage.tabs.activeTabPanelId, "property-details")
         }
 
         @Test
@@ -53,7 +53,7 @@ class PropertyDetailsTests : IntegrationTest() {
         @Test
         fun `in the landlord details section the landlord name link goes the landlord view of landlord details`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
-            detailsPage.goToLandlordDetails()
+            detailsPage.tabs.goToLandlordDetails()
 
             detailsPage.getLandlordLinkFromLandlordDetails("Alexander Smith").clickAndWait()
 
@@ -85,25 +85,25 @@ class PropertyDetailsTests : IntegrationTest() {
         fun `the property details page loads with the property details tab selected by default`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
 
-            assertEquals(detailsPage.getActiveTabPanelId(), "property-details")
+            assertEquals(detailsPage.tabs.activeTabPanelId, "property-details")
         }
 
         @Test
         fun `loading the landlord details page and clicking landlord details tab shows the landlords details tab`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
-            detailsPage.goToLandlordDetails()
+            detailsPage.tabs.goToLandlordDetails()
 
-            assertEquals(detailsPage.getActiveTabPanelId(), "landlord-details")
+            assertEquals(detailsPage.tabs.activeTabPanelId, "landlord-details")
         }
 
         @Test
         fun `when the landlord details tab is active clicking the property details tab shows property details tab`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
-            detailsPage.goToLandlordDetails()
+            detailsPage.tabs.goToLandlordDetails()
 
-            detailsPage.goToPropertyDetails()
+            detailsPage.tabs.goToPropertyDetails()
 
-            assertEquals(detailsPage.getActiveTabPanelId(), "property-details")
+            assertEquals(detailsPage.tabs.activeTabPanelId, "property-details")
         }
 
         @Test
@@ -118,7 +118,7 @@ class PropertyDetailsTests : IntegrationTest() {
         @Test
         fun `in the landlord details section the landlord name link goes the local authority view of landlord details`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
-            detailsPage.goToLandlordDetails()
+            detailsPage.tabs.goToLandlordDetails()
 
             detailsPage.getLandlordLinkFromLandlordDetails("Alexander Smith").clickAndWait()
 
