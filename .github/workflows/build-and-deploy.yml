@@ -103,7 +103,7 @@ jobs:
 
       - name: Redeploy ECS service
         run: |
-          aws ecs update-service --cluster integration-app --service integration-app --force-new-deployment
+          aws ecs update-service --cluster integration-app --service integration-app --task-definition prsdb-webapp-integration --force-new-deployment
   
   report-pipeline-status:
     runs-on: ubuntu-latest
