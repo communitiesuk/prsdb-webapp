@@ -117,7 +117,7 @@ jobs:
           payload: |
             {
               "commit": ${{ toJson(github.event.head_commit.message) }},
-              "result": "${{ (needs.update-task-definition.result == 'success' || needs.update-task-definition.result == 'skipped') && 'Success :tick:' || 'Failure :no-cross:' }}",
+              "result": "${{ (needs.update-ecs-service == 'success' || needs.update-ecs-service.result == 'skipped') && 'Success :tick:' || 'Failure :no-cross:' }}",
               "url": "${{ format('https://github.com/communitiesuk/prsdb-webapp/actions/runs/{0}', github.run_id) }}"
             }
         env:
