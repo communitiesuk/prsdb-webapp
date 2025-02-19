@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.mockObjects
 
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -57,10 +56,6 @@ class JourneyDataBuilder(
                 "number-of-people" to
                     mutableMapOf(
                         "numberOfPeople" to "4",
-                    ),
-                "landlord-type" to
-                    mutableMapOf(
-                        "landlordType" to "SOLE",
                     ),
                 "licensing-type" to
                     mutableMapOf(
@@ -233,14 +228,6 @@ class JourneyDataBuilder(
                 "numberOfPeople" to people.toString(),
             )
 
-        return this
-    }
-
-    fun withLandlordType(type: LandlordType): JourneyDataBuilder {
-        journeyData["landlord-type"] =
-            mutableMapOf(
-                "landlordType" to type.name,
-            )
         return this
     }
 

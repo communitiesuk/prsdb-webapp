@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -106,16 +105,6 @@ class PropertyRegistrationJourneyDataHelperTests {
         val ownershipType = PropertyRegistrationJourneyDataHelper.getOwnershipType(mockJourneyData)
 
         assertEquals(expectedOwnershipType, ownershipType)
-    }
-
-    @Test
-    fun `getLandlordType returns the corresponding landlord type`() {
-        val expectedLandlordType = LandlordType.SOLE
-        val mockJourneyData = journeyDataBuilder.withLandlordType(expectedLandlordType).build()
-
-        val landlordType = PropertyRegistrationJourneyDataHelper.getLandlordType(mockJourneyData)
-
-        assertEquals(expectedLandlordType, landlordType)
     }
 
     @Test

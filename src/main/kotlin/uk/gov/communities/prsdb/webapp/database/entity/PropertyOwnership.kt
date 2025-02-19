@@ -11,7 +11,6 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import java.time.OffsetDateTime
@@ -30,10 +29,6 @@ class PropertyOwnership(
 
     @Column(nullable = false)
     lateinit var occupancyType: OccupancyType
-        private set
-
-    @Column(nullable = false)
-    lateinit var landlordType: LandlordType
         private set
 
     @Column(nullable = false)
@@ -81,7 +76,6 @@ class PropertyOwnership(
 
     constructor(
         occupancyType: OccupancyType,
-        landlordType: LandlordType,
         ownershipType: OwnershipType,
         currentNumHouseholds: Int,
         currentNumTenants: Int,
@@ -93,7 +87,6 @@ class PropertyOwnership(
     ) : this() {
         this.isActive = isActive
         this.occupancyType = occupancyType
-        this.landlordType = landlordType
         this.ownershipType = ownershipType
         this.currentNumHouseholds = currentNumHouseholds
         this.currentNumTenants = currentNumTenants
@@ -107,7 +100,6 @@ class PropertyOwnership(
         id: Long,
         isActive: Boolean,
         occupancyType: OccupancyType,
-        landlordType: LandlordType,
         ownershipType: OwnershipType,
         currentNumHouseholds: Int,
         currentNumTenants: Int,
@@ -118,7 +110,6 @@ class PropertyOwnership(
     ) : this(id) {
         this.isActive = isActive
         this.occupancyType = occupancyType
-        this.landlordType = landlordType
         this.ownershipType = ownershipType
         this.currentNumHouseholds = currentNumHouseholds
         this.currentNumTenants = currentNumTenants

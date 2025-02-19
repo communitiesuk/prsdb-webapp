@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -27,7 +26,6 @@ import uk.gov.communities.prsdb.webapp.models.emailModels.PropertyRegistrationCo
 import uk.gov.communities.prsdb.webapp.models.formModels.DeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoAdditionalLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoMandatoryLicenceFormModel
-import uk.gov.communities.prsdb.webapp.models.formModels.LandlordTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.ManualAddressFormModel
@@ -97,10 +95,6 @@ class PropertyRegistrationJourney(
             ),
             licensingTask(),
             occupancyTask(),
-            JourneyTask.withOneStep(
-                landlordTypeStep(),
-                "registerProperty.taskList.register.selectOperation",
-            ),
         )
 
     private fun checkAndSubmitPropertiesTasks(): List<JourneyTask<RegisterPropertyStepId>> =
@@ -416,37 +410,6 @@ class PropertyRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
-            nextAction = { _, _ -> Pair(RegisterPropertyStepId.LandlordType, null) },
-        )
-
-    private fun landlordTypeStep() =
-        Step(
-            id = RegisterPropertyStepId.LandlordType,
-            page =
-                Page(
-                    formModel = LandlordTypeFormModel::class,
-                    templateName = "forms/landlordTypeForm",
-                    content =
-                        mapOf(
-                            "title" to "registerProperty.title",
-                            "fieldSetHeading" to "forms.landlordType.fieldSetHeading",
-                            "fieldSetHint" to "forms.landlordType.fieldSetHint",
-                            "radioOptions" to
-                                listOf(
-                                    RadiosButtonViewModel(
-                                        value = LandlordType.SOLE,
-                                        labelMsgKey = "forms.landlordType.radios.option.individual.label",
-                                        hintMsgKey = "forms.landlordType.radios.option.individual.hint",
-                                    ),
-                                    RadiosButtonViewModel(
-                                        value = LandlordType.JOINT,
-                                        labelMsgKey = "forms.landlordType.radios.option.joint.label",
-                                        hintMsgKey = "forms.landlordType.radios.option.joint.hint",
-                                    ),
-                                ),
-                        ),
-                    shouldDisplaySectionHeader = true,
-                ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
         )
 
@@ -612,7 +575,7 @@ class PropertyRegistrationJourney(
         if (PropertyRegistrationJourneyDataHelper.getIsOccupied(journeyData)!!) {
             Pair(RegisterPropertyStepId.NumberOfHouseholds, null)
         } else {
-            Pair(RegisterPropertyStepId.LandlordType, null)
+            Pair(RegisterPropertyStepId.CheckAnswers, null)
         }
 
     private fun selectAddressNextAction(
@@ -661,7 +624,6 @@ class PropertyRegistrationJourney(
                     propertyType = PropertyRegistrationJourneyDataHelper.getPropertyType(journeyData)!!,
                     licenseType = PropertyRegistrationJourneyDataHelper.getLicensingType(journeyData)!!,
                     licenceNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(journeyData)!!,
-                    landlordType = PropertyRegistrationJourneyDataHelper.getLandlordType(journeyData)!!,
                     ownershipType = PropertyRegistrationJourneyDataHelper.getOwnershipType(journeyData)!!,
                     numberOfHouseholds = PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(journeyData),
                     numberOfPeople = PropertyRegistrationJourneyDataHelper.getNumberOfTenants(journeyData),

@@ -59,8 +59,7 @@ class PropertyRegistrationCheckAnswersPage(
             getPropertyTypeDetails(journeyData) +
             getOwnershipTypeDetails(journeyData) +
             getLicensingTypeDetails(journeyData) +
-            getTenancyDetails(journeyData) +
-            getLandlordTypeDetails(journeyData)
+            getTenancyDetails(journeyData)
 
     private fun getAddressDetails(journeyData: JourneyData): List<SummaryListRowViewModel> {
         val address = DataHelper.getAddress(journeyData, addressDataService)!!
@@ -165,15 +164,6 @@ class PropertyRegistrationCheckAnswersPage(
                 ),
             )
         }
-    }
-
-    private fun getLandlordTypeDetails(journeyData: JourneyData): SummaryListRowViewModel {
-        val landlordType = DataHelper.getLandlordType(journeyData)!!
-        return SummaryListRowViewModel(
-            "forms.checkPropertyAnswers.propertyDetails.landlordType",
-            landlordType,
-            RegisterPropertyStepId.LandlordType.urlPathSegment,
-        )
     }
 
     private fun getOccupyingTenantsDetails(journeyData: JourneyData): List<SummaryListRowViewModel> =

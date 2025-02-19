@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.mockObjects
 
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -73,7 +72,6 @@ class MockLandlordData {
 
         fun createPropertyOwnership(
             occupancyType: OccupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
-            landlordType: LandlordType = LandlordType.SOLE,
             ownershipType: OwnershipType = OwnershipType.FREEHOLD,
             currentNumHouseholds: Int = 0,
             currentNumTenants: Int = 0,
@@ -86,7 +84,6 @@ class MockLandlordData {
             val propertyOwnership =
                 PropertyOwnership(
                     occupancyType = occupancyType,
-                    landlordType = landlordType,
                     ownershipType = ownershipType,
                     currentNumHouseholds = currentNumHouseholds,
                     currentNumTenants = currentNumTenants,
