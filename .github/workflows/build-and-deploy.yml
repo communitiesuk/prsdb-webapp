@@ -103,7 +103,7 @@ jobs:
 
       - name: Redeploy ECS service
         run: |
-          aws ecs update-service --cluster integration-app --service integration-app --force-new-deployment
+          aws ecs update-service --cluster integration-app --service integration-app --task-definition prsdb-webapp-integration --force-new-deployment
   
   report-pipeline-status:
     runs-on: ubuntu-latest
@@ -117,7 +117,7 @@ jobs:
           payload: |
             {
               "commit": ${{ toJson(github.event.head_commit.message) }},
-              "result": "${{ (needs.update-ecs-service == 'success' || needs.update-ecs-service.result == 'skipped') && 'Success :tick:' || 'Failure :no-cross:' }}",
+              "result": "${{ (needs.update-ecs-service.result == 'success' || needs.update-ecs-service.result == 'skipped') && 'Success :tick:' || 'Failure :no-cross:' }}",
               "url": "${{ format('https://github.com/communitiesuk/prsdb-webapp/actions/runs/{0}', github.run_id) }}"
             }
         env:
