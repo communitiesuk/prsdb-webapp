@@ -4,31 +4,21 @@
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html>
-<th:block id="main-content"
-          th:replace="~{fragments/layout :: layout(#{${title}}, ~{::#main-content/content()},false)}">
-    <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
-    <main class="govuk-main-wrapper">
-        <div id="page-content"
-             th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}},${formModel}, ~{::#form-content},${backUrl}, ${sectionHeaderInfo})}">
 
-            <form th:action="@{''}" method="post" novalidate th:object="${formModel}">
-                <p th:replace="~{fragments/sectionHeader :: sectionHeader(${sectionHeaderInfo})}" ></p>
-                <header>
-                    <h1 class="govuk-heading-l" th:text="#{forms.confirmDetails.heading}">forms.checkAnswers.heading</h1>
-                    <p  class="govuk-body" th:text="#{forms.confirmDetails.summary}">forms.confirmDetails.summary</p>
-                </header>
-                <dl th:replace="~{fragments/summaryList :: summaryList(${formData})}"></dl>
-                <details  id="details" th:replace="~{fragments/details :: details(#{forms.confirmDetails.details.summary}, ~{::#details/content()})}" >
-                    <div class="govuk-details__text">
-                        <span th:text="#{forms.confirmDetails.details.text.one}"></span>
-                        <a th:href="#{forms.confirmDetails.details.oneLoginUrl}" th:text="#{forms.confirmDetails.details.text.link}">
-                        </a><span th:text="#{forms.confirmDetails.details.text.two}"></span>
-                    </div>
-                </details>
-                <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
-            </form>
-        </div>
-    </main>
+<th:block id="form-content">
+    <th:block id="fieldset-content"
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'confirmIdentity', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
+        <dl th:replace="~{fragments/summaryList :: summaryList(${formData})}"></dl>
+        <details  id="details" th:replace="~{fragments/details :: details(#{forms.confirmDetails.details.summary}, ~{::#details/content()})}" >
+            <div class="govuk-details__text">
+                <span th:text="#{forms.confirmDetails.details.text.one}"></span>
+                <a th:href="#{forms.confirmDetails.details.oneLoginUrl}" th:text="#{forms.confirmDetails.details.text.link}">
+                </a><span th:text="#{forms.confirmDetails.details.text.two}"></span>
+            </div>
+        </details>
+
+    </th:block>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </th:block>
 </html>

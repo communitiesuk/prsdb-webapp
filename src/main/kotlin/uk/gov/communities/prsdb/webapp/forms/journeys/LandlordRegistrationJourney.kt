@@ -184,6 +184,8 @@ class LandlordRegistrationJourney(
                     content =
                         mapOf(
                             "title" to "registerAsALandlord.title",
+                            "fieldSetHeading" to "forms.confirmDetails.heading",
+                            "fieldSetHint" to "forms.confirmDetails.summary",
                             "submitButtonText" to "forms.buttons.confirmAndContinue",
                         ),
                     displaySectionHeader = true,
