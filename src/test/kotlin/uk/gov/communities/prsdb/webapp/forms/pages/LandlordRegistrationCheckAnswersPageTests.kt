@@ -200,7 +200,7 @@ class LandlordRegistrationCheckAnswersPageTests {
     }
 
     @Test
-    fun `formData has the correct outside England or Wales and selected contact addresses`() {
+    fun `formData has the correct non England or Wales and selected contact addresses`() {
         val countryOfResidence = "Germany"
         val nonEnglandOrWalesAddress = "test address"
         val selectedAddress = "1 Example Road"
@@ -247,7 +247,7 @@ class LandlordRegistrationCheckAnswersPageTests {
     }
 
     @Test
-    fun `formData has the correct outside England or Wales and manual contact addresses`() {
+    fun `formData has the correct non England or Wales and manual contact addresses`() {
         val countryOfResidence = "Germany"
         val nonEnglandOrWalesAddress = "test address"
         val addressLineOne = "1 Example Road"

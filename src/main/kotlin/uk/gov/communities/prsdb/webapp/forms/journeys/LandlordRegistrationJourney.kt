@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_PLACE_NAMES
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.constants.OUTSIDE_ENGLAND_OR_WALES_ADDRESS_MAX_LENGTH
+import uk.gov.communities.prsdb.webapp.constants.NON_ENGLAND_OR_WALES_ADDRESS_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
@@ -308,7 +308,7 @@ class LandlordRegistrationJourney(
                             "fieldSetHeading" to "forms.nonEnglandOrWalesAddress.fieldSetHeading",
                             "fieldSetHint" to "forms.nonEnglandOrWalesAddress.fieldSetHint",
                             "label" to "forms.nonEnglandOrWalesAddress.label",
-                            "limit" to OUTSIDE_ENGLAND_OR_WALES_ADDRESS_MAX_LENGTH,
+                            "limit" to NON_ENGLAND_OR_WALES_ADDRESS_MAX_LENGTH,
                             "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),
