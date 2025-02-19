@@ -48,7 +48,7 @@ open class Page(
         pageData: Map<String, Any?>?,
         prevStepUrl: String?,
         journeyData: JourneyData?,
-        sectionHeaderInfo: SectionHeaderViewModel? = null,
+        sectionHeaderInfo: SectionHeaderViewModel?,
     ): String {
         if (sectionHeaderInfo != null) {
             model.addAttribute("sectionHeaderInfo", sectionHeaderInfo)
