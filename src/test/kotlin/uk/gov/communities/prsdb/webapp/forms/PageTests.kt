@@ -38,7 +38,7 @@ class PageTests {
                 TestFormModel::class,
                 "index",
                 mutableMapOf("testKey" to "testValue"),
-                displaySectionHeader = true,
+                shouldDisplaySectionHeader = true,
             )
         validatorFactory = Validation.buildDefaultValidatorFactory()
         validator = SpringValidatorAdapter(validatorFactory.validator)

@@ -17,7 +17,7 @@ open class Page(
     private val formModel: KClass<out FormModel>,
     private val templateName: String,
     private val content: Map<String, Any>,
-    val displaySectionHeader: Boolean = false,
+    val shouldDisplaySectionHeader: Boolean = false,
 ) {
     open fun populateModelAndGetTemplateName(
         validator: Validator,
@@ -52,14 +52,20 @@ open class Page(
         journeyData: JourneyData?,
         sectionHeaderInfo: SectionHeaderViewModel?,
     ): String {
-        if (displaySectionHeader) {
+        addSectionHeaderInfoToModel(model, sectionHeaderInfo)
+        return populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData)
+    }
+
+    private fun addSectionHeaderInfoToModel(
+        model: Model,
+        sectionHeaderInfo: SectionHeaderViewModel?,
+    ) {
+        if (shouldDisplaySectionHeader) {
             if (sectionHeaderInfo == null) {
                 throw PrsdbWebException("Section heading requested but heading message key not found")
             }
             model.addAttribute("sectionHeaderInfo", sectionHeaderInfo)
         }
-
-        return populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData)
     }
 
     open fun isSatisfied(

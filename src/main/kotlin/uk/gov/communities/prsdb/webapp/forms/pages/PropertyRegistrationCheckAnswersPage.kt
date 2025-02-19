@@ -25,7 +25,7 @@ class PropertyRegistrationCheckAnswersPage(
             "title" to "registerProperty.title",
             "submitButtonText" to "forms.buttons.saveAndContinue",
         ),
-        displaySectionHeader = displaySectionHeader,
+        shouldDisplaySectionHeader = displaySectionHeader,
     ) {
     override fun populateModelAndGetTemplateName(
         validator: Validator,
@@ -36,13 +36,20 @@ class PropertyRegistrationCheckAnswersPage(
         sectionHeaderInfo: SectionHeaderViewModel?,
     ): String {
         journeyData!!
+        addPropertyDetailsToModel(model, journeyData)
+        return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData, sectionHeaderInfo)
+    }
+
+    private fun addPropertyDetailsToModel(
+        model: Model,
+        journeyData: JourneyData,
+    ) {
         val propertyName = getPropertyName(journeyData)
         val propertyDetails = getPropertyDetailsSummary(journeyData)
 
         model.addAttribute("propertyDetails", propertyDetails)
         model.addAttribute("propertyName", propertyName)
         model.addAttribute("showUprnDetail", !DataHelper.isManualAddressChosen(journeyData))
-        return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData, sectionHeaderInfo)
     }
 
     private fun getPropertyName(journeyData: JourneyData) = DataHelper.getAddress(journeyData, addressDataService)!!.singleLineAddress

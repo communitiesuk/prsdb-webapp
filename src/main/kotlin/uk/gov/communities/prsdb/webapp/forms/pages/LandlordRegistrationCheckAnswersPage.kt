@@ -21,7 +21,7 @@ class LandlordRegistrationCheckAnswersPage(
                 "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
                 "submitButtonText" to "forms.buttons.confirmAndContinue",
             ),
-        displaySectionHeader = displaySectionHeader,
+        shouldDisplaySectionHeader = displaySectionHeader,
     ) {
     override fun populateModelAndGetTemplateName(
         validator: Validator,

@@ -14,7 +14,7 @@ class SelectLocalAuthorityPage(
         formModel = SelectLocalAuthorityFormModel::class,
         templateName = "forms/selectLocalAuthorityForm",
         content = content,
-        displaySectionHeader = displaySectionHeader,
+        shouldDisplaySectionHeader = displaySectionHeader,
     ) {
     override fun populateModelAndGetTemplateName(
         validator: Validator,
