@@ -1,29 +1,24 @@
-package uk.gov.communities.prsdb.webapp.models.formModels
+package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
+import uk.gov.communities.prsdb.webapp.validation.PositiveOrZeroIntegerValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class LookupAddressFormModel : FormModel {
+class NumberOfPeopleFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.lookupAddress.postcode.error.missing",
+                messageKey = "forms.numberOfPeople.input.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
-        ],
-    )
-    var postcode: String? = null
-
-    @ValidatedBy(
-        constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.lookupAddress.houseNameOrNumber.error.missing",
-                validatorType = NotBlankConstraintValidator::class,
+                messageKey = "forms.numberOfPeople.input.error.invalidFormat",
+                validatorType = PositiveOrZeroIntegerValidator::class,
             ),
         ],
     )
-    var houseNameOrNumber: String? = null
+    var numberOfPeople: String = ""
 }

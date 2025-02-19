@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.formModels
+package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DateValidator
@@ -176,7 +176,7 @@ class DateOfBirthFormModel(
         ],
     )
     var year: String = "",
-) : FormModel {
+) : uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel {
     val dateValidator = DateValidator()
 
     fun notAllBlank(): Boolean = !(dateValidator.isAllBlank(day, month, year))

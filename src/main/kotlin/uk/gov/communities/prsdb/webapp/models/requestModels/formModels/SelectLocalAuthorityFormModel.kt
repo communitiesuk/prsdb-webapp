@@ -1,20 +1,19 @@
-package uk.gov.communities.prsdb.webapp.models.formModels
+package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.NotNullConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class OwnershipTypeFormModel : FormModel {
+class SelectLocalAuthorityFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.ownershipType.radios.error.missing",
+                messageKey = "forms.selectLocalAuthority.error.missing",
                 validatorType = NotNullConstraintValidator::class,
             ),
         ],
     )
-    var ownershipType: OwnershipType? = null
+    var localAuthorityId: Int? = null
 }

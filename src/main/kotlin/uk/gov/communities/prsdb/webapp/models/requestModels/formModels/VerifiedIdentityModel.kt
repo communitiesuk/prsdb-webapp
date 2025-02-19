@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.formModels
+package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
 import java.time.LocalDate
 

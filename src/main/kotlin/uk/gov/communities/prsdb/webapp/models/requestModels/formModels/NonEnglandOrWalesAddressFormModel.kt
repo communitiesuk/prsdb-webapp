@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.formModels
+package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
@@ -7,19 +7,19 @@ import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class HmoMandatoryLicenceFormModel : FormModel {
+class NonEnglandOrWalesAddressFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.hmoMandatoryLicence.error.missing",
+                messageKey = "forms.nonEnglandOrWalesAddress.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(
-                messageKey = "forms.licenceNumber.error.tooLong",
+                messageKey = "forms.nonEnglandOrWalesAddress.error.tooLong",
                 validatorType = LengthConstraintValidator::class,
-                validatorArgs = arrayOf("0", "255"),
+                validatorArgs = arrayOf("0", "1000"),
             ),
         ],
     )
-    var licenceNumber: String? = null
+    var nonEnglandOrWalesAddress: String = ""
 }

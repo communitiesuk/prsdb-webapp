@@ -1,24 +1,24 @@
-package uk.gov.communities.prsdb.webapp.models.formModels
+package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
-import uk.gov.communities.prsdb.webapp.validation.EmailConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
+import uk.gov.communities.prsdb.webapp.validation.PhoneNumberConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class EmailFormModel : FormModel {
+class PhoneNumberFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.email.error.missing",
+                messageKey = "forms.phoneNumber.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(
-                messageKey = "forms.email.error.invalidFormat",
-                validatorType = EmailConstraintValidator::class,
+                messageKey = "forms.phoneNumber.error.invalidFormat",
+                validatorType = PhoneNumberConstraintValidator::class,
             ),
         ],
     )
-    var emailAddress: String? = null
+    var phoneNumber: String? = null
 }
