@@ -52,7 +52,10 @@ class RegisterLAUserController(
         model: Model,
     ): String {
         val token = invitationService.getTokenFromSession()
-        if (token == null || !invitationService.tokenIsValid(token)) return REDIRECT_FOR_INVALID_TOKEN
+        if (token == null || !invitationService.tokenIsValid(token)) {
+            invitationService.clearTokenFromSession()
+            return REDIRECT_FOR_INVALID_TOKEN
+        }
 
         return laUserRegistrationJourney.populateModelAndGetViewName(
             laUserRegistrationJourney.getStepId(stepName),
