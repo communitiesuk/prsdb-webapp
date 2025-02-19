@@ -276,37 +276,37 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withOutsideEnglandOrWalesAndSelectedContactAddress(
+    fun withNonEnglandOrWalesAndSelectedContactAddress(
         countryOfResidence: String,
-        outsideEnglandOrWalesAddress: String,
+        nonEnglandOrWalesAddress: String,
         selectedAddress: String,
     ): JourneyDataBuilder =
         this
-            .withOutsideEnglandOrWalesAddress(countryOfResidence, outsideEnglandOrWalesAddress)
+            .withNonEnglandOrWalesAddress(countryOfResidence, nonEnglandOrWalesAddress)
             .withSelectedAddress(selectedAddress, localAuthority = createLocalAuthority(), isContactAddress = true)
 
-    fun withOutsideEnglandOrWalesAndManualContactAddress(
+    fun withNonEnglandOrWalesAndManualContactAddress(
         countryOfResidence: String,
-        outsideEnglandOrWalesAddress: String,
+        nonEnglandOrWalesAddress: String,
         addressLineOne: String,
         townOrCity: String,
         postcode: String,
     ): JourneyDataBuilder =
         this
-            .withOutsideEnglandOrWalesAddress(countryOfResidence, outsideEnglandOrWalesAddress)
+            .withNonEnglandOrWalesAddress(countryOfResidence, nonEnglandOrWalesAddress)
             .withManualAddress(addressLineOne, townOrCity, postcode, isContactAddress = true)
 
-    private fun withOutsideEnglandOrWalesAddress(
+    private fun withNonEnglandOrWalesAddress(
         countryOfResidence: String,
-        outsideEnglandOrWalesAddress: String,
+        nonEnglandOrWalesAddress: String,
     ): JourneyDataBuilder {
         journeyData[LandlordRegistrationStepId.CountryOfResidence.urlPathSegment] =
             mutableMapOf(
                 "livesInEnglandOrWales" to false,
                 "countryOfResidence" to countryOfResidence,
             )
-        journeyData[LandlordRegistrationStepId.OutsideEnglandOrWalesAddress.urlPathSegment] =
-            mutableMapOf("outsideEnglandOrWalesAddress" to outsideEnglandOrWalesAddress)
+        journeyData[LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment] =
+            mutableMapOf("nonEnglandOrWalesAddress" to nonEnglandOrWalesAddress)
         return this
     }
 }

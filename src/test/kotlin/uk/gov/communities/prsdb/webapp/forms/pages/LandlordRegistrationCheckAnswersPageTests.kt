@@ -202,13 +202,13 @@ class LandlordRegistrationCheckAnswersPageTests {
     @Test
     fun `formData has the correct outside England or Wales and selected contact addresses`() {
         val countryOfResidence = "Germany"
-        val outsideEnglandOrWalesAddress = "test address"
+        val nonEnglandOrWalesAddress = "test address"
         val selectedAddress = "1 Example Road"
         val journeyData =
             journeyDataBuilder
-                .withOutsideEnglandOrWalesAndSelectedContactAddress(
+                .withNonEnglandOrWalesAndSelectedContactAddress(
                     countryOfResidence,
-                    outsideEnglandOrWalesAddress,
+                    nonEnglandOrWalesAddress,
                     selectedAddress,
                 ).build()
 
@@ -226,12 +226,12 @@ class LandlordRegistrationCheckAnswersPageTests {
         )
         assertEquals(
             SummaryListRowViewModel(
-                "registerAsALandlord.checkAnswers.rowHeading.outsideEnglandOrWalesContactAddress",
-                outsideEnglandOrWalesAddress,
-                LandlordRegistrationStepId.OutsideEnglandOrWalesAddress.urlPathSegment,
+                "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress",
+                nonEnglandOrWalesAddress,
+                LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment,
             ),
             formData.single {
-                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.outsideEnglandOrWalesContactAddress"
+                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress"
             },
         )
         assertEquals(
@@ -249,15 +249,15 @@ class LandlordRegistrationCheckAnswersPageTests {
     @Test
     fun `formData has the correct outside England or Wales and manual contact addresses`() {
         val countryOfResidence = "Germany"
-        val outsideEnglandOrWalesAddress = "test address"
+        val nonEnglandOrWalesAddress = "test address"
         val addressLineOne = "1 Example Road"
         val townOrCity = "Townville"
         val postcode = "EG1 2BA"
         val journeyData =
             journeyDataBuilder
-                .withOutsideEnglandOrWalesAndManualContactAddress(
+                .withNonEnglandOrWalesAndManualContactAddress(
                     countryOfResidence,
-                    outsideEnglandOrWalesAddress,
+                    nonEnglandOrWalesAddress,
                     addressLineOne,
                     townOrCity,
                     postcode,
@@ -277,12 +277,12 @@ class LandlordRegistrationCheckAnswersPageTests {
         )
         assertEquals(
             SummaryListRowViewModel(
-                "registerAsALandlord.checkAnswers.rowHeading.outsideEnglandOrWalesContactAddress",
-                outsideEnglandOrWalesAddress,
-                LandlordRegistrationStepId.OutsideEnglandOrWalesAddress.urlPathSegment,
+                "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress",
+                nonEnglandOrWalesAddress,
+                LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment,
             ),
             formData.single {
-                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.outsideEnglandOrWalesContactAddress"
+                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress"
             },
         )
         assertEquals(
@@ -303,6 +303,6 @@ class LandlordRegistrationCheckAnswersPageTests {
 
         val formData = getFormData(journeyData)
 
-        assertTrue(formData.none { it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.outsideEnglandOrWalesContactAddress" })
+        assertTrue(formData.none { it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress" })
     }
 }

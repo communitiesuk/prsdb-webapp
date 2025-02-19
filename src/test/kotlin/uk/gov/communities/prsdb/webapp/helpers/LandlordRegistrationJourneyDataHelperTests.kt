@@ -71,7 +71,7 @@ class LandlordRegistrationJourneyDataHelperTests {
         val expectedCountryOfResidence = "US"
         val mockJourneyData =
             journeyDataBuilder
-                .withOutsideEnglandOrWalesAndSelectedContactAddress(
+                .withNonEnglandOrWalesAndSelectedContactAddress(
                     expectedCountryOfResidence,
                     "test address",
                     "selected address",
@@ -103,7 +103,7 @@ class LandlordRegistrationJourneyDataHelperTests {
         val selectedAddress = "1 Example Address, EG1 2AB"
         val mockJourneyData =
             journeyDataBuilder
-                .withOutsideEnglandOrWalesAndSelectedContactAddress(
+                .withNonEnglandOrWalesAndSelectedContactAddress(
                     "countryOfResidence",
                     "test address",
                     selectedAddress,
@@ -125,7 +125,7 @@ class LandlordRegistrationJourneyDataHelperTests {
         val postcode = "EG1 2AB"
         val mockJourneyData =
             journeyDataBuilder
-                .withOutsideEnglandOrWalesAndManualContactAddress(
+                .withNonEnglandOrWalesAndManualContactAddress(
                     "countryofResidence",
                     "test address",
                     addressLineOne,

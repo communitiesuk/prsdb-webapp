@@ -74,7 +74,7 @@ class LandlordRegistrationCheckAnswersPage(
         val livesInEnglandOrWales = LandlordRegistrationJourneyDataHelper.getLivesInEnglandOrWales(journeyData)!!
 
         return getLivesInEnglandOrWalesFormData(livesInEnglandOrWales) +
-            (if (!livesInEnglandOrWales) getOutsideEnglandOrWalesAddressFormData(journeyData) else emptyList()) +
+            (if (!livesInEnglandOrWales) getNonEnglandOrWalesAddressFormData(journeyData) else emptyList()) +
             getContactAddressFormData(journeyData, addressDataService, livesInEnglandOrWales)
     }
 
@@ -87,7 +87,7 @@ class LandlordRegistrationCheckAnswersPage(
             ),
         )
 
-    private fun getOutsideEnglandOrWalesAddressFormData(journeyData: JourneyData): List<SummaryListRowViewModel> =
+    private fun getNonEnglandOrWalesAddressFormData(journeyData: JourneyData): List<SummaryListRowViewModel> =
         listOf(
             SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence",
@@ -95,9 +95,9 @@ class LandlordRegistrationCheckAnswersPage(
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
             ),
             SummaryListRowViewModel(
-                "registerAsALandlord.checkAnswers.rowHeading.outsideEnglandOrWalesContactAddress",
-                LandlordRegistrationJourneyDataHelper.getOutsideEnglandOrWalesAddress(journeyData)!!,
-                LandlordRegistrationStepId.OutsideEnglandOrWalesAddress.urlPathSegment,
+                "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress",
+                LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesAddress(journeyData)!!,
+                LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment,
             ),
         )
 

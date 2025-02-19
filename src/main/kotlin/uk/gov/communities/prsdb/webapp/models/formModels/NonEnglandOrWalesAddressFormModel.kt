@@ -7,19 +7,19 @@ import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class OutsideEnglandOrWalesAddressFormModel : FormModel {
+class NonEnglandOrWalesAddressFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.outsideEnglandOrWalesAddress.error.missing",
+                messageKey = "forms.nonEnglandOrWalesAddress.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(
-                messageKey = "forms.outsideEnglandOrWalesAddress.error.tooLong",
+                messageKey = "forms.nonEnglandOrWalesAddress.error.tooLong",
                 validatorType = LengthConstraintValidator::class,
                 validatorArgs = arrayOf("0", "1000"),
             ),
         ],
     )
-    var outsideEnglandOrWalesAddress: String = ""
+    var nonEnglandOrWalesAddress: String = ""
 }

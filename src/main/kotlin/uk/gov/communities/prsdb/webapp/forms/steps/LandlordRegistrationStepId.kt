@@ -15,7 +15,7 @@ enum class LandlordRegistrationStepId(
     LookupAddress("lookup-address"),
     SelectAddress("select-address"),
     ManualAddress("manual-address"),
-    OutsideEnglandOrWalesAddress("outside-england-or-wales-address"),
+    NonEnglandOrWalesAddress("neither-england-nor-wales-address"),
     LookupContactAddress("lookup-contact-address"),
     SelectContactAddress("select-contact-address"),
     ManualContactAddress("manual-contact-address"),

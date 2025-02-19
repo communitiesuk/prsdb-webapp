@@ -11,8 +11,8 @@
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
     <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'outsideEnglandOrWalesAddress', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
-        <div th:replace="~{fragments/forms/textArea :: textArea(#{${label}}, 'outsideEnglandOrWalesAddress', null, ${limit})}">
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'nonEnglandOrWalesAddress', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
+        <div th:replace="~{fragments/forms/textArea :: textArea(#{${label}}, 'nonEnglandOrWalesAddress', null, ${limit})}">
         </div>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>

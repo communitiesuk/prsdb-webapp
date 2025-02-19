@@ -138,11 +138,11 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             return getManualAddress(journeyData, manualAddressPathSegment)
         }
 
-        fun getOutsideEnglandOrWalesAddress(journeyData: JourneyData) =
+        fun getNonEnglandOrWalesAddress(journeyData: JourneyData) =
             getFieldStringValue(
                 journeyData,
-                LandlordRegistrationStepId.OutsideEnglandOrWalesAddress.urlPathSegment,
-                "outsideEnglandOrWalesAddress",
+                LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment,
+                "nonEnglandOrWalesAddress",
             )
 
         fun isIdentityVerified(journeyData: JourneyData) =

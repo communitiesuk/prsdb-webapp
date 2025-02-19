@@ -55,7 +55,7 @@ class PropertyDetailsLandlordViewModelTests {
                 "landlordDetails.personalDetails.dateOfBirth",
                 "landlordDetails.personalDetails.emailAddress",
                 "propertyDetails.landlordDetails.contactNumber",
-                "propertyDetails.landlordDetails.addressOutsideEnglandOrWales",
+                "propertyDetails.landlordDetails.addressNonEnglandOrWales",
                 "propertyDetails.landlordDetails.contactAddressInEnglandOrWales",
             )
 
@@ -161,7 +161,7 @@ class PropertyDetailsLandlordViewModelTests {
         // Assert
         val addressString =
             viewModel.landlordsDetails
-                .single { it.fieldHeading == "propertyDetails.landlordDetails.addressOutsideEnglandOrWales" }
+                .single { it.fieldHeading == "propertyDetails.landlordDetails.addressNonEnglandOrWales" }
                 .getConvertedFieldValue()
         assertEquals(addressString, oneLineAddress)
     }
