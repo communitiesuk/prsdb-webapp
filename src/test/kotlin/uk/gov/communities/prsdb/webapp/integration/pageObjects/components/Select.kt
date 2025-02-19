@@ -4,10 +4,11 @@ import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 
 class Select(
-    private val page: Page,
-    locator: Locator = page.locator(".autocomplete__wrapper"),
-) : BaseComponent(locator) {
-    val autocompleteInput = getChildComponent("input")
+    parentLocator: Locator,
+) : BaseComponent(parentLocator.locator(".autocomplete__wrapper")) {
+    constructor(page: Page) : this(page.locator("html"))
 
-    fun selectValue(value: String) = getChildComponent("li", Locator.LocatorOptions().setHasText(value)).click()
+    val autocompleteInput = locator.locator("input")
+
+    fun selectValue(value: String) = locator.locator("li", Locator.LocatorOptions().setHasText(value)).click()
 }

@@ -23,6 +23,7 @@ import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmationPageLandlordRegistration
@@ -576,7 +577,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             val internationalAddressPage = navigator.goToLandlordRegistrationInternationalAddressPage()
             internationalAddressPage.textAreaInput.fill("too long address".repeat(1001))
             internationalAddressPage.form.submit()
-            assertThat(internationalAddressPage.form.getErrorMessage()).containsText("Address must be 1000 characters or fewer")
+            assertThat(internationalAddressPage.form.getErrorMessage().nth(0)).containsText("Address must be 1000 characters or fewer")
         }
     }
 

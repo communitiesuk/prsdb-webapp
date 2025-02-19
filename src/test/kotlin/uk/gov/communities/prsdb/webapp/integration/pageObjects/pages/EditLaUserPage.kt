@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 class EditLaUserPage(
     page: Page,
 ) : BasePage(page, "/edit-user/") {
-    val name = Heading(page)
+    val name = Heading.default(page)
     val email = SubHeading(page)
     val form = Form(page)
     val isManagerRadios = form.getRadios()
