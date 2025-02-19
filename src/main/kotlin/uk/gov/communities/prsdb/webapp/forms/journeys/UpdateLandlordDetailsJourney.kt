@@ -91,14 +91,18 @@ class UpdateLandlordDetailsJourney(
         )
 
     override fun getUnreachableStepRedirect(journeyData: JourneyData) =
-        "/${JourneyType.UPDATE_DETAILS.urlPathSegment}/${getLastReachableStep(journeyData)?.step?.id?.urlPathSegment}"
+        if (journeyData[originalLandlordJourneyDataKey] == null) {
+            "/${JourneyType.UPDATE_DETAILS.urlPathSegment}/${UpdateDetailsStepId.ChangeDetailsSession.urlPathSegment}"
+        } else {
+            "/${JourneyType.UPDATE_DETAILS.urlPathSegment}/${getLastReachableStep(journeyData)?.step?.id?.urlPathSegment}"
+        }
 
     override fun getPrevStep(
         journeyData: JourneyData,
         targetStep: Step<UpdateDetailsStepId>,
         targetSubPageNumber: Int?,
     ): StepDetails<UpdateDetailsStepId>? {
-        val originalLandlordData = JourneyDataHelper.getPageData(journeyData, originalLandlordJourneyDataKey)!!
+        val originalLandlordData = JourneyDataHelper.getPageData(journeyData, originalLandlordJourneyDataKey) ?: return null
         val updatedLandlordData = getUpdatedLandlordData(journeyData, originalLandlordData)
 
         return super.getPrevStep(updatedLandlordData, targetStep, targetSubPageNumber)
