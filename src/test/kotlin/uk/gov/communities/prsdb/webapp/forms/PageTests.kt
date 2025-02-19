@@ -5,10 +5,13 @@ import jakarta.validation.ValidatorFactory
 import jakarta.validation.constraints.NotNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.assertThrows
 import org.springframework.validation.BindingResult
 import org.springframework.validation.Validator
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter
 import org.springframework.validation.support.BindingAwareModelMap
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
 import kotlin.test.Test
@@ -35,6 +38,7 @@ class PageTests {
                 TestFormModel::class,
                 "index",
                 mutableMapOf("testKey" to "testValue"),
+                shouldDisplaySectionHeader = true,
             )
         validatorFactory = Validation.buildDefaultValidatorFactory()
         validator = SpringValidatorAdapter(validatorFactory.validator)
@@ -89,5 +93,20 @@ class PageTests {
         val propertyValue = bindingResult.getRawFieldValue("testProperty")
         assertEquals("testPropertyValue", propertyValue)
         assertEquals("index", result)
+    }
+
+    @Test
+    fun `populateModelAndGetTemplateName throws an error if the section heading is requested but not found`() {
+        // Arrange
+        val formData = mapOf("testProperty" to "testPropertyValue")
+        val model = BindingAwareModelMap()
+        val previousUrl = "/previous"
+        val journeyData: JourneyData = mutableMapOf()
+        val sectionHeaderInfo = null
+
+        // Act, Assert
+        assertThrows<PrsdbWebException> {
+            testPage.populateModelAndGetTemplateName(validator, model, formData, previousUrl, journeyData, sectionHeaderInfo)
+        }
     }
 }
