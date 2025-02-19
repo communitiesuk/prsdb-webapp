@@ -74,15 +74,15 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
                 "phoneNumber",
             )
 
-        fun getLivesInUK(journeyData: JourneyData) =
+        fun getLivesInEnglandOrWales(journeyData: JourneyData) =
             getFieldBooleanValue(
                 journeyData,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
-                "livesInUK",
+                "livesInEnglandOrWales",
             )
 
-        fun getNonUKCountryOfResidence(journeyData: JourneyData) =
-            if (getLivesInUK(journeyData) == true) {
+        fun getNonEnglandOrWalesCountryOfResidence(journeyData: JourneyData) =
+            if (getLivesInEnglandOrWales(journeyData) == true) {
                 null
             } else {
                 getFieldStringValue(
@@ -96,12 +96,12 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             journeyData: JourneyData,
             addressDataService: AddressDataService,
         ): AddressDataModel? {
-            val livesInUK = getLivesInUK(journeyData) ?: return null
+            val livesInEnglandOrWales = getLivesInEnglandOrWales(journeyData) ?: return null
 
-            return if (isManualAddressChosen(journeyData, !livesInUK)) {
-                getManualAddress(journeyData, !livesInUK)
+            return if (isManualAddressChosen(journeyData, !livesInEnglandOrWales)) {
+                getManualAddress(journeyData, !livesInEnglandOrWales)
             } else {
-                val selectedAddress = getSelectedAddress(journeyData, !livesInUK) ?: return null
+                val selectedAddress = getSelectedAddress(journeyData, !livesInEnglandOrWales) ?: return null
                 addressDataService.getAddressData(selectedAddress)
             }
         }
@@ -138,11 +138,11 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             return getManualAddress(journeyData, manualAddressPathSegment)
         }
 
-        fun getInternationalAddress(journeyData: JourneyData) =
+        fun getNonEnglandOrWalesAddress(journeyData: JourneyData) =
             getFieldStringValue(
                 journeyData,
-                LandlordRegistrationStepId.InternationalAddress.urlPathSegment,
-                "internationalAddress",
+                LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment,
+                "nonEnglandOrWalesAddress",
             )
 
         fun isIdentityVerified(journeyData: JourneyData) =
@@ -154,6 +154,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             isContactAddress: Boolean = false,
         ) = getSelectedAddress(journeyData, isContactAddress) == MANUAL_ADDRESS_CHOSEN
 
-        fun getCountryOfResidence(journeyData: JourneyData): String = getNonUKCountryOfResidence(journeyData) ?: ENGLAND_OR_WALES
+        fun getCountryOfResidence(journeyData: JourneyData): String =
+            getNonEnglandOrWalesCountryOfResidence(journeyData) ?: ENGLAND_OR_WALES
     }
 }

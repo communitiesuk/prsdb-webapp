@@ -31,11 +31,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DeclarationFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.InternationalAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualContactAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NonEnglandOrWalesAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
@@ -67,7 +67,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     }
 
     @Test
-    fun `User can navigate the whole journey if pages are correctly filled in (verified, UK resident, selected address)`(page: Page) {
+    fun `User can navigate the whole journey if pages are correctly filled in (verified, England or Wales, selected address)`(page: Page) {
         val confirmIdentityPage = navigator.goToLandlordRegistrationConfirmIdentityFormPage()
         confirmIdentityPage.form.submit()
 
@@ -117,7 +117,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     }
 
     @Test
-    fun `User can navigate the whole journey if pages are correctly filled in (verified, UK resident, manual address)`(page: Page) {
+    fun `User can navigate the whole journey if pages are correctly filled in (verified, England or Wales, manual address)`(page: Page) {
         val confirmIdentityPage = navigator.goToLandlordRegistrationConfirmIdentityFormPage()
         confirmIdentityPage.form.submit()
 
@@ -175,7 +175,9 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     }
 
     @Test
-    fun `User can navigate the whole journey if pages are correctly filled in (unverified, international, selected address)`(page: Page) {
+    fun `User can navigate the whole journey if pages are correctly filled in (unverified, non England or Wales, selected address)`(
+        page: Page,
+    ) {
         val namePage = navigator.goToLandlordRegistrationNameFormPage()
         namePage.nameInput.fill("landlord name")
         namePage.form.submit()
@@ -202,9 +204,9 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         countryOfResidencePage.select.selectValue("Zimbabwe")
         countryOfResidencePage.form.submit()
 
-        val internationalAddressPage = assertPageIs(page, InternationalAddressFormPageLandlordRegistration::class)
-        internationalAddressPage.textAreaInput.fill("international address")
-        internationalAddressPage.form.submit()
+        val nonEnglandOrWalesAddressPage = assertPageIs(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
+        nonEnglandOrWalesAddressPage.textAreaInput.fill("Zimbabwe address")
+        nonEnglandOrWalesAddressPage.form.submit()
 
         val lookupContactAddressPage = assertPageIs(page, LookupContactAddressFormPageLandlordRegistration::class)
         lookupContactAddressPage.postcodeInput.fill("EG1 2AB")
@@ -240,7 +242,9 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     }
 
     @Test
-    fun `User can navigate the whole journey if pages are correctly filled in (unverified, international, manual address)`(page: Page) {
+    fun `User can navigate the whole journey if pages are correctly filled in (unverified, non England or Wales, manual address)`(
+        page: Page,
+    ) {
         val namePage = navigator.goToLandlordRegistrationNameFormPage()
         namePage.nameInput.fill("landlord name")
         namePage.form.submit()
@@ -267,9 +271,9 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         countryOfResidencePage.select.selectValue("Zimbabwe")
         countryOfResidencePage.form.submit()
 
-        val internationalAddressPage = assertPageIs(page, InternationalAddressFormPageLandlordRegistration::class)
-        internationalAddressPage.textAreaInput.fill("international address")
-        internationalAddressPage.form.submit()
+        val nonEnglandOrWalesAddressPage = assertPageIs(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
+        nonEnglandOrWalesAddressPage.textAreaInput.fill("test address")
+        nonEnglandOrWalesAddressPage.form.submit()
 
         val lookupContactAddressPage = assertPageIs(page, LookupContactAddressFormPageLandlordRegistration::class)
         lookupContactAddressPage.postcodeInput.fill("EG1 2AB")
@@ -564,20 +568,20 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     }
 
     @Nested
-    inner class LandlordRegistrationStepInternationalAddress {
+    inner class LandlordRegistrationStepNonEnglandOrWalesAddress {
         @Test
         fun `Submitting with no address returns an error`(page: Page) {
-            val internationalAddressPage = navigator.goToLandlordRegistrationInternationalAddressPage()
-            internationalAddressPage.form.submit()
-            assertThat(internationalAddressPage.form.getErrorMessage()).containsText("You must include an address")
+            val nonEnglandOrWalesAddressPage = navigator.goToLandlordRegistrationNonEnglandOrWalesAddressPage()
+            nonEnglandOrWalesAddressPage.form.submit()
+            assertThat(nonEnglandOrWalesAddressPage.form.getErrorMessage()).containsText("You must include an address")
         }
 
         @Test
         fun `Submitting with a too long address returns an error`(page: Page) {
-            val internationalAddressPage = navigator.goToLandlordRegistrationInternationalAddressPage()
-            internationalAddressPage.textAreaInput.fill("too long address".repeat(1001))
-            internationalAddressPage.form.submit()
-            assertThat(internationalAddressPage.form.getErrorMessage().nth(0)).containsText("Address must be 1000 characters or fewer")
+            val nonEnglandOrWalesAddressPage = navigator.goToLandlordRegistrationNonEnglandOrWalesAddressPage()
+            nonEnglandOrWalesAddressPage.textAreaInput.fill("too long address".repeat(1001))
+            nonEnglandOrWalesAddressPage.form.submit()
+            assertThat(nonEnglandOrWalesAddressPage.form.getErrorMessage().nth(0)).containsText("Address must be 1000 characters or fewer")
         }
     }
 

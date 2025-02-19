@@ -147,12 +147,12 @@ class LandlordRegistrationCheckAnswersPageTests {
 
         assertEquals(
             SummaryListRowViewModel(
-                "registerAsALandlord.checkAnswers.rowHeading.ukResident",
+                "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesResident",
                 true,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
             ),
             formData.single {
-                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.ukResident"
+                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesResident"
             },
         )
     }
@@ -200,15 +200,15 @@ class LandlordRegistrationCheckAnswersPageTests {
     }
 
     @Test
-    fun `formData has the correct international and selected contact addresses`() {
+    fun `formData has the correct non England or Wales and selected contact addresses`() {
         val countryOfResidence = "Germany"
-        val internationalAddress = "international address"
+        val nonEnglandOrWalesAddress = "test address"
         val selectedAddress = "1 Example Road"
         val journeyData =
             journeyDataBuilder
-                .withInternationalAndSelectedContactAddress(
+                .withNonEnglandOrWalesAndSelectedContactAddress(
                     countryOfResidence,
-                    internationalAddress,
+                    nonEnglandOrWalesAddress,
                     selectedAddress,
                 ).build()
 
@@ -226,38 +226,38 @@ class LandlordRegistrationCheckAnswersPageTests {
         )
         assertEquals(
             SummaryListRowViewModel(
-                "registerAsALandlord.checkAnswers.rowHeading.contactAddressOutsideUK",
-                internationalAddress,
-                LandlordRegistrationStepId.InternationalAddress.urlPathSegment,
+                "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress",
+                nonEnglandOrWalesAddress,
+                LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment,
             ),
             formData.single {
-                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.contactAddressOutsideUK"
+                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress"
             },
         )
         assertEquals(
             SummaryListRowViewModel(
-                "registerAsALandlord.checkAnswers.rowHeading.ukContactAddress",
+                "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress",
                 selectedAddress,
                 LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
             ),
             formData.single {
-                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.ukContactAddress"
+                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress"
             },
         )
     }
 
     @Test
-    fun `formData has the correct international and manual contact addresses`() {
+    fun `formData has the correct non England or Wales and manual contact addresses`() {
         val countryOfResidence = "Germany"
-        val internationalAddress = "international address"
+        val nonEnglandOrWalesAddress = "test address"
         val addressLineOne = "1 Example Road"
         val townOrCity = "Townville"
         val postcode = "EG1 2BA"
         val journeyData =
             journeyDataBuilder
-                .withInternationalAndManualContactAddress(
+                .withNonEnglandOrWalesAndManualContactAddress(
                     countryOfResidence,
-                    internationalAddress,
+                    nonEnglandOrWalesAddress,
                     addressLineOne,
                     townOrCity,
                     postcode,
@@ -277,22 +277,22 @@ class LandlordRegistrationCheckAnswersPageTests {
         )
         assertEquals(
             SummaryListRowViewModel(
-                "registerAsALandlord.checkAnswers.rowHeading.contactAddressOutsideUK",
-                internationalAddress,
-                LandlordRegistrationStepId.InternationalAddress.urlPathSegment,
+                "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress",
+                nonEnglandOrWalesAddress,
+                LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment,
             ),
             formData.single {
-                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.contactAddressOutsideUK"
+                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress"
             },
         )
         assertEquals(
             SummaryListRowViewModel(
-                "registerAsALandlord.checkAnswers.rowHeading.ukContactAddress",
+                "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress",
                 AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode).singleLineAddress,
                 LandlordRegistrationStepId.ManualContactAddress.urlPathSegment,
             ),
             formData.single {
-                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.ukContactAddress"
+                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress"
             },
         )
     }
@@ -303,6 +303,6 @@ class LandlordRegistrationCheckAnswersPageTests {
 
         val formData = getFormData(journeyData)
 
-        assertTrue(formData.none { it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.contactAddressOutsideUK" })
+        assertTrue(formData.none { it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress" })
     }
 }

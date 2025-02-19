@@ -112,7 +112,7 @@ class IsValidPrioritisedValidatorTest {
                     ),
                 ],
             )
-            val internationalAddress: String,
+            val nonEnglandOrWalesAddress: String,
         )
 
         @Test
@@ -133,7 +133,7 @@ class IsValidPrioritisedValidatorTest {
             assertEquals(1, violations.size)
             val violation = violations.first()
             assertEquals("notvalidlength", violation.messageTemplate)
-            assertEquals("internationalAddress", violation.propertyPath.toString())
+            assertEquals("nonEnglandOrWalesAddress", violation.propertyPath.toString())
         }
 
         @IsValidPrioritised
@@ -147,7 +147,7 @@ class IsValidPrioritisedValidatorTest {
                     ),
                 ],
             )
-            val internationalAddress: String,
+            val nonEnglandOrWalesAddress: String,
         )
 
         @Test
