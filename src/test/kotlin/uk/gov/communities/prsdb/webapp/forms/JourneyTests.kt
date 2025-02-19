@@ -32,7 +32,6 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.Journey
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneySection
@@ -358,7 +357,7 @@ class JourneyTests {
     @Nested
     inner class GetSectionHeaderInfoTests {
         @Test
-        fun `getSectionHeaderInfo returns SectionHeaderViewModel if displaySectionHeader is true`() {
+        fun `getSectionHeaderInfo returns SectionHeaderViewModel if headingKey is not null`() {
             val testStep =
                 Step(
                     TestStepId.StepOne,
@@ -368,7 +367,6 @@ class JourneyTests {
                             "index",
                             mutableMapOf("testKey" to "testValue"),
                         ),
-                    displaySectionHeader = true,
                 )
 
             val testJourney =
@@ -393,7 +391,7 @@ class JourneyTests {
         }
 
         @Test
-        fun `getSectionHeaderInfo returns null if the step's displaySectionHeader is false`() {
+        fun `getSectionHeaderInfo returns null if headingKey not null`() {
             val testStep =
                 Step(
                     TestStepId.StepOne,
@@ -403,7 +401,6 @@ class JourneyTests {
                             "index",
                             mutableMapOf("testKey" to "testValue"),
                         ),
-                    displaySectionHeader = false,
                 )
 
             val testJourney =
@@ -419,35 +416,6 @@ class JourneyTests {
                 )
 
             assertNull(testJourney.getSectionHeaderInfo(testStep))
-        }
-
-        @Test
-        fun `getSectionHeaderInfo throws an error if displaySectionHeader is true but the headingKey is null`() {
-            val testStep =
-                Step(
-                    TestStepId.StepOne,
-                    page =
-                        Page(
-                            TestFormModel::class,
-                            "index",
-                            mutableMapOf("testKey" to "testValue"),
-                        ),
-                    displaySectionHeader = true,
-                )
-
-            val testJourney =
-                TestJourneyWithSections(
-                    JourneyType.PROPERTY_REGISTRATION,
-                    sections =
-                        listOf(
-                            JourneySection.withOneStep(testStep),
-                        ),
-                    initialStepId = TestStepId.StepOne,
-                    journeyDataService = mockJourneyDataService,
-                    validator = validator,
-                )
-
-            assertThrows<PrsdbWebException> { testJourney.getSectionHeaderInfo(testStep) }
         }
     }
 
