@@ -29,7 +29,7 @@ class EditLAUserTests : IntegrationTest() {
         assertThat(editUserPage.name).containsText("Arthur Dent")
         // TODO PRSD-405: fix when LA users have email addresses
         assertThat(editUserPage.email).containsText("Arthur Dent@ISLE OF MAN.gov.uk")
-        assertEquals("false", editUserPage.isManagerRadios.getSelectedValue())
+        assertEquals("false", editUserPage.isManagerRadios.selectedValue)
 
         // Update the user's access level to admin
         editUserPage.isManagerRadios.selectValue("true")
@@ -43,7 +43,7 @@ class EditLAUserTests : IntegrationTest() {
         // The user's page also now defaults to admin
         manageUsersPage.getChangeLink(rowIndex = 0).clickAndWait()
         editUserPage = assertPageIs(page, EditLaUserPage::class)
-        assertEquals("true", editUserPage.isManagerRadios.getSelectedValue())
+        assertEquals("true", editUserPage.isManagerRadios.selectedValue)
     }
 
     @Test

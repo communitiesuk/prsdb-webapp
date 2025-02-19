@@ -8,9 +8,9 @@ open class Button(
 ) : BaseComponent(locator),
     ClickAndWaitable {
     companion object {
-        fun default(parentLocator: Locator) = factory(parentLocator, null)
+        fun default(parentLocator: Locator) = factory(parentLocator)
 
-        fun default(page: Page) = factory(page, null)
+        fun default(page: Page) = factory(page)
 
         fun byText(
             parentLocator: Locator,
@@ -24,21 +24,17 @@ open class Button(
 
         private fun factory(
             page: Page,
-            text: String?,
+            text: String? = null,
         ): Button = factory(page.locator("html"), text)
 
         private fun factory(
             parentLocator: Locator,
-            text: String?,
+            text: String? = null,
         ): Button =
             Button(
                 parentLocator.locator(
                     ".govuk-button",
-                    if (text == null) {
-                        null
-                    } else {
-                        Locator.LocatorOptions().setHasText(text)
-                    },
+                    Locator.LocatorOptions().setHasText(text),
                 ),
             )
     }
