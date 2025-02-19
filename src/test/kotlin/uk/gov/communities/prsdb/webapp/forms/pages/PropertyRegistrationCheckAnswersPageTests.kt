@@ -46,7 +46,7 @@ class PropertyRegistrationCheckAnswersPageTests {
     }
 
     private fun getPropertyDetails(journeyData: MutableMap<String, Any?>): List<SummaryListRowViewModel> {
-        page.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData)
+        page.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData, null)
 
         val propertyDetails = model.asMap()["propertyDetails"] as List<*>
         return propertyDetails.filterIsInstance<SummaryListRowViewModel>()

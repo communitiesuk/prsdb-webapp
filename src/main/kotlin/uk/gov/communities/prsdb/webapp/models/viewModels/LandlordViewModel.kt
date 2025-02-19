@@ -68,7 +68,7 @@ class LandlordViewModel(
                     toggleChangeLink("$UPDATE_ROUTE/telephone"),
                 ),
                 SummaryListRowViewModel(
-                    "landlordDetails.personalDetails.ukResident",
+                    "landlordDetails.personalDetails.englandOrWalesResident",
                     isEnglandOrWalesResident,
                     toggleChangeLink("$UPDATE_ROUTE/country-of-residence"),
                 ),
@@ -92,12 +92,12 @@ class LandlordViewModel(
                 toggleChangeLink("$UPDATE_ROUTE/country-of-residence"),
             ),
             SummaryListRowViewModel(
-                "landlordDetails.personalDetails.nonUkAddress",
+                "landlordDetails.personalDetails.nonEnglandOrWalesAddress",
                 landlord.nonEnglandOrWalesAddress,
                 toggleChangeLink("$UPDATE_ROUTE/address"),
             ),
             SummaryListRowViewModel(
-                "landlordDetails.personalDetails.ukAddress",
+                "landlordDetails.personalDetails.englandOrWalesAddress",
                 landlord.address.singleLineAddress,
                 toggleChangeLink("$UPDATE_ROUTE/contact-address"),
             ),

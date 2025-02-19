@@ -12,7 +12,8 @@ class ConfirmIdentityPage(
     formModel: KClass<out FormModel>,
     templateName: String,
     content: Map<String, Any>,
-) : Page(formModel, templateName, content) {
+    displaySectionHeader: Boolean = false,
+) : Page(formModel, templateName, content, displaySectionHeader) {
     override fun populateModelAndGetTemplateName(
         validator: Validator,
         model: Model,

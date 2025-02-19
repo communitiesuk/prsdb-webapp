@@ -13,6 +13,8 @@ open class Form(
 
     fun getTextInput(fieldName: String? = null): Locator = locator.locator("input${if (fieldName == null) "" else "[name='$fieldName']"}")
 
+    fun getSectionHeader() = SectionHeader(locator)
+
     fun getRadios() = Radios(locator)
 
     fun getFieldsetHeading() = FieldsetHeading(locator)
@@ -34,4 +36,8 @@ open class Form(
     class SubmitButton(
         parentLocator: Locator,
     ) : Button(parentLocator.locator("button[type='submit']"))
+
+    class SectionHeader(
+        parentLocator: Locator,
+    ) : BaseComponent(parentLocator.locator("#section-header"))
 }
