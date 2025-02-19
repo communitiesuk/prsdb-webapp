@@ -4,10 +4,12 @@ import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 
 class Radios(
-    private val page: Page,
-    locator: Locator = page.locator(".govuk-radios"),
-) : BaseComponent(locator) {
-    fun getSelectedValue(): String = getChildComponent("input:checked").getAttribute("value")
+    parentLocator: Locator,
+) : BaseComponent(parentLocator.locator(".govuk-radios")) {
+    constructor(page: Page) : this(page.locator("html"))
+
+    val selectedValue: String
+        get() = locator.locator("input:checked").getAttribute("value")
 
     fun <E : Enum<E>> selectValue(value: E) {
         val radio = getRadio(value.name)
@@ -18,5 +20,5 @@ class Radios(
         getRadio(value).check()
     }
 
-    private fun getRadio(value: String) = getChildComponent("input[value='$value']")
+    private fun getRadio(value: String) = locator.locator("input[value='$value']")
 }

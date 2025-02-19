@@ -8,21 +8,23 @@ abstract class PropertyDetailsBasePage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
-    val tabs = Tabs(page)
-
-    fun getActiveTabPanelId() = tabs.getActiveTabPanelId()
-
-    fun goToLandlordDetails() {
-        tabs.goToTab("Landlord details")
-    }
-
-    fun goToPropertyDetails() {
-        tabs.goToTab("Property details")
-    }
+    val tabs = PropertyDetailsTabs(page)
 
     fun getLandlordNameLinkFromKeyDetails(landlordName: String) = Link.byText(page, landlordName, 0)
 
     fun getLandlordLinkFromLandlordDetails(landlordName: String) = Link.byText(page, landlordName, 1)
 
     val backLink = Link.byText(page, "Back")
+
+    class PropertyDetailsTabs(
+        page: Page,
+    ) : Tabs(page) {
+        fun goToLandlordDetails() {
+            goToTab("Landlord details")
+        }
+
+        fun goToPropertyDetails() {
+            goToTab("Property details")
+        }
+    }
 }

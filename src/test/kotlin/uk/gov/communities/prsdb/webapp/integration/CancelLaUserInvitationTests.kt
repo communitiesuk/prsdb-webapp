@@ -20,7 +20,7 @@ class CancelLaUserInvitationTests : IntegrationTest() {
         var manageUsersPage = navigator.goToManageLaUsers(1)
         assertThat(manageUsersPage.table.getCell(1, ACCOUNT_STATUS_COL_INDEX)).containsText("PENDING")
         assertThat(manageUsersPage.table.getCell(1, USERNAME_COL_INDEX)).containsText("invited.user@example.com")
-        manageUsersPage.getChangeLink(rowIndex = 1).click()
+        manageUsersPage.getChangeLink(rowIndex = 1).clickAndWait()
         val cancelInvitationPage = assertPageIs(page, CancelLaUserInvitationPage::class)
 
         // Cancel invitation

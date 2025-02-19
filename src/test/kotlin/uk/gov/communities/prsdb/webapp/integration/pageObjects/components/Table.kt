@@ -4,23 +4,36 @@ import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 
 class Table(
-    page: Page,
-    locator: Locator = getLocator(page),
-) : BaseComponent(locator) {
-    fun getHeaderCell(colIndex: Int) = getChildComponent(getHeaderRow(), "th", index = colIndex)
+    parentLocator: Locator,
+) : BaseComponent(parentLocator.locator(".govuk-table")) {
+    constructor(page: Page) : this(page.locator("html"))
+
+    val headerRow = HeaderRow(locator)
+    val rows = TableRows(locator)
 
     fun getCell(
         rowIndex: Int,
         colIndex: Int,
-    ) = getChildComponent(getRow(rowIndex), "td", index = colIndex)
+    ) = rows.getByIndex(rowIndex).getCell(colIndex)
 
-    fun countRows() = locator.locator("tbody").locator("tr").count()
+    class TableRows(
+        parentLocator: Locator,
+    ) : BaseComponent(parentLocator.locator("tbody tr")) {
+        fun count() = locator.count()
 
-    private fun getHeaderRow() = getChildComponent("thead tr")
+        fun getByIndex(rowIndex: Int) = TableRow(locator, rowIndex)
+    }
 
-    private fun getRow(index: Int) = getChildComponent("tbody tr", index = index)
+    class TableRow(
+        parentLocator: Locator,
+        index: Int,
+    ) : BaseComponent(parentLocator.nth(index)) {
+        fun getCell(colIndex: Int): Locator = locator.locator("td").nth(colIndex)
+    }
 
-    companion object {
-        fun getLocator(page: Page): Locator = page.locator(".govuk-table")
+    class HeaderRow(
+        parentLocator: Locator,
+    ) : BaseComponent(parentLocator.locator("thead tr")) {
+        fun getCell(colIndex: Int): Locator = locator.locator("th").nth(colIndex)
     }
 }

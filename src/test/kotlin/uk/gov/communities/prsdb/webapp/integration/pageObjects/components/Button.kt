@@ -2,14 +2,20 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.components
 
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
-import com.microsoft.playwright.Page.LocatorOptions
 
-class Button(
+open class Button(
     override val locator: Locator,
 ) : BaseComponent(locator),
     ClickAndWaitable {
     companion object {
-        fun default(page: Page) = factory(page, null)
+        fun default(parentLocator: Locator) = factory(parentLocator)
+
+        fun default(page: Page) = factory(page)
+
+        fun byText(
+            parentLocator: Locator,
+            text: String? = null,
+        ): Button = factory(parentLocator, text)
 
         fun byText(
             page: Page,
@@ -18,16 +24,17 @@ class Button(
 
         private fun factory(
             page: Page,
-            text: String?,
+            text: String? = null,
+        ): Button = factory(page.locator("html"), text)
+
+        private fun factory(
+            parentLocator: Locator,
+            text: String? = null,
         ): Button =
             Button(
-                page.locator(
+                parentLocator.locator(
                     ".govuk-button",
-                    if (text == null) {
-                        null
-                    } else {
-                        LocatorOptions().setHasText(text)
-                    },
+                    Locator.LocatorOptions().setHasText(text),
                 ),
             )
     }

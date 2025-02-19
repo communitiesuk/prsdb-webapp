@@ -4,24 +4,32 @@ import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 
 class FilterPanel(
-    private val page: Page,
-    locator: Locator = page.locator(".moj-filter-layout"),
-) : BaseComponent(locator) {
-    fun getPanel() = getChildComponent(".moj-filter")
+    parentLocator: Locator,
+) : BaseComponent(parentLocator.locator(".moj-filter-layout")) {
+    constructor(page: Page) : this(page.locator("html"))
 
-    fun getCloseFilterPanelButton() = Button.byText(page, "Close filters panel")
+    val panel: Locator = locator.locator(".moj-filter")
 
-    fun getShowFilterPanel() = Button.byText(page, "Show filters panel")
+    val closeFilterPanelButton = Button.byText(locator, "Close filters panel")
 
-    val clearFiltersLink = Link.byText(page, "Clear filters")
+    val showFilterPanelButton = Button.byText(locator, "Show filters panel")
 
-    fun getSelectedHeadings() = getChildrenComponents(".moj-filter__selected >> h3")
+    val clearFiltersLink = Link.byText(locator, "Clear filters")
 
-    fun getNoFiltersSelectedText() = getChildComponent(".moj-filter__selected", Locator.LocatorOptions().setHasText("No filters selected"))
+    val selectedHeadings: Locator = locator.locator(".moj-filter__selected >> h3")
 
-    fun clickApplyFiltersButton() = Form(page, parentLocator = locator).submit()
+    val noFiltersSelectedTextNode: Locator =
+        locator.locator(
+            ".moj-filter__selected",
+            Locator.LocatorOptions().setHasText("No filters selected"),
+        )
 
-    fun getFilterCheckboxes(label: String? = null) = Form(page, parentLocator = locator).getCheckboxes(label)
+    private val form = Form(locator)
 
-    fun getRemoveFilterTag(filterOption: String) = getChildComponent(".moj-filter__tag", Locator.LocatorOptions().setHasText(filterOption))
+    fun clickApplyFiltersButton() = form.submit()
+
+    fun getFilterCheckboxes(label: String? = null) = form.getCheckboxes(label)
+
+    fun getRemoveFilterTag(filterOption: String): Locator =
+        locator.locator(".moj-filter__tag", Locator.LocatorOptions().setHasText(filterOption))
 }
