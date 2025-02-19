@@ -27,6 +27,10 @@
                         <h2 class="govuk-heading-m" th:text="#{landlordDetails.personalDetails.optionalChoices.heading}">landlordDetails.personalDetails.optionalChoices.heading</h2>
                         <p class="govuk-hint" th:text="#{landlordDetails.personalDetails.optionalChoices.hint}">landlordDetails.personalDetails.optionalChoices.hint</p>
                         <dl th:replace="~{fragments/summaryList :: summaryList(${landlord.consentInformation})}" ></dl>
+
+                        <form th:action="@{''}" method="post" novalidate th:if="${shouldShowSubmitButton}">
+                            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton('TODO: PRSD-355 Confirmation page for update landlord details')}"></button>
+                        </form>
                     </th:block>
                 </div>
 

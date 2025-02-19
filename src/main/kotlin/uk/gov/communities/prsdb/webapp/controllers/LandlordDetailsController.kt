@@ -36,6 +36,8 @@ class LandlordDetailsController(
         principal: Principal,
     ): String {
         updateDetailsJourney.initialiseJourneyDataIfNotInitialised(principal.name)
+        // TODO: PRSD-355 Remove this way of showing submit button
+        model.addAttribute("shouldShowSubmitButton", true)
         return getLandlordDetailsPage(model, principal, includeChangeLinks = true)
     }
 
