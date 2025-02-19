@@ -16,7 +16,7 @@
                 <p th:replace="~{fragments/sectionHeader :: sectionHeader(${sectionHeaderInfo})}" ></p>
                 <header>
                     <h1 class="govuk-heading-l" th:text="#{forms.confirmDetails.heading}">forms.checkAnswers.heading</h1>
-                    <p  class="govuk-body" th:text="#{forms.confirmDetails.summary}"></p>
+                    <p  class="govuk-body" th:text="#{forms.confirmDetails.summary}">forms.confirmDetails.summary</p>
                 </header>
                 <dl th:replace="~{fragments/summaryList :: summaryList(${formData})}"></dl>
                 <details  id="details" th:replace="~{fragments/details :: details(#{forms.confirmDetails.details.summary}, ~{::#details/content()})}" >

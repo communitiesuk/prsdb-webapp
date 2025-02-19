@@ -35,25 +35,6 @@ class PropertyRegistrationCheckAnswersPage(
         journeyData: JourneyData?,
         sectionHeaderInfo: SectionHeaderViewModel?,
     ): String {
-        addPropertyDetailsToModel(model, journeyData)
-        return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData, sectionHeaderInfo)
-    }
-
-    override fun populateModelAndGetTemplateName(
-        validator: Validator,
-        model: Model,
-        pageData: Map<String, Any?>?,
-        prevStepUrl: String?,
-        journeyData: JourneyData?,
-    ): String {
-        addPropertyDetailsToModel(model, journeyData)
-        return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData)
-    }
-
-    private fun addPropertyDetailsToModel(
-        model: Model,
-        journeyData: JourneyData?,
-    ) {
         journeyData!!
         val propertyName = getPropertyName(journeyData)
         val propertyDetails = getPropertyDetailsSummary(journeyData)
@@ -61,6 +42,7 @@ class PropertyRegistrationCheckAnswersPage(
         model.addAttribute("propertyDetails", propertyDetails)
         model.addAttribute("propertyName", propertyName)
         model.addAttribute("showUprnDetail", !DataHelper.isManualAddressChosen(journeyData))
+        return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData, sectionHeaderInfo)
     }
 
     private fun getPropertyName(journeyData: JourneyData) = DataHelper.getAddress(journeyData, addressDataService)!!.singleLineAddress
