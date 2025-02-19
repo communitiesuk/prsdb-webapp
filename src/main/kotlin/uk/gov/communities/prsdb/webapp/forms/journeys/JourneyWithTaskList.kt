@@ -15,8 +15,7 @@ abstract class JourneyWithTaskList<T : StepId>(
     abstract val taskListFactory: TaskListViewModelFactory<T>
     abstract val taskListUrlSegment: String
 
-    final override val unreachableStepRedirect
-        get() = "/${journeyType.urlPathSegment}/$taskListUrlSegment"
+    final override fun getUnreachableStepRedirect(journeyData: JourneyData) = "/${journeyType.urlPathSegment}/$taskListUrlSegment"
 
     fun populateModelAndGetTaskListViewName(model: Model): String {
         val journeyData = journeyDataService.getJourneyDataFromSession()

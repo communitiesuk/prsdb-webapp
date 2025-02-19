@@ -57,11 +57,17 @@ class UpdateLandlordDetailsJourney(
             saveAfterSubmit = false,
         )
 
-    override val steps =
-        setOf(
-            emailStep,
-            updateSessionStep,
+    override val sections =
+        createSingleSectionWithSingleTaskFromSteps(
+            initialStepId,
+            setOf(
+                emailStep,
+                updateSessionStep,
+            ),
         )
+
+    override fun getUnreachableStepRedirect(journeyData: JourneyData) =
+        "/${JourneyType.UPDATE_DETAILS.urlPathSegment}/${getLastReachableStep(journeyData)?.step?.id?.urlPathSegment}"
 
     override fun getPrevStep(
         journeyData: JourneyData,

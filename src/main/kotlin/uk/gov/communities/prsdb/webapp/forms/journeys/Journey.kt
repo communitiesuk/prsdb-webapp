@@ -26,8 +26,7 @@ abstract class Journey<T : StepId>(
 
     abstract val sections: List<JourneySection<T>>
 
-    open val unreachableStepRedirect
-        get() = "/${journeyType.urlPathSegment}/${initialStepId.urlPathSegment}"
+    open fun getUnreachableStepRedirect(journeyData: JourneyData) = "/${journeyType.urlPathSegment}/${initialStepId.urlPathSegment}"
 
     fun getStepId(stepName: String): StepId {
         val step = steps.singleOrNull { step -> step.id.urlPathSegment == stepName }
@@ -53,7 +52,7 @@ abstract class Journey<T : StepId>(
                 "Step ${stepId.urlPathSegment} not valid for journey ${journeyType.urlPathSegment}",
             )
         if (!isStepReachable(journeyData, requestedStep, subPageNumber)) {
-            return "redirect:$unreachableStepRedirect"
+            return "redirect:${getUnreachableStepRedirect(journeyData)}"
         }
         val prevStepDetails = getPrevStep(journeyData, requestedStep, subPageNumber)
         val prevStepUrl = getPrevStepUrl(prevStepDetails?.step, prevStepDetails?.subPageNumber)
@@ -125,9 +124,10 @@ abstract class Journey<T : StepId>(
         targetStep: Step<T>,
         targetSubPageNumber: Int?,
     ): StepDetails<T>? {
+        if (targetStep.id == initialStepId && targetSubPageNumber == null) return null
         val initialStep = steps.singleOrNull { step -> step.id == initialStepId } ?: return null
         var currentStep = initialStep
-        var prevStep: Step<T>? = null
+        lateinit var prevStep: Step<T>
         var prevSubPageNumber: Int? = null
         var currentSubPageNumber: Int? = null
         val filteredJourneyData: JourneyData = mutableMapOf()
@@ -140,8 +140,7 @@ abstract class Journey<T : StepId>(
             val stepData = JourneyDataHelper.getPageData(journeyData, currentStep.name, null)
             filteredJourneyData[currentStep.name] = stepData
 
-            val (nextStepId, nextSubPageNumber) =
-                currentStep.nextAction(journeyData, currentSubPageNumber)
+            val (nextStepId, nextSubPageNumber) = currentStep.nextAction(journeyData, currentSubPageNumber)
             val nextStep = steps.singleOrNull { step -> step.id == nextStepId } ?: return null
             prevStep = currentStep
             prevSubPageNumber = currentSubPageNumber
@@ -149,6 +148,31 @@ abstract class Journey<T : StepId>(
             currentSubPageNumber = nextSubPageNumber
         }
         return StepDetails(prevStep, prevSubPageNumber, filteredJourneyData)
+    }
+
+    protected fun getLastReachableStep(journeyData: JourneyData): StepDetails<T>? {
+        val initialStep = steps.single { step -> step.id == initialStepId }
+        var currentStepDetails: StepDetails<T>? = StepDetails(initialStep, null, mutableMapOf())
+        while (currentStepDetails != null) {
+            val pageData = JourneyDataHelper.getPageData(journeyData, currentStepDetails.step.name, currentStepDetails.subPageNumber)
+            if (pageData == null || !currentStepDetails.step.isSatisfied(validator, pageData)) {
+                return currentStepDetails
+            }
+
+            // This stores journeyData for only the journey path the user is on
+            // and excludes user data for pages in the journey that belong to a different path
+            val stepData = JourneyDataHelper.getPageData(journeyData, currentStepDetails.step.name, null)
+            currentStepDetails.filteredJourneyData[currentStepDetails.step.name] = stepData
+
+            val (nextStepId, nextSubPageNumber) = currentStepDetails.step.nextAction(journeyData, currentStepDetails.subPageNumber)
+            currentStepDetails =
+                nextStepId?.let {
+                    val nextStep = steps.single { step -> step.id == nextStepId }
+                    StepDetails(nextStep, nextSubPageNumber, currentStepDetails!!.filteredJourneyData)
+                }
+        }
+
+        return null
     }
 
     private fun getPrevStepUrl(
