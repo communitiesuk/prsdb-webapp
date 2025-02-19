@@ -1,10 +1,9 @@
-package uk.gov.communities.prsdb.webapp.models.requestModels
+package uk.gov.communities.prsdb.webapp.models.requestModels.searchModels
 
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.SearchRequestModel
 import kotlin.test.assertEquals
 
 class SearchRequestModelTests {
