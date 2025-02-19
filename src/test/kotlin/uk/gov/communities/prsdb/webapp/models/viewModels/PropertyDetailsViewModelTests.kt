@@ -243,7 +243,7 @@ class PropertyDetailsViewModelTests {
 
         val changeLinkCount = viewModel.propertyRecord.count { it.changeUrl != null }
 
-        assertEquals(6, changeLinkCount)
+        assertEquals(5, changeLinkCount)
     }
 
     @Test
