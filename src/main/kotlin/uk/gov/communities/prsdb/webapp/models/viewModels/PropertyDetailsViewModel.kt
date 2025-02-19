@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels
 
 import kotlinx.datetime.toKotlinInstant
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -17,22 +16,10 @@ class PropertyDetailsViewModel(
 ) {
     val address: String = propertyOwnership.property.address.singleLineAddress
 
-    val landlordTypeKey: String =
-        when (propertyOwnership.landlordType) {
-            LandlordType.SOLE -> "propertyDetails.keyDetails.landlordType.sole"
-            LandlordType.JOINT -> "propertyDetails.keyDetails.landlordType.joint"
-            LandlordType.COMPANY -> "propertyDetails.keyDetails.landlordType.company"
-        }
-
     val isTenantedKey: String = MessageKeyConverter.convert(propertyOwnership.currentNumTenants > 0)
 
     val keyDetails: List<SummaryListRowViewModel> =
         listOf(
-            SummaryListRowViewModel(
-                "propertyDetails.keyDetails.landlordType",
-                landlordTypeKey,
-                null,
-            ),
             SummaryListRowViewModel(
                 "propertyDetails.keyDetails.registeredLandlord",
                 propertyOwnership.primaryLandlord.name,
@@ -108,7 +95,5 @@ class PropertyDetailsViewModel(
                     // TODO PRSD-801: Add update link
                     addRow("propertyDetails.propertyRecord.numberOfPeople", propertyOwnership.currentNumTenants, "#", withChangeLinks)
                 }
-                // TODO PRSD-xxx Add update link
-                addRow("propertyDetails.propertyRecord.landlordType", landlordTypeKey, "#", withChangeLinks)
             }.toList()
 }
