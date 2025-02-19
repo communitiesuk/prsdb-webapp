@@ -74,6 +74,7 @@ class LandlordService(
         val landlordEntity = retrieveLandlordByBaseUserId(baseUserId)!!
 
         landlordUpdate.email?.let { landlordEntity.email = it }
+        landlordUpdate.fullName?.let { landlordEntity.name = it }
 
         return landlordEntity
     }

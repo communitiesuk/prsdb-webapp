@@ -6,10 +6,17 @@ import uk.gov.communities.prsdb.webapp.forms.steps.UpdateDetailsStepId
 class UpdateLandlordDetailsJourneyDataHelper : JourneyDataHelper() {
     companion object {
         fun getEmailUpdateIfPresent(journeyData: JourneyData) =
-            JourneyDataHelper.getFieldStringValue(
+            getFieldStringValue(
                 journeyData,
                 UpdateDetailsStepId.UpdateEmail.urlPathSegment,
                 "emailAddress",
+            )
+
+        fun getNameUpdateIfPresent(journeyData: JourneyData) =
+            getFieldStringValue(
+                journeyData,
+                UpdateDetailsStepId.UpdateFullName.urlPathSegment,
+                "name",
             )
     }
 }

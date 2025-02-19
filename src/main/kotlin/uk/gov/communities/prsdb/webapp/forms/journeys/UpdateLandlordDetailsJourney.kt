@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.UpdateLandlordDetailsJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
+import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -53,6 +54,28 @@ class UpdateLandlordDetailsJourney(
                         ),
                 ),
             handleSubmitAndRedirect = { _, _ -> getRedirectToUpdateSessionPage() },
+            nextAction = { _, _ -> Pair(UpdateDetailsStepId.UpdateFullName, null) },
+            saveAfterSubmit = false,
+        )
+
+    private val fullNameStep =
+        Step(
+            id = UpdateDetailsStepId.UpdateFullName,
+            page =
+                Page(
+                    formModel = NameFormModel::class,
+                    templateName = "forms/nameForm",
+                    content =
+                        mapOf(
+                            "title" to "forms.update.title",
+                            "fieldSetHeading" to "forms.update.name.fieldSetHeading",
+                            "fieldSetHint" to "forms.name.fieldSetHint",
+                            "label" to "forms.name.label",
+                            "submitButtonText" to "forms.buttons.continue",
+                            "backUrl" to "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}",
+                        ),
+                ),
+            handleSubmitAndRedirect = { _, _ -> getRedirectToUpdateSessionPage() },
             nextAction = { _, _ -> Pair(UpdateDetailsStepId.ChangeDetailsSession, null) },
             saveAfterSubmit = false,
         )
@@ -62,6 +85,7 @@ class UpdateLandlordDetailsJourney(
             initialStepId,
             setOf(
                 emailStep,
+                fullNameStep,
                 updateSessionStep,
             ),
         )
@@ -95,6 +119,7 @@ class UpdateLandlordDetailsJourney(
         val landlordUpdate =
             LandlordUpdateModel(
                 email = UpdateLandlordDetailsJourneyDataHelper.getEmailUpdateIfPresent(journeyData),
+                fullName = UpdateLandlordDetailsJourneyDataHelper.getNameUpdateIfPresent(journeyData),
             )
 
         landlordService.updateLandlordForBaseUserId(
