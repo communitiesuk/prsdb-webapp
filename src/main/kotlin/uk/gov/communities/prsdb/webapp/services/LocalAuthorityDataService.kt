@@ -89,8 +89,7 @@ class LocalAuthorityDataService(
         }
     }
 
-    fun getLocalAuthorityOrNullFromUserID(localAuthorityUserId: Long): LocalAuthority? =
-        localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)?.localAuthority
+    fun getLocalAuthorityUserOrNull(localAuthorityUserId: Long) = localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
 
     fun updateUserAccessLevel(
         localAuthorityUserAccessLevel: LocalAuthorityUserAccessLevelDataModel,

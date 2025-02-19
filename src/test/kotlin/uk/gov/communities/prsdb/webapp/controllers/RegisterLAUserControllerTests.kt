@@ -104,9 +104,9 @@ class RegisterLAUserControllerTests(
     @WithMockUser
     fun `getConfirmation returns 200 if an LA user has been registered`() {
         val laUserId = 0L
-        val localAuthority = MockLocalAuthorityData.createLocalAuthority()
+        val localAuthorityUser = MockLocalAuthorityData.createLocalAuthorityUser()
 
-        whenever(localAuthorityDataService.getLocalAuthorityOrNullFromUserID(laUserId)).thenReturn(localAuthority)
+        whenever(localAuthorityDataService.getLocalAuthorityUserOrNull(laUserId)).thenReturn(localAuthorityUser)
 
         mvc
             .perform(
@@ -120,9 +120,9 @@ class RegisterLAUserControllerTests(
     @WithMockUser
     fun `getConfirmation returns 400 if there's no LA user ID in session`() {
         val laUserId = 0L
-        val localAuthority = MockLocalAuthorityData.createLocalAuthority()
+        val localAuthorityUser = MockLocalAuthorityData.createLocalAuthorityUser()
 
-        whenever(localAuthorityDataService.getLocalAuthorityOrNullFromUserID(laUserId)).thenReturn(localAuthority)
+        whenever(localAuthorityDataService.getLocalAuthorityUserOrNull(laUserId)).thenReturn(localAuthorityUser)
 
         mvc
             .get("/$REGISTER_LA_USER_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT")
@@ -134,7 +134,7 @@ class RegisterLAUserControllerTests(
     fun `getConfirmation returns 400 if the LA user ID in session is not valid`() {
         val laUserId = 0L
 
-        whenever(localAuthorityDataService.getLocalAuthorityOrNullFromUserID(laUserId)).thenReturn(null)
+        whenever(localAuthorityDataService.getLocalAuthorityUserOrNull(laUserId)).thenReturn(null)
 
         mvc
             .perform(

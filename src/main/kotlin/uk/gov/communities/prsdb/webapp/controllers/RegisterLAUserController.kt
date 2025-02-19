@@ -92,14 +92,14 @@ class RegisterLAUserController(
                     "$LA_USER_ID was not found in the session",
                 )
 
-        val localAuthority =
-            localAuthorityDataService.getLocalAuthorityOrNullFromUserID(localAuthorityUserID)
+        val localAuthorityUser =
+            localAuthorityDataService.getLocalAuthorityUserOrNull(localAuthorityUserID)
                 ?: throw ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "No LA user with ID $localAuthorityUserID was found in the database",
                 )
 
-        model.addAttribute("localAuthority", localAuthority.name)
+        model.addAttribute("localAuthority", localAuthorityUser.localAuthority.name)
 
         return "registerLAUserSuccess"
     }
