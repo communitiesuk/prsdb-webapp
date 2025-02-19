@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
 import org.mockito.Mockito.mock
+import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
@@ -34,18 +35,21 @@ import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepositor
 import uk.gov.communities.prsdb.webapp.forms.journeys.Journey
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneySection
+import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyTask
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import java.security.Principal
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class JourneyTests {
     private lateinit var validatorFactory: ValidatorFactory
@@ -69,6 +73,14 @@ class JourneyTests {
     ) : Journey<TestStepId>(journeyType, validator, journeyDataService) {
         override val sections: List<JourneySection<TestStepId>> = createSingleSectionWithSingleTaskFromSteps(initialStepId, steps)
     }
+
+    class TestJourneyWithSections(
+        journeyType: JourneyType,
+        override val sections: List<JourneySection<TestStepId>>,
+        override val initialStepId: TestStepId,
+        validator: Validator,
+        journeyDataService: JourneyDataService,
+    ) : Journey<TestStepId>(journeyType, validator, journeyDataService)
 
     class TestFormModel : FormModel {
         @NotNull
@@ -339,6 +351,71 @@ class JourneyTests {
             val propertyValue = bindingResult.getRawFieldValue("testProperty")
             assertEquals("testPropertyValue", propertyValue)
             assertEquals("templateName", result)
+        }
+    }
+
+    @Nested
+    inner class GetSectionHeaderInfoTests {
+        @Test
+        fun `getSectionHeaderInfo returns SectionHeaderViewModel if headingKey is not null`() {
+            val testStep =
+                Step(
+                    TestStepId.StepOne,
+                    page =
+                        Page(
+                            TestFormModel::class,
+                            "index",
+                            mutableMapOf("testKey" to "testValue"),
+                        ),
+                )
+
+            val testJourney =
+                TestJourneyWithSections(
+                    JourneyType.PROPERTY_REGISTRATION,
+                    sections =
+                        listOf(
+                            JourneySection.withOneTask(
+                                JourneyTask(TestStepId.StepOne, setOf(testStep)),
+                                "Test section heading name key",
+                            ),
+                        ),
+                    initialStepId = TestStepId.StepOne,
+                    journeyDataService = mockJourneyDataService,
+                    validator = validator,
+                )
+
+            val expectedSectionHeader = SectionHeaderViewModel("Test section heading name key", 1, 1)
+            val sectionHeader = testJourney.getSectionHeaderInfo(testStep)
+
+            assertTrue(ReflectionEquals(expectedSectionHeader).matches(sectionHeader))
+        }
+
+        @Test
+        fun `getSectionHeaderInfo returns null if headingKey not null`() {
+            val testStep =
+                Step(
+                    TestStepId.StepOne,
+                    page =
+                        Page(
+                            TestFormModel::class,
+                            "index",
+                            mutableMapOf("testKey" to "testValue"),
+                        ),
+                )
+
+            val testJourney =
+                TestJourneyWithSections(
+                    JourneyType.PROPERTY_REGISTRATION,
+                    sections =
+                        listOf(
+                            JourneySection.withOneStep(testStep),
+                        ),
+                    initialStepId = TestStepId.StepOne,
+                    journeyDataService = mockJourneyDataService,
+                    validator = validator,
+                )
+
+            assertNull(testJourney.getSectionHeaderInfo(testStep))
         }
     }
 

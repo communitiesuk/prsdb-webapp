@@ -102,6 +102,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         // Address lookup step - render page
         assertThat(addressLookupPage.form.getFieldsetHeading()).containsText("What is the property address?")
+        assertThat(addressLookupPage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         addressLookupPage.postcodeInput.fill("EG1 2AB")
         addressLookupPage.houseNameOrNumberInput.fill("1")
@@ -111,6 +112,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         // Select address step - render page
         assertThat(selectAddressPage.form.getFieldsetHeading()).containsText("Select an address")
+        assertThat(selectAddressPage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
         selectAddressPage.form.submit()
@@ -118,6 +120,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         // Property type selection step - render page
         assertThat(propertyTypePage.form.getFieldsetHeading()).containsText("What type of property are you registering?")
+        assertThat(propertyTypePage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         propertyTypePage.form.getRadios().selectValue(PropertyType.DETACHED_HOUSE)
         propertyTypePage.form.submit()
@@ -126,6 +129,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         // Ownership type selection step - render page
         assertThat(ownershipTypePage.form.getFieldsetHeading()).containsText("Select the ownership type for your property")
+        assertThat(ownershipTypePage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         ownershipTypePage.form.getRadios().selectValue(OwnershipType.FREEHOLD)
         ownershipTypePage.form.submit()
@@ -133,6 +137,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         // Licensing type - render page
         assertThat(licensingTypePage.form.getFieldsetHeading()).containsText("Select the type of licensing you have for your property")
+        assertThat(licensingTypePage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         licensingTypePage.form.getRadios().selectValue(LicensingType.SELECTIVE_LICENCE)
         licensingTypePage.form.submit()
@@ -140,6 +145,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         // Selective licence - render page
         assertThat(selectiveLicencePage.form.getFieldsetHeading()).containsText("What is your selective licence number?")
+        assertThat(selectiveLicencePage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         selectiveLicencePage.licenceNumberInput.fill("licence number")
         selectiveLicencePage.form.submit()
@@ -147,6 +153,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         // Occupancy - render page
         assertThat(occupancyPage.form.getFieldsetHeading()).containsText("Is your property occupied by tenants?")
+        assertThat(occupancyPage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in "yes" and submit
         occupancyPage.form.getRadios().selectValue("true")
         occupancyPage.form.submit()
@@ -154,6 +161,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         // Number of Households - render page
         assertThat(householdsPage.form.getFieldsetHeading()).containsText("How many households live in your property?")
+        assertThat(householdsPage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         householdsPage.householdsInput.fill("2")
         householdsPage.form.submit()
@@ -161,6 +169,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         // Number of people - render page
         assertThat(peoplePage.form.getFieldsetHeading()).containsText("How many people live in your property?")
+        assertThat(peoplePage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         peoplePage.peopleInput.fill("2")
         peoplePage.form.submit()
@@ -168,6 +177,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         // Landlord type - render page
         assertThat(landlordTypePage.form.getFieldsetHeading()).containsText("How are you operating for this property?")
+        assertThat(landlordTypePage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         landlordTypePage.form.getRadios().selectValue(LandlordType.SOLE)
         landlordTypePage.form.submit()
@@ -175,6 +185,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         // Check answers - render page
         assertThat(checkAnswersPage.form.getFieldsetHeading()).containsText("Check your answers for:")
+        assertThat(checkAnswersPage.form.getSectionHeader()).containsText("Section 2 of 2 \u2014 Check and submit your property details")
 
         //  submit
         checkAnswersPage.form.submit()
@@ -182,6 +193,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         // Declaration - render page
         assertThat(declarationPage.form.getFieldsetHeading()).containsText("Declaration")
+        assertThat(declarationPage.form.getSectionHeader()).containsText("Section 2 of 2 \u2014 Check and submit your property details")
         // submit
         declarationPage.checkbox.check()
         declarationPage.form.submit()
@@ -271,7 +283,8 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val selectAddressPage = navigator.goToPropertyRegistrationSelectAddressPage()
             selectAddressPage.radios.selectValue(MANUAL_ADDRESS_CHOSEN)
             selectAddressPage.form.submit()
-            assertPageIs(page, ManualAddressFormPagePropertyRegistration::class)
+            val manualAddressPage = assertPageIs(page, ManualAddressFormPagePropertyRegistration::class)
+            assertThat(manualAddressPage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
         }
 
         @Test
@@ -292,7 +305,8 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             manualAddressPage.townOrCityInput.fill("Testville")
             manualAddressPage.postcodeInput.fill("EG1 2AB")
             manualAddressPage.form.submit()
-            assertPageIs(page, SelectLocalAuthorityFormPagePropertyRegistration::class)
+            val localAuthorityPage = assertPageIs(page, SelectLocalAuthorityFormPagePropertyRegistration::class)
+            assertThat(localAuthorityPage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
         }
 
         @Test
@@ -490,7 +504,8 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val licensingTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
             licensingTypePage.form.getRadios().selectValue(LicensingType.HMO_MANDATORY_LICENCE)
             licensingTypePage.form.submit()
-            assertPageIs(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
+            val licenseNumberPage = assertPageIs(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
+            assertThat(licenseNumberPage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
         }
 
         @Test
@@ -498,7 +513,8 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val licensingTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
             licensingTypePage.form.getRadios().selectValue(LicensingType.HMO_ADDITIONAL_LICENCE)
             licensingTypePage.form.submit()
-            assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
+            val licenseNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
+            assertThat(licenseNumberPage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
         }
     }
 

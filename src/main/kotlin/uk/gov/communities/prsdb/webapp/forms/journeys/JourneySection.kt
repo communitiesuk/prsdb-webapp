@@ -7,6 +7,8 @@ class JourneySection<T : StepId>(
     val tasks: List<JourneyTask<T>>,
     val headingKey: String? = null,
 ) {
+    fun isStepInSection(stepId: T): Boolean = stepId in tasks.flatMap { task -> task.steps.map { step -> step.id } }
+
     companion object {
         fun <T : StepId> withOneTask(
             task: JourneyTask<T>,

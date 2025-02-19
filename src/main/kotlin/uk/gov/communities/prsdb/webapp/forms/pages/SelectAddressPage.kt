@@ -17,10 +17,11 @@ class SelectAddressPage(
     formModel: KClass<out FormModel>,
     templateName: String,
     content: Map<String, Any>,
+    displaySectionHeader: Boolean = false,
     private val lookupAddressPathSegment: String,
     private val addressLookupService: AddressLookupService,
     private val addressDataService: AddressDataService,
-) : Page(formModel, templateName, content) {
+) : Page(formModel, templateName, content, displaySectionHeader) {
     override fun populateModelAndGetTemplateName(
         validator: Validator,
         model: Model,

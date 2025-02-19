@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.services.AddressDataService
 
 class LandlordRegistrationCheckAnswersPage(
     private val addressDataService: AddressDataService,
+    displaySectionHeader: Boolean = false,
 ) : Page(
         formModel = CheckAnswersFormModel::class,
         templateName = "forms/checkAnswersForm",
@@ -20,6 +21,7 @@ class LandlordRegistrationCheckAnswersPage(
                 "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
                 "submitButtonText" to "forms.buttons.confirmAndContinue",
             ),
+        shouldDisplaySectionHeader = displaySectionHeader,
     ) {
     override fun populateModelAndGetTemplateName(
         validator: Validator,
