@@ -23,9 +23,9 @@ class ManageLAUsersTests : IntegrationTest() {
         val managePage = navigator.goToManageLaUsers(localAuthorityId)
 
         // Header
-        assertThat(managePage.table.getHeaderCell(USERNAME_COL_INDEX)).containsText("Username")
-        assertThat(managePage.table.getHeaderCell(ACCESS_LEVEL_COL_INDEX)).containsText("Access level")
-        assertThat(managePage.table.getHeaderCell(ACCOUNT_STATUS_COL_INDEX)).containsText("Account status")
+        assertThat(managePage.table.headerRow.getCell(USERNAME_COL_INDEX)).containsText("Username")
+        assertThat(managePage.table.headerRow.getCell(ACCESS_LEVEL_COL_INDEX)).containsText("Access level")
+        assertThat(managePage.table.headerRow.getCell(ACCOUNT_STATUS_COL_INDEX)).containsText("Account status")
 
         // Arthur Dent Row
         assertThat(managePage.table.getCell(0, USERNAME_COL_INDEX)).containsText("Arthur Dent")
@@ -56,15 +56,15 @@ class ManageLAUsersTests : IntegrationTest() {
     fun `pagination component renders with more than 10 table entries`(page: Page) {
         var managePage = navigator.goToManageLaUsers(localAuthorityId)
         val pagination = managePage.getPaginationComponent()
-        assertThat(pagination.getNextLink()).isVisible()
-        assertEquals("1", pagination.getCurrentPageNumberLinkText())
+        assertThat(pagination.nextLink).isVisible()
+        assertEquals("1", pagination.currentPageNumberLinkText)
         assertThat(pagination.getPageNumberLink(2)).isVisible()
 
-        pagination.getPageNumberLink(2).click()
+        pagination.getPageNumberLink(2).clickAndWait()
         managePage = assertPageIs(page, ManageLaUsersPage::class)
 
-        assertThat(pagination.getPreviousLink()).isVisible()
+        assertThat(pagination.previousLink).isVisible()
         assertThat(pagination.getPageNumberLink(1)).isVisible()
-        assertEquals("2", pagination.getCurrentPageNumberLinkText())
+        assertEquals("2", pagination.currentPageNumberLinkText)
     }
 }

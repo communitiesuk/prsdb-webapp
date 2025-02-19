@@ -8,12 +8,14 @@ abstract class LandlordDetailsBasePage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
-    val tabs = Tabs(page)
+    val tabs = LandlordDetailsTabs(page)
     val table = Table(page)
 
-    fun getActiveTabPanelId() = tabs.getActiveTabPanelId()
-
-    fun goToRegisteredProperties() {
-        tabs.goToTab("Registered properties")
+    class LandlordDetailsTabs(
+        page: Page,
+    ) : Tabs(page) {
+        fun goToRegisteredProperties() {
+            goToTab("Registered properties")
+        }
     }
 }
