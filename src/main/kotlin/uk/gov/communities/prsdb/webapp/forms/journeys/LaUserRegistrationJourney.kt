@@ -24,7 +24,7 @@ import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 class LaUserRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
-    invitationService: LocalAuthorityInvitationService,
+    private val invitationService: LocalAuthorityInvitationService,
     localAuthorityDataService: LocalAuthorityDataService,
     session: HttpSession,
 ) : Journey<RegisterLaUserStepId>(
@@ -44,6 +44,15 @@ class LaUserRegistrationJourney(
                 checkAnswersStep(journeyDataService, invitationService, localAuthorityDataService, session),
             ),
         )
+
+    fun initialiseJourneyData(token: String) {
+        val journeyData = journeyDataService.getJourneyDataFromSession()
+        val formData: PageData = mutableMapOf("emailAddress" to invitationService.getEmailAddressForToken(token))
+        val emailStep = steps.single { step -> step.id == RegisterLaUserStepId.Email }
+
+        emailStep.updateJourneyData(journeyData, formData, null)
+        journeyDataService.setJourneyData(journeyData)
+    }
 
     private fun landingPageStep() =
         Step(
