@@ -7,7 +7,6 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
@@ -75,18 +74,15 @@ abstract class Journey<T : StepId>(
     }
 
     fun getSectionHeaderInfo(step: Step<T>): SectionHeaderViewModel? {
-        if (step.displaySectionHeader) {
-            val sectionContainingStep = sections.first { it.isStepInTaskList(step.id) }
-            if (sectionContainingStep.headingKey == null) {
-                throw PrsdbWebException("Section heading requested but heading message key not found")
-            }
-            return SectionHeaderViewModel(
-                sectionContainingStep.headingKey,
-                sections.indexOf(sectionContainingStep) + 1,
-                sections.size,
-            )
+        val sectionContainingStep = sections.single { it.isStepInSection(step.id) }
+        if (sectionContainingStep.headingKey == null) {
+            return null
         }
-        return null
+        return SectionHeaderViewModel(
+            sectionContainingStep.headingKey,
+            sections.indexOf(sectionContainingStep) + 1,
+            sections.size,
+        )
     }
 
     fun updateJourneyDataAndGetViewNameOrRedirect(

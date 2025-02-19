@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHe
 class PropertyRegistrationCheckAnswersPage(
     private val addressDataService: AddressDataService,
     private val localAuthorityService: LocalAuthorityService,
+    displaySectionHeader: Boolean = false,
 ) : Page(
         NoInputFormModel::class,
         "forms/propertyRegistrationCheckAnswersForm",
@@ -24,6 +25,7 @@ class PropertyRegistrationCheckAnswersPage(
             "title" to "registerProperty.title",
             "submitButtonText" to "forms.buttons.saveAndContinue",
         ),
+        displaySectionHeader = displaySectionHeader,
     ) {
     override fun populateModelAndGetTemplateName(
         validator: Validator,

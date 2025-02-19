@@ -6,6 +6,7 @@ import org.springframework.validation.BindingResult
 import org.springframework.validation.Validator
 import org.springframework.web.bind.WebDataBinder
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
@@ -16,6 +17,7 @@ open class Page(
     private val formModel: KClass<out FormModel>,
     private val templateName: String,
     private val content: Map<String, Any>,
+    val displaySectionHeader: Boolean = false,
 ) {
     open fun populateModelAndGetTemplateName(
         validator: Validator,
@@ -50,9 +52,13 @@ open class Page(
         journeyData: JourneyData?,
         sectionHeaderInfo: SectionHeaderViewModel?,
     ): String {
-        if (sectionHeaderInfo != null) {
+        if (displaySectionHeader) {
+            if (sectionHeaderInfo == null) {
+                throw PrsdbWebException("Section heading requested but heading message key not found")
+            }
             model.addAttribute("sectionHeaderInfo", sectionHeaderInfo)
         }
+
         return populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData)
     }
 

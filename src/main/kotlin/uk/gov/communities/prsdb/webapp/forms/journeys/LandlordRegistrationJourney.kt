@@ -148,8 +148,8 @@ class LandlordRegistrationJourney(
                             "submitButtonText" to "forms.buttons.continue",
                             "backUrl" to "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}",
                         ),
+                    displaySectionHeader = true,
                 ),
-            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.DateOfBirth, null) },
             saveAfterSubmit = false,
         )
@@ -168,8 +168,8 @@ class LandlordRegistrationJourney(
                             "fieldSetHint" to "forms.dateOfBirth.fieldSetHint",
                             "submitButtonText" to "forms.buttons.continue",
                         ),
+                    displaySectionHeader = true,
                 ),
-            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Email, null) },
             saveAfterSubmit = false,
         )
@@ -186,8 +186,8 @@ class LandlordRegistrationJourney(
                             "title" to "registerAsALandlord.title",
                             "submitButtonText" to "forms.buttons.confirmAndContinue",
                         ),
+                    displaySectionHeader = true,
                 ),
-            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Email, null) },
             saveAfterSubmit = false,
         )
@@ -207,8 +207,8 @@ class LandlordRegistrationJourney(
                             "label" to "forms.email.label",
                             "submitButtonText" to "forms.buttons.continue",
                         ),
+                    displaySectionHeader = true,
                 ),
-            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.PhoneNumber, null) },
             saveAfterSubmit = false,
         )
@@ -229,8 +229,8 @@ class LandlordRegistrationJourney(
                             "submitButtonText" to "forms.buttons.continue",
                             "hint" to "forms.phoneNumber.hint",
                         ),
+                    displaySectionHeader = true,
                 ),
-            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CountryOfResidence, null) },
             saveAfterSubmit = false,
         )
@@ -262,8 +262,8 @@ class LandlordRegistrationJourney(
                                     ),
                                 ),
                         ),
+                    displaySectionHeader = true,
                 ),
-            displaySectionHeader = true,
             nextAction = { journeyData, _ -> countryOfResidenceNextAction(journeyData) },
             saveAfterSubmit = false,
         )
@@ -286,8 +286,8 @@ class LandlordRegistrationJourney(
                             "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
                             "submitButtonText" to "forms.buttons.continue",
                         ),
+                    displaySectionHeader = true,
                 ),
-            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.SelectAddress, null) },
             saveAfterSubmit = false,
         )
@@ -313,8 +313,8 @@ class LandlordRegistrationJourney(
                 lookupAddressPathSegment = LandlordRegistrationStepId.LookupAddress.urlPathSegment,
                 addressLookupService = addressLookupService,
                 addressDataService = addressDataService,
+                displaySectionHeader = true,
             ),
-        displaySectionHeader = true,
         nextAction = { journeyData, _ -> selectAddressNextAction(journeyData) },
         saveAfterSubmit = false,
     )
@@ -338,8 +338,8 @@ class LandlordRegistrationJourney(
                             "postcodeLabel" to "forms.lookupAddress.postcode.label",
                             "submitButtonText" to "forms.buttons.continue",
                         ),
+                    displaySectionHeader = true,
                 ),
-            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CheckAnswers, null) },
             saveAfterSubmit = false,
         )
@@ -360,8 +360,8 @@ class LandlordRegistrationJourney(
                             "limit" to INTERNATIONAL_ADDRESS_MAX_LENGTH,
                             "submitButtonText" to "forms.buttons.continue",
                         ),
+                    displaySectionHeader = true,
                 ),
-            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.LookupContactAddress, null) },
             saveAfterSubmit = false,
         )
@@ -383,8 +383,8 @@ class LandlordRegistrationJourney(
                             "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
                             "submitButtonText" to "forms.buttons.continue",
                         ),
+                    displaySectionHeader = true,
                 ),
-            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.SelectContactAddress, null) },
             saveAfterSubmit = false,
         )
@@ -410,8 +410,8 @@ class LandlordRegistrationJourney(
                 lookupAddressPathSegment = LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
                 addressLookupService = addressLookupService,
                 addressDataService = addressDataService,
+                displaySectionHeader = true,
             ),
-        displaySectionHeader = true,
         nextAction = { journeyData, _ ->
             selectContactAddressNextAction(
                 journeyData,
@@ -438,8 +438,8 @@ class LandlordRegistrationJourney(
                             "postcodeLabel" to "forms.lookupAddress.postcode.label",
                             "submitButtonText" to "forms.buttons.continue",
                         ),
+                    displaySectionHeader = true,
                 ),
-            displaySectionHeader = true,
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CheckAnswers, null) },
             saveAfterSubmit = false,
         )
@@ -447,9 +447,8 @@ class LandlordRegistrationJourney(
     private fun checkAnswersStep(addressDataService: AddressDataService) =
         Step(
             id = LandlordRegistrationStepId.CheckAnswers,
-            page = LandlordRegistrationCheckAnswersPage(addressDataService),
+            page = LandlordRegistrationCheckAnswersPage(addressDataService, displaySectionHeader = true),
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Declaration, null) },
-            displaySectionHeader = true,
             saveAfterSubmit = false,
         )
 
@@ -478,8 +477,8 @@ class LandlordRegistrationJourney(
                             ),
                         "submitButtonText" to "forms.buttons.confirmAndCompleteRegistration",
                     ),
+                displaySectionHeader = true,
             ),
-        displaySectionHeader = true,
         handleSubmitAndRedirect = { journeyData, _ ->
             declarationHandleSubmitAndRedirect(
                 journeyData,
