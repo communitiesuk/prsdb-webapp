@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.viewModels
+package uk.gov.communities.prsdb.webapp.models.viewModels.filterPanelModels
 
 import jakarta.servlet.http.HttpServletRequest
 import org.junit.jupiter.api.BeforeEach
@@ -7,9 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.mock.web.MockHttpServletRequest
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.SearchRequestModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.filterPanelModels.FilterPanelViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.filterPanelModels.FilterViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.filterPanelModels.SelectedFilterOptionViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.CheckboxViewModel
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
