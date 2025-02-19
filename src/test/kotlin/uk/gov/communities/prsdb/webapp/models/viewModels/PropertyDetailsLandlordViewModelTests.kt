@@ -12,7 +12,7 @@ import java.time.LocalDate
 
 class PropertyDetailsLandlordViewModelTests {
     @Test
-    fun `UK based landlord details are present and in the correct order`() {
+    fun `England or Wales resident landlord details are present and in the correct order`() {
         // Arrange
         val testLandlord = MockLandlordData.createLandlord(nonEnglandOrWalesAddress = null)
 
@@ -35,7 +35,7 @@ class PropertyDetailsLandlordViewModelTests {
     }
 
     @Test
-    fun `Non-UK based landlord details are present and in the correct order`() {
+    fun `Non England or Wales landlord details are present and in the correct order`() {
         // Arrange
         val testLandlord =
             MockLandlordData.createLandlord(
@@ -55,7 +55,7 @@ class PropertyDetailsLandlordViewModelTests {
                 "landlordDetails.personalDetails.dateOfBirth",
                 "landlordDetails.personalDetails.emailAddress",
                 "propertyDetails.landlordDetails.contactNumber",
-                "propertyDetails.landlordDetails.addressOutsideEnglandOrWales",
+                "propertyDetails.landlordDetails.addressNonEnglandOrWales",
                 "propertyDetails.landlordDetails.contactAddressInEnglandOrWales",
             )
 
@@ -133,7 +133,7 @@ class PropertyDetailsLandlordViewModelTests {
     }
 
     @Test
-    fun `UK landlord details shows the correct contact address`() {
+    fun `England or Wales landlord details shows the correct contact address`() {
         // Arrange
         val oneLineAddress = "A test address"
         val testLandlord = MockLandlordData.createLandlord(address = Address(AddressDataModel(oneLineAddress)))
@@ -150,7 +150,7 @@ class PropertyDetailsLandlordViewModelTests {
     }
 
     @Test
-    fun `Non UK landlord personal shows the residency address`() {
+    fun `Non England or Wales landlord personal shows the residency address`() {
         // Arrange
         val oneLineAddress = "A test address"
         val testLandlord = MockLandlordData.createLandlord(nonEnglandOrWalesAddress = oneLineAddress, countryOfResidence = "USA")
@@ -161,13 +161,13 @@ class PropertyDetailsLandlordViewModelTests {
         // Assert
         val addressString =
             viewModel.landlordsDetails
-                .single { it.fieldHeading == "propertyDetails.landlordDetails.addressOutsideEnglandOrWales" }
+                .single { it.fieldHeading == "propertyDetails.landlordDetails.addressNonEnglandOrWales" }
                 .getConvertedFieldValue()
         assertEquals(addressString, oneLineAddress)
     }
 
     @Test
-    fun `Non UK landlord details shows the correct UK contact address`() {
+    fun `Non England or Wales landlord details shows the correct England or Wales contact address`() {
         // Arrange
         val oneLineAddress = "A test address"
         val testLandlord =

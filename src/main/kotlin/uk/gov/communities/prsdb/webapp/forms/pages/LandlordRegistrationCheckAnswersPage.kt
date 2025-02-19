@@ -73,56 +73,56 @@ class LandlordRegistrationCheckAnswersPage(
         )
 
     private fun getAddressFormData(journeyData: JourneyData): List<SummaryListRowViewModel> {
-        val livesInUK = LandlordRegistrationJourneyDataHelper.getLivesInUK(journeyData)!!
+        val livesInEnglandOrWales = LandlordRegistrationJourneyDataHelper.getLivesInEnglandOrWales(journeyData)!!
 
-        return getLivesInUKFormData(livesInUK) +
-            (if (!livesInUK) getInternationalAddressFormData(journeyData) else emptyList()) +
-            getContactAddressFormData(journeyData, addressDataService, livesInUK)
+        return getLivesInEnglandOrWalesFormData(livesInEnglandOrWales) +
+            (if (!livesInEnglandOrWales) getNonEnglandOrWalesAddressFormData(journeyData) else emptyList()) +
+            getContactAddressFormData(journeyData, addressDataService, livesInEnglandOrWales)
     }
 
-    private fun getLivesInUKFormData(livesInUK: Boolean): List<SummaryListRowViewModel> =
+    private fun getLivesInEnglandOrWalesFormData(livesInEnglandOrWales: Boolean): List<SummaryListRowViewModel> =
         listOf(
             SummaryListRowViewModel(
-                "registerAsALandlord.checkAnswers.rowHeading.ukResident",
-                livesInUK,
+                "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesResident",
+                livesInEnglandOrWales,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
             ),
         )
 
-    private fun getInternationalAddressFormData(journeyData: JourneyData): List<SummaryListRowViewModel> =
+    private fun getNonEnglandOrWalesAddressFormData(journeyData: JourneyData): List<SummaryListRowViewModel> =
         listOf(
             SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence",
-                LandlordRegistrationJourneyDataHelper.getNonUKCountryOfResidence(journeyData)!!,
+                LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesCountryOfResidence(journeyData)!!,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
             ),
             SummaryListRowViewModel(
-                "registerAsALandlord.checkAnswers.rowHeading.contactAddressOutsideUK",
-                LandlordRegistrationJourneyDataHelper.getInternationalAddress(journeyData)!!,
-                LandlordRegistrationStepId.InternationalAddress.urlPathSegment,
+                "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress",
+                LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesAddress(journeyData)!!,
+                LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment,
             ),
         )
 
     private fun getContactAddressFormData(
         journeyData: JourneyData,
         addressDataService: AddressDataService,
-        livesInUK: Boolean,
+        livesInEnglandOrWales: Boolean,
     ): SummaryListRowViewModel =
         SummaryListRowViewModel(
-            if (livesInUK) {
+            if (livesInEnglandOrWales) {
                 "registerAsALandlord.checkAnswers.rowHeading.contactAddress"
             } else {
-                "registerAsALandlord.checkAnswers.rowHeading.ukContactAddress"
+                "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress"
             },
             LandlordRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!.singleLineAddress,
-            getContactAddressChangeURLPathSegment(journeyData, livesInUK),
+            getContactAddressChangeURLPathSegment(journeyData, livesInEnglandOrWales),
         )
 
     private fun getContactAddressChangeURLPathSegment(
         journeyData: JourneyData,
-        livesInUK: Boolean,
+        livesInEnglandOrWales: Boolean,
     ): String =
-        if (livesInUK) {
+        if (livesInEnglandOrWales) {
             if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
                 LandlordRegistrationStepId.ManualAddress.urlPathSegment
             } else {
