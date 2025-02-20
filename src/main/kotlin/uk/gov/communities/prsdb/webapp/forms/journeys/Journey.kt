@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import java.security.Principal
 import java.util.Optional
@@ -58,12 +59,28 @@ abstract class Journey<T : StepId>(
         val prevStepUrl = getPrevStepUrl(prevStepDetails?.step, prevStepDetails?.subPageNumber)
         val pageData =
             submittedPageData ?: JourneyDataHelper.getPageData(journeyData, requestedStep.name, subPageNumber)
+
+        val sectionHeaderInfo = getSectionHeaderInfo(requestedStep)
+
         return requestedStep.page.populateModelAndGetTemplateName(
             validator,
             model,
             pageData,
             prevStepUrl,
             prevStepDetails?.filteredJourneyData,
+            sectionHeaderInfo,
+        )
+    }
+
+    fun getSectionHeaderInfo(step: Step<T>): SectionHeaderViewModel? {
+        val sectionContainingStep = sections.single { it.isStepInSection(step.id) }
+        if (sectionContainingStep.headingKey == null) {
+            return null
+        }
+        return SectionHeaderViewModel(
+            sectionContainingStep.headingKey,
+            sections.indexOf(sectionContainingStep) + 1,
+            sections.size,
         )
     }
 

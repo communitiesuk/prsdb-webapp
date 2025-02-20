@@ -9,6 +9,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.CheckAnswersPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
@@ -122,14 +123,16 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Change Name link navigates to the name step`(page: Page) {
             val checkAnswersPage = navigator.goToLaUserRegistrationCheckAnswersPage()
-            checkAnswersPage.changeNameLink.click()
+            checkAnswersPage.form.summaryList.nameRow
+                .clickActionLinkAndWait()
             assertPageIs(page, NameFormPageLaUserRegistration::class)
         }
 
         @Test
         fun `Change Email link navigates to the email step`(page: Page) {
             val checkAnswersPage = navigator.goToLaUserRegistrationCheckAnswersPage()
-            checkAnswersPage.changeEmailLink.click()
+            checkAnswersPage.form.summaryList.emailRow
+                .clickActionLinkAndWait()
             assertPageIs(page, EmailFormPageLaUserRegistration::class)
         }
 

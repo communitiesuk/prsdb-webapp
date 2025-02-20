@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -27,7 +26,6 @@ import uk.gov.communities.prsdb.webapp.models.emailModels.PropertyRegistrationCo
 import uk.gov.communities.prsdb.webapp.models.formModels.DeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoAdditionalLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.HmoMandatoryLicenceFormModel
-import uk.gov.communities.prsdb.webapp.models.formModels.LandlordTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.ManualAddressFormModel
@@ -42,7 +40,6 @@ import uk.gov.communities.prsdb.webapp.models.formModels.SelectiveLicenceFormMod
 import uk.gov.communities.prsdb.webapp.models.viewModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosDividerViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -98,10 +95,6 @@ class PropertyRegistrationJourney(
             ),
             licensingTask(),
             occupancyTask(),
-            JourneyTask.withOneStep(
-                landlordTypeStep(),
-                "registerProperty.taskList.register.selectOperation",
-            ),
         )
 
     private fun checkAndSubmitPropertiesTasks(): List<JourneyTask<RegisterPropertyStepId>> =
@@ -178,9 +171,8 @@ class PropertyRegistrationJourney(
                             "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
                             "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
                             "submitButtonText" to "forms.buttons.saveAndContinue",
-                            "sectionHeaderInfo" to
-                                SectionHeaderViewModel("registerProperty.taskList.register.heading", 1, 3),
                         ),
+                    shouldDisplaySectionHeader = true,
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.SelectAddress, null) },
         )
@@ -207,6 +199,7 @@ class PropertyRegistrationJourney(
                 lookupAddressPathSegment = RegisterPropertyStepId.LookupAddress.urlPathSegment,
                 addressLookupService = addressLookupService,
                 addressDataService = addressDataService,
+                displaySectionHeader = true,
             ),
         nextAction = { journeyData, _ ->
             selectAddressNextAction(
@@ -254,6 +247,7 @@ class PropertyRegistrationJourney(
                             "postcodeLabel" to "forms.manualAddress.postcode.label",
                             "submitButtonText" to "forms.buttons.saveAndContinue",
                         ),
+                    shouldDisplaySectionHeader = true,
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.LocalAuthority, null) },
         )
@@ -271,6 +265,7 @@ class PropertyRegistrationJourney(
                             "selectLabel" to "forms.selectLocalAuthority.select.label",
                         ),
                     localAuthorityService = localAuthorityService,
+                    displaySectionHeader = true,
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.PropertyType, null) },
         )
@@ -316,6 +311,7 @@ class PropertyRegistrationJourney(
                                     ),
                                 ),
                         ),
+                    shouldDisplaySectionHeader = true,
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.OwnershipType, null) },
         )
@@ -345,6 +341,7 @@ class PropertyRegistrationJourney(
                                     ),
                                 ),
                         ),
+                    shouldDisplaySectionHeader = true,
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.LicensingType, null) },
         )
@@ -374,6 +371,7 @@ class PropertyRegistrationJourney(
                                     ),
                                 ),
                         ),
+                    shouldDisplaySectionHeader = true,
                 ),
             nextAction = { journeyData, _ -> occupancyNextAction(journeyData) },
         )
@@ -391,6 +389,7 @@ class PropertyRegistrationJourney(
                             "fieldSetHeading" to "forms.numberOfHouseholds.fieldSetHeading",
                             "label" to "forms.numberOfHouseholds.label",
                         ),
+                    shouldDisplaySectionHeader = true,
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.NumberOfPeople, null) },
         )
@@ -409,36 +408,7 @@ class PropertyRegistrationJourney(
                             "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
                             "label" to "forms.numberOfPeople.label",
                         ),
-                ),
-            nextAction = { _, _ -> Pair(RegisterPropertyStepId.LandlordType, null) },
-        )
-
-    private fun landlordTypeStep() =
-        Step(
-            id = RegisterPropertyStepId.LandlordType,
-            page =
-                Page(
-                    formModel = LandlordTypeFormModel::class,
-                    templateName = "forms/landlordTypeForm",
-                    content =
-                        mapOf(
-                            "title" to "registerProperty.title",
-                            "fieldSetHeading" to "forms.landlordType.fieldSetHeading",
-                            "fieldSetHint" to "forms.landlordType.fieldSetHint",
-                            "radioOptions" to
-                                listOf(
-                                    RadiosButtonViewModel(
-                                        value = LandlordType.SOLE,
-                                        labelMsgKey = "forms.landlordType.radios.option.individual.label",
-                                        hintMsgKey = "forms.landlordType.radios.option.individual.hint",
-                                    ),
-                                    RadiosButtonViewModel(
-                                        value = LandlordType.JOINT,
-                                        labelMsgKey = "forms.landlordType.radios.option.joint.label",
-                                        hintMsgKey = "forms.landlordType.radios.option.joint.hint",
-                                    ),
-                                ),
-                        ),
+                    shouldDisplaySectionHeader = true,
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
         )
@@ -479,6 +449,7 @@ class PropertyRegistrationJourney(
                                     ),
                                 ),
                         ),
+                    shouldDisplaySectionHeader = true,
                 ),
             nextAction = { journeyData, _ -> licensingTypeNextAction(journeyData) },
         )
@@ -498,6 +469,7 @@ class PropertyRegistrationJourney(
                             "detailSummary" to "forms.selectiveLicence.detail.summary",
                             "detailMainText" to "forms.selectiveLicence.detail.text",
                         ),
+                    shouldDisplaySectionHeader = true,
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
         )
@@ -523,6 +495,7 @@ class PropertyRegistrationJourney(
                                     "text" to "forms.hmoMandatoryLicence.detail.paragraph.two",
                                 ),
                         ),
+                    shouldDisplaySectionHeader = true,
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
         )
@@ -542,6 +515,7 @@ class PropertyRegistrationJourney(
                             "detailSummary" to "forms.hmoAdditionalLicence.detail.summary",
                             "detailMainText" to "forms.hmoAdditionalLicence.detail.text",
                         ),
+                    shouldDisplaySectionHeader = true,
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
         )
@@ -551,7 +525,7 @@ class PropertyRegistrationJourney(
         localAuthorityService: LocalAuthorityService,
     ) = Step(
         id = RegisterPropertyStepId.CheckAnswers,
-        page = PropertyRegistrationCheckAnswersPage(addressDataService, localAuthorityService),
+        page = PropertyRegistrationCheckAnswersPage(addressDataService, localAuthorityService, displaySectionHeader = true),
         nextAction = { _, _ -> Pair(RegisterPropertyStepId.Declaration, null) },
     )
 
@@ -582,6 +556,7 @@ class PropertyRegistrationJourney(
                             ),
                         "submitButtonText" to "forms.buttons.confirmAndCompleteRegistration",
                     ),
+                shouldDisplaySectionHeader = true,
             ),
         handleSubmitAndRedirect = { journeyData, _ ->
             checkAnswersSubmitAndRedirect(
@@ -600,7 +575,7 @@ class PropertyRegistrationJourney(
         if (PropertyRegistrationJourneyDataHelper.getIsOccupied(journeyData)!!) {
             Pair(RegisterPropertyStepId.NumberOfHouseholds, null)
         } else {
-            Pair(RegisterPropertyStepId.LandlordType, null)
+            Pair(RegisterPropertyStepId.CheckAnswers, null)
         }
 
     private fun selectAddressNextAction(
@@ -649,7 +624,6 @@ class PropertyRegistrationJourney(
                     propertyType = PropertyRegistrationJourneyDataHelper.getPropertyType(journeyData)!!,
                     licenseType = PropertyRegistrationJourneyDataHelper.getLicensingType(journeyData)!!,
                     licenceNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(journeyData)!!,
-                    landlordType = PropertyRegistrationJourneyDataHelper.getLandlordType(journeyData)!!,
                     ownershipType = PropertyRegistrationJourneyDataHelper.getOwnershipType(journeyData)!!,
                     numberOfHouseholds = PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(journeyData),
                     numberOfPeople = PropertyRegistrationJourneyDataHelper.getNumberOfTenants(journeyData),

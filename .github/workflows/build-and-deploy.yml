@@ -85,11 +85,29 @@ jobs:
       account_id: 794038239680
       image_name: ${{ needs.build-and-deploy.outputs.image_name }}
 
-      # ToDo PRSD-752: Redeploy ECS service
+  update-ecs-service:
+    name: Update ECS service
+    needs: update-task-definition
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      AWS_REGION: "eu-west-2"
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::794038239680:role/github-actions-terraform-admin
+          aws-region: ${{ env.AWS_REGION }}
 
+      - name: Redeploy ECS service
+        run: |
+          aws ecs update-service --cluster integration-app --service integration-app --task-definition prsdb-webapp-integration --force-new-deployment
+  
   report-pipeline-status:
     runs-on: ubuntu-latest
-    needs: update-task-definition
+    needs: update-ecs-service
     steps:
       - name: Report pipeline status
         if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -99,7 +117,7 @@ jobs:
           payload: |
             {
               "commit": ${{ toJson(github.event.head_commit.message) }},
-              "result": "${{ (needs.update-task-definition.result == 'success' || needs.update-task-definition.result == 'skipped') && 'Success :tick:' || 'Failure :no-cross:' }}",
+              "result": "${{ (needs.update-ecs-service.result == 'success' || needs.update-ecs-service.result == 'skipped') && 'Success :tick:' || 'Failure :no-cross:' }}",
               "url": "${{ format('https://github.com/communitiesuk/prsdb-webapp/actions/runs/{0}', github.run_id) }}"
             }
         env:

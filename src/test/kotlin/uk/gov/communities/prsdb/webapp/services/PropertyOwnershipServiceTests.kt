@@ -20,7 +20,6 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -56,7 +55,6 @@ class PropertyOwnershipServiceTests {
     @Test
     fun `createPropertyOwnership creates a property ownership`() {
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
-        val landlordType = LandlordType.SOLE
         val ownershipType = OwnershipType.FREEHOLD
         val households = 1
         val tenants = 2
@@ -67,7 +65,6 @@ class PropertyOwnershipServiceTests {
         val expectedPropertyOwnership =
             PropertyOwnership(
                 occupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
-                landlordType = landlordType,
                 ownershipType = ownershipType,
                 currentNumHouseholds = households,
                 currentNumTenants = tenants,
@@ -85,7 +82,6 @@ class PropertyOwnershipServiceTests {
         )
 
         propertyOwnershipService.createPropertyOwnership(
-            landlordType,
             ownershipType,
             households,
             tenants,
@@ -102,7 +98,6 @@ class PropertyOwnershipServiceTests {
     @Test
     fun `createPropertyOwnership can create a property ownership with no license`() {
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
-        val landlordType = LandlordType.SOLE
         val ownershipType = OwnershipType.FREEHOLD
         val households = 1
         val tenants = 2
@@ -112,7 +107,6 @@ class PropertyOwnershipServiceTests {
         val expectedPropertyOwnership =
             PropertyOwnership(
                 occupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
-                landlordType = landlordType,
                 ownershipType = ownershipType,
                 currentNumHouseholds = households,
                 currentNumTenants = tenants,
@@ -130,7 +124,6 @@ class PropertyOwnershipServiceTests {
         )
 
         propertyOwnershipService.createPropertyOwnership(
-            landlordType,
             ownershipType,
             households,
             tenants,

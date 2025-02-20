@@ -1,16 +1,29 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages
 
+import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.FormBasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
 class CheckAnswersPageLaUserRegistration(
     page: Page,
-) : FormBasePage(page, "/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.CheckAnswers.urlPathSegment}") {
+) : BasePage(page, "/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.CheckAnswers.urlPathSegment}") {
+    val form = CheckAnswersLaUserRegistrationForm(page)
     val heading = form.getFieldsetHeading()
 
-    private val summaryList = form.getSummaryList()
-    val changeNameLink = summaryList.getRowActionLink(1)
-    val changeEmailLink = summaryList.getRowActionLink(2)
+    class CheckAnswersLaUserRegistrationForm(
+        page: Page,
+    ) : Form(page) {
+        val summaryList = CheckAnswersLaUserRegistrationSummaryList(locator)
+    }
+
+    class CheckAnswersLaUserRegistrationSummaryList(
+        locator: Locator,
+    ) : SummaryList(locator) {
+        val nameRow = getRow("Name")
+        val emailRow = getRow("Email address")
+    }
 }

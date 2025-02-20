@@ -3,32 +3,41 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.components
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 
-class Form(
-    private val page: Page,
-    parentLocator: Locator? = null,
-    locator: Locator = if (parentLocator == null) page.locator("form") else parentLocator.locator("form"),
-) : BaseComponent(locator) {
-    fun getErrorMessage(fieldName: String? = null) =
-        getChildComponent(if (fieldName == null) ".govuk-error-message" else "p[id='$fieldName-error']")
+open class Form(
+    parentLocator: Locator,
+) : BaseComponent(parentLocator.locator("form")) {
+    constructor(page: Page) : this(page.locator("html"))
 
-    fun getTextInput(fieldName: String? = null): Locator = getChildComponent("input${if (fieldName == null) "" else "[name='$fieldName']"}")
+    fun getErrorMessage(fieldName: String? = null): Locator =
+        locator.locator(if (fieldName == null) ".govuk-error-message" else "p[id='$fieldName-error']")
 
-    fun getRadios() = Radios(page)
+    fun getTextInput(fieldName: String? = null): Locator = locator.locator("input${if (fieldName == null) "" else "[name='$fieldName']"}")
 
-    fun getFieldsetHeading() = getChildComponent(".govuk-fieldset__heading")
+    fun getSectionHeader() = SectionHeader(locator)
 
-    fun getSelect() = Select(page)
+    fun getRadios() = Radios(locator)
 
-    fun getTextArea() = getChildComponent("textarea")
+    fun getFieldsetHeading() = FieldsetHeading(locator)
 
-    fun getCheckboxes(label: String? = null) = Checkboxes(page, label)
+    fun getSelect() = Select(locator)
 
-    fun getSummaryList() = SummaryList(page)
+    fun getTextArea(): Locator = locator.locator("textarea")
 
-    fun submit() {
-        getSubmitButton().click()
-        page.waitForLoadState()
-    }
+    fun getCheckboxes(label: String? = null) = Checkboxes(locator, label)
 
-    private fun getSubmitButton() = getChildComponent("button[type='submit']")
+    fun getSummaryList() = SummaryList(locator)
+
+    fun submit() = SubmitButton(locator).clickAndWait()
+
+    class FieldsetHeading(
+        parentLocator: Locator,
+    ) : BaseComponent(parentLocator.locator(".govuk-fieldset__heading"))
+
+    class SubmitButton(
+        parentLocator: Locator,
+    ) : Button(parentLocator.locator("button[type='submit']"))
+
+    class SectionHeader(
+        parentLocator: Locator,
+    ) : BaseComponent(parentLocator.locator("#section-header"))
 }

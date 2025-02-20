@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.mockObjects
 
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -59,10 +58,6 @@ class JourneyDataBuilder(
                     mutableMapOf(
                         "numberOfPeople" to "4",
                     ),
-                "landlord-type" to
-                    mutableMapOf(
-                        "landlordType" to "SOLE",
-                    ),
                 "licensing-type" to
                     mutableMapOf(
                         "licensingType" to "HMO_MANDATORY_LICENCE",
@@ -93,7 +88,7 @@ class JourneyDataBuilder(
                     ),
                 LandlordRegistrationStepId.Email.urlPathSegment to mutableMapOf("emailAddress" to "test@example.com"),
                 LandlordRegistrationStepId.PhoneNumber.urlPathSegment to mutableMapOf("phoneNumber" to "07123456789"),
-                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment to mutableMapOf("livesInUK" to true),
+                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment to mutableMapOf("livesInEnglandOrWales" to true),
                 LandlordRegistrationStepId.SelectAddress.urlPathSegment to mutableMapOf("address" to DEFAULT_ADDRESS),
             )
 
@@ -237,14 +232,6 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withLandlordType(type: LandlordType): JourneyDataBuilder {
-        journeyData["landlord-type"] =
-            mutableMapOf(
-                "landlordType" to type.name,
-            )
-        return this
-    }
-
     fun withVerifiedUser(
         name: String,
         dob: LocalDate,
@@ -277,37 +264,37 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withInternationalAndSelectedContactAddress(
+    fun withNonEnglandOrWalesAndSelectedContactAddress(
         countryOfResidence: String,
-        internationalAddress: String,
+        nonEnglandOrWalesAddress: String,
         selectedAddress: String,
     ): JourneyDataBuilder =
         this
-            .withInternationalAddress(countryOfResidence, internationalAddress)
+            .withNonEnglandOrWalesAddress(countryOfResidence, nonEnglandOrWalesAddress)
             .withSelectedAddress(selectedAddress, localAuthority = createLocalAuthority(), isContactAddress = true)
 
-    fun withInternationalAndManualContactAddress(
+    fun withNonEnglandOrWalesAndManualContactAddress(
         countryOfResidence: String,
-        internationalAddress: String,
+        nonEnglandOrWalesAddress: String,
         addressLineOne: String,
         townOrCity: String,
         postcode: String,
     ): JourneyDataBuilder =
         this
-            .withInternationalAddress(countryOfResidence, internationalAddress)
+            .withNonEnglandOrWalesAddress(countryOfResidence, nonEnglandOrWalesAddress)
             .withManualAddress(addressLineOne, townOrCity, postcode, isContactAddress = true)
 
-    private fun withInternationalAddress(
+    private fun withNonEnglandOrWalesAddress(
         countryOfResidence: String,
-        internationalAddress: String,
+        nonEnglandOrWalesAddress: String,
     ): JourneyDataBuilder {
         journeyData[LandlordRegistrationStepId.CountryOfResidence.urlPathSegment] =
             mutableMapOf(
-                "livesInUK" to false,
+                "livesInEnglandOrWales" to false,
                 "countryOfResidence" to countryOfResidence,
             )
-        journeyData[LandlordRegistrationStepId.InternationalAddress.urlPathSegment] =
-            mutableMapOf("internationalAddress" to internationalAddress)
+        journeyData[LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment] =
+            mutableMapOf("nonEnglandOrWalesAddress" to nonEnglandOrWalesAddress)
         return this
     }
 

@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.helpers.converters
 
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -18,17 +17,9 @@ class MessageKeyConverter {
                 is PropertyType -> convertPropertyType(enum)
                 is OwnershipType -> convertOwnershipType(enum)
                 is LicensingType -> convertLicensingType(enum)
-                is LandlordType -> convertLandlordType(enum)
                 else -> throw NotImplementedError(
                     "Was not able to convert Enum as ${this::class.simpleName} does not have a conversion for ${enum::class.simpleName}",
                 )
-            }
-
-        private fun convertLandlordType(landlordType: LandlordType): String =
-            when (landlordType) {
-                LandlordType.SOLE -> "forms.checkPropertyAnswers.propertyDetails.landlordType.sole"
-                LandlordType.JOINT -> "forms.checkPropertyAnswers.propertyDetails.landlordType.joint"
-                LandlordType.COMPANY -> TODO("PRSD-674 - Organisational Landlords")
             }
 
         private fun convertLicensingType(licensingType: LicensingType): String =

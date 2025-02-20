@@ -7,7 +7,6 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -33,12 +32,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DeclarationFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.InternationalAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NonEnglandOrWalesAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
@@ -47,7 +46,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HouseholdsFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LandlordTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
@@ -165,19 +163,19 @@ class Navigator(
         return createValidPage(page, ManualAddressFormPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationInternationalAddressPage(): InternationalAddressFormPageLandlordRegistration {
+    fun goToLandlordRegistrationNonEnglandOrWalesAddressPage(): NonEnglandOrWalesAddressFormPageLandlordRegistration {
         val countryOfResidencePage = goToLandlordRegistrationCountryOfResidencePage()
         countryOfResidencePage.radios.selectValue("false")
         countryOfResidencePage.select.autocompleteInput.fill("Zimbabwe")
         countryOfResidencePage.select.selectValue("Zimbabwe")
         countryOfResidencePage.form.submit()
-        return createValidPage(page, InternationalAddressFormPageLandlordRegistration::class)
+        return createValidPage(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
     }
 
     fun goToLandlordRegistrationLookupContactAddressPage(): LookupContactAddressFormPageLandlordRegistration {
-        val internationalAddressPage = goToLandlordRegistrationInternationalAddressPage()
-        internationalAddressPage.textAreaInput.fill("international address")
-        internationalAddressPage.form.submit()
+        val nonEnglandOrWalesAddressPage = goToLandlordRegistrationNonEnglandOrWalesAddressPage()
+        nonEnglandOrWalesAddressPage.textAreaInput.fill("test address")
+        nonEnglandOrWalesAddressPage.form.submit()
         return createValidPage(page, LookupContactAddressFormPageLandlordRegistration::class)
     }
 
@@ -197,12 +195,16 @@ class Navigator(
     }
 
     fun goToLandlordRegistrationCheckAnswersPage(
-        livesInUK: Boolean = true,
+        livesInEnglandOrWales: Boolean = true,
         isManualAddressChosen: Boolean = false,
     ): CheckAnswersPageLandlordRegistration {
         if (isManualAddressChosen) {
             val manualAddressPage =
-                if (livesInUK) goToLandlordRegistrationManualAddressPage() else goToLandlordRegistrationManualContactAddressPage()
+                if (livesInEnglandOrWales) {
+                    goToLandlordRegistrationManualAddressPage()
+                } else {
+                    goToLandlordRegistrationManualContactAddressPage()
+                }
             manualAddressPage.addressLineOneInput.fill("1 Example Road")
             manualAddressPage.townOrCityInput.fill("Townville")
             manualAddressPage.postcodeInput.fill("EG1 2AB")
@@ -210,7 +212,11 @@ class Navigator(
             return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
         } else {
             val selectAddressPage =
-                if (livesInUK) goToLandlordRegistrationSelectAddressPage() else goToLandlordRegistrationSelectContactAddressPage()
+                if (livesInEnglandOrWales) {
+                    goToLandlordRegistrationSelectAddressPage()
+                } else {
+                    goToLandlordRegistrationSelectContactAddressPage()
+                }
             selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
             selectAddressPage.form.submit()
             return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
@@ -371,17 +377,10 @@ class Navigator(
         return createValidPage(page, PeopleFormPagePropertyRegistration::class)
     }
 
-    fun goToPropertyRegistrationLandlordTypePage(): LandlordTypeFormPagePropertyRegistration {
+    fun goToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
         val peoplePage = goToPropertyRegistrationPeoplePage()
         peoplePage.peopleInput.fill("4")
         peoplePage.form.submit()
-        return createValidPage(page, LandlordTypeFormPagePropertyRegistration::class)
-    }
-
-    fun goToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
-        val landlordTypePage = goToPropertyRegistrationLandlordTypePage()
-        landlordTypePage.form.getRadios().selectValue(LandlordType.SOLE)
-        landlordTypePage.form.submit()
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 

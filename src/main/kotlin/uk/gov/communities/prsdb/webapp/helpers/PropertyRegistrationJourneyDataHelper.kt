@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -47,13 +46,6 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
                 journeyData,
                 RegisterPropertyStepId.OwnershipType.urlPathSegment,
                 "ownershipType",
-            )
-
-        fun getLandlordType(journeyData: JourneyData): LandlordType? =
-            getFieldEnumValue<LandlordType>(
-                journeyData,
-                RegisterPropertyStepId.LandlordType.urlPathSegment,
-                "landlordType",
             )
 
         fun getIsOccupied(journeyData: JourneyData): Boolean? =

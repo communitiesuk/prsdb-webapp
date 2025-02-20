@@ -50,7 +50,7 @@ class PropertyDetailsLandlordViewModel(
                     )
                 } else {
                     addRow(
-                        "propertyDetails.landlordDetails.addressOutsideEnglandOrWales",
+                        "propertyDetails.landlordDetails.addressNonEnglandOrWales",
                         landlord.nonEnglandOrWalesAddress,
                         "$UPDATE_ROUTE/address",
                         withChangeLinks,

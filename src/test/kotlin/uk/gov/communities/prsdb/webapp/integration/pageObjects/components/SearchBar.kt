@@ -4,14 +4,20 @@ import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 
 class SearchBar(
-    private val page: Page,
-    locator: Locator = page.locator(".moj-search"),
-) : BaseComponent(locator) {
-    private val form = Form(page, parentLocator = locator)
-    private val searchInput = form.getTextInput()
+    parentLocator: Locator,
+) : BaseComponent(parentLocator.locator(".moj-search")) {
+    constructor(page: Page) : this(page.locator("html"))
+
+    private val form = SearchBarForm(locator)
 
     fun search(searchTerm: String) {
-        searchInput.fill(searchTerm)
+        form.searchInput.fill(searchTerm)
         form.submit()
+    }
+
+    class SearchBarForm(
+        parentLocator: Locator,
+    ) : Form(parentLocator) {
+        val searchInput: Locator = locator.locator("input#searchTerm")
     }
 }

@@ -43,8 +43,8 @@ VALUES (1, 1, true, 1, 1);
 
 SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
 
-INSERT INTO property_ownership (id, is_active, occupancy_type, landlord_type, ownership_type, current_num_households,
+INSERT INTO property_ownership (id, is_active, occupancy_type, ownership_type, current_num_households,
                                 current_num_tenants, registration_number_id, primary_landlord_id, property_id)
-VALUES (1, true, 0, 0, 1, 1, 2, 6, 1, 1);
+VALUES (1, true, 0, 1, 1, 2, 6, 1, 1);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));

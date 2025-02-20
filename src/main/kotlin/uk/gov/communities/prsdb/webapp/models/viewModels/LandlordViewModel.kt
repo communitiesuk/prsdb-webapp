@@ -70,7 +70,7 @@ class LandlordViewModel(
                     null,
                 ),
                 SummaryListRowViewModel(
-                    "landlordDetails.personalDetails.ukResident",
+                    "landlordDetails.personalDetails.englandOrWalesResident",
                     isEnglandOrWalesResident,
                     // TODO: PRSD-688 toggleChangeLink("$UPDATE_ROUTE/country-of-residence"),
                     null,
@@ -96,13 +96,13 @@ class LandlordViewModel(
                 null,
             ),
             SummaryListRowViewModel(
-                "landlordDetails.personalDetails.nonUkAddress",
+                "landlordDetails.personalDetails.nonEnglandOrWalesAddress",
                 landlord.nonEnglandOrWalesAddress,
                 // TODO: PRSD-688 toggleChangeLink("$UPDATE_ROUTE/address"),
                 null,
             ),
             SummaryListRowViewModel(
-                "landlordDetails.personalDetails.ukAddress",
+                "landlordDetails.personalDetails.englandOrWalesAddress",
                 landlord.address.singleLineAddress,
                 // TODO: PRSD-688 toggleChangeLink("$UPDATE_ROUTE/contact-address"),
                 null,

@@ -16,7 +16,6 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -149,7 +148,6 @@ class PropertyRegistrationServiceTests {
                     PropertyType.DETACHED_HOUSE,
                     LicensingType.NO_LICENSING,
                     "license number",
-                    LandlordType.SOLE,
                     OwnershipType.FREEHOLD,
                     1,
                     1,
@@ -173,7 +171,6 @@ class PropertyRegistrationServiceTests {
                     PropertyType.DETACHED_HOUSE,
                     LicensingType.NO_LICENSING,
                     "license number",
-                    LandlordType.SOLE,
                     OwnershipType.FREEHOLD,
                     1,
                     1,
@@ -190,7 +187,6 @@ class PropertyRegistrationServiceTests {
         val propertyType = PropertyType.DETACHED_HOUSE
         val licenceType = LicensingType.SELECTIVE_LICENCE
         val licenceNumber = "L1234"
-        val landlordType = LandlordType.SOLE
         val ownershipType = OwnershipType.FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
@@ -202,7 +198,6 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             createPropertyOwnership(
-                landlordType = landlordType,
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
@@ -219,7 +214,6 @@ class PropertyRegistrationServiceTests {
         whenever(mockLicenceService.createLicense(licenceType, licenceNumber)).thenReturn(licence)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
-                landlordType = landlordType,
                 ownershipType = ownershipType,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
@@ -235,7 +229,6 @@ class PropertyRegistrationServiceTests {
                 propertyType,
                 licenceType,
                 licenceNumber,
-                landlordType,
                 ownershipType,
                 numberOfHouseholds,
                 numberOfPeople,
@@ -251,7 +244,6 @@ class PropertyRegistrationServiceTests {
         val propertyType = PropertyType.DETACHED_HOUSE
         val licenceType = LicensingType.NO_LICENSING
         val licenceNumber = ""
-        val landlordType = LandlordType.SOLE
         val ownershipType = OwnershipType.FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
@@ -262,7 +254,6 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             createPropertyOwnership(
-                landlordType = landlordType,
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
@@ -278,7 +269,6 @@ class PropertyRegistrationServiceTests {
         )
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
-                landlordType = landlordType,
                 ownershipType = ownershipType,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
@@ -294,7 +284,6 @@ class PropertyRegistrationServiceTests {
                 propertyType,
                 licenceType,
                 licenceNumber,
-                landlordType,
                 ownershipType,
                 numberOfHouseholds,
                 numberOfPeople,
