@@ -2,8 +2,10 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.persistence.EntityExistsException
 import jakarta.persistence.EntityNotFoundException
+import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -22,6 +24,7 @@ class PropertyRegistrationService(
     private val propertyService: PropertyService,
     private val licenseService: LicenseService,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val session: HttpSession,
 ) {
     fun getIsAddressRegistered(
         uprn: Long,
@@ -85,4 +88,8 @@ class PropertyRegistrationService(
 
         return propertyOwnership.registrationNumber
     }
+
+    fun setLastPropertyRegisteredThisSession(prn: Long) = session.setAttribute(PROPERTY_REGISTRATION_NUMBER, prn)
+
+    fun getLastPropertyRegisteredThisSession() = session.getAttribute(PROPERTY_REGISTRATION_NUMBER)?.toString()?.toLong()
 }

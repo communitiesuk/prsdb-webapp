@@ -1,12 +1,10 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import jakarta.persistence.EntityExistsException
-import jakarta.servlet.http.HttpSession
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -52,13 +50,12 @@ import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 class PropertyRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
-    val addressLookupService: AddressLookupService,
-    val addressDataService: AddressDataService,
-    val propertyRegistrationService: PropertyRegistrationService,
-    val localAuthorityService: LocalAuthorityService,
-    val landlordService: LandlordService,
-    val session: HttpSession,
-    val confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
+    private val addressLookupService: AddressLookupService,
+    private val addressDataService: AddressDataService,
+    private val propertyRegistrationService: PropertyRegistrationService,
+    private val localAuthorityService: LocalAuthorityService,
+    private val landlordService: LandlordService,
+    private val confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
 ) : JourneyWithTaskList<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
         validator = validator,
@@ -113,7 +110,6 @@ class PropertyRegistrationJourney(
                     addressDataService,
                     landlordService,
                     confirmationEmailSender,
-                    session,
                 ),
             ),
         )
@@ -525,7 +521,12 @@ class PropertyRegistrationJourney(
         localAuthorityService: LocalAuthorityService,
     ) = Step(
         id = RegisterPropertyStepId.CheckAnswers,
-        page = PropertyRegistrationCheckAnswersPage(addressDataService, localAuthorityService, displaySectionHeader = true),
+        page =
+            PropertyRegistrationCheckAnswersPage(
+                addressDataService,
+                localAuthorityService,
+                displaySectionHeader = true,
+            ),
         nextAction = { _, _ -> Pair(RegisterPropertyStepId.Declaration, null) },
     )
 
@@ -535,7 +536,6 @@ class PropertyRegistrationJourney(
         addressDataService: AddressDataService,
         landlordService: LandlordService,
         confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
-        session: HttpSession,
     ) = Step(
         id = RegisterPropertyStepId.Declaration,
         page =
@@ -566,7 +566,6 @@ class PropertyRegistrationJourney(
                 addressDataService,
                 landlordService,
                 confirmationEmailSender,
-                session,
             )
         },
     )
@@ -613,7 +612,6 @@ class PropertyRegistrationJourney(
         addressDataService: AddressDataService,
         landlordService: LandlordService,
         confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
-        session: HttpSession,
     ): String {
         try {
             val address = PropertyRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!
@@ -630,6 +628,8 @@ class PropertyRegistrationJourney(
                     baseUserId = baseUserId,
                 )
 
+            propertyRegistrationService.setLastPropertyRegisteredThisSession(propertyRegistrationNumber.number)
+
             confirmationEmailSender.sendEmail(
                 landlordService.retrieveLandlordByBaseUserId(baseUserId)!!.email,
                 PropertyRegistrationConfirmationEmail(
@@ -640,8 +640,6 @@ class PropertyRegistrationJourney(
             )
 
             journeyDataService.deleteJourneyData()
-
-            session.setAttribute(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber.number)
 
             return CONFIRMATION_PAGE_PATH_SEGMENT
         } catch (exception: EntityExistsException) {

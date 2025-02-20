@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import jakarta.servlet.http.HttpSession
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
@@ -17,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import java.security.Principal
 
 @PreAuthorize("hasRole('LANDLORD')")
@@ -25,7 +25,7 @@ import java.security.Principal
 class RegisterPropertyController(
     private val propertyRegistrationJourney: PropertyRegistrationJourney,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val session: HttpSession,
+    private val propertyRegistrationService: PropertyRegistrationService,
 ) {
     @GetMapping
     fun index(model: Model): String {
@@ -82,7 +82,7 @@ class RegisterPropertyController(
         principal: Principal,
     ): String {
         val propertyRegistrationNumber =
-            session.getAttribute(PROPERTY_REGISTRATION_NUMBER)?.toString()?.toLong()
+            propertyRegistrationService.getLastPropertyRegisteredThisSession()
                 ?: throw ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "$PROPERTY_REGISTRATION_NUMBER was not found in the session",
