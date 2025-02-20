@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import jakarta.servlet.http.HttpSession
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -21,10 +20,9 @@ import java.security.Principal
 @Controller
 @RequestMapping("/${REGISTER_LA_USER_JOURNEY_URL}")
 class RegisterLAUserController(
-    var laUserRegistrationJourney: LaUserRegistrationJourney,
-    var invitationService: LocalAuthorityInvitationService,
-    var localAuthorityDataService: LocalAuthorityDataService,
-    var session: HttpSession,
+    val laUserRegistrationJourney: LaUserRegistrationJourney,
+    val invitationService: LocalAuthorityInvitationService,
+    val localAuthorityDataService: LocalAuthorityDataService,
 ) {
     @GetMapping
     fun acceptInvitation(
@@ -83,7 +81,7 @@ class RegisterLAUserController(
         principal: Principal,
     ): String {
         val localAuthorityUserID =
-            session.getAttribute(LA_USER_ID)?.toString()?.toLong()
+            localAuthorityDataService.getUserRegisteredThisSession()
                 ?: throw ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "$LA_USER_ID was not found in the session",

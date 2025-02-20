@@ -1,10 +1,8 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
-import jakarta.servlet.http.HttpSession
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.pages.LaUserRegistrationCheckAnswersPage
@@ -26,7 +24,6 @@ class LaUserRegistrationJourney(
     journeyDataService: JourneyDataService,
     private val invitationService: LocalAuthorityInvitationService,
     private val localAuthorityDataService: LocalAuthorityDataService,
-    private val session: HttpSession,
 ) : Journey<RegisterLaUserStepId>(
         journeyType = JourneyType.LA_USER_REGISTRATION,
         validator = validator,
@@ -143,13 +140,13 @@ class LaUserRegistrationJourney(
                 email = LaUserRegistrationJourneyDataHelper.getEmail(journeyData)!!,
             )
 
+        localAuthorityDataService.setUserRegisteredThisSession(localAuthorityUserID)
+
         val invitation = invitationService.getInvitationFromToken(token)
         invitationService.deleteInvitation(invitation)
         invitationService.clearTokenFromSession()
 
         journeyDataService.clearJourneyDataFromSession()
-
-        session.setAttribute(LA_USER_ID, localAuthorityUserID)
 
         return CONFIRMATION_PAGE_PATH_SEGMENT
     }
