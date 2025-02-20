@@ -99,26 +99,23 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         val addressLookupPage = assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
 
         // Address lookup step - render page
-        assertThat(addressLookupPage.form.getFieldsetHeading()).containsText("What is the property address?")
-        assertThat(addressLookupPage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
+        assertThat(addressLookupPage.form.fieldsetHeading).containsText("What is the property address?")
+        assertThat(addressLookupPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
-        addressLookupPage.postcodeInput.fill("EG1 2AB")
-        addressLookupPage.houseNameOrNumberInput.fill("1")
-        addressLookupPage.form.submit()
+        addressLookupPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AB", "1")
         // goes to the next page
         val selectAddressPage = assertPageIs(page, SelectAddressFormPagePropertyRegistration::class)
 
         // Select address step - render page
-        assertThat(selectAddressPage.form.getFieldsetHeading()).containsText("Select an address")
-        assertThat(selectAddressPage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
+        assertThat(selectAddressPage.form.fieldsetHeading).containsText("Select an address")
+        assertThat(selectAddressPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
-        selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
-        selectAddressPage.form.submit()
+        selectAddressPage.selectAddressAndSubmit("1, Example Road, EG1 2AB")
         val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
 
         // Property type selection step - render page
-        assertThat(propertyTypePage.form.getFieldsetHeading()).containsText("What type of property are you registering?")
-        assertThat(propertyTypePage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
+        assertThat(propertyTypePage.form.fieldsetHeading).containsText("What type of property are you registering?")
+        assertThat(propertyTypePage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         propertyTypePage.form.getRadios().selectValue(PropertyType.DETACHED_HOUSE)
         propertyTypePage.form.submit()
@@ -126,64 +123,64 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         val ownershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
 
         // Ownership type selection step - render page
-        assertThat(ownershipTypePage.form.getFieldsetHeading()).containsText("Select the ownership type for your property")
-        assertThat(ownershipTypePage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
+        assertThat(ownershipTypePage.form.fieldsetHeading).containsText("Select the ownership type for your property")
+        assertThat(ownershipTypePage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         ownershipTypePage.form.getRadios().selectValue(OwnershipType.FREEHOLD)
         ownershipTypePage.form.submit()
         val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
 
         // Licensing type - render page
-        assertThat(licensingTypePage.form.getFieldsetHeading()).containsText("Select the type of licensing you have for your property")
-        assertThat(licensingTypePage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
+        assertThat(licensingTypePage.form.fieldsetHeading).containsText("Select the type of licensing you have for your property")
+        assertThat(licensingTypePage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         licensingTypePage.form.getRadios().selectValue(LicensingType.SELECTIVE_LICENCE)
         licensingTypePage.form.submit()
         val selectiveLicencePage = assertPageIs(page, SelectiveLicenceFormPagePropertyRegistration::class)
 
         // Selective licence - render page
-        assertThat(selectiveLicencePage.form.getFieldsetHeading()).containsText("What is your selective licence number?")
-        assertThat(selectiveLicencePage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
+        assertThat(selectiveLicencePage.form.fieldsetHeading).containsText("What is your selective licence number?")
+        assertThat(selectiveLicencePage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         selectiveLicencePage.licenceNumberInput.fill("licence number")
         selectiveLicencePage.form.submit()
         val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
 
         // Occupancy - render page
-        assertThat(occupancyPage.form.getFieldsetHeading()).containsText("Is your property occupied by tenants?")
-        assertThat(occupancyPage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
+        assertThat(occupancyPage.form.fieldsetHeading).containsText("Is your property occupied by tenants?")
+        assertThat(occupancyPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in "yes" and submit
         occupancyPage.form.getRadios().selectValue("true")
         occupancyPage.form.submit()
         val householdsPage = assertPageIs(page, HouseholdsFormPagePropertyRegistration::class)
 
         // Number of Households - render page
-        assertThat(householdsPage.form.getFieldsetHeading()).containsText("How many households live in your property?")
-        assertThat(householdsPage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
+        assertThat(householdsPage.form.fieldsetHeading).containsText("How many households live in your property?")
+        assertThat(householdsPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         householdsPage.householdsInput.fill("2")
         householdsPage.form.submit()
         val peoplePage = assertPageIs(page, PeopleFormPagePropertyRegistration::class)
 
         // Number of people - render page
-        assertThat(peoplePage.form.getFieldsetHeading()).containsText("How many people live in your property?")
-        assertThat(peoplePage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
+        assertThat(peoplePage.form.fieldsetHeading).containsText("How many people live in your property?")
+        assertThat(peoplePage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         peoplePage.peopleInput.fill("2")
         peoplePage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
         // Check answers - render page
-        assertThat(checkAnswersPage.form.getFieldsetHeading()).containsText("Check your answers for:")
-        assertThat(checkAnswersPage.form.getSectionHeader()).containsText("Section 2 of 2 \u2014 Check and submit your property details")
+        assertThat(checkAnswersPage.form.fieldsetHeading).containsText("Check your answers for:")
+        assertThat(checkAnswersPage.form.sectionHeader).containsText("Section 2 of 2 \u2014 Check and submit your property details")
 
         //  submit
         checkAnswersPage.form.submit()
         val declarationPage = assertPageIs(page, DeclarationFormPagePropertyRegistration::class)
 
         // Declaration - render page
-        assertThat(declarationPage.form.getFieldsetHeading()).containsText("Declaration")
-        assertThat(declarationPage.form.getSectionHeader()).containsText("Section 2 of 2 \u2014 Check and submit your property details")
+        assertThat(declarationPage.form.fieldsetHeading).containsText("Declaration")
+        assertThat(declarationPage.form.sectionHeader).containsText("Section 2 of 2 \u2014 Check and submit your property details")
         // submit
         declarationPage.checkbox.check()
         declarationPage.form.submit()
@@ -269,17 +266,15 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Selecting the manual option navigates to the ManualAddress step`(page: Page) {
             val selectAddressPage = navigator.goToPropertyRegistrationSelectAddressPage()
-            selectAddressPage.radios.selectValue(MANUAL_ADDRESS_CHOSEN)
-            selectAddressPage.form.submit()
+            selectAddressPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
             val manualAddressPage = assertPageIs(page, ManualAddressFormPagePropertyRegistration::class)
-            assertThat(manualAddressPage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
+            assertThat(manualAddressPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         }
 
         @Test
         fun `Selecting an already-registered address navigates to the AlreadyRegistered step`(page: Page) {
             val selectAddressPage = navigator.goToPropertyRegistrationSelectAddressPage()
-            selectAddressPage.radios.selectValue("already registered address")
-            selectAddressPage.form.submit()
+            selectAddressPage.selectAddressAndSubmit("already registered address")
             assertPageIs(page, AlreadyRegisteredFormPagePropertyRegistration::class)
         }
     }
@@ -289,12 +284,13 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Submitting valid data redirects to the SelectLocalAuthority step`(page: Page) {
             val manualAddressPage = navigator.goToPropertyRegistrationManualAddressPage()
-            manualAddressPage.addressLineOneInput.fill("Test address line 1")
-            manualAddressPage.townOrCityInput.fill("Testville")
-            manualAddressPage.postcodeInput.fill("EG1 2AB")
-            manualAddressPage.form.submit()
+            manualAddressPage.submitAddress(
+                addressLineOne = "Test address line 1",
+                townOrCity = "Testville",
+                postcode = "EG1 2AB",
+            )
             val localAuthorityPage = assertPageIs(page, SelectLocalAuthorityFormPagePropertyRegistration::class)
-            assertThat(localAuthorityPage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
+            assertThat(localAuthorityPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         }
 
         @Test
@@ -483,7 +479,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             licensingTypePage.form.getRadios().selectValue(LicensingType.HMO_MANDATORY_LICENCE)
             licensingTypePage.form.submit()
             val licenseNumberPage = assertPageIs(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
-            assertThat(licenseNumberPage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
+            assertThat(licenseNumberPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         }
 
         @Test
@@ -492,7 +488,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             licensingTypePage.form.getRadios().selectValue(LicensingType.HMO_ADDITIONAL_LICENCE)
             licensingTypePage.form.submit()
             val licenseNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
-            assertThat(licenseNumberPage.form.getSectionHeader()).containsText("Section 1 of 2 \u2014 Register your property details")
+            assertThat(licenseNumberPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         }
     }
 

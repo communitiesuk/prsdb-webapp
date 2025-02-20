@@ -33,6 +33,7 @@ abstract class BasePage(
         ) = createValidPage(page, expectedPageClass)
     }
 
+    // TODO: PRSD-884 Delete
     fun clickComponent(locator: Locator) {
         locator.click()
         page.waitForLoadState()
