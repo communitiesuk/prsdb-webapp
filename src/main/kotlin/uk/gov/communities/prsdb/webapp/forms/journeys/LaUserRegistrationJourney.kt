@@ -25,8 +25,8 @@ class LaUserRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     private val invitationService: LocalAuthorityInvitationService,
-    localAuthorityDataService: LocalAuthorityDataService,
-    session: HttpSession,
+    private val localAuthorityDataService: LocalAuthorityDataService,
+    private val session: HttpSession,
 ) : Journey<RegisterLaUserStepId>(
         journeyType = JourneyType.LA_USER_REGISTRATION,
         validator = validator,
@@ -41,7 +41,7 @@ class LaUserRegistrationJourney(
                 landingPageStep(),
                 registerUserStep(),
                 emailStep(),
-                checkAnswersStep(journeyDataService, invitationService, localAuthorityDataService, session),
+                checkAnswersStep(),
             ),
         )
 
@@ -111,44 +111,28 @@ class LaUserRegistrationJourney(
             saveAfterSubmit = false,
         )
 
-    private fun checkAnswersStep(
-        journeyDataService: JourneyDataService,
-        invitationService: LocalAuthorityInvitationService,
-        localAuthorityDataService: LocalAuthorityDataService,
-        session: HttpSession,
-    ) = Step(
-        id = RegisterLaUserStepId.CheckAnswers,
-        page =
-            LaUserRegistrationCheckAnswersPage(
-                formModel = CheckAnswersFormModel::class,
-                templateName = "forms/checkAnswersForm",
-                content =
-                    mapOf(
-                        "title" to "registerLAUser.title",
-                        "summaryName" to "registerLaUser.checkAnswers.summaryName",
-                        "submitButtonText" to "forms.buttons.confirm",
-                    ),
-                invitationService,
-            ),
-        handleSubmitAndRedirect = { journeyData, _ ->
-            checkAnswersHandleSubmitAndRedirect(
-                journeyData,
-                journeyDataService,
-                invitationService,
-                localAuthorityDataService,
-                session,
-            )
-        },
-        saveAfterSubmit = false,
-    )
+    private fun checkAnswersStep() =
+        Step(
+            id = RegisterLaUserStepId.CheckAnswers,
+            page =
+                LaUserRegistrationCheckAnswersPage(
+                    formModel = CheckAnswersFormModel::class,
+                    templateName = "forms/checkAnswersForm",
+                    content =
+                        mapOf(
+                            "title" to "registerLAUser.title",
+                            "summaryName" to "registerLaUser.checkAnswers.summaryName",
+                            "submitButtonText" to "forms.buttons.confirm",
+                        ),
+                    invitationService,
+                ),
+            handleSubmitAndRedirect = { journeyData, _ ->
+                checkAnswersHandleSubmitAndRedirect(journeyData)
+            },
+            saveAfterSubmit = false,
+        )
 
-    private fun checkAnswersHandleSubmitAndRedirect(
-        journeyData: JourneyData,
-        journeyDataService: JourneyDataService,
-        invitationService: LocalAuthorityInvitationService,
-        localAuthorityDataService: LocalAuthorityDataService,
-        session: HttpSession,
-    ): String {
+    private fun checkAnswersHandleSubmitAndRedirect(journeyData: JourneyData): String {
         val token = invitationService.getTokenFromSession()!!
 
         val localAuthorityUserID =
