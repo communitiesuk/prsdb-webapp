@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -46,6 +47,9 @@ class LocalAuthorityDataServiceTests {
 
     @Mock
     private lateinit var oneLoginUserService: OneLoginUserService
+
+    @Mock
+    private lateinit var mockHttpSession: HttpSession
 
     @InjectMocks
     private lateinit var localAuthorityDataService: LocalAuthorityDataService
