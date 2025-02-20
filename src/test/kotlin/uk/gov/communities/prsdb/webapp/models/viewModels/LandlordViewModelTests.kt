@@ -323,16 +323,18 @@ class LandlordViewModelTests {
     fun `LandlordViewModel populates change links in rows that should have them`() {
         // Arrange
         val testLandlord = MockLandlordData.createLandlord()
+        val changeablePersonalDetailKeys = listOf("landlordDetails.personalDetails.name", "landlordDetails.personalDetails.emailAddress")
 
         // Act
         val viewModel = LandlordViewModel(testLandlord)
 
         // Assert
-        assertNull(viewModel.personalDetails[0].changeUrl)
-        assertNull(viewModel.personalDetails[1].changeUrl)
-
-        for (i in viewModel.personalDetails.subList(2, viewModel.personalDetails.size)) {
+        for (i in viewModel.personalDetails.filter { detail -> detail.fieldHeading in changeablePersonalDetailKeys }) {
             assertNotNull(i.changeUrl)
+        }
+
+        for (i in viewModel.personalDetails.filter { detail -> detail.fieldHeading !in changeablePersonalDetailKeys }) {
+            assertNull(i.changeUrl)
         }
 
         // TODO PRSD-746 change assertion for consentInformation once links have been added
