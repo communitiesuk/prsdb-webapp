@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.UpdateLandlordDetailsJourney
@@ -22,7 +23,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
 @Controller
-@RequestMapping("/landlord-details")
+@RequestMapping(LandlordDetailsController.LANDLORD_DETAILS_ROUTE)
 class LandlordDetailsController(
     val landlordService: LandlordService,
     val addressDataService: AddressDataService,
@@ -30,7 +31,7 @@ class LandlordDetailsController(
     val updateDetailsJourney: UpdateLandlordDetailsJourney,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
-    @GetMapping("update/details")
+    @GetMapping("$UPDATE_PATH_SEGMENT/details")
     fun getUpdateUserLandlordDetails(
         model: Model,
         principal: Principal,
@@ -73,7 +74,7 @@ class LandlordDetailsController(
     }
 
     @PreAuthorize("hasRole('LANDLORD')")
-    @GetMapping("update/{stepName}")
+    @GetMapping("${UPDATE_PATH_SEGMENT}/{stepName}")
     fun getJourneyStep(
         @PathVariable("stepName") stepName: String,
         model: Model,
@@ -86,7 +87,7 @@ class LandlordDetailsController(
         )
 
     @PreAuthorize("hasRole('LANDLORD')")
-    @PostMapping("update/{stepName}")
+    @PostMapping("${UPDATE_PATH_SEGMENT}/{stepName}")
     fun postJourneyData(
         @PathVariable("stepName") stepName: String,
         @RequestParam formData: PageData,
@@ -130,6 +131,7 @@ class LandlordDetailsController(
     }
 
     companion object {
-        const val UPDATE_ROUTE = "/landlord-details/update"
+        const val LANDLORD_DETAILS_ROUTE = "/landlord-details"
+        const val UPDATE_ROUTE = "$LANDLORD_DETAILS_ROUTE/$UPDATE_PATH_SEGMENT"
     }
 }

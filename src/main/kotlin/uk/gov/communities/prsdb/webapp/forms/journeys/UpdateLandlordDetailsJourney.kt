@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
@@ -94,9 +95,9 @@ class UpdateLandlordDetailsJourney(
 
     override fun getUnreachableStepRedirect(journeyData: JourneyData) =
         if (journeyData[originalLandlordJourneyDataKey] == null) {
-            "/${JourneyType.UPDATE_LANDLORD_DETAILS.urlPathSegment}/${UpdateDetailsStepId.ChangeDetailsSession.urlPathSegment}"
+            UpdateDetailsStepId.ChangeDetailsSession.urlPathSegment
         } else {
-            "/${JourneyType.UPDATE_LANDLORD_DETAILS.urlPathSegment}/${getLastReachableStep(journeyData)!!.step.id.urlPathSegment}"
+            getLastReachableStep(journeyData)!!.step.id.urlPathSegment
         }
 
     override fun getPrevStep(
@@ -135,11 +136,10 @@ class UpdateLandlordDetailsJourney(
 
         journeyDataService.clearJourneyDataFromSession()
 
-        return "/landlord-details"
+        return LandlordDetailsController.LANDLORD_DETAILS_ROUTE
     }
 
-    private fun getRedirectToUpdateSessionPage(): String =
-        "/${JourneyType.UPDATE_LANDLORD_DETAILS.urlPathSegment}/${UpdateDetailsStepId.ChangeDetailsSession.urlPathSegment}"
+    private fun getRedirectToUpdateSessionPage(): String = UpdateDetailsStepId.ChangeDetailsSession.urlPathSegment
 
     fun initialiseJourneyDataIfNotInitialised(landlordId: String) {
         val journeyData = journeyDataService.getJourneyDataFromSession()

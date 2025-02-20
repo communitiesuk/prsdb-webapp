@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -47,7 +48,7 @@ class PropertyDetailsTests : IntegrationTest() {
             detailsPage.getLandlordNameLinkFromKeyDetails("Alexander Smith").clickAndWait()
 
             assertPageIs(page, LandlordDetailsPage::class)
-            Assertions.assertEquals("/landlord-details", URI(page.url()).path)
+            Assertions.assertEquals(LandlordDetailsController.LANDLORD_DETAILS_ROUTE, URI(page.url()).path)
         }
 
         @Test
@@ -58,7 +59,7 @@ class PropertyDetailsTests : IntegrationTest() {
             detailsPage.getLandlordLinkFromLandlordDetails("Alexander Smith").clickAndWait()
 
             assertPageIs(page, LandlordDetailsPage::class)
-            Assertions.assertEquals("/landlord-details", URI(page.url()).path)
+            Assertions.assertEquals(LandlordDetailsController.LANDLORD_DETAILS_ROUTE, URI(page.url()).path)
         }
 
         @Test
@@ -112,7 +113,7 @@ class PropertyDetailsTests : IntegrationTest() {
             detailsPage.getLandlordNameLinkFromKeyDetails("Alexander Smith").clickAndWait()
 
             assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
-            Assertions.assertEquals("/landlord-details/1", URI(page.url()).path)
+            Assertions.assertEquals("${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/1", URI(page.url()).path)
         }
 
         @Test
@@ -123,7 +124,7 @@ class PropertyDetailsTests : IntegrationTest() {
             detailsPage.getLandlordLinkFromLandlordDetails("Alexander Smith").clickAndWait()
 
             assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
-            Assertions.assertEquals("/landlord-details/1", URI(page.url()).path)
+            Assertions.assertEquals("${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/1", URI(page.url()).path)
         }
 
         @Test

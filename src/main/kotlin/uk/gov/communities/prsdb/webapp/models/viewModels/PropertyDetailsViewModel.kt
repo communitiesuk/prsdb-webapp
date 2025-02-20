@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels
 import kotlinx.datetime.toKotlinInstant
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
@@ -13,7 +14,7 @@ class PropertyDetailsViewModel(
     private val propertyOwnership: PropertyOwnership,
     private val withChangeLinks: Boolean = true,
     private val hideNullUprn: Boolean = true,
-    private val landlordDetailsUrl: String = "/landlord-details",
+    private val landlordDetailsUrl: String = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
 ) {
     val address: String = propertyOwnership.property.address.singleLineAddress
 

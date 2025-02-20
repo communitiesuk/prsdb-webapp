@@ -33,14 +33,14 @@ class PropertyDetailsController(
                 propertyOwnership = propertyOwnership,
                 withChangeLinks = true,
                 hideNullUprn = true,
-                landlordDetailsUrl = "/landlord-details",
+                landlordDetailsUrl = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
             )
 
         val landlordViewModel =
             PropertyDetailsLandlordViewModel(
                 landlord = propertyOwnership.primaryLandlord,
                 withChangeLinks = true,
-                landlordDetailsUrl = "/landlord-details",
+                landlordDetailsUrl = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
             )
 
         model.addAttribute("propertyDetails", propertyDetails)
@@ -70,14 +70,14 @@ class PropertyDetailsController(
                 propertyOwnership = propertyOwnership,
                 withChangeLinks = false,
                 hideNullUprn = false,
-                landlordDetailsUrl = "/landlord-details/${propertyOwnership.primaryLandlord.id}",
+                landlordDetailsUrl = "${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/${propertyOwnership.primaryLandlord.id}",
             )
 
         val landlordViewModel =
             PropertyDetailsLandlordViewModel(
                 landlord = propertyOwnership.primaryLandlord,
                 withChangeLinks = false,
-                landlordDetailsUrl = "/landlord-details/${propertyOwnership.primaryLandlord.id}",
+                landlordDetailsUrl = "${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/${propertyOwnership.primaryLandlord.id}",
             )
 
         model.addAttribute("propertyDetails", propertyDetails)

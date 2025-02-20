@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.ADDRESS_COL_INDEX
@@ -81,7 +82,7 @@ class SearchRegisterTests : IntegrationTest() {
             searchLandlordRegisterPage.searchBar.search("L-CKSQ-3SX9")
             searchLandlordRegisterPage.getLandlordLink(rowIndex = 0).click()
 
-            assertContains(page.url(), "/landlord-details/1")
+            assertContains(page.url(), "${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/1")
         }
 
         @Test
@@ -256,7 +257,7 @@ class SearchRegisterTests : IntegrationTest() {
             searchPropertyRegisterPage.searchBar.search("P-C5YY-J34H")
             searchPropertyRegisterPage.getLandlordLink(rowIndex = 0).click()
 
-            assertContains(page.url(), "/landlord-details/1")
+            assertContains(page.url(), "${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/1")
         }
 
         @Test
