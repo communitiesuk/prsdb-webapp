@@ -39,11 +39,12 @@ class PropertyRegistrationJourneyTests {
                     mock(),
                     mock(),
                     mock(),
-                    mock(),
                 )
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mutableMapOf())
-            whenever(mockJourneyDataService.getContextId(principalName, JourneyType.PROPERTY_REGISTRATION)).thenReturn(null)
+            whenever(mockJourneyDataService.getContextId(principalName, JourneyType.PROPERTY_REGISTRATION)).thenReturn(
+                null,
+            )
 
             // Act
             testJourney.initialiseJourneyDataIfNotInitialised(principalName)
@@ -67,11 +68,12 @@ class PropertyRegistrationJourneyTests {
                     mock(),
                     mock(),
                     mock(),
-                    mock(),
                 )
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mutableMapOf())
-            whenever(mockJourneyDataService.getContextId(principalName, JourneyType.PROPERTY_REGISTRATION)).thenReturn(contextId)
+            whenever(mockJourneyDataService.getContextId(principalName, JourneyType.PROPERTY_REGISTRATION)).thenReturn(
+                contextId,
+            )
 
             // Act
             testJourney.initialiseJourneyDataIfNotInitialised(principalName)
@@ -89,7 +91,6 @@ class PropertyRegistrationJourneyTests {
                 PropertyRegistrationJourney(
                     mock(),
                     mockJourneyDataService,
-                    mock(),
                     mock(),
                     mock(),
                     mock(),
