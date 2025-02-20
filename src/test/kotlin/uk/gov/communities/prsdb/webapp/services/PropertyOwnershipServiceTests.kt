@@ -35,8 +35,8 @@ import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData
 import uk.gov.communities.prsdb.webapp.mockObjects.MockOneLoginUserData
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RegisteredPropertyViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 
 @ExtendWith(MockitoExtension::class)
 class PropertyOwnershipServiceTests {

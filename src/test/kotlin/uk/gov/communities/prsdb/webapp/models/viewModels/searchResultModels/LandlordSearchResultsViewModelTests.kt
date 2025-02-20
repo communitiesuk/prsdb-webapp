@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.viewModels
+package uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels
 
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropertyCount

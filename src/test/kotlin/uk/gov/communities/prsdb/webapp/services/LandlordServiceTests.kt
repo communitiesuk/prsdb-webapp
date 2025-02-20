@@ -29,7 +29,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPro
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.LandlordSearchResultViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import kotlin.test.assertNull
 
 @ExtendWith(MockitoExtension::class)
