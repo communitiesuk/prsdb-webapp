@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.viewModels
+package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -278,7 +278,8 @@ class LandlordViewModelTests {
     fun `Non England or Wales landlord personal details shows the residency address`() {
         // Arrange
         val oneLineAddress = "A test address"
-        val testLandlord = MockLandlordData.createLandlord(nonEnglandOrWalesAddress = oneLineAddress, countryOfResidence = "USA")
+        val testLandlord =
+            MockLandlordData.createLandlord(nonEnglandOrWalesAddress = oneLineAddress, countryOfResidence = "USA")
 
         // Act
         val viewModel = LandlordViewModel(testLandlord)

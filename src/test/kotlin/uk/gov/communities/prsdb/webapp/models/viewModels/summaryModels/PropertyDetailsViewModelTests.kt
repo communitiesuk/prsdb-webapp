@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.viewModels
+package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -165,7 +165,10 @@ class PropertyDetailsViewModelTests {
             viewModelDeclaredNoLicense.propertyRecord
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingType" }
 
-        assertEquals("forms.checkPropertyAnswers.propertyDetails.noLicensing", propertyRecordDeclaredNoLicense.fieldValue)
+        assertEquals(
+            "forms.checkPropertyAnswers.propertyDetails.noLicensing",
+            propertyRecordDeclaredNoLicense.fieldValue,
+        )
 
         val propertyOwnershipNullLicense =
             createPropertyOwnership()

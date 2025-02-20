@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.viewModels
+package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -24,7 +24,10 @@ data class RegisteredPropertyViewModel(
                 localAuthorityName =
                     propertyOwnership.property.address.localAuthority!!
                         .name,
-                licenseTypeMessageKey = MessageKeyConverter.convert(propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING),
+                licenseTypeMessageKey =
+                    MessageKeyConverter.convert(
+                        propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING,
+                    ),
                 isTenantedMessageKey = MessageKeyConverter.convert(propertyOwnership.currentNumTenants > 0),
             )
     }

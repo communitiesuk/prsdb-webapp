@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.viewModels
+package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import kotlinx.datetime.toKotlinInstant
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -94,7 +94,12 @@ class PropertyDetailsViewModel(
                         withChangeLinks,
                     )
                     // TODO PRSD-801: Add update link
-                    addRow("propertyDetails.propertyRecord.numberOfPeople", propertyOwnership.currentNumTenants, "#", withChangeLinks)
+                    addRow(
+                        "propertyDetails.propertyRecord.numberOfPeople",
+                        propertyOwnership.currentNumTenants,
+                        "#",
+                        withChangeLinks,
+                    )
                 }
             }.toList()
 }
