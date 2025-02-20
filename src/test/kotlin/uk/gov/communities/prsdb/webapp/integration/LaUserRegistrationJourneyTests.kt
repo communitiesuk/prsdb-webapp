@@ -62,22 +62,20 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
         val namePage = assertPageIs(page, NameFormPageLaUserRegistration::class)
 
         // Name page - render
-        assertThat(namePage.form.getFieldsetHeading()).containsText("What is your full name?")
+        assertThat(namePage.form.fieldsetHeading).containsText("What is your full name?")
         // Fill in, submit and go to next page
-        namePage.nameInput.fill("Test User")
-        namePage.form.submit()
+        namePage.submitName("Test User")
         val emailPage = assertPageIs(page, EmailFormPageLaUserRegistration::class)
 
         // Email page - render
-        assertThat(emailPage.form.getFieldsetHeading()).containsText("What is your work email address?")
-        assertThat(emailPage.emailInput).hasValue(invitation.invitedEmail)
+        assertThat(emailPage.form.fieldsetHeading).containsText("What is your work email address?")
+        assertThat(emailPage.form.emailInput).hasValue(invitation.invitedEmail)
         // Fill in, submit and go to next page
-        emailPage.emailInput.fill("test@example.com")
-        emailPage.form.submit()
+        emailPage.submitEmail("test@example.com")
         val checkAnswersPage = assertPageIs(page, CheckAnswersPageLaUserRegistration::class)
 
         // Check answers page - render
-        assertThat(checkAnswersPage.heading).containsText("Check your answers")
+        assertThat(checkAnswersPage.form.fieldsetHeading).containsText("Check your answers")
         // Submit and go to next page
         checkAnswersPage.form.submit()
         val confirmationPage = assertPageIs(page, ConfirmationPageLaUserRegistration::class)
@@ -99,8 +97,7 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Submitting an empty name returns an error`() {
             val namePage = navigator.goToLaUserRegistrationNameFormPage(invitation.token.toString())
-            namePage.nameInput.fill("")
-            namePage.form.submit()
+            namePage.submitName("")
             assertThat(namePage.form.getErrorMessage()).containsText("You must enter your full name")
         }
     }
@@ -110,8 +107,7 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Submitting an empty e-mail address returns an error`() {
             val emailPage = navigator.goToLaUserRegistrationEmailFormPage(invitation.token.toString())
-            emailPage.emailInput.fill("")
-            emailPage.form.submit()
+            emailPage.submitEmail("")
             assertThat(emailPage.form.getErrorMessage())
                 .containsText("Enter a valid email address to continue. An email is required for contact purposes.")
         }
@@ -119,8 +115,7 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Submitting an invalid e-mail address returns an error`() {
             val emailPage = navigator.goToLaUserRegistrationEmailFormPage(invitation.token.toString())
-            emailPage.emailInput.fill("notAnEmail")
-            emailPage.form.submit()
+            emailPage.submitEmail("notAnEmail")
             assertThat(emailPage.form.getErrorMessage()).containsText("Enter an email address in the right format")
         }
     }
