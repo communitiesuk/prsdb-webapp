@@ -33,6 +33,13 @@ class LocalAuthorityDashboardController(
         model.addAttribute("localAuthority", localAuthorityUser.localAuthority.name)
         model.addAttribute("searchPropertyUrl", SEARCH_PROPERTY_URL)
         model.addAttribute("searchLandlordUrl", SEARCH_LANDLORD_URL)
+        model.addAttribute("privacyNoticeUrl", "#")
+        model.addAttribute(
+            "rentersRightsBillUrl",
+            "https://www.gov.uk/government/publications/" +
+                "guide-to-the-renters-rights-bill/82ffc7fb-64b0-4af5-a72e-c24701a5f12a#private-rented-sector-database",
+        )
+        model.addAttribute("aboutPilotUrl", "#")
         return "localAuthorityDashboard"
     }
 
