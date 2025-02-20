@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
-import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.ConfirmedEmailRequestModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityInvitationCancellationEmail
@@ -115,7 +115,7 @@ class ManageLocalAuthorityUsersController(
     fun updateUserAccessLevel(
         @PathVariable localAuthorityId: Int,
         @PathVariable localAuthorityUserId: Long,
-        @ModelAttribute localAuthorityUserAccessLevel: LocalAuthorityUserAccessLevelDataModel,
+        @ModelAttribute localAuthorityUserAccessLevel: LocalAuthorityUserAccessLevelRequestModel,
         principal: Principal,
     ): String {
         val (currentUser, _) =
