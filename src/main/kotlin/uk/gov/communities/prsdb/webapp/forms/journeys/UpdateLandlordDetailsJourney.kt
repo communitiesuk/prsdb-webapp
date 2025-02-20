@@ -25,7 +25,7 @@ class UpdateLandlordDetailsJourney(
     journeyDataService: JourneyDataService,
     val landlordService: LandlordService,
 ) : Journey<UpdateDetailsStepId>(
-        journeyType = JourneyType.UPDATE_DETAILS,
+        journeyType = JourneyType.UPDATE_LANDLORD_DETAILS,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
@@ -94,9 +94,9 @@ class UpdateLandlordDetailsJourney(
 
     override fun getUnreachableStepRedirect(journeyData: JourneyData) =
         if (journeyData[originalLandlordJourneyDataKey] == null) {
-            "/${JourneyType.UPDATE_DETAILS.urlPathSegment}/${UpdateDetailsStepId.ChangeDetailsSession.urlPathSegment}"
+            "/${JourneyType.UPDATE_LANDLORD_DETAILS.urlPathSegment}/${UpdateDetailsStepId.ChangeDetailsSession.urlPathSegment}"
         } else {
-            "/${JourneyType.UPDATE_DETAILS.urlPathSegment}/${getLastReachableStep(journeyData)?.step?.id?.urlPathSegment}"
+            "/${JourneyType.UPDATE_LANDLORD_DETAILS.urlPathSegment}/${getLastReachableStep(journeyData)!!.step.id.urlPathSegment}"
         }
 
     override fun getPrevStep(
@@ -139,7 +139,7 @@ class UpdateLandlordDetailsJourney(
     }
 
     private fun getRedirectToUpdateSessionPage(): String =
-        "/${JourneyType.UPDATE_DETAILS.urlPathSegment}/${UpdateDetailsStepId.ChangeDetailsSession.urlPathSegment}"
+        "/${JourneyType.UPDATE_LANDLORD_DETAILS.urlPathSegment}/${UpdateDetailsStepId.ChangeDetailsSession.urlPathSegment}"
 
     fun initialiseJourneyDataIfNotInitialised(landlordId: String) {
         val journeyData = journeyDataService.getJourneyDataFromSession()

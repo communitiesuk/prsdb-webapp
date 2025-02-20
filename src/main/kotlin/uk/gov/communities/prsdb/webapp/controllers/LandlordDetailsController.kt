@@ -74,7 +74,7 @@ class LandlordDetailsController(
 
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping("update/{stepName}")
-    fun getUpdateEmail(
+    fun getJourneyStep(
         @PathVariable("stepName") stepName: String,
         model: Model,
         principal: Principal,
@@ -87,7 +87,7 @@ class LandlordDetailsController(
 
     @PreAuthorize("hasRole('LANDLORD')")
     @PostMapping("update/{stepName}")
-    fun submitUpdateEmail(
+    fun postJourneyData(
         @PathVariable("stepName") stepName: String,
         @RequestParam formData: PageData,
         model: Model,

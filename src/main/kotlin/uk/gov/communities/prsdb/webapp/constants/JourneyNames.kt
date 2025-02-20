@@ -4,4 +4,4 @@ package uk.gov.communities.prsdb.webapp.constants
 const val REGISTER_LANDLORD_JOURNEY_URL: String = "register-as-a-landlord"
 const val REGISTER_LA_USER_JOURNEY_URL: String = "register-local-authority-user"
 const val REGISTER_PROPERTY_JOURNEY_URL: String = "register-property"
-const val UPDATE_DETAILS_URL: String = "landlord-details/update"
+const val UPDATE_LANDLORD_DETAILS_URL: String = "landlord-details/update"

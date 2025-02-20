@@ -315,4 +315,9 @@ class JourneyDataBuilder(
         journeyData[UpdateDetailsStepId.UpdateEmail.urlPathSegment] = mutableMapOf("emailAddress" to newEmail)
         return this
     }
+
+    fun withNameUpdate(newName: String): JourneyDataBuilder {
+        journeyData[UpdateDetailsStepId.UpdateFullName.urlPathSegment] = mutableMapOf("name" to newName)
+        return this
+    }
 }
