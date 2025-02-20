@@ -237,28 +237,28 @@ class Navigator(
         return createValidPage(page, ErrorPage::class)
     }
 
-    fun goToLaUserRegistrationLandingPage(): LandingPageLaUserRegistration {
-        navigate("register-local-authority-user/landing-page")
+    fun goToLaUserRegistrationLandingPage(token: String): LandingPageLaUserRegistration {
+        navigate("$REGISTER_LA_USER_JOURNEY_URL?token=$token")
         return createValidPage(page, LandingPageLaUserRegistration::class)
     }
 
-    fun goToLaUserRegistrationNameFormPage(): NameFormPageLaUserRegistration {
-        val landingPage = goToLaUserRegistrationLandingPage()
+    fun goToLaUserRegistrationNameFormPage(token: String): NameFormPageLaUserRegistration {
+        val landingPage = goToLaUserRegistrationLandingPage(token)
         landingPage.clickBeginButton()
         val namePage = createValidPage(page, NameFormPageLaUserRegistration::class)
         return namePage
     }
 
-    fun goToLaUserRegistrationEmailFormPage(): EmailFormPageLaUserRegistration {
-        val namePage = goToLaUserRegistrationNameFormPage()
+    fun goToLaUserRegistrationEmailFormPage(token: String): EmailFormPageLaUserRegistration {
+        val namePage = goToLaUserRegistrationNameFormPage(token)
         namePage.nameInput.fill("Test user")
         namePage.form.submit()
         val emailPage = createValidPage(page, EmailFormPageLaUserRegistration::class)
         return emailPage
     }
 
-    fun goToLaUserRegistrationCheckAnswersPage(): CheckAnswersPageLaUserRegistration {
-        val emailPage = goToLaUserRegistrationEmailFormPage()
+    fun goToLaUserRegistrationCheckAnswersPage(token: String): CheckAnswersPageLaUserRegistration {
+        val emailPage = goToLaUserRegistrationEmailFormPage(token)
         emailPage.emailInput.fill("test.user@example.com")
         emailPage.form.submit()
         val checkAnswersPage = createValidPage(page, CheckAnswersPageLaUserRegistration::class)

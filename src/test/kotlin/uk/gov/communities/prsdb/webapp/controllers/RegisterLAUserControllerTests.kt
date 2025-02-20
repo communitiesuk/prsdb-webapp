@@ -17,12 +17,8 @@ import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
-import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
-import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData
-import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 
@@ -37,67 +33,42 @@ class RegisterLAUserControllerTests(
     lateinit var invitationService: LocalAuthorityInvitationService
 
     @MockBean
-    lateinit var journeyDataService: JourneyDataService
-
-    @MockBean
     lateinit var localAuthorityDataService: LocalAuthorityDataService
+
+    private val validToken = "token123"
+
+    private val invalidToken = "invalid-token"
 
     @BeforeEach
     fun setupMocks() {
         whenever(laUserRegistrationJourney.initialStepId).thenReturn(RegisterLaUserStepId.LandingPage)
-        whenever(invitationService.tokenIsValid("token123")).thenReturn(true)
-        whenever(invitationService.tokenIsValid("invalid-token")).thenReturn(false)
-        whenever(invitationService.getTokenFromSession()).thenReturn("token123")
+        whenever(invitationService.tokenIsValid(validToken)).thenReturn(true)
+        whenever(invitationService.getTokenFromSession()).thenReturn(validToken)
+        whenever(invitationService.tokenIsValid(invalidToken)).thenReturn(false)
     }
 
     @Test
     @WithMockUser
-    fun `acceptInvitation endpoint checks token and stores in session if valid`() {
-        mvc.get("/register-local-authority-user?token=token123").andExpect {
+    fun `acceptInvitation endpoint stores valid token in session and uses it to initialise journey data`() {
+        mvc.get("/register-local-authority-user?token=$validToken").andExpect {
             status { is3xxRedirection() }
         }
 
-        verify(invitationService).tokenIsValid("token123")
-        verify(invitationService).storeTokenInSession("token123")
+        verify(invitationService).tokenIsValid(validToken)
+        verify(invitationService).storeTokenInSession(validToken)
+        verify(laUserRegistrationJourney).initialiseJourneyData(validToken)
     }
 
     @Test
     @WithMockUser
     fun `acceptInvitation endpoint rejects invalid token`() {
-        mvc.get("/register-local-authority-user?token=invalid-token").andExpect {
+        mvc.get("/register-local-authority-user?token=$invalidToken").andExpect {
             status { is3xxRedirection() }
         }
 
-        verify(invitationService).tokenIsValid("invalid-token")
-        verify(invitationService, never()).storeTokenInSession("invalid-token")
-    }
-
-    @Test
-    @WithMockUser
-    fun `acceptInvitation prepopulates the email address in journeyData`() {
-        whenever(laUserRegistrationJourney.steps).thenReturn(
-            setOf(
-                Step(
-                    id = RegisterLaUserStepId.Email,
-                    page =
-                        Page(
-                            EmailFormModel::class,
-                            "forms/emailForm",
-                            mutableMapOf("testKey" to "testValue"),
-                        ),
-                ),
-            ),
-        )
-        whenever(invitationService.getEmailAddressForToken("token123")).thenReturn("invite@example.com")
-
-        mvc.get("/register-local-authority-user?token=token123").andExpect {
-            status { is3xxRedirection() }
-        }
-
-        val formData = mutableMapOf<String, Any?>("emailAddress" to "invite@example.com")
-        val journeyData = mutableMapOf<String, Any?>("email" to formData)
-
-        verify(journeyDataService).setJourneyData(journeyData)
+        verify(invitationService).tokenIsValid(invalidToken)
+        verify(invitationService, never()).storeTokenInSession(invalidToken)
+        verify(laUserRegistrationJourney, never()).initialiseJourneyData(validToken)
     }
 
     @Test
