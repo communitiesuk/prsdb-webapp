@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -31,7 +30,6 @@ class PropertyOwnershipService(
 ) {
     @Transactional
     fun createPropertyOwnership(
-        landlordType: LandlordType,
         ownershipType: OwnershipType,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
@@ -47,7 +45,6 @@ class PropertyOwnershipService(
             PropertyOwnership(
                 isActive = isActive,
                 occupancyType = occupancyType,
-                landlordType = landlordType,
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,

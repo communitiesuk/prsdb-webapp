@@ -10,7 +10,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.ui.ExtendedModelMap
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -307,27 +306,6 @@ class PropertyRegistrationCheckAnswersPageTests {
             ),
             propertyDetails.single {
                 it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.people"
-            },
-        )
-    }
-
-    @Test
-    fun `propertyDetails has a single line landlord type row`() {
-        // Arrange
-        val journeyData = journeyDataBuilder.withLandlordType(LandlordType.SOLE).build()
-
-        // Act
-        val propertyDetails = getPropertyDetails(journeyData)
-
-        // Assert
-        assertEquals(
-            SummaryListRowViewModel(
-                "forms.checkPropertyAnswers.propertyDetails.landlordType",
-                LandlordType.SOLE,
-                RegisterPropertyStepId.LandlordType.urlPathSegment,
-            ),
-            propertyDetails.single {
-                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.landlordType"
             },
         )
     }

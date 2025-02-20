@@ -7,7 +7,6 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -47,7 +46,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HouseholdsFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LandlordTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
@@ -379,17 +377,10 @@ class Navigator(
         return createValidPage(page, PeopleFormPagePropertyRegistration::class)
     }
 
-    fun goToPropertyRegistrationLandlordTypePage(): LandlordTypeFormPagePropertyRegistration {
+    fun goToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
         val peoplePage = goToPropertyRegistrationPeoplePage()
         peoplePage.peopleInput.fill("4")
         peoplePage.form.submit()
-        return createValidPage(page, LandlordTypeFormPagePropertyRegistration::class)
-    }
-
-    fun goToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
-        val landlordTypePage = goToPropertyRegistrationLandlordTypePage()
-        landlordTypePage.form.getRadios().selectValue(LandlordType.SOLE)
-        landlordTypePage.form.submit()
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 

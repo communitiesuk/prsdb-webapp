@@ -4,7 +4,6 @@ import jakarta.persistence.EntityExistsException
 import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -50,7 +49,6 @@ class PropertyRegistrationService(
         propertyType: PropertyType,
         licenseType: LicensingType,
         licenceNumber: String,
-        landlordType: LandlordType,
         ownershipType: OwnershipType,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
@@ -75,7 +73,6 @@ class PropertyRegistrationService(
 
         val propertyOwnership =
             propertyOwnershipService.createPropertyOwnership(
-                landlordType = landlordType,
                 ownershipType = ownershipType,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
