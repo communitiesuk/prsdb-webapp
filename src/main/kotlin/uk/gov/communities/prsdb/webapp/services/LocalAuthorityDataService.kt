@@ -133,7 +133,7 @@ class LocalAuthorityDataService(
 
     fun getIsLocalAuthorityUser(baseUserId: String): Boolean = localAuthorityUserRepository.findByBaseUser_Id(baseUserId) != null
 
-    fun setUserRegisteredThisSession(localAuthorityUserId: Long) = session.setAttribute(LA_USER_ID, localAuthorityUserId)
+    fun setLastUserRegisteredThisSession(localAuthorityUserId: Long) = session.setAttribute(LA_USER_ID, localAuthorityUserId)
 
-    fun getUserRegisteredThisSession() = session.getAttribute(LA_USER_ID)?.toString()?.toLong()
+    fun getLastUserRegisteredThisSession() = session.getAttribute(LA_USER_ID)?.toString()?.toLong()
 }

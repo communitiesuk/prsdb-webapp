@@ -140,7 +140,7 @@ class LaUserRegistrationJourney(
                 email = LaUserRegistrationJourneyDataHelper.getEmail(journeyData)!!,
             )
 
-        localAuthorityDataService.setUserRegisteredThisSession(localAuthorityUserID)
+        localAuthorityDataService.setLastUserRegisteredThisSession(localAuthorityUserID)
 
         val invitation = invitationService.getInvitationFromToken(token)
         invitationService.deleteInvitation(invitation)

@@ -92,7 +92,7 @@ class PropertyRegistrationService(
         return propertyOwnership.registrationNumber
     }
 
-    fun setPropertyRegisteredThisSession(prn: Long) = session.setAttribute(PROPERTY_REGISTRATION_NUMBER, prn)
+    fun setLastPropertyRegisteredThisSession(prn: Long) = session.setAttribute(PROPERTY_REGISTRATION_NUMBER, prn)
 
-    fun getPropertyRegisteredThisSession() = session.getAttribute(PROPERTY_REGISTRATION_NUMBER)?.toString()?.toLong()
+    fun getLastPropertyRegisteredThisSession() = session.getAttribute(PROPERTY_REGISTRATION_NUMBER)?.toString()?.toLong()
 }

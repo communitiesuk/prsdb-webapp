@@ -82,7 +82,7 @@ class RegisterPropertyController(
         principal: Principal,
     ): String {
         val propertyRegistrationNumber =
-            propertyRegistrationService.getPropertyRegisteredThisSession()
+            propertyRegistrationService.getLastPropertyRegisteredThisSession()
                 ?: throw ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "$PROPERTY_REGISTRATION_NUMBER was not found in the session",

@@ -81,7 +81,7 @@ class RegisterLAUserController(
         principal: Principal,
     ): String {
         val localAuthorityUserID =
-            localAuthorityDataService.getUserRegisteredThisSession()
+            localAuthorityDataService.getLastUserRegisteredThisSession()
                 ?: throw ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "$LA_USER_ID was not found in the session",

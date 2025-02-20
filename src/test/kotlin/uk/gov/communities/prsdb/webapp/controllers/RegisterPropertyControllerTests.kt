@@ -76,7 +76,9 @@ class RegisterPropertyControllerTests(
                 registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
             )
 
-        whenever(propertyRegistrationService.getPropertyRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
+        whenever(propertyRegistrationService.getLastPropertyRegisteredThisSession()).thenReturn(
+            propertyRegistrationNumber,
+        )
         whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(
             propertyOwnership,
         )
@@ -98,7 +100,7 @@ class RegisterPropertyControllerTests(
                 registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
             )
 
-        whenever(propertyRegistrationService.getPropertyRegisteredThisSession()).thenReturn(null)
+        whenever(propertyRegistrationService.getLastPropertyRegisteredThisSession()).thenReturn(null)
         whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(
             propertyOwnership,
         )
@@ -113,7 +115,9 @@ class RegisterPropertyControllerTests(
     fun `getConfirmation returns 400 if the property ownership ID in session is not valid`() {
         val propertyRegistrationNumber = 0L
 
-        whenever(propertyRegistrationService.getPropertyRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
+        whenever(propertyRegistrationService.getLastPropertyRegisteredThisSession()).thenReturn(
+            propertyRegistrationNumber,
+        )
         whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(null)
 
         mvc
