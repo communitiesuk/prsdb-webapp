@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.viewModels
+package uk.gov.communities.prsdb.webapp.models.viewModels.taskModels
 
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
