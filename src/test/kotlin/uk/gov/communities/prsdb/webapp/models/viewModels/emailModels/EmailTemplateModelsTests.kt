@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.emailModels
+package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
