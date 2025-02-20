@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController.Companion.SEARCH_LANDLORD_URL
+import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController.Companion.SEARCH_PROPERTY_URL
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import java.security.Principal
 
@@ -29,7 +31,8 @@ class LocalAuthorityDashboardController(
         model.addAttribute("title", "dashboard.title")
         model.addAttribute("userName", localAuthorityUser.name)
         model.addAttribute("localAuthority", localAuthorityUser.localAuthority.name)
-
+        model.addAttribute("searchPropertyUrl", SEARCH_PROPERTY_URL)
+        model.addAttribute("searchLandlordUrl", SEARCH_LANDLORD_URL)
         return "localAuthorityDashboard"
     }
 

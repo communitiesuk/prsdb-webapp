@@ -5,8 +5,35 @@
         <div id="dashboard-banner"
              th:replace="~{fragments/dashboardBanner :: dashboardBanner(${userName}, ~{::#dashboard-banner/content()})}">
             <strong th:text="#{localAuthority.dashboard.banner.subheading}">localAuthority.dashboard.banner.subheading</strong>
-            <span th:text="${localAuthority}"></span>
+            <span th:text="${localAuthority}">localAuthority</span>
         </div>
+        <h1 class="govuk-heading-l" th:text="#{localAuthority.dashboard.searchAndView.heading}">localAuthority.dashboard.searchAndView.heading</h1>
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-one-third-from-desktop govuk-grid-column-one-half">
+                <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${searchPropertyUrl}, #{localAuthority.dashboard.searchForProperty.button},true)}">
+                    localAuthority.dashboard.searchForProperty.button
+                </a>
+            </div>
+            <div class="govuk-grid-column-one-third-from-desktop govuk-grid-column-one-half">
+                <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${searchLandlordUrl}, #{localAuthority.dashboard.searchForLandlord.button}, true)}">
+                    localAuthority.dashboard.searchForLandlord.button
+                </a>
+            </div>
+        </div>
+        <h1 class="govuk-heading-l" th:text="#{localAuthority.dashboard.aboutTheDatabase.heading}">localAuthority.dashboard.aboutTheDatabase.heading</h1>
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-one-third-from-desktop">
+                Oh look a load of text, let's see what this looks like with different device widths
+            </div>
+            <div class="govuk-grid-column-one-third-from-desktop">
+                Oh look a load of text, let's see what this looks like with different device widths
+            </div>
+            <div class="govuk-grid-column-one-third-from-desktop">
+                Oh look a load of text, let's see what this looks like with different device widths
+            </div>
+        </div>
+
+
     </div>
 </main>
 </html>

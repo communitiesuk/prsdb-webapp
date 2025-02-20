@@ -45,6 +45,7 @@
     background-color: var(--govuk-colour-blue);
     text-align: left;
     padding: 0;
+    margin-bottom: 30px;
 }
 
 .prsd-dashboard-panel__title {
@@ -53,4 +54,8 @@
 
 .prsd-dashboard-panel__body {
     color: var(--govuk-colour-white);
+}
+
+.prsd-fill-container {
+    width: 100%;
 }
