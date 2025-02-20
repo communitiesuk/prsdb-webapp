@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -51,6 +52,7 @@ class UpdateLandlordDetailsJourney(
                             "fieldSetHint" to "forms.email.fieldSetHint",
                             "label" to "forms.email.label",
                             "submitButtonText" to "forms.buttons.continue",
+                            BACK_URL_ATTR_NAME to UpdateDetailsStepId.ChangeDetailsSession.urlPathSegment,
                         ),
                 ),
             handleSubmitAndRedirect = { _, _ -> getRedirectToUpdateSessionPage() },
@@ -72,7 +74,7 @@ class UpdateLandlordDetailsJourney(
                             "fieldSetHint" to "forms.name.fieldSetHint",
                             "label" to "forms.name.label",
                             "submitButtonText" to "forms.buttons.continue",
-                            "backUrl" to "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}",
+                            BACK_URL_ATTR_NAME to UpdateDetailsStepId.ChangeDetailsSession.urlPathSegment,
                         ),
                 ),
             handleSubmitAndRedirect = { _, _ -> getRedirectToUpdateSessionPage() },
