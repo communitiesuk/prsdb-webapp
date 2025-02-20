@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/layout :: layout(#{${title}}, ~{::main}, false)}">
 <main class="govuk-main-wrapper">
-    <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
-        <div id="page-content">
-            <h1 th:text="${title}"></h1>
+    <div id="page-content">
+        <div id="dashboard-banner"
+             th:replace="~{fragments/dashboardBanner :: dashboardBanner(${userName}, ~{::#dashboard-banner/content()})}">
+            <strong th:text="#{localAuthority.dashboard.banner.subheading}">localAuthority.dashboard.banner.subheading</strong>
+            <span th:text="${localAuthority}"></span>
         </div>
     </div>
 </main>
