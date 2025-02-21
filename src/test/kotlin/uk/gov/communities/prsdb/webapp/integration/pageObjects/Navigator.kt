@@ -6,6 +6,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -25,7 +26,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegis
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.LandingPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.SuccessPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmIdentityFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
@@ -61,6 +61,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import java.time.LocalDate
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT as LA_CONFIRMATION
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT as LANDLORD_CONFIRMATION
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT as PROPERTY_CONFIRMATION
 
@@ -234,44 +235,37 @@ class Navigator(
         return createValidPage(page, ErrorPage::class)
     }
 
-    fun goToLaUserRegistrationLandingPage(): LandingPageLaUserRegistration {
-        navigate("register-local-authority-user/landing-page")
+    fun goToLaUserRegistrationLandingPage(token: String): LandingPageLaUserRegistration {
+        navigate("$REGISTER_LA_USER_JOURNEY_URL?token=$token")
         return createValidPage(page, LandingPageLaUserRegistration::class)
     }
 
-    fun goToLaUserRegistrationNameFormPage(): NameFormPageLaUserRegistration {
-        val landingPage = goToLaUserRegistrationLandingPage()
+    fun goToLaUserRegistrationNameFormPage(token: String): NameFormPageLaUserRegistration {
+        val landingPage = goToLaUserRegistrationLandingPage(token)
         landingPage.clickBeginButton()
         val namePage = createValidPage(page, NameFormPageLaUserRegistration::class)
         return namePage
     }
 
-    fun goToLaUserRegistrationEmailFormPage(): EmailFormPageLaUserRegistration {
-        val namePage = goToLaUserRegistrationNameFormPage()
+    fun goToLaUserRegistrationEmailFormPage(token: String): EmailFormPageLaUserRegistration {
+        val namePage = goToLaUserRegistrationNameFormPage(token)
         namePage.nameInput.fill("Test user")
         namePage.form.submit()
         val emailPage = createValidPage(page, EmailFormPageLaUserRegistration::class)
         return emailPage
     }
 
-    fun goToLaUserRegistrationCheckAnswersPage(): CheckAnswersPageLaUserRegistration {
-        val emailPage = goToLaUserRegistrationEmailFormPage()
+    fun goToLaUserRegistrationCheckAnswersPage(token: String): CheckAnswersPageLaUserRegistration {
+        val emailPage = goToLaUserRegistrationEmailFormPage(token)
         emailPage.emailInput.fill("test.user@example.com")
         emailPage.form.submit()
         val checkAnswersPage = createValidPage(page, CheckAnswersPageLaUserRegistration::class)
         return checkAnswersPage
     }
 
-    fun goToLaUserRegistrationSuccessPage(): SuccessPageLaUserRegistration {
-        val checkAnswersPage = goToLaUserRegistrationCheckAnswersPage()
-        checkAnswersPage.form.submit()
-        val successPage = createValidPage(page, SuccessPageLaUserRegistration::class)
-        return successPage
-    }
-
-    fun skipToLaUserRegistrationSuccessPage(): SuccessPageLaUserRegistration {
-        navigate("register-local-authority-user/success")
-        return createValidPage(page, SuccessPageLaUserRegistration::class)
+    fun skipToLaUserRegistrationConfirmationPage(): ErrorPage {
+        navigate("$REGISTER_LA_USER_JOURNEY_URL/$LA_CONFIRMATION")
+        return createValidPage(page, ErrorPage::class)
     }
 
     fun goToPropertyRegistrationStartPage(): RegisterPropertyStartPage {

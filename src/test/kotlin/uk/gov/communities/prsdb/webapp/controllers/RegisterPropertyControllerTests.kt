@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourne
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
 @WebMvcTest(RegisterPropertyController::class)
 class RegisterPropertyControllerTests(
@@ -30,6 +31,9 @@ class RegisterPropertyControllerTests(
 
     @MockBean
     lateinit var propertyOwnershipService: PropertyOwnershipService
+
+    @MockBean
+    lateinit var propertyRegistrationService: PropertyRegistrationService
 
     @BeforeEach
     fun setupMocks() {
@@ -72,6 +76,9 @@ class RegisterPropertyControllerTests(
                 registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
             )
 
+        whenever(propertyRegistrationService.getLastPrnRegisteredThisSession()).thenReturn(
+            propertyRegistrationNumber,
+        )
         whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(
             propertyOwnership,
         )
@@ -93,6 +100,7 @@ class RegisterPropertyControllerTests(
                 registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
             )
 
+        whenever(propertyRegistrationService.getLastPrnRegisteredThisSession()).thenReturn(null)
         whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(
             propertyOwnership,
         )
@@ -107,6 +115,9 @@ class RegisterPropertyControllerTests(
     fun `getConfirmation returns 400 if the property ownership ID in session is not valid`() {
         val propertyRegistrationNumber = 0L
 
+        whenever(propertyRegistrationService.getLastPrnRegisteredThisSession()).thenReturn(
+            propertyRegistrationNumber,
+        )
         whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(null)
 
         mvc

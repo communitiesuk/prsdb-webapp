@@ -1,24 +1,29 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.pages.LaUserRegistrationCheckAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.helpers.LaUserRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 
 @Component
 class LaUserRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
-    invitationService: LocalAuthorityInvitationService,
+    private val invitationService: LocalAuthorityInvitationService,
+    private val localAuthorityDataService: LocalAuthorityDataService,
 ) : Journey<RegisterLaUserStepId>(
         journeyType = JourneyType.LA_USER_REGISTRATION,
         validator = validator,
@@ -33,9 +38,18 @@ class LaUserRegistrationJourney(
                 landingPageStep(),
                 registerUserStep(),
                 emailStep(),
-                checkAnswersStep(invitationService),
+                checkAnswersStep(),
             ),
         )
+
+    fun initialiseJourneyData(token: String) {
+        val journeyData = journeyDataService.getJourneyDataFromSession()
+        val formData: PageData = mutableMapOf("emailAddress" to invitationService.getEmailAddressForToken(token))
+        val emailStep = steps.single { step -> step.id == RegisterLaUserStepId.Email }
+
+        emailStep.updateJourneyData(journeyData, formData, null)
+        journeyDataService.setJourneyData(journeyData)
+    }
 
     private fun landingPageStep() =
         Step(
@@ -94,7 +108,7 @@ class LaUserRegistrationJourney(
             saveAfterSubmit = false,
         )
 
-    private fun checkAnswersStep(invitationService: LocalAuthorityInvitationService) =
+    private fun checkAnswersStep() =
         Step(
             id = RegisterLaUserStepId.CheckAnswers,
             page =
@@ -109,7 +123,31 @@ class LaUserRegistrationJourney(
                         ),
                     invitationService,
                 ),
-            handleSubmitAndRedirect = { _, _ -> "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/success" },
+            handleSubmitAndRedirect = { journeyData, _ ->
+                checkAnswersHandleSubmitAndRedirect(journeyData)
+            },
             saveAfterSubmit = false,
         )
+
+    private fun checkAnswersHandleSubmitAndRedirect(journeyData: JourneyData): String {
+        val token = invitationService.getTokenFromSession()!!
+
+        val localAuthorityUserID =
+            localAuthorityDataService.registerUserAndReturnID(
+                baseUserId = SecurityContextHolder.getContext().authentication.name,
+                localAuthority = invitationService.getAuthorityForToken(token),
+                name = LaUserRegistrationJourneyDataHelper.getName(journeyData)!!,
+                email = LaUserRegistrationJourneyDataHelper.getEmail(journeyData)!!,
+            )
+
+        localAuthorityDataService.setLastUserIdRegisteredThisSession(localAuthorityUserID)
+
+        val invitation = invitationService.getInvitationFromToken(token)
+        invitationService.deleteInvitation(invitation)
+        invitationService.clearTokenFromSession()
+
+        journeyDataService.clearJourneyDataFromSession()
+
+        return CONFIRMATION_PAGE_PATH_SEGMENT
+    }
 }

@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -13,6 +14,7 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.data.domain.PageImpl
@@ -45,6 +47,9 @@ class LocalAuthorityDataServiceTests {
 
     @Mock
     private lateinit var oneLoginUserService: OneLoginUserService
+
+    @Mock
+    private lateinit var mockHttpSession: HttpSession
 
     @InjectMocks
     private lateinit var localAuthorityDataService: LocalAuthorityDataService
@@ -312,25 +317,30 @@ class LocalAuthorityDataServiceTests {
     }
 
     @Test
-    fun `registerNewUser adds a new user to local_authority_user`() {
+    fun `registerUserAndReturnID adds a new user to local_authority_user and returns the generated ID`() {
         // Arrange
         val baseUser = createOneLoginUser()
         val localAuthority = createLocalAuthority()
         val newLocalAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority, isManager = false)
+
         whenever(oneLoginUserService.findOrCreate1LUser(baseUser.id)).thenReturn(baseUser)
+        whenever(localAuthorityUserRepository.save(any())).thenReturn(newLocalAuthorityUser)
 
         // Act
-        localAuthorityDataService.registerNewUser(
-            baseUser.id,
-            localAuthority,
-            newLocalAuthorityUser.name,
-            newLocalAuthorityUser.email,
-        )
+        val localAuthorityUserID =
+            localAuthorityDataService.registerUserAndReturnID(
+                baseUser.id,
+                localAuthority,
+                newLocalAuthorityUser.name,
+                newLocalAuthorityUser.email,
+            )
 
         // Assert
         val localAuthorityUserCaptor = captor<LocalAuthorityUser>()
         verify(localAuthorityUserRepository).save(localAuthorityUserCaptor.capture())
         assertTrue(ReflectionEquals(newLocalAuthorityUser, "id").matches(localAuthorityUserCaptor.value))
+
+        assertEquals(newLocalAuthorityUser.id, localAuthorityUserID)
     }
 
     @Test
