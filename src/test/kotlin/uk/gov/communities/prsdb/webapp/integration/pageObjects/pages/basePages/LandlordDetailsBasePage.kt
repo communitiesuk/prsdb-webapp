@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Table
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Tabs
@@ -12,6 +13,8 @@ abstract class LandlordDetailsBasePage(
     val tabs = LandlordDetailsTabs(page)
     val personalDetailsSummaryList = LandlordPersonalDetailsSummaryList(page)
     val registeredPropertiesTable = Table(page)
+
+    fun getPropertyAddressLink(address: String) = Link.byText(page, address)
 
     class LandlordDetailsTabs(
         page: Page,

@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
@@ -139,60 +140,35 @@ class PropertyOwnershipServiceTests {
     @Nested
     inner class GetLandlordRegisteredPropertiesDetails {
         private val landlord = MockLandlordData.createLandlord()
-
-        private val address1 = "11 Example Road, EG1 2AB"
-        private val address2 = "12 Example Road, EG1 2AB"
         private val localAuthority = LocalAuthority(11, "DERBYSHIRE DALES DISTRICT COUNCIL", "1045")
-        private val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
-
-        private val property1 =
-            MockLandlordData.createProperty(address = MockLandlordData.createAddress(address1, localAuthority))
-        private val property2 =
-            MockLandlordData.createProperty(address = MockLandlordData.createAddress(address2, localAuthority))
-
-        private val expectedLocalAuthority = localAuthority.name
-        private val expectedRegistrationNumber =
-            RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString()
         private val expectedPropertyLicence = "forms.checkPropertyAnswers.propertyDetails.noLicensing"
         private val expectedIsTenantedMessageKey = "commonText.no"
 
         private val propertyOwnership1 =
             MockLandlordData.createPropertyOwnership(
                 primaryLandlord = landlord,
-                property = property1,
-                registrationNumber = registrationNumber,
+                property =
+                    MockLandlordData.createProperty(
+                        address = MockLandlordData.createAddress("11 Example Road, EG1 2AB", localAuthority),
+                    ),
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
                 license = null,
                 currentNumTenants = 0,
             )
+
         private val propertyOwnership2 =
             MockLandlordData.createPropertyOwnership(
                 primaryLandlord = landlord,
-                property = property2,
-                registrationNumber = registrationNumber,
+                property =
+                    MockLandlordData.createProperty(
+                        address = MockLandlordData.createAddress("12 Example Road, EG1 2AB", localAuthority),
+                    ),
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 654321),
                 license = null,
                 currentNumTenants = 0,
             )
 
-        private val landlordsProperties: List<PropertyOwnership> =
-            listOf(propertyOwnership1, propertyOwnership2)
-
-        private val expectedResults: List<RegisteredPropertyViewModel> =
-            listOf(
-                RegisteredPropertyViewModel(
-                    address1,
-                    expectedRegistrationNumber,
-                    expectedLocalAuthority,
-                    expectedPropertyLicence,
-                    expectedIsTenantedMessageKey,
-                ),
-                RegisteredPropertyViewModel(
-                    address2,
-                    expectedRegistrationNumber,
-                    expectedLocalAuthority,
-                    expectedPropertyLicence,
-                    expectedIsTenantedMessageKey,
-                ),
-            )
+        private val landlordsProperties: List<PropertyOwnership> = listOf(propertyOwnership1, propertyOwnership2)
 
         @Test
         fun `Returns a list of Landlords properties in correctly formatted data model from landlords BaseUser_Id`() {
@@ -203,7 +179,33 @@ class PropertyOwnershipServiceTests {
                 ),
             ).thenReturn(landlordsProperties)
 
-            val result = propertyOwnershipService.getRegisteredPropertiesForLandlord("landlord")
+            val expectedResults: List<RegisteredPropertyViewModel> =
+                listOf(
+                    RegisteredPropertyViewModel(
+                        address = propertyOwnership1.property.address.singleLineAddress,
+                        registrationNumber =
+                            RegistrationNumberDataModel
+                                .fromRegistrationNumber(propertyOwnership1.registrationNumber)
+                                .toString(),
+                        localAuthorityName = localAuthority.name,
+                        licenseTypeMessageKey = expectedPropertyLicence,
+                        isTenantedMessageKey = expectedIsTenantedMessageKey,
+                        recordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership1.id),
+                    ),
+                    RegisteredPropertyViewModel(
+                        address = propertyOwnership2.property.address.singleLineAddress,
+                        registrationNumber =
+                            RegistrationNumberDataModel
+                                .fromRegistrationNumber(propertyOwnership2.registrationNumber)
+                                .toString(),
+                        localAuthorityName = localAuthority.name,
+                        licenseTypeMessageKey = expectedPropertyLicence,
+                        isTenantedMessageKey = expectedIsTenantedMessageKey,
+                        recordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership2.id),
+                    ),
+                )
+
+            val result = propertyOwnershipService.getRegisteredPropertiesForLandlordUser("landlord")
 
             assertTrue(result.size == 2)
             assertEquals(expectedResults, result)
@@ -217,6 +219,40 @@ class PropertyOwnershipServiceTests {
                     RegistrationStatus.REGISTERED,
                 ),
             ).thenReturn(landlordsProperties)
+
+            val expectedResults: List<RegisteredPropertyViewModel> =
+                listOf(
+                    RegisteredPropertyViewModel(
+                        address = propertyOwnership1.property.address.singleLineAddress,
+                        registrationNumber =
+                            RegistrationNumberDataModel
+                                .fromRegistrationNumber(propertyOwnership1.registrationNumber)
+                                .toString(),
+                        localAuthorityName = localAuthority.name,
+                        licenseTypeMessageKey = expectedPropertyLicence,
+                        isTenantedMessageKey = expectedIsTenantedMessageKey,
+                        recordLink =
+                            PropertyDetailsController.getPropertyDetailsPath(
+                                propertyOwnership1.id,
+                                isLaView = true,
+                            ),
+                    ),
+                    RegisteredPropertyViewModel(
+                        address = propertyOwnership2.property.address.singleLineAddress,
+                        registrationNumber =
+                            RegistrationNumberDataModel
+                                .fromRegistrationNumber(propertyOwnership2.registrationNumber)
+                                .toString(),
+                        localAuthorityName = localAuthority.name,
+                        licenseTypeMessageKey = expectedPropertyLicence,
+                        isTenantedMessageKey = expectedIsTenantedMessageKey,
+                        recordLink =
+                            PropertyDetailsController.getPropertyDetailsPath(
+                                propertyOwnership2.id,
+                                isLaView = true,
+                            ),
+                    ),
+                )
 
             val result = propertyOwnershipService.getRegisteredPropertiesForLandlord(landlord.id)
 
