@@ -4,8 +4,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.ValueSource
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
@@ -15,22 +17,14 @@ import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.cr
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class RegisteredPropertyViewModelTests {
-    @Test
-    fun `Returns a RegisteredPropertyViewModel from a PropertyOwnership`() {
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `Returns a corresponding RegisteredPropertyViewModel from a PropertyOwnership when`(isLaView: Boolean) {
         val address = "11 Example Road, EG1 2AB"
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
         val localAuthority = LocalAuthority(11, "DERBYSHIRE DALES DISTRICT COUNCIL", "1045")
 
         val property = createProperty(address = createAddress(address, localAuthority))
-
-        val expectedLocalAuthority = localAuthority.name
-        val expectedRegistrationNumber =
-            RegistrationNumberDataModel
-                .fromRegistrationNumber(
-                    registrationNumber,
-                ).toString()
-        val expectedPropertyLicence = "forms.checkPropertyAnswers.propertyDetails.noLicensing"
-        val expectedIsTenantedMessageKey = "commonText.no"
 
         val propertyOwnership =
             createPropertyOwnership(
@@ -40,6 +34,13 @@ class RegisteredPropertyViewModelTests {
                 currentNumTenants = 0,
             )
 
+        val expectedLocalAuthority = localAuthority.name
+        val expectedRegistrationNumber =
+            RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString()
+        val expectedPropertyLicence = "forms.checkPropertyAnswers.propertyDetails.noLicensing"
+        val expectedIsTenantedMessageKey = "commonText.no"
+        val expectedRecordLink = PropertyDetailsController.getPropertyDetailsPath(property.id, isLaView)
+
         val expectedRegisteredPropertyViewModel =
             RegisteredPropertyViewModel(
                 address,
@@ -47,9 +48,10 @@ class RegisteredPropertyViewModelTests {
                 expectedLocalAuthority,
                 expectedPropertyLicence,
                 expectedIsTenantedMessageKey,
+                expectedRecordLink,
             )
 
-        val result = RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
+        val result = RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership, isLaView)
 
         assertEquals(expectedRegisteredPropertyViewModel, result)
     }
