@@ -13,13 +13,14 @@ abstract class SearchRegisterBasePage(
 ) : BasePage(page, urlSegment) {
     val searchBar = SearchBar(page)
 
-    fun getFilterPanel() = FilterPanel(page)
+    val filterPanel = FilterPanel(page)
 
-    fun getResultTable() = Table(page)
+    val resultTable = Table(page)
 
-    fun getPaginationComponent() = Pagination(page)
+    val paginationComponent = Pagination(page)
 
-    fun getErrorMessageText() = getErrorMessage().innerText()
+    val errorMessageText: String?
+        get() = noResultErrorMessage.innerText()
 
-    fun getErrorMessage(): Locator = page.locator("#no-results")
+    val noResultErrorMessage: Locator = page.locator("#no-results")
 }
