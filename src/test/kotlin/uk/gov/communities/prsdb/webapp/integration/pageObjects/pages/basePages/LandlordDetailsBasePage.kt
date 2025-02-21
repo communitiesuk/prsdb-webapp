@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Table
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Tabs
 
@@ -9,6 +10,7 @@ abstract class LandlordDetailsBasePage(
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
     val tabs = LandlordDetailsTabs(page)
+    val personalDetails = LandlordPersonalDetailsSummaryList(page)
     val table = Table(page)
 
     class LandlordDetailsTabs(
@@ -17,5 +19,12 @@ abstract class LandlordDetailsBasePage(
         fun goToRegisteredProperties() {
             goToTab("Registered properties")
         }
+    }
+
+    class LandlordPersonalDetailsSummaryList(
+        page: Page,
+    ) : SummaryList(page) {
+        val nameRow = getRow("Name")
+        val emailRow = getRow("Email address")
     }
 }

@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordUpdateDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
@@ -407,6 +408,11 @@ class Navigator(
     fun goToPropertyDetailsLocalAuthorityView(id: Long): PropertyDetailsPageLocalAuthorityView {
         navigate("local-authority/property-details/$id")
         return createValidPage(page, PropertyDetailsPageLocalAuthorityView::class)
+    }
+
+    fun goToUpdateLandlordDetailsPage(): LandlordUpdateDetailsPage {
+        navigate("landlord-details/update/details")
+        return createValidPage(page, LandlordUpdateDetailsPage::class)
     }
 
     fun navigate(path: String): Response? = page.navigate("http://localhost:$port/$path")
