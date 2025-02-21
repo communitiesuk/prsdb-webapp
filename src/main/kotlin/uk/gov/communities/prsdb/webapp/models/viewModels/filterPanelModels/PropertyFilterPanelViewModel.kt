@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.filterPanelModels
 import jakarta.servlet.http.HttpServletRequest
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.PropertySearchRequestModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.CheckboxViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 
 class PropertyFilterPanelViewModel(
     searchRequestModel: PropertySearchRequestModel,

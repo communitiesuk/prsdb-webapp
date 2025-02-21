@@ -4,7 +4,7 @@ import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
-import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import kotlin.reflect.KClass
 
 class AlreadyRegisteredPage(

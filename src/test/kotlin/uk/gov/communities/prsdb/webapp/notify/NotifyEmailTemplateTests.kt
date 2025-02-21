@@ -11,7 +11,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
-import uk.gov.communities.prsdb.webapp.models.emailModels.EmailTemplateId
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateId
 import uk.gov.service.notify.NotificationClient
 import uk.gov.service.notify.Template
 import uk.gov.service.notify.TemplateList

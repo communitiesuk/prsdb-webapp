@@ -12,8 +12,8 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData
-import uk.gov.communities.prsdb.webapp.models.viewModels.LandlordSearchResultViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.PropertySearchResultViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import kotlin.test.Test

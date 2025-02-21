@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.filterPanelModels
 
 import jakarta.servlet.http.HttpServletRequest
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.LandlordSearchRequestModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.CheckboxViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 
 class LandlordFilterPanelViewModel(
     searchRequestModel: LandlordSearchRequestModel,

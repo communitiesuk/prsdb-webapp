@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{addLAUser.title}, ~{::main}, ${#fields.hasErrors('${confirmedEmailDataModel.*}')})}">
+<html th:replace="~{fragments/layout :: layout(#{addLAUser.title}, ~{::main}, ${#fields.hasErrors('${confirmedEmailRequestModel.*}')})}">
 <main class="govuk-main-wrapper" id="main-content">
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <header id="header">
             <h1 class="govuk-heading-l" th:text="#{addLAUser.heading(${councilName})}"></h1>
         </header>
-        <!--/*/ <th:block th:object="${confirmedEmailDataModel}" th:if="confirmedEmailDataModel != null"> /*/-->
+        <!--/*/ <th:block th:object="${confirmedEmailRequestModel}" th:if="confirmedEmailRequestModel != null"> /*/-->
         <div th:replace="~{fragments/forms/errorSummary :: errorSummary }"></div>
         <!--/*/ </th:block> /*/-->
         <section id="explanation">
@@ -25,7 +25,7 @@
                 </li>
             </ul>
         </section>
-        <form th:action="@{''}" class="form" id="email-form" method="post" th:object="${confirmedEmailDataModel}"
+        <form th:action="@{''}" class="form" id="email-form" method="post" th:object="${confirmedEmailRequestModel}"
               novalidate>
             <!--/*/ <th:block id="fieldset-content"
                       th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'email', null, null)}"> /*/-->

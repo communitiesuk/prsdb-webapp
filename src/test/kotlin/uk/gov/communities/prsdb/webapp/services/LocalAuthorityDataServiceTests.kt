@@ -32,8 +32,8 @@ import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Compan
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.mockObjects.MockOneLoginUserData.Companion.createOneLoginUser
-import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
 import java.util.Optional
 import kotlin.test.assertEquals
 
@@ -290,7 +290,7 @@ class LocalAuthorityDataServiceTests {
 
         // Act
         localAuthorityDataService.updateUserAccessLevel(
-            LocalAuthorityUserAccessLevelDataModel(false),
+            LocalAuthorityUserAccessLevelRequestModel(false),
             DEFAULT_LA_USER_ID,
         )
 
@@ -309,7 +309,7 @@ class LocalAuthorityDataServiceTests {
         val errorThrown =
             assertThrows<ResponseStatusException> {
                 localAuthorityDataService.updateUserAccessLevel(
-                    LocalAuthorityUserAccessLevelDataModel(false),
+                    LocalAuthorityUserAccessLevelRequestModel(false),
                     DEFAULT_LA_USER_ID,
                 )
             }

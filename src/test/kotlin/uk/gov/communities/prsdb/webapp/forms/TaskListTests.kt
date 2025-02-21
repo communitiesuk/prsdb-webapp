@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyWithTaskList
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.tasks.TaskListViewModelFactory
-import uk.gov.communities.prsdb.webapp.models.viewModels.TaskListViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import kotlin.test.Test
 
@@ -76,13 +76,13 @@ class TaskListTests {
                 Step(
                     TestStepId.TwoStepTaskPartOne,
                     mock(),
-                    isSatisfied = { _, _ -> if (status == TaskStatus.IN_PROGRESS || status == TaskStatus.COMPLETED) true else false },
+                    isSatisfied = { _, _ -> status == TaskStatus.IN_PROGRESS || status == TaskStatus.COMPLETED },
                     nextAction = { _, _ -> Pair(TestStepId.TwoStepTaskPartTwo, null) },
                 ),
                 Step(
                     TestStepId.TwoStepTaskPartTwo,
                     mock(),
-                    isSatisfied = { _, _ -> if (status == TaskStatus.COMPLETED) true else false },
+                    isSatisfied = { _, _ -> status == TaskStatus.COMPLETED },
                     nextAction = { _, _ -> Pair(TestStepId.SimpleTaskTwo, null) },
                 ),
             ),

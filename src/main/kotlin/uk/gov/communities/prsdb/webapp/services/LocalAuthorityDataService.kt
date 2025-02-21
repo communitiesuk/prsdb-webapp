@@ -16,8 +16,8 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
-import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
 
 @Service
 class LocalAuthorityDataService(
@@ -95,7 +95,7 @@ class LocalAuthorityDataService(
     fun getLocalAuthorityUserOrNull(localAuthorityUserId: Long) = localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
 
     fun updateUserAccessLevel(
-        localAuthorityUserAccessLevel: LocalAuthorityUserAccessLevelDataModel,
+        localAuthorityUserAccessLevel: LocalAuthorityUserAccessLevelRequestModel,
         localAuthorityUserId: Long,
     ) {
         val localAuthorityUser =
