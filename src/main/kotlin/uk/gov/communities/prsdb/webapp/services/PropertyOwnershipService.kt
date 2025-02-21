@@ -88,14 +88,14 @@ class PropertyOwnershipService(
         baseUserId: String,
     ): Boolean = propertyOwnership.primaryLandlord.baseUser.id == baseUserId
 
-    fun getRegisteredPropertiesForLandlord(baseUserId: String): List<RegisteredPropertyViewModel> =
+    fun getRegisteredPropertiesForLandlordUser(baseUserId: String): List<RegisteredPropertyViewModel> =
         retrieveAllRegisteredPropertiesForLandlord(baseUserId).map { propertyOwnership ->
             RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
         }
 
     fun getRegisteredPropertiesForLandlord(landlordId: Long): List<RegisteredPropertyViewModel> =
         retrieveAllRegisteredPropertiesForLandlord(landlordId).map { propertyOwnership ->
-            RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
+            RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership, isLaView = true)
         }
 
     fun retrievePropertyOwnership(registrationNumber: Long): PropertyOwnership? =

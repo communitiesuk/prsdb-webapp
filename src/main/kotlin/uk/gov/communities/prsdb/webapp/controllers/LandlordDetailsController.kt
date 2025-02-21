@@ -64,7 +64,7 @@ class LandlordDetailsController(
         model.addAttribute("name", landlordViewModel.name)
         model.addAttribute("landlord", landlordViewModel)
 
-        val registeredPropertiesList = propertyOwnershipService.getRegisteredPropertiesForLandlord(principal.name)
+        val registeredPropertiesList = propertyOwnershipService.getRegisteredPropertiesForLandlordUser(principal.name)
 
         model.addAttribute("registeredPropertiesList", registeredPropertiesList)
 
