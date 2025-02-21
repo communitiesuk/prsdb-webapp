@@ -195,13 +195,17 @@ class PropertyDetailsLandlordViewModelTests {
     fun `LandlordViewModel populates change links in rows that should have them`() {
         // Arrange
         val testLandlord = MockLandlordData.createLandlord()
+        val rowHeadingsWithoutChangeLinks =
+            listOf(
+                "landlordDetails.personalDetails.oneLoginVerified",
+            )
 
         // Act
         val viewModel = PropertyDetailsLandlordViewModel(testLandlord)
 
         // Assert
         for (row in viewModel.landlordsDetails) {
-            if (row.fieldHeading == "landlordDetails.personalDetails.oneLoginVerified") {
+            if (rowHeadingsWithoutChangeLinks.contains(row.fieldHeading)) {
                 assertNull(row.changeUrl)
             } else {
                 assertNotNull(row.changeUrl)
