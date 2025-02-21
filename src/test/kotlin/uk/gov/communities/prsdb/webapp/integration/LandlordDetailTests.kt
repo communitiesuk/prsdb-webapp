@@ -39,7 +39,7 @@ class LandlordDetailTests : IntegrationTest() {
         }
 
         @Test
-        fun `in the registered properties table the property address link goes the landlord view of the property's details`(page: Page) {
+        fun `in the registered properties table the property address link goes to the landlord view of the property's details`(page: Page) {
             val detailsPage = navigator.goToLandlordDetails()
             detailsPage.tabs.goToRegisteredProperties()
 
@@ -84,7 +84,7 @@ class LandlordDetailTests : IntegrationTest() {
         }
 
         @Test
-        fun `in the registered properties table the property address link goes the LA view of the property's details`(page: Page) {
+        fun `in the registered properties table the property address link goes to the LA view of the property's details`(page: Page) {
             val detailsPage = navigator.goToLandlordDetailsAsALocalAuthorityUser(1)
             detailsPage.tabs.goToRegisteredProperties()
 
