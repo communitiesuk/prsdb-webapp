@@ -26,8 +26,7 @@ class CountryOfResidenceFormPageLandlordRegistration(
         countryNameFull: String,
     ) {
         form.selectNonUk()
-        form.countrySelect.autocompleteInput.fill(countryFragment)
-        form.countrySelect.selectValue(countryNameFull)
+        form.countrySelect.fillPartialAndSelectValue(countryFragment, countryNameFull)
         form.submit()
     }
 
