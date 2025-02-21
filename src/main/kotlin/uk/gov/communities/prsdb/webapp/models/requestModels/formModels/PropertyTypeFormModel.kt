@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.validation.NotNullConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class PropertyTypeFormModel : uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel {
+class PropertyTypeFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(

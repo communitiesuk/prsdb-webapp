@@ -176,7 +176,7 @@ class DateOfBirthFormModel(
         ],
     )
     var year: String = "",
-) : uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel {
+) : FormModel {
     val dateValidator = DateValidator()
 
     fun notAllBlank(): Boolean = !(dateValidator.isAllBlank(day, month, year))
