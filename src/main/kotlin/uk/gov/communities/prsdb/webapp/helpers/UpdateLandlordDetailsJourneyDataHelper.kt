@@ -15,7 +15,7 @@ class UpdateLandlordDetailsJourneyDataHelper : JourneyDataHelper() {
         fun getNameUpdateIfPresent(journeyData: JourneyData) =
             getFieldStringValue(
                 journeyData,
-                UpdateDetailsStepId.UpdateFullName.urlPathSegment,
+                UpdateDetailsStepId.UpdateName.urlPathSegment,
                 "name",
             )
     }

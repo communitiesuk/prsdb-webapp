@@ -6,6 +6,6 @@ enum class UpdateDetailsStepId(
     override val urlPathSegment: String,
 ) : StepId {
     UpdateEmail("email"),
-    UpdateFullName("name"),
+    UpdateName("name"),
     UpdateDetails(DETAILS_PATH_SEGMENT),
 }

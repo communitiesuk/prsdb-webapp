@@ -36,7 +36,7 @@ class UpdateLandlordDetailsJourney(
         Step(
             id = UpdateDetailsStepId.UpdateDetails,
             page = Page(NoInputFormModel::class, "error/500", mapOf()),
-            handleSubmitAndRedirect = { journeyData, _ -> submitAllChanges(journeyData) },
+            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
         )
 
     private val emailStep =
@@ -56,14 +56,14 @@ class UpdateLandlordDetailsJourney(
                             BACK_URL_ATTR_NAME to UpdateDetailsStepId.UpdateDetails.urlPathSegment,
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> getRedirectToUpdateSessionPage() },
-            nextAction = { _, _ -> Pair(UpdateDetailsStepId.UpdateFullName, null) },
+            handleSubmitAndRedirect = { _, _ -> UpdateDetailsStepId.UpdateDetails.urlPathSegment },
+            nextAction = { _, _ -> Pair(UpdateDetailsStepId.UpdateName, null) },
             saveAfterSubmit = false,
         )
 
-    private val fullNameStep =
+    private val nameStep =
         Step(
-            id = UpdateDetailsStepId.UpdateFullName,
+            id = UpdateDetailsStepId.UpdateName,
             page =
                 Page(
                     formModel = NameFormModel::class,
@@ -78,7 +78,7 @@ class UpdateLandlordDetailsJourney(
                             BACK_URL_ATTR_NAME to UpdateDetailsStepId.UpdateDetails.urlPathSegment,
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> getRedirectToUpdateSessionPage() },
+            handleSubmitAndRedirect = { _, _ -> UpdateDetailsStepId.UpdateDetails.urlPathSegment },
             nextAction = { _, _ -> Pair(UpdateDetailsStepId.UpdateDetails, null) },
             saveAfterSubmit = false,
         )
@@ -89,13 +89,13 @@ class UpdateLandlordDetailsJourney(
             initialStepId,
             setOf(
                 emailStep,
-                fullNameStep,
+                nameStep,
                 updateDetailsStep,
             ),
         )
 
     override fun getUnreachableStepRedirect(journeyData: JourneyData) =
-        if (journeyData[originalLandlordJourneyDataKey] == null) {
+        if (journeyData[ORIGINAL_LANDLORD_DATA_KEY] == null) {
             UpdateDetailsStepId.UpdateDetails.urlPathSegment
         } else {
             getLastReachableStep(journeyData)!!.step.id.urlPathSegment
@@ -106,7 +106,7 @@ class UpdateLandlordDetailsJourney(
         targetStep: Step<UpdateDetailsStepId>,
         targetSubPageNumber: Int?,
     ): StepDetails<UpdateDetailsStepId>? {
-        val originalLandlordData = JourneyDataHelper.getPageData(journeyData, originalLandlordJourneyDataKey) ?: return null
+        val originalLandlordData = JourneyDataHelper.getPageData(journeyData, ORIGINAL_LANDLORD_DATA_KEY) ?: return null
         val updatedLandlordData = getUpdatedLandlordData(journeyData, originalLandlordData)
 
         return super.getPrevStep(updatedLandlordData, targetStep, targetSubPageNumber)
@@ -123,7 +123,7 @@ class UpdateLandlordDetailsJourney(
         return landlordData
     }
 
-    private fun submitAllChanges(journeyData: JourneyData): String {
+    private fun updateLandlordWithChangesAndRedirect(journeyData: JourneyData): String {
         val landlordUpdate =
             LandlordUpdateModel(
                 email = UpdateLandlordDetailsJourneyDataHelper.getEmailUpdateIfPresent(journeyData),
@@ -140,13 +140,11 @@ class UpdateLandlordDetailsJourney(
         return LandlordDetailsController.LANDLORD_DETAILS_ROUTE
     }
 
-    private fun getRedirectToUpdateSessionPage(): String = UpdateDetailsStepId.UpdateDetails.urlPathSegment
-
     fun initialiseJourneyDataIfNotInitialised(landlordId: String) {
         val journeyData = journeyDataService.getJourneyDataFromSession()
-        if (journeyData[originalLandlordJourneyDataKey] == null) {
+        if (journeyData[ORIGINAL_LANDLORD_DATA_KEY] == null) {
             val landlord = landlordService.retrieveLandlordByBaseUserId(landlordId)!!
-            journeyData[originalLandlordJourneyDataKey] = createOriginalLandlordJourneyData(landlord)
+            journeyData[ORIGINAL_LANDLORD_DATA_KEY] = createOriginalLandlordJourneyData(landlord)
             journeyDataService.setJourneyData(journeyData)
         }
     }
@@ -154,10 +152,10 @@ class UpdateLandlordDetailsJourney(
     private fun createOriginalLandlordJourneyData(landlord: Landlord): JourneyData =
         mutableMapOf(
             UpdateDetailsStepId.UpdateEmail.urlPathSegment to mutableMapOf("emailAddress" to landlord.email),
-            UpdateDetailsStepId.UpdateFullName.urlPathSegment to mutableMapOf("name" to landlord.name),
+            UpdateDetailsStepId.UpdateName.urlPathSegment to mutableMapOf("name" to landlord.name),
         )
 
     companion object {
-        val originalLandlordJourneyDataKey = "original-landlord-data"
+        const val ORIGINAL_LANDLORD_DATA_KEY = "original-landlord-data"
     }
 }

@@ -304,7 +304,7 @@ class JourneyDataBuilder(
     }
 
     fun withNameUpdate(newName: String): JourneyDataBuilder {
-        journeyData[UpdateDetailsStepId.UpdateFullName.urlPathSegment] = mutableMapOf("name" to newName)
+        journeyData[UpdateDetailsStepId.UpdateName.urlPathSegment] = mutableMapOf("name" to newName)
         return this
     }
 }
