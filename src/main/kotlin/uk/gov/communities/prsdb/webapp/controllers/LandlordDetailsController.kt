@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
@@ -31,7 +32,7 @@ class LandlordDetailsController(
     val updateDetailsJourney: UpdateLandlordDetailsJourney,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
-    @GetMapping("$UPDATE_PATH_SEGMENT/details")
+    @GetMapping("$UPDATE_PATH_SEGMENT/$DETAILS_PATH_SEGMENT")
     fun getUpdateUserLandlordDetails(
         model: Model,
         principal: Principal,
