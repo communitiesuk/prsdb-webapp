@@ -4,6 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.Response
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
@@ -11,10 +12,12 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordUpdateDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
@@ -71,22 +74,22 @@ class Navigator(
     private val identityService: OneLoginIdentityService,
 ) {
     fun goToManageLaUsers(authorityId: Int): ManageLaUsersPage {
-        navigate("local-authority/$authorityId/manage-users")
+        navigate("/local-authority/$authorityId/manage-users")
         return createValidPage(page, ManageLaUsersPage::class)
     }
 
     fun goToInviteNewLaUser(authorityId: Int): InviteNewLaUserPage {
-        navigate("local-authority/$authorityId/invite-new-user")
+        navigate("/local-authority/$authorityId/invite-new-user")
         return createValidPage(page, InviteNewLaUserPage::class)
     }
 
     fun goToLandlordSearchPage(): SearchLandlordRegisterPage {
-        navigate("search/landlord")
+        navigate("/search/landlord")
         return createValidPage(page, SearchLandlordRegisterPage::class)
     }
 
     fun goToPropertySearchPage(): SearchPropertyRegisterPage {
-        navigate("search/property")
+        navigate("/search/property")
         return createValidPage(page, SearchPropertyRegisterPage::class)
     }
 
@@ -98,14 +101,14 @@ class Navigator(
             )
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentityMap)
 
-        navigate("$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.VerifyIdentity.urlPathSegment}")
+        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.VerifyIdentity.urlPathSegment}")
         return createValidPage(page, ConfirmIdentityFormPageLandlordRegistration::class)
     }
 
     fun goToLandlordRegistrationNameFormPage(): NameFormPageLandlordRegistration {
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
 
-        navigate("$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.Name.urlPathSegment}")
+        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.Name.urlPathSegment}")
         return createValidPage(page, NameFormPageLandlordRegistration::class)
     }
 
@@ -231,12 +234,12 @@ class Navigator(
     }
 
     fun skipToLandlordRegistrationConfirmationPage(): ErrorPage {
-        navigate("$REGISTER_LANDLORD_JOURNEY_URL/$LANDLORD_CONFIRMATION")
+        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/$LANDLORD_CONFIRMATION")
         return createValidPage(page, ErrorPage::class)
     }
 
     fun goToLaUserRegistrationLandingPage(token: String): LandingPageLaUserRegistration {
-        navigate("$REGISTER_LA_USER_JOURNEY_URL?token=$token")
+        navigate("/$REGISTER_LA_USER_JOURNEY_URL?token=$token")
         return createValidPage(page, LandingPageLaUserRegistration::class)
     }
 
@@ -264,17 +267,17 @@ class Navigator(
     }
 
     fun skipToLaUserRegistrationConfirmationPage(): ErrorPage {
-        navigate("$REGISTER_LA_USER_JOURNEY_URL/$LA_CONFIRMATION")
+        navigate("/$REGISTER_LA_USER_JOURNEY_URL/$LA_CONFIRMATION")
         return createValidPage(page, ErrorPage::class)
     }
 
     fun goToPropertyRegistrationStartPage(): RegisterPropertyStartPage {
-        navigate("register-property")
+        navigate("/register-property")
         return createValidPage(page, RegisterPropertyStartPage::class)
     }
 
     fun goToPropertyRegistrationTaskList(): TaskListPagePropertyRegistration {
-        navigate("register-property/task-list")
+        navigate("/register-property/task-list")
         return createValidPage(page, TaskListPagePropertyRegistration::class)
     }
 
@@ -385,29 +388,34 @@ class Navigator(
     }
 
     fun skipToPropertyRegistrationConfirmationPage(): ErrorPage {
-        navigate("$REGISTER_PROPERTY_JOURNEY_URL/$PROPERTY_CONFIRMATION")
+        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/$PROPERTY_CONFIRMATION")
         return createValidPage(page, ErrorPage::class)
     }
 
     fun goToLandlordDetails(): LandlordDetailsPage {
-        navigate("landlord-details")
+        navigate("/landlord-details")
         return createValidPage(page, LandlordDetailsPage::class)
     }
 
     fun goToLandlordDetailsAsALocalAuthorityUser(id: Long): LocalAuthorityViewLandlordDetailsPage {
-        navigate("landlord-details/$id")
+        navigate("/landlord-details/$id")
         return createValidPage(page, LocalAuthorityViewLandlordDetailsPage::class)
     }
 
     fun goToPropertyDetailsLandlordView(id: Long): PropertyDetailsPageLandlordView {
-        navigate("property-details/$id")
+        navigate("/property-details/$id")
         return createValidPage(page, PropertyDetailsPageLandlordView::class)
     }
 
     fun goToPropertyDetailsLocalAuthorityView(id: Long): PropertyDetailsPageLocalAuthorityView {
-        navigate("local-authority/property-details/$id")
+        navigate("/local-authority/property-details/$id")
         return createValidPage(page, PropertyDetailsPageLocalAuthorityView::class)
     }
 
-    fun navigate(path: String): Response? = page.navigate("http://localhost:$port/$path")
+    fun goToUpdateLandlordDetailsPage(): LandlordUpdateDetailsPage {
+        navigate("${LandlordDetailsController.UPDATE_ROUTE}/$DETAILS_PATH_SEGMENT")
+        return createValidPage(page, LandlordUpdateDetailsPage::class)
+    }
+
+    fun navigate(path: String): Response? = page.navigate("http://localhost:$port$path")
 }

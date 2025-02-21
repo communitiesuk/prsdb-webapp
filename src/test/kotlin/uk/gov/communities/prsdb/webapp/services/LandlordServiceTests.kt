@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPro
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import kotlin.test.assertNull
 
@@ -347,5 +348,43 @@ class LandlordServiceTests {
 
         assertEquals(expectedFormattedSearchResultsPage1, searchResults1.content)
         assertEquals(expectedFormattedSearchResultsPage2, searchResults2.content)
+    }
+
+    @Test
+    fun `when update landlord is passed an update model, null fields provided do not change the entity`() {
+        // Arrange
+        val userId = "my id"
+        val originalName = "original name"
+        val originalEmail = "original email"
+        val landlordEntity = createLandlord(name = originalName, email = originalEmail)
+        val updateModel = LandlordUpdateModel(null, null)
+
+        whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
+
+        // Act
+        landlordService.updateLandlordForBaseUserId(userId, updateModel)
+
+        // Assert
+        assertEquals(originalName, landlordEntity.name)
+        assertEquals(originalEmail, landlordEntity.email)
+    }
+
+    @Test
+    fun `when update landlord is passed an update model, non-null fields provided are applied to the entity`() {
+        // Arrange
+        val userId = "my id"
+        val originalName = "original name"
+        val originalEmail = "original email"
+        val landlordEntity = createLandlord(name = originalName, email = originalEmail)
+        val updateModel = LandlordUpdateModel("newEmail", "newName")
+
+        whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
+
+        // Act
+        landlordService.updateLandlordForBaseUserId(userId, updateModel)
+
+        // Assert
+        assertEquals(updateModel.fullName, landlordEntity.name)
+        assertEquals(updateModel.email, landlordEntity.email)
     }
 }
