@@ -18,7 +18,7 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
         newName: String,
     ): LandlordUpdateDetailsPage {
         val page = detailsPage.page
-        detailsPage.personalDetails.nameRow.actions.actionLink
+        detailsPage.personalDetailsSummaryList.nameRow.actions.actionLink
             .clickAndWait()
         val updateNamePage = assertPageIs(page, NameFormPageUpdateLandlordDetails::class)
 
@@ -32,7 +32,7 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
         newEmail: String,
     ): LandlordUpdateDetailsPage {
         val page = detailsPage.page
-        detailsPage.personalDetails.emailRow.actions.actionLink
+        detailsPage.personalDetailsSummaryList.emailRow.actions.actionLink
             .clickAndWait()
         val updateEmailPage = assertPageIs(page, EmailFormPageUpdateLandlordDetails::class)
 
@@ -58,8 +58,8 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
         val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
 
         // Check changes have occurred
-        assertThat(landlordDetailsPage.personalDetails.nameRow.value).containsText(landlordName)
-        assertThat(landlordDetailsPage.personalDetails.emailRow.value).containsText(landlordEmail)
+        assertThat(landlordDetailsPage.personalDetailsSummaryList.nameRow.value).containsText(landlordName)
+        assertThat(landlordDetailsPage.personalDetailsSummaryList.emailRow.value).containsText(landlordEmail)
     }
 
     @Test
@@ -76,7 +76,7 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
         val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
 
         // Check changes have occurred
-        assertThat(landlordDetailsPage.personalDetails.nameRow.value).containsText(landlordName)
+        assertThat(landlordDetailsPage.personalDetailsSummaryList.nameRow.value).containsText(landlordName)
     }
 
     @Test
@@ -92,6 +92,6 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
         val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
 
         // Check changes have occurred
-        assertThat(landlordDetailsPage.personalDetails.emailRow.value).containsText(landlordEmail)
+        assertThat(landlordDetailsPage.personalDetailsSummaryList.emailRow.value).containsText(landlordEmail)
     }
 }

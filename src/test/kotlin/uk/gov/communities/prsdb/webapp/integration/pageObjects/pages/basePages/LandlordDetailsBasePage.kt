@@ -10,8 +10,8 @@ abstract class LandlordDetailsBasePage(
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
     val tabs = LandlordDetailsTabs(page)
-    val personalDetails = LandlordPersonalDetailsSummaryList(page)
-    val table = Table(page)
+    val personalDetailsSummaryList = LandlordPersonalDetailsSummaryList(page)
+    val registeredPropertiesTable = Table(page)
 
     class LandlordDetailsTabs(
         page: Page,

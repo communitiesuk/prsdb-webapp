@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.DETAILS_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
@@ -132,7 +133,7 @@ class LandlordDetailsController(
     }
 
     companion object {
-        const val LANDLORD_DETAILS_ROUTE = "/landlord-details"
+        const val LANDLORD_DETAILS_ROUTE = "/$LANDLORD_DETAILS_SEGMENT"
         const val UPDATE_ROUTE = "$LANDLORD_DETAILS_ROUTE/$UPDATE_PATH_SEGMENT"
     }
 }
