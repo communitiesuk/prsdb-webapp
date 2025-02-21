@@ -31,7 +31,7 @@ class SearchRegisterTests : IntegrationTest() {
         fun `results table does not show before search has been requested`() {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
 
-            assertThat(searchLandlordRegisterPage.getResultTable()).isHidden()
+            assertThat(searchLandlordRegisterPage.resultTable).isHidden()
         }
 
         @Test
@@ -39,14 +39,14 @@ class SearchRegisterTests : IntegrationTest() {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
             searchLandlordRegisterPage.searchBar.search("")
 
-            assertThat(searchLandlordRegisterPage.getResultTable()).isHidden()
+            assertThat(searchLandlordRegisterPage.resultTable).isHidden()
         }
 
         @Test
         fun `results table shows after (LRN) search has been requested`() {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
             searchLandlordRegisterPage.searchBar.search("L-CKSQ-3SX9")
-            val resultTable = searchLandlordRegisterPage.getResultTable()
+            val resultTable = searchLandlordRegisterPage.resultTable
 
             assertThat(resultTable.headerRow.getCell(LANDLORD_COL_INDEX)).containsText("Landlord")
             assertThat(resultTable.getCell(0, LANDLORD_COL_INDEX)).containsText("Alexander Smith\nL-CKSQ-3SX9")
@@ -62,14 +62,14 @@ class SearchRegisterTests : IntegrationTest() {
             assertThat(resultTable.headerRow.getCell(LISTED_PROPERTY_COL_INDEX)).containsText("Listed properties")
             assertThat(resultTable.getCell(0, LISTED_PROPERTY_COL_INDEX)).containsText("30")
 
-            assertTrue(searchLandlordRegisterPage.getErrorMessage().isHidden)
+            assertTrue(searchLandlordRegisterPage.noResultErrorMessage.isHidden)
         }
 
         @Test
         fun `fuzzy search functionality produces table of matching results`() {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
             searchLandlordRegisterPage.searchBar.search("Alex")
-            val resultTable = searchLandlordRegisterPage.getResultTable()
+            val resultTable = searchLandlordRegisterPage.resultTable
 
             assertThat(resultTable.getCell(0, LANDLORD_COL_INDEX)).containsText("Alexander Smith")
             assertThat(resultTable.getCell(1, LANDLORD_COL_INDEX)).containsText("Alexandra Davies")
@@ -90,7 +90,7 @@ class SearchRegisterTests : IntegrationTest() {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
             searchLandlordRegisterPage.searchBar.search("non-matching searchTerm")
 
-            assertContains(searchLandlordRegisterPage.getErrorMessageText(), "No landlord record found")
+            assertContains(searchLandlordRegisterPage.errorMessageText!!, "No landlord record found")
         }
 
         @Test
@@ -107,7 +107,7 @@ class SearchRegisterTests : IntegrationTest() {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
             searchLandlordRegisterPage.searchBar.search("Alex")
 
-            assertThat(searchLandlordRegisterPage.getPaginationComponent()).isHidden()
+            assertThat(searchLandlordRegisterPage.paginationComponent).isHidden()
         }
 
         @Test
@@ -115,15 +115,15 @@ class SearchRegisterTests : IntegrationTest() {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
             searchLandlordRegisterPage.searchBar.search("PRSDB")
 
-            searchLandlordRegisterPage.getPaginationComponent().nextLink.clickAndWait()
+            searchLandlordRegisterPage.paginationComponent.nextLink.clickAndWait()
             assertContains(page.url(), "page=2")
             val nextPage = assertPageIs(page, SearchLandlordRegisterPage::class)
 
-            nextPage.getPaginationComponent().previousLink.clickAndWait()
+            nextPage.paginationComponent.previousLink.clickAndWait()
             assertContains(page.url(), "page=1")
             val previousPage = assertPageIs(page, SearchLandlordRegisterPage::class)
 
-            previousPage.getPaginationComponent().getPageNumberLink(2).clickAndWait()
+            previousPage.paginationComponent.getPageNumberLink(2).clickAndWait()
             assertContains(page.url(), "page=2")
             assertPageIs(page, SearchLandlordRegisterPage::class)
         }
@@ -133,7 +133,7 @@ class SearchRegisterTests : IntegrationTest() {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
             searchLandlordRegisterPage.searchBar.search("Alex")
 
-            val filter = searchLandlordRegisterPage.getFilterPanel()
+            val filter = searchLandlordRegisterPage.filterPanel
 
             // Toggle filter
             filter.closeFilterPanelButton.clickAndWait()
@@ -149,11 +149,11 @@ class SearchRegisterTests : IntegrationTest() {
 
             val laFilterSelectedHeadingText = filter.selectedHeadings.first().innerText()
             assertContains(laFilterSelectedHeadingText, "Show landlords operating in my authority")
-            val resultTable = searchLandlordRegisterPage.getResultTable()
+            val resultTable = searchLandlordRegisterPage.resultTable
             assertEquals(1, resultTable.rows.count())
 
             // Remove LA filter
-            searchLandlordRegisterPage.clickComponent(filter.getRemoveFilterTag("Landlords in my authority"))
+            filter.getRemoveFilterTag("Landlords in my authority").clickAndWait()
             assertThat(filter.selectedHeadings).hasCount(0)
             assertThat(resultTable.rows).not().hasCount(0)
 
@@ -174,14 +174,14 @@ class SearchRegisterTests : IntegrationTest() {
             searchLandlordRegisterPage.searchBar.search("Alex")
 
             // Apply LA filter
-            val filter = searchLandlordRegisterPage.getFilterPanel()
+            val filter = searchLandlordRegisterPage.filterPanel
             val laFilter = filter.getFilterCheckboxes("Show landlords operating in my authority")
             laFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
             // Search again
             searchLandlordRegisterPage.searchBar.search("PRSD")
-            assertTrue(filter.getRemoveFilterTag("Landlords in my authority").isVisible)
+            assertThat(filter.getRemoveFilterTag("Landlords in my authority")).isVisible()
         }
     }
 
@@ -191,7 +191,7 @@ class SearchRegisterTests : IntegrationTest() {
         fun `results table does not show before search has been requested`() {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
 
-            assertThat(searchPropertyRegisterPage.getResultTable()).isHidden()
+            assertThat(searchPropertyRegisterPage.resultTable).isHidden()
         }
 
         @Test
@@ -199,14 +199,14 @@ class SearchRegisterTests : IntegrationTest() {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("")
 
-            assertThat(searchPropertyRegisterPage.getResultTable()).isHidden()
+            assertThat(searchPropertyRegisterPage.resultTable).isHidden()
         }
 
         @Test
         fun `results table shows after (PRN) search has been requested`() {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("P-CCCT-GRKQ")
-            val resultTable = searchPropertyRegisterPage.getResultTable()
+            val resultTable = searchPropertyRegisterPage.resultTable
 
             assertThat(resultTable.headerRow.getCell(PROPERTY_COL_INDEX)).containsText("Property address")
             assertThat(resultTable.getCell(0, PROPERTY_COL_INDEX)).containsText("11 PRSDB Square, EG1 2AK")
@@ -220,14 +220,14 @@ class SearchRegisterTests : IntegrationTest() {
             assertThat(resultTable.headerRow.getCell(PROPERTY_LANDLORD_COL_INDEX)).containsText("Registered landlord")
             assertThat(resultTable.getCell(0, PROPERTY_LANDLORD_COL_INDEX)).containsText("Alexander Smith")
 
-            assertTrue(searchPropertyRegisterPage.getErrorMessage().isHidden)
+            assertTrue(searchPropertyRegisterPage.noResultErrorMessage.isHidden)
         }
 
         @Test
         fun `UPRN search produces an exact result`() {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("1123456")
-            val resultTable = searchPropertyRegisterPage.getResultTable()
+            val resultTable = searchPropertyRegisterPage.resultTable
 
             assertThat(resultTable.getCell(0, PROPERTY_COL_INDEX)).containsText("1, Example Road, EG")
         }
@@ -236,7 +236,7 @@ class SearchRegisterTests : IntegrationTest() {
         fun `Fuzzy search produces table of matching results`(page: Page) {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("Way")
-            val resultTable = searchPropertyRegisterPage.getResultTable()
+            val resultTable = searchPropertyRegisterPage.resultTable
 
             assertThat(resultTable.getCell(0, PROPERTY_COL_INDEX)).containsText("3 Fake Way")
             assertThat(resultTable.getCell(1, PROPERTY_COL_INDEX)).containsText("5 Pretend Crescent Way")
@@ -265,7 +265,7 @@ class SearchRegisterTests : IntegrationTest() {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("non-matching searchTerm")
 
-            assertContains(searchPropertyRegisterPage.getErrorMessageText(), "No property record found")
+            assertContains(searchPropertyRegisterPage.errorMessageText!!, "No property record found")
         }
 
         @Test
@@ -282,7 +282,7 @@ class SearchRegisterTests : IntegrationTest() {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("Way")
 
-            assertThat(searchPropertyRegisterPage.getPaginationComponent()).isHidden()
+            assertThat(searchPropertyRegisterPage.paginationComponent).isHidden()
         }
 
         @Test
@@ -290,15 +290,15 @@ class SearchRegisterTests : IntegrationTest() {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("PRSDB")
 
-            searchPropertyRegisterPage.getPaginationComponent().nextLink.clickAndWait()
+            searchPropertyRegisterPage.paginationComponent.nextLink.clickAndWait()
             assertContains(page.url(), "page=2")
             val nextPage = assertPageIs(page, SearchPropertyRegisterPage::class)
 
-            nextPage.getPaginationComponent().previousLink.clickAndWait()
+            nextPage.paginationComponent.previousLink.clickAndWait()
             assertContains(page.url(), "page=1")
             val previousPage = assertPageIs(page, SearchPropertyRegisterPage::class)
 
-            previousPage.getPaginationComponent().getPageNumberLink(2).clickAndWait()
+            previousPage.paginationComponent.getPageNumberLink(2).clickAndWait()
             assertContains(page.url(), "page=2")
             assertPageIs(page, SearchPropertyRegisterPage::class)
         }
@@ -315,11 +315,11 @@ class SearchRegisterTests : IntegrationTest() {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("Way")
 
-            val resultTable = searchPropertyRegisterPage.getResultTable()
+            val resultTable = searchPropertyRegisterPage.resultTable
             assertEquals(expectedMatchingPropertyCount, resultTable.rows.count())
 
             // Toggle filter
-            val filter = searchPropertyRegisterPage.getFilterPanel()
+            val filter = searchPropertyRegisterPage.filterPanel
             filter.closeFilterPanelButton.clickAndWait()
             assertTrue(filter.panel.isHidden)
 
@@ -350,7 +350,7 @@ class SearchRegisterTests : IntegrationTest() {
             assertEquals(expectedPropertyInLAWithSelectiveOrNoLicenseCount, resultTable.rows.count())
 
             // Remove LA filter
-            searchPropertyRegisterPage.clickComponent(filter.getRemoveFilterTag("Properties in my authority"))
+            filter.getRemoveFilterTag("Properties in my authority").clickAndWait()
             assertEquals(1, filter.selectedHeadings.count())
             assertEquals(expectedPropertyWithSelectiveOrNoLicenseCount, resultTable.rows.count())
 
@@ -368,14 +368,14 @@ class SearchRegisterTests : IntegrationTest() {
             searchPropertyRegisterPage.searchBar.search("Way")
 
             // Apply LA filter
-            val filter = searchPropertyRegisterPage.getFilterPanel()
+            val filter = searchPropertyRegisterPage.filterPanel
             val laFilter = filter.getFilterCheckboxes("Show properties in my authority")
             laFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
             // Search again
             searchPropertyRegisterPage.searchBar.search("PRSD")
-            assertTrue(filter.getRemoveFilterTag("Properties in my authority").isVisible)
+            assertThat(filter.getRemoveFilterTag("Properties in my authority")).isVisible()
         }
     }
 }

@@ -7,11 +7,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.S
 class SearchPropertyRegisterPage(
     page: Page,
 ) : SearchRegisterBasePage(page, "/search/property") {
-    fun getPropertyLink(rowIndex: Int) = Link(getResultTable().getCell(rowIndex, PROPERTY_COL_INDEX).locator("a"))
+    fun getPropertyLink(rowIndex: Int) = Link(resultTable.getCell(rowIndex, PROPERTY_COL_INDEX).locator("a"))
 
-    fun getLandlordLink(rowIndex: Int) = Link(getResultTable().getCell(rowIndex, PROPERTY_LANDLORD_COL_INDEX).locator("a"))
+    fun getLandlordLink(rowIndex: Int) = Link(resultTable.getCell(rowIndex, PROPERTY_LANDLORD_COL_INDEX).locator("a"))
 
-    fun getLandlordSearchLink() = Link(getErrorMessage().locator("a"))
+    fun getLandlordSearchLink() = Link(noResultErrorMessage.locator("a"))
 
     companion object {
         const val PROPERTY_COL_INDEX: Int = 0

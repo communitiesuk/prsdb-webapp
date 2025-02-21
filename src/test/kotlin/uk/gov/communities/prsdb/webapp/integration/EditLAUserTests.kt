@@ -12,7 +12,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUse
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.ACCESS_LEVEL_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.USERNAME_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @Sql("/data-local.sql")
 class EditLAUserTests : IntegrationTest() {
@@ -29,10 +30,10 @@ class EditLAUserTests : IntegrationTest() {
         assertThat(editUserPage.name).containsText("Arthur Dent")
         // TODO PRSD-405: fix when LA users have email addresses
         assertThat(editUserPage.email).containsText("Arthur Dent@ISLE OF MAN.gov.uk")
-        assertEquals("false", editUserPage.isManagerRadios.selectedValue)
+        assertFalse(editUserPage.isManagerSelected)
 
         // Update the user's access level to admin
-        editUserPage.isManagerRadios.selectValue("true")
+        editUserPage.selectManagerRadio()
         editUserPage.form.submit()
         manageUsersPage = assertPageIs(page, ManageLaUsersPage::class)
 
@@ -43,7 +44,7 @@ class EditLAUserTests : IntegrationTest() {
         // The user's page also now defaults to admin
         manageUsersPage.getChangeLink(rowIndex = 0).clickAndWait()
         editUserPage = assertPageIs(page, EditLaUserPage::class)
-        assertEquals("true", editUserPage.isManagerRadios.selectedValue)
+        assertTrue(editUserPage.isManagerSelected)
     }
 
     @Test

@@ -24,12 +24,29 @@ class FilterPanel(
             Locator.LocatorOptions().setHasText("No filters selected"),
         )
 
-    private val form = Form(locator)
+    private val form = FilterPanelForm(locator)
 
     fun clickApplyFiltersButton() = form.submit()
 
-    fun getFilterCheckboxes(label: String? = null) = form.getCheckboxes(label)
+    fun getFilterCheckboxes(label: String? = null) = form.getFilterCheckboxes(label)
 
-    fun getRemoveFilterTag(filterOption: String): Locator =
-        locator.locator(".moj-filter__tag", Locator.LocatorOptions().setHasText(filterOption))
+    fun getRemoveFilterTag(filterOption: String) = FilterTag.byFilterOptionName(locator, filterOption)
+
+    class FilterPanelForm(
+        locator: Locator,
+    ) : Form(locator) {
+        fun getFilterCheckboxes(label: String? = null) = Checkboxes(locator, label)
+    }
+
+    class FilterTag(
+        override val locator: Locator,
+    ) : BaseComponent(locator),
+        ClickAndWaitable {
+        companion object {
+            fun byFilterOptionName(
+                parentLocator: Locator,
+                filterOption: String,
+            ) = FilterTag(parentLocator.locator(".moj-filter__tag", Locator.LocatorOptions().setHasText(filterOption)))
+        }
+    }
 }
