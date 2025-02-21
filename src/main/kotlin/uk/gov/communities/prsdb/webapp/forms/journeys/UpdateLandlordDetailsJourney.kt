@@ -32,9 +32,9 @@ class UpdateLandlordDetailsJourney(
     ) {
     override val initialStepId = UpdateDetailsStepId.UpdateEmail
 
-    private val updateSessionStep =
+    private val updateDetailsStep =
         Step(
-            id = UpdateDetailsStepId.ChangeDetailsSession,
+            id = UpdateDetailsStepId.UpdateDetails,
             page = Page(NoInputFormModel::class, "error/500", mapOf()),
             handleSubmitAndRedirect = { journeyData, _ -> submitAllChanges(journeyData) },
         )
@@ -53,7 +53,7 @@ class UpdateLandlordDetailsJourney(
                             "fieldSetHint" to "forms.email.fieldSetHint",
                             "label" to "forms.email.label",
                             "submitButtonText" to "forms.buttons.continue",
-                            BACK_URL_ATTR_NAME to UpdateDetailsStepId.ChangeDetailsSession.urlPathSegment,
+                            BACK_URL_ATTR_NAME to UpdateDetailsStepId.UpdateDetails.urlPathSegment,
                         ),
                 ),
             handleSubmitAndRedirect = { _, _ -> getRedirectToUpdateSessionPage() },
@@ -75,27 +75,28 @@ class UpdateLandlordDetailsJourney(
                             "fieldSetHint" to "forms.name.fieldSetHint",
                             "label" to "forms.name.label",
                             "submitButtonText" to "forms.buttons.continue",
-                            BACK_URL_ATTR_NAME to UpdateDetailsStepId.ChangeDetailsSession.urlPathSegment,
+                            BACK_URL_ATTR_NAME to UpdateDetailsStepId.UpdateDetails.urlPathSegment,
                         ),
                 ),
             handleSubmitAndRedirect = { _, _ -> getRedirectToUpdateSessionPage() },
-            nextAction = { _, _ -> Pair(UpdateDetailsStepId.ChangeDetailsSession, null) },
+            nextAction = { _, _ -> Pair(UpdateDetailsStepId.UpdateDetails, null) },
             saveAfterSubmit = false,
         )
 
+    // The next action flow must have the `updateDetailsStep` after all data changing steps to ensure that validation for all of them is run
     override val sections =
         createSingleSectionWithSingleTaskFromSteps(
             initialStepId,
             setOf(
                 emailStep,
                 fullNameStep,
-                updateSessionStep,
+                updateDetailsStep,
             ),
         )
 
     override fun getUnreachableStepRedirect(journeyData: JourneyData) =
         if (journeyData[originalLandlordJourneyDataKey] == null) {
-            UpdateDetailsStepId.ChangeDetailsSession.urlPathSegment
+            UpdateDetailsStepId.UpdateDetails.urlPathSegment
         } else {
             getLastReachableStep(journeyData)!!.step.id.urlPathSegment
         }
@@ -139,7 +140,7 @@ class UpdateLandlordDetailsJourney(
         return LandlordDetailsController.LANDLORD_DETAILS_ROUTE
     }
 
-    private fun getRedirectToUpdateSessionPage(): String = UpdateDetailsStepId.ChangeDetailsSession.urlPathSegment
+    private fun getRedirectToUpdateSessionPage(): String = UpdateDetailsStepId.UpdateDetails.urlPathSegment
 
     fun initialiseJourneyDataIfNotInitialised(landlordId: String) {
         val journeyData = journeyDataService.getJourneyDataFromSession()
