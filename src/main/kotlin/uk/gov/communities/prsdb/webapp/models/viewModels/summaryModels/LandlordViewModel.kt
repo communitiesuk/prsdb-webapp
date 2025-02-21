@@ -4,6 +4,7 @@ import kotlinx.datetime.toKotlinInstant
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.UPDATE_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class LandlordViewModel(
@@ -46,7 +47,6 @@ class LandlordViewModel(
                     RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber),
                     null,
                 ),
-                // TODO PRSD-747 to pass Id verification status (see Figma for design)
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.name",
                     landlord.name,
@@ -56,6 +56,11 @@ class LandlordViewModel(
                     "landlordDetails.personalDetails.dateOfBirth",
                     landlord.dateOfBirth,
                     // TODO: PRSD-792 toggleChangeLink("$UPDATE_ROUTE/date-of-birth"),
+                    null,
+                ),
+                SummaryListRowViewModel(
+                    "landlordDetails.personalDetails.oneLoginVerified",
+                    MessageKeyConverter.convert(landlord.isVerified),
                     null,
                 ),
                 SummaryListRowViewModel(

@@ -26,6 +26,7 @@ class PropertyDetailsLandlordViewModelTests {
             listOf(
                 "landlordDetails.personalDetails.name",
                 "landlordDetails.personalDetails.dateOfBirth",
+                "landlordDetails.personalDetails.oneLoginVerified",
                 "landlordDetails.personalDetails.emailAddress",
                 "propertyDetails.landlordDetails.contactNumber",
                 "landlordDetails.personalDetails.contactAddress",
@@ -53,6 +54,7 @@ class PropertyDetailsLandlordViewModelTests {
             listOf(
                 "landlordDetails.personalDetails.name",
                 "landlordDetails.personalDetails.dateOfBirth",
+                "landlordDetails.personalDetails.oneLoginVerified",
                 "landlordDetails.personalDetails.emailAddress",
                 "propertyDetails.landlordDetails.contactNumber",
                 "propertyDetails.landlordDetails.addressNonEnglandOrWales",
