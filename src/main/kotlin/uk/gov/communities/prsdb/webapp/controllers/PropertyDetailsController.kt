@@ -7,6 +7,7 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
@@ -19,7 +20,7 @@ class PropertyDetailsController(
     val propertyOwnershipService: PropertyOwnershipService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
-    @GetMapping("/property-details/{propertyOwnershipId}")
+    @GetMapping(PROPERTY_DETAILS_ROUTE)
     fun getPropertyDetails(
         @PathVariable propertyOwnershipId: Long,
         model: Model,
@@ -53,7 +54,7 @@ class PropertyDetailsController(
     }
 
     @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
-    @GetMapping("local-authority/property-details/{propertyOwnershipId}")
+    @GetMapping(LA_PROPERTY_DETAILS_ROUTE)
     fun getPropertyDetailsLaView(
         @PathVariable propertyOwnershipId: Long,
         model: Model,
@@ -89,5 +90,19 @@ class PropertyDetailsController(
         model.addAttribute("backUrl", "/")
 
         return "propertyDetailsView"
+    }
+
+    companion object {
+        const val PROPERTY_DETAILS_ROUTE = "/property-details/{propertyOwnershipId}"
+
+        const val LA_PROPERTY_DETAILS_ROUTE = "/local-authority$PROPERTY_DETAILS_ROUTE"
+
+        fun getPropertyDetailsPath(
+            propertyOwnershipId: Long,
+            isLaView: Boolean = false,
+        ): String =
+            UriTemplate(if (isLaView) LA_PROPERTY_DETAILS_ROUTE else PROPERTY_DETAILS_ROUTE)
+                .expand(propertyOwnershipId)
+                .toASCIIString()
     }
 }
