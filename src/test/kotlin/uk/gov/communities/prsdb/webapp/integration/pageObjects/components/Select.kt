@@ -11,4 +11,12 @@ class Select(
     val autocompleteInput = locator.locator("input")
 
     fun selectValue(value: String) = locator.locator("li", Locator.LocatorOptions().setHasText(value)).click()
+
+    fun fillPartialAndSelectValue(
+        partial: String,
+        value: String,
+    ) {
+        autocompleteInput.fill(partial)
+        selectValue(value)
+    }
 }

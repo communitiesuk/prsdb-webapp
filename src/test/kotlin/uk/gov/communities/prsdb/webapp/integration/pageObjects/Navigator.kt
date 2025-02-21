@@ -298,70 +298,61 @@ class Navigator(
 
     fun goToPropertyRegistrationOwnershipTypePage(): OwnershipTypeFormPagePropertyRegistration {
         val propertyTypePage = goToPropertyRegistrationPropertyTypePage()
-        propertyTypePage.form.getRadios().selectValue(PropertyType.DETACHED_HOUSE)
-        propertyTypePage.form.submit()
+        propertyTypePage.submitPropertyType(PropertyType.DETACHED_HOUSE)
         return createValidPage(page, OwnershipTypeFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationLicensingTypePage(): LicensingTypeFormPagePropertyRegistration {
         val ownershipTypePage = goToPropertyRegistrationOwnershipTypePage()
-        ownershipTypePage.form.getRadios().selectValue(OwnershipType.FREEHOLD)
-        ownershipTypePage.form.submit()
+        ownershipTypePage.submitOwnershipType(OwnershipType.FREEHOLD)
         return createValidPage(page, LicensingTypeFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationSelectiveLicencePage(): SelectiveLicenceFormPagePropertyRegistration {
         val licensingTypePage = goToPropertyRegistrationLicensingTypePage()
-        licensingTypePage.form.getRadios().selectValue(LicensingType.SELECTIVE_LICENCE)
-        licensingTypePage.form.submit()
+        licensingTypePage.submitLicensingType(LicensingType.SELECTIVE_LICENCE)
         return createValidPage(page, SelectiveLicenceFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationHmoMandatoryLicencePage(): HmoMandatoryLicenceFormPagePropertyRegistration {
         val licensingTypePage = goToPropertyRegistrationLicensingTypePage()
-        licensingTypePage.form.getRadios().selectValue(LicensingType.HMO_MANDATORY_LICENCE)
-        licensingTypePage.form.submit()
+        licensingTypePage.submitLicensingType(LicensingType.HMO_MANDATORY_LICENCE)
         return createValidPage(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationHmoAdditionalLicencePage(): HmoAdditionalLicenceFormPagePropertyRegistration {
         val licensingTypePage = goToPropertyRegistrationLicensingTypePage()
-        licensingTypePage.form.getRadios().selectValue(LicensingType.HMO_ADDITIONAL_LICENCE)
-        licensingTypePage.form.submit()
+        licensingTypePage.submitLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
         return createValidPage(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationOccupancyPage(): OccupancyFormPagePropertyRegistration {
         val licensingTypePage = goToPropertyRegistrationLicensingTypePage()
-        licensingTypePage.form.getRadios().selectValue(LicensingType.NO_LICENSING)
-        licensingTypePage.form.submit()
+        licensingTypePage.submitLicensingType(LicensingType.NO_LICENSING)
         return createValidPage(page, OccupancyFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationHouseholdsPage(): HouseholdsFormPagePropertyRegistration {
         val occupancyPage = goToPropertyRegistrationOccupancyPage()
-        occupancyPage.form.getRadios().selectValue("true")
-        occupancyPage.form.submit()
+        occupancyPage.submitIsOccupied()
         return createValidPage(page, HouseholdsFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationPeoplePage(): PeopleFormPagePropertyRegistration {
         val householdsPage = goToPropertyRegistrationHouseholdsPage()
-        householdsPage.householdsInput.fill("2")
-        householdsPage.form.submit()
+        householdsPage.submitNumberOfHouseholds(2)
         return createValidPage(page, PeopleFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
         val peoplePage = goToPropertyRegistrationPeoplePage()
-        peoplePage.peopleInput.fill("4")
-        peoplePage.form.submit()
+        peoplePage.submitNumOfPeople(4)
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationDeclarationPage(): DeclarationFormPagePropertyRegistration {
         val checkAnswersPage = goToPropertyRegistrationCheckAnswersPage()
-        checkAnswersPage.form.submit()
+        checkAnswersPage.confirm()
         return createValidPage(page, DeclarationFormPagePropertyRegistration::class)
     }
 
