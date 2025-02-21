@@ -628,7 +628,7 @@ class PropertyRegistrationJourney(
                     baseUserId = baseUserId,
                 )
 
-            propertyRegistrationService.setLastPropertyRegisteredThisSession(propertyRegistrationNumber.number)
+            propertyRegistrationService.setLastPrnRegisteredThisSession(propertyRegistrationNumber.number)
 
             confirmationEmailSender.sendEmail(
                 landlordService.retrieveLandlordByBaseUserId(baseUserId)!!.email,

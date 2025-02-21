@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
@@ -37,7 +36,7 @@ class RegisterLAUserController(
             return "redirect:${REGISTER_LA_USER_JOURNEY_URL}/${laUserRegistrationJourney.initialStepId.urlPathSegment}"
         }
 
-        return REDIRECT_FOR_INVALID_TOKEN
+        return "redirect:$INVALID_LINK_PAGE_PATH_SEGMENT"
     }
 
     @GetMapping("/{stepName}")
@@ -49,7 +48,7 @@ class RegisterLAUserController(
         val token = invitationService.getTokenFromSession()
         if (token == null || !invitationService.tokenIsValid(token)) {
             invitationService.clearTokenFromSession()
-            return REDIRECT_FOR_INVALID_TOKEN
+            return "redirect:$INVALID_LINK_PAGE_PATH_SEGMENT"
         }
 
         return laUserRegistrationJourney.populateModelAndGetViewName(
@@ -81,10 +80,10 @@ class RegisterLAUserController(
         principal: Principal,
     ): String {
         val localAuthorityUserID =
-            localAuthorityDataService.getLastUserRegisteredThisSession()
+            localAuthorityDataService.getLastUserIdRegisteredThisSession()
                 ?: throw ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "$LA_USER_ID was not found in the session",
+                    "No registered LA user was found in the session",
                 )
 
         val localAuthorityUser =
@@ -105,7 +104,5 @@ class RegisterLAUserController(
     companion object {
         const val CONFIRMATION_PAGE_PATH_SEGMENT = "confirmation"
         const val INVALID_LINK_PAGE_PATH_SEGMENT = "invalid-link"
-
-        private const val REDIRECT_FOR_INVALID_TOKEN = "redirect:$INVALID_LINK_PAGE_PATH_SEGMENT"
     }
 }

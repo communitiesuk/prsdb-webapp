@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
@@ -82,10 +81,10 @@ class RegisterPropertyController(
         principal: Principal,
     ): String {
         val propertyRegistrationNumber =
-            propertyRegistrationService.getLastPropertyRegisteredThisSession()
+            propertyRegistrationService.getLastPrnRegisteredThisSession()
                 ?: throw ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "$PROPERTY_REGISTRATION_NUMBER was not found in the session",
+                    "No registered property was found in the session",
                 )
         val propertyOwnership =
             propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)

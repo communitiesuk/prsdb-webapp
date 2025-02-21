@@ -77,7 +77,7 @@ class RegisterLAUserControllerTests(
         val laUserId = 0L
         val localAuthorityUser = MockLocalAuthorityData.createLocalAuthorityUser()
 
-        whenever(localAuthorityDataService.getLastUserRegisteredThisSession()).thenReturn(laUserId)
+        whenever(localAuthorityDataService.getLastUserIdRegisteredThisSession()).thenReturn(laUserId)
         whenever(localAuthorityDataService.getLocalAuthorityUserOrNull(laUserId)).thenReturn(localAuthorityUser)
 
         mvc
@@ -94,7 +94,7 @@ class RegisterLAUserControllerTests(
         val laUserId = 0L
         val localAuthorityUser = MockLocalAuthorityData.createLocalAuthorityUser()
 
-        whenever(localAuthorityDataService.getLastUserRegisteredThisSession()).thenReturn(null)
+        whenever(localAuthorityDataService.getLastUserIdRegisteredThisSession()).thenReturn(null)
         whenever(localAuthorityDataService.getLocalAuthorityUserOrNull(laUserId)).thenReturn(localAuthorityUser)
 
         mvc
@@ -107,7 +107,7 @@ class RegisterLAUserControllerTests(
     fun `getConfirmation returns 400 if the LA user ID in session is not valid`() {
         val laUserId = 0L
 
-        whenever(localAuthorityDataService.getLastUserRegisteredThisSession()).thenReturn(laUserId)
+        whenever(localAuthorityDataService.getLastUserIdRegisteredThisSession()).thenReturn(laUserId)
         whenever(localAuthorityDataService.getLocalAuthorityUserOrNull(laUserId)).thenReturn(null)
 
         mvc
