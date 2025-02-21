@@ -153,7 +153,7 @@ class SearchRegisterTests : IntegrationTest() {
             assertEquals(1, resultTable.rows.count())
 
             // Remove LA filter
-            searchLandlordRegisterPage.clickComponent(filter.getRemoveFilterTag("Landlords in my authority"))
+            filter.getRemoveFilterTag("Landlords in my authority").clickAndWait()
             assertThat(filter.selectedHeadings).hasCount(0)
             assertThat(resultTable.rows).not().hasCount(0)
 
@@ -181,7 +181,7 @@ class SearchRegisterTests : IntegrationTest() {
 
             // Search again
             searchLandlordRegisterPage.searchBar.search("PRSD")
-            assertTrue(filter.getRemoveFilterTag("Landlords in my authority").isVisible)
+            assertThat(filter.getRemoveFilterTag("Landlords in my authority")).isVisible()
         }
     }
 
@@ -350,7 +350,7 @@ class SearchRegisterTests : IntegrationTest() {
             assertEquals(expectedPropertyInLAWithSelectiveOrNoLicenseCount, resultTable.rows.count())
 
             // Remove LA filter
-            searchPropertyRegisterPage.clickComponent(filter.getRemoveFilterTag("Properties in my authority"))
+            filter.getRemoveFilterTag("Properties in my authority").clickAndWait()
             assertEquals(1, filter.selectedHeadings.count())
             assertEquals(expectedPropertyWithSelectiveOrNoLicenseCount, resultTable.rows.count())
 
@@ -375,7 +375,7 @@ class SearchRegisterTests : IntegrationTest() {
 
             // Search again
             searchPropertyRegisterPage.searchBar.search("PRSD")
-            assertTrue(filter.getRemoveFilterTag("Properties in my authority").isVisible)
+            assertThat(filter.getRemoveFilterTag("Properties in my authority")).isVisible()
         }
     }
 }
