@@ -189,6 +189,7 @@ abstract class Journey<T : StepId>(
                 }
         }
 
+        // TODO PRSD-901: This should not return null if the journey is completely valid
         return null
     }
 
