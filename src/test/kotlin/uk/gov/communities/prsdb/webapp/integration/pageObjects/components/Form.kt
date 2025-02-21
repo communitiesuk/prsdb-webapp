@@ -15,8 +15,6 @@ open class Form(
     // the property here in the Form class
     val fieldsetHeading = FieldsetHeading(locator)
 
-    fun getCheckboxes(label: String? = null) = Checkboxes(locator, label)
-
     fun submit() = SubmitButton(locator).clickAndWait()
 
     class FieldsetHeading(
