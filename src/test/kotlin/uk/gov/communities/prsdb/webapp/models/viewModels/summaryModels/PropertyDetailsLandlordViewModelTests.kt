@@ -200,8 +200,12 @@ class PropertyDetailsLandlordViewModelTests {
         val viewModel = PropertyDetailsLandlordViewModel(testLandlord)
 
         // Assert
-        for (i in viewModel.landlordsDetails) {
-            assertNotNull(i.changeUrl)
+        for (row in viewModel.landlordsDetails) {
+            if (row.fieldHeading == "landlordDetails.personalDetails.oneLoginVerified") {
+                assertNull(row.changeUrl)
+            } else {
+                assertNotNull(row.changeUrl)
+            }
         }
     }
 
