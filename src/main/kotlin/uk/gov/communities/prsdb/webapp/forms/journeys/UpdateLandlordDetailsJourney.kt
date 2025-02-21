@@ -13,10 +13,10 @@ import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.UpdateLandlordDetailsJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordUpdateModel
-import uk.gov.communities.prsdb.webapp.models.formModels.EmailFormModel
-import uk.gov.communities.prsdb.webapp.models.formModels.NameFormModel
-import uk.gov.communities.prsdb.webapp.models.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 
