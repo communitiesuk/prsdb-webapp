@@ -26,6 +26,7 @@ class PropertyDetailsLandlordViewModelTests {
             listOf(
                 "landlordDetails.personalDetails.name",
                 "landlordDetails.personalDetails.dateOfBirth",
+                "landlordDetails.personalDetails.oneLoginVerified",
                 "landlordDetails.personalDetails.emailAddress",
                 "propertyDetails.landlordDetails.contactNumber",
                 "landlordDetails.personalDetails.contactAddress",
@@ -53,6 +54,7 @@ class PropertyDetailsLandlordViewModelTests {
             listOf(
                 "landlordDetails.personalDetails.name",
                 "landlordDetails.personalDetails.dateOfBirth",
+                "landlordDetails.personalDetails.oneLoginVerified",
                 "landlordDetails.personalDetails.emailAddress",
                 "propertyDetails.landlordDetails.contactNumber",
                 "propertyDetails.landlordDetails.addressNonEnglandOrWales",
@@ -193,13 +195,21 @@ class PropertyDetailsLandlordViewModelTests {
     fun `LandlordViewModel populates change links in rows that should have them`() {
         // Arrange
         val testLandlord = MockLandlordData.createLandlord()
+        val rowHeadingsWithoutChangeLinks =
+            listOf(
+                "landlordDetails.personalDetails.oneLoginVerified",
+            )
 
         // Act
         val viewModel = PropertyDetailsLandlordViewModel(testLandlord)
 
         // Assert
-        for (i in viewModel.landlordsDetails) {
-            assertNotNull(i.changeUrl)
+        for (row in viewModel.landlordsDetails) {
+            if (rowHeadingsWithoutChangeLinks.contains(row.fieldHeading)) {
+                assertNull(row.changeUrl)
+            } else {
+                assertNotNull(row.changeUrl)
+            }
         }
     }
 

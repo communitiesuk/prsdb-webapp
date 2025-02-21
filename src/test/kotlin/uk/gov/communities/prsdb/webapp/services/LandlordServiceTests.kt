@@ -123,6 +123,7 @@ class LandlordServiceTests {
                 address,
                 registrationNumber,
                 ENGLAND_OR_WALES,
+                true,
                 null,
                 null,
             )
@@ -142,6 +143,7 @@ class LandlordServiceTests {
                 "07123456789",
                 addressDataModel,
                 ENGLAND_OR_WALES,
+                true,
             )
 
         val landlordCaptor = captor<Landlord>()

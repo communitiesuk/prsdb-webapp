@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.UPDATE_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extenstions.addRow
 
 class PropertyDetailsLandlordViewModel(
@@ -22,12 +23,16 @@ class PropertyDetailsLandlordViewModel(
                     withChangeLinks,
                     landlordDetailsUrl,
                 )
-                // TODO PRSD-747 to pass Id verification status (see Figma for design)
                 addRow(
                     "landlordDetails.personalDetails.dateOfBirth",
                     landlord.dateOfBirth,
                     "$UPDATE_ROUTE/date-of-birth",
                     withChangeLinks,
+                )
+                addRow(
+                    "landlordDetails.personalDetails.oneLoginVerified",
+                    MessageKeyConverter.convert(landlord.isVerified),
+                    null,
                 )
                 addRow(
                     "landlordDetails.personalDetails.emailAddress",

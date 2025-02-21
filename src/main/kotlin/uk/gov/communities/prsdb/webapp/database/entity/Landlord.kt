@@ -65,6 +65,10 @@ class Landlord() : ModifiableAuditableEntity() {
     var isActive: Boolean = false
         private set
 
+    @Column(nullable = false)
+    var isVerified: Boolean = false
+        private set
+
     constructor(
         baseUser: OneLoginUser,
         name: String,
@@ -73,6 +77,7 @@ class Landlord() : ModifiableAuditableEntity() {
         address: Address,
         registrationNumber: RegistrationNumber,
         countryOfResidence: String,
+        isVerified: Boolean,
         nonEnglandOrWalesAddress: String?,
         dateOfBirth: LocalDate?,
     ) : this() {
@@ -83,6 +88,7 @@ class Landlord() : ModifiableAuditableEntity() {
         this.address = address
         this.registrationNumber = registrationNumber
         this.countryOfResidence = countryOfResidence
+        this.isVerified = isVerified
         this.nonEnglandOrWalesAddress = nonEnglandOrWalesAddress
         this.dateOfBirth = dateOfBirth
         this.isActive = true
