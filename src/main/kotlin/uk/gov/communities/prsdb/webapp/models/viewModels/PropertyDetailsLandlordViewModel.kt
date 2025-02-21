@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels
 
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.UPDATE_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.helpers.extenstions.addRow
@@ -7,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extenstions.addRow
 class PropertyDetailsLandlordViewModel(
     private val landlord: Landlord,
     private val withChangeLinks: Boolean = true,
-    private val landlordDetailsUrl: String = "/landlord-details",
+    private val landlordDetailsUrl: String = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
 ) {
     private val isEnglandOrWalesResident = landlord.isEnglandOrWalesResident()
 

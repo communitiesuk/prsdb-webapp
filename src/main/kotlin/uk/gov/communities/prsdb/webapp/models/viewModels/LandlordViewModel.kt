@@ -55,7 +55,8 @@ class LandlordViewModel(
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.dateOfBirth",
                     landlord.dateOfBirth,
-                    toggleChangeLink("$UPDATE_ROUTE/date-of-birth"),
+                    // TODO: PRSD-792 toggleChangeLink("$UPDATE_ROUTE/date-of-birth"),
+                    null,
                 ),
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.emailAddress",
@@ -65,12 +66,14 @@ class LandlordViewModel(
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.telephoneNumber",
                     landlord.phoneNumber,
-                    toggleChangeLink("$UPDATE_ROUTE/telephone"),
+                    // TODO: PRSD-797 toggleChangeLink("$UPDATE_ROUTE/telephone"),
+                    null,
                 ),
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.englandOrWalesResident",
                     isEnglandOrWalesResident,
-                    toggleChangeLink("$UPDATE_ROUTE/country-of-residence"),
+                    // TODO: PRSD-688 toggleChangeLink("$UPDATE_ROUTE/country-of-residence"),
+                    null,
                 ),
             )
 
@@ -89,17 +92,20 @@ class LandlordViewModel(
             SummaryListRowViewModel(
                 "landlordDetails.personalDetails.country",
                 landlord.countryOfResidence,
-                toggleChangeLink("$UPDATE_ROUTE/country-of-residence"),
+                // TODO: PRSD-688 toggleChangeLink("$UPDATE_ROUTE/country-of-residence"),
+                null,
             ),
             SummaryListRowViewModel(
                 "landlordDetails.personalDetails.nonEnglandOrWalesAddress",
                 landlord.nonEnglandOrWalesAddress,
-                toggleChangeLink("$UPDATE_ROUTE/address"),
+                // TODO: PRSD-688 toggleChangeLink("$UPDATE_ROUTE/address"),
+                null,
             ),
             SummaryListRowViewModel(
                 "landlordDetails.personalDetails.englandOrWalesAddress",
                 landlord.address.singleLineAddress,
-                toggleChangeLink("$UPDATE_ROUTE/contact-address"),
+                // TODO: PRSD-688 toggleChangeLink("$UPDATE_ROUTE/contact-address"),
+                null,
             ),
         )
 
@@ -108,7 +114,8 @@ class LandlordViewModel(
             SummaryListRowViewModel(
                 "landlordDetails.personalDetails.contactAddress",
                 landlord.address.singleLineAddress,
-                toggleChangeLink("$UPDATE_ROUTE/address"),
+                // TODO: PRSD-796 toggleChangeLink("$UPDATE_ROUTE/address"),
+                null,
             ),
         )
 

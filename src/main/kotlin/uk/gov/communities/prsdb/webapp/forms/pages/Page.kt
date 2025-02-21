@@ -27,11 +27,13 @@ open class Page(
     ): String {
         var bindingResult = bindDataToFormModel(validator, pageData)
         model.addAttribute(BindingResult.MODEL_KEY_PREFIX + "formModel", bindingResult)
-        for ((key, value) in content) {
-            model.addAttribute(key, value)
-        }
+
         if (prevStepUrl != null) {
             model.addAttribute(BACK_URL_ATTR_NAME, prevStepUrl)
+        }
+
+        for ((key, value) in content) {
+            model.addAttribute(key, value)
         }
         return templateName
     }
