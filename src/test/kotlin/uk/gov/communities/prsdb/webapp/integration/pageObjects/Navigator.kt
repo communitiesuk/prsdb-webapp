@@ -114,87 +114,70 @@ class Navigator(
 
     fun goToLandlordRegistrationDateOfBirthFormPage(): DateOfBirthFormPageLandlordRegistration {
         val nameFormPage = goToLandlordRegistrationNameFormPage()
-        nameFormPage.nameInput.fill("Arthur Dent")
-        nameFormPage.form.submit()
+        nameFormPage.submitName("Arthur Dent")
         val dateOfBirthFormPage = createValidPage(page, DateOfBirthFormPageLandlordRegistration::class)
         return dateOfBirthFormPage
     }
 
     fun goToLandlordRegistrationEmailFormPage(): EmailFormPageLandlordRegistration {
         val dateOfBirthFormPage = goToLandlordRegistrationDateOfBirthFormPage()
-        dateOfBirthFormPage.dayInput.fill("8")
-        dateOfBirthFormPage.monthInput.fill("6")
-        dateOfBirthFormPage.yearInput.fill("2000")
-        dateOfBirthFormPage.form.submit()
+        dateOfBirthFormPage.submitDateOfBirth("8", "6", "2000")
         val emailFormPage = createValidPage(page, EmailFormPageLandlordRegistration::class)
         return emailFormPage
     }
 
     fun goToLandlordRegistrationPhoneNumberFormPage(): PhoneNumberFormPageLandlordRegistration {
         val emailFormPage = goToLandlordRegistrationEmailFormPage()
-        emailFormPage.emailInput.fill("test@example.com")
-        emailFormPage.form.submit()
+        emailFormPage.submitEmail("test@example.com")
         val phoneNumberPage = createValidPage(page, PhoneNumberFormPageLandlordRegistration::class)
         return phoneNumberPage
     }
 
     fun goToLandlordRegistrationCountryOfResidencePage(): CountryOfResidenceFormPageLandlordRegistration {
         val phoneNumberPage = goToLandlordRegistrationPhoneNumberFormPage()
-        phoneNumberPage.phoneNumberInput.fill("07456097576")
-        phoneNumberPage.form.submit()
+        phoneNumberPage.submitPhoneNumber("07456097576")
         return createValidPage(page, CountryOfResidenceFormPageLandlordRegistration::class)
     }
 
     fun goToLandlordRegistrationLookupAddressPage(): LookupAddressFormPageLandlordRegistration {
         val countryOfResidencePage = goToLandlordRegistrationCountryOfResidencePage()
-        countryOfResidencePage.radios.selectValue("true")
-        countryOfResidencePage.form.submit()
+        countryOfResidencePage.submitUk()
         return createValidPage(page, LookupAddressFormPageLandlordRegistration::class)
     }
 
     fun goToLandlordRegistrationSelectAddressPage(): SelectAddressFormPageLandlordRegistration {
         val lookupAddressPage = goToLandlordRegistrationLookupAddressPage()
-        lookupAddressPage.postcodeInput.fill("EG")
-        lookupAddressPage.houseNameOrNumberInput.fill("1")
-        lookupAddressPage.form.submit()
+        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG", "1")
         return createValidPage(page, SelectAddressFormPageLandlordRegistration::class)
     }
 
     fun goToLandlordRegistrationManualAddressPage(): ManualAddressFormPageLandlordRegistration {
         val selectAddressPage = goToLandlordRegistrationSelectAddressPage()
-        selectAddressPage.radios.selectValue(MANUAL_ADDRESS_CHOSEN)
-        selectAddressPage.form.submit()
+        selectAddressPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
         return createValidPage(page, ManualAddressFormPageLandlordRegistration::class)
     }
 
     fun goToLandlordRegistrationNonEnglandOrWalesAddressPage(): NonEnglandOrWalesAddressFormPageLandlordRegistration {
         val countryOfResidencePage = goToLandlordRegistrationCountryOfResidencePage()
-        countryOfResidencePage.radios.selectValue("false")
-        countryOfResidencePage.select.autocompleteInput.fill("Zimbabwe")
-        countryOfResidencePage.select.selectValue("Zimbabwe")
-        countryOfResidencePage.form.submit()
+        countryOfResidencePage.submitNonUkCountrySelectedByPartialName("Zimbabwe", "Zimbabwe")
         return createValidPage(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
     }
 
     fun goToLandlordRegistrationLookupContactAddressPage(): LookupContactAddressFormPageLandlordRegistration {
         val nonEnglandOrWalesAddressPage = goToLandlordRegistrationNonEnglandOrWalesAddressPage()
-        nonEnglandOrWalesAddressPage.textAreaInput.fill("test address")
-        nonEnglandOrWalesAddressPage.form.submit()
+        nonEnglandOrWalesAddressPage.submitAddress("test address")
         return createValidPage(page, LookupContactAddressFormPageLandlordRegistration::class)
     }
 
     fun goToLandlordRegistrationSelectContactAddressPage(): SelectContactAddressFormPageLandlordRegistration {
         val lookupContactAddressPage = goToLandlordRegistrationLookupContactAddressPage()
-        lookupContactAddressPage.postcodeInput.fill("EG")
-        lookupContactAddressPage.houseNameOrNumberInput.fill("5")
-        lookupContactAddressPage.form.submit()
+        lookupContactAddressPage.submitPostcodeAndBuildingNameOrNumber("EG", "5")
         return createValidPage(page, SelectContactAddressFormPageLandlordRegistration::class)
     }
 
     fun goToLandlordRegistrationManualContactAddressPage(): ManualContactAddressFormPageLandlordRegistration {
         val selectAddressPage = goToLandlordRegistrationSelectContactAddressPage()
-        selectAddressPage.radios.selectValue(MANUAL_ADDRESS_CHOSEN)
-        selectAddressPage.form.submit()
+        selectAddressPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
         return createValidPage(page, ManualContactAddressFormPageLandlordRegistration::class)
     }
 
@@ -209,10 +192,11 @@ class Navigator(
                 } else {
                     goToLandlordRegistrationManualContactAddressPage()
                 }
-            manualAddressPage.addressLineOneInput.fill("1 Example Road")
-            manualAddressPage.townOrCityInput.fill("Townville")
-            manualAddressPage.postcodeInput.fill("EG1 2AB")
-            manualAddressPage.form.submit()
+            manualAddressPage.submitAddress(
+                addressLineOne = "1 Example Road",
+                townOrCity = "Townville",
+                postcode = "EG1 2AB",
+            )
             return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
         } else {
             val selectAddressPage =
@@ -221,15 +205,14 @@ class Navigator(
                 } else {
                     goToLandlordRegistrationSelectContactAddressPage()
                 }
-            selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
-            selectAddressPage.form.submit()
+            selectAddressPage.selectAddressAndSubmit("1, Example Road, EG1 2AB")
             return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
         }
     }
 
     fun goToLandlordRegistrationDeclarationPage(): DeclarationFormPageLandlordRegistration {
         val checkAnswersPage = goToLandlordRegistrationCheckAnswersPage()
-        checkAnswersPage.form.submit()
+        checkAnswersPage.confirm()
         return createValidPage(page, DeclarationFormPageLandlordRegistration::class)
     }
 
@@ -252,16 +235,14 @@ class Navigator(
 
     fun goToLaUserRegistrationEmailFormPage(token: String): EmailFormPageLaUserRegistration {
         val namePage = goToLaUserRegistrationNameFormPage(token)
-        namePage.nameInput.fill("Test user")
-        namePage.form.submit()
+        namePage.submitName("Test user")
         val emailPage = createValidPage(page, EmailFormPageLaUserRegistration::class)
         return emailPage
     }
 
     fun goToLaUserRegistrationCheckAnswersPage(token: String): CheckAnswersPageLaUserRegistration {
         val emailPage = goToLaUserRegistrationEmailFormPage(token)
-        emailPage.emailInput.fill("test.user@example.com")
-        emailPage.form.submit()
+        emailPage.submitEmail("test.user@example.com")
         val checkAnswersPage = createValidPage(page, CheckAnswersPageLaUserRegistration::class)
         return checkAnswersPage
     }
@@ -289,101 +270,89 @@ class Navigator(
 
     fun goToPropertyRegistrationSelectAddressPage(): SelectAddressFormPagePropertyRegistration {
         val addressLookupPage = goToPropertyRegistrationLookupAddressPage()
-        addressLookupPage.postcodeInput.fill("EG1 2AB")
-        addressLookupPage.houseNameOrNumberInput.fill("1")
-        addressLookupPage.form.submit()
+        addressLookupPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AB", "5")
         return createValidPage(page, SelectAddressFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationManualAddressPage(): ManualAddressFormPagePropertyRegistration {
         val addressSelectPage = goToPropertyRegistrationSelectAddressPage()
-        addressSelectPage.radios.selectValue(MANUAL_ADDRESS_CHOSEN)
-        addressSelectPage.form.submit()
+        addressSelectPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
         return createValidPage(page, ManualAddressFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationSelectLocalAuthorityPage(): SelectLocalAuthorityFormPagePropertyRegistration {
         val manualAddressPage = goToPropertyRegistrationManualAddressPage()
-        manualAddressPage.addressLineOneInput.fill("Test address line 1")
-        manualAddressPage.townOrCityInput.fill("Testville")
-        manualAddressPage.postcodeInput.fill("EG1 2AB")
-        manualAddressPage.form.submit()
+        manualAddressPage.submitAddress(
+            addressLineOne = "Test address line 1",
+            townOrCity = "Testville",
+            postcode = "EG1 2AB",
+        )
         return createValidPage(page, SelectLocalAuthorityFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationPropertyTypePage(): PropertyTypeFormPagePropertyRegistration {
         val selectAddressPage = goToPropertyRegistrationSelectAddressPage()
-        selectAddressPage.radios.selectValue("1, Example Road, EG1 2AB")
-        selectAddressPage.form.submit()
+        selectAddressPage.selectAddressAndSubmit("1, Example Road, EG1 2AB")
         return createValidPage(page, PropertyTypeFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationOwnershipTypePage(): OwnershipTypeFormPagePropertyRegistration {
         val propertyTypePage = goToPropertyRegistrationPropertyTypePage()
-        propertyTypePage.form.getRadios().selectValue(PropertyType.DETACHED_HOUSE)
-        propertyTypePage.form.submit()
+        propertyTypePage.submitPropertyType(PropertyType.DETACHED_HOUSE)
         return createValidPage(page, OwnershipTypeFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationLicensingTypePage(): LicensingTypeFormPagePropertyRegistration {
         val ownershipTypePage = goToPropertyRegistrationOwnershipTypePage()
-        ownershipTypePage.form.getRadios().selectValue(OwnershipType.FREEHOLD)
-        ownershipTypePage.form.submit()
+        ownershipTypePage.submitOwnershipType(OwnershipType.FREEHOLD)
         return createValidPage(page, LicensingTypeFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationSelectiveLicencePage(): SelectiveLicenceFormPagePropertyRegistration {
         val licensingTypePage = goToPropertyRegistrationLicensingTypePage()
-        licensingTypePage.form.getRadios().selectValue(LicensingType.SELECTIVE_LICENCE)
-        licensingTypePage.form.submit()
+        licensingTypePage.submitLicensingType(LicensingType.SELECTIVE_LICENCE)
         return createValidPage(page, SelectiveLicenceFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationHmoMandatoryLicencePage(): HmoMandatoryLicenceFormPagePropertyRegistration {
         val licensingTypePage = goToPropertyRegistrationLicensingTypePage()
-        licensingTypePage.form.getRadios().selectValue(LicensingType.HMO_MANDATORY_LICENCE)
-        licensingTypePage.form.submit()
+        licensingTypePage.submitLicensingType(LicensingType.HMO_MANDATORY_LICENCE)
         return createValidPage(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationHmoAdditionalLicencePage(): HmoAdditionalLicenceFormPagePropertyRegistration {
         val licensingTypePage = goToPropertyRegistrationLicensingTypePage()
-        licensingTypePage.form.getRadios().selectValue(LicensingType.HMO_ADDITIONAL_LICENCE)
-        licensingTypePage.form.submit()
+        licensingTypePage.submitLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
         return createValidPage(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationOccupancyPage(): OccupancyFormPagePropertyRegistration {
         val licensingTypePage = goToPropertyRegistrationLicensingTypePage()
-        licensingTypePage.form.getRadios().selectValue(LicensingType.NO_LICENSING)
-        licensingTypePage.form.submit()
+        licensingTypePage.submitLicensingType(LicensingType.NO_LICENSING)
         return createValidPage(page, OccupancyFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationHouseholdsPage(): HouseholdsFormPagePropertyRegistration {
         val occupancyPage = goToPropertyRegistrationOccupancyPage()
-        occupancyPage.form.getRadios().selectValue("true")
-        occupancyPage.form.submit()
+        occupancyPage.submitIsOccupied()
         return createValidPage(page, HouseholdsFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationPeoplePage(): PeopleFormPagePropertyRegistration {
         val householdsPage = goToPropertyRegistrationHouseholdsPage()
-        householdsPage.householdsInput.fill("2")
-        householdsPage.form.submit()
+        householdsPage.submitNumberOfHouseholds(2)
         return createValidPage(page, PeopleFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
         val peoplePage = goToPropertyRegistrationPeoplePage()
-        peoplePage.peopleInput.fill("4")
-        peoplePage.form.submit()
+        peoplePage.submitNumOfPeople(4)
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationDeclarationPage(): DeclarationFormPagePropertyRegistration {
         val checkAnswersPage = goToPropertyRegistrationCheckAnswersPage()
-        checkAnswersPage.form.submit()
+        checkAnswersPage.confirm()
         return createValidPage(page, DeclarationFormPagePropertyRegistration::class)
     }
 
