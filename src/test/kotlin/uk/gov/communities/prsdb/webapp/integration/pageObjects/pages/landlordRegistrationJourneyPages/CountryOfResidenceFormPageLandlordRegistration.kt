@@ -21,12 +21,12 @@ class CountryOfResidenceFormPageLandlordRegistration(
         form.submit()
     }
 
-    fun submitNonUkFromPartial(
-        countryFragment: String,
+    fun submitNonUkCountrySelectedByPartialName(
+        countryNamePartial: String,
         countryNameFull: String,
     ) {
         form.selectNonUk()
-        form.countrySelect.fillPartialAndSelectValue(countryFragment, countryNameFull)
+        form.countrySelect.fillPartialAndSelectValue(countryNamePartial, countryNameFull)
         form.submit()
     }
 

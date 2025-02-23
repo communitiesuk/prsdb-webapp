@@ -187,7 +187,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         phoneNumPage.submitPhoneNumber(phoneNumberUtil.getFormattedUkPhoneNumber())
 
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
-        countryOfResidencePage.submitNonUkFromPartial("Zi", "Zimbabwe")
+        countryOfResidencePage.submitNonUkCountrySelectedByPartialName("Zi", "Zimbabwe")
 
         val nonEnglandOrWalesAddressPage = assertPageIs(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
         assertThat(nonEnglandOrWalesAddressPage.form.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
@@ -241,7 +241,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         phoneNumPage.submitPhoneNumber(phoneNumberUtil.getFormattedUkPhoneNumber())
 
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
-        countryOfResidencePage.submitNonUkFromPartial("Zi", "Zimbabwe")
+        countryOfResidencePage.submitNonUkCountrySelectedByPartialName("Zi", "Zimbabwe")
 
         val nonEnglandOrWalesAddressPage = assertPageIs(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
         nonEnglandOrWalesAddressPage.submitAddress("test address")

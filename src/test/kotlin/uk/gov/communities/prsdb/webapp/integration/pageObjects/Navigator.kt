@@ -159,7 +159,7 @@ class Navigator(
 
     fun goToLandlordRegistrationNonEnglandOrWalesAddressPage(): NonEnglandOrWalesAddressFormPageLandlordRegistration {
         val countryOfResidencePage = goToLandlordRegistrationCountryOfResidencePage()
-        countryOfResidencePage.submitNonUkFromPartial("Zimbabwe", "Zimbabwe")
+        countryOfResidencePage.submitNonUkCountrySelectedByPartialName("Zimbabwe", "Zimbabwe")
         return createValidPage(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
     }
 
