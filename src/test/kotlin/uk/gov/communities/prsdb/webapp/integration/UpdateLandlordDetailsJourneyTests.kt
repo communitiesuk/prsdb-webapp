@@ -22,8 +22,7 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
             .clickAndWait()
         val updateNamePage = assertPageIs(page, NameFormPageUpdateLandlordDetails::class)
 
-        updateNamePage.nameInput.fill(newName)
-        updateNamePage.form.submit()
+        updateNamePage.submitName(newName)
         return assertPageIs(page, LandlordUpdateDetailsPage::class)
     }
 
@@ -36,8 +35,7 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
             .clickAndWait()
         val updateEmailPage = assertPageIs(page, EmailFormPageUpdateLandlordDetails::class)
 
-        updateEmailPage.emailInput.fill(newEmail)
-        updateEmailPage.form.submit()
+        updateEmailPage.submitEmail(newEmail)
         return assertPageIs(page, LandlordUpdateDetailsPage::class)
     }
 
