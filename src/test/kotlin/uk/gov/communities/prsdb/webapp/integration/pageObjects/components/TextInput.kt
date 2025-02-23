@@ -3,8 +3,9 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.components
 import com.microsoft.playwright.Locator
 
 class TextInput(
-    locator: Locator,
-) : BaseComponent(locator) {
+    override val locator: Locator,
+) : BaseComponent(locator),
+    TextFillable {
     companion object {
         fun textByFieldName(
             parentLocator: Locator,
@@ -22,6 +23,4 @@ class TextInput(
             fieldName: String? = null,
         ) = TextInput(parentLocator.locator("input[type='$type']${if (fieldName == null) "" else "[name='$fieldName']"}"))
     }
-
-    fun fill(text: String) = locator.fill(text)
 }

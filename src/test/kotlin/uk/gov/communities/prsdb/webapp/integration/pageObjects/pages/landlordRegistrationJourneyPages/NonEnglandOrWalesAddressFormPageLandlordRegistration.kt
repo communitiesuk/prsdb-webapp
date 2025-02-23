@@ -23,6 +23,6 @@ class NonEnglandOrWalesAddressFormPageLandlordRegistration(
     class InternationalAddressFormLandlord(
         page: Page,
     ) : FormWithSectionHeader(page) {
-        val textAreaInput = TextArea(locator)
+        val textAreaInput = TextArea.default(locator)
     }
 }
