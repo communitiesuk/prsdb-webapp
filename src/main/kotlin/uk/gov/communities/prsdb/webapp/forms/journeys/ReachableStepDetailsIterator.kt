@@ -1,46 +1,97 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 
 class ReachableStepDetailsIterator<T : StepId>(
-    val journeyData: JourneyData,
-    val steps: Iterable<Step<T>>,
-    val initialStepId: T,
-    val validator: Validator,
+    journeyData: JourneyData,
+    private val steps: Iterable<Step<T>>,
+    private val initialStepId: T,
+    private val validator: Validator,
 ) : Iterator<StepDetails<T>> {
-    lateinit var currentStepDetails: StepDetails<T>
+    private lateinit var currentStepDetails: StepDetails<T>
+    private val immutableJourneyData = journeyData.toMap()
 
     override fun hasNext(): Boolean {
-        if (!this::currentStepDetails.isInitialized) return steps.count { step -> step.id == initialStepId } == 1
-        val pageData = JourneyDataHelper.getPageData(journeyData, currentStepDetails.step.name, currentStepDetails.subPageNumber)
-        if (pageData == null || !currentStepDetails.step.isSatisfied(validator, pageData)) {
-            return false
+        if (!this::currentStepDetails.isInitialized) {
+            return steps.count { step -> step.id == initialStepId } == 1
         }
 
-        return currentStepDetails.step.nextAction(journeyData, currentStepDetails.subPageNumber).first != null
+        return isStepSatisfied(currentStepDetails) && subsequentStepDetailsOrNull(currentStepDetails) != null
     }
 
     override fun next(): StepDetails<T> {
-        if (!this::currentStepDetails.isInitialized) {
-            currentStepDetails = StepDetails(steps.single { step -> step.id == initialStepId }, null, mutableMapOf())
-        } else {
-            val pageData = JourneyDataHelper.getPageData(journeyData, currentStepDetails.step.name, currentStepDetails.subPageNumber)
-            if (pageData == null || !currentStepDetails.step.isSatisfied(validator, pageData)) {
-                throw PrsdbWebException("Does not have next")
+        currentStepDetails =
+            if (!this::currentStepDetails.isInitialized) {
+                initialStepDetails()
+            } else {
+                subsequentStepDetails(currentStepDetails)
             }
-            val stepData = JourneyDataHelper.getPageData(journeyData, currentStepDetails.step.name, null)
-            currentStepDetails.filteredJourneyData[currentStepDetails.step.name] = stepData
-
-            val (nextStepId, nextSubPageNumber) = currentStepDetails.step.nextAction(journeyData, currentStepDetails.subPageNumber)
-            if (nextStepId == null) throw PrsdbWebException("Does not have next")
-            val nextStep = steps.single { step -> step.id == nextStepId }
-            currentStepDetails = StepDetails(nextStep, nextSubPageNumber, currentStepDetails.filteredJourneyData)
-        }
         return currentStepDetails
+    }
+
+    private fun initialStepDetails() =
+        steps.singleOrNull { step -> step.id == initialStepId }.let {
+            if (it == null) {
+                throw NoSuchElementException("Journey does not have initial step")
+            } else {
+                StepDetails(it, null, mutableMapOf())
+            }
+        }
+
+    private fun getInitialStepDetailsProcedural(): StepDetails<T> {
+        val initialStepOrNull = steps.singleOrNull { step -> step.id == initialStepId }
+        if (initialStepOrNull == null) {
+            throw NoSuchElementException("Journey does not have initial step")
+        }
+
+        return StepDetails(initialStepOrNull, null, mutableMapOf())
+    }
+
+    private fun subsequentStepDetails(currentStep: StepDetails<T>): StepDetails<T> {
+        if (!isStepSatisfied(currentStep)) {
+            throw NoSuchElementException("The previous step of the journey has not been validly completed")
+        }
+        return subsequentStepDetailsOrNull(currentStep)
+            ?: throw NoSuchElementException("The previous step of the journey is the last step")
+    }
+
+    private fun subsequentStepDetailsOrNull(currentStep: StepDetails<T>): StepDetails<T>? {
+        val filteredJourneyData = subsequentFilteredJourneyData(currentStep.filteredJourneyData)
+
+        val (nextStepId, nextSubPageNumber) =
+            currentStep.step.nextAction(
+                immutableJourneyData.toMutableMap(),
+                currentStep.subPageNumber,
+            )
+        val nextStep = steps.singleOrNull { step -> step.id == nextStepId }
+
+        if (nextStep == null) {
+            return null
+        }
+        return StepDetails(nextStep, nextSubPageNumber, filteredJourneyData.toMutableMap())
+    }
+
+    private fun subsequentFilteredJourneyData(filteredJourneyData: Map<String, Any?>): Map<String, Any?> {
+        val stepData =
+            JourneyDataHelper.getPageData(
+                immutableJourneyData.toMutableMap(),
+                currentStepDetails.step.name,
+                null,
+            )
+        return filteredJourneyData + Pair(currentStepDetails.step.name, stepData)
+    }
+
+    private fun isStepSatisfied(step: StepDetails<T>): Boolean {
+        val subPageData =
+            JourneyDataHelper.getPageData(
+                immutableJourneyData.toMutableMap(),
+                step.step.name,
+                step.subPageNumber,
+            )
+        return subPageData != null && step.step.isSatisfied(validator, subPageData)
     }
 }
