@@ -139,10 +139,18 @@ abstract class Journey<T : StepId>(
     private fun getPrevStep(
         targetStep: Step<T>,
         targetSubPageNumber: Int?,
-    ): StepDetails<T>? =
-        zipWithNext()
-            .singleOrNull { (_, next) -> next.step == targetStep && next.subPageNumber == targetSubPageNumber }
-            ?.first
+    ): StepDetails<T>? {
+        val lastTwoSteps =
+            zipWithNext()
+                .singleOrNull { (_, next) ->
+                    next.step == targetStep && next.subPageNumber == targetSubPageNumber
+                }
+        return lastTwoSteps?.let {
+            val previousStep = lastTwoSteps.first
+            val currentStep = lastTwoSteps.second
+            StepDetails(previousStep.step, previousStep.subPageNumber, currentStep.filteredJourneyData)
+        }
+    }
 
     private fun getPrevStepUrl(
         prevStep: Step<T>?,
