@@ -105,9 +105,9 @@ class UpdateLandlordDetailsJourney(
         val journeyData = journeyDataService.getJourneyDataFromSession()
         val originalLandlordData =
             JourneyDataHelper.getPageData(journeyData, ORIGINAL_LANDLORD_DATA_KEY)
-                ?: return StepDetailsIterator(journeyData, steps, initialStepId, validator)
+                ?: return ReachableStepDetailsIterator(journeyData, steps, initialStepId, validator)
         val updatedLandlordData = getUpdatedLandlordData(journeyData, originalLandlordData)
-        return StepDetailsIterator(updatedLandlordData, steps, initialStepId, validator)
+        return ReachableStepDetailsIterator(updatedLandlordData, steps, initialStepId, validator)
     }
 
     private fun getUpdatedLandlordData(
