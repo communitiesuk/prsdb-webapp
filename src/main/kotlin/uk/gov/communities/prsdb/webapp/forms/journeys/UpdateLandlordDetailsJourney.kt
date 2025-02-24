@@ -35,7 +35,14 @@ class UpdateLandlordDetailsJourney(
     private val updateDetailsStep =
         Step(
             id = UpdateDetailsStepId.UpdateDetails,
-            page = Page(NoInputFormModel::class, "error/500", mapOf()),
+            page =
+                Page(
+                    NoInputFormModel::class,
+                    "landlordDetailsView",
+                    mapOf(
+                        BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
+                    ),
+                ),
             handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
         )
 
