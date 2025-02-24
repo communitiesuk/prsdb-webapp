@@ -22,17 +22,9 @@ class JourneyDataService(
     private val oneLoginUserRepository: OneLoginUserRepository,
     private val objectMapper: ObjectMapper,
 ) {
-    var journeyDataCache: Map<String, Any?>? = null
-
-    fun getJourneyDataFromSession(): JourneyData {
-        if (journeyDataCache == null) {
-            journeyDataCache = objectToStringKeyedMap(session.getAttribute("journeyData"))?.toMap() ?: mapOf()
-        }
-        return journeyDataCache!!.toMutableMap()
-    }
+    fun getJourneyDataFromSession(): JourneyData = objectToStringKeyedMap(session.getAttribute("journeyData")) ?: mutableMapOf()
 
     fun setJourneyData(journeyData: JourneyData) {
-        journeyDataCache = journeyData.toMap()
         session.setAttribute("journeyData", journeyData)
     }
 
@@ -95,7 +87,6 @@ class JourneyDataService(
     }
 
     fun clearJourneyDataFromSession() {
-        journeyDataCache = null
         session.setAttribute("journeyData", null)
     }
 }
