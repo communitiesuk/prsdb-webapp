@@ -357,7 +357,7 @@ class LandlordServiceTests {
         val originalName = "original name"
         val originalEmail = "original email"
         val landlordEntity = createLandlord(name = originalName, email = originalEmail)
-        val updateModel = LandlordUpdateModel(null, null)
+        val updateModel = LandlordUpdateModel(null, null, null)
 
         whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
 
