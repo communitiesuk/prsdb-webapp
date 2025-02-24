@@ -31,6 +31,7 @@ class ReachableStepDetailsIterator<T : StepId>(
             } else {
                 subsequentStepDetails(currentStepDetails)
             }
+        currentFilteredJourneyData = currentStepDetails.filteredJourneyData.toMap()
         return currentStepDetails
     }
 
@@ -39,7 +40,8 @@ class ReachableStepDetailsIterator<T : StepId>(
             if (it == null) {
                 throw NoSuchElementException("Journey does not have initial step")
             } else {
-                StepDetails(it, null, currentFilteredJourneyData.toMutableMap())
+                val nextFilteredJourneyData = subsequentFilteredJourneyData(currentFilteredJourneyData, it.name)
+                StepDetails(it, null, nextFilteredJourneyData.toMutableMap())
             }
         }
 
@@ -49,7 +51,8 @@ class ReachableStepDetailsIterator<T : StepId>(
             throw NoSuchElementException("Journey does not have initial step")
         }
 
-        return StepDetails(initialStepOrNull, null, mutableMapOf())
+        val nextFilteredJourneyData = subsequentFilteredJourneyData(currentFilteredJourneyData, initialStepOrNull.name)
+        return StepDetails(initialStepOrNull, null, nextFilteredJourneyData.toMutableMap())
     }
 
     private fun subsequentStepDetails(currentStep: StepDetails<T>): StepDetails<T> {
@@ -61,8 +64,6 @@ class ReachableStepDetailsIterator<T : StepId>(
     }
 
     private fun subsequentStepDetailsOrNull(currentStep: StepDetails<T>): StepDetails<T>? {
-        currentFilteredJourneyData = subsequentFilteredJourneyData(currentFilteredJourneyData)
-
         val (nextStepId, nextSubPageNumber) =
             currentStep.step.nextAction(
                 immutableJourneyData.toMutableMap(),
@@ -73,17 +74,21 @@ class ReachableStepDetailsIterator<T : StepId>(
         if (nextStep == null) {
             return null
         }
-        return StepDetails(nextStep, nextSubPageNumber, currentFilteredJourneyData.toMutableMap())
+        val nextFilteredJourneyData = subsequentFilteredJourneyData(currentFilteredJourneyData, nextStep.name)
+        return StepDetails(nextStep, nextSubPageNumber, nextFilteredJourneyData.toMutableMap())
     }
 
-    private fun subsequentFilteredJourneyData(filteredJourneyData: Map<String, Any?>): Map<String, Any?> {
+    private fun subsequentFilteredJourneyData(
+        filteredJourneyData: Map<String, Any?>,
+        stepName: String,
+    ): Map<String, Any?> {
         val stepData =
             JourneyDataHelper.getPageData(
                 immutableJourneyData.toMutableMap(),
-                currentStepDetails.step.name,
+                stepName,
                 null,
             )
-        return filteredJourneyData + Pair(currentStepDetails.step.name, stepData)
+        return filteredJourneyData + Pair(stepName, stepData)
     }
 
     private fun isStepSatisfied(step: StepDetails<T>): Boolean {

@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -149,14 +148,14 @@ class ReachableStepDetailsIteratorTest {
         }
 
         @Test
-        fun `next adds the current step's data to the filtered journey data of the next step`() {
+        fun `next adds the next step's data to the filtered journey data of the next step`() {
             // Arrange
-            val currentStepModel = TestStepModel("1", isSatisfied = true)
+            val currentStepModel = TestStepModel("2", isSatisfied = true)
             val builder =
                 TestIteratorBuilder()
                     .onStep(1)
+                    .addStepToEnd(TestStepModel("1", isSatisfied = true))
                     .addStepToEnd(currentStepModel)
-                    .addStepToEnd(TestStepModel("2", isSatisfied = true))
             val pageDataForStep = builder.getDataForStep(currentStepModel.urlPathSegment)
 
             val testIterator = builder.build()
@@ -166,21 +165,6 @@ class ReachableStepDetailsIteratorTest {
 
             // Assert
             assertEquals(pageDataForStep, nextStepDetails.filteredJourneyData[currentStepModel.urlPathSegment])
-        }
-
-        @Test
-        fun `next does not add the next step's data to the filtered journey data of the next step`() {
-            // Arrange
-            val stepModel = TestStepModel("1", isSatisfied = true)
-            val builder = TestIteratorBuilder().addStepToEnd(stepModel)
-
-            val testIterator = builder.build()
-
-            // Act
-            val nextStepDetails = testIterator.next()
-
-            // Assert
-            assertNull(nextStepDetails.filteredJourneyData[stepModel.urlPathSegment])
         }
 
         @Test
