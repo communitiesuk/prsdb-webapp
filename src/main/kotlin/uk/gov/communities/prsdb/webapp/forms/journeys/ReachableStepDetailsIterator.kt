@@ -13,6 +13,7 @@ class ReachableStepDetailsIterator<T : StepId>(
     private val validator: Validator,
 ) : Iterator<StepDetails<T>> {
     private lateinit var currentStepDetails: StepDetails<T>
+    private var currentFilteredJourneyData: Map<String, Any?> = mapOf()
     private val immutableJourneyData = journeyData.toMap()
 
     override fun hasNext(): Boolean {
@@ -38,7 +39,7 @@ class ReachableStepDetailsIterator<T : StepId>(
             if (it == null) {
                 throw NoSuchElementException("Journey does not have initial step")
             } else {
-                StepDetails(it, null, mutableMapOf())
+                StepDetails(it, null, currentFilteredJourneyData.toMutableMap())
             }
         }
 
@@ -60,7 +61,7 @@ class ReachableStepDetailsIterator<T : StepId>(
     }
 
     private fun subsequentStepDetailsOrNull(currentStep: StepDetails<T>): StepDetails<T>? {
-        val filteredJourneyData = subsequentFilteredJourneyData(currentStep.filteredJourneyData)
+        currentFilteredJourneyData = subsequentFilteredJourneyData(currentFilteredJourneyData)
 
         val (nextStepId, nextSubPageNumber) =
             currentStep.step.nextAction(
@@ -72,7 +73,7 @@ class ReachableStepDetailsIterator<T : StepId>(
         if (nextStep == null) {
             return null
         }
-        return StepDetails(nextStep, nextSubPageNumber, filteredJourneyData.toMutableMap())
+        return StepDetails(nextStep, nextSubPageNumber, currentFilteredJourneyData.toMutableMap())
     }
 
     private fun subsequentFilteredJourneyData(filteredJourneyData: Map<String, Any?>): Map<String, Any?> {
