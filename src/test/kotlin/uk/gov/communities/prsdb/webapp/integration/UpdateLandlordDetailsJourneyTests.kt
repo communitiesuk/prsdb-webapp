@@ -88,7 +88,7 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
         var landlordDetailsUpdatePage = navigator.goToUpdateLandlordDetailsPage()
         assertThat(landlordDetailsUpdatePage.heading).containsText("Alexander Smith")
 
-        val landlordName = phoneNumberUtil.getFormattedUkPhoneNumber()
+        val landlordName = "landlord name"
         landlordDetailsUpdatePage = updateLandlordNameAndReturn(landlordDetailsUpdatePage, landlordName)
 
         // Submit changes TODO PRSD-355 add proper submit button and declaration page
