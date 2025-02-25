@@ -98,18 +98,16 @@ class UpdateLandlordDetailsJourney(
         if (journeyData[ORIGINAL_LANDLORD_DATA_KEY] == null) {
             UpdateDetailsStepId.UpdateDetails.urlPathSegment
         } else {
-            getLastReachableStep(journeyData)!!.step.id.urlPathSegment
+            last().step.id.urlPathSegment
         }
 
-    override fun getPrevStep(
-        journeyData: JourneyData,
-        targetStep: Step<UpdateDetailsStepId>,
-        targetSubPageNumber: Int?,
-    ): StepDetails<UpdateDetailsStepId>? {
-        val originalLandlordData = JourneyDataHelper.getPageData(journeyData, ORIGINAL_LANDLORD_DATA_KEY) ?: return null
+    override fun iterator(): Iterator<StepDetails<UpdateDetailsStepId>> {
+        val journeyData = journeyDataService.getJourneyDataFromSession()
+        val originalLandlordData =
+            JourneyDataHelper.getPageData(journeyData, ORIGINAL_LANDLORD_DATA_KEY)
+                ?: return ReachableStepDetailsIterator(journeyData, steps, initialStepId, validator)
         val updatedLandlordData = getUpdatedLandlordData(journeyData, originalLandlordData)
-
-        return super.getPrevStep(updatedLandlordData, targetStep, targetSubPageNumber)
+        return ReachableStepDetailsIterator(updatedLandlordData, steps, initialStepId, validator)
     }
 
     private fun getUpdatedLandlordData(
