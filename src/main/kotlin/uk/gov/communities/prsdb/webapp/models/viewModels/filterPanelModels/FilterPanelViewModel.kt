@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.filterPanelModels
 import jakarta.servlet.http.HttpServletRequest
 import uk.gov.communities.prsdb.webapp.helpers.URIQueryBuilder
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.SearchRequestModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.CheckboxViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 import kotlin.properties.Delegates
 import kotlin.reflect.full.memberProperties
 

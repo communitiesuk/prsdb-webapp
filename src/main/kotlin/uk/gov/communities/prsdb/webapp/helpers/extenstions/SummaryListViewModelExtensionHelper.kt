@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.helpers.extenstions
 
-import uk.gov.communities.prsdb.webapp.models.viewModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
 fun MutableList<SummaryListRowViewModel>.addRow(
     key: String,

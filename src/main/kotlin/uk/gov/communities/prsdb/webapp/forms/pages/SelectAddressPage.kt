@@ -5,10 +5,10 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
-import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosDividerViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosViewModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import kotlin.reflect.KClass

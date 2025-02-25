@@ -12,7 +12,6 @@ class CheckAnswersPageLaUserRegistration(
     page: Page,
 ) : BasePage(page, "/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.CheckAnswers.urlPathSegment}") {
     val form = CheckAnswersLaUserRegistrationForm(page)
-    val heading = form.getFieldsetHeading()
 
     class CheckAnswersLaUserRegistrationForm(
         page: Page,

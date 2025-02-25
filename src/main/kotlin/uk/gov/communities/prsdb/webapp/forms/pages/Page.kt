@@ -8,7 +8,7 @@ import org.springframework.web.bind.WebDataBinder
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
-import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -27,11 +27,13 @@ open class Page(
     ): String {
         var bindingResult = bindDataToFormModel(validator, pageData)
         model.addAttribute(BindingResult.MODEL_KEY_PREFIX + "formModel", bindingResult)
-        for ((key, value) in content) {
-            model.addAttribute(key, value)
-        }
+
         if (prevStepUrl != null) {
             model.addAttribute(BACK_URL_ATTR_NAME, prevStepUrl)
+        }
+
+        for ((key, value) in content) {
+            model.addAttribute(key, value)
         }
         return templateName
     }

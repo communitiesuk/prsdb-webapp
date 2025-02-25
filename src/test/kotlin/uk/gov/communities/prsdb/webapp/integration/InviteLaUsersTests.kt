@@ -13,8 +13,7 @@ class InviteLaUsersTests : IntegrationTest() {
     @Test
     fun `inviting a new LA user ends with a success page`(page: Page) {
         val invitePage = navigator.goToInviteNewLaUser(1)
-        invitePage.fillBothEmailFields("test@example.com")
-        invitePage.form.submit()
+        invitePage.submitMatchingEmail("test@example.com")
         val successPage = assertPageIs(page, InviteNewLaUserSuccessPage::class)
         assertThat(successPage.confirmationBanner).containsText("You've sent test@example.com an invite to the database")
     }
@@ -22,9 +21,7 @@ class InviteLaUsersTests : IntegrationTest() {
     @Test
     fun `inviting a new LA user shows validation errors if the email addresses don't match`() {
         val invitePage = navigator.goToInviteNewLaUser(1)
-        invitePage.emailInput.fill("test@example.com")
-        invitePage.confirmEmailInput.fill("different@example.com")
-        invitePage.form.submit()
+        invitePage.submitMismatchedEmails("test@example.com", "different@example.com")
         assertThat(invitePage.form.getErrorMessage()).containsText("Both email address should match")
     }
 }

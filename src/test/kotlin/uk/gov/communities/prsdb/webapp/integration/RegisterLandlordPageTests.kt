@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.jdbc.Sql
-import uk.gov.communities.prsdb.webapp.models.formModels.VerifiedIdentityModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.VerifiedIdentityModel
 import java.net.URI
 import java.time.LocalDate
 

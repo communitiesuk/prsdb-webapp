@@ -18,12 +18,12 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
-import uk.gov.communities.prsdb.webapp.models.dataModels.ConfirmedEmailDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
-import uk.gov.communities.prsdb.webapp.models.emailModels.LocalAuthorityInvitationCancellationEmail
-import uk.gov.communities.prsdb.webapp.models.emailModels.LocalAuthorityInvitationEmail
+import uk.gov.communities.prsdb.webapp.models.requestModels.ConfirmedEmailRequestModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityInvitationCancellationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityInvitationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
@@ -117,7 +117,7 @@ class ManageLocalAuthorityUsersController(
     fun updateUserAccessLevel(
         @PathVariable localAuthorityId: Int,
         @PathVariable localAuthorityUserId: Long,
-        @ModelAttribute localAuthorityUserAccessLevel: LocalAuthorityUserAccessLevelDataModel,
+        @ModelAttribute localAuthorityUserAccessLevel: LocalAuthorityUserAccessLevelRequestModel,
         principal: Principal,
     ): String {
         val (currentUser, _) =
@@ -206,7 +206,7 @@ class ManageLocalAuthorityUsersController(
                 principal.name,
             )
         model.addAttribute("councilName", currentAuthority.name)
-        model.addAttribute("confirmedEmailDataModel", ConfirmedEmailDataModel())
+        model.addAttribute("confirmedEmailRequestModel", ConfirmedEmailRequestModel())
 
         return "inviteLAUser"
     }
@@ -217,7 +217,7 @@ class ManageLocalAuthorityUsersController(
         model: Model,
         @Valid
         @ModelAttribute
-        emailModel: ConfirmedEmailDataModel,
+        emailModel: ConfirmedEmailRequestModel,
         bindingResult: BindingResult,
         principal: Principal,
         redirectAttributes: RedirectAttributes,

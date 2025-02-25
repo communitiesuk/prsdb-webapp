@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -7,14 +8,11 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import java.security.Principal
@@ -22,10 +20,9 @@ import java.security.Principal
 @Controller
 @RequestMapping("/${REGISTER_LA_USER_JOURNEY_URL}")
 class RegisterLAUserController(
-    var laUserRegistrationJourney: LaUserRegistrationJourney,
-    var invitationService: LocalAuthorityInvitationService,
-    var journeyDataService: JourneyDataService,
-    var localAuthorityDataService: LocalAuthorityDataService,
+    val laUserRegistrationJourney: LaUserRegistrationJourney,
+    val invitationService: LocalAuthorityInvitationService,
+    val localAuthorityDataService: LocalAuthorityDataService,
 ) {
     @GetMapping
     fun acceptInvitation(
@@ -36,11 +33,11 @@ class RegisterLAUserController(
         // see https://github.com/spring-projects/spring-hateoas/issues/155 for details
         if (invitationService.tokenIsValid(token)) {
             invitationService.storeTokenInSession(token)
-            prePopulateJourneyData(token)
+            laUserRegistrationJourney.initialiseJourneyData(token)
             return "redirect:${REGISTER_LA_USER_JOURNEY_URL}/${laUserRegistrationJourney.initialStepId.urlPathSegment}"
         }
 
-        return "redirect:${REGISTER_LA_USER_JOURNEY_URL}/invalid-link"
+        return "redirect:$INVALID_LINK_PAGE_PATH_SEGMENT"
     }
 
     @GetMapping("/{stepName}")
@@ -52,7 +49,7 @@ class RegisterLAUserController(
         val token = invitationService.getTokenFromSession()
         if (token == null || !invitationService.tokenIsValid(token)) {
             invitationService.clearTokenFromSession()
-            return "redirect:invalid-link"
+            return "redirect:$INVALID_LINK_PAGE_PATH_SEGMENT"
         }
 
         return laUserRegistrationJourney.populateModelAndGetViewName(
@@ -78,49 +75,36 @@ class RegisterLAUserController(
             principal,
         )
 
-    @GetMapping("/invalid-link")
-    fun invalidToken(model: Model): String = "invalidLaInvitationLink"
-
-    fun prePopulateJourneyData(token: String) {
-        val journeyData = journeyDataService.getJourneyDataFromSession()
-
-        val emailStep = laUserRegistrationJourney.steps.singleOrNull { step -> step.id == RegisterLaUserStepId.Email }
-        val formData = mutableMapOf<String, Any?>("emailAddress" to invitationService.getEmailAddressForToken(token))
-        emailStep?.updateJourneyData(journeyData, formData, null)
-
-        journeyDataService.setJourneyData(journeyData)
-    }
-
-    @GetMapping("/success")
-    fun submitRegistration(
+    @GetMapping("/$CONFIRMATION_PAGE_PATH_SEGMENT")
+    fun getConfirmation(
         model: Model,
         principal: Principal,
     ): String {
-        val token = invitationService.getTokenFromSession()
-        if (token == null || !invitationService.tokenIsValid(token)) {
-            invitationService.clearTokenFromSession()
-            return "redirect:invalid-link"
-        }
-        val localAuthority = invitationService.getAuthorityForToken(token)
+        val localAuthorityUserID =
+            localAuthorityDataService.getLastUserIdRegisteredThisSession()
+                ?: throw ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "No registered LA user was found in the session",
+                )
 
-        val journeyData = journeyDataService.getJourneyDataFromSession()
-        val name = objectToStringKeyedMap(journeyData["name"])?.get("name").toString()
-        val email = objectToStringKeyedMap(journeyData["email"])?.get("emailAddress").toString()
+        val localAuthorityUser =
+            localAuthorityDataService.getLocalAuthorityUserOrNull(localAuthorityUserID)
+                ?: throw ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "No LA user with ID $localAuthorityUserID was found in the database",
+                )
 
-        if (name == "null" || email == "null") {
-            throw(PrsdbWebException("The form has not been fully completed"))
-        }
-
-        localAuthorityDataService.registerNewUser(principal.name, localAuthority, name, email)
-
-        val invitation = invitationService.getInvitationFromToken(token)
-        invitationService.deleteInvitation(invitation)
-        invitationService.clearTokenFromSession()
-        journeyDataService.clearJourneyDataFromSession()
-
-        model.addAttribute("localAuthority", localAuthority.name)
+        model.addAttribute("localAuthority", localAuthorityUser.localAuthority.name)
         model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
 
         return "registerLAUserSuccess"
+    }
+
+    @GetMapping("/$INVALID_LINK_PAGE_PATH_SEGMENT")
+    fun invalidToken(model: Model): String = "invalidLaInvitationLink"
+
+    companion object {
+        const val CONFIRMATION_PAGE_PATH_SEGMENT = "confirmation"
+        const val INVALID_LINK_PAGE_PATH_SEGMENT = "invalid-link"
     }
 }

@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -9,19 +10,21 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LA_USERS_TABLE_PAGE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
-import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserAccessLevelDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
 
 @Service
 class LocalAuthorityDataService(
-    val localAuthorityUserRepository: LocalAuthorityUserRepository,
-    val localAuthorityUserOrInvitationRepository: LocalAuthorityUserOrInvitationRepository,
-    val oneLoginUserService: OneLoginUserService,
+    private val localAuthorityUserRepository: LocalAuthorityUserRepository,
+    private val localAuthorityUserOrInvitationRepository: LocalAuthorityUserOrInvitationRepository,
+    private val oneLoginUserService: OneLoginUserService,
+    private val session: HttpSession,
 ) {
     fun getUserAndLocalAuthorityIfAuthorizedUser(
         localAuthorityId: Int,
@@ -89,8 +92,10 @@ class LocalAuthorityDataService(
         }
     }
 
+    fun getLocalAuthorityUserOrNull(localAuthorityUserId: Long) = localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
+
     fun updateUserAccessLevel(
-        localAuthorityUserAccessLevel: LocalAuthorityUserAccessLevelDataModel,
+        localAuthorityUserAccessLevel: LocalAuthorityUserAccessLevelRequestModel,
         localAuthorityUserId: Long,
     ) {
         val localAuthorityUser =
@@ -106,21 +111,24 @@ class LocalAuthorityDataService(
     }
 
     @Transactional
-    fun registerNewUser(
+    fun registerUserAndReturnID(
         baseUserId: String,
         localAuthority: LocalAuthority,
         name: String,
         email: String,
-    ) {
-        localAuthorityUserRepository.save(
-            LocalAuthorityUser(
-                baseUser = oneLoginUserService.findOrCreate1LUser(baseUserId),
-                isManager = false,
-                localAuthority = localAuthority,
-                name = name,
-                email = email,
-            ),
-        )
+    ): Long {
+        val localAuthorityUser =
+            localAuthorityUserRepository.save(
+                LocalAuthorityUser(
+                    baseUser = oneLoginUserService.findOrCreate1LUser(baseUserId),
+                    isManager = false,
+                    localAuthority = localAuthority,
+                    name = name,
+                    email = email,
+                ),
+            )
+
+        return localAuthorityUser.id
     }
 
     fun getIsLocalAuthorityUser(baseUserId: String): Boolean = localAuthorityUserRepository.findByBaseUser_Id(baseUserId) != null
@@ -132,4 +140,8 @@ class LocalAuthorityDataService(
 
         return localAuthorityUser
     }
+
+    fun setLastUserIdRegisteredThisSession(localAuthorityUserId: Long) = session.setAttribute(LA_USER_ID, localAuthorityUserId)
+
+    fun getLastUserIdRegisteredThisSession() = session.getAttribute(LA_USER_ID)?.toString()?.toLong()
 }

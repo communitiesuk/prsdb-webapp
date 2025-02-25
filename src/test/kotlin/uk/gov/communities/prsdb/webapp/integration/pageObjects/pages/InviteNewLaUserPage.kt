@@ -2,17 +2,33 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
 class InviteNewLaUserPage(
     page: Page,
 ) : BasePage(page, "/invite-new-user") {
-    val form = Form(page)
-    val emailInput = form.getTextInput("email")
-    val confirmEmailInput = form.getTextInput("confirmEmail")
+    val form = InviteNewLaUserForm(page)
 
-    fun fillBothEmailFields(text: String) {
-        emailInput.fill(text)
-        confirmEmailInput.fill(text)
+    fun submitMatchingEmail(email: String) {
+        form.emailInput.fill(email)
+        form.confirmEmailInput.fill(email)
+        form.submit()
+    }
+
+    fun submitMismatchedEmails(
+        email: String,
+        confirm: String,
+    ) {
+        form.emailInput.fill(email)
+        form.confirmEmailInput.fill(confirm)
+        form.submit()
+    }
+
+    class InviteNewLaUserForm(
+        page: Page,
+    ) : Form(page) {
+        val emailInput = TextInput.emailByFieldName(locator, "email")
+        val confirmEmailInput = TextInput.emailByFieldName(locator, "confirmEmail")
     }
 }

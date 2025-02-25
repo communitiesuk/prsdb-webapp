@@ -5,9 +5,9 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyTask
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
-import uk.gov.communities.prsdb.webapp.models.viewModels.TaskListItemViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.TaskListViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.TaskSectionViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListItemViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskSectionViewModel
 
 class TaskListViewModelFactory<T : StepId>(
     private val titleKey: String,

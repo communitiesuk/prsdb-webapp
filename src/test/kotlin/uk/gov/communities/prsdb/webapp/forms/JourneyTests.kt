@@ -41,7 +41,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
-import uk.gov.communities.prsdb.webapp.models.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import java.security.Principal
@@ -71,7 +71,8 @@ class JourneyTests {
         validator: Validator,
         journeyDataService: JourneyDataService,
     ) : Journey<TestStepId>(journeyType, validator, journeyDataService) {
-        override val sections: List<JourneySection<TestStepId>> = createSingleSectionWithSingleTaskFromSteps(initialStepId, steps)
+        override val sections: List<JourneySection<TestStepId>> =
+            createSingleSectionWithSingleTaskFromSteps(initialStepId, steps)
     }
 
     class TestJourneyWithSections(
