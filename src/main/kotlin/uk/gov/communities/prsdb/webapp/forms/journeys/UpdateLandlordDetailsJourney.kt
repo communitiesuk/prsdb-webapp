@@ -112,7 +112,7 @@ class UpdateLandlordDetailsJourney(
                     content =
                         mapOf(
                             "title" to "forms.update.title",
-                            "fieldSetHeading" to "forms.lookupAddress.landlordRegistration.fieldSetHeading",
+                            "fieldSetHeading" to "forms.update.lookupAddress.fieldSetHeading",
                             "fieldSetHint" to "forms.lookupAddress.fieldSetHint",
                             "postcodeLabel" to "forms.lookupAddress.postcode.label",
                             "postcodeHint" to "forms.lookupAddress.postcode.hint",
