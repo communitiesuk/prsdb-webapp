@@ -1,9 +1,8 @@
-<a th:fragment="secondaryButtonLink(href, text, fullWidth)"
+<a th:fragment="secondaryButtonLink(href, text)"
    th:href="${href}"
    role="button"
    draggable="false"
    class="govuk-button govuk-button--secondary"
-   th:classappend="${fullWidth ? 'prsd-fill-container' : ''}"
    data-module="govuk-button"
    th:text="${text}"
 >
