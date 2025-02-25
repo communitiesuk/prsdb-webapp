@@ -25,7 +25,7 @@
             </li>
         </ul>
         <div class="govuk-button-group">
-            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/}, #{common.confirmationPage.goToDashboard})}">
+            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${dashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
                 registerLaUser.success.goToDashboardButtonText
             </a>
         </div>

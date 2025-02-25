@@ -45,7 +45,7 @@
                 <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/local-authority/{id}/invite-new-user(id=${localAuthority.id})}, #{manageLAUsers.inviteAnotherUserButtonText})}">
                     manageLAUsers.inviteAnotherUserButtonText
                 </a>
-                <button th:replace="~{fragments/buttons/secondaryButton :: secondaryButton(#{manageLAUsers.returnToDashboardButton})}"></button>
+                <button th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${dashboardUrl}},#{manageLAUsers.returnToDashboardButton}, false)}"></button>
             </div>
         </section>
     </th:block>

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
@@ -118,6 +119,7 @@ class RegisterLAUserController(
         journeyDataService.clearJourneyDataFromSession()
 
         model.addAttribute("localAuthority", localAuthority.name)
+        model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
 
         return "registerLAUserSuccess"
     }

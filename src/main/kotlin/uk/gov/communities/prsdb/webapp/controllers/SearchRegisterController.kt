@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SEARCH_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.helpers.URIQueryBuilder
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.LandlordSearchRequestModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.PropertySearchRequestModel
@@ -44,8 +45,7 @@ class SearchRegisterController(
 
         model.addAttribute("searchRequest", searchRequest)
         model.addAttribute("filterPanelViewModel", LandlordFilterPanelViewModel(searchRequest, httpServletRequest))
-        // TODO PRSD-647: Set backURL to LA landing page
-        model.addAttribute("backURL", "")
+        model.addAttribute("backURL", LOCAL_AUTHORITY_DASHBOARD_URL)
 
         if (searchRequest.searchTerm == null) {
             return "searchLandlord"
@@ -89,8 +89,7 @@ class SearchRegisterController(
 
         model.addAttribute("searchRequest", searchRequest)
         model.addAttribute("filterPanelViewModel", PropertyFilterPanelViewModel(searchRequest, httpServletRequest))
-        // TODO PRSD-647: Set backURL to LA landing page
-        model.addAttribute("backURL", "")
+        model.addAttribute("backURL", LOCAL_AUTHORITY_DASHBOARD_URL)
 
         if (searchRequest.searchTerm == null) {
             return "searchProperty"
