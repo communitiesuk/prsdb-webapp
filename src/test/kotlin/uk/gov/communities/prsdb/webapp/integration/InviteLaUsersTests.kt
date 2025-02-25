@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 @Sql("/data-local.sql")
 class InviteLaUsersTests : IntegrationTest() {
     @Test
-    fun `inviting a new LA user ends with a success page`(page: Page) {
+    fun `inviting a new LA user ends with a success page with a button linking to the dashboard`(page: Page) {
         val invitePage = navigator.goToInviteNewLaUser(1)
         invitePage.submitMatchingEmail("test@example.com")
         val successPage = assertPageIs(page, InviteNewLaUserSuccessPage::class)

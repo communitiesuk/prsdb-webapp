@@ -49,7 +49,7 @@ class PropertyDetailsController(
         model.addAttribute("landlordDetails", landlordViewModel.landlordsDetails)
         model.addAttribute("deleteRecordLink", "delete-record")
         // TODO PRSD-670: Replace with link to dashboard
-        model.addAttribute("backUrl", "/")
+        model.addAttribute("backUrl", "#")
 
         return "propertyDetailsView"
     }
