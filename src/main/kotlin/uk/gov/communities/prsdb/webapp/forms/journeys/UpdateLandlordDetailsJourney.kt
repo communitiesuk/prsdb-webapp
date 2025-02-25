@@ -10,17 +10,23 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
+import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.UpdateLandlordDetailsJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
+import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 
@@ -30,6 +36,7 @@ class UpdateLandlordDetailsJourney(
     journeyDataService: JourneyDataService,
     val landlordService: LandlordService,
     val addressDataService: AddressDataService,
+    val addressLookupService: AddressLookupService,
 ) : Journey<UpdateDetailsStepId>(
         journeyType = JourneyType.UPDATE_LANDLORD_DETAILS,
         validator = validator,
@@ -91,6 +98,88 @@ class UpdateLandlordDetailsJourney(
                         ),
                 ),
             handleSubmitAndRedirect = { _, _ -> UpdateDetailsStepId.UpdateDetails.urlPathSegment },
+            nextAction = { _, _ -> Pair(UpdateDetailsStepId.LookupEnglandAndWalesAddress, null) },
+            saveAfterSubmit = false,
+        )
+
+    private val lookupAddressStep =
+        Step(
+            id = UpdateDetailsStepId.LookupEnglandAndWalesAddress,
+            page =
+                Page(
+                    formModel = LookupAddressFormModel::class,
+                    templateName = "forms/lookupAddressForm",
+                    content =
+                        mapOf(
+                            "title" to "forms.update.title",
+                            "fieldSetHeading" to "forms.lookupAddress.landlordRegistration.fieldSetHeading",
+                            "fieldSetHint" to "forms.lookupAddress.fieldSetHint",
+                            "postcodeLabel" to "forms.lookupAddress.postcode.label",
+                            "postcodeHint" to "forms.lookupAddress.postcode.hint",
+                            "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
+                            "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
+                            "submitButtonText" to "forms.buttons.continue",
+                            BACK_URL_ATTR_NAME to UpdateDetailsStepId.UpdateDetails.urlPathSegment,
+                        ),
+                    shouldDisplaySectionHeader = false,
+                ),
+            nextAction = { _, _ -> Pair(UpdateDetailsStepId.SelectEnglandAndWalesAddress, null) },
+            saveAfterSubmit = false,
+        )
+
+    private val selectAddressStep =
+        Step(
+            id = UpdateDetailsStepId.SelectEnglandAndWalesAddress,
+            page =
+                SelectAddressPage(
+                    formModel = SelectAddressFormModel::class,
+                    templateName = "forms/selectAddressForm",
+                    content =
+                        mapOf(
+                            "title" to "forms.update.title",
+                            "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
+                            "submitButtonText" to "forms.buttons.useThisAddress",
+                            "searchAgainUrl" to
+                                "${LandlordDetailsController.UPDATE_ROUTE}/" +
+                                UpdateDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
+                        ),
+                    lookupAddressPathSegment = UpdateDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
+                    addressLookupService = addressLookupService,
+                    addressDataService = addressDataService,
+                    displaySectionHeader = false,
+                ),
+            nextAction = { journeyData, _ -> selectAddressNextAction(journeyData) },
+            saveAfterSubmit = false,
+        )
+
+    private fun selectAddressNextAction(journeyData: JourneyData): Pair<UpdateDetailsStepId, Int?> =
+        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
+            Pair(UpdateDetailsStepId.ManualEnglandAndWalesAddress, null)
+        } else {
+            Pair(UpdateDetailsStepId.UpdateDetails, null)
+        }
+
+    private val manualAddressStep =
+        Step(
+            id = UpdateDetailsStepId.ManualEnglandAndWalesAddress,
+            page =
+                Page(
+                    formModel = ManualAddressFormModel::class,
+                    templateName = "forms/manualAddressForm",
+                    content =
+                        mapOf(
+                            "title" to "forms.update.title",
+                            "fieldSetHeading" to "forms.manualAddress.landlordRegistration.fieldSetHeading",
+                            "fieldSetHint" to "forms.manualAddress.fieldSetHint",
+                            "addressLineOneLabel" to "forms.manualAddress.addressLineOne.label",
+                            "addressLineTwoLabel" to "forms.manualAddress.addressLineTwo.label",
+                            "townOrCityLabel" to "forms.manualAddress.townOrCity.label",
+                            "countyLabel" to "forms.manualAddress.county.label",
+                            "postcodeLabel" to "forms.lookupAddress.postcode.label",
+                            "submitButtonText" to "forms.buttons.continue",
+                        ),
+                    shouldDisplaySectionHeader = false,
+                ),
             nextAction = { _, _ -> Pair(UpdateDetailsStepId.UpdateDetails, null) },
             saveAfterSubmit = false,
         )
@@ -102,32 +191,35 @@ class UpdateLandlordDetailsJourney(
             setOf(
                 emailStep,
                 nameStep,
+                lookupAddressStep,
+                selectAddressStep,
+                manualAddressStep,
                 updateDetailsStep,
             ),
         )
 
-    override fun getUnreachableStepRedirect(journeyData: JourneyData) =
-        if (journeyData[ORIGINAL_LANDLORD_DATA_KEY] == null) {
+    override fun getUnreachableStepRedirect(journeyData: JourneyData): String {
+        val updatedJourneyData = getUpdatedLandlordData(journeyData)
+        return if (updatedJourneyData == null) {
             UpdateDetailsStepId.UpdateDetails.urlPathSegment
         } else {
-            getLastReachableStep(journeyData)!!.step.id.urlPathSegment
+            getLastReachableStep(updatedJourneyData)!!.step.id.urlPathSegment
         }
+    }
 
     override fun getPrevStep(
         journeyData: JourneyData,
         targetStep: Step<UpdateDetailsStepId>,
         targetSubPageNumber: Int?,
     ): StepDetails<UpdateDetailsStepId>? {
-        val originalLandlordData = JourneyDataHelper.getPageData(journeyData, ORIGINAL_LANDLORD_DATA_KEY) ?: return null
-        val updatedLandlordData = getUpdatedLandlordData(journeyData, originalLandlordData)
+        val updatedLandlordData = getUpdatedLandlordData(journeyData) ?: return null
 
         return super.getPrevStep(updatedLandlordData, targetStep, targetSubPageNumber)
     }
 
-    private fun getUpdatedLandlordData(
-        journeyData: JourneyData,
-        landlordData: PageData,
-    ): JourneyData {
+    private fun getUpdatedLandlordData(journeyData: JourneyData): JourneyData? {
+        val landlordData = JourneyDataHelper.getPageData(journeyData, ORIGINAL_LANDLORD_DATA_KEY) ?: return null
+
         // For any fields where the data is updated, replace the original value with the new value
         for (key in journeyData.keys) {
             landlordData[key] = journeyData[key]
@@ -140,7 +232,7 @@ class UpdateLandlordDetailsJourney(
             LandlordUpdateModel(
                 email = UpdateLandlordDetailsJourneyDataHelper.getEmailUpdateIfPresent(journeyData),
                 fullName = UpdateLandlordDetailsJourneyDataHelper.getNameUpdateIfPresent(journeyData),
-                address = null,
+                address = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(journeyData, addressDataService),
             )
 
         landlordService.updateLandlordForBaseUserId(
