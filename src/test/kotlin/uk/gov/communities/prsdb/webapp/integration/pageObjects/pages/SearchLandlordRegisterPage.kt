@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.SearchRegisterBasePage
 
@@ -10,6 +11,8 @@ class SearchLandlordRegisterPage(
     fun getLandlordLink(rowIndex: Int) = Link(resultTable.getCell(rowIndex, LANDLORD_COL_INDEX).locator("a"))
 
     fun getPropertySearchLink() = Link(noResultErrorMessage.locator("a"))
+
+    val backLink = BackLink.default(page)
 
     companion object {
         const val LANDLORD_COL_INDEX: Int = 0

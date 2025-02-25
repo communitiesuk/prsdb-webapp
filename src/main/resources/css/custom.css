@@ -1,6 +1,8 @@
 :root {
     --govuk-colour-red: #d4351c;
     --govuk-colour-light-grey: #f3f2f1;
+    --govuk-colour-blue: #1d70b8;
+    --govuk-colour-white: #ffffff;
 }
 
 .border-color-red {
@@ -37,5 +39,27 @@
 
 .prsd-key-values__value {
     margin: 0;
+}
+
+.prsd-dashboard-panel {
+    background-color: var(--govuk-colour-blue);
+    text-align: left;
+    padding: 0;
+}
+
+.prsd-dashboard-panel__title {
+    color: var(--govuk-colour-white);
+}
+
+.prsd-dashboard-panel__body {
+    color: var(--govuk-colour-white);
+}
+
+.prsd-dashboard-section {
+    margin-bottom: 30px;
+}
+
+.stretch-justify-buttons > a {
+    width: 100%
 }
 

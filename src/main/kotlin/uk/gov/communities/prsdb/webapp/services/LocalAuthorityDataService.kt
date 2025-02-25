@@ -133,6 +133,14 @@ class LocalAuthorityDataService(
 
     fun getIsLocalAuthorityUser(baseUserId: String): Boolean = localAuthorityUserRepository.findByBaseUser_Id(baseUserId) != null
 
+    fun getLocalAuthorityUser(baseUserId: String): LocalAuthorityUser {
+        val localAuthorityUser =
+            localAuthorityUserRepository.findByBaseUser_Id(baseUserId)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $baseUserId not found")
+
+        return localAuthorityUser
+    }
+
     fun setLastUserIdRegisteredThisSession(localAuthorityUserId: Long) = session.setAttribute(LA_USER_ID, localAuthorityUserId)
 
     fun getLastUserIdRegisteredThisSession() = session.getAttribute(LA_USER_ID)?.toString()?.toLong()

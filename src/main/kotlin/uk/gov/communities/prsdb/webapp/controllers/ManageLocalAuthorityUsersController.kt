@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
+import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.requestModels.ConfirmedEmailRequestModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
@@ -65,6 +66,7 @@ class ManageLocalAuthorityUsersController(
             "paginationViewModel",
             PaginationViewModel(page, pagedUserList.totalPages, httpServletRequest),
         )
+        model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
 
         return "manageLAUsers"
     }
@@ -259,6 +261,7 @@ class ManageLocalAuthorityUsersController(
                 principal.name,
             )
         model.addAttribute("localAuthority", currentAuthority)
+        model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
         return "inviteLAUserSuccess"
     }
 

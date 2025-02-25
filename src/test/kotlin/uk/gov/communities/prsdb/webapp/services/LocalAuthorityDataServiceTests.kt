@@ -361,4 +361,23 @@ class LocalAuthorityDataServiceTests {
 
         assertFalse(localAuthorityDataService.getIsLocalAuthorityUser(baseUserId))
     }
+
+    @Test
+    fun `getLocalAuthorityUser returns a localAuthorityUser if baseUserId matches an entry in the localAuthorityUser table`() {
+        val localAuthorityUser = createLocalAuthorityUser(createOneLoginUser(), createLocalAuthority())
+        val baseUserId = localAuthorityUser.baseUser.id
+
+        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(localAuthorityUser)
+
+        assertEquals(localAuthorityUser, localAuthorityDataService.getLocalAuthorityUser(baseUserId))
+    }
+
+    @Test
+    fun `getLocalAuthorityUser throws an error if baseUserId does not match an entry in the localAuthorityUser table`() {
+        val baseUserId = "not-an-la-user"
+
+        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
+
+        assertThrows<ResponseStatusException> { localAuthorityDataService.getLocalAuthorityUser(baseUserId) }
+    }
 }

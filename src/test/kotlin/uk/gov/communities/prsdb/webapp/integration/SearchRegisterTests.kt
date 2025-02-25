@@ -9,6 +9,7 @@ import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.ADDRESS_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.CONTACT_INFO_COL_INDEX
@@ -182,6 +183,13 @@ class SearchRegisterTests : IntegrationTest() {
             // Search again
             searchLandlordRegisterPage.searchBar.search("PRSD")
             assertThat(filter.getRemoveFilterTag("Landlords in my authority")).isVisible()
+        }
+
+        @Test
+        fun `Back link returns to the LA dashboard page`(page: Page) {
+            val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
+            searchLandlordRegisterPage.backLink.clickAndWait()
+            assertPageIs(page, LocalAuthorityDashboardPage::class)
         }
     }
 
@@ -376,6 +384,13 @@ class SearchRegisterTests : IntegrationTest() {
             // Search again
             searchPropertyRegisterPage.searchBar.search("PRSD")
             assertThat(filter.getRemoveFilterTag("Properties in my authority")).isVisible()
+        }
+
+        @Test
+        fun `Back link returns to the LA dashboard page`(page: Page) {
+            val searchPropertyRegisterPage = navigator.goToLandlordSearchPage()
+            searchPropertyRegisterPage.backLink.clickAndWait()
+            assertPageIs(page, LocalAuthorityDashboardPage::class)
         }
     }
 }
