@@ -3,6 +3,7 @@ import resolve from "@rollup/plugin-node-resolve";
 import copy from "rollup-plugin-copy";
 import del from "rollup-plugin-delete";
 import babel from "@rollup/plugin-babel";
+import sass from 'rollup-plugin-sass';
 
 export default {
     input: 'src/main/js/index.js',
@@ -16,6 +17,9 @@ export default {
         babel({babelHelpers: 'bundled'}),
         del({
             targets: 'dist/*',
+        }),
+        sass({
+            output: 'dist/css/custom.css',
         }),
         copy({
                 targets: [
@@ -58,10 +62,6 @@ export default {
                     {
                         src: 'node_modules/@ministryofjustice/frontend/moj/assets/fonts/**/*',
                         dest: 'dist/fonts',
-                    },
-                    {
-                        src: 'src/main/resources/css/**/*',
-                        dest: 'dist/css'
                     },
                 ],
             }
