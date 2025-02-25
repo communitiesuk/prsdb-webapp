@@ -148,9 +148,9 @@ class UpdateLandlordDetailsJourney(
     }
 
     private fun createOriginalLandlordJourneyData(landlord: Landlord): JourneyData =
-        mutableMapOf(
-            UpdateDetailsStepId.UpdateEmail.urlPathSegment to mutableMapOf("emailAddress" to landlord.email),
-            UpdateDetailsStepId.UpdateName.urlPathSegment to mutableMapOf("name" to landlord.name),
+        mapOf(
+            UpdateDetailsStepId.UpdateEmail.urlPathSegment to mapOf("emailAddress" to landlord.email),
+            UpdateDetailsStepId.UpdateName.urlPathSegment to mapOf("name" to landlord.name),
         )
 
     companion object {

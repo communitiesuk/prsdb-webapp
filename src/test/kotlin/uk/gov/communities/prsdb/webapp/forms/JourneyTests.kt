@@ -122,7 +122,7 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "index",
-                                        mutableMapOf("testKey" to "testValue"),
+                                        mapOf("testKey" to "testValue"),
                                     ),
                             ),
                         ),
@@ -152,7 +152,7 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "index",
-                                        mutableMapOf("testKey" to "testValue"),
+                                        mapOf("testKey" to "testValue"),
                                     ),
                             ),
                         ),
@@ -184,7 +184,7 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "index",
-                                        mutableMapOf("testKey" to "testValue"),
+                                        mapOf("testKey" to "testValue"),
                                     ),
                             ),
                         ),
@@ -220,7 +220,7 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "index",
-                                        mutableMapOf("testKey" to "testValue"),
+                                        mapOf("testKey" to "testValue"),
                                     ),
                                 nextAction = { _, _ -> Pair(TestStepId.StepThree, null) },
                             ),
@@ -230,7 +230,7 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "index",
-                                        mutableMapOf("testKey" to "testValue"),
+                                        mapOf("testKey" to "testValue"),
                                     ),
                             ),
                             Step(
@@ -239,14 +239,14 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "index",
-                                        mutableMapOf("testKey" to "testValue"),
+                                        mapOf("testKey" to "testValue"),
                                     ),
                             ),
                         ),
                 )
             val model = BindingAwareModelMap()
-            val pageData: PageData = mutableMapOf("testProperty" to "testPropertyValue")
-            val journeyData: JourneyData = mutableMapOf(TestStepId.StepOne.urlPathSegment to pageData)
+            val pageData: PageData = mapOf("testProperty" to "testPropertyValue")
+            val journeyData: JourneyData = mapOf(TestStepId.StepOne.urlPathSegment to pageData)
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
@@ -274,7 +274,7 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "index",
-                                        mutableMapOf("testKey" to "testValue"),
+                                        mapOf("testKey" to "testValue"),
                                     ),
                                 nextAction = { _, _ -> Pair(TestStepId.StepTwo, null) },
                             ),
@@ -284,13 +284,13 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "index",
-                                        mutableMapOf("testKey" to "testValue"),
+                                        mapOf("testKey" to "testValue"),
                                     ),
                             ),
                         ),
                 )
             val model = BindingAwareModelMap()
-            val journeyData: JourneyData = mutableMapOf()
+            val journeyData: JourneyData = mapOf()
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
@@ -318,7 +318,7 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "index",
-                                        mutableMapOf(),
+                                        mapOf(),
                                     ),
                                 nextAction = { _, _ -> Pair(TestStepId.StepTwo, null) },
                             ),
@@ -328,14 +328,14 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "templateName",
-                                        mutableMapOf("testKey" to "testValue"),
+                                        mapOf("testKey" to "testValue"),
                                     ),
                             ),
                         ),
                 )
             val model = BindingAwareModelMap()
-            val pageData: PageData = mutableMapOf("testProperty" to "testPropertyValue")
-            val journeyData: JourneyData = mutableMapOf(TestStepId.StepOne.urlPathSegment to pageData)
+            val pageData: PageData = mapOf("testProperty" to "testPropertyValue")
+            val journeyData: JourneyData = mapOf(TestStepId.StepOne.urlPathSegment to pageData)
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
@@ -366,7 +366,7 @@ class JourneyTests {
                         Page(
                             TestFormModel::class,
                             "index",
-                            mutableMapOf("testKey" to "testValue"),
+                            mapOf("testKey" to "testValue"),
                         ),
                 )
 
@@ -400,7 +400,7 @@ class JourneyTests {
                         Page(
                             TestFormModel::class,
                             "index",
-                            mutableMapOf("testKey" to "testValue"),
+                            mapOf("testKey" to "testValue"),
                         ),
                 )
 
@@ -453,7 +453,7 @@ class JourneyTests {
                 Page(
                     TestFormModel::class,
                     "templateName",
-                    mutableMapOf("testKey" to "testValue"),
+                    mapOf("testKey" to "testValue"),
                 )
             val spiedOnPage = spy(page)
 
@@ -471,7 +471,7 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "index",
-                                        mutableMapOf(),
+                                        mapOf(),
                                     ),
                                 nextAction = { _, _ -> Pair(TestStepId.StepThree, null) },
                             ),
@@ -481,7 +481,7 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "templateName",
-                                        mutableMapOf("testKey" to "testValue"),
+                                        mapOf("testKey" to "testValue"),
                                     ),
                             ),
                             Step(
@@ -490,7 +490,7 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "index",
-                                        mutableMapOf("testKey" to "testValue"),
+                                        mapOf("testKey" to "testValue"),
                                     ),
                                 nextAction = { _, _ -> Pair(TestStepId.StepFour, null) },
                             ),
@@ -501,18 +501,18 @@ class JourneyTests {
                         ),
                 )
             val model = BindingAwareModelMap()
-            val pageDataStepOne: PageData = mutableMapOf("testProperty" to "testProperty")
-            val pageDataStepTwo: PageData = mutableMapOf("testPropertyTwo" to "testProperty")
-            val pageDataStepThree: PageData = mutableMapOf("testProperty" to "testProperty")
-            val pageDataStepFour: PageData = mutableMapOf("testProperty" to "testProperty")
+            val pageDataStepOne: PageData = mapOf("testProperty" to "testProperty")
+            val pageDataStepTwo: PageData = mapOf("testPropertyTwo" to "testProperty")
+            val pageDataStepThree: PageData = mapOf("testProperty" to "testProperty")
+            val pageDataStepFour: PageData = mapOf("testProperty" to "testProperty")
             val journeyData: JourneyData =
-                mutableMapOf(
+                mapOf(
                     TestStepId.StepOne.urlPathSegment to pageDataStepOne,
                     TestStepId.StepTwo.urlPathSegment to pageDataStepTwo,
                     TestStepId.StepThree.urlPathSegment to pageDataStepThree,
                 )
             val filteredJourneyData: JourneyData =
-                mutableMapOf(
+                mapOf(
                     TestStepId.StepOne.urlPathSegment to pageDataStepOne,
                     TestStepId.StepThree.urlPathSegment to pageDataStepThree,
                 )
@@ -551,13 +551,13 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "index",
-                                        mutableMapOf("testKey" to "testValue"),
+                                        mapOf("testKey" to "testValue"),
                                     ),
                             ),
                         ),
                 )
             val model = BindingAwareModelMap()
-            val pageData: PageData = mutableMapOf()
+            val pageData: PageData = mapOf()
             val principal = Principal { "testPrincipalId" }
 
             // Act and Assert
@@ -591,7 +591,7 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "stepOneTemplate",
-                                        mutableMapOf("testKey" to "testValue"),
+                                        mapOf("testKey" to "testValue"),
                                     ),
                                 nextAction = { _, _ -> Pair(TestStepId.StepTwo, null) },
                             ),
@@ -601,16 +601,16 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "stepTwoTemplate",
-                                        mutableMapOf("anotherTestKey" to "anotherTestValue"),
+                                        mapOf("anotherTestKey" to "anotherTestValue"),
                                     ),
                             ),
                         ),
                 )
             val model = BindingAwareModelMap()
             val principal = Principal { "testPrincipalId" }
-            val pageData: PageData = mutableMapOf()
+            val pageData: PageData = mapOf()
             val journeyData: JourneyData =
-                mutableMapOf(TestStepId.StepOne.urlPathSegment to pageData)
+                mapOf(TestStepId.StepOne.urlPathSegment to pageData)
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
@@ -651,7 +651,7 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "stepOneTemplate",
-                                        mutableMapOf("testKey" to "testValue"),
+                                        mapOf("testKey" to "testValue"),
                                     ),
                                 nextAction = { _, _ -> Pair(TestStepId.StepTwo, null) },
                             ),
@@ -661,15 +661,15 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "stepTwoTemplate",
-                                        mutableMapOf("anotherTestKey" to "anotherTestValue"),
+                                        mapOf("anotherTestKey" to "anotherTestValue"),
                                     ),
                             ),
                         ),
                 )
             val model = BindingAwareModelMap()
             val principal = Principal { "testPrincipalId" }
-            val pageData: PageData = mutableMapOf("testProperty" to "testPropertyValue")
-            val journeyData: JourneyData = mutableMapOf()
+            val pageData: PageData = mapOf("testProperty" to "testPropertyValue")
+            val journeyData: JourneyData = mapOf()
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
@@ -709,7 +709,7 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "stepOneTemplate",
-                                        mutableMapOf("testKey" to "testValue"),
+                                        mapOf("testKey" to "testValue"),
                                     ),
                                 nextAction = { _, _ -> Pair(TestStepId.StepTwo, null) },
                                 saveAfterSubmit = true,
@@ -720,15 +720,15 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "stepTwoTemplate",
-                                        mutableMapOf("anotherTestKey" to "anotherTestValue"),
+                                        mapOf("anotherTestKey" to "anotherTestValue"),
                                     ),
                             ),
                         ),
                 )
             val model = BindingAwareModelMap()
             val principal = Principal { "testPrincipalId" }
-            val pageData: PageData = mutableMapOf("testProperty" to "testPropertyValue")
-            val journeyData: JourneyData = mutableMapOf()
+            val pageData: PageData = mapOf("testProperty" to "testPropertyValue")
+            val journeyData: JourneyData = mapOf()
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
@@ -773,7 +773,7 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "stepOneTemplate",
-                                        mutableMapOf("testKey" to "testValue"),
+                                        mapOf("testKey" to "testValue"),
                                     ),
                                 nextAction = { _, _ -> Pair(TestStepId.StepTwo, null) },
                                 saveAfterSubmit = false,
@@ -784,15 +784,15 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "stepTwoTemplate",
-                                        mutableMapOf("anotherTestKey" to "anotherTestValue"),
+                                        mapOf("anotherTestKey" to "anotherTestValue"),
                                     ),
                             ),
                         ),
                 )
             val model = BindingAwareModelMap()
             val principal = Principal { "testPrincipalId" }
-            val pageData: PageData = mutableMapOf("testProperty" to "testPropertyValue")
-            val journeyData: JourneyData = mutableMapOf()
+            val pageData: PageData = mapOf("testProperty" to "testPropertyValue")
+            val journeyData: JourneyData = mapOf()
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
@@ -834,7 +834,7 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "stepOneTemplate",
-                                        mutableMapOf("testKey" to "testValue"),
+                                        mapOf("testKey" to "testValue"),
                                     ),
                                 handleSubmitAndRedirect = { _, _ -> "/customRedirect" },
                             ),
@@ -844,15 +844,15 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "stepTwoTemplate",
-                                        mutableMapOf("anotherTestKey" to "anotherTestValue"),
+                                        mapOf("anotherTestKey" to "anotherTestValue"),
                                     ),
                             ),
                         ),
                 )
             val model = BindingAwareModelMap()
             val principal = Principal { "testPrincipalId" }
-            val pageData: PageData = mutableMapOf("testProperty" to "testPropertyValue")
-            val journeyData: JourneyData = mutableMapOf()
+            val pageData: PageData = mapOf("testProperty" to "testPropertyValue")
+            val journeyData: JourneyData = mapOf()
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
@@ -887,7 +887,7 @@ class JourneyTests {
                                     Page(
                                         TestFormModel::class,
                                         "stepOneTemplate",
-                                        mutableMapOf("testKey" to "testValue"),
+                                        mapOf("testKey" to "testValue"),
                                     ),
                                 nextAction = { _, _ -> Pair(null, null) },
                             ),
@@ -895,8 +895,8 @@ class JourneyTests {
                 )
             val model = BindingAwareModelMap()
             val principal = Principal { "testPrincipalId" }
-            val pageData: PageData = mutableMapOf("testProperty" to "testPropertyValue")
-            val journeyData: JourneyData = mutableMapOf()
+            val pageData: PageData = mapOf("testProperty" to "testPropertyValue")
+            val journeyData: JourneyData = mapOf()
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 

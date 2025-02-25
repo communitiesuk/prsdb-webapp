@@ -25,8 +25,8 @@ class StepTests {
     fun `updateJourneyData adds pageData when subPageNumber is null`() {
         // Arrange
         val journeyData: JourneyData =
-            mutableMapOf("existingPage" to mutableMapOf("existingProperty" to "existingValue"))
-        val pageData: PageData = mutableMapOf("newProperty" to "newValue")
+            mapOf("existingPage" to mapOf("existingProperty" to "existingValue"))
+        val pageData: PageData = mapOf("newProperty" to "newValue")
         val testStep = Step<TestStepId>(TestStepId.StepOne, mockPage)
 
         // Act
@@ -44,10 +44,10 @@ class StepTests {
     fun `updateJourneyData adds subPage data to existing pageData`() {
         // Arrange
         val subPageNumber = 12
-        val pageData: PageData = mutableMapOf("newProperty" to "newValue")
+        val pageData: PageData = mapOf("newProperty" to "newValue")
         val testStep = Step<TestStepId>(TestStepId.StepOne, mockPage)
         val journeyData: JourneyData =
-            mutableMapOf(testStep.name to mutableMapOf(("existingProperty" to "existingValue")))
+            mapOf(testStep.name to mapOf(("existingProperty" to "existingValue")))
 
         // Act
         val newJourneyData = testStep.updatedJourneyData(journeyData, pageData, subPageNumber)
@@ -64,8 +64,8 @@ class StepTests {
         // Arrange
         val subPageNumber = 12
         val journeyData: JourneyData =
-            mutableMapOf("existingPage" to mutableMapOf(("existingProperty" to "existingValue")))
-        val pageData: PageData = mutableMapOf("newProperty" to "newValue")
+            mapOf("existingPage" to mapOf(("existingProperty" to "existingValue")))
+        val pageData: PageData = mapOf("newProperty" to "newValue")
         val testStep = Step<TestStepId>(TestStepId.StepOne, mockPage)
 
         // Act
