@@ -7,7 +7,7 @@
             <strong th:text="#{localAuthority.dashboard.banner.subheading}">localAuthority.dashboard.banner.subheading</strong>
             <span th:text="${localAuthority}">localAuthority</span>
         </div>
-        <section class="prsd-section">
+        <section class="prsd-dashboard-section">
             <h2 class="govuk-heading-l" th:text="#{localAuthority.dashboard.searchAndView.heading}">localAuthority.dashboard.searchAndView.heading</h2>
             <div class="govuk-grid-row">
                 <div class="govuk-grid-column-one-third-from-desktop govuk-grid-column-one-half">
@@ -22,7 +22,7 @@
                 </div>
             </div>
         </section>
-        <section class="prsd-section">
+        <section class="prsd-dashboard-section">
             <h2 class="govuk-heading-l" th:text="#{localAuthority.dashboard.aboutTheDatabase.heading}">localAuthority.dashboard.aboutTheDatabase.heading</h2>
             <div class="govuk-grid-row">
                 <div th:replace="~{fragments/dashboardAction :: dashboardAction(
@@ -45,9 +45,6 @@
                 </div>
             </div>
         </section>
-
-
-
     </div>
 </main>
 </html>

@@ -10,8 +10,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 class LocalAuthorityDashboardPage(
     page: Page,
 ) : BasePage(page, LOCAL_AUTHORITY_DASHBOARD_URL) {
-    val bannerHeading = Heading(page.locator("html").locator("div.prsd-dashboard-panel h1.govuk-heading-xl"))
-    val bannerSubHeading = Heading(page.locator("html").locator("div.prsd-dashboard-panel div.govuk-body-l"))
+    val bannerHeading = Heading(page.locator("div.prsd-dashboard-panel h1.govuk-heading-xl"))
+    val bannerSubHeading = Heading(page.locator("div.prsd-dashboard-panel div.govuk-body-l"))
 
     val searchPropertyButton = Button.byText(page, "Search for a property")
     val searchLandlordButton = Button.byText(page, "Search for a landlord")
