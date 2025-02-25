@@ -4,8 +4,10 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
+import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
@@ -13,10 +15,12 @@ import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.UpdateLandlordDetailsJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 
@@ -25,6 +29,7 @@ class UpdateLandlordDetailsJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     val landlordService: LandlordService,
+    val addressDataService: AddressDataService,
 ) : Journey<UpdateDetailsStepId>(
         journeyType = JourneyType.UPDATE_LANDLORD_DETAILS,
         validator = validator,
@@ -154,14 +159,44 @@ class UpdateLandlordDetailsJourney(
             val landlord = landlordService.retrieveLandlordByBaseUserId(landlordId)!!
             journeyData[ORIGINAL_LANDLORD_DATA_KEY] = createOriginalLandlordJourneyData(landlord)
             journeyDataService.setJourneyData(journeyData)
+            addressDataService.setAddressData(listOf(AddressDataModel.fromAddress(landlord.address)))
         }
     }
 
-    private fun createOriginalLandlordJourneyData(landlord: Landlord): JourneyData =
-        mutableMapOf(
-            UpdateDetailsStepId.UpdateEmail.urlPathSegment to mutableMapOf("emailAddress" to landlord.email),
-            UpdateDetailsStepId.UpdateName.urlPathSegment to mutableMapOf("name" to landlord.name),
-        )
+    private fun createOriginalLandlordJourneyData(landlord: Landlord): JourneyData {
+        val originalLandlordData: JourneyData =
+            mutableMapOf(
+                UpdateDetailsStepId.UpdateEmail.urlPathSegment to mutableMapOf("emailAddress" to landlord.email),
+                UpdateDetailsStepId.UpdateName.urlPathSegment to mutableMapOf("name" to landlord.name),
+                UpdateDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment to
+                    mutableMapOf(
+                        "postcode" to landlord.address.getPostcodeSearchTerm(),
+                        "houseNameOrNumber" to landlord.address.getHouseNameOrNumber(),
+                    ),
+                UpdateDetailsStepId.SelectEnglandAndWalesAddress.urlPathSegment to
+                    mutableMapOf(
+                        "address" to landlord.address.getSelectedAddress(),
+                    ),
+            )
+
+        if (landlord.address.uprn == null) {
+            originalLandlordData[UpdateDetailsStepId.ManualEnglandAndWalesAddress.urlPathSegment] =
+                mutableMapOf(
+                    "addressLineOne" to landlord.address.singleLineAddress,
+                    "townOrCity" to landlord.address.getTownOrCity(),
+                    "postcode" to landlord.address.getPostcodeSearchTerm(),
+                )
+        }
+        return originalLandlordData
+    }
+
+    private fun Address.getHouseNameOrNumber(): String = buildingName ?: buildingNumber ?: singleLineAddress
+
+    private fun Address.getPostcodeSearchTerm(): String = postcode ?: singleLineAddress
+
+    private fun Address.getSelectedAddress(): String = if (uprn == null) MANUAL_ADDRESS_CHOSEN else singleLineAddress
+
+    private fun Address.getTownOrCity(): String = townName ?: singleLineAddress
 
     companion object {
         const val ORIGINAL_LANDLORD_DATA_KEY = "original-landlord-data"
