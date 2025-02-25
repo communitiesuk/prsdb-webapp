@@ -51,4 +51,23 @@ class UpdateDetailsJourneyDataHelperTests {
 
         assertEquals(null, nameUpdate)
     }
+
+    @Test
+    fun `getPhoneNumberIfPresent returns a phone number if the phone number page is in journeyData`() {
+        val newPhoneNumber = "new phone number"
+        val testJourneyData = journeyDataBuilder.withPhoneNumber(newPhoneNumber).build()
+
+        val phoneNumberUpdate = UpdateLandlordDetailsJourneyDataHelper.getPhoneNumberIfPresent(testJourneyData)
+
+        assertEquals(newPhoneNumber, phoneNumberUpdate)
+    }
+
+    @Test
+    fun `getPhoneNumberIfPresent returns null if the phone number page is in not journeyData`() {
+        val testJourneyData = journeyDataBuilder.build()
+
+        val phoneNumberUpdate = UpdateLandlordDetailsJourneyDataHelper.getPhoneNumberIfPresent(testJourneyData)
+
+        assertEquals(null, phoneNumberUpdate)
+    }
 }

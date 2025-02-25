@@ -356,7 +356,8 @@ class LandlordServiceTests {
         val userId = "my id"
         val originalName = "original name"
         val originalEmail = "original email"
-        val landlordEntity = createLandlord(name = originalName, email = originalEmail)
+        val originalPhoneNumber = "original phone number"
+        val landlordEntity = createLandlord(name = originalName, email = originalEmail, phoneNumber = originalPhoneNumber)
         val updateModel = LandlordUpdateModel(null, null, null)
 
         whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
@@ -367,6 +368,7 @@ class LandlordServiceTests {
         // Assert
         assertEquals(originalName, landlordEntity.name)
         assertEquals(originalEmail, landlordEntity.email)
+        assertEquals(originalPhoneNumber, landlordEntity.phoneNumber)
     }
 
     @Test
@@ -375,8 +377,9 @@ class LandlordServiceTests {
         val userId = "my id"
         val originalName = "original name"
         val originalEmail = "original email"
-        val landlordEntity = createLandlord(name = originalName, email = originalEmail)
-        val updateModel = LandlordUpdateModel("newEmail", "newName")
+        val originalPhoneNumber = "original phone number"
+        val landlordEntity = createLandlord(name = originalName, email = originalEmail, phoneNumber = originalPhoneNumber)
+        val updateModel = LandlordUpdateModel("newEmail", "newName", "new phone number")
 
         whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
 
@@ -386,5 +389,6 @@ class LandlordServiceTests {
         // Assert
         assertEquals(updateModel.fullName, landlordEntity.name)
         assertEquals(updateModel.email, landlordEntity.email)
+        assertEquals(updateModel.phoneNumber, landlordEntity.phoneNumber)
     }
 }
