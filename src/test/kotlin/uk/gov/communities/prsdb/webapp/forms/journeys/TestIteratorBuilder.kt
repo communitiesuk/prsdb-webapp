@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.mockito.Mockito.mock
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 
 data class TestStepModel(
@@ -13,7 +14,7 @@ class TestIteratorBuilder {
     private var initialised = false
     private val steps: MutableList<TestStepModel> = mutableListOf()
     private val journeyData: JourneyData = mutableMapOf()
-    private var missingFirstStep: Boolean = false
+    private var initialStepModel: TestStepModel? = null
     private var onStep: Int? = null
 
     fun initialised(): TestIteratorBuilder {
@@ -26,39 +27,57 @@ class TestIteratorBuilder {
         return this
     }
 
-    fun withMissingFirstStep(): TestIteratorBuilder {
-        missingFirstStep = true
+    fun withFirstStep(stepModel: TestStepModel): TestIteratorBuilder {
+        if (initialStepModel != null) {
+            throw PrsdbWebException("This builder already has a first step set")
+        }
+        initialStepModel = stepModel
+        journeyData[stepModel.urlPathSegment] = mapOf("urlPathSegment" to stepModel.urlPathSegment, "isSatisfied" to stepModel.isSatisfied)
         return this
     }
 
-    fun addStepToEnd(stepModel: TestStepModel): TestIteratorBuilder {
+    fun withNextStep(stepModel: TestStepModel): TestIteratorBuilder {
         journeyData[stepModel.urlPathSegment] = mapOf("urlPathSegment" to stepModel.urlPathSegment, "isSatisfied" to stepModel.isSatisfied)
-        return addStepToEndWithoutJourneyData(stepModel)
+        return withNextStepWithoutPageData(stepModel)
     }
 
-    fun addStepToEndWithoutJourneyData(stepModel: TestStepModel): TestIteratorBuilder {
+    fun withNextStepWithoutPageData(stepModel: TestStepModel): TestIteratorBuilder {
         steps.add(stepModel)
         return this
     }
 
     fun build(): ReachableStepDetailsIterator<TestStepId> {
         val linkedSteps =
-            steps.zipWithNext {
-                    stepModel,
-                    nextStepModel,
-                ->
-                testStep(stepModel.urlPathSegment, nextStepModel.urlPathSegment, stepModel.isSatisfied, stepModel.customNextActionAddition)
-            } + testStep(steps.last().urlPathSegment, isSatisfied = steps.last().isSatisfied)
+            (
+                steps.zipWithNext {
+                        stepModel,
+                        nextStepModel,
+                    ->
+                    testStep(
+                        stepModel.urlPathSegment,
+                        nextStepModel.urlPathSegment,
+                        stepModel.isSatisfied,
+                        stepModel.customNextActionAddition,
+                    )
+                } + steps.lastOrNull()?.let { testStep(it.urlPathSegment, isSatisfied = it.isSatisfied) }
+            ).filterNotNull()
 
-        val firstStepId =
-            if (missingFirstStep) {
-                // A concatenation of all strings in a list cannot be contained by the list
-                TestStepId(steps.joinToString { it.urlPathSegment })
+        val currentInitialStepModel = initialStepModel
+        val iterator =
+            if (currentInitialStepModel != null) {
+                val initialStep =
+                    testStep(
+                        currentInitialStepModel.urlPathSegment,
+                        nextSegment = steps.firstOrNull()?.urlPathSegment,
+                        isSatisfied = currentInitialStepModel.isSatisfied,
+                        customNextActionAddition = currentInitialStepModel.customNextActionAddition,
+                    )
+                ReachableStepDetailsIterator(journeyData, linkedSteps + initialStep, initialStep.id, mock())
             } else {
-                TestStepId(steps.first().urlPathSegment)
+                // A concatenation of all strings in a list cannot be contained by the list
+                val urlSegmentNotUsedByAnyStep = steps.joinToString { it.urlPathSegment }
+                ReachableStepDetailsIterator(journeyData, linkedSteps, TestStepId(urlSegmentNotUsedByAnyStep), mock())
             }
-
-        val iterator = ReachableStepDetailsIterator(journeyData, linkedSteps, firstStepId, mock())
 
         val currentOnStep = onStep
         if (currentOnStep != null) {

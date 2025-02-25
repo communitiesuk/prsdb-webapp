@@ -21,7 +21,7 @@ class ReachableStepDetailsIteratorTest {
             val testIterator =
                 TestIteratorBuilder()
                     .initialised()
-                    .addStepToEnd(TestStepModel("1"))
+                    .withFirstStep(TestStepModel("1"))
                     .build()
 
             // Act && assert
@@ -33,9 +33,10 @@ class ReachableStepDetailsIteratorTest {
             // Arrange
             val testIterator =
                 TestIteratorBuilder()
-                    .initialised()
-                    .addStepToEndWithoutJourneyData(TestStepModel("1", isSatisfied = true))
-                    .addStepToEndWithoutJourneyData(TestStepModel("2", isSatisfied = true))
+                    .onStep(2)
+                    .withFirstStep(TestStepModel("1", isSatisfied = true))
+                    .withNextStepWithoutPageData(TestStepModel("2", isSatisfied = true))
+                    .withNextStepWithoutPageData(TestStepModel("3", isSatisfied = true))
                     .build()
 
             // Act && assert
@@ -48,8 +49,8 @@ class ReachableStepDetailsIteratorTest {
             val testIterator =
                 TestIteratorBuilder()
                     .initialised()
-                    .addStepToEnd(TestStepModel("1", isSatisfied = false))
-                    .addStepToEnd(TestStepModel("2", isSatisfied = false))
+                    .withFirstStep(TestStepModel("1", isSatisfied = false))
+                    .withNextStep(TestStepModel("2", isSatisfied = false))
                     .build()
 
             // Act && assert
@@ -62,8 +63,8 @@ class ReachableStepDetailsIteratorTest {
             val testIterator =
                 TestIteratorBuilder()
                     .initialised()
-                    .addStepToEnd(TestStepModel("1", isSatisfied = true))
-                    .addStepToEnd(TestStepModel("2", isSatisfied = false))
+                    .withFirstStep(TestStepModel("1", isSatisfied = true))
+                    .withNextStep(TestStepModel("2", isSatisfied = false))
                     .build()
 
             // Act && assert
@@ -75,10 +76,8 @@ class ReachableStepDetailsIteratorTest {
             // Arrange
             val testIterator =
                 TestIteratorBuilder()
-                    .withMissingFirstStep()
-                    .addStepToEnd(TestStepModel("1", isSatisfied = true))
-                    .addStepToEnd(TestStepModel("2", isSatisfied = false))
-                    .withMissingFirstStep()
+                    .withNextStep(TestStepModel("1", isSatisfied = true))
+                    .withNextStep(TestStepModel("2", isSatisfied = false))
                     .build()
 
             // Act && assert
@@ -88,11 +87,12 @@ class ReachableStepDetailsIteratorTest {
         @Test
         fun `hasNext returns false if it hasn't been initialised and there are multiple initial steps`() {
             // Arrange
+            val initialStepSegment = "initial step segment"
             val testIterator =
                 TestIteratorBuilder()
-                    .addStepToEnd(TestStepModel("1", isSatisfied = true))
-                    .addStepToEnd(TestStepModel("2", isSatisfied = false))
-                    .addStepToEnd(TestStepModel("1", isSatisfied = true))
+                    .withFirstStep(TestStepModel(initialStepSegment, isSatisfied = true))
+                    .withNextStep(TestStepModel("2", isSatisfied = false))
+                    .withNextStep(TestStepModel(initialStepSegment, isSatisfied = true))
                     .build()
 
             // Act && assert
@@ -104,8 +104,8 @@ class ReachableStepDetailsIteratorTest {
             // Arrange
             val testIterator =
                 TestIteratorBuilder()
-                    .addStepToEnd(TestStepModel("1", isSatisfied = true))
-                    .addStepToEnd(TestStepModel("2", isSatisfied = false))
+                    .withFirstStep(TestStepModel("1", isSatisfied = true))
+                    .withNextStep(TestStepModel("2", isSatisfied = false))
                     .build()
 
             // Act && assert
@@ -121,8 +121,8 @@ class ReachableStepDetailsIteratorTest {
             val firstUrlSegment = "test step id"
             val testIterator =
                 TestIteratorBuilder()
-                    .addStepToEnd(TestStepModel(firstUrlSegment, isSatisfied = true))
-                    .addStepToEnd(TestStepModel("2", isSatisfied = false))
+                    .withFirstStep(TestStepModel(firstUrlSegment, isSatisfied = true))
+                    .withNextStep(TestStepModel("2", isSatisfied = false))
                     .build()
 
             // Act && assert
@@ -136,8 +136,8 @@ class ReachableStepDetailsIteratorTest {
             val testIterator =
                 TestIteratorBuilder()
                     .initialised()
-                    .addStepToEnd(TestStepModel("1", isSatisfied = true))
-                    .addStepToEnd(TestStepModel(subsequentUrlSegment, isSatisfied = false))
+                    .withFirstStep(TestStepModel("1", isSatisfied = true))
+                    .withNextStep(TestStepModel(subsequentUrlSegment, isSatisfied = false))
                     .build()
 
             // Act
@@ -154,8 +154,8 @@ class ReachableStepDetailsIteratorTest {
             val builder =
                 TestIteratorBuilder()
                     .onStep(1)
-                    .addStepToEnd(TestStepModel("1", isSatisfied = true))
-                    .addStepToEnd(currentStepModel)
+                    .withFirstStep(TestStepModel("1", isSatisfied = true))
+                    .withNextStep(currentStepModel)
             val pageDataForStep = builder.getDataForStep(currentStepModel.urlPathSegment)
 
             val testIterator = builder.build()
@@ -173,12 +173,12 @@ class ReachableStepDetailsIteratorTest {
             val builder =
                 TestIteratorBuilder()
                     .onStep(4)
-                    .addStepToEnd(TestStepModel("1", isSatisfied = true))
-                    .addStepToEnd(TestStepModel("2", isSatisfied = true))
-                    .addStepToEnd(TestStepModel("3", isSatisfied = true))
-                    .addStepToEnd(TestStepModel("4", isSatisfied = true))
-                    .addStepToEnd(TestStepModel("5", isSatisfied = true))
-                    .addStepToEnd(TestStepModel("6", isSatisfied = true))
+                    .withFirstStep(TestStepModel("1", isSatisfied = true))
+                    .withNextStep(TestStepModel("2", isSatisfied = true))
+                    .withNextStep(TestStepModel("3", isSatisfied = true))
+                    .withNextStep(TestStepModel("4", isSatisfied = true))
+                    .withNextStep(TestStepModel("5", isSatisfied = true))
+                    .withNextStep(TestStepModel("6", isSatisfied = true))
 
             val testIterator = builder.build()
 
@@ -201,8 +201,8 @@ class ReachableStepDetailsIteratorTest {
             val testIterator =
                 TestIteratorBuilder()
                     .initialised()
-                    .addStepToEnd(TestStepModel("1", isSatisfied = false))
-                    .addStepToEnd(TestStepModel("2", isSatisfied = false))
+                    .withFirstStep(TestStepModel("1", isSatisfied = false))
+                    .withNextStep(TestStepModel("2", isSatisfied = false))
                     .build()
 
             // Act && assert
@@ -215,7 +215,7 @@ class ReachableStepDetailsIteratorTest {
             val testIterator =
                 TestIteratorBuilder()
                     .initialised()
-                    .addStepToEnd(TestStepModel("1"))
+                    .withFirstStep(TestStepModel("1"))
                     .build()
 
             // Act && assert
@@ -232,9 +232,9 @@ class ReachableStepDetailsIteratorTest {
             val builder =
                 TestIteratorBuilder()
                     .onStep(2)
-                    .addStepToEnd(previousModel)
-                    .addStepToEnd(TestStepModel("2"))
-                    .addStepToEnd(TestStepModel("3"))
+                    .withFirstStep(previousModel)
+                    .withNextStep(TestStepModel("2"))
+                    .withNextStep(TestStepModel("3"))
 
             val testIterator = builder.build()
 
@@ -253,9 +253,9 @@ class ReachableStepDetailsIteratorTest {
             val testIterator =
                 TestIteratorBuilder()
                     .onStep(1)
-                    .addStepToEnd(previousModel)
-                    .addStepToEnd(TestStepModel("2"))
-                    .addStepToEnd(TestStepModel("3"))
+                    .withFirstStep(previousModel)
+                    .withNextStep(TestStepModel("2"))
+                    .withNextStep(TestStepModel("3"))
                     .build()
             val currentStepDetails = testIterator.next()
 
@@ -274,9 +274,9 @@ class ReachableStepDetailsIteratorTest {
             val testIterator =
                 TestIteratorBuilder()
                     .onStep(2)
-                    .addStepToEnd(previousModel)
-                    .addStepToEnd(TestStepModel("2", customNextActionAddition = { journeyData -> journeyData.clear() }))
-                    .addStepToEnd(TestStepModel("3"))
+                    .withFirstStep(previousModel)
+                    .withNextStep(TestStepModel("2", customNextActionAddition = { journeyData -> journeyData.clear() }))
+                    .withNextStep(TestStepModel("3"))
                     .build()
 
             // Act
