@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import java.security.Principal
 
@@ -24,7 +25,7 @@ class JourneyDataService(
 ) {
     fun getJourneyDataFromSession(): JourneyData = objectToStringKeyedMap(session.getAttribute("journeyData")) ?: mutableMapOf()
 
-    fun setJourneyData(journeyData: JourneyData) {
+    fun setJourneyData(journeyData: PageData) {
         session.setAttribute("journeyData", journeyData)
     }
 

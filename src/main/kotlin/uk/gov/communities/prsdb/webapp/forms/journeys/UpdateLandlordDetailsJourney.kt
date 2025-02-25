@@ -115,10 +115,10 @@ class UpdateLandlordDetailsJourney(
         landlordData: PageData,
     ): JourneyData {
         // For any fields where the data is updated, replace the original value with the new value
-        for (key in journeyData.keys) {
-            landlordData[key] = journeyData[key]
-        }
         return landlordData
+            .map { (key, value) ->
+                key to if (journeyData.containsKey(key)) journeyData[key] else value
+            }.associate { it }
     }
 
     private fun updateLandlordWithChangesAndRedirect(journeyData: JourneyData): String {
@@ -140,10 +140,10 @@ class UpdateLandlordDetailsJourney(
 
     fun initialiseJourneyDataIfNotInitialised(landlordId: String) {
         val journeyData = journeyDataService.getJourneyDataFromSession()
-        if (journeyData[ORIGINAL_LANDLORD_DATA_KEY] == null) {
+        if (!journeyData.containsKey(ORIGINAL_LANDLORD_DATA_KEY)) {
             val landlord = landlordService.retrieveLandlordByBaseUserId(landlordId)!!
-            journeyData[ORIGINAL_LANDLORD_DATA_KEY] = createOriginalLandlordJourneyData(landlord)
-            journeyDataService.setJourneyData(journeyData)
+            val newJourneyData = journeyData + (ORIGINAL_LANDLORD_DATA_KEY to createOriginalLandlordJourneyData(landlord))
+            journeyDataService.setJourneyData(newJourneyData)
         }
     }
 

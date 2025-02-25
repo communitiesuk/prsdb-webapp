@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateDetailsStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
@@ -17,7 +18,7 @@ import java.time.LocalDate
 class JourneyDataBuilder(
     private val mockAddressDataService: AddressDataService,
     private val mockLocalAuthorityService: LocalAuthorityService,
-    initialJourneyData: Map<String, Any?>? = null,
+    initialJourneyData: JourneyData? = null,
 ) {
     private val journeyData = initialJourneyData?.toMutableMap() ?: mutableMapOf()
 
@@ -26,7 +27,7 @@ class JourneyDataBuilder(
     companion object {
         const val DEFAULT_ADDRESS = "4, Example Road, EG"
 
-        private val defaultPropertyJourneyData: Map<String, Any?> =
+        private val defaultPropertyJourneyData: JourneyData =
             mapOf(
                 "lookup-address" to
                     mutableMapOf(
@@ -77,7 +78,7 @@ class JourneyDataBuilder(
             createLocalAuthority(),
         )
 
-        private val defaultLandlordJourneyData: Map<String, Any?> =
+        private val defaultLandlordJourneyData: JourneyData =
             mapOf(
                 LandlordRegistrationStepId.Name.urlPathSegment to mutableMapOf("name" to "Arthur Dent"),
                 LandlordRegistrationStepId.DateOfBirth.urlPathSegment to

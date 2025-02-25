@@ -17,7 +17,7 @@ class OneLoginIdentityService(
     private val decoderFactory: JwtDecoderFactory<Unit>,
     private val session: HttpSession,
 ) {
-    fun getVerifiedIdentityData(user: OidcUser): MutableMap<String, Any?>? {
+    fun getVerifiedIdentityData(user: OidcUser): Map<String, Any?>? {
         val cachedVerifiedIdentity = retrieveCachedVerifiedIdentity()
         if (cachedVerifiedIdentity != null) {
             return cachedVerifiedIdentity
@@ -34,15 +34,15 @@ class OneLoginIdentityService(
         return null
     }
 
-    private fun cacheVerifiedIdentity(verifiedIdentity: MutableMap<String, Any?>) {
+    private fun cacheVerifiedIdentity(verifiedIdentity: Map<String, Any?>) {
         session.setAttribute(VERIFIED_IDENTITY_CACHE_KEY, verifiedIdentity)
     }
 
-    private fun extractVerifiedIdentity(idClaimJwt: Jwt): MutableMap<String, Any?> {
+    private fun extractVerifiedIdentity(idClaimJwt: Jwt): Map<String, Any?> {
         val verifiableCredentialMap = idClaimJwt.claims["vc"] as? Map<*, *>
         val verifiableCredential = VerifiedCredentialModel.fromUnknownMap(verifiableCredentialMap)
 
-        return mutableMapOf(
+        return mapOf(
             "name" to verifiableCredential.credentialSubject.getCurrentName(),
             "birthDate" to verifiableCredential.credentialSubject.birthDate,
         )
@@ -57,12 +57,12 @@ class OneLoginIdentityService(
         }
     }
 
-    private fun retrieveCachedVerifiedIdentity(): MutableMap<String, Any?>? {
+    private fun retrieveCachedVerifiedIdentity(): Map<String, Any?>? {
         val cached = session.getAttribute(VERIFIED_IDENTITY_CACHE_KEY) as? Map<*, *>
         return cached
             ?.map { (key, value) ->
                 if (key !is String) return null
                 key to value
-            }?.toMap(mutableMapOf())
+            }?.associate { it }
     }
 }

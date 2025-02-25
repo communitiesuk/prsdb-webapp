@@ -4,6 +4,7 @@ import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
@@ -25,7 +26,7 @@ class SelectAddressPage(
     override fun populateModelAndGetTemplateName(
         validator: Validator,
         model: Model,
-        pageData: Map<String, Any?>?,
+        pageData: PageData?,
         prevStepUrl: String?,
         journeyData: JourneyData?,
     ): String {
@@ -65,7 +66,7 @@ class SelectAddressPage(
 
     override fun isSatisfied(
         validator: Validator,
-        formData: Map<String, Any?>,
+        formData: PageData,
     ): Boolean {
         val selectedAddress = formData["address"].toString()
         return selectedAddress == MANUAL_ADDRESS_CHOSEN || addressDataService.getAddressData(selectedAddress) != null

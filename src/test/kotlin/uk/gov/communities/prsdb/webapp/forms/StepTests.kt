@@ -30,10 +30,10 @@ class StepTests {
         val testStep = Step<TestStepId>(TestStepId.StepOne, mockPage)
 
         // Act
-        testStep.updateJourneyData(journeyData, pageData, null)
-        val newJourneyData = objectToStringKeyedMap(journeyData)
-        val existingPageData = objectToStringKeyedMap(newJourneyData?.get("existingPage"))
-        val newPageData = objectToStringKeyedMap(newJourneyData?.get(testStep.name))
+
+        val newJourneyData = testStep.updatedJourneyData(journeyData, pageData, null)
+        val existingPageData = objectToStringKeyedMap(newJourneyData["existingPage"])
+        val newPageData = objectToStringKeyedMap(newJourneyData[testStep.name])
 
         // Assert
         assertEquals("existingValue", existingPageData?.get("existingProperty"))
@@ -50,9 +50,8 @@ class StepTests {
             mutableMapOf(testStep.name to mutableMapOf(("existingProperty" to "existingValue")))
 
         // Act
-        testStep.updateJourneyData(journeyData, pageData, subPageNumber)
-        val newJourneyData = objectToStringKeyedMap(journeyData)
-        val existingPageData = objectToStringKeyedMap(newJourneyData?.get(testStep.name))
+        val newJourneyData = testStep.updatedJourneyData(journeyData, pageData, subPageNumber)
+        val existingPageData = objectToStringKeyedMap(newJourneyData[testStep.name])
         val subPageData = objectToStringKeyedMap(existingPageData?.get(subPageNumber.toString()))
 
         // Assert
@@ -70,10 +69,9 @@ class StepTests {
         val testStep = Step<TestStepId>(TestStepId.StepOne, mockPage)
 
         // Act
-        testStep.updateJourneyData(journeyData, pageData, subPageNumber)
-        val newJourneyData = objectToStringKeyedMap(journeyData)
-        val existingPageData = objectToStringKeyedMap(newJourneyData?.get("existingPage"))
-        val newPageData = objectToStringKeyedMap(newJourneyData?.get(TestStepId.StepOne.urlPathSegment))
+        val newJourneyData = testStep.updatedJourneyData(journeyData, pageData, subPageNumber)
+        val existingPageData = objectToStringKeyedMap(newJourneyData["existingPage"])
+        val newPageData = objectToStringKeyedMap(newJourneyData[TestStepId.StepOne.urlPathSegment])
         val subPageData = objectToStringKeyedMap(newPageData?.get(subPageNumber.toString()))
 
         // Assert
