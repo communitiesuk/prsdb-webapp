@@ -10,6 +10,8 @@ import org.mockito.kotlin.whenever
 import org.springframework.ui.ExtendedModelMap
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder.Companion.DEFAULT_ADDRESS
@@ -25,7 +27,7 @@ class LandlordRegistrationCheckAnswersPageTests {
     private lateinit var localAuthorityService: LocalAuthorityService
     private lateinit var validator: Validator
     private lateinit var model: Model
-    private lateinit var pageData: Map<String, Any?>
+    private lateinit var pageData: PageData
     private lateinit var prevStepUrl: String
     private lateinit var journeyDataBuilder: JourneyDataBuilder
 
@@ -42,7 +44,7 @@ class LandlordRegistrationCheckAnswersPageTests {
         journeyDataBuilder = JourneyDataBuilder.landlordDefault(addressService, localAuthorityService)
     }
 
-    private fun getFormData(journeyData: MutableMap<String, Any?>): List<SummaryListRowViewModel> {
+    private fun getFormData(journeyData: JourneyData): List<SummaryListRowViewModel> {
         page.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData)
 
         val formData = model.asMap()["formData"] as List<*>

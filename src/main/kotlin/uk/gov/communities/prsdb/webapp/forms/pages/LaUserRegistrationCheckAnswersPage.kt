@@ -5,6 +5,7 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.helpers.LaUserRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
@@ -21,7 +22,7 @@ class LaUserRegistrationCheckAnswersPage(
     override fun populateModelAndGetTemplateName(
         validator: Validator,
         model: Model,
-        pageData: Map<String, Any?>?,
+        pageData: PageData?,
         prevStepUrl: String?,
         journeyData: JourneyData?,
     ): String {

@@ -49,7 +49,7 @@ class AddressDataServiceTests {
         val expectedAddressData =
             AddressDataModel("1, Example Road, EG", 1, 1234, buildingNumber = "1", postcode = "EG")
 
-        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mutableMapOf("address-data" to addressDataJSON))
+        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf("address-data" to addressDataJSON))
 
         val addressData = addressDataService.getAddressData("1, Example Road, EG")
 
@@ -67,7 +67,7 @@ class AddressDataServiceTests {
                 ).associateBy { it.singleLineAddress },
             )
 
-        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mutableMapOf("address-data" to addressDataJSON))
+        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf("address-data" to addressDataJSON))
 
         val addressData = addressDataService.getAddressData("invalid address")
 
@@ -84,7 +84,7 @@ class AddressDataServiceTests {
             )
         val expectedAddressDataString = Json.encodeToString(addressDataList.associateBy { it.singleLineAddress })
 
-        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mutableMapOf())
+        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf())
 
         addressDataService.setAddressData(addressDataList)
 
@@ -103,31 +103,31 @@ class AddressDataServiceTests {
     @Test
     fun `getCachedAddressRegisteredResult returns null if no matching result is cached`() {
         val uprn = 1234.toLong()
-        whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(mutableMapOf(5678.toString() to true))
+        whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(mapOf(5678.toString() to true))
         assertNull(addressDataService.getCachedAddressRegisteredResult(uprn))
     }
 
     @Test
     fun `getCachedAddressRegisteredResult returns true if the cached result is true`() {
         val uprn = 1234.toLong()
-        whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(mutableMapOf(uprn.toString() to true))
+        whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(mapOf(uprn.toString() to true))
         assertTrue(addressDataService.getCachedAddressRegisteredResult(uprn) ?: false)
     }
 
     @Test
     fun `getCachedAddressRegisteredResult returns false if the cached result is false`() {
         val uprn = 1234.toLong()
-        whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(mutableMapOf(uprn.toString() to false))
+        whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(mapOf(uprn.toString() to false))
         assertFalse(addressDataService.getCachedAddressRegisteredResult(uprn) ?: true)
     }
 
     @Test
     fun `setCachedAddressRegisteredResult adds the result keyed by the uprn to the existing results cache`() {
-        whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(mutableMapOf(5678.toString() to true))
+        whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(mapOf(5678.toString() to true))
 
         val uprn = 1234.toLong()
 
-        val expectedNewCache = mutableMapOf(5678.toString() to true, uprn.toString() to false)
+        val expectedNewCache = mapOf(5678.toString() to true, uprn.toString() to false)
 
         addressDataService.setCachedAddressRegisteredResult(uprn, false)
         val addressRegisteredResultCaptor = argumentCaptor<MutableMap<String, Boolean>>()

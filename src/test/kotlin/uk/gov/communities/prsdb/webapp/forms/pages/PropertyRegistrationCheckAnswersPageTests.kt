@@ -13,6 +13,8 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
@@ -27,7 +29,7 @@ class PropertyRegistrationCheckAnswersPageTests {
     private lateinit var localAuthorityService: LocalAuthorityService
     private lateinit var validator: Validator
     private lateinit var model: Model
-    private lateinit var pageData: Map<String, Any?>
+    private lateinit var pageData: PageData
     private lateinit var prevStepUrl: String
     private lateinit var journeyDataBuilder: JourneyDataBuilder
 
@@ -44,7 +46,7 @@ class PropertyRegistrationCheckAnswersPageTests {
         journeyDataBuilder = JourneyDataBuilder.propertyDefault(addressService, localAuthorityService)
     }
 
-    private fun getPropertyDetails(journeyData: MutableMap<String, Any?>): List<SummaryListRowViewModel> {
+    private fun getPropertyDetails(journeyData: JourneyData): List<SummaryListRowViewModel> {
         page.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData, null)
 
         val propertyDetails = model.asMap()["propertyDetails"] as List<*>

@@ -100,18 +100,18 @@ abstract class Journey<T : StepId>(
             return populateModelAndGetViewName(stepId, model, subPageNumber, pageData)
         }
         val journeyData = journeyDataService.getJourneyDataFromSession()
-        currentStep.updateJourneyData(journeyData, pageData, subPageNumber)
-        journeyDataService.setJourneyData(journeyData)
+        val newJourneyData = currentStep.updatedJourneyData(journeyData, pageData, subPageNumber)
+        journeyDataService.setJourneyData(newJourneyData)
 
         if (currentStep.saveAfterSubmit) {
             val journeyDataContextId = journeyDataService.getContextId()
-            journeyDataService.saveJourneyData(journeyDataContextId, journeyData, journeyType, principal)
+            journeyDataService.saveJourneyData(journeyDataContextId, newJourneyData, journeyType, principal)
         }
 
         if (currentStep.handleSubmitAndRedirect != null) {
-            return "redirect:${currentStep.handleSubmitAndRedirect!!(journeyData, subPageNumber)}"
+            return "redirect:${currentStep.handleSubmitAndRedirect!!(newJourneyData, subPageNumber)}"
         }
-        val (newStepId: StepId?, newSubPageNumber: Int?) = currentStep.nextAction(journeyData, subPageNumber)
+        val (newStepId: StepId?, newSubPageNumber: Int?) = currentStep.nextAction(newJourneyData, subPageNumber)
         if (newStepId == null) {
             throw IllegalStateException("Cannot compute next step from step ${currentStep.id.urlPathSegment}")
         }

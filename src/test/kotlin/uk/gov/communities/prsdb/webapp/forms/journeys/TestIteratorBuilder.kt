@@ -13,7 +13,7 @@ data class TestStepModel(
 class TestIteratorBuilder {
     private var initialised = false
     private val steps: MutableList<TestStepModel> = mutableListOf()
-    private val journeyData: JourneyData = mutableMapOf()
+    private var journeyData: JourneyData = mapOf()
     private var initialStepModel: TestStepModel? = null
     private var onStep: Int? = null
 
@@ -32,12 +32,16 @@ class TestIteratorBuilder {
             throw PrsdbWebException("This builder already has a first step set")
         }
         initialStepModel = stepModel
-        journeyData[stepModel.urlPathSegment] = mapOf("urlPathSegment" to stepModel.urlPathSegment, "isSatisfied" to stepModel.isSatisfied)
+        journeyData =
+            journeyData +
+            (stepModel.urlPathSegment to mapOf("urlPathSegment" to stepModel.urlPathSegment, "isSatisfied" to stepModel.isSatisfied))
         return this
     }
 
     fun withNextStep(stepModel: TestStepModel): TestIteratorBuilder {
-        journeyData[stepModel.urlPathSegment] = mapOf("urlPathSegment" to stepModel.urlPathSegment, "isSatisfied" to stepModel.isSatisfied)
+        journeyData =
+            journeyData +
+            (stepModel.urlPathSegment to mapOf("urlPathSegment" to stepModel.urlPathSegment, "isSatisfied" to stepModel.isSatisfied))
         return withNextStepWithoutPageData(stepModel)
     }
 
@@ -106,6 +110,4 @@ class TestIteratorBuilder {
     )
 
     fun getDataForStep(urlPathSegment: String): Any? = journeyData[urlPathSegment]
-
-    fun clearJourneyData() = journeyData.clear()
 }

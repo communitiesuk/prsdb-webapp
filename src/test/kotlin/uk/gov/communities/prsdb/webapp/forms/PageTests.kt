@@ -37,7 +37,7 @@ class PageTests {
             Page(
                 TestFormModel::class,
                 "index",
-                mutableMapOf("testKey" to "testValue"),
+                mapOf("testKey" to "testValue"),
                 shouldDisplaySectionHeader = true,
             )
         validatorFactory = Validation.buildDefaultValidatorFactory()
@@ -101,7 +101,7 @@ class PageTests {
         val formData = mapOf("testProperty" to "testPropertyValue")
         val model = BindingAwareModelMap()
         val previousUrl = "/previous"
-        val journeyData: JourneyData = mutableMapOf()
+        val journeyData: JourneyData = mapOf()
         val sectionHeaderInfo = null
 
         // Act, Assert

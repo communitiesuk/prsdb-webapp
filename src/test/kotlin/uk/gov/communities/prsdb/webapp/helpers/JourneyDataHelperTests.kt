@@ -87,8 +87,8 @@ class JourneyDataHelperTests {
             val key = "testKey"
             val value = "testValue"
             val journeyData: JourneyData =
-                mutableMapOf(
-                    pageName to mutableMapOf(key to value),
+                mapOf(
+                    pageName to mapOf(key to value),
                 )
 
             // Act
@@ -102,7 +102,7 @@ class JourneyDataHelperTests {
         fun `returns null if page data is missing`() {
             // Arrange
             val pageName = "testPage"
-            val journeyData: JourneyData = mutableMapOf()
+            val journeyData: JourneyData = mapOf()
 
             // Act
             val pageData = JourneyDataHelper.getPageData(journeyData, pageName, null)
@@ -119,8 +119,8 @@ class JourneyDataHelperTests {
             val key = "testKey"
             val value = "testValue"
             val journeyData: JourneyData =
-                mutableMapOf(
-                    pageName to mutableMapOf(subPageNumber.toString() to mutableMapOf(key to value)),
+                mapOf(
+                    pageName to mapOf(subPageNumber.toString() to mapOf(key to value)),
                 )
 
             // Act
@@ -135,7 +135,7 @@ class JourneyDataHelperTests {
             // Arrange
             val pageName = "testPage"
             val subPageNumber = 12
-            val journeyData: JourneyData = mutableMapOf(pageName to mutableMapOf<String, Any>())
+            val journeyData: JourneyData = mapOf(pageName to mutableMapOf<String, Any>())
 
             // Act
             val subPageData = JourneyDataHelper.getPageData(journeyData, pageName, subPageNumber)

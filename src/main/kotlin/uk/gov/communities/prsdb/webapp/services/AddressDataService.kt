@@ -24,12 +24,12 @@ class AddressDataService(
 
     fun setAddressData(addressDataList: List<AddressDataModel>) {
         val journeyData = journeyDataService.getJourneyDataFromSession()
-        journeyData["address-data"] = Json.encodeToString(addressDataList.associateBy { it.singleLineAddress })
-        journeyDataService.setJourneyData(journeyData)
+        val newJourneyData = journeyData + ("address-data" to Json.encodeToString(addressDataList.associateBy { it.singleLineAddress }))
+        journeyDataService.setJourneyData(newJourneyData)
     }
 
     fun getCachedAddressRegisteredResult(uprn: Long): Boolean? {
-        val cachedResults = objectToStringKeyedMap(session.getAttribute("addressRegisteredResults")) ?: mutableMapOf()
+        val cachedResults = objectToStringKeyedMap(session.getAttribute("addressRegisteredResults")) ?: mapOf()
         return cachedResults[uprn.toString()].toString().toBooleanStrictOrNull()
     }
 
@@ -37,11 +37,10 @@ class AddressDataService(
         uprn: Long,
         result: Boolean,
     ) {
-        val cachedResults =
-            objectToStringKeyedMap(session.getAttribute("addressRegisteredResults")) ?: mutableMapOf()
+        val cachedResults = objectToStringKeyedMap(session.getAttribute("addressRegisteredResults")) ?: mapOf()
 
-        cachedResults[uprn.toString()] = result
+        val newCachedResult = cachedResults + (uprn.toString() to result)
 
-        session.setAttribute("addressRegisteredResults", cachedResults)
+        session.setAttribute("addressRegisteredResults", newCachedResult)
     }
 }

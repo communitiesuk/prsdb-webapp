@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateDetailsStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
@@ -17,7 +18,7 @@ import java.time.LocalDate
 class JourneyDataBuilder(
     private val mockAddressDataService: AddressDataService,
     private val mockLocalAuthorityService: LocalAuthorityService,
-    initialJourneyData: Map<String, Any?>? = null,
+    initialJourneyData: JourneyData? = null,
 ) {
     private val journeyData = initialJourneyData?.toMutableMap() ?: mutableMapOf()
 
@@ -26,44 +27,44 @@ class JourneyDataBuilder(
     companion object {
         const val DEFAULT_ADDRESS = "4, Example Road, EG"
 
-        private val defaultPropertyJourneyData: Map<String, Any?> =
+        private val defaultPropertyJourneyData: JourneyData =
             mapOf(
                 "lookup-address" to
-                    mutableMapOf(
+                    mapOf(
                         "postcode" to "EG",
                         "houseNameOrNumber" to "4",
                     ),
                 "select-address" to
-                    mutableMapOf(
+                    mapOf(
                         "address" to DEFAULT_ADDRESS,
                     ),
                 "property-type" to
-                    mutableMapOf(
+                    mapOf(
                         "propertyType" to "OTHER",
                         "customPropertyType" to "Bungalow",
                     ),
                 "ownership-type" to
-                    mutableMapOf(
+                    mapOf(
                         "ownershipType" to "FREEHOLD",
                     ),
                 "occupancy" to
-                    mutableMapOf(
+                    mapOf(
                         "occupied" to "true",
                     ),
                 "number-of-households" to
-                    mutableMapOf(
+                    mapOf(
                         "numberOfHouseholds" to "2",
                     ),
                 "number-of-people" to
-                    mutableMapOf(
+                    mapOf(
                         "numberOfPeople" to "4",
                     ),
                 "licensing-type" to
-                    mutableMapOf(
+                    mapOf(
                         "licensingType" to "HMO_MANDATORY_LICENCE",
                     ),
                 "hmo-mandatory-licence" to
-                    mutableMapOf(
+                    mapOf(
                         "licenceNumber" to "test1234",
                     ),
             )
@@ -77,19 +78,19 @@ class JourneyDataBuilder(
             createLocalAuthority(),
         )
 
-        private val defaultLandlordJourneyData: Map<String, Any?> =
+        private val defaultLandlordJourneyData: JourneyData =
             mapOf(
-                LandlordRegistrationStepId.Name.urlPathSegment to mutableMapOf("name" to "Arthur Dent"),
+                LandlordRegistrationStepId.Name.urlPathSegment to mapOf("name" to "Arthur Dent"),
                 LandlordRegistrationStepId.DateOfBirth.urlPathSegment to
-                    mutableMapOf(
+                    mapOf(
                         "day" to 6,
                         "month" to 8,
                         "year" to 2000,
                     ),
-                LandlordRegistrationStepId.Email.urlPathSegment to mutableMapOf("emailAddress" to "test@example.com"),
-                LandlordRegistrationStepId.PhoneNumber.urlPathSegment to mutableMapOf("phoneNumber" to "07123456789"),
-                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment to mutableMapOf("livesInEnglandOrWales" to true),
-                LandlordRegistrationStepId.SelectAddress.urlPathSegment to mutableMapOf("address" to DEFAULT_ADDRESS),
+                LandlordRegistrationStepId.Email.urlPathSegment to mapOf("emailAddress" to "test@example.com"),
+                LandlordRegistrationStepId.PhoneNumber.urlPathSegment to mapOf("phoneNumber" to "07123456789"),
+                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment to mapOf("livesInEnglandOrWales" to true),
+                LandlordRegistrationStepId.SelectAddress.urlPathSegment to mapOf("address" to DEFAULT_ADDRESS),
             )
 
         fun landlordDefault(
@@ -108,7 +109,7 @@ class JourneyDataBuilder(
         isContactAddress: Boolean = false,
     ): JourneyDataBuilder {
         val lookupAddressKey = if (isContactAddress) "lookup-contact-address" else "lookup-address"
-        journeyData[lookupAddressKey] = mutableMapOf("houseNameOrNumber" to houseNameOrNumber, "postcode" to postcode)
+        journeyData[lookupAddressKey] = mapOf("houseNameOrNumber" to houseNameOrNumber, "postcode" to postcode)
         return this
     }
 
@@ -129,7 +130,7 @@ class JourneyDataBuilder(
         whenever(mockLocalAuthorityService.retrieveLocalAuthorityById(localAuthority.id)).thenReturn(localAuthority)
 
         val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
-        journeyData[selectAddressKey] = mutableMapOf("address" to singleLineAddress)
+        journeyData[selectAddressKey] = mapOf("address" to singleLineAddress)
         return this
     }
 
@@ -141,11 +142,11 @@ class JourneyDataBuilder(
         isContactAddress: Boolean = false,
     ): JourneyDataBuilder {
         val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
-        journeyData[selectAddressKey] = mutableMapOf("address" to MANUAL_ADDRESS_CHOSEN)
+        journeyData[selectAddressKey] = mapOf("address" to MANUAL_ADDRESS_CHOSEN)
 
         val manualAddressKey = if (isContactAddress) "manual-contact-address" else "manual-address"
         journeyData[manualAddressKey] =
-            mutableMapOf(
+            mapOf(
                 "addressLineOne" to addressLineOne,
                 "townOrCity" to townOrCity,
                 "postcode" to postcode,
@@ -156,7 +157,7 @@ class JourneyDataBuilder(
         }
 
         journeyData["local-authority"] =
-            mutableMapOf("localAuthorityId" to localAuthority?.id)
+            mapOf("localAuthorityId" to localAuthority?.id)
 
         return this
     }
@@ -167,15 +168,15 @@ class JourneyDataBuilder(
     ): JourneyDataBuilder {
         journeyData["property-type"] =
             if (type == PropertyType.OTHER) {
-                mutableMapOf("propertyType" to type.name, "customPropertyType" to customType)
+                mapOf("propertyType" to type.name, "customPropertyType" to customType)
             } else {
-                mutableMapOf("propertyType" to type.name)
+                mapOf("propertyType" to type.name)
             }
         return this
     }
 
     fun withOwnershipType(ownershipType: OwnershipType): JourneyDataBuilder {
-        journeyData["ownership-type"] = mutableMapOf("ownershipType" to ownershipType.name)
+        journeyData["ownership-type"] = mapOf("ownershipType" to ownershipType.name)
         return this
     }
 
@@ -183,19 +184,19 @@ class JourneyDataBuilder(
         licensingType: LicensingType,
         licenseNumber: String? = null,
     ): JourneyDataBuilder {
-        journeyData["licensing-type"] = mutableMapOf("licensingType" to licensingType.name)
+        journeyData["licensing-type"] = mapOf("licensingType" to licensingType.name)
         when (licensingType) {
             LicensingType.SELECTIVE_LICENCE ->
                 journeyData["selective-licence"] =
-                    mutableMapOf("licenceNumber" to licenseNumber)
+                    mapOf("licenceNumber" to licenseNumber)
 
             LicensingType.HMO_MANDATORY_LICENCE ->
                 journeyData["hmo-mandatory-licence"] =
-                    mutableMapOf("licenceNumber" to licenseNumber)
+                    mapOf("licenceNumber" to licenseNumber)
 
             LicensingType.HMO_ADDITIONAL_LICENCE ->
                 journeyData["hmo-additional-licence"] =
-                    mutableMapOf("licenceNumber" to licenseNumber)
+                    mapOf("licenceNumber" to licenseNumber)
 
             LicensingType.NO_LICENSING -> {}
         }
@@ -204,7 +205,7 @@ class JourneyDataBuilder(
 
     fun withNoTenants(): JourneyDataBuilder {
         journeyData["occupancy"] =
-            mutableMapOf(
+            mapOf(
                 "occupied" to "false",
             )
         journeyData.remove("number-of-households")
@@ -217,15 +218,15 @@ class JourneyDataBuilder(
         people: Int,
     ): JourneyDataBuilder {
         journeyData["occupancy"] =
-            mutableMapOf(
+            mapOf(
                 "occupied" to "true",
             )
         journeyData["number-of-households"] =
-            mutableMapOf(
+            mapOf(
                 "numberOfHouseholds" to households.toString(),
             )
         journeyData["number-of-people"] =
-            mutableMapOf(
+            mapOf(
                 "numberOfPeople" to people.toString(),
             )
 
@@ -237,7 +238,7 @@ class JourneyDataBuilder(
         dob: LocalDate,
     ): JourneyDataBuilder {
         journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment] =
-            mutableMapOf(
+            mapOf(
                 "name" to name,
                 "birthDate" to dob,
             )
@@ -248,19 +249,19 @@ class JourneyDataBuilder(
         name: String,
         dob: LocalDate,
     ): JourneyDataBuilder {
-        journeyData[LandlordRegistrationStepId.Name.urlPathSegment] = mutableMapOf("name" to name)
+        journeyData[LandlordRegistrationStepId.Name.urlPathSegment] = mapOf("name" to name)
         journeyData[LandlordRegistrationStepId.DateOfBirth.urlPathSegment] =
-            mutableMapOf("day" to dob.dayOfMonth, "month" to dob.monthValue, "year" to dob.year)
+            mapOf("day" to dob.dayOfMonth, "month" to dob.monthValue, "year" to dob.year)
         return this
     }
 
     fun withEmailAddress(emailAddress: String): JourneyDataBuilder {
-        journeyData[LandlordRegistrationStepId.Email.urlPathSegment] = mutableMapOf("emailAddress" to emailAddress)
+        journeyData[LandlordRegistrationStepId.Email.urlPathSegment] = mapOf("emailAddress" to emailAddress)
         return this
     }
 
     fun withPhoneNumber(phoneNumber: String): JourneyDataBuilder {
-        journeyData[LandlordRegistrationStepId.PhoneNumber.urlPathSegment] = mutableMapOf("phoneNumber" to phoneNumber)
+        journeyData[LandlordRegistrationStepId.PhoneNumber.urlPathSegment] = mapOf("phoneNumber" to phoneNumber)
         return this
     }
 
@@ -289,22 +290,22 @@ class JourneyDataBuilder(
         nonEnglandOrWalesAddress: String,
     ): JourneyDataBuilder {
         journeyData[LandlordRegistrationStepId.CountryOfResidence.urlPathSegment] =
-            mutableMapOf(
+            mapOf(
                 "livesInEnglandOrWales" to false,
                 "countryOfResidence" to countryOfResidence,
             )
         journeyData[LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment] =
-            mutableMapOf("nonEnglandOrWalesAddress" to nonEnglandOrWalesAddress)
+            mapOf("nonEnglandOrWalesAddress" to nonEnglandOrWalesAddress)
         return this
     }
 
     fun withEmailAddressUpdate(newEmail: String): JourneyDataBuilder {
-        journeyData[UpdateDetailsStepId.UpdateEmail.urlPathSegment] = mutableMapOf("emailAddress" to newEmail)
+        journeyData[UpdateDetailsStepId.UpdateEmail.urlPathSegment] = mapOf("emailAddress" to newEmail)
         return this
     }
 
     fun withNameUpdate(newName: String): JourneyDataBuilder {
-        journeyData[UpdateDetailsStepId.UpdateName.urlPathSegment] = mutableMapOf("name" to newName)
+        journeyData[UpdateDetailsStepId.UpdateName.urlPathSegment] = mapOf("name" to newName)
         return this
     }
 }

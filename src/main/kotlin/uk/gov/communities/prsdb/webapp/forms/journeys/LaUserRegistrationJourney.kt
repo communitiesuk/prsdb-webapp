@@ -44,11 +44,11 @@ class LaUserRegistrationJourney(
 
     fun initialiseJourneyData(token: String) {
         val journeyData = journeyDataService.getJourneyDataFromSession()
-        val formData: PageData = mutableMapOf("emailAddress" to invitationService.getEmailAddressForToken(token))
+        val formData: PageData = mapOf("emailAddress" to invitationService.getEmailAddressForToken(token))
         val emailStep = steps.single { step -> step.id == RegisterLaUserStepId.Email }
 
-        emailStep.updateJourneyData(journeyData, formData, null)
-        journeyDataService.setJourneyData(journeyData)
+        val newJourneyData = emailStep.updatedJourneyData(journeyData, formData, null)
+        journeyDataService.setJourneyData(newJourneyData)
     }
 
     private fun landingPageStep() =

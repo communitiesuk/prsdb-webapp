@@ -11,7 +11,7 @@ class JourneyDataTests {
         // Arrange
         val key = "testKey"
         val value = "testValue"
-        val mapAsObject: Any = mutableMapOf(key to value)
+        val mapAsObject: Any = mapOf(key to value)
 
         // Act
         val reconstructedMap = objectToStringKeyedMap(mapAsObject)
@@ -44,7 +44,7 @@ class JourneyDataTests {
     @Test
     fun `objectToStringKeyedMap returns null when the map keys are not strings`() {
         // Arrange
-        val intKeyedMap: Any = mutableMapOf(1 to "one", 2 to "two", 3 to "three")
+        val intKeyedMap: Any = mapOf(1 to "one", 2 to "two", 3 to "three")
 
         // Act
         val reconstructedMap = objectToStringKeyedMap(intKeyedMap)
