@@ -135,6 +135,7 @@ class UpdateLandlordDetailsJourney(
             LandlordUpdateModel(
                 email = UpdateLandlordDetailsJourneyDataHelper.getEmailUpdateIfPresent(journeyData),
                 fullName = UpdateLandlordDetailsJourneyDataHelper.getNameUpdateIfPresent(journeyData),
+                address = null,
             )
 
         landlordService.updateLandlordForBaseUserId(
