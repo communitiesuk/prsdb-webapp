@@ -8,6 +8,7 @@ import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import java.net.URI
@@ -67,7 +68,7 @@ class PropertyDetailsTests : IntegrationTest() {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
             detailsPage.backLink.clickAndWait()
 
-            // TODO: PRSD-647 add link to the dashboard
+            // TODO: PRSD-670 add link to the dashboard
             Assertions.assertEquals("/property-details/1", URI(page.url()).path)
         }
 
@@ -131,9 +132,7 @@ class PropertyDetailsTests : IntegrationTest() {
         fun `the back link returns to the dashboard`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
             detailsPage.backLink.clickAndWait()
-
-            // TODO: PRSD-647 add link to the dashboard
-            Assertions.assertEquals("/local-authority/property-details/1", URI(page.url()).path)
+            assertPageIs(page, LocalAuthorityDashboardPage::class)
         }
 
         @Test
