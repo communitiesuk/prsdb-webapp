@@ -36,24 +36,13 @@ class ReachableStepDetailsIterator<T : StepId>(
     }
 
     private fun initialStepDetails() =
-        steps.singleOrNull { step -> step.id == initialStepId }.let {
-            if (it == null) {
-                throw NoSuchElementException("Journey does not have initial step")
-            } else {
-                val nextFilteredJourneyData = subsequentFilteredJourneyData(currentFilteredJourneyData, it.name)
-                StepDetails(it, null, nextFilteredJourneyData.toMutableMap())
-            }
-        }
-
-    private fun getInitialStepDetailsProcedural(): StepDetails<T> {
-        val initialStepOrNull = steps.singleOrNull { step -> step.id == initialStepId }
-        if (initialStepOrNull == null) {
-            throw NoSuchElementException("Journey does not have initial step")
-        }
-
-        val nextFilteredJourneyData = subsequentFilteredJourneyData(currentFilteredJourneyData, initialStepOrNull.name)
-        return StepDetails(initialStepOrNull, null, nextFilteredJourneyData.toMutableMap())
-    }
+        steps.singleOrNull { step -> step.id == initialStepId }?.let {
+            StepDetails(
+                it,
+                null,
+                subsequentFilteredJourneyData(currentFilteredJourneyData, it.name).toMutableMap(),
+            )
+        } ?: throw NoSuchElementException("Journey does not have initial step")
 
     private fun subsequentStepDetails(currentStep: StepDetails<T>): StepDetails<T> {
         if (!isStepSatisfied(currentStep)) {
