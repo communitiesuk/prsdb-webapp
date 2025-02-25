@@ -29,5 +29,6 @@ abstract class LandlordDetailsBasePage(
     ) : SummaryList(page) {
         val nameRow = getRow("Name")
         val emailRow = getRow("Email address")
+        val addressRow = getRow("Contact address")
     }
 }
