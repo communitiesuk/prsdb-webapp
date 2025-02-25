@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.UpdateLandlordDetailsJourney
+import uk.gov.communities.prsdb.webapp.forms.steps.UpdateDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
@@ -41,7 +42,12 @@ class LandlordDetailsController(
         updateDetailsJourney.initialiseJourneyDataIfNotInitialised(principal.name)
         // TODO: PRSD-355 Remove this way of showing submit button
         model.addAttribute("shouldShowSubmitButton", true)
-        return getLandlordDetailsPage(model, principal, includeChangeLinks = true)
+        addLandlordDetailsToModel(model, principal, includeChangeLinks = true)
+        return updateDetailsJourney.populateModelAndGetViewName(
+            UpdateDetailsStepId.UpdateDetails,
+            model,
+            null,
+        )
     }
 
     @PreAuthorize("hasRole('LANDLORD')")
@@ -49,13 +55,16 @@ class LandlordDetailsController(
     fun getUserLandlordDetails(
         model: Model,
         principal: Principal,
-    ): String = getLandlordDetailsPage(model, principal, includeChangeLinks = false)
+    ): String {
+        addLandlordDetailsToModel(model, principal, includeChangeLinks = false)
+        return "landlordDetailsView"
+    }
 
-    private fun getLandlordDetailsPage(
+    private fun addLandlordDetailsToModel(
         model: Model,
         principal: Principal,
         includeChangeLinks: Boolean,
-    ): String {
+    ) {
         val landlord =
             landlordService.retrieveLandlordByBaseUserId(principal.name)
                 ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
@@ -71,8 +80,6 @@ class LandlordDetailsController(
 
         // TODO PRSD-670: Replace with link to dashboard
         model.addAttribute("backUrl", "/")
-
-        return "landlordDetailsView"
     }
 
     @PreAuthorize("hasRole('LANDLORD')")

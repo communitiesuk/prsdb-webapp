@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPropertyCountRepository
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -357,7 +358,7 @@ class LandlordServiceTests {
         val originalName = "original name"
         val originalEmail = "original email"
         val landlordEntity = createLandlord(name = originalName, email = originalEmail)
-        val updateModel = LandlordUpdateModel(null, null)
+        val updateModel = LandlordUpdateModel(null, null, null)
 
         whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
 
@@ -373,11 +374,11 @@ class LandlordServiceTests {
     fun `when update landlord is passed an update model, non-null fields provided are applied to the entity`() {
         // Arrange
         val userId = "my id"
-        val originalName = "original name"
-        val originalEmail = "original email"
-        val landlordEntity = createLandlord(name = originalName, email = originalEmail)
-        val updateModel = LandlordUpdateModel("newEmail", "newName")
+        val landlordEntity = createLandlord(name = "original name", email = "original email", address = createAddress("original address"))
+        val newAddress = createAddress("new address")
+        val updateModel = LandlordUpdateModel("newEmail", "newName", AddressDataModel.fromAddress(newAddress))
 
+        whenever(mockAddressService.findOrCreateAddress(updateModel.address!!)).thenReturn(newAddress)
         whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
 
         // Act
@@ -386,5 +387,6 @@ class LandlordServiceTests {
         // Assert
         assertEquals(updateModel.fullName, landlordEntity.name)
         assertEquals(updateModel.email, landlordEntity.email)
+        assertEquals(newAddress, landlordEntity.address)
     }
 }

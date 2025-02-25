@@ -119,8 +119,7 @@ class LandlordViewModel(
             SummaryListRowViewModel(
                 "landlordDetails.personalDetails.contactAddress",
                 landlord.address.singleLineAddress,
-                // TODO: PRSD-796 toggleChangeLink("$UPDATE_ROUTE/address"),
-                null,
+                toggleChangeLink("$UPDATE_ROUTE/lookup-address"),
             ),
         )
 

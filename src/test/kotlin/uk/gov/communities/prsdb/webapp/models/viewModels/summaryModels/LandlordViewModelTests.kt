@@ -326,7 +326,12 @@ class LandlordViewModelTests {
     fun `LandlordViewModel populates change links in rows that should have them`() {
         // Arrange
         val testLandlord = MockLandlordData.createLandlord()
-        val changeablePersonalDetailKeys = listOf("landlordDetails.personalDetails.name", "landlordDetails.personalDetails.emailAddress")
+        val changeablePersonalDetailKeys =
+            listOf(
+                "landlordDetails.personalDetails.name",
+                "landlordDetails.personalDetails.emailAddress",
+                "landlordDetails.personalDetails.contactAddress",
+            )
 
         // Act
         val viewModel = LandlordViewModel(testLandlord)
