@@ -20,7 +20,7 @@ abstract class Journey<T : StepId>(
     private val journeyType: JourneyType,
     protected val validator: Validator,
     protected val journeyDataService: JourneyDataService,
-) {
+) : Iterable<StepDetails<T>> {
     abstract val initialStepId: T
     val steps: Set<Step<T>>
         get() = sections.flatMap { section -> section.tasks }.flatMap { task -> task.steps }.toSet()
@@ -52,10 +52,10 @@ abstract class Journey<T : StepId>(
                 HttpStatus.NOT_FOUND,
                 "Step ${stepId.urlPathSegment} not valid for journey ${journeyType.urlPathSegment}",
             )
-        if (!isStepReachable(journeyData, requestedStep, subPageNumber)) {
+        if (!isStepReachable(requestedStep, subPageNumber)) {
             return "redirect:${getUnreachableStepRedirect(journeyData)}"
         }
-        val prevStepDetails = getPrevStep(journeyData, requestedStep, subPageNumber)
+        val prevStepDetails = getPrevStep(requestedStep, subPageNumber)
         val prevStepUrl = getPrevStepUrl(prevStepDetails?.step, prevStepDetails?.subPageNumber)
         val pageData =
             submittedPageData ?: JourneyDataHelper.getPageData(journeyData, requestedStep.name, subPageNumber)
@@ -126,72 +126,22 @@ abstract class Journey<T : StepId>(
     }
 
     fun isStepReachable(
-        journeyData: JourneyData,
         targetStep: Step<T>,
         targetSubPageNumber: Int? = null,
     ): Boolean {
         // Initial page is always reachable
         if (targetStep.id == initialStepId) return true
         // All other steps are reachable if and only if we can find their previous step by traversal
-        return getPrevStep(journeyData, targetStep, targetSubPageNumber) != null
+        return getPrevStep(targetStep, targetSubPageNumber) != null
     }
 
-    protected open fun getPrevStep(
-        journeyData: JourneyData,
+    private fun getPrevStep(
         targetStep: Step<T>,
         targetSubPageNumber: Int?,
-    ): StepDetails<T>? {
-        if (targetStep.id == initialStepId && targetSubPageNumber == null) return null
-        val initialStep = steps.singleOrNull { step -> step.id == initialStepId } ?: return null
-        var currentStep = initialStep
-        lateinit var prevStep: Step<T>
-        var prevSubPageNumber: Int? = null
-        var currentSubPageNumber: Int? = null
-        val filteredJourneyData: JourneyData = mutableMapOf()
-        while (!(currentStep.id == targetStep.id && currentSubPageNumber == targetSubPageNumber)) {
-            val pageData = JourneyDataHelper.getPageData(journeyData, currentStep.name, currentSubPageNumber)
-            if (pageData == null || !currentStep.isSatisfied(validator, pageData)) return null
-
-            // This stores journeyData for only the journey path the user is on
-            // and excludes user data for pages in the journey that belong to a different path
-            val stepData = JourneyDataHelper.getPageData(journeyData, currentStep.name, null)
-            filteredJourneyData[currentStep.name] = stepData
-
-            val (nextStepId, nextSubPageNumber) = currentStep.nextAction(journeyData, currentSubPageNumber)
-            val nextStep = steps.singleOrNull { step -> step.id == nextStepId } ?: return null
-            prevStep = currentStep
-            prevSubPageNumber = currentSubPageNumber
-            currentStep = nextStep
-            currentSubPageNumber = nextSubPageNumber
-        }
-        return StepDetails(prevStep, prevSubPageNumber, filteredJourneyData)
-    }
-
-    protected fun getLastReachableStep(journeyData: JourneyData): StepDetails<T>? {
-        val initialStep = steps.single { step -> step.id == initialStepId }
-        var currentStepDetails: StepDetails<T>? = StepDetails(initialStep, null, mutableMapOf())
-        while (currentStepDetails != null) {
-            val pageData = JourneyDataHelper.getPageData(journeyData, currentStepDetails.step.name, currentStepDetails.subPageNumber)
-            if (pageData == null || !currentStepDetails.step.isSatisfied(validator, pageData)) {
-                return currentStepDetails
-            }
-
-            // This stores journeyData for only the journey path the user is on
-            // and excludes user data for pages in the journey that belong to a different path
-            val stepData = JourneyDataHelper.getPageData(journeyData, currentStepDetails.step.name, null)
-            currentStepDetails.filteredJourneyData[currentStepDetails.step.name] = stepData
-
-            val (nextStepId, nextSubPageNumber) = currentStepDetails.step.nextAction(journeyData, currentStepDetails.subPageNumber)
-            currentStepDetails =
-                nextStepId?.let {
-                    val nextStep = steps.single { step -> step.id == nextStepId }
-                    StepDetails(nextStep, nextSubPageNumber, currentStepDetails!!.filteredJourneyData)
-                }
-        }
-
-        // TODO PRSD-901: This should not return null if the journey is completely valid
-        return null
-    }
+    ): StepDetails<T>? =
+        zipWithNext()
+            .singleOrNull { (_, next) -> next.step == targetStep && next.subPageNumber == targetSubPageNumber }
+            ?.first
 
     private fun getPrevStepUrl(
         prevStep: Step<T>?,
@@ -211,7 +161,7 @@ abstract class Journey<T : StepId>(
         task: JourneyTask<T>,
         journeyData: JourneyData,
     ): TaskStatus {
-        val canTaskBeStarted = isStepReachable(journeyData, task.steps.single { it.id == task.startingStepId })
+        val canTaskBeStarted = isStepReachable(task.steps.single { it.id == task.startingStepId })
         return task.getTaskStatus(journeyData, validator, canTaskBeStarted)
     }
 
@@ -219,4 +169,7 @@ abstract class Journey<T : StepId>(
         initialStepId: T,
         steps: Set<Step<T>>,
     ): List<JourneySection<T>> = listOf(JourneySection.withOneTask(JourneyTask(initialStepId, steps)))
+
+    override fun iterator(): Iterator<StepDetails<T>> =
+        ReachableStepDetailsIterator(journeyDataService.getJourneyDataFromSession(), steps, initialStepId, validator)
 }

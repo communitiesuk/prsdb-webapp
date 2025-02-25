@@ -77,6 +77,7 @@ class LandlordService(
 
         landlordUpdate.email?.let { landlordEntity.email = it }
         landlordUpdate.fullName?.let { landlordEntity.name = it }
+        landlordUpdate.phoneNumber?.let { landlordEntity.phoneNumber = it }
 
         return landlordEntity
     }

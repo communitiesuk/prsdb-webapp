@@ -18,5 +18,12 @@ class UpdateLandlordDetailsJourneyDataHelper : JourneyDataHelper() {
                 UpdateDetailsStepId.UpdateName.urlPathSegment,
                 "name",
             )
+
+        fun getPhoneNumberIfPresent(journeyData: JourneyData) =
+            getFieldStringValue(
+                journeyData,
+                UpdateDetailsStepId.UpdatePhoneNumber.urlPathSegment,
+                "phoneNumber",
+            )
     }
 }

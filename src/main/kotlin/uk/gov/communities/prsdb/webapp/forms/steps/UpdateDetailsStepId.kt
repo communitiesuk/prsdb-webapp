@@ -7,5 +7,6 @@ enum class UpdateDetailsStepId(
 ) : StepId {
     UpdateEmail("email"),
     UpdateName("name"),
+    UpdatePhoneNumber("phone-number"),
     UpdateDetails(DETAILS_PATH_SEGMENT),
 }

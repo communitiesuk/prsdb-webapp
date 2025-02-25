@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUp
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 
@@ -79,6 +80,29 @@ class UpdateLandlordDetailsJourney(
                         ),
                 ),
             handleSubmitAndRedirect = { _, _ -> UpdateDetailsStepId.UpdateDetails.urlPathSegment },
+            nextAction = { _, _ -> Pair(UpdateDetailsStepId.UpdatePhoneNumber, null) },
+            saveAfterSubmit = false,
+        )
+
+    private val phoneNumberStep =
+        Step(
+            id = UpdateDetailsStepId.UpdatePhoneNumber,
+            page =
+                Page(
+                    formModel = PhoneNumberFormModel::class,
+                    templateName = "forms/phoneNumberForm",
+                    content =
+                        mapOf(
+                            "title" to "forms.update.title",
+                            "fieldSetHeading" to "forms.update.phoneNumber.fieldSetHeading",
+                            "fieldSetHint" to "forms.phoneNumber.fieldSetHint",
+                            "label" to "forms.phoneNumber.label",
+                            "submitButtonText" to "forms.buttons.continue",
+                            "hint" to "forms.phoneNumber.hint",
+                            BACK_URL_ATTR_NAME to UpdateDetailsStepId.UpdateDetails.urlPathSegment,
+                        ),
+                ),
+            handleSubmitAndRedirect = { _, _ -> UpdateDetailsStepId.UpdateDetails.urlPathSegment },
             nextAction = { _, _ -> Pair(UpdateDetailsStepId.UpdateDetails, null) },
             saveAfterSubmit = false,
         )
@@ -90,6 +114,7 @@ class UpdateLandlordDetailsJourney(
             setOf(
                 emailStep,
                 nameStep,
+                phoneNumberStep,
                 updateDetailsStep,
             ),
         )
@@ -98,18 +123,16 @@ class UpdateLandlordDetailsJourney(
         if (journeyData[ORIGINAL_LANDLORD_DATA_KEY] == null) {
             UpdateDetailsStepId.UpdateDetails.urlPathSegment
         } else {
-            getLastReachableStep(journeyData)!!.step.id.urlPathSegment
+            last().step.id.urlPathSegment
         }
 
-    override fun getPrevStep(
-        journeyData: JourneyData,
-        targetStep: Step<UpdateDetailsStepId>,
-        targetSubPageNumber: Int?,
-    ): StepDetails<UpdateDetailsStepId>? {
-        val originalLandlordData = JourneyDataHelper.getPageData(journeyData, ORIGINAL_LANDLORD_DATA_KEY) ?: return null
+    override fun iterator(): Iterator<StepDetails<UpdateDetailsStepId>> {
+        val journeyData = journeyDataService.getJourneyDataFromSession()
+        val originalLandlordData =
+            JourneyDataHelper.getPageData(journeyData, ORIGINAL_LANDLORD_DATA_KEY)
+                ?: return ReachableStepDetailsIterator(journeyData, steps, initialStepId, validator)
         val updatedLandlordData = getUpdatedLandlordData(journeyData, originalLandlordData)
-
-        return super.getPrevStep(updatedLandlordData, targetStep, targetSubPageNumber)
+        return ReachableStepDetailsIterator(updatedLandlordData, steps, initialStepId, validator)
     }
 
     private fun getUpdatedLandlordData(
@@ -128,6 +151,7 @@ class UpdateLandlordDetailsJourney(
             LandlordUpdateModel(
                 email = UpdateLandlordDetailsJourneyDataHelper.getEmailUpdateIfPresent(journeyData),
                 fullName = UpdateLandlordDetailsJourneyDataHelper.getNameUpdateIfPresent(journeyData),
+                phoneNumber = UpdateLandlordDetailsJourneyDataHelper.getPhoneNumberIfPresent(journeyData),
             )
 
         landlordService.updateLandlordForBaseUserId(
@@ -153,6 +177,7 @@ class UpdateLandlordDetailsJourney(
         mutableMapOf(
             UpdateDetailsStepId.UpdateEmail.urlPathSegment to mutableMapOf("emailAddress" to landlord.email),
             UpdateDetailsStepId.UpdateName.urlPathSegment to mutableMapOf("name" to landlord.name),
+            UpdateDetailsStepId.UpdatePhoneNumber.urlPathSegment to mutableMapOf("phoneNumber" to landlord.phoneNumber),
         )
 
     companion object {
