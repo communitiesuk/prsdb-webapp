@@ -97,20 +97,11 @@ class PropertyRegistrationJourney(
     private fun checkAndSubmitPropertiesTasks(): List<JourneyTask<RegisterPropertyStepId>> =
         listOf(
             JourneyTask.withOneStep(
-                checkAnswersStep(
-                    addressDataService,
-                    localAuthorityService,
-                ),
+                checkAnswersStep(),
                 "registerProperty.taskList.checkAndSubmit.checkAnswers",
             ),
             JourneyTask.withOneStep(
-                declarationStep(
-                    journeyDataService,
-                    propertyRegistrationService,
-                    addressDataService,
-                    landlordService,
-                    confirmationEmailSender,
-                ),
+                declarationStep(),
             ),
         )
 
@@ -119,10 +110,10 @@ class PropertyRegistrationJourney(
             RegisterPropertyStepId.LookupAddress,
             setOf(
                 lookupAddressStep(),
-                selectAddressStep(addressLookupService, addressDataService, propertyRegistrationService),
+                selectAddressStep(),
                 alreadyRegisteredStep(),
                 manualAddressStep(),
-                localAuthorityStep(localAuthorityService),
+                localAuthorityStep(),
             ),
             "registerProperty.taskList.register.addAddress",
         )
@@ -173,38 +164,35 @@ class PropertyRegistrationJourney(
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.SelectAddress, null) },
         )
 
-    private fun selectAddressStep(
-        addressLookupService: AddressLookupService,
-        addressDataService: AddressDataService,
-        propertyRegistrationService: PropertyRegistrationService,
-    ) = Step(
-        id = RegisterPropertyStepId.SelectAddress,
-        page =
-            SelectAddressPage(
-                formModel = SelectAddressFormModel::class,
-                templateName = "forms/selectAddressForm",
-                content =
-                    mapOf(
-                        "title" to "registerProperty.title",
-                        "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
-                        "submitButtonText" to "forms.buttons.useThisAddress",
-                        "searchAgainUrl" to
-                            "/$REGISTER_PROPERTY_JOURNEY_URL/" +
-                            RegisterPropertyStepId.LookupAddress.urlPathSegment,
-                    ),
-                lookupAddressPathSegment = RegisterPropertyStepId.LookupAddress.urlPathSegment,
-                addressLookupService = addressLookupService,
-                addressDataService = addressDataService,
-                displaySectionHeader = true,
-            ),
-        nextAction = { journeyData, _ ->
-            selectAddressNextAction(
-                journeyData,
-                addressDataService,
-                propertyRegistrationService,
-            )
-        },
-    )
+    private fun selectAddressStep() =
+        Step(
+            id = RegisterPropertyStepId.SelectAddress,
+            page =
+                SelectAddressPage(
+                    formModel = SelectAddressFormModel::class,
+                    templateName = "forms/selectAddressForm",
+                    content =
+                        mapOf(
+                            "title" to "registerProperty.title",
+                            "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
+                            "submitButtonText" to "forms.buttons.useThisAddress",
+                            "searchAgainUrl" to
+                                "/$REGISTER_PROPERTY_JOURNEY_URL/" +
+                                RegisterPropertyStepId.LookupAddress.urlPathSegment,
+                        ),
+                    lookupAddressPathSegment = RegisterPropertyStepId.LookupAddress.urlPathSegment,
+                    addressLookupService = addressLookupService,
+                    addressDataService = addressDataService,
+                    displaySectionHeader = true,
+                ),
+            nextAction = { journeyData, _ ->
+                selectAddressNextAction(
+                    journeyData,
+                    addressDataService,
+                    propertyRegistrationService,
+                )
+            },
+        )
 
     private fun alreadyRegisteredStep() =
         Step(
@@ -248,7 +236,7 @@ class PropertyRegistrationJourney(
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.LocalAuthority, null) },
         )
 
-    private fun localAuthorityStep(localAuthorityService: LocalAuthorityService) =
+    private fun localAuthorityStep() =
         Step(
             id = RegisterPropertyStepId.LocalAuthority,
             page =
@@ -516,59 +504,43 @@ class PropertyRegistrationJourney(
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
         )
 
-    private fun checkAnswersStep(
-        addressDataService: AddressDataService,
-        localAuthorityService: LocalAuthorityService,
-    ) = Step(
-        id = RegisterPropertyStepId.CheckAnswers,
-        page =
-            PropertyRegistrationCheckAnswersPage(
-                addressDataService,
-                localAuthorityService,
-                displaySectionHeader = true,
-            ),
-        nextAction = { _, _ -> Pair(RegisterPropertyStepId.Declaration, null) },
-    )
+    private fun checkAnswersStep() =
+        Step(
+            id = RegisterPropertyStepId.CheckAnswers,
+            page =
+                PropertyRegistrationCheckAnswersPage(
+                    addressDataService,
+                    localAuthorityService,
+                    displaySectionHeader = true,
+                ),
+            nextAction = { _, _ -> Pair(RegisterPropertyStepId.Declaration, null) },
+        )
 
-    private fun declarationStep(
-        journeyDataService: JourneyDataService,
-        propertyRegistrationService: PropertyRegistrationService,
-        addressDataService: AddressDataService,
-        landlordService: LandlordService,
-        confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
-    ) = Step(
-        id = RegisterPropertyStepId.Declaration,
-        page =
-            Page(
-                formModel = DeclarationFormModel::class,
-                templateName = "forms/declarationForm",
-                content =
-                    mapOf(
-                        "title" to "registerProperty.title",
-                        "bulletOneFineAmount" to "forms.declaration.fines.propertyRegistrationJourneyAmount",
-                        "bulletTwoFineAmount" to "forms.declaration.fines.propertyRegistrationJourneyAmount",
-                        "options" to
-                            listOf(
-                                CheckboxViewModel(
-                                    value = "true",
-                                    labelMsgKey = "forms.declaration.checkbox.label",
+    private fun declarationStep() =
+        Step(
+            id = RegisterPropertyStepId.Declaration,
+            page =
+                Page(
+                    formModel = DeclarationFormModel::class,
+                    templateName = "forms/declarationForm",
+                    content =
+                        mapOf(
+                            "title" to "registerProperty.title",
+                            "bulletOneFineAmount" to "forms.declaration.fines.propertyRegistrationJourneyAmount",
+                            "bulletTwoFineAmount" to "forms.declaration.fines.propertyRegistrationJourneyAmount",
+                            "options" to
+                                listOf(
+                                    CheckboxViewModel(
+                                        value = "true",
+                                        labelMsgKey = "forms.declaration.checkbox.label",
+                                    ),
                                 ),
-                            ),
-                        "submitButtonText" to "forms.buttons.confirmAndCompleteRegistration",
-                    ),
-                shouldDisplaySectionHeader = true,
-            ),
-        handleSubmitAndRedirect = { journeyData, _ ->
-            checkAnswersSubmitAndRedirect(
-                journeyData,
-                journeyDataService,
-                propertyRegistrationService,
-                addressDataService,
-                landlordService,
-                confirmationEmailSender,
-            )
-        },
-    )
+                            "submitButtonText" to "forms.buttons.confirmAndCompleteRegistration",
+                        ),
+                    shouldDisplaySectionHeader = true,
+                ),
+            handleSubmitAndRedirect = { _, _ -> checkAnswersSubmitAndRedirect() },
+        )
 
     private fun occupancyNextAction(journeyData: JourneyData): Pair<RegisterPropertyStepId, Int?> =
         if (PropertyRegistrationJourneyDataHelper.getIsOccupied(journeyData)!!) {
@@ -605,15 +577,9 @@ class PropertyRegistrationJourney(
             LicensingType.NO_LICENSING -> Pair(RegisterPropertyStepId.Occupancy, null)
         }
 
-    private fun checkAnswersSubmitAndRedirect(
-        journeyData: JourneyData,
-        journeyDataService: JourneyDataService,
-        propertyRegistrationService: PropertyRegistrationService,
-        addressDataService: AddressDataService,
-        landlordService: LandlordService,
-        confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
-    ): String {
+    private fun checkAnswersSubmitAndRedirect(): String {
         try {
+            val journeyData = last().filteredJourneyData
             val address = PropertyRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!
             val baseUserId = SecurityContextHolder.getContext().authentication.name
             val propertyRegistrationNumber =
