@@ -1,20 +1,34 @@
 @import "node_modules/govuk-frontend/dist/govuk/base";
 
+%margin-below-section {
+  @include govuk-responsive-margin(6, "bottom");
+}
 
 .prsd-dashboard-panel {
+  @extend %margin-below-section;
   background-color: govuk-colour("blue");
   text-align: left;
-  padding: 0;
+  padding: govuk-spacing(2);
 }
 
 .prsd-dashboard-panel__title {
   color: govuk-colour("white");
+  @include govuk-responsive-margin(1, "bottom");
 }
 
 .prsd-dashboard-panel__body {
   color: govuk-colour("white");
+  margin: 0;
 }
 
-.prsd-dashboard-section {
-  margin-bottom: govuk-spacing(6);
+.prsd-dashboard__section {
+  @extend %margin-below-section;
+  padding-inline: govuk-spacing(2);
+}
+
+.prsd-dashboard__stretched-button-container {
+  a {
+    width: 100%;
+    margin-inline: govuk-spacing(-2);
+  }
 }

@@ -1,8 +1,8 @@
-<div th:fragment="dashboardBanner(userName, body)" class="prsd-dashboard-panel prsd-dashboard-section govuk-!-padding-2">
-    <h1 class="govuk-heading-xl prsd-dashboard-panel__title govuk-!-margin-bottom-1" th:text="${userName}">
+<div th:fragment="dashboardBanner(userName, body)" class="prsd-dashboard-panel">
+    <h1 class="govuk-heading-xl prsd-dashboard-panel__title" th:text="${userName}">
         User name
     </h1>
-    <div class="govuk-body-l govuk-!-margin-0 prsd-dashboard-panel__body" th:insert="${body}">
+    <div class="govuk-body-l prsd-dashboard-panel__body" th:insert="${body}">
         Body text that goes in the banner
     </div>
 </div>
