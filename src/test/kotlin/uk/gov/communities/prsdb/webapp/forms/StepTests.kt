@@ -25,15 +25,15 @@ class StepTests {
     fun `updateJourneyData adds pageData when subPageNumber is null`() {
         // Arrange
         val journeyData: JourneyData =
-            mutableMapOf("existingPage" to mutableMapOf("existingProperty" to "existingValue"))
-        val pageData: PageData = mutableMapOf("newProperty" to "newValue")
+            mapOf("existingPage" to mapOf("existingProperty" to "existingValue"))
+        val pageData: PageData = mapOf("newProperty" to "newValue")
         val testStep = Step<TestStepId>(TestStepId.StepOne, mockPage)
 
         // Act
-        testStep.updateJourneyData(journeyData, pageData, null)
-        val newJourneyData = objectToStringKeyedMap(journeyData)
-        val existingPageData = objectToStringKeyedMap(newJourneyData?.get("existingPage"))
-        val newPageData = objectToStringKeyedMap(newJourneyData?.get(testStep.name))
+
+        val newJourneyData = testStep.updatedJourneyData(journeyData, pageData, null)
+        val existingPageData = objectToStringKeyedMap(newJourneyData["existingPage"])
+        val newPageData = objectToStringKeyedMap(newJourneyData[testStep.name])
 
         // Assert
         assertEquals("existingValue", existingPageData?.get("existingProperty"))
@@ -44,15 +44,14 @@ class StepTests {
     fun `updateJourneyData adds subPage data to existing pageData`() {
         // Arrange
         val subPageNumber = 12
-        val pageData: PageData = mutableMapOf("newProperty" to "newValue")
+        val pageData: PageData = mapOf("newProperty" to "newValue")
         val testStep = Step<TestStepId>(TestStepId.StepOne, mockPage)
         val journeyData: JourneyData =
-            mutableMapOf(testStep.name to mutableMapOf(("existingProperty" to "existingValue")))
+            mapOf(testStep.name to mapOf(("existingProperty" to "existingValue")))
 
         // Act
-        testStep.updateJourneyData(journeyData, pageData, subPageNumber)
-        val newJourneyData = objectToStringKeyedMap(journeyData)
-        val existingPageData = objectToStringKeyedMap(newJourneyData?.get(testStep.name))
+        val newJourneyData = testStep.updatedJourneyData(journeyData, pageData, subPageNumber)
+        val existingPageData = objectToStringKeyedMap(newJourneyData[testStep.name])
         val subPageData = objectToStringKeyedMap(existingPageData?.get(subPageNumber.toString()))
 
         // Assert
@@ -65,15 +64,14 @@ class StepTests {
         // Arrange
         val subPageNumber = 12
         val journeyData: JourneyData =
-            mutableMapOf("existingPage" to mutableMapOf(("existingProperty" to "existingValue")))
-        val pageData: PageData = mutableMapOf("newProperty" to "newValue")
+            mapOf("existingPage" to mapOf(("existingProperty" to "existingValue")))
+        val pageData: PageData = mapOf("newProperty" to "newValue")
         val testStep = Step<TestStepId>(TestStepId.StepOne, mockPage)
 
         // Act
-        testStep.updateJourneyData(journeyData, pageData, subPageNumber)
-        val newJourneyData = objectToStringKeyedMap(journeyData)
-        val existingPageData = objectToStringKeyedMap(newJourneyData?.get("existingPage"))
-        val newPageData = objectToStringKeyedMap(newJourneyData?.get(TestStepId.StepOne.urlPathSegment))
+        val newJourneyData = testStep.updatedJourneyData(journeyData, pageData, subPageNumber)
+        val existingPageData = objectToStringKeyedMap(newJourneyData["existingPage"])
+        val newPageData = objectToStringKeyedMap(newJourneyData[TestStepId.StepOne.urlPathSegment])
         val subPageData = objectToStringKeyedMap(newPageData?.get(subPageNumber.toString()))
 
         // Assert

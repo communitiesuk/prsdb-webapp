@@ -39,7 +39,6 @@ class Landlord() : ModifiableAuditableEntity() {
         foreignKey = ForeignKey(name = "FK_LANDLORD_ADDRESS"),
     )
     lateinit var address: Address
-        private set
 
     @Column(nullable = false)
     lateinit var countryOfResidence: String

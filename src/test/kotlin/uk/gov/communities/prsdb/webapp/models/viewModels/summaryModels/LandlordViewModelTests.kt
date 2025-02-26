@@ -331,6 +331,7 @@ class LandlordViewModelTests {
                 "landlordDetails.personalDetails.name",
                 "landlordDetails.personalDetails.emailAddress",
                 "landlordDetails.personalDetails.telephoneNumber",
+                "landlordDetails.personalDetails.contactAddress",
             )
 
         // Act

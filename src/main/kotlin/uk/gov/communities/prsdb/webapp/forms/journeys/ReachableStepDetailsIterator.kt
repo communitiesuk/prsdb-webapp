@@ -13,7 +13,7 @@ class ReachableStepDetailsIterator<T : StepId>(
     private val validator: Validator,
 ) : Iterator<StepDetails<T>> {
     private lateinit var currentStepDetails: StepDetails<T>
-    private var currentFilteredJourneyData: Map<String, Any?> = mapOf()
+    private var currentFilteredJourneyData: JourneyData = mapOf()
     private val immutableJourneyData = journeyData.toMap()
 
     override fun hasNext(): Boolean {
@@ -68,12 +68,12 @@ class ReachableStepDetailsIterator<T : StepId>(
     }
 
     private fun subsequentFilteredJourneyData(
-        filteredJourneyData: Map<String, Any?>,
+        filteredJourneyData: JourneyData,
         stepName: String,
-    ): Map<String, Any?> {
+    ): JourneyData {
         val stepData =
             JourneyDataHelper.getPageData(
-                immutableJourneyData.toMutableMap(),
+                immutableJourneyData,
                 stepName,
                 null,
             )
@@ -83,7 +83,7 @@ class ReachableStepDetailsIterator<T : StepId>(
     private fun isStepSatisfied(step: StepDetails<T>): Boolean {
         val subPageData =
             JourneyDataHelper.getPageData(
-                immutableJourneyData.toMutableMap(),
+                immutableJourneyData,
                 step.step.name,
                 step.subPageNumber,
             )

@@ -1,7 +1,10 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateDetailsStepId
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.services.AddressDataService
 
 class UpdateLandlordDetailsJourneyDataHelper : JourneyDataHelper() {
     companion object {
@@ -25,5 +28,25 @@ class UpdateLandlordDetailsJourneyDataHelper : JourneyDataHelper() {
                 UpdateDetailsStepId.UpdatePhoneNumber.urlPathSegment,
                 "phoneNumber",
             )
+
+        fun getAddressIfPresent(
+            journeyData: JourneyData,
+            addressDataService: AddressDataService,
+        ): AddressDataModel? {
+            val selectedAddress =
+                getFieldStringValue(
+                    journeyData,
+                    UpdateDetailsStepId.SelectEnglandAndWalesAddress.urlPathSegment,
+                    "address",
+                )
+
+            return if (selectedAddress == MANUAL_ADDRESS_CHOSEN) {
+                getManualAddress(journeyData, UpdateDetailsStepId.ManualEnglandAndWalesAddress.urlPathSegment)
+            } else if (selectedAddress != null) {
+                addressDataService.getAddressData(selectedAddress)
+            } else {
+                null
+            }
+        }
     }
 }
