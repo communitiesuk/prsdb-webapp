@@ -7,4 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.L
 
 class LookupAddressFormPageUpdateLandlordDetails(
     page: Page,
-) : LookupAddressFormPage(page, "${LandlordDetailsController.UPDATE_ROUTE}/${UpdateDetailsStepId.LookupEnglandAndWalesAddress}")
+) : LookupAddressFormPage(
+        page,
+        "${LandlordDetailsController.UPDATE_ROUTE}/${UpdateDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment}",
+    )

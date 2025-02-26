@@ -237,10 +237,11 @@ class UpdateLandlordDetailsJourney(
 
         // For any fields where the data is updated, replace the original value with the new value
         val updatedLandlordData =
-            landlordData
-                ?.map { (key, value) ->
-                    key to if (journeyData.containsKey(key)) journeyData[key] else value
-                }?.associate { it }
+            journeyData.keys
+                .union(landlordData?.keys ?: setOf())
+                .map { key ->
+                    key to if (journeyData.containsKey(key)) journeyData[key] else landlordData?.get(key)
+                }.associate { it }
 
         return ReachableStepDetailsIterator(updatedLandlordData ?: journeyData, steps, initialStepId, validator)
     }

@@ -7,5 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.S
 
 class SelectAddressFormPageUpdateLandlordDetails(
     page: Page,
-    // QQ - use constants
-) : SelectAddressFormPage(page, "${LandlordDetailsController.UPDATE_ROUTE}/${UpdateDetailsStepId.SelectEnglandAndWalesAddress}")
+) : SelectAddressFormPage(
+        page,
+        "${LandlordDetailsController.UPDATE_ROUTE}/${UpdateDetailsStepId.SelectEnglandAndWalesAddress.urlPathSegment}",
+    )

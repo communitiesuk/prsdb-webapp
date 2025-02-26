@@ -7,4 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.M
 
 class ManualAddressFormPageUpdateLandlordDetails(
     page: Page,
-) : ManualAddressFormPage(page, "${LandlordDetailsController.UPDATE_ROUTE}/${UpdateDetailsStepId.ManualEnglandAndWalesAddress}")
+) : ManualAddressFormPage(
+        page,
+        "${LandlordDetailsController.UPDATE_ROUTE}/${UpdateDetailsStepId.ManualEnglandAndWalesAddress.urlPathSegment}",
+    )
