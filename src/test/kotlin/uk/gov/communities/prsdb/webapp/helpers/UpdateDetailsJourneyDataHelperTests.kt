@@ -114,6 +114,6 @@ class UpdateDetailsJourneyDataHelperTests {
 
         val phoneNumberUpdate = UpdateLandlordDetailsJourneyDataHelper.getPhoneNumberIfPresent(testJourneyData)
 
-        assertEquals(null, phoneNumberUpdate)
+        assertNull(phoneNumberUpdate)
     }
 }
