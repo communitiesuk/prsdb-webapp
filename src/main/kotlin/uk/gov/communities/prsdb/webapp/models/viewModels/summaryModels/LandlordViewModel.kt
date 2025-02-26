@@ -5,127 +5,117 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Com
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
+import uk.gov.communities.prsdb.webapp.helpers.extenstions.addRow
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class LandlordViewModel(
     private val landlord: Landlord,
     private val withChangeLinks: Boolean = true,
 ) {
+    private val isEnglandOrWalesResident = landlord.isEnglandOrWalesResident()
+
     val name: String = landlord.name
 
-    val consentInformation: List<SummaryListRowViewModel>
-        get() {
-            // TODO PRSD-746 - add user consent information to this page once it is captured (this will need to be passed into the constructor since this is a view model)
-            return listOf(
-                SummaryListRowViewModel(
+    // TODO PRSD-746 - add user consent information to this page once it is captured (this will need to be passed into the constructor since this is a view model)
+    val consentInformation: List<SummaryListRowViewModel> =
+        mutableListOf<SummaryListRowViewModel>()
+            .apply {
+                addRow(
                     "landlordDetails.personalDetails.optionalChoices.legalChanges",
                     "TODO PRSD-746",
-                    toggleChangeLink(null),
-                ),
-                SummaryListRowViewModel(
+                    null,
+                    withChangeLinks,
+                )
+                addRow(
                     "landlordDetails.personalDetails.optionalChoices.research",
                     "TODO PRSD-746",
-                    toggleChangeLink(null),
-                ),
-            )
-        }
+                    null,
+                    withChangeLinks,
+                )
+            }
 
-    val personalDetails: List<SummaryListRowViewModel> = formatPersonalDetails()
-
-    private fun formatPersonalDetails(): List<SummaryListRowViewModel> {
-        val isEnglandOrWalesResident = landlord.isEnglandOrWalesResident()
-
-        val residencyIndependentPersonalDetails =
-            listOf(
-                SummaryListRowViewModel(
+    val personalDetails: List<SummaryListRowViewModel> =
+        mutableListOf<SummaryListRowViewModel>()
+            .apply {
+                addRow(
                     "landlordDetails.personalDetails.registrationDate",
                     DateTimeHelper.getDateInUK(landlord.createdDate.toKotlinInstant()),
                     null,
-                ),
-                SummaryListRowViewModel(
+                    withChangeLinks,
+                )
+                addRow(
                     "landlordDetails.personalDetails.lrn",
                     RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber),
                     null,
-                ),
-                SummaryListRowViewModel(
+                    withChangeLinks,
+                )
+                addRow(
                     "landlordDetails.personalDetails.name",
                     landlord.name,
-                    toggleChangeLink("$UPDATE_ROUTE/name"),
-                ),
-                SummaryListRowViewModel(
+                    if (!landlord.isVerified) "$UPDATE_ROUTE/name" else null,
+                    withChangeLinks,
+                )
+                addRow(
                     "landlordDetails.personalDetails.dateOfBirth",
                     landlord.dateOfBirth,
                     // TODO: PRSD-792 toggleChangeLink("$UPDATE_ROUTE/date-of-birth"),
-                    null,
-                ),
-                SummaryListRowViewModel(
+                    if (!landlord.isVerified) "$UPDATE_ROUTE/date-of-birth" else null,
+                    withChangeLinks,
+                )
+                addRow(
                     "landlordDetails.personalDetails.oneLoginVerified",
                     MessageKeyConverter.convert(landlord.isVerified),
                     null,
-                ),
-                SummaryListRowViewModel(
+                    withChangeLinks,
+                )
+                addRow(
                     "landlordDetails.personalDetails.emailAddress",
                     landlord.email,
-                    toggleChangeLink("$UPDATE_ROUTE/email"),
-                ),
-                SummaryListRowViewModel(
+                    "$UPDATE_ROUTE/email",
+                    withChangeLinks,
+                )
+                addRow(
                     "landlordDetails.personalDetails.telephoneNumber",
                     landlord.phoneNumber,
-                    toggleChangeLink("$UPDATE_ROUTE/phone-number"),
-                ),
-                SummaryListRowViewModel(
+                    "$UPDATE_ROUTE/phone-number",
+                    withChangeLinks,
+                )
+                addRow(
                     "landlordDetails.personalDetails.englandOrWalesResident",
                     isEnglandOrWalesResident,
                     // TODO: PRSD-688 toggleChangeLink("$UPDATE_ROUTE/country-of-residence"),
                     null,
-                ),
-            )
-
-        val residencyPersonalDetails =
-            if (isEnglandOrWalesResident) {
-                formatEnglandOrWalesResidentAddressDetails(landlord)
-            } else {
-                formatNonEnglandOrWalesResidentAddressDetails(landlord)
-            }
-
-        return residencyIndependentPersonalDetails + residencyPersonalDetails
-    }
-
-    private fun formatNonEnglandOrWalesResidentAddressDetails(landlord: Landlord) =
-        listOf(
-            SummaryListRowViewModel(
-                "landlordDetails.personalDetails.country",
-                landlord.countryOfResidence,
-                // TODO: PRSD-688 toggleChangeLink("$UPDATE_ROUTE/country-of-residence"),
-                null,
-            ),
-            SummaryListRowViewModel(
-                "landlordDetails.personalDetails.nonEnglandOrWalesAddress",
-                landlord.nonEnglandOrWalesAddress,
-                // TODO: PRSD-688 toggleChangeLink("$UPDATE_ROUTE/address"),
-                null,
-            ),
-            SummaryListRowViewModel(
-                "landlordDetails.personalDetails.englandOrWalesAddress",
-                landlord.address.singleLineAddress,
-                // TODO: PRSD-688 toggleChangeLink("$UPDATE_ROUTE/contact-address"),
-                null,
-            ),
-        )
-
-    private fun formatEnglandOrWalesResidentAddressDetails(landlord: Landlord) =
-        listOf(
-            SummaryListRowViewModel(
-                "landlordDetails.personalDetails.contactAddress",
-                landlord.address.singleLineAddress,
-                toggleChangeLink("$UPDATE_ROUTE/lookup-address"),
-            ),
-        )
-
-    private fun toggleChangeLink(link: String?): String? =
-        if (withChangeLinks) {
-            link
-        } else {
-            null
-        }
+                    withChangeLinks,
+                )
+                if (isEnglandOrWalesResident) {
+                    addRow(
+                        "landlordDetails.personalDetails.contactAddress",
+                        landlord.address.singleLineAddress,
+                        "$UPDATE_ROUTE/lookup-address",
+                        withChangeLinks,
+                    )
+                } else {
+                    addRow(
+                        "landlordDetails.personalDetails.country",
+                        landlord.countryOfResidence,
+                        // TODO: PRSD-688 toggleChangeLink("$UPDATE_ROUTE/country-of-residence"),
+                        null,
+                        withChangeLinks,
+                    )
+                    addRow(
+                        "landlordDetails.personalDetails.nonEnglandOrWalesAddress",
+                        landlord.nonEnglandOrWalesAddress,
+                        // TODO: PRSD-688 toggleChangeLink("$UPDATE_ROUTE/address"),
+                        null,
+                        withChangeLinks,
+                    )
+                    addRow(
+                        "landlordDetails.personalDetails.englandOrWalesAddress",
+                        landlord.address.singleLineAddress,
+                        // TODO: PRSD-688 toggleChangeLink("$UPDATE_ROUTE/contact-address"),
+                        null,
+                        withChangeLinks,
+                    )
+                }
+            }.toList()
 }
