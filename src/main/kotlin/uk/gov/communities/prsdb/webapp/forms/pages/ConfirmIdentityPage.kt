@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -17,7 +18,7 @@ class ConfirmIdentityPage(
     override fun populateModelAndGetTemplateName(
         validator: Validator,
         model: Model,
-        pageData: Map<String, Any?>?,
+        pageData: PageData?,
         prevStepUrl: String?,
         journeyData: JourneyData?,
     ): String {

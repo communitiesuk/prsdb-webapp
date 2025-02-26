@@ -10,10 +10,10 @@ class Step<T : StepId>(
     val id: T,
     val page: Page,
     val handleSubmitAndRedirect: ((journeyData: JourneyData, subPageNumber: Int?) -> String)? = null,
-    val isSatisfied: (validator: Validator, journeyData: JourneyData) -> Boolean = { validator, journeyData ->
+    val isSatisfied: (validator: Validator, pageData: PageData) -> Boolean = { validator, pageData ->
         page.isSatisfied(
             validator,
-            journeyData,
+            pageData,
         )
     },
     val nextAction: (journeyData: JourneyData, subPageNumber: Int?) -> Pair<T?, Int?> = { _, _ ->
@@ -26,20 +26,28 @@ class Step<T : StepId>(
 ) {
     val name: String = id.urlPathSegment
 
-    fun updateJourneyData(
+    fun updatedJourneyData(
         journeyData: JourneyData,
         pageData: PageData,
         subPageNumber: Int?,
-    ) {
+    ): JourneyData =
         if (subPageNumber != null) {
-            var stepData = objectToStringKeyedMap(journeyData[name])
-            if (stepData == null) {
-                stepData = mutableMapOf<String, Any?>()
-            }
-            stepData[subPageNumber.toString()] = pageData
-            journeyData[name] = stepData
+            val newStepData = updatedStepData(journeyData, subPageNumber, pageData)
+            journeyData + (name to newStepData)
         } else {
-            journeyData[name] = pageData
+            journeyData + (name to pageData)
+        }
+
+    private fun updatedStepData(
+        journeyData: JourneyData,
+        subPageNumber: Int,
+        pageData: PageData,
+    ): PageData {
+        val stepData = objectToStringKeyedMap(journeyData[name])
+        return if (stepData == null) {
+            mapOf(subPageNumber.toString() to pageData)
+        } else {
+            stepData + (subPageNumber.toString() to pageData)
         }
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.web.bind.WebDataBinder
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import kotlin.reflect.KClass
@@ -22,7 +23,7 @@ open class Page(
     open fun populateModelAndGetTemplateName(
         validator: Validator,
         model: Model,
-        pageData: Map<String, Any?>?,
+        pageData: PageData?,
         prevStepUrl: String?,
     ): String {
         var bindingResult = bindDataToFormModel(validator, pageData)
@@ -41,7 +42,7 @@ open class Page(
     open fun populateModelAndGetTemplateName(
         validator: Validator,
         model: Model,
-        pageData: Map<String, Any?>?,
+        pageData: PageData?,
         prevStepUrl: String?,
         journeyData: JourneyData?,
     ): String = populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)
@@ -49,7 +50,7 @@ open class Page(
     open fun populateModelAndGetTemplateName(
         validator: Validator,
         model: Model,
-        pageData: Map<String, Any?>?,
+        pageData: PageData?,
         prevStepUrl: String?,
         journeyData: JourneyData?,
         sectionHeaderInfo: SectionHeaderViewModel?,
@@ -72,7 +73,7 @@ open class Page(
 
     open fun isSatisfied(
         validator: Validator,
-        formData: Map<String, Any?>,
+        formData: PageData,
     ): Boolean {
         val bindingResult = bindDataToFormModel(validator, formData)
         return !bindingResult.hasErrors()
@@ -80,7 +81,7 @@ open class Page(
 
     protected fun bindDataToFormModel(
         validator: Validator,
-        formData: Map<String, Any?>?,
+        formData: PageData?,
     ): BindingResult {
         val binder = WebDataBinder(formModel.createInstance())
         binder.validator = validator

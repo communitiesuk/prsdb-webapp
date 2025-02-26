@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import java.security.Principal
 
@@ -22,9 +23,9 @@ class JourneyDataService(
     private val oneLoginUserRepository: OneLoginUserRepository,
     private val objectMapper: ObjectMapper,
 ) {
-    fun getJourneyDataFromSession(): JourneyData = objectToStringKeyedMap(session.getAttribute("journeyData")) ?: mutableMapOf()
+    fun getJourneyDataFromSession(): JourneyData = objectToStringKeyedMap(session.getAttribute("journeyData")) ?: mapOf()
 
-    fun setJourneyData(journeyData: JourneyData) {
+    fun setJourneyData(journeyData: PageData) {
         session.setAttribute("journeyData", journeyData)
     }
 
@@ -73,7 +74,7 @@ class JourneyDataService(
                 .findById(contextId)
                 .orElseThrow { IllegalStateException("FormContext with ID $contextId not found") }!!
         val loadedJourneyData =
-            objectToStringKeyedMap(objectMapper.readValue(formContext.context, Any::class.java)) ?: mutableMapOf()
+            objectToStringKeyedMap(objectMapper.readValue(formContext.context, Any::class.java)) ?: mapOf()
         setJourneyData(loadedJourneyData)
         setContextId(contextId)
     }
