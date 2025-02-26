@@ -1,0 +1,7 @@
+<div th:fragment="dashboardAction(linkTextKey, linkUrl,descriptionKey)"
+     class="govuk-grid-column-one-third-from-desktop">
+    <a th:href="${linkUrl}"
+    th:text="#{${linkTextKey}}"
+    class="govuk-heading-m govuk-link">linkTextKey</a>
+    <p class="govuk-body" th:text="#{${descriptionKey}}">descriptionKey</p>
+</div>

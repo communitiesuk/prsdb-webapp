@@ -71,8 +71,7 @@ class LandlordViewModel(
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.telephoneNumber",
                     landlord.phoneNumber,
-                    // TODO: PRSD-797 toggleChangeLink("$UPDATE_ROUTE/telephone"),
-                    null,
+                    toggleChangeLink("$UPDATE_ROUTE/phone-number"),
                 ),
                 SummaryListRowViewModel(
                     "landlordDetails.personalDetails.englandOrWalesResident",

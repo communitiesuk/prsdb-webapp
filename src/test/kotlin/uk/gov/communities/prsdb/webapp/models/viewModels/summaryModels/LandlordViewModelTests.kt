@@ -330,6 +330,7 @@ class LandlordViewModelTests {
             listOf(
                 "landlordDetails.personalDetails.name",
                 "landlordDetails.personalDetails.emailAddress",
+                "landlordDetails.personalDetails.telephoneNumber",
                 "landlordDetails.personalDetails.contactAddress",
             )
 

@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAdd
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
@@ -94,6 +95,29 @@ class UpdateLandlordDetailsJourney(
                             "fieldSetHint" to "forms.name.fieldSetHint",
                             "label" to "forms.name.label",
                             "submitButtonText" to "forms.buttons.continue",
+                            BACK_URL_ATTR_NAME to UpdateDetailsStepId.UpdateDetails.urlPathSegment,
+                        ),
+                ),
+            handleSubmitAndRedirect = { _, _ -> UpdateDetailsStepId.UpdateDetails.urlPathSegment },
+            nextAction = { _, _ -> Pair(UpdateDetailsStepId.UpdatePhoneNumber, null) },
+            saveAfterSubmit = false,
+        )
+
+    private val phoneNumberStep =
+        Step(
+            id = UpdateDetailsStepId.UpdatePhoneNumber,
+            page =
+                Page(
+                    formModel = PhoneNumberFormModel::class,
+                    templateName = "forms/phoneNumberForm",
+                    content =
+                        mapOf(
+                            "title" to "forms.update.title",
+                            "fieldSetHeading" to "forms.update.phoneNumber.fieldSetHeading",
+                            "fieldSetHint" to "forms.phoneNumber.fieldSetHint",
+                            "label" to "forms.phoneNumber.label",
+                            "submitButtonText" to "forms.buttons.continue",
+                            "hint" to "forms.phoneNumber.hint",
                             BACK_URL_ATTR_NAME to UpdateDetailsStepId.UpdateDetails.urlPathSegment,
                         ),
                 ),
@@ -191,6 +215,7 @@ class UpdateLandlordDetailsJourney(
             setOf(
                 emailStep,
                 nameStep,
+                phoneNumberStep,
                 lookupAddressStep,
                 selectAddressStep,
                 manualAddressStep,
@@ -198,33 +223,26 @@ class UpdateLandlordDetailsJourney(
             ),
         )
 
-    override fun getUnreachableStepRedirect(journeyData: JourneyData): String {
-        val updatedJourneyData = getUpdatedLandlordData(journeyData)
-        return if (updatedJourneyData == null) {
+    override fun getUnreachableStepRedirect(journeyData: JourneyData): String =
+        if (!journeyData.containsKey(ORIGINAL_LANDLORD_DATA_KEY)) {
             UpdateDetailsStepId.UpdateDetails.urlPathSegment
         } else {
-            getLastReachableStep(updatedJourneyData)!!.step.id.urlPathSegment
+            last().step.id.urlPathSegment
         }
-    }
 
-    override fun getPrevStep(
-        journeyData: JourneyData,
-        targetStep: Step<UpdateDetailsStepId>,
-        targetSubPageNumber: Int?,
-    ): StepDetails<UpdateDetailsStepId>? {
-        val updatedLandlordData = getUpdatedLandlordData(journeyData) ?: return null
+    override fun iterator(): Iterator<StepDetails<UpdateDetailsStepId>> {
+        val journeyData = journeyDataService.getJourneyDataFromSession()
 
-        return super.getPrevStep(updatedLandlordData, targetStep, targetSubPageNumber)
-    }
-
-    private fun getUpdatedLandlordData(journeyData: JourneyData): JourneyData? {
-        val landlordData = JourneyDataHelper.getPageData(journeyData, ORIGINAL_LANDLORD_DATA_KEY) ?: return null
+        val landlordData = JourneyDataHelper.getPageData(journeyData, ORIGINAL_LANDLORD_DATA_KEY)
 
         // For any fields where the data is updated, replace the original value with the new value
-        for (key in journeyData.keys) {
-            landlordData[key] = journeyData[key]
-        }
-        return landlordData
+        val updatedLandlordData =
+            landlordData
+                ?.map { (key, value) ->
+                    key to if (journeyData.containsKey(key)) journeyData[key] else value
+                }?.associate { it }
+
+        return ReachableStepDetailsIterator(updatedLandlordData ?: journeyData, steps, initialStepId, validator)
     }
 
     private fun updateLandlordWithChangesAndRedirect(journeyData: JourneyData): String {
@@ -232,6 +250,7 @@ class UpdateLandlordDetailsJourney(
             LandlordUpdateModel(
                 email = UpdateLandlordDetailsJourneyDataHelper.getEmailUpdateIfPresent(journeyData),
                 fullName = UpdateLandlordDetailsJourneyDataHelper.getNameUpdateIfPresent(journeyData),
+                phoneNumber = UpdateLandlordDetailsJourneyDataHelper.getPhoneNumberIfPresent(journeyData),
                 address = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(journeyData, addressDataService),
             )
 
@@ -247,33 +266,34 @@ class UpdateLandlordDetailsJourney(
 
     fun initialiseJourneyDataIfNotInitialised(landlordId: String) {
         val journeyData = journeyDataService.getJourneyDataFromSession()
-        if (journeyData[ORIGINAL_LANDLORD_DATA_KEY] == null) {
+        if (!journeyData.containsKey(ORIGINAL_LANDLORD_DATA_KEY)) {
             val landlord = landlordService.retrieveLandlordByBaseUserId(landlordId)!!
-            journeyData[ORIGINAL_LANDLORD_DATA_KEY] = createOriginalLandlordJourneyData(landlord)
-            journeyDataService.setJourneyData(journeyData)
+            val newJourneyData = journeyData + (ORIGINAL_LANDLORD_DATA_KEY to createOriginalLandlordJourneyData(landlord))
+            journeyDataService.setJourneyData(newJourneyData)
             addressDataService.setAddressData(listOf(AddressDataModel.fromAddress(landlord.address)))
         }
     }
 
     private fun createOriginalLandlordJourneyData(landlord: Landlord): JourneyData {
-        val originalLandlordData: JourneyData =
+        val originalLandlordData =
             mutableMapOf(
-                UpdateDetailsStepId.UpdateEmail.urlPathSegment to mutableMapOf("emailAddress" to landlord.email),
-                UpdateDetailsStepId.UpdateName.urlPathSegment to mutableMapOf("name" to landlord.name),
+                UpdateDetailsStepId.UpdateEmail.urlPathSegment to mapOf("emailAddress" to landlord.email),
+                UpdateDetailsStepId.UpdateName.urlPathSegment to mapOf("name" to landlord.name),
+                UpdateDetailsStepId.UpdatePhoneNumber.urlPathSegment to mapOf("phoneNumber" to landlord.phoneNumber),
                 UpdateDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment to
-                    mutableMapOf(
+                    mapOf(
                         "postcode" to landlord.address.getPostcodeSearchTerm(),
                         "houseNameOrNumber" to landlord.address.getHouseNameOrNumber(),
                     ),
                 UpdateDetailsStepId.SelectEnglandAndWalesAddress.urlPathSegment to
-                    mutableMapOf(
+                    mapOf(
                         "address" to landlord.address.getSelectedAddress(),
                     ),
             )
 
         if (landlord.address.uprn == null) {
             originalLandlordData[UpdateDetailsStepId.ManualEnglandAndWalesAddress.urlPathSegment] =
-                mutableMapOf(
+                mapOf(
                     "addressLineOne" to landlord.address.singleLineAddress,
                     "townOrCity" to landlord.address.getTownOrCity(),
                     "postcode" to landlord.address.getPostcodeSearchTerm(),

@@ -31,7 +31,6 @@ class Landlord() : ModifiableAuditableEntity() {
 
     @Column(nullable = false)
     lateinit var phoneNumber: String
-        private set
 
     @ManyToOne(optional = false)
     @JoinColumn(

@@ -64,8 +64,8 @@ class JourneyDataServiceTests {
             val key = "testKey"
             val value = "testValue"
             val journeyData: JourneyData =
-                mutableMapOf(
-                    pageName to mutableMapOf(key to value),
+                mapOf(
+                    pageName to mapOf(key to value),
                 )
             val serializedJourneyData = ObjectMapper().writeValueAsString(journeyData)
 
@@ -107,7 +107,7 @@ class JourneyDataServiceTests {
             // Original JourneyData
             val pageName = "testPage"
             val journeyData: JourneyData =
-                mutableMapOf(
+                mapOf(
                     pageName to mutableMapOf<String, Any>(),
                 )
             val serializedJourneyData = ObjectMapper().writeValueAsString(journeyData)
@@ -116,8 +116,8 @@ class JourneyDataServiceTests {
             val newKey = "newTestKey"
             val newValue = "newTestValue"
             val newJourneyData: JourneyData =
-                mutableMapOf(
-                    pageName to mutableMapOf(newKey to newValue),
+                mapOf(
+                    pageName to mapOf(newKey to newValue),
                 )
             val newSerializedJourneyData = ObjectMapper().writeValueAsString(newJourneyData)
 
@@ -150,7 +150,7 @@ class JourneyDataServiceTests {
             val journeyType = JourneyType.LANDLORD_REGISTRATION
             val principalId = "testPrincipleSub"
             val principal = Principal { principalId }
-            val journeyData: JourneyData = mutableMapOf()
+            val journeyData: JourneyData = mapOf()
 
             // FormContext
             val contextId: Long = 123
@@ -180,8 +180,8 @@ class JourneyDataServiceTests {
             val key = "testKey"
             val value = "testValue"
             val journeyData: JourneyData =
-                mutableMapOf(
-                    pageName to mutableMapOf(key to value),
+                mapOf(
+                    pageName to mapOf(key to value),
                 )
             val serializedJourneyData = ObjectMapper().writeValueAsString(journeyData)
 

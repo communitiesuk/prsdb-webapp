@@ -357,8 +357,9 @@ class LandlordServiceTests {
         val userId = "my id"
         val originalName = "original name"
         val originalEmail = "original email"
-        val landlordEntity = createLandlord(name = originalName, email = originalEmail)
-        val updateModel = LandlordUpdateModel(null, null, null)
+        val originalPhoneNumber = "original phone number"
+        val landlordEntity = createLandlord(name = originalName, email = originalEmail, phoneNumber = originalPhoneNumber)
+        val updateModel = LandlordUpdateModel(null, null, null, null)
 
         whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
 
@@ -368,15 +369,22 @@ class LandlordServiceTests {
         // Assert
         assertEquals(originalName, landlordEntity.name)
         assertEquals(originalEmail, landlordEntity.email)
+        assertEquals(originalPhoneNumber, landlordEntity.phoneNumber)
     }
 
     @Test
     fun `when update landlord is passed an update model, non-null fields provided are applied to the entity`() {
         // Arrange
         val userId = "my id"
-        val landlordEntity = createLandlord(name = "original name", email = "original email", address = createAddress("original address"))
+        val landlordEntity =
+            createLandlord(
+                name = "original name",
+                email = "original email",
+                phoneNumber = "original phone number",
+                address = createAddress("original address"),
+            )
         val newAddress = createAddress("new address")
-        val updateModel = LandlordUpdateModel("newEmail", "newName", AddressDataModel.fromAddress(newAddress))
+        val updateModel = LandlordUpdateModel("newEmail", "newName", "new phone number", AddressDataModel.fromAddress(newAddress))
 
         whenever(mockAddressService.findOrCreateAddress(updateModel.address!!)).thenReturn(newAddress)
         whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
@@ -387,6 +395,7 @@ class LandlordServiceTests {
         // Assert
         assertEquals(updateModel.fullName, landlordEntity.name)
         assertEquals(updateModel.email, landlordEntity.email)
+        assertEquals(updateModel.phoneNumber, landlordEntity.phoneNumber)
         assertEquals(newAddress, landlordEntity.address)
     }
 }

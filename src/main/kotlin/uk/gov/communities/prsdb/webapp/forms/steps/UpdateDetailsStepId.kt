@@ -7,6 +7,7 @@ enum class UpdateDetailsStepId(
 ) : StepId {
     UpdateEmail("email"),
     UpdateName("name"),
+    UpdatePhoneNumber("phone-number"),
     LookupEnglandAndWalesAddress("lookup-address"),
     SelectEnglandAndWalesAddress("select-address"),
     ManualEnglandAndWalesAddress("manual-address"),

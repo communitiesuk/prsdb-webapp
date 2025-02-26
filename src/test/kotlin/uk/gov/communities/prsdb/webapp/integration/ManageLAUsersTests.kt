@@ -5,6 +5,7 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.ACCESS_LEVEL_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.ACCOUNT_STATUS_COL_INDEX
@@ -47,9 +48,10 @@ class ManageLAUsersTests : IntegrationTest() {
     }
 
     @Test
-    fun `return to dashboard button is visible`() {
+    fun `return to dashboard button goes to LA dashboard`(page: Page) {
         val managePage = navigator.goToManageLaUsers(localAuthorityId)
-        assertThat(managePage.returnToDashboardButton).isVisible()
+        managePage.returnToDashboardButton.clickAndWait()
+        assertPageIs(page, LocalAuthorityDashboardPage::class)
     }
 
     @Test

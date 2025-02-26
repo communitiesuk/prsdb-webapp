@@ -5,6 +5,7 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
@@ -30,7 +31,7 @@ class PropertyRegistrationCheckAnswersPage(
     override fun populateModelAndGetTemplateName(
         validator: Validator,
         model: Model,
-        pageData: Map<String, Any?>?,
+        pageData: PageData?,
         prevStepUrl: String?,
         journeyData: JourneyData?,
         sectionHeaderInfo: SectionHeaderViewModel?,
