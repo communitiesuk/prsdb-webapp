@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHe
 import uk.gov.communities.prsdb.webapp.helpers.UpdateLandlordDetailsJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DateOfBirthFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
@@ -80,8 +81,14 @@ class UpdateLandlordDetailsJourney(
                             BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
-            nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.UpdateName, null) },
+            handleSubmitAndRedirect = { _, _ -> UpdateDetailsStepId.UpdateDetails.urlPathSegment },
+            nextAction = { journeyData, _ ->
+                if (UpdateLandlordDetailsJourneyDataHelper.getIsIdentityVerified(journeyData)) {
+                    Pair(UpdateDetailsStepId.UpdatePhoneNumber, null)
+                } else {
+                    Pair(UpdateDetailsStepId.UpdateName, null)
+                }
+            },
             saveAfterSubmit = false,
         )
 
@@ -102,8 +109,35 @@ class UpdateLandlordDetailsJourney(
                             BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
-            nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.UpdatePhoneNumber, null) },
+            handleSubmitAndRedirect = { _, _ -> UpdateDetailsStepId.UpdateDetails.urlPathSegment },
+            nextAction = { journeyData, _ ->
+                if (UpdateLandlordDetailsJourneyDataHelper.getIsIdentityVerified(journeyData)) {
+                    Pair(UpdateDetailsStepId.UpdatePhoneNumber, null)
+                } else {
+                    Pair(UpdateDetailsStepId.UpdateDateOfBirth, null)
+                }
+            },
+            saveAfterSubmit = false,
+        )
+
+    private val dateOfBirthStep =
+        Step(
+            id = UpdateDetailsStepId.UpdateDateOfBirth,
+            page =
+                Page(
+                    formModel = DateOfBirthFormModel::class,
+                    templateName = "forms/dateForm",
+                    content =
+                        mapOf(
+                            "title" to "forms.update.title",
+                            "fieldSetHeading" to "forms.update.dateOfBirth.fieldSetHeading",
+                            "fieldSetHint" to "forms.dateOfBirth.fieldSetHint",
+                            "submitButtonText" to "forms.buttons.continue",
+                            BACK_URL_ATTR_NAME to UpdateDetailsStepId.UpdateDetails.urlPathSegment,
+                        ),
+                ),
+            handleSubmitAndRedirect = { _, _ -> UpdateDetailsStepId.UpdateDetails.urlPathSegment },
+            nextAction = { _, _ -> Pair(UpdateDetailsStepId.UpdatePhoneNumber, null) },
             saveAfterSubmit = false,
         )
 
@@ -219,6 +253,7 @@ class UpdateLandlordDetailsJourney(
             setOf(
                 emailStep,
                 nameStep,
+                dateOfBirthStep,
                 phoneNumberStep,
                 lookupAddressStep,
                 selectAddressStep,
@@ -234,6 +269,7 @@ class UpdateLandlordDetailsJourney(
                 name = UpdateLandlordDetailsJourneyDataHelper.getNameUpdateIfPresent(journeyData),
                 phoneNumber = UpdateLandlordDetailsJourneyDataHelper.getPhoneNumberIfPresent(journeyData),
                 address = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(journeyData, addressDataService),
+                dateOfBirth = UpdateLandlordDetailsJourneyDataHelper.getDateOfBirthIfPresent(journeyData),
             )
 
         landlordService.updateLandlordForBaseUserId(
@@ -266,6 +302,12 @@ class UpdateLandlordDetailsJourney(
                 ORIGINAL_ADDRESS_DATA_KEY to
                     mapOf(
                         "address" to Json.encodeToString(AddressDataModel.fromAddress(landlord.address)),
+                    ),
+                UpdateDetailsStepId.UpdateDateOfBirth.urlPathSegment to
+                    mapOf(
+                        "day" to landlord.dateOfBirth?.dayOfMonth.toString(),
+                        "month" to landlord.dateOfBirth?.monthValue.toString(),
+                        "year" to landlord.dateOfBirth?.year.toString(),
                     ),
             )
 
@@ -308,5 +350,6 @@ class UpdateLandlordDetailsJourney(
 
     companion object {
         private const val ORIGINAL_ADDRESS_DATA_KEY = "original-address-data"
+        const val IS_IDENTITY_VERIFIED_KEY = "isIdentityVerified"
     }
 }

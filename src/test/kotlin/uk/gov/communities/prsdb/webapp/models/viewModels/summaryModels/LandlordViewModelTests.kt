@@ -323,12 +323,40 @@ class LandlordViewModelTests {
     }
 
     @Test
-    fun `LandlordViewModel populates change links in rows that should have them`() {
+    fun `LandlordViewModel populates change links in rows that should have them for an unverified landlord`() {
         // Arrange
-        val testLandlord = MockLandlordData.createLandlord()
+        val testLandlord = MockLandlordData.createLandlord(isVerified = false)
         val changeablePersonalDetailKeys =
             listOf(
                 "landlordDetails.personalDetails.name",
+                "landlordDetails.personalDetails.emailAddress",
+                "landlordDetails.personalDetails.telephoneNumber",
+                "landlordDetails.personalDetails.contactAddress",
+                "landlordDetails.personalDetails.dateOfBirth",
+            )
+
+        // Act
+        val viewModel = LandlordViewModel(testLandlord)
+
+        // Assert
+        for (i in viewModel.personalDetails.filter { detail -> detail.fieldHeading in changeablePersonalDetailKeys }) {
+            assertNotNull(i.changeUrl)
+        }
+
+        for (i in viewModel.personalDetails.filter { detail -> detail.fieldHeading !in changeablePersonalDetailKeys }) {
+            assertNull(i.changeUrl)
+        }
+
+        // TODO PRSD-746 change assertion for consentInformation once links have been added
+        viewModel.consentInformation.forEach { consentInformation -> assertNull(consentInformation.changeUrl) }
+    }
+
+    @Test
+    fun `LandlordViewModel populates change links in rows that should have them for a verified landlord`() {
+        // Arrange
+        val testLandlord = MockLandlordData.createLandlord(isVerified = true)
+        val changeablePersonalDetailKeys =
+            listOf(
                 "landlordDetails.personalDetails.emailAddress",
                 "landlordDetails.personalDetails.telephoneNumber",
                 "landlordDetails.personalDetails.contactAddress",
