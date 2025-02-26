@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels
 
 import kotlinx.serialization.Serializable
+import uk.gov.communities.prsdb.webapp.database.entity.Address
 
 @Serializable
 data class AddressDataModel(
@@ -42,5 +43,20 @@ data class AddressDataModel(
         ) = listOf(addressLineOne, addressLineTwo, townOrCity, county, postcode)
             .filterNot { it.isNullOrBlank() }
             .joinToString(", ")
+
+        fun fromAddress(address: Address) =
+            AddressDataModel(
+                singleLineAddress = address.singleLineAddress,
+                localAuthorityId = address.localAuthority?.id,
+                uprn = address.uprn,
+                organisation = address.organisation,
+                subBuilding = address.subBuilding,
+                buildingName = address.buildingName,
+                buildingNumber = address.buildingNumber,
+                streetName = address.streetName,
+                locality = address.locality,
+                townName = address.townName,
+                postcode = address.postcode,
+            )
     }
 }

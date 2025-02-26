@@ -73,7 +73,7 @@ class ReachableStepDetailsIterator<T : StepId>(
     ): JourneyData {
         val stepData =
             JourneyDataHelper.getPageData(
-                immutableJourneyData.toMutableMap(),
+                immutableJourneyData,
                 stepName,
                 null,
             )
@@ -83,7 +83,7 @@ class ReachableStepDetailsIterator<T : StepId>(
     private fun isStepSatisfied(step: StepDetails<T>): Boolean {
         val subPageData =
             JourneyDataHelper.getPageData(
-                immutableJourneyData.toMutableMap(),
+                immutableJourneyData,
                 step.step.name,
                 step.subPageNumber,
             )
