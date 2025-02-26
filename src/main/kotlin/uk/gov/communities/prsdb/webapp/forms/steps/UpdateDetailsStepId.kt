@@ -8,5 +8,8 @@ enum class UpdateDetailsStepId(
     UpdateEmail("email"),
     UpdateName("name"),
     UpdatePhoneNumber("phone-number"),
+    LookupEnglandAndWalesAddress("lookup-address"),
+    SelectEnglandAndWalesAddress("select-address"),
+    ManualEnglandAndWalesAddress("manual-address"),
     UpdateDetails(DETAILS_PATH_SEGMENT),
 }
