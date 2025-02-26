@@ -50,4 +50,6 @@ class Step<T : StepId>(
             stepData + (subPageNumber.toString() to pageData)
         }
     }
+
+    override fun toString() = id.toString()
 }
