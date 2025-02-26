@@ -29,7 +29,7 @@ abstract class Journey<T : StepId>(
 
     open fun getUnreachableStepRedirect(journeyData: JourneyData) = "/${journeyType.urlPathSegment}/${initialStepId.urlPathSegment}"
 
-    fun getStepId(stepName: String): StepId {
+    fun getStepId(stepName: String): T {
         val step = steps.singleOrNull { step -> step.id.urlPathSegment == stepName }
         if (step == null) {
             throw ResponseStatusException(
@@ -85,7 +85,7 @@ abstract class Journey<T : StepId>(
     }
 
     fun updateJourneyDataAndGetViewNameOrRedirect(
-        stepId: StepId,
+        stepId: T,
         pageData: PageData,
         model: Model,
         subPageNumber: Int?,
