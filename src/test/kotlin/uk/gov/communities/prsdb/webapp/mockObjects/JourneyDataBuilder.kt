@@ -129,6 +129,10 @@ class JourneyDataBuilder(
 
         whenever(mockLocalAuthorityService.retrieveLocalAuthorityById(localAuthority.id)).thenReturn(localAuthority)
 
+        if (!isContactAddress) {
+            withEnglandOrWalesResidence()
+        }
+
         val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
         journeyData[selectAddressKey] = mapOf("address" to singleLineAddress)
         return this
@@ -152,6 +156,10 @@ class JourneyDataBuilder(
                 "postcode" to postcode,
             )
 
+        if (!isContactAddress) {
+            withEnglandOrWalesResidence()
+        }
+
         if (localAuthority != null) {
             whenever(mockLocalAuthorityService.retrieveLocalAuthorityById(localAuthority.id)).thenReturn(localAuthority)
         }
@@ -159,6 +167,14 @@ class JourneyDataBuilder(
         journeyData["local-authority"] =
             mapOf("localAuthorityId" to localAuthority?.id)
 
+        return this
+    }
+
+    private fun withEnglandOrWalesResidence(): JourneyDataBuilder {
+        journeyData[LandlordRegistrationStepId.CountryOfResidence.urlPathSegment] =
+            mapOf(
+                "livesInEnglandOrWales" to true,
+            )
         return this
     }
 
@@ -204,12 +220,16 @@ class JourneyDataBuilder(
     }
 
     fun withNoTenants(): JourneyDataBuilder {
+        journeyData.remove("number-of-households")
+        journeyData.remove("number-of-people")
+        return withOccupiedSetToFalse()
+    }
+
+    fun withOccupiedSetToFalse(): JourneyDataBuilder {
         journeyData["occupancy"] =
             mapOf(
                 "occupied" to "false",
             )
-        journeyData.remove("number-of-households")
-        journeyData.remove("number-of-people")
         return this
     }
 
