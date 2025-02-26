@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
@@ -47,8 +48,8 @@ class PropertyDetailsController(
         model.addAttribute("propertyDetails", propertyDetails)
         model.addAttribute("landlordDetails", landlordViewModel.landlordsDetails)
         model.addAttribute("deleteRecordLink", "delete-record")
-        // TODO PRSD-647: Replace with link to dashboard
-        model.addAttribute("backUrl", "/")
+        // TODO PRSD-670: Replace with link to dashboard
+        model.addAttribute("backUrl", "#")
 
         return "propertyDetailsView"
     }
@@ -85,9 +86,7 @@ class PropertyDetailsController(
         model.addAttribute("lastModifiedDate", lastModifiedDate)
         model.addAttribute("lastModifiedBy", lastModifiedBy)
         model.addAttribute("landlordDetails", landlordViewModel.landlordsDetails)
-
-        // TODO PRSD-647: Replace with link to dashboard
-        model.addAttribute("backUrl", "/")
+        model.addAttribute("backUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
 
         return "propertyDetailsView"
     }

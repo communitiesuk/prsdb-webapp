@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
@@ -94,6 +95,7 @@ class RegisterLAUserController(
                 )
 
         model.addAttribute("localAuthority", localAuthorityUser.localAuthority.name)
+        model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
 
         return "registerLAUserSuccess"
     }

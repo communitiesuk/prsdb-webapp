@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{${title}}, ~{::main}, false)}">
+<main class="govuk-main-wrapper">
+    <div id="page-content">
+        <div id="dashboard-banner"
+             th:replace="~{fragments/dashboardBanner :: dashboardBanner(${userName}, ~{::#dashboard-banner/content()})}">
+            <strong th:text="#{localAuthority.dashboard.banner.subheading}">localAuthority.dashboard.banner.subheading</strong>
+            <span th:text="${localAuthority}">localAuthority</span>
+        </div>
+        <section class="prsd-dashboard-section">
+            <h2 class="govuk-heading-l" th:text="#{localAuthority.dashboard.searchAndView.heading}">localAuthority.dashboard.searchAndView.heading</h2>
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-one-third-from-desktop govuk-grid-column-one-half stretch-justify-buttons">
+                    <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${searchPropertyUrl}, #{localAuthority.dashboard.searchForProperty.button})}">
+                        localAuthority.dashboard.searchForProperty.button
+                    </a>
+                </div>
+                <div class="govuk-grid-column-one-third-from-desktop govuk-grid-column-one-half stretch-justify-buttons">
+                    <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${searchLandlordUrl}, #{localAuthority.dashboard.searchForLandlord.button})}">
+                        localAuthority.dashboard.searchForLandlord.button
+                    </a>
+                </div>
+            </div>
+        </section>
+        <section class="prsd-dashboard-section">
+            <h2 class="govuk-heading-l" th:text="#{localAuthority.dashboard.aboutTheDatabase.heading}">localAuthority.dashboard.aboutTheDatabase.heading</h2>
+            <div class="govuk-grid-row">
+                <div th:replace="~{fragments/dashboardAction :: dashboardAction(
+                'localAuthority.dashboard.action.privacyNotice.linkText',
+                ${privacyNoticeUrl},
+                'localAuthority.dashboard.action.privacyNotice.descriptionText')}">
+                    View privacy notice action
+                </div>
+                <div th:replace="~{fragments/dashboardAction :: dashboardAction(
+                'localAuthority.dashboard.action.rentersRightsBill.linkText',
+                ${rentersRightsBillUrl},
+                'localAuthority.dashboard.action.rentersRightsBill.descriptionText')}">
+                    View Renters' Rights Bill action
+                </div>
+                <div th:replace="~{fragments/dashboardAction :: dashboardAction(
+                'localAuthority.dashboard.action.aboutPilot.linkText',
+                ${aboutPilotUrl},
+                'localAuthority.dashboard.action.aboutPilot.descriptionText')}">
+                    View About pilot action
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+</html>
