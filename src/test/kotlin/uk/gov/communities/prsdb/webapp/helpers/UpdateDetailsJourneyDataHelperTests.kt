@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
@@ -35,7 +36,7 @@ class UpdateDetailsJourneyDataHelperTests {
 
         val emailUpdate = UpdateLandlordDetailsJourneyDataHelper.getEmailUpdateIfPresent(testJourneyData)
 
-        assertEquals(null, emailUpdate)
+        assertNull(emailUpdate)
     }
 
     @Test
@@ -54,7 +55,7 @@ class UpdateDetailsJourneyDataHelperTests {
 
         val nameUpdate = UpdateLandlordDetailsJourneyDataHelper.getNameUpdateIfPresent(testJourneyData)
 
-        assertEquals(null, nameUpdate)
+        assertNull(nameUpdate)
     }
 
     @Test
@@ -89,11 +90,11 @@ class UpdateDetailsJourneyDataHelperTests {
     }
 
     @Test
-    fun `getNameUpdateIfPresent retur4ns null if the name page is in not journeyData`() {
+    fun `getAddressUpdateIfPresent returns null if the address pages are not journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
         val addressUpdate = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(testJourneyData, addressDataService)
 
-        assertEquals(null, addressUpdate)
+        assertNull(addressUpdate)
     }
 }
