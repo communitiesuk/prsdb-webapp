@@ -3,12 +3,12 @@
         <div class="prsd-key-details__column" th:each="column: ${listColumns}">
             <dt class="prsd-key-details__key" th:text="#{${column.fieldHeading}}">fieldHeading</dt>
             <dd th:if="${column.changeUrl} == null"
-                class="prsd-key-values__value"
+                class="prsd-key-details__value"
                 th:text="${#messages.msgOrNull(column.fieldValue)} ?: ${{fieldValue}}">
                 column.convertedFieldValue
             </dd>
             <dd th:if="${column.changeUrl} != null"
-                class="prsd-key-values__value">
+                class="prsd-key-details__value">
                 <a class="govuk-link"
                    th:href="@{${column.changeUrl}}"
                     th:text="${#messages.msgOrNull(column.fieldValue)} ?: ${{column.fieldValue}}">

@@ -1,7 +1,4 @@
-@import "node_modules/govuk-frontend/dist/govuk/base";
-
-.test-class {
-  padding: 30px;
-  @include govuk-responsive-margin(6);
-  color: govuk-colour("light-grey");
-}
+@use "warnings";
+@use "containers";
+@use "keyDetails";
+@use "dashboard";

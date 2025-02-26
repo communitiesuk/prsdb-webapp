@@ -1,0 +1,20 @@
+@import "node_modules/govuk-frontend/dist/govuk/base";
+
+
+.prsd-dashboard-panel {
+  background-color: govuk-colour("blue");
+  text-align: left;
+  padding: 0;
+}
+
+.prsd-dashboard-panel__title {
+  color: govuk-colour("white");
+}
+
+.prsd-dashboard-panel__body {
+  color: govuk-colour("white");
+}
+
+.prsd-dashboard-section {
+  margin-bottom: govuk-spacing(6);
+}
