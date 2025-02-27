@@ -1,7 +1,5 @@
 package uk.gov.communities.prsdb.webapp.mockObjects
 
-import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -124,7 +122,7 @@ class JourneyDataBuilder(
         localAuthority: LocalAuthority,
         isContactAddress: Boolean = false,
     ): JourneyDataBuilder {
-        whenever(mockAddressDataService.getAddressData(any(), eq(singleLineAddress))).thenReturn(
+        whenever(mockAddressDataService.getAddressData(singleLineAddress)).thenReturn(
             AddressDataModel(
                 singleLineAddress,
                 localAuthorityId = localAuthority.id,

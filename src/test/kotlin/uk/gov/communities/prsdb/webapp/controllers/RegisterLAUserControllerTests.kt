@@ -58,7 +58,7 @@ class RegisterLAUserControllerTests(
 
         verify(invitationService).tokenIsValid(validToken)
         verify(invitationService).storeTokenInSession(validToken)
-        verify(laUserRegistrationJourney).initialiseJourneyData(validToken)
+        verify(laUserRegistrationJourney).initialiseJourneyData(validToken, JourneyType.LA_USER_REGISTRATION.name)
     }
 
     @Test
@@ -70,7 +70,10 @@ class RegisterLAUserControllerTests(
 
         verify(invitationService).tokenIsValid(invalidToken)
         verify(invitationService, never()).storeTokenInSession(invalidToken)
-        verify(laUserRegistrationJourney, never()).initialiseJourneyData(validToken)
+        verify(laUserRegistrationJourney, never()).initialiseJourneyData(
+            validToken,
+            JourneyType.LA_USER_REGISTRATION.name,
+        )
     }
 
     @Test

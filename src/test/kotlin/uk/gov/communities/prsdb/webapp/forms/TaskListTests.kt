@@ -41,6 +41,7 @@ class TaskListTests {
         override val initialStepId: TestStepId,
         override val sections: List<JourneySection<TestStepId>>,
     ) : JourneyWithTaskList<TestStepId>(JourneyType.PROPERTY_REGISTRATION, validator, journeyDataService) {
+        override val journeyPathSegment = "any-url-segment"
         override val taskListFactory: TaskListViewModelFactory<TestStepId>
             get() =
                 getTaskListViewModelFactory(

@@ -14,6 +14,7 @@ import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController
@@ -84,6 +85,7 @@ class InvitationUrlTests(
         val encodedConfirmedEmailContent = urlEncodedConfirmedEmailDataModel(testEmail)
 
         whenever(laUserRegistrationJourney.initialStepId).thenReturn(RegisterLaUserStepId.LandingPage)
+        whenever(laUserRegistrationJourney.journeyType).thenReturn(JourneyType.LA_USER_REGISTRATION)
 
         // Act
         mvc
