@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.constants.UPDATE_LANDLORD_DETAILS_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.Address
@@ -44,6 +45,8 @@ class UpdateLandlordDetailsJourney(
         journeyDataService = journeyDataService,
     ) {
     override val initialStepId = UpdateLandlordDetailsStepId.UpdateEmail
+
+    override val journeyPathSegment: String = UPDATE_LANDLORD_DETAILS_URL
 
     private val updateDetailsStep =
         Step(

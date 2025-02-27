@@ -72,6 +72,8 @@ class PropertyRegistrationJourney(
             JourneySection(checkAndSubmitPropertiesTasks(), "registerProperty.taskList.checkAndSubmit.heading"),
         )
 
+    override val journeyPathSegment = REGISTER_PROPERTY_JOURNEY_URL
+
     override val taskListFactory =
         getTaskListViewModelFactory(
             "registerProperty.title",
