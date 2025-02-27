@@ -453,6 +453,7 @@ class JourneyTests {
                     mockOneLoginUserRepository,
                     ObjectMapper(),
                 )
+            journeyDataService.journeyDataKey = "test-journey-key"
         }
 
         @Test

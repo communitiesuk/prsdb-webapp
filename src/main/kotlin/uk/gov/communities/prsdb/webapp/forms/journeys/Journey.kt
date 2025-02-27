@@ -93,11 +93,11 @@ abstract class Journey<T : StepId>(
         principal: Principal,
         journeyDataKey: String = journeyType.name,
     ): String {
+        journeyDataService.journeyDataKey = journeyDataKey
         val currentStep = getStep(stepId)
         if (!currentStep.isSatisfied(validator, pageData)) {
             return populateModelAndGetViewName(stepId, model, subPageNumber, journeyDataKey, pageData)
         }
-        journeyDataService.journeyDataKey = journeyDataKey
         val journeyData = journeyDataService.getJourneyDataFromSession()
         val newJourneyData = currentStep.updatedJourneyData(journeyData, pageData, subPageNumber)
         journeyDataService.setJourneyDataInSession(newJourneyData)
