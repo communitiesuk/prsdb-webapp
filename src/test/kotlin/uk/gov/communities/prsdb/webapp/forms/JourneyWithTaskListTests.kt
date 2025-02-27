@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourne
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import kotlin.test.assertEquals
 
-class PropertyRegistrationJourneyTests {
+class JourneyWithTaskListTests {
     @Mock
     lateinit var mockJourneyDataService: JourneyDataService
 
@@ -98,11 +98,12 @@ class PropertyRegistrationJourneyTests {
                     mock(),
                     mock(),
                 )
+            val journeyDataKey = "key"
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf("anything" to "Anything else"))
 
             // Act
-            testJourney.initialiseJourneyDataIfNotInitialised(principalName)
+            testJourney.initialiseJourneyDataIfNotInitialised(principalName, journeyDataKey)
 
             // Assert
             verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any())
