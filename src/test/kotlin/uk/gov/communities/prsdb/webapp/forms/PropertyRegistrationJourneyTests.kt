@@ -14,8 +14,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.validation.Errors
-import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -24,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.helpers.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
@@ -64,15 +63,6 @@ class PropertyRegistrationJourneyTests {
     lateinit var urlProvider: AbsoluteUrlProvider
 
     val alwaysTrueValidator: AlwaysTrueValidator = AlwaysTrueValidator()
-
-    class AlwaysTrueValidator : Validator {
-        override fun supports(clazz: Class<*>): Boolean = true
-
-        override fun validate(
-            target: Any,
-            errors: Errors,
-        ) {}
-    }
 
     @BeforeEach
     fun setup() {
