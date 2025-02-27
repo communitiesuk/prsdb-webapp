@@ -4,7 +4,6 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_PLACE_NAMES
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.constants.NON_ENGLAND_OR_WALES_ADDRESS_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
@@ -33,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordReg
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.SelectViewModel
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -46,6 +46,7 @@ class LandlordRegistrationJourney(
     addressLookupService: AddressLookupService,
     addressDataService: AddressDataService,
     landlordService: LandlordService,
+    absoluteUrlProvider: AbsoluteUrlProvider,
     emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
 ) : Journey<LandlordRegistrationStepId>(
         journeyType = JourneyType.LANDLORD_REGISTRATION,
@@ -62,7 +63,7 @@ class LandlordRegistrationJourney(
                 "registerAsALandlord.section.yourDetails.heading",
             ),
             JourneySection(
-                checkAndSubmitDetailsTasks(addressDataService, landlordService, emailNotificationService),
+                checkAndSubmitDetailsTasks(addressDataService, landlordService, absoluteUrlProvider, emailNotificationService),
                 "registerAsALandlord.section.checkAndSubmit.heading",
             ),
         )
@@ -84,11 +85,14 @@ class LandlordRegistrationJourney(
     private fun checkAndSubmitDetailsTasks(
         addressDataService: AddressDataService,
         landlordService: LandlordService,
+        absoluteUrlProvider: AbsoluteUrlProvider,
         emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
     ): List<JourneyTask<LandlordRegistrationStepId>> =
         listOf(
             JourneyTask.withOneStep(checkAnswersStep(addressDataService)),
-            JourneyTask.withOneStep(declarationStep(journeyDataService, landlordService, addressDataService, emailNotificationService)),
+            JourneyTask.withOneStep(
+                declarationStep(journeyDataService, landlordService, addressDataService, absoluteUrlProvider, emailNotificationService),
+            ),
         )
 
     private fun identityTask() =
@@ -458,6 +462,7 @@ class LandlordRegistrationJourney(
         journeyDataService: JourneyDataService,
         landlordService: LandlordService,
         addressDataService: AddressDataService,
+        absoluteUrlProvider: AbsoluteUrlProvider,
         emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
     ) = Step(
         id = LandlordRegistrationStepId.Declaration,
@@ -487,6 +492,7 @@ class LandlordRegistrationJourney(
                 journeyDataService,
                 landlordService,
                 addressDataService,
+                absoluteUrlProvider,
                 emailNotificationService,
             )
         },
@@ -520,6 +526,7 @@ class LandlordRegistrationJourney(
         journeyDataService: JourneyDataService,
         landlordService: LandlordService,
         addressDataService: AddressDataService,
+        absoluteUrlProvider: AbsoluteUrlProvider,
         emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
     ): String {
         val landlord =
@@ -541,7 +548,7 @@ class LandlordRegistrationJourney(
             landlord.email,
             LandlordRegistrationConfirmationEmail(
                 RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
-                LANDLORD_DASHBOARD_URL,
+                absoluteUrlProvider.buildLandlordDashboardUri().toString(),
             ),
         )
 
