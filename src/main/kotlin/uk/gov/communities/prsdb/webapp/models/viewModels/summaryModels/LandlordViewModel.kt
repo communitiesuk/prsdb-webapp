@@ -58,7 +58,6 @@ class LandlordViewModel(
                 addRow(
                     "landlordDetails.personalDetails.dateOfBirth",
                     landlord.dateOfBirth,
-                    // TODO: PRSD-792 toggleChangeLink("$UPDATE_ROUTE/date-of-birth"),
                     if (!landlord.isVerified) "$UPDATE_ROUTE/date-of-birth" else null,
                     withChangeLinks,
                 )
