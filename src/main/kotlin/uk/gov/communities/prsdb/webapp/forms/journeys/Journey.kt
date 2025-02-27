@@ -6,7 +6,6 @@ import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
-import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
@@ -17,20 +16,18 @@ import java.security.Principal
 import java.util.Optional
 
 abstract class Journey<T : StepId>(
-    val journeyType: JourneyType,
+    protected val journeyType: JourneyType,
     protected val validator: Validator,
     protected val journeyDataService: JourneyDataService,
 ) : Iterable<StepDetails<T>> {
     abstract val initialStepId: T
 
-    val steps: Set<Step<T>>
-        get() = sections.flatMap { section -> section.tasks }.flatMap { task -> task.steps }.toSet()
-
     abstract val sections: List<JourneySection<T>>
 
-    abstract val journeyPathSegment: String
+    protected val steps: Set<Step<T>>
+        get() = sections.flatMap { section -> section.tasks }.flatMap { task -> task.steps }.toSet()
 
-    open fun getUnreachableStepRedirect(journeyData: JourneyData) = initialStepId.urlPathSegment
+    protected abstract val journeyPathSegment: String
 
     fun getStepId(stepName: String): T {
         val step = steps.singleOrNull { step -> step.id.urlPathSegment == stepName }
@@ -73,18 +70,6 @@ abstract class Journey<T : StepId>(
         )
     }
 
-    fun getSectionHeaderInfo(step: Step<T>): SectionHeaderViewModel? {
-        val sectionContainingStep = sections.single { it.isStepInSection(step.id) }
-        if (sectionContainingStep.headingKey == null) {
-            return null
-        }
-        return SectionHeaderViewModel(
-            sectionContainingStep.headingKey,
-            sections.indexOf(sectionContainingStep) + 1,
-            sections.size,
-        )
-    }
-
     fun updateJourneyDataAndGetViewNameOrRedirect(
         stepId: T,
         pageData: PageData,
@@ -124,7 +109,10 @@ abstract class Journey<T : StepId>(
         return "redirect:$redirectUrl"
     }
 
-    fun isStepReachable(
+    override fun iterator(): Iterator<StepDetails<T>> =
+        ReachableStepDetailsIterator(journeyDataService.getJourneyDataFromSession(), steps, initialStepId, validator)
+
+    protected fun isStepReachable(
         targetStep: Step<T>,
         targetSubPageNumber: Int? = null,
     ): Boolean {
@@ -134,11 +122,32 @@ abstract class Journey<T : StepId>(
         return getPrevStep(targetStep, targetSubPageNumber) != null
     }
 
+    protected open fun getUnreachableStepRedirect(journeyData: JourneyData) = initialStepId.urlPathSegment
+
+    protected fun <T : StepId> createSingleSectionWithSingleTaskFromSteps(
+        initialStepId: T,
+        steps: Set<Step<T>>,
+    ): List<JourneySection<T>> = listOf(JourneySection.withOneTask(JourneyTask(initialStepId, steps)))
+
+    protected fun journeyDataKeyOrDefault(journeyDataKey: String?) = journeyDataKey ?: journeyType.name
+
+    private fun getSectionHeaderInfo(step: Step<T>): SectionHeaderViewModel? {
+        val sectionContainingStep = sections.single { it.isStepInSection(step.id) }
+        if (sectionContainingStep.headingKey == null) {
+            return null
+        }
+        return SectionHeaderViewModel(
+            sectionContainingStep.headingKey,
+            sections.indexOf(sectionContainingStep) + 1,
+            sections.size,
+        )
+    }
+
     private fun getStep(stepId: StepId) =
         steps.singleOrNull { step -> step.id == stepId }
             ?: throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "Step $journeyPathSegment not valid for journey ${journeyType.name}",
+                "Step $stepId not valid for journey ${journeyType.name}",
             )
 
     private fun getPrevStep(
@@ -162,20 +171,4 @@ abstract class Journey<T : StepId>(
             .build(true)
             .toUriString()
     }
-
-    fun getTaskStatus(
-        task: JourneyTask<T>,
-        journeyData: JourneyData,
-    ): TaskStatus {
-        val canTaskBeStarted = isStepReachable(task.steps.single { it.id == task.startingStepId })
-        return task.getTaskStatus(journeyData, validator, canTaskBeStarted)
-    }
-
-    protected fun <T : StepId> createSingleSectionWithSingleTaskFromSteps(
-        initialStepId: T,
-        steps: Set<Step<T>>,
-    ): List<JourneySection<T>> = listOf(JourneySection.withOneTask(JourneyTask(initialStepId, steps)))
-
-    override fun iterator(): Iterator<StepDetails<T>> =
-        ReachableStepDetailsIterator(journeyDataService.getJourneyDataFromSession(), steps, initialStepId, validator)
 }

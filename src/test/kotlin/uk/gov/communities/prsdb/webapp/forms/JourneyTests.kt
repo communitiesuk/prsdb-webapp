@@ -377,6 +377,7 @@ class JourneyTests {
                             TestFormModel::class,
                             "index",
                             mapOf("testKey" to "testValue"),
+                            shouldDisplaySectionHeader = true,
                         ),
                 )
 
@@ -395,10 +396,12 @@ class JourneyTests {
                     validator = validator,
                 )
 
-            val expectedSectionHeader = SectionHeaderViewModel("Test section heading name key", 1, 1)
-            val sectionHeader = testJourney.getSectionHeaderInfo(testStep)
+            val model = BindingAwareModelMap()
 
-            assertTrue(ReflectionEquals(expectedSectionHeader).matches(sectionHeader))
+            testJourney.populateModelAndGetViewName(TestStepId.StepOne, model, null)
+
+            val expectedSectionHeader = SectionHeaderViewModel("Test section heading name key", 1, 1)
+            assertTrue(ReflectionEquals(expectedSectionHeader).matches(model["sectionHeaderInfo"]))
         }
 
         @Test
@@ -426,7 +429,11 @@ class JourneyTests {
                     validator = validator,
                 )
 
-            assertNull(testJourney.getSectionHeaderInfo(testStep))
+            val model = BindingAwareModelMap()
+
+            testJourney.populateModelAndGetViewName(TestStepId.StepOne, model, null)
+
+            assertNull(model["sectionHeaderInfo"])
         }
     }
 
