@@ -28,7 +28,6 @@ class EditLAUserTests : IntegrationTest() {
         manageUsersPage.getChangeLink(rowIndex = 0).clickAndWait()
         var editUserPage = assertPageIs(page, EditLaUserPage::class)
         assertThat(editUserPage.name).containsText("Arthur Dent")
-        // TODO PRSD-405: fix when LA users have email addresses
         assertThat(editUserPage.email).containsText("Arthur Dent@ISLE OF MAN.gov.uk")
         assertFalse(editUserPage.isManagerSelected)
 
@@ -59,7 +58,6 @@ class EditLAUserTests : IntegrationTest() {
         editUserPage.removeAccountButton.clickAndWait()
         val confirmDeletePage = assertPageIs(page, ConfirmDeleteLaUserPage::class)
         assertThat(confirmDeletePage.userDetailsSection).containsText("Arthur Dent")
-        // TODO PRSD-405: fix when LA users have email addresses
         assertThat(confirmDeletePage.userDetailsSection).containsText("Arthur Dent@ISLE OF MAN.gov.uk")
         confirmDeletePage.form.submit()
         val successPage = assertPageIs(page, DeleteLaUserSuccessPage::class)
