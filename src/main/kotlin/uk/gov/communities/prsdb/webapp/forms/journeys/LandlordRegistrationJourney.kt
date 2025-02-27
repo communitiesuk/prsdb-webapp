@@ -43,11 +43,11 @@ import uk.gov.communities.prsdb.webapp.services.LandlordService
 class LandlordRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
-    addressLookupService: AddressLookupService,
-    addressDataService: AddressDataService,
-    landlordService: LandlordService,
-    absoluteUrlProvider: AbsoluteUrlProvider,
-    emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
+    val addressLookupService: AddressLookupService,
+    val addressDataService: AddressDataService,
+    val landlordService: LandlordService,
+    val absoluteUrlProvider: AbsoluteUrlProvider,
+    val emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
 ) : Journey<LandlordRegistrationStepId>(
         journeyType = JourneyType.LANDLORD_REGISTRATION,
         validator = validator,
@@ -59,40 +59,30 @@ class LandlordRegistrationJourney(
         listOf(
             JourneySection(privacyNoticeTasks(), "registerAsALandlord.section.privacyNotice.heading"),
             JourneySection(
-                registerDetailsTasks(addressLookupService, addressDataService),
+                registerDetailsTasks(),
                 "registerAsALandlord.section.yourDetails.heading",
             ),
             JourneySection(
-                checkAndSubmitDetailsTasks(addressDataService, landlordService, absoluteUrlProvider, emailNotificationService),
+                checkAndSubmitDetailsTasks(),
                 "registerAsALandlord.section.checkAndSubmit.heading",
             ),
         )
 
     private fun privacyNoticeTasks(): List<JourneyTask<LandlordRegistrationStepId>> = emptyList()
 
-    private fun registerDetailsTasks(
-        addressLookupService: AddressLookupService,
-        addressDataService: AddressDataService,
-    ): List<JourneyTask<LandlordRegistrationStepId>> =
+    private fun registerDetailsTasks(): List<JourneyTask<LandlordRegistrationStepId>> =
         listOf(
             identityTask(),
             JourneyTask.withOneStep(emailStep()),
             JourneyTask.withOneStep(phoneNumberStep()),
             JourneyTask.withOneStep(countryOfResidenceStep()),
-            landlordAddressesTask(addressLookupService, addressDataService),
+            landlordAddressesTask(),
         )
 
-    private fun checkAndSubmitDetailsTasks(
-        addressDataService: AddressDataService,
-        landlordService: LandlordService,
-        absoluteUrlProvider: AbsoluteUrlProvider,
-        emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
-    ): List<JourneyTask<LandlordRegistrationStepId>> =
+    private fun checkAndSubmitDetailsTasks(): List<JourneyTask<LandlordRegistrationStepId>> =
         listOf(
-            JourneyTask.withOneStep(checkAnswersStep(addressDataService)),
-            JourneyTask.withOneStep(
-                declarationStep(journeyDataService, landlordService, addressDataService, absoluteUrlProvider, emailNotificationService),
-            ),
+            JourneyTask.withOneStep(checkAnswersStep()),
+            JourneyTask.withOneStep(declarationStep()),
         )
 
     private fun identityTask() =
@@ -106,21 +96,19 @@ class LandlordRegistrationJourney(
             ),
         )
 
-    private fun landlordAddressesTask(
-        addressLookupService: AddressLookupService,
-        addressDataService: AddressDataService,
-    ) = JourneyTask(
-        LandlordRegistrationStepId.LookupAddress,
-        setOf(
-            lookupAddressStep(),
-            selectAddressStep(addressLookupService, addressDataService),
-            manualAddressStep(),
-            nonEnglandOrWalesAddressStep(),
-            lookupContactAddressStep(),
-            selectContactAddressStep(addressLookupService, addressDataService),
-            manualContactAddressStep(),
-        ),
-    )
+    private fun landlordAddressesTask() =
+        JourneyTask(
+            LandlordRegistrationStepId.LookupAddress,
+            setOf(
+                lookupAddressStep(),
+                selectAddressStep(),
+                manualAddressStep(),
+                nonEnglandOrWalesAddressStep(),
+                lookupContactAddressStep(),
+                selectContactAddressStep(),
+                manualContactAddressStep(),
+            ),
+        )
 
     private fun verifyIdentityStep() =
         Step(
@@ -298,32 +286,30 @@ class LandlordRegistrationJourney(
             saveAfterSubmit = false,
         )
 
-    private fun selectAddressStep(
-        addressLookupService: AddressLookupService,
-        addressDataService: AddressDataService,
-    ) = Step(
-        id = LandlordRegistrationStepId.SelectAddress,
-        page =
-            SelectAddressPage(
-                formModel = SelectAddressFormModel::class,
-                templateName = "forms/selectAddressForm",
-                content =
-                    mapOf(
-                        "title" to "registerAsALandlord.title",
-                        "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
-                        "submitButtonText" to "forms.buttons.useThisAddress",
-                        "searchAgainUrl" to
-                            "/${REGISTER_LANDLORD_JOURNEY_URL}/" +
-                            LandlordRegistrationStepId.LookupAddress.urlPathSegment,
-                    ),
-                lookupAddressPathSegment = LandlordRegistrationStepId.LookupAddress.urlPathSegment,
-                addressLookupService = addressLookupService,
-                addressDataService = addressDataService,
-                displaySectionHeader = true,
-            ),
-        nextAction = { journeyData, _ -> selectAddressNextAction(journeyData) },
-        saveAfterSubmit = false,
-    )
+    private fun selectAddressStep() =
+        Step(
+            id = LandlordRegistrationStepId.SelectAddress,
+            page =
+                SelectAddressPage(
+                    formModel = SelectAddressFormModel::class,
+                    templateName = "forms/selectAddressForm",
+                    content =
+                        mapOf(
+                            "title" to "registerAsALandlord.title",
+                            "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
+                            "submitButtonText" to "forms.buttons.useThisAddress",
+                            "searchAgainUrl" to
+                                "/${REGISTER_LANDLORD_JOURNEY_URL}/" +
+                                LandlordRegistrationStepId.LookupAddress.urlPathSegment,
+                        ),
+                    lookupAddressPathSegment = LandlordRegistrationStepId.LookupAddress.urlPathSegment,
+                    addressLookupService = addressLookupService,
+                    addressDataService = addressDataService,
+                    displaySectionHeader = true,
+                ),
+            nextAction = { journeyData, _ -> selectAddressNextAction(journeyData) },
+            saveAfterSubmit = false,
+        )
 
     private fun manualAddressStep() =
         Step(
@@ -395,36 +381,34 @@ class LandlordRegistrationJourney(
             saveAfterSubmit = false,
         )
 
-    private fun selectContactAddressStep(
-        addressLookupService: AddressLookupService,
-        addressDataService: AddressDataService,
-    ) = Step(
-        id = LandlordRegistrationStepId.SelectContactAddress,
-        page =
-            SelectAddressPage(
-                formModel = SelectAddressFormModel::class,
-                templateName = "forms/selectAddressForm",
-                content =
-                    mapOf(
-                        "title" to "registerAsALandlord.title",
-                        "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
-                        "submitButtonText" to "forms.buttons.continue",
-                        "searchAgainUrl" to
-                            "/${REGISTER_LANDLORD_JOURNEY_URL}/" +
-                            LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
-                    ),
-                lookupAddressPathSegment = LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
-                addressLookupService = addressLookupService,
-                addressDataService = addressDataService,
-                displaySectionHeader = true,
-            ),
-        nextAction = { journeyData, _ ->
-            selectContactAddressNextAction(
-                journeyData,
-            )
-        },
-        saveAfterSubmit = false,
-    )
+    private fun selectContactAddressStep() =
+        Step(
+            id = LandlordRegistrationStepId.SelectContactAddress,
+            page =
+                SelectAddressPage(
+                    formModel = SelectAddressFormModel::class,
+                    templateName = "forms/selectAddressForm",
+                    content =
+                        mapOf(
+                            "title" to "registerAsALandlord.title",
+                            "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
+                            "submitButtonText" to "forms.buttons.continue",
+                            "searchAgainUrl" to
+                                "/${REGISTER_LANDLORD_JOURNEY_URL}/" +
+                                LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
+                        ),
+                    lookupAddressPathSegment = LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
+                    addressLookupService = addressLookupService,
+                    addressDataService = addressDataService,
+                    displaySectionHeader = true,
+                ),
+            nextAction = { journeyData, _ ->
+                selectContactAddressNextAction(
+                    journeyData,
+                )
+            },
+            saveAfterSubmit = false,
+        )
 
     private fun manualContactAddressStep() =
         Step(
@@ -450,7 +434,7 @@ class LandlordRegistrationJourney(
             saveAfterSubmit = false,
         )
 
-    private fun checkAnswersStep(addressDataService: AddressDataService) =
+    private fun checkAnswersStep() =
         Step(
             id = LandlordRegistrationStepId.CheckAnswers,
             page = LandlordRegistrationCheckAnswersPage(addressDataService, displaySectionHeader = true),
@@ -458,46 +442,32 @@ class LandlordRegistrationJourney(
             saveAfterSubmit = false,
         )
 
-    private fun declarationStep(
-        journeyDataService: JourneyDataService,
-        landlordService: LandlordService,
-        addressDataService: AddressDataService,
-        absoluteUrlProvider: AbsoluteUrlProvider,
-        emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
-    ) = Step(
-        id = LandlordRegistrationStepId.Declaration,
-        page =
-            Page(
-                formModel = DeclarationFormModel::class,
-                templateName = "forms/declarationForm",
-                content =
-                    mapOf(
-                        "title" to "registerAsALandlord.title",
-                        "bulletOneFineAmount" to "forms.declaration.fines.bullet.one.landlordRegistrationJourneyAmount",
-                        "bulletTwoFineAmount" to "forms.declaration.fines.bullet.two.landlordRegistrationJourneyAmount",
-                        "options" to
-                            listOf(
-                                CheckboxViewModel(
-                                    value = "true",
-                                    labelMsgKey = "forms.declaration.checkbox.label",
+    private fun declarationStep() =
+        Step(
+            id = LandlordRegistrationStepId.Declaration,
+            page =
+                Page(
+                    formModel = DeclarationFormModel::class,
+                    templateName = "forms/declarationForm",
+                    content =
+                        mapOf(
+                            "title" to "registerAsALandlord.title",
+                            "bulletOneFineAmount" to "forms.declaration.fines.bullet.one.landlordRegistrationJourneyAmount",
+                            "bulletTwoFineAmount" to "forms.declaration.fines.bullet.two.landlordRegistrationJourneyAmount",
+                            "options" to
+                                listOf(
+                                    CheckboxViewModel(
+                                        value = "true",
+                                        labelMsgKey = "forms.declaration.checkbox.label",
+                                    ),
                                 ),
-                            ),
-                        "submitButtonText" to "forms.buttons.confirmAndCompleteRegistration",
-                    ),
-                shouldDisplaySectionHeader = true,
-            ),
-        handleSubmitAndRedirect = { journeyData, _ ->
-            declarationHandleSubmitAndRedirect(
-                journeyData,
-                journeyDataService,
-                landlordService,
-                addressDataService,
-                absoluteUrlProvider,
-                emailNotificationService,
-            )
-        },
-        saveAfterSubmit = false,
-    )
+                            "submitButtonText" to "forms.buttons.confirmAndCompleteRegistration",
+                        ),
+                    shouldDisplaySectionHeader = true,
+                ),
+            handleSubmitAndRedirect = { _, _ -> declarationHandleSubmitAndRedirect() },
+            saveAfterSubmit = false,
+        )
 
     private fun countryOfResidenceNextAction(journeyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
         if (LandlordRegistrationJourneyDataHelper.getLivesInEnglandOrWales(journeyData)!!) {
@@ -521,14 +491,8 @@ class LandlordRegistrationJourney(
             Pair(LandlordRegistrationStepId.CheckAnswers, null)
         }
 
-    private fun declarationHandleSubmitAndRedirect(
-        journeyData: JourneyData,
-        journeyDataService: JourneyDataService,
-        landlordService: LandlordService,
-        addressDataService: AddressDataService,
-        absoluteUrlProvider: AbsoluteUrlProvider,
-        emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
-    ): String {
+    private fun declarationHandleSubmitAndRedirect(): String {
+        val journeyData = last().filteredJourneyData
         val landlord =
             landlordService.createLandlord(
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
