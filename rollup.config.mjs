@@ -20,6 +20,9 @@ export default {
         }),
         sass({
             output: 'dist/css/custom.css',
+            options: {
+                includePaths: ['node_modules/govuk-frontend/dist'],
+            }
         }),
         copy({
                 targets: [

@@ -1,4 +1,4 @@
-@import "node_modules/govuk-frontend/dist/govuk/base";
+@import "govuk/base";
 
 %margin-below-section {
   @include govuk-responsive-margin(6, "bottom");
