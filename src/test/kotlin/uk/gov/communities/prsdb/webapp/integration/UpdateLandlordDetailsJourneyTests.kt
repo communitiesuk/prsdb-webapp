@@ -186,6 +186,7 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
     }
 
     @Nested
+    @Sql("/data-local.sql")
     inner class AddressUpdates {
         @Test
         fun `A Landlord can update their address to a manually entered address`(page: Page) {
