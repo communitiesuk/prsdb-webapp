@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
+import java.time.LocalDate
 import kotlin.test.assertEquals
 
 class UpdateLandlordDetailsJourneyDataHelperTests {
@@ -118,5 +119,24 @@ class UpdateLandlordDetailsJourneyDataHelperTests {
         val phoneNumberUpdate = UpdateLandlordDetailsJourneyDataHelper.getPhoneNumberIfPresent(testJourneyData)
 
         assertNull(phoneNumberUpdate)
+    }
+
+    @Test
+    fun `getDateOfBirthIfPresent returns the date if the date of birth page is in journeyData`() {
+        val newDateOfBirth = LocalDate.of(1991, 1, 1)
+        val testJourneyData = journeyDataBuilder.withDateOfBirthUpdate(newDateOfBirth).build()
+
+        val dateOfBirthUpdate = UpdateLandlordDetailsJourneyDataHelper.getDateOfBirthIfPresent(testJourneyData)
+
+        assertEquals(newDateOfBirth, dateOfBirthUpdate)
+    }
+
+    @Test
+    fun `getDateOfBirthIfPresent returns null if the date of birth page is in not journeyData`() {
+        val testJourneyData = journeyDataBuilder.build()
+
+        val dateOfBirthUpdate = UpdateLandlordDetailsJourneyDataHelper.getDateOfBirthIfPresent(testJourneyData)
+
+        assertEquals(null, dateOfBirthUpdate)
     }
 }
