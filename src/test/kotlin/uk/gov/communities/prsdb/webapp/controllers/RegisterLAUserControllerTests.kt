@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
@@ -42,6 +43,7 @@ class RegisterLAUserControllerTests(
     @BeforeEach
     fun setupMocks() {
         whenever(laUserRegistrationJourney.initialStepId).thenReturn(RegisterLaUserStepId.LandingPage)
+        whenever(laUserRegistrationJourney.journeyType).thenReturn(JourneyType.LA_USER_REGISTRATION)
         whenever(invitationService.tokenIsValid(validToken)).thenReturn(true)
         whenever(invitationService.getTokenFromSession()).thenReturn(validToken)
         whenever(invitationService.tokenIsValid(invalidToken)).thenReturn(false)

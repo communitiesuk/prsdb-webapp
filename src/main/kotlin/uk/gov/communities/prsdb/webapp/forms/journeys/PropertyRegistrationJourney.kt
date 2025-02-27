@@ -649,7 +649,11 @@ class PropertyRegistrationJourney(
         }
     }
 
-    fun initialiseJourneyDataIfNotInitialised(principalName: String) {
+    fun initialiseJourneyDataIfNotInitialised(
+        principalName: String,
+        journeyDataKey: String = journeyType.name,
+    ) {
+        journeyDataService.journeyDataKey = journeyDataKey
         val data = journeyDataService.getJourneyDataFromSession()
         if (data.isEmpty()) {
             /* TODO PRSD-589 Currently this looks the context up from the database,

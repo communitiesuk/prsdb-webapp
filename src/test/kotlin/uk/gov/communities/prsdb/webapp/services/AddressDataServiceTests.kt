@@ -13,7 +13,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.capture
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
@@ -89,7 +88,7 @@ class AddressDataServiceTests {
         addressDataService.setAddressData(addressDataList)
 
         val addressDataStringCaptor = argumentCaptor<JourneyData>()
-        verify(mockJourneyDataService).setJourneyData(addressDataStringCaptor.capture())
+        verify(mockJourneyDataService).setJourneyDataInSession(addressDataStringCaptor.capture())
         Assertions.assertEquals(expectedAddressDataString, addressDataStringCaptor.firstValue["address-data"])
     }
 
