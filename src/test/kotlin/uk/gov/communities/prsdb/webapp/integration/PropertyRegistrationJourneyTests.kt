@@ -47,6 +47,7 @@ import java.net.URI
 class PropertyRegistrationJourneyTests : IntegrationTest() {
     private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
 
+    @SpyBean
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
 
     @SpyBean
