@@ -28,7 +28,6 @@ import org.springframework.validation.Validator
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter
 import org.springframework.validation.support.BindingAwareModelMap
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
@@ -55,6 +54,10 @@ class JourneyTests {
     private lateinit var validatorFactory: ValidatorFactory
     private lateinit var validator: Validator
 
+    companion object {
+        const val JOURNEY_PATH_SEGMENT = "journey-path-segment"
+    }
+
     enum class TestStepId(
         override val urlPathSegment: String,
     ) : StepId {
@@ -73,6 +76,8 @@ class JourneyTests {
     ) : Journey<TestStepId>(journeyType, validator, journeyDataService) {
         override val sections: List<JourneySection<TestStepId>> =
             createSingleSectionWithSingleTaskFromSteps(initialStepId, steps)
+
+        override val journeyPathSegment = JOURNEY_PATH_SEGMENT
     }
 
     class TestJourneyWithSections(
@@ -81,7 +86,9 @@ class JourneyTests {
         override val initialStepId: TestStepId,
         validator: Validator,
         journeyDataService: JourneyDataService,
-    ) : Journey<TestStepId>(journeyType, validator, journeyDataService)
+    ) : Journey<TestStepId>(journeyType, validator, journeyDataService) {
+        override val journeyPathSegment = JOURNEY_PATH_SEGMENT
+    }
 
     class TestFormModel : FormModel {
         @NotNull
@@ -254,7 +261,7 @@ class JourneyTests {
             val result = testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, null)
 
             // Assert
-            assertEquals("redirect:/${REGISTER_LANDLORD_JOURNEY_URL}/${TestStepId.StepOne.urlPathSegment}", result)
+            assertEquals("redirect:${TestStepId.StepOne.urlPathSegment}", result)
         }
 
         @Test
@@ -298,7 +305,7 @@ class JourneyTests {
             val result = testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, null)
 
             // Assert
-            assertEquals("redirect:/${REGISTER_LANDLORD_JOURNEY_URL}/${TestStepId.StepOne.urlPathSegment}", result)
+            assertEquals("redirect:${TestStepId.StepOne.urlPathSegment}", result)
         }
 
         @Test
@@ -686,7 +693,7 @@ class JourneyTests {
             verify(mockJourneyDataService).setJourneyData(journeyDataCaptor.capture())
 
             // Assert
-            assertEquals("redirect:/${REGISTER_LANDLORD_JOURNEY_URL}/${TestStepId.StepTwo.urlPathSegment}", result)
+            assertEquals("redirect:/${JOURNEY_PATH_SEGMENT}/${TestStepId.StepTwo.urlPathSegment}", result)
             assertIs<PageData>(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment]!!)
             val resultPageData = objectToStringKeyedMap(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment])
             assertEquals("testPropertyValue", resultPageData?.get("testProperty"))
@@ -750,7 +757,7 @@ class JourneyTests {
             )
 
             // Assert
-            assertEquals("redirect:/${REGISTER_LANDLORD_JOURNEY_URL}/${TestStepId.StepTwo.urlPathSegment}", result)
+            assertEquals("redirect:/${JOURNEY_PATH_SEGMENT}/${TestStepId.StepTwo.urlPathSegment}", result)
             assertIs<PageData>(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment]!!)
             val resultPageData = objectToStringKeyedMap(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment])
             assertEquals("testPropertyValue", resultPageData?.get("testProperty"))
@@ -814,7 +821,7 @@ class JourneyTests {
                 eq(JourneyType.LANDLORD_REGISTRATION),
                 eq(principal),
             )
-            assertEquals("redirect:/${REGISTER_LANDLORD_JOURNEY_URL}/${TestStepId.StepTwo.urlPathSegment}", result)
+            assertEquals("redirect:/${JOURNEY_PATH_SEGMENT}/${TestStepId.StepTwo.urlPathSegment}", result)
         }
 
         @Test
