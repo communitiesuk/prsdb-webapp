@@ -68,7 +68,7 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
             val landlordDateOfBirth = LocalDate(1990, 1, 1)
             landlordDetailsUpdatePage = updateLandlordDateOfBirthAndReturn(landlordDetailsUpdatePage, landlordDateOfBirth)
 
-           val selectedAddress = addressFound
+            val selectedAddress = addressFound
             landlordDetailsUpdatePage = updateLandlordAddressAndReturn(landlordDetailsUpdatePage, selectedAddress)
 
             // Submit changes TODO PRSD-355 add proper submit button and declaration page
