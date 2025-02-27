@@ -2,7 +2,9 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.LocatorAssertions
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -18,12 +20,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddre
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManualAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.DateOfBirthFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.EmailFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NameFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.PhoneNumberFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
-@Sql("/data-local.sql")
 class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
     val addressFound = "Entirely new test address"
@@ -45,82 +47,142 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
         )
     }
 
-    @Test
-    fun `A Landlord can update all of their details on the Update Details Journey`(page: Page) {
-        // Update details page
-        var landlordDetailsUpdatePage = navigator.goToUpdateLandlordDetailsPage()
-        assertThat(landlordDetailsUpdatePage.heading).containsText("Alexander Smith")
+    @Nested
+    @Sql("/data-unverified-landlord.sql")
+    inner class NonIdentityVerifiedLandlord {
+        @Test
+        fun `An unverified Landlord can update all of their details on the Update Details Journey`(page: Page) {
+            // Update details page
+            var landlordDetailsUpdatePage = navigator.goToUpdateLandlordDetailsPage()
+            assertThat(landlordDetailsUpdatePage.heading).containsText("Alexander Smith")
 
-        val landlordName = "landlord name"
-        landlordDetailsUpdatePage = updateLandlordNameAndReturn(landlordDetailsUpdatePage, landlordName)
+            val landlordName = "landlord name"
+            landlordDetailsUpdatePage = updateLandlordNameAndReturn(landlordDetailsUpdatePage, landlordName)
 
-        val landlordEmail = "new@email.test"
-        landlordDetailsUpdatePage = updateLandlordEmailAndReturn(landlordDetailsUpdatePage, landlordEmail)
+            val landlordEmail = "new@email.test"
+            landlordDetailsUpdatePage = updateLandlordEmailAndReturn(landlordDetailsUpdatePage, landlordEmail)
 
-        val landlordPhoneNumber = phoneNumberUtil.getFormattedUkPhoneNumber()
-        landlordDetailsUpdatePage = updateLandlordPhoneNumberAndReturn(landlordDetailsUpdatePage, landlordPhoneNumber)
+            val landlordPhoneNumber = phoneNumberUtil.getFormattedUkPhoneNumber()
+            landlordDetailsUpdatePage = updateLandlordPhoneNumberAndReturn(landlordDetailsUpdatePage, landlordPhoneNumber)
 
-        val selectedAddress = addressFound
-        landlordDetailsUpdatePage = updateLandlordAddressAndReturn(landlordDetailsUpdatePage, selectedAddress)
+            val landlordDateOfBirth = LocalDate(1990, 1, 1)
+            landlordDetailsUpdatePage = updateLandlordDateOfBirthAndReturn(landlordDetailsUpdatePage, landlordDateOfBirth)
 
-        // Submit changes TODO PRSD-355 add proper submit button and declaration page
-        landlordDetailsUpdatePage.submitButton.clickAndWait()
-        val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
+            val selectedAddress = addressFound
+            landlordDetailsUpdatePage = updateLandlordAddressAndReturn(landlordDetailsUpdatePage, selectedAddress)
 
-        // Check changes have occurred
-        assertThat(landlordDetailsPage.personalDetailsSummaryList.nameRow.value).containsText(landlordName)
-        assertThat(landlordDetailsPage.personalDetailsSummaryList.emailRow.value).containsText(landlordEmail)
-        assertThat(landlordDetailsPage.personalDetailsSummaryList.phoneNumberRow.value).containsText(landlordPhoneNumber)
-        assertThat(landlordDetailsPage.personalDetailsSummaryList.addressRow.value).containsText(selectedAddress)
+            // Submit changes TODO PRSD-355 add proper submit button and declaration page
+            landlordDetailsUpdatePage.submitButton.clickAndWait()
+            val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
+
+            // Check changes have occurred
+            assertThat(landlordDetailsPage.personalDetailsSummaryList.nameRow.value).containsText(landlordName)
+            assertThat(landlordDetailsPage.personalDetailsSummaryList.emailRow.value).containsText(landlordEmail)
+            assertThat(landlordDetailsPage.personalDetailsSummaryList.phoneNumberRow.value).containsText(landlordPhoneNumber)
+            assertThat(landlordDetailsPage.personalDetailsSummaryList.addressRow.value).containsText(selectedAddress)
+            assertThat(
+                landlordDetailsPage.personalDetailsSummaryList.dateOfBirthRow.value,
+            ).containsText(formatDateOfBirth(landlordDateOfBirth), LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
+        }
+
+        @Test
+        fun `A Landlord can update just their name on the Update Details Journey`(page: Page) {
+            // Update details page
+            var landlordDetailsUpdatePage = navigator.goToUpdateLandlordDetailsPage()
+            assertThat(landlordDetailsUpdatePage.heading).containsText("Alexander Smith")
+
+            val landlordName = "landlord name"
+            landlordDetailsUpdatePage = updateLandlordNameAndReturn(landlordDetailsUpdatePage, landlordName)
+
+            // Submit changes TODO PRSD-355 add proper submit button and declaration page
+            landlordDetailsUpdatePage.submitButton.clickAndWait()
+            val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
+
+            // Check changes have occurred
+            assertThat(landlordDetailsPage.personalDetailsSummaryList.nameRow.value).containsText(landlordName)
+        }
+
+        @Test
+        fun `A Landlord can update just their email on the Update Details Journey`(page: Page) {
+            // Update details page
+            var landlordDetailsUpdatePage = navigator.goToUpdateLandlordDetailsPage()
+            assertThat(landlordDetailsUpdatePage.heading).containsText("Alexander Smith")
+
+            val landlordEmail = "new@email.test"
+            landlordDetailsUpdatePage = updateLandlordEmailAndReturn(landlordDetailsUpdatePage, landlordEmail)
+
+            // Submit changes TODO PRSD-355 add proper submit button and declaration page
+            landlordDetailsUpdatePage.submitButton.clickAndWait()
+            val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
+
+            // Check changes have occurred
+            assertThat(landlordDetailsPage.personalDetailsSummaryList.emailRow.value).containsText(landlordEmail)
+        }
+
+        @Test
+        fun `A Landlord can update just their phone number on the Update Details Journey`(page: Page) {
+            // Update details page
+            var landlordDetailsUpdatePage = navigator.goToUpdateLandlordDetailsPage()
+            assertThat(landlordDetailsUpdatePage.heading).containsText("Alexander Smith")
+
+            val landlordPhoneNumber = phoneNumberUtil.getFormattedUkPhoneNumber()
+            landlordDetailsUpdatePage = updateLandlordPhoneNumberAndReturn(landlordDetailsUpdatePage, landlordPhoneNumber)
+
+            // Submit changes TODO PRSD-355 add proper submit button and declaration page
+            landlordDetailsUpdatePage.submitButton.clickAndWait()
+            val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
+
+            // Check changes have occurred
+            assertThat(landlordDetailsPage.personalDetailsSummaryList.phoneNumberRow.value).containsText(landlordPhoneNumber)
+        }
+
+        @Test
+        fun `A Landlord can update just their date of birth on the Update Details Journey`(page: Page) {
+            // Update details page
+            var landlordDetailsUpdatePage = navigator.goToUpdateLandlordDetailsPage()
+            assertThat(landlordDetailsUpdatePage.heading).containsText("Alexander Smith")
+
+            val landlordDateOfBirth = LocalDate(1990, 1, 1)
+            landlordDetailsUpdatePage = updateLandlordDateOfBirthAndReturn(landlordDetailsUpdatePage, landlordDateOfBirth)
+
+            // Submit changes TODO PRSD-355 add proper submit button and declaration page
+            landlordDetailsUpdatePage.submitButton.clickAndWait()
+            val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
+
+            // Check changes have occurred
+            assertThat(
+                landlordDetailsPage.personalDetailsSummaryList.dateOfBirthRow.value,
+            ).containsText(formatDateOfBirth(landlordDateOfBirth), LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
+        }
     }
 
-    @Test
-    fun `A Landlord can update just their name on the Update Details Journey`(page: Page) {
-        // Update details page
-        var landlordDetailsUpdatePage = navigator.goToUpdateLandlordDetailsPage()
-        assertThat(landlordDetailsUpdatePage.heading).containsText("Alexander Smith")
+    @Nested
+    @Sql("/data-local.sql")
+    inner class IdentityVerifiedLandlord {
+        @Test
+        fun `A verified Landlord can update all of their details on the Update Details Journey`(page: Page) {
+            // Update details page
+            var landlordDetailsUpdatePage = navigator.goToUpdateLandlordDetailsPage()
+            assertThat(landlordDetailsUpdatePage.heading).containsText("Alexander Smith")
 
-        val landlordName = "landlord name"
-        landlordDetailsUpdatePage = updateLandlordNameAndReturn(landlordDetailsUpdatePage, landlordName)
+            val landlordEmail = "new@email.test"
+            landlordDetailsUpdatePage = updateLandlordEmailAndReturn(landlordDetailsUpdatePage, landlordEmail)
 
-        // Submit changes TODO PRSD-355 add proper submit button and declaration page
-        landlordDetailsUpdatePage.submitButton.clickAndWait()
-        val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
+            val landlordPhoneNumber = phoneNumberUtil.getFormattedUkPhoneNumber()
+            landlordDetailsUpdatePage = updateLandlordPhoneNumberAndReturn(landlordDetailsUpdatePage, landlordPhoneNumber)
 
-        // Check changes have occurred
-        assertThat(landlordDetailsPage.personalDetailsSummaryList.nameRow.value).containsText(landlordName)
-    }
+            val selectedAddress = addressFound
+            landlordDetailsUpdatePage = updateLandlordAddressAndReturn(landlordDetailsUpdatePage, selectedAddress)
 
-    @Test
-    fun `A Landlord can update just their email on the Update Details Journey`(page: Page) {
-        // Update details page
-        var landlordDetailsUpdatePage = navigator.goToUpdateLandlordDetailsPage()
-        assertThat(landlordDetailsUpdatePage.heading).containsText("Alexander Smith")
-        val landlordEmail = "new@email.test"
-        landlordDetailsUpdatePage = updateLandlordEmailAndReturn(landlordDetailsUpdatePage, landlordEmail)
+            // Submit changes TODO PRSD-355 add proper submit button and declaration page
+            landlordDetailsUpdatePage.submitButton.clickAndWait()
+            val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
 
-        // Submit changes TODO PRSD-355 add proper submit button and declaration page
-        landlordDetailsUpdatePage.submitButton.clickAndWait()
-        val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
-
-        // Check changes have occurred
-        assertThat(landlordDetailsPage.personalDetailsSummaryList.emailRow.value).containsText(landlordEmail)
-    }
-
-    @Test
-    fun `A Landlord can update just their phone number on the Update Details Journey`(page: Page) {
-        // Update details page
-        var landlordDetailsUpdatePage = navigator.goToUpdateLandlordDetailsPage()
-        assertThat(landlordDetailsUpdatePage.heading).containsText("Alexander Smith")
-        val landlordPhoneNumber = phoneNumberUtil.getFormattedUkPhoneNumber()
-        landlordDetailsUpdatePage = updateLandlordPhoneNumberAndReturn(landlordDetailsUpdatePage, landlordPhoneNumber)
-
-        // Submit changes TODO PRSD-355 add proper submit button and declaration page
-        landlordDetailsUpdatePage.submitButton.clickAndWait()
-        val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
-
-        // Check changes have occurred
-        assertThat(landlordDetailsPage.personalDetailsSummaryList.phoneNumberRow.value).containsText(landlordPhoneNumber)
+            // Check changes have occurred
+            assertThat(landlordDetailsPage.personalDetailsSummaryList.emailRow.value).containsText(landlordEmail)
+            assertThat(landlordDetailsPage.personalDetailsSummaryList.phoneNumberRow.value).containsText(landlordPhoneNumber)
+            assertThat(landlordDetailsPage.personalDetailsSummaryList.addressRow.value).containsText(selectedAddress)
+        }
     }
 
     @Nested
@@ -209,4 +271,19 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
         }
         return assertPageIs(page, LandlordUpdateDetailsPage::class)
     }
+
+    private fun updateLandlordDateOfBirthAndReturn(
+        detailsPage: LandlordUpdateDetailsPage,
+        newDateOfBirth: LocalDate,
+    ): LandlordUpdateDetailsPage {
+        val page = detailsPage.page
+        detailsPage.personalDetailsSummaryList.dateOfBirthRow.actions.actionLink
+            .clickAndWait()
+        val updateDateOfBirthPage = assertPageIs(page, DateOfBirthFormPageUpdateLandlordDetails::class)
+
+        updateDateOfBirthPage.submitDateOfBirth(newDateOfBirth)
+        return assertPageIs(page, LandlordUpdateDetailsPage::class)
+    }
+
+    private fun formatDateOfBirth(date: LocalDate): String = "${date.dayOfMonth} ${date.month} ${date.year}"
 }
