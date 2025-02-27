@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityInvitationCancellationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
@@ -37,6 +38,7 @@ class ManageLocalAuthorityUsersController(
     var cancellationEmailSender: EmailNotificationService<LocalAuthorityInvitationCancellationEmail>,
     var invitationService: LocalAuthorityInvitationService,
     val localAuthorityDataService: LocalAuthorityDataService,
+    val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
     @GetMapping("/manage-users")
     fun index(
@@ -235,7 +237,7 @@ class ManageLocalAuthorityUsersController(
 
         try {
             val token = invitationService.createInvitationToken(emailModel.email, currentAuthority)
-            val invitationLinkAddress = invitationService.buildInvitationUri(token)
+            val invitationLinkAddress = absoluteUrlProvider.buildInvitationUri(token)
             invitationEmailSender.sendEmail(
                 emailModel.email,
                 LocalAuthorityInvitationEmail(currentAuthority, invitationLinkAddress),

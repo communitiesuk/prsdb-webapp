@@ -19,7 +19,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.jdbc.Sql
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.getFormattedInternationalPhoneNumber
@@ -50,6 +49,7 @@ import kotlin.test.assertNotNull
 @Sql("/data-mockuser-not-landlord.sql")
 class LandlordRegistrationJourneyTests : IntegrationTest() {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
+    private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
 
     @Autowired
     private lateinit var landlordService: LandlordService
@@ -65,6 +65,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             "{'results':[{'DPA':{'ADDRESS':'1, Example Road, EG1 2AB'," +
                 "'LOCAL_CUSTODIAN_CODE':28,'UPRN':'1','BUILDING_NUMBER':1,'POSTCODE':'EG1 2AB'}}]}",
         )
+
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
     }
 
     @Test
@@ -107,7 +109,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
         verify(confirmationEmailSender).sendEmail(
             "test@example.com",
-            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), LANDLORD_DASHBOARD_URL),
+            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), absoluteLandlordUrl),
         )
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
@@ -158,7 +160,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
         verify(confirmationEmailSender).sendEmail(
             "test@example.com",
-            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), LANDLORD_DASHBOARD_URL),
+            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), absoluteLandlordUrl),
         )
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
@@ -213,7 +215,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
         verify(confirmationEmailSender).sendEmail(
             "test@example.com",
-            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), LANDLORD_DASHBOARD_URL),
+            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), absoluteLandlordUrl),
         )
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
@@ -271,7 +273,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
         verify(confirmationEmailSender).sendEmail(
             "test@example.com",
-            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), LANDLORD_DASHBOARD_URL),
+            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), absoluteLandlordUrl),
         )
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
