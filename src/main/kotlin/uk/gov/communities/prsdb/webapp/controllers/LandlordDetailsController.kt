@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.UpdateLandlordDetailsJourney
-import uk.gov.communities.prsdb.webapp.forms.steps.UpdateDetailsStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
@@ -44,7 +44,7 @@ class LandlordDetailsController(
         model.addAttribute("shouldShowSubmitButton", true)
         addLandlordDetailsToModel(model, principal, includeChangeLinks = true)
         return updateDetailsJourney.populateModelAndGetViewName(
-            UpdateDetailsStepId.UpdateDetails,
+            UpdateLandlordDetailsStepId.UpdateDetails,
             model,
             null,
         )

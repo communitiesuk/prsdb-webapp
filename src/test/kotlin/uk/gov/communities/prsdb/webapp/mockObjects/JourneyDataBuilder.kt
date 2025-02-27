@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.mockObjects
 
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -8,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
-import uk.gov.communities.prsdb.webapp.forms.steps.UpdateDetailsStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
@@ -122,7 +124,7 @@ class JourneyDataBuilder(
         localAuthority: LocalAuthority,
         isContactAddress: Boolean = false,
     ): JourneyDataBuilder {
-        whenever(mockAddressDataService.getAddressData(singleLineAddress)).thenReturn(
+        whenever(mockAddressDataService.getAddressData(any(), eq(singleLineAddress))).thenReturn(
             AddressDataModel(
                 singleLineAddress,
                 localAuthorityId = localAuthority.id,
@@ -323,12 +325,12 @@ class JourneyDataBuilder(
     }
 
     fun withEmailAddressUpdate(newEmail: String): JourneyDataBuilder {
-        journeyData[UpdateDetailsStepId.UpdateEmail.urlPathSegment] = mapOf("emailAddress" to newEmail)
+        journeyData[UpdateLandlordDetailsStepId.UpdateEmail.urlPathSegment] = mapOf("emailAddress" to newEmail)
         return this
     }
 
     fun withNameUpdate(newName: String): JourneyDataBuilder {
-        journeyData[UpdateDetailsStepId.UpdateName.urlPathSegment] = mapOf("name" to newName)
+        journeyData[UpdateLandlordDetailsStepId.UpdateName.urlPathSegment] = mapOf("name" to newName)
         return this
     }
 }
