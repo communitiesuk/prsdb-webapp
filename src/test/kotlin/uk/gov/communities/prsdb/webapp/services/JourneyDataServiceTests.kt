@@ -47,6 +47,7 @@ class JourneyDataServiceTests {
                 mockOneLoginUserRepository,
                 ObjectMapper(),
             )
+        journeyDataService.journeyDataKey = "test-journey-key"
     }
 
     @Nested
@@ -196,7 +197,7 @@ class JourneyDataServiceTests {
             // Act
             journeyDataService.loadJourneyDataIntoSession(contextId)
             val formContextCaptor = captor<JourneyData>()
-            verify(mockHttpSession).setAttribute(eq("journeyData"), formContextCaptor.capture())
+            verify(mockHttpSession).setAttribute(eq(journeyDataService.journeyDataKey), formContextCaptor.capture())
             val contextIdCaptor = captor<Long>()
             verify(mockHttpSession).setAttribute(eq("contextId"), contextIdCaptor.capture())
 

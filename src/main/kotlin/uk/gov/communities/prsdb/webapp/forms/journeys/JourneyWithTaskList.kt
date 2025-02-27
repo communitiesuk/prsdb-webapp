@@ -8,16 +8,38 @@ import uk.gov.communities.prsdb.webapp.forms.tasks.TaskListViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 abstract class JourneyWithTaskList<T : StepId>(
-    val journeyType: JourneyType,
+    journeyType: JourneyType,
     validator: Validator,
     journeyDataService: JourneyDataService,
 ) : Journey<T>(journeyType, validator, journeyDataService) {
     abstract val taskListFactory: TaskListViewModelFactory<T>
     abstract val taskListUrlSegment: String
 
-    final override fun getUnreachableStepRedirect(journeyData: JourneyData) = "/${journeyType.urlPathSegment}/$taskListUrlSegment"
+    final override fun getUnreachableStepRedirect(journeyData: JourneyData) = taskListUrlSegment
 
-    fun populateModelAndGetTaskListViewName(model: Model): String {
+    fun initialiseJourneyDataIfNotInitialised(
+        principalName: String,
+        journeyDataKey: String = journeyType.name,
+    ) {
+        journeyDataService.journeyDataKey = journeyDataKey
+        val data = journeyDataService.getJourneyDataFromSession()
+        if (data.isEmpty()) {
+            /* TODO PRSD-589 Currently this looks the context up from the database,
+                takes the id, then passes the id to another method which retrieves it
+                from the database. When this is reworked, we should just pass the whole
+                context to an overload of journeyDataService.loadJourneyDataIntoSession().*/
+            val contextId = journeyDataService.getContextId(principalName, journeyType)
+            if (contextId != null) {
+                journeyDataService.loadJourneyDataIntoSession(contextId)
+            }
+        }
+    }
+
+    fun populateModelAndGetTaskListViewName(
+        model: Model,
+        journeyDataKey: String = journeyType.name,
+    ): String {
+        journeyDataService.journeyDataKey = journeyDataKey
         val journeyData = journeyDataService.getJourneyDataFromSession()
         model.addAttribute("taskListViewModel", taskListFactory.getTaskListViewModel(journeyData))
         return "taskList"

@@ -17,24 +17,27 @@ import java.security.Principal
 import java.util.Optional
 
 abstract class Journey<T : StepId>(
-    private val journeyType: JourneyType,
+    val journeyType: JourneyType,
     protected val validator: Validator,
     protected val journeyDataService: JourneyDataService,
 ) : Iterable<StepDetails<T>> {
     abstract val initialStepId: T
+
     val steps: Set<Step<T>>
         get() = sections.flatMap { section -> section.tasks }.flatMap { task -> task.steps }.toSet()
 
     abstract val sections: List<JourneySection<T>>
 
-    open fun getUnreachableStepRedirect(journeyData: JourneyData) = "/${journeyType.urlPathSegment}/${initialStepId.urlPathSegment}"
+    abstract val journeyPathSegment: String
+
+    open fun getUnreachableStepRedirect(journeyData: JourneyData) = initialStepId.urlPathSegment
 
     fun getStepId(stepName: String): StepId {
         val step = steps.singleOrNull { step -> step.id.urlPathSegment == stepName }
         if (step == null) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "Step $stepName not valid for journey ${journeyType.urlPathSegment}",
+                "Step $stepName not valid for journey ${journeyType.name}",
             )
         }
         return step.id
@@ -44,14 +47,12 @@ abstract class Journey<T : StepId>(
         stepId: StepId,
         model: Model,
         subPageNumber: Int?,
+        journeyDataKey: String = journeyType.name,
         submittedPageData: PageData? = null,
     ): String {
+        journeyDataService.journeyDataKey = journeyDataKey
         val journeyData: JourneyData = journeyDataService.getJourneyDataFromSession()
-        val requestedStep =
-            steps.singleOrNull { step -> step.id == stepId } ?: throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Step ${stepId.urlPathSegment} not valid for journey ${journeyType.urlPathSegment}",
-            )
+        val requestedStep = getStep(stepId)
         if (!isStepReachable(requestedStep, subPageNumber)) {
             return "redirect:${getUnreachableStepRedirect(journeyData)}"
         }
@@ -90,18 +91,16 @@ abstract class Journey<T : StepId>(
         model: Model,
         subPageNumber: Int?,
         principal: Principal,
+        journeyDataKey: String = journeyType.name,
     ): String {
-        val currentStep =
-            steps.singleOrNull { step -> step.id == stepId } ?: throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Step ${stepId.urlPathSegment} not valid for journey ${journeyType.urlPathSegment}",
-            )
+        journeyDataService.journeyDataKey = journeyDataKey
+        val currentStep = getStep(stepId)
         if (!currentStep.isSatisfied(validator, pageData)) {
-            return populateModelAndGetViewName(stepId, model, subPageNumber, pageData)
+            return populateModelAndGetViewName(stepId, model, subPageNumber, journeyDataKey, pageData)
         }
         val journeyData = journeyDataService.getJourneyDataFromSession()
         val newJourneyData = currentStep.updatedJourneyData(journeyData, pageData, subPageNumber)
-        journeyDataService.setJourneyData(newJourneyData)
+        journeyDataService.setJourneyDataInSession(newJourneyData)
 
         if (currentStep.saveAfterSubmit) {
             val journeyDataContextId = journeyDataService.getContextId()
@@ -118,7 +117,7 @@ abstract class Journey<T : StepId>(
         val redirectUrl =
             UriComponentsBuilder
                 .newInstance()
-                .path("/${journeyType.urlPathSegment}/${newStepId.urlPathSegment}")
+                .path("/$journeyPathSegment/${newStepId.urlPathSegment}")
                 .queryParamIfPresent("subpage", Optional.ofNullable(newSubPageNumber))
                 .build(true)
                 .toUriString()
@@ -134,6 +133,13 @@ abstract class Journey<T : StepId>(
         // All other steps are reachable if and only if we can find their previous step by traversal
         return getPrevStep(targetStep, targetSubPageNumber) != null
     }
+
+    private fun getStep(stepId: StepId) =
+        steps.singleOrNull { step -> step.id == stepId }
+            ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Step $journeyPathSegment not valid for journey ${journeyType.name}",
+            )
 
     private fun getPrevStep(
         targetStep: Step<T>,

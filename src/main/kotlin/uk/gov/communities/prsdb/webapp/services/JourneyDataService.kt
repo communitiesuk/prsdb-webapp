@@ -10,8 +10,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import java.security.Principal
 
@@ -23,10 +23,29 @@ class JourneyDataService(
     private val oneLoginUserRepository: OneLoginUserRepository,
     private val objectMapper: ObjectMapper,
 ) {
-    fun getJourneyDataFromSession(): JourneyData = objectToStringKeyedMap(session.getAttribute("journeyData")) ?: mapOf()
+    var journeyDataKey: String? = null
 
-    fun setJourneyData(journeyData: PageData) {
-        session.setAttribute("journeyData", journeyData)
+    fun getJourneyDataFromSession(): JourneyData =
+        if (journeyDataKey != null) {
+            objectToStringKeyedMap(session.getAttribute(journeyDataKey)) ?: mapOf()
+        } else {
+            throw PrsdbWebException("journeyDataKey not set")
+        }
+
+    fun setJourneyDataInSession(journeyData: JourneyData) {
+        if (journeyDataKey != null) {
+            session.setAttribute(journeyDataKey, journeyData)
+        } else {
+            throw PrsdbWebException("journeyDataKey not set")
+        }
+    }
+
+    fun clearJourneyDataFromSession() {
+        if (journeyDataKey != null) {
+            session.setAttribute(journeyDataKey, null)
+        } else {
+            throw PrsdbWebException("journeyDataKey not set")
+        }
     }
 
     fun getContextId(): Long? = session.getAttribute("contextId") as? Long
@@ -75,7 +94,7 @@ class JourneyDataService(
                 .orElseThrow { IllegalStateException("FormContext with ID $contextId not found") }!!
         val loadedJourneyData =
             objectToStringKeyedMap(objectMapper.readValue(formContext.context, Any::class.java)) ?: mapOf()
-        setJourneyData(loadedJourneyData)
+        setJourneyDataInSession(loadedJourneyData)
         setContextId(contextId)
     }
 
@@ -85,9 +104,5 @@ class JourneyDataService(
 
         session.removeAttribute("contextId")
         clearJourneyDataFromSession()
-    }
-
-    fun clearJourneyDataFromSession() {
-        session.setAttribute("journeyData", null)
     }
 }
