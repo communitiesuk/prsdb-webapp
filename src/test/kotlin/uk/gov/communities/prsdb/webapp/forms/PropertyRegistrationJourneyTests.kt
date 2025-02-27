@@ -39,6 +39,7 @@ class PropertyRegistrationJourneyTests {
                     mock(),
                     mock(),
                     mock(),
+                    mock(),
                 )
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf())
@@ -68,6 +69,7 @@ class PropertyRegistrationJourneyTests {
                     mock(),
                     mock(),
                     mock(),
+                    mock(),
                 )
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf())
@@ -91,6 +93,7 @@ class PropertyRegistrationJourneyTests {
                 PropertyRegistrationJourney(
                     mock(),
                     mockJourneyDataService,
+                    mock(),
                     mock(),
                     mock(),
                     mock(),
