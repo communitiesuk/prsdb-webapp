@@ -12,7 +12,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.jdbc.Sql
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -46,7 +45,8 @@ import java.net.URI
 
 @Sql("/data-local.sql")
 class PropertyRegistrationJourneyTests : IntegrationTest() {
-    @SpyBean
+    private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
+
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
 
     @SpyBean
@@ -82,6 +82,8 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             }
             """.trimIndent(),
         )
+
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
     }
 
     @Test
@@ -189,7 +191,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             PropertyRegistrationConfirmationEmail(
                 expectedPropertyRegNum.toString(),
                 "1, Example Road, EG1 2AB",
-                LANDLORD_DASHBOARD_URL,
+                absoluteLandlordUrl,
             ),
         )
 

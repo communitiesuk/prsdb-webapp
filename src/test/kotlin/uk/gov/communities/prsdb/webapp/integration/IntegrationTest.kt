@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OSPlacesConfig
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.Navigator
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.service.notify.NotificationClient
 
@@ -49,6 +50,9 @@ abstract class IntegrationTest {
 
     @MockBean
     lateinit var identityService: OneLoginIdentityService
+
+    @MockBean
+    lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     @SpyBean
     lateinit var clientRegistrationRepository: ClientRegistrationRepository
