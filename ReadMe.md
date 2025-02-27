@@ -71,6 +71,12 @@ Static assets should be added to the `src/main/resources/assets` folder. These w
 the `src/main/resources/static/assets` folder at build time. Assets should not be added to the `static/assets` folder
 directly as this is excluded from source control.
 
+Custom css can now be added using [sass](https://sass-lang.com/) which is compiled to css by rollup when the project is run.
+New styles can be added to new or existing files in `src/main/resources/css` - if you make a new file, make sure it is added 
+to `custom.scss` (this is what will get compiled). This lets directly use the govuk colours / spacing mixins.
+So far we just included minimal govuk scss as this is all we need - see 
+[here](https://frontend.design-system.service.gov.uk/import-css/#import-specific-parts-using-sass) for adding more if required.
+
 ### Database migrations
 
 The project uses Flyway to manage migrations. To add a migration, create a new SQL file
