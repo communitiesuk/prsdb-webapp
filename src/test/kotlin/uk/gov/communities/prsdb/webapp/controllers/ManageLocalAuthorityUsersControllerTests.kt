@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataM
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityInvitationCancellationEmail
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
@@ -46,6 +47,9 @@ class ManageLocalAuthorityUsersControllerTests(
 
     @MockBean
     lateinit var localAuthorityInvitationService: LocalAuthorityInvitationService
+
+    @MockBean
+    lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     @MockBean
     private lateinit var localAuthorityDataService: LocalAuthorityDataService
@@ -123,7 +127,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .thenReturn(Pair(loggedInUserModel, localAuthority))
         whenever(localAuthorityInvitationService.createInvitationToken(any(), any()))
             .thenReturn("test-token")
-        whenever(localAuthorityInvitationService.buildInvitationUri("test-token"))
+        whenever(absoluteUrlProvider.buildInvitationUri("test-token"))
             .thenReturn(URI("https://test-service.gov.uk/sign-up-la-user"))
 
         mvc

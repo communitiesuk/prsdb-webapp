@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.integration
+package uk.gov.communities.prsdb.webapp.urlProviders
 
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createdLoggedInUserModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityInvitationEmail
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
@@ -39,6 +40,9 @@ class InvitationUrlTests(
 
     @MockBean
     lateinit var localAuthorityInvitationService: LocalAuthorityInvitationService
+
+    @MockBean
+    lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     @MockBean
     private lateinit var localAuthorityDataService: LocalAuthorityDataService
@@ -67,7 +71,7 @@ class InvitationUrlTests(
 
         whenever(localAuthorityInvitationService.createInvitationToken(testEmail, localAuthority)).thenReturn(testToken)
         whenever(localAuthorityInvitationService.getAuthorityForToken(testToken)).thenReturn(localAuthority)
-        whenever(localAuthorityInvitationService.buildInvitationUri(testToken)).thenCallRealMethod()
+        whenever(absoluteUrlProvider.buildInvitationUri(testToken)).thenCallRealMethod()
         whenever(localAuthorityInvitationService.tokenIsValid(testToken)).thenReturn(true)
 
         val invitationCaptor = argumentCaptor<LocalAuthorityInvitationEmail>()

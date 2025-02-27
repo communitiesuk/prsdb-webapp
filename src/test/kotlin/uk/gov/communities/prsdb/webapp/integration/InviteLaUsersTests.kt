@@ -3,16 +3,22 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.kotlin.whenever
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserSuccessPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import java.net.URI
 
 @Sql("/data-local.sql")
 class InviteLaUsersTests : IntegrationTest() {
     @Test
     fun `inviting a new LA user ends with a success page with a button linking to the dashboard`(page: Page) {
+        whenever(absoluteUrlProvider.buildInvitationUri(anyString()))
+            .thenReturn(URI("www.prsd.gov.uk/register-la-user/test-token"))
+
         val invitePage = navigator.goToInviteNewLaUser(1)
         invitePage.submitMatchingEmail("test@example.com")
         val successPage = assertPageIs(page, InviteNewLaUserSuccessPage::class)

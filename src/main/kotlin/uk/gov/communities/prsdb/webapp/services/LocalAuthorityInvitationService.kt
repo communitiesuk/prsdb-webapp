@@ -2,15 +2,11 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
 import org.springframework.stereotype.Service
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.on
 import uk.gov.communities.prsdb.webapp.constants.LA_USER_INVITATION_TOKEN
-import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.InvalidTokenException
-import java.net.URI
 import java.util.UUID
 
 @Service
@@ -55,12 +51,6 @@ class LocalAuthorityInvitationService(
 
         return true
     }
-
-    fun buildInvitationUri(token: String): URI =
-        MvcUriComponentsBuilder
-            .fromMethodCall(on(RegisterLAUserController::class.java).acceptInvitation(token))
-            .build()
-            .toUri()
 
     fun storeTokenInSession(token: String) {
         session.setAttribute(LA_USER_INVITATION_TOKEN, token)

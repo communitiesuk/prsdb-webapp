@@ -4,7 +4,6 @@ import jakarta.persistence.EntityExistsException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -38,6 +37,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyReg
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -55,6 +55,7 @@ class PropertyRegistrationJourney(
     private val propertyRegistrationService: PropertyRegistrationService,
     private val localAuthorityService: LocalAuthorityService,
     private val landlordService: LandlordService,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
 ) : JourneyWithTaskList<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
@@ -601,7 +602,7 @@ class PropertyRegistrationJourney(
                 PropertyRegistrationConfirmationEmail(
                     RegistrationNumberDataModel.fromRegistrationNumber(propertyRegistrationNumber).toString(),
                     address.singleLineAddress,
-                    LANDLORD_DASHBOARD_URL,
+                    absoluteUrlProvider.buildLandlordDashboardUri().toString(),
                 ),
             )
 

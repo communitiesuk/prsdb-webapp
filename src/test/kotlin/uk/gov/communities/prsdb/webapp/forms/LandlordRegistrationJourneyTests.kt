@@ -22,11 +22,13 @@ import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import java.net.URI
 
 class LandlordRegistrationJourneyTests {
     @Mock
@@ -43,6 +45,9 @@ class LandlordRegistrationJourneyTests {
 
     @Mock
     lateinit var confirmationEmailSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>
+
+    @Mock
+    lateinit var urlProvider: AbsoluteUrlProvider
 
     val alwaysTrueValidator: AlwaysTrueValidator = AlwaysTrueValidator()
 
@@ -62,6 +67,7 @@ class LandlordRegistrationJourneyTests {
         landlordService = mock()
         addressLookupService = mock()
         confirmationEmailSender = mock()
+        urlProvider = mock()
     }
 
     @Nested
@@ -73,6 +79,7 @@ class LandlordRegistrationJourneyTests {
             whenever(
                 landlordService.createLandlord(any(), any(), any(), any(), any(), any(), any(), anyOrNull(), anyOrNull()),
             ).thenReturn(MockLandlordData.createLandlord())
+            whenever(urlProvider.buildLandlordDashboardUri()).thenReturn(URI.create("https://gov.uk"))
 
             testJourney =
                 LandlordRegistrationJourney(
@@ -82,6 +89,7 @@ class LandlordRegistrationJourneyTests {
                     addressDataService = addressDataService,
                     landlordService = landlordService,
                     emailNotificationService = confirmationEmailSender,
+                    absoluteUrlProvider = urlProvider,
                 )
             setMockUser()
         }

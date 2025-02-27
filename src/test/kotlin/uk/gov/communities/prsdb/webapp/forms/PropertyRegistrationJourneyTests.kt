@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -34,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import java.net.URI
 import kotlin.test.assertEquals
 
 class PropertyRegistrationJourneyTests {
@@ -58,6 +60,9 @@ class PropertyRegistrationJourneyTests {
     @Mock
     lateinit var confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>
 
+    @Mock
+    lateinit var urlProvider: AbsoluteUrlProvider
+
     val alwaysTrueValidator: AlwaysTrueValidator = AlwaysTrueValidator()
 
     class AlwaysTrueValidator : Validator {
@@ -78,6 +83,7 @@ class PropertyRegistrationJourneyTests {
         landlordService = mock()
         addressLookupService = mock()
         confirmationEmailSender = mock()
+        urlProvider = mock()
     }
 
     @Nested
@@ -87,6 +93,7 @@ class PropertyRegistrationJourneyTests {
         @BeforeEach
         fun beforeEach() {
             whenever(landlordService.retrieveLandlordByBaseUserId(any())).thenReturn(MockLandlordData.createLandlord())
+            whenever(urlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
             whenever(
                 mockPropertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(
@@ -111,6 +118,7 @@ class PropertyRegistrationJourneyTests {
                     localAuthorityService = localAuthorityService,
                     landlordService = landlordService,
                     confirmationEmailSender = confirmationEmailSender,
+                    absoluteUrlProvider = urlProvider,
                 )
             setMockUser()
         }
@@ -261,6 +269,7 @@ class PropertyRegistrationJourneyTests {
                     localAuthorityService = localAuthorityService,
                     landlordService = landlordService,
                     confirmationEmailSender = confirmationEmailSender,
+                    absoluteUrlProvider = mock(),
                 )
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf())
@@ -290,6 +299,7 @@ class PropertyRegistrationJourneyTests {
                     mock(),
                     mock(),
                     mock(),
+                    mock(),
                 )
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf())
@@ -313,6 +323,7 @@ class PropertyRegistrationJourneyTests {
                 PropertyRegistrationJourney(
                     mock(),
                     mockJourneyDataService,
+                    mock(),
                     mock(),
                     mock(),
                     mock(),
