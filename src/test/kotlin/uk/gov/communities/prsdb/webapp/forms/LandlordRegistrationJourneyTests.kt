@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -70,7 +71,7 @@ class LandlordRegistrationJourneyTests {
         @BeforeEach
         fun beforeEach() {
             whenever(
-                landlordService.createLandlord(any(), any(), any(), any(), any(), any(), any(), any(), any()),
+                landlordService.createLandlord(any(), any(), any(), any(), any(), any(), any(), anyOrNull(), anyOrNull()),
             ).thenReturn(MockLandlordData.createLandlord())
 
             testJourney =
