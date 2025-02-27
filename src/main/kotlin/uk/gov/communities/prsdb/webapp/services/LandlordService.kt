@@ -76,7 +76,7 @@ class LandlordService(
         val landlordEntity = retrieveLandlordByBaseUserId(baseUserId)!!
 
         landlordUpdate.email?.let { landlordEntity.email = it }
-        landlordUpdate.fullName?.let { landlordEntity.name = it }
+        landlordUpdate.name?.let { landlordEntity.name = it }
         landlordUpdate.phoneNumber?.let { landlordEntity.phoneNumber = it }
         landlordUpdate.address?.let {
             landlordEntity.address = addressService.findOrCreateAddress(it)

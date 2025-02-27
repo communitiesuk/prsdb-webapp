@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import kotlin.test.assertEquals
 
-class UpdateDetailsJourneyDataHelperTests {
+class UpdateLandlordDetailsJourneyDataHelperTests {
     private lateinit var journeyDataBuilder: JourneyDataBuilder
     private lateinit var addressDataService: AddressDataService
 
@@ -65,7 +65,8 @@ class UpdateDetailsJourneyDataHelperTests {
         val authority = LocalAuthority()
         val testJourneyData = journeyDataBuilder.withSelectedAddress(singleLineAddress, uprn, authority).build()
 
-        val addressUpdate = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(testJourneyData, addressDataService)
+        val addressUpdate =
+            UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(testJourneyData, addressDataService)
 
         assertEquals(AddressDataModel(singleLineAddress, uprn = uprn, localAuthorityId = authority.id), addressUpdate)
     }
@@ -77,7 +78,8 @@ class UpdateDetailsJourneyDataHelperTests {
         val postcode = "EG1 9ZY"
         val testJourneyData = journeyDataBuilder.withManualAddress(lineOne, locality, postcode).build()
 
-        val addressUpdate = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(testJourneyData, addressDataService)
+        val addressUpdate =
+            UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(testJourneyData, addressDataService)
 
         assertEquals(
             AddressDataModel(
@@ -93,7 +95,8 @@ class UpdateDetailsJourneyDataHelperTests {
     fun `getAddressUpdateIfPresent returns null if the address pages are not journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
-        val addressUpdate = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(testJourneyData, addressDataService)
+        val addressUpdate =
+            UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(testJourneyData, addressDataService)
 
         assertNull(addressUpdate)
     }
