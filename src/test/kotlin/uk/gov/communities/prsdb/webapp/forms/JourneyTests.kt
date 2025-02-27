@@ -258,7 +258,8 @@ class JourneyTests {
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
-            val result = testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, null)
+            val result =
+                testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, submittedPageData = null)
 
             // Assert
             assertEquals("redirect:${TestStepId.StepOne.urlPathSegment}", result)
@@ -302,7 +303,8 @@ class JourneyTests {
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
-            val result = testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, null)
+            val result =
+                testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, submittedPageData = null)
 
             // Assert
             assertEquals("redirect:${TestStepId.StepOne.urlPathSegment}", result)
@@ -347,7 +349,8 @@ class JourneyTests {
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
-            val result = testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, pageData)
+            val result =
+                testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, submittedPageData = pageData)
 
             // Assert
             assertIs<BindingResult>(model[BindingResult.MODEL_KEY_PREFIX + "formModel"])
@@ -526,7 +529,12 @@ class JourneyTests {
             whenever(spiedOnJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
-            testJourney.populateModelAndGetViewName(TestStepId.StepFour, model, null, pageDataStepFour)
+            testJourney.populateModelAndGetViewName(
+                TestStepId.StepFour,
+                model,
+                null,
+                submittedPageData = pageDataStepFour,
+            )
 
             // Assert
             verify(spiedOnPage).populateModelAndGetTemplateName(
@@ -690,7 +698,7 @@ class JourneyTests {
                     principal,
                 )
             val journeyDataCaptor = argumentCaptor<JourneyData>()
-            verify(mockJourneyDataService).setJourneyData(journeyDataCaptor.capture())
+            verify(mockJourneyDataService).setJourneyDataInSession(journeyDataCaptor.capture())
 
             // Assert
             assertEquals("redirect:/${JOURNEY_PATH_SEGMENT}/${TestStepId.StepTwo.urlPathSegment}", result)

@@ -268,13 +268,17 @@ class UpdateLandlordDetailsJourney(
         return LandlordDetailsController.LANDLORD_DETAILS_ROUTE
     }
 
-    fun initialiseJourneyDataIfNotInitialised(landlordId: String) {
+    fun initialiseJourneyDataIfNotInitialised(
+        landlordId: String,
+        journeyDataKey: String = journeyType.name,
+    ) {
+        journeyDataService.journeyDataKey = journeyDataKey
         val journeyData = journeyDataService.getJourneyDataFromSession()
         if (!journeyData.containsKey(ORIGINAL_LANDLORD_DATA_KEY)) {
             val landlord = landlordService.retrieveLandlordByBaseUserId(landlordId)!!
             val newJourneyData =
                 journeyData + (ORIGINAL_LANDLORD_DATA_KEY to createOriginalLandlordJourneyData(landlord))
-            journeyDataService.setJourneyData(newJourneyData)
+            journeyDataService.setJourneyDataInSession(newJourneyData)
             addressDataService.setAddressData(listOf(AddressDataModel.fromAddress(landlord.address)))
         }
     }

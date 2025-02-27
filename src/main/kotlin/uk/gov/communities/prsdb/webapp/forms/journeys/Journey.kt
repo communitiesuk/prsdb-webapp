@@ -17,7 +17,7 @@ import java.security.Principal
 import java.util.Optional
 
 abstract class Journey<T : StepId>(
-    protected val journeyType: JourneyType,
+    val journeyType: JourneyType,
     protected val validator: Validator,
     protected val journeyDataService: JourneyDataService,
 ) : Iterable<StepDetails<T>> {
@@ -47,8 +47,10 @@ abstract class Journey<T : StepId>(
         stepId: StepId,
         model: Model,
         subPageNumber: Int?,
+        journeyDataKey: String = journeyType.name,
         submittedPageData: PageData? = null,
     ): String {
+        journeyDataService.journeyDataKey = journeyDataKey
         val journeyData: JourneyData = journeyDataService.getJourneyDataFromSession()
         val requestedStep = getStep(stepId)
         if (!isStepReachable(requestedStep, subPageNumber)) {
@@ -89,14 +91,16 @@ abstract class Journey<T : StepId>(
         model: Model,
         subPageNumber: Int?,
         principal: Principal,
+        journeyDataKey: String = journeyType.name,
     ): String {
         val currentStep = getStep(stepId)
         if (!currentStep.isSatisfied(validator, pageData)) {
-            return populateModelAndGetViewName(stepId, model, subPageNumber, pageData)
+            return populateModelAndGetViewName(stepId, model, subPageNumber, journeyDataKey, pageData)
         }
+        journeyDataService.journeyDataKey = journeyDataKey
         val journeyData = journeyDataService.getJourneyDataFromSession()
         val newJourneyData = currentStep.updatedJourneyData(journeyData, pageData, subPageNumber)
-        journeyDataService.setJourneyData(newJourneyData)
+        journeyDataService.setJourneyDataInSession(newJourneyData)
 
         if (currentStep.saveAfterSubmit) {
             val journeyDataContextId = journeyDataService.getContextId()

@@ -24,8 +24,9 @@ class AddressDataService(
 
     fun setAddressData(addressDataList: List<AddressDataModel>) {
         val journeyData = journeyDataService.getJourneyDataFromSession()
-        val newJourneyData = journeyData + ("address-data" to Json.encodeToString(addressDataList.associateBy { it.singleLineAddress }))
-        journeyDataService.setJourneyData(newJourneyData)
+        val newJourneyData =
+            journeyData + ("address-data" to Json.encodeToString(addressDataList.associateBy { it.singleLineAddress }))
+        journeyDataService.setJourneyDataInSession(newJourneyData)
     }
 
     fun getCachedAddressRegisteredResult(uprn: Long): Boolean? {
