@@ -13,9 +13,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
-import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.UpdateLandlordDetailsJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -39,12 +37,13 @@ class UpdateLandlordDetailsJourney(
     private val landlordService: LandlordService,
     private val addressDataService: AddressDataService,
     addressLookupService: AddressLookupService,
-) : Journey<UpdateLandlordDetailsStepId>(
+) : UpdateJourney<UpdateLandlordDetailsStepId>(
         journeyType = JourneyType.LANDLORD_DETAILS_UPDATE,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
     override val initialStepId = UpdateLandlordDetailsStepId.UpdateEmail
+    override val updateStepId = UpdateLandlordDetailsStepId.UpdateDetails
 
     override val journeyPathSegment: String = UPDATE_LANDLORD_DETAILS_URL
 
@@ -226,29 +225,6 @@ class UpdateLandlordDetailsJourney(
             ),
         )
 
-    override fun getUnreachableStepRedirect(journeyData: JourneyData): String =
-        if (!journeyData.containsKey(ORIGINAL_LANDLORD_DATA_KEY)) {
-            UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment
-        } else {
-            last().step.id.urlPathSegment
-        }
-
-    override fun iterator(): Iterator<StepDetails<UpdateLandlordDetailsStepId>> {
-        val journeyData = journeyDataService.getJourneyDataFromSession()
-
-        val landlordData = JourneyDataHelper.getPageData(journeyData, ORIGINAL_LANDLORD_DATA_KEY)
-
-        // For any fields where the data is updated, replace the original value with the new value
-        val updatedLandlordData =
-            journeyData.keys
-                .union(landlordData?.keys ?: setOf())
-                .map { key ->
-                    key to if (journeyData.containsKey(key)) journeyData[key] else landlordData?.get(key)
-                }.associate { it }
-
-        return ReachableStepDetailsIterator(updatedLandlordData ?: journeyData, steps, initialStepId, validator)
-    }
-
     private fun updateLandlordWithChangesAndRedirect(journeyData: JourneyData): String {
         val landlordUpdate =
             LandlordUpdateModel(
@@ -274,10 +250,10 @@ class UpdateLandlordDetailsJourney(
     ) {
         journeyDataService.journeyDataKey = journeyDataKey
         val journeyData = journeyDataService.getJourneyDataFromSession()
-        if (!journeyData.containsKey(ORIGINAL_LANDLORD_DATA_KEY)) {
+        if (!journeyData.containsKey(originalDataKey)) {
             val landlord = landlordService.retrieveLandlordByBaseUserId(landlordId)!!
             val newJourneyData =
-                journeyData + (ORIGINAL_LANDLORD_DATA_KEY to createOriginalLandlordJourneyData(landlord))
+                journeyData + (originalDataKey to createOriginalLandlordJourneyData(landlord))
             journeyDataService.setJourneyDataInSession(newJourneyData)
             addressDataService.setAddressData(listOf(AddressDataModel.fromAddress(landlord.address)))
         }
@@ -318,8 +294,4 @@ class UpdateLandlordDetailsJourney(
     private fun Address.getSelectedAddress(): String = if (uprn == null) MANUAL_ADDRESS_CHOSEN else singleLineAddress
 
     private fun Address.getTownOrCity(): String = townName ?: singleLineAddress
-
-    companion object {
-        const val ORIGINAL_LANDLORD_DATA_KEY = "original-landlord-data"
-    }
 }
