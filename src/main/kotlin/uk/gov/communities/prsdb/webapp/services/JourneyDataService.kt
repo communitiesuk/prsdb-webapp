@@ -2,10 +2,8 @@ package uk.gov.communities.prsdb.webapp.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.HttpSession
-import org.springframework.context.annotation.Scope
-import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Service
-import org.springframework.web.context.WebApplicationContext
+import org.springframework.web.context.annotation.RequestScope
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
@@ -16,36 +14,33 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import java.security.Principal
 
 @Service
-@Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+@RequestScope
 class JourneyDataService(
     private val session: HttpSession,
     private val formContextRepository: FormContextRepository,
     private val oneLoginUserRepository: OneLoginUserRepository,
     private val objectMapper: ObjectMapper,
 ) {
-    var journeyDataKey: String? = null
+    // This service can have class attributes as it is request scoped
+    final lateinit var journeyDataKey: String private set
 
-    fun getJourneyDataFromSession(): JourneyData =
-        if (journeyDataKey != null) {
-            objectToStringKeyedMap(session.getAttribute(journeyDataKey)) ?: mapOf()
+    fun getJourneyDataFromSession(journeyDataKey: String): JourneyData {
+        if (this::journeyDataKey.isInitialized && journeyDataKey != this.journeyDataKey) {
+            throw PrsdbWebException("journeyDataKey has already been set to ${this.journeyDataKey}")
         } else {
-            throw PrsdbWebException("journeyDataKey not set")
+            this.journeyDataKey = journeyDataKey
         }
+        return getJourneyDataFromSession()
+    }
+
+    fun getJourneyDataFromSession(): JourneyData = objectToStringKeyedMap(session.getAttribute(journeyDataKey)) ?: mapOf()
 
     fun setJourneyDataInSession(journeyData: JourneyData) {
-        if (journeyDataKey != null) {
-            session.setAttribute(journeyDataKey, journeyData)
-        } else {
-            throw PrsdbWebException("journeyDataKey not set")
-        }
+        session.setAttribute(journeyDataKey, journeyData)
     }
 
     fun clearJourneyDataFromSession() {
-        if (journeyDataKey != null) {
-            session.setAttribute(journeyDataKey, null)
-        } else {
-            throw PrsdbWebException("journeyDataKey not set")
-        }
+        session.setAttribute(journeyDataKey, null)
     }
 
     fun getContextId(): Long? = session.getAttribute("contextId") as? Long

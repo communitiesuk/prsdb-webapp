@@ -16,6 +16,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
@@ -36,6 +37,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyTask
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
+import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
@@ -259,7 +261,7 @@ class JourneyTests {
 
             // Act
             val result =
-                testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, submittedPageData = null)
+                testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, null)
 
             // Assert
             assertEquals("redirect:${TestStepId.StepOne.urlPathSegment}", result)
@@ -304,7 +306,7 @@ class JourneyTests {
 
             // Act
             val result =
-                testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, submittedPageData = null)
+                testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, null)
 
             // Assert
             assertEquals("redirect:${TestStepId.StepOne.urlPathSegment}", result)
@@ -350,7 +352,7 @@ class JourneyTests {
 
             // Act
             val result =
-                testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, submittedPageData = pageData)
+                testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, pageData)
 
             // Assert
             assertIs<BindingResult>(model[BindingResult.MODEL_KEY_PREFIX + "formModel"])
@@ -460,7 +462,6 @@ class JourneyTests {
                     mockOneLoginUserRepository,
                     ObjectMapper(),
                 )
-            journeyDataService.journeyDataKey = "test-journey-key"
         }
 
         @Test
@@ -534,6 +535,9 @@ class JourneyTests {
                     TestStepId.StepOne.urlPathSegment to pageDataStepOne,
                     TestStepId.StepThree.urlPathSegment to pageDataStepThree,
                 )
+            val journeyDataKey = "journey-data-key"
+
+            whenever(spiedOnJourneyDataService.getJourneyDataFromSession(journeyDataKey)).thenReturn(journeyData)
             whenever(spiedOnJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
@@ -541,7 +545,8 @@ class JourneyTests {
                 TestStepId.StepFour,
                 model,
                 null,
-                submittedPageData = pageDataStepFour,
+                pageDataStepFour,
+                journeyDataKey,
             )
 
             // Assert
@@ -951,6 +956,7 @@ class JourneyTests {
                     mock(),
                     mock(),
                     mock(),
+                    mock(),
                 )
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf())
@@ -974,6 +980,7 @@ class JourneyTests {
                 PropertyRegistrationJourney(
                     mock(),
                     mockJourneyDataService,
+                    mock(),
                     mock(),
                     mock(),
                     mock(),
@@ -1009,9 +1016,10 @@ class JourneyTests {
                     mock(),
                     mock(),
                     mock(),
+                    mock(),
                 )
 
-            whenever(mockJourneyDataService.getJourneyDataFromSession(testJourney.journeyType.name)).thenReturn(
+            whenever(mockJourneyDataService.getJourneyDataFromSession(any())).thenReturn(
                 mapOf("anything" to "Anything else"),
             )
 

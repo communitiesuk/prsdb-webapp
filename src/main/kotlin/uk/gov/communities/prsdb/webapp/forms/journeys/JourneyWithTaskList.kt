@@ -20,10 +20,9 @@ abstract class JourneyWithTaskList<T : StepId>(
 
     fun populateModelAndGetTaskListViewName(
         model: Model,
-        journeyDataKey: String = journeyType.name,
+        journeyDataKey: String? = null,
     ): String {
-        journeyDataService.journeyDataKey = journeyDataKey
-        val journeyData = journeyDataService.getJourneyDataFromSession()
+        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKeyOrDefault(journeyDataKey))
         model.addAttribute("taskListViewModel", taskListFactory.getTaskListViewModel(journeyData))
         return "taskList"
     }

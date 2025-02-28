@@ -45,12 +45,8 @@ class LaUserRegistrationJourney(
 
     override val journeyPathSegment = REGISTER_LA_USER_JOURNEY_URL
 
-    fun initialiseJourneyData(
-        token: String,
-        journeyDataKey: String = journeyType.name,
-    ) {
-        journeyDataService.journeyDataKey = journeyDataKey
-        val journeyData = journeyDataService.getJourneyDataFromSession()
+    fun initialiseJourneyData(token: String) {
+        val journeyData = journeyDataService.getJourneyDataFromSession(journeyType.name)
         val formData: PageData = mapOf("emailAddress" to invitationService.getEmailAddressForToken(token))
         val emailStep = steps.single { step -> step.id == RegisterLaUserStepId.Email }
 

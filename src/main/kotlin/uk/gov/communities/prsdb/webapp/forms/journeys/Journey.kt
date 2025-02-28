@@ -61,11 +61,11 @@ abstract class Journey<T : StepId>(
         stepId: StepId,
         model: Model,
         subPageNumber: Int?,
-        journeyDataKey: String = journeyType.name,
         submittedPageData: PageData? = null,
+        journeyDataKey: String? = null,
     ): String {
-        journeyDataService.journeyDataKey = journeyDataKey
-        val journeyData: JourneyData = journeyDataService.getJourneyDataFromSession()
+        val journeyData: JourneyData =
+            journeyDataService.getJourneyDataFromSession(journeyDataKeyOrDefault(journeyDataKey))
         val requestedStep = getStep(stepId)
         if (!isStepReachable(requestedStep, subPageNumber)) {
             return "redirect:${getUnreachableStepRedirect(journeyData)}"
@@ -93,14 +93,16 @@ abstract class Journey<T : StepId>(
         model: Model,
         subPageNumber: Int?,
         principal: Principal,
-        journeyDataKey: String = journeyType.name,
+        journeyDataKey: String? = null,
     ): String {
-        journeyDataService.journeyDataKey = journeyDataKey
+        val journeyDataKeyOrDefault = journeyDataKeyOrDefault(journeyDataKey)
+        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKeyOrDefault)
+
         val currentStep = getStep(stepId)
         if (!currentStep.isSatisfied(validator, pageData)) {
-            return populateModelAndGetViewName(stepId, model, subPageNumber, journeyDataKey, pageData)
+            return populateModelAndGetViewName(stepId, model, subPageNumber, pageData, journeyDataKeyOrDefault)
         }
-        val journeyData = journeyDataService.getJourneyDataFromSession()
+
         val newJourneyData = currentStep.updatedJourneyData(journeyData, pageData, subPageNumber)
         journeyDataService.setJourneyDataInSession(newJourneyData)
 

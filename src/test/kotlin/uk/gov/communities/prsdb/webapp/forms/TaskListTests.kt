@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.mockito.Mock
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.ui.ExtendedModelMap
 import org.springframework.validation.Validator
@@ -67,6 +68,7 @@ class TaskListTests {
 
         // Ensure form data for each page is never null
         val journeyData = TestStepId.entries.associate { it.urlPathSegment to mutableMapOf<String, String>() }
+        whenever(mockJourneyDataService.getJourneyDataFromSession(any())).thenReturn(journeyData.toMutableMap())
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData.toMutableMap())
     }
 
