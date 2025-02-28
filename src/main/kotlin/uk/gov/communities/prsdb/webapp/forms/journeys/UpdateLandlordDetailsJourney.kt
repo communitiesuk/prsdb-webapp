@@ -275,12 +275,13 @@ class UpdateLandlordDetailsJourney(
     }
 
     override fun initialiseJourneyDataIfNotInitialised(updateEntityId: String) {
-        super.initialiseJourneyDataIfNotInitialised(updateEntityId)
-
-        val landlord = landlordService.retrieveLandlordByBaseUserId(updateEntityId)!!
-        if (addressDataService.getAddressData(landlord.address.singleLineAddress) == null) {
+        val journeyData = journeyDataService.getJourneyDataFromSession(defaultJourneyDataKey)
+        if (!isJourneyDataInitialised(journeyData)) {
+            val landlord = landlordService.retrieveLandlordByBaseUserId(updateEntityId)!!
             addressDataService.setAddressData(listOf(AddressDataModel.fromAddress(landlord.address)))
         }
+
+        super.initialiseJourneyDataIfNotInitialised(updateEntityId)
     }
 
     private fun Address.getHouseNameOrNumber(): String = buildingName ?: buildingNumber ?: singleLineAddress

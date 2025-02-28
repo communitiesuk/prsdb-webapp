@@ -61,5 +61,5 @@ abstract class UpdateJourney<T : StepId>(
         return ReachableStepDetailsIterator(updatedData, steps, initialStepId, validator)
     }
 
-    private fun isJourneyDataInitialised(journeyData: JourneyData): Boolean = journeyData.containsKey(originalDataKey)
+    protected fun isJourneyDataInitialised(journeyData: JourneyData): Boolean = journeyData.containsKey(originalDataKey)
 }
