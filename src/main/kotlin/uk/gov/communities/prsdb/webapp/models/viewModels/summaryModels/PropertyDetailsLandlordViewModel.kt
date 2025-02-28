@@ -1,14 +1,12 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
-import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.UPDATE_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
-import uk.gov.communities.prsdb.webapp.helpers.extenstions.addRow
+import uk.gov.communities.prsdb.webapp.helpers.extenstions.addRowWithoutChangeLink
 
 class PropertyDetailsLandlordViewModel(
     private val landlord: Landlord,
-    private val withChangeLinks: Boolean = true,
     private val landlordDetailsUrl: String = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
 ) {
     private val isEnglandOrWalesResident = landlord.isEnglandOrWalesResident()
@@ -16,55 +14,40 @@ class PropertyDetailsLandlordViewModel(
     val landlordsDetails: List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
-                addRow(
+                addRowWithoutChangeLink(
                     "landlordDetails.personalDetails.name",
                     landlord.name,
-                    "$UPDATE_ROUTE/name",
-                    withChangeLinks,
                     landlordDetailsUrl,
                 )
-                addRow(
+                addRowWithoutChangeLink(
                     "landlordDetails.personalDetails.dateOfBirth",
                     landlord.dateOfBirth,
-                    "$UPDATE_ROUTE/date-of-birth",
-                    withChangeLinks,
                 )
-                addRow(
+                addRowWithoutChangeLink(
                     "landlordDetails.personalDetails.oneLoginVerified",
                     MessageKeyConverter.convert(landlord.isVerified),
-                    null,
                 )
-                addRow(
+                addRowWithoutChangeLink(
                     "landlordDetails.personalDetails.emailAddress",
                     landlord.email,
-                    "$UPDATE_ROUTE/email",
-                    withChangeLinks,
                 )
-                addRow(
+                addRowWithoutChangeLink(
                     "propertyDetails.landlordDetails.contactNumber",
                     landlord.phoneNumber,
-                    "$UPDATE_ROUTE/telephone",
-                    withChangeLinks,
                 )
                 if (isEnglandOrWalesResident) {
-                    addRow(
+                    addRowWithoutChangeLink(
                         "landlordDetails.personalDetails.contactAddress",
                         landlord.address.singleLineAddress,
-                        "$UPDATE_ROUTE/address",
-                        withChangeLinks,
                     )
                 } else {
-                    addRow(
+                    addRowWithoutChangeLink(
                         "propertyDetails.landlordDetails.addressNonEnglandOrWales",
                         landlord.nonEnglandOrWalesAddress,
-                        "$UPDATE_ROUTE/address",
-                        withChangeLinks,
                     )
-                    addRow(
+                    addRowWithoutChangeLink(
                         "propertyDetails.landlordDetails.contactAddressInEnglandOrWales",
                         landlord.address.singleLineAddress,
-                        "$UPDATE_ROUTE/contact-address",
-                        withChangeLinks,
                     )
                 }
             }.toList()

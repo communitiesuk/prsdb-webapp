@@ -12,3 +12,11 @@ fun MutableList<SummaryListRowViewModel>.addRow(
     val changeLinkOrNull = if (withChangeLinks) changeLink else null
     add(SummaryListRowViewModel(key, value, changeLinkOrNull, valueUrl))
 }
+
+fun MutableList<SummaryListRowViewModel>.addRowWithoutChangeLink(
+    key: String,
+    value: Any?,
+    valueUrl: String? = null,
+) {
+    addRow(key = key, value = value, withChangeLinks = false, valueUrl = valueUrl)
+}
