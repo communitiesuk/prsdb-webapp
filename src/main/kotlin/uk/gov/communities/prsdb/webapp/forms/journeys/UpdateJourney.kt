@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
+import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
@@ -14,10 +15,31 @@ abstract class UpdateJourney<T : StepId>(
 ) : Journey<T>(journeyType, validator, journeyDataService) {
     abstract val updateStepId: T
 
-    protected val originalDataKey = "ORIGINAL_${journeyType.name}"
+    private val originalDataKey = "ORIGINAL_${journeyType.name}"
+
+    protected abstract fun createOriginalJourneyData(updateEntityId: String): JourneyData
+
+    protected open fun initialiseJourneyDataIfNotInitialised(updateEntityId: String) {
+        val journeyData = journeyDataService.getJourneyDataFromSession(defaultJourneyDataKey)
+        if (!isJourneyDataInitialised(journeyData)) {
+            val newJourneyData = journeyData + (originalDataKey to createOriginalJourneyData(updateEntityId))
+            journeyDataService.setJourneyDataInSession(newJourneyData)
+        }
+    }
+
+    fun populateModelAndGetViewNameForUpdateStep(
+        updateEntityId: String,
+        model: Model,
+        subPageNumber: Int? = null,
+        submittedPageData: PageData? = null,
+        journeyDataKey: String? = null,
+    ): String {
+        initialiseJourneyDataIfNotInitialised(updateEntityId)
+        return super.populateModelAndGetViewName(updateStepId, model, subPageNumber, submittedPageData, journeyDataKey)
+    }
 
     override fun getUnreachableStepRedirect(journeyData: JourneyData) =
-        if (!journeyData.containsKey(originalDataKey)) {
+        if (!isJourneyDataInitialised(journeyData)) {
             updateStepId.urlPathSegment
         } else {
             last().step.id.urlPathSegment
@@ -38,4 +60,6 @@ abstract class UpdateJourney<T : StepId>(
 
         return ReachableStepDetailsIterator(updatedData, steps, initialStepId, validator)
     }
+
+    private fun isJourneyDataInitialised(journeyData: JourneyData): Boolean = journeyData.containsKey(originalDataKey)
 }

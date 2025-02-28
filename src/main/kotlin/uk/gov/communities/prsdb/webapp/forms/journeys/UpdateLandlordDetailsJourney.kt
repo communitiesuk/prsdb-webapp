@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.constants.UPDATE_LANDLORD_DETAILS_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.Address
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
@@ -42,7 +41,7 @@ class UpdateLandlordDetailsJourney(
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
-    override val initialStepId = UpdateLandlordDetailsStepId.UpdateEmail
+    final override val initialStepId = UpdateLandlordDetailsStepId.UpdateEmail
     override val updateStepId = UpdateLandlordDetailsStepId.UpdateDetails
 
     override val journeyPathSegment: String = UPDATE_LANDLORD_DETAILS_URL
@@ -244,18 +243,9 @@ class UpdateLandlordDetailsJourney(
         return LandlordDetailsController.LANDLORD_DETAILS_ROUTE
     }
 
-    fun initialiseJourneyDataIfNotInitialised(landlordId: String) {
-        val journeyData = journeyDataService.getJourneyDataFromSession(defaultJourneyDataKey)
-        if (!journeyData.containsKey(originalDataKey)) {
-            val landlord = landlordService.retrieveLandlordByBaseUserId(landlordId)!!
-            val newJourneyData =
-                journeyData + (originalDataKey to createOriginalLandlordJourneyData(landlord))
-            journeyDataService.setJourneyDataInSession(newJourneyData)
-            addressDataService.setAddressData(listOf(AddressDataModel.fromAddress(landlord.address)))
-        }
-    }
+    override fun createOriginalJourneyData(updateEntityId: String): JourneyData {
+        val landlord = landlordService.retrieveLandlordByBaseUserId(updateEntityId)!!
 
-    private fun createOriginalLandlordJourneyData(landlord: Landlord): JourneyData {
         val originalLandlordData =
             mutableMapOf(
                 UpdateLandlordDetailsStepId.UpdateEmail.urlPathSegment to mapOf("emailAddress" to landlord.email),
@@ -280,7 +270,17 @@ class UpdateLandlordDetailsJourney(
                     "postcode" to landlord.address.getPostcodeSearchTerm(),
                 )
         }
+
         return originalLandlordData
+    }
+
+    override fun initialiseJourneyDataIfNotInitialised(updateEntityId: String) {
+        super.initialiseJourneyDataIfNotInitialised(updateEntityId)
+
+        val landlord = landlordService.retrieveLandlordByBaseUserId(updateEntityId)!!
+        if (addressDataService.getAddressData(landlord.address.singleLineAddress) == null) {
+            addressDataService.setAddressData(listOf(AddressDataModel.fromAddress(landlord.address)))
+        }
     }
 
     private fun Address.getHouseNameOrNumber(): String = buildingName ?: buildingNumber ?: singleLineAddress
