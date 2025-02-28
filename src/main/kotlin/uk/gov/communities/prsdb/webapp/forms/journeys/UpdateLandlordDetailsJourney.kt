@@ -287,6 +287,7 @@ class UpdateLandlordDetailsJourney(
 
         val originalLandlordData =
             mutableMapOf(
+                IS_IDENTITY_VERIFIED_KEY to landlord.isVerified,
                 UpdateLandlordDetailsStepId.UpdateEmail.urlPathSegment to mapOf("emailAddress" to landlord.email),
                 UpdateLandlordDetailsStepId.UpdateName.urlPathSegment to mapOf("name" to landlord.name),
                 UpdateLandlordDetailsStepId.UpdatePhoneNumber.urlPathSegment to mapOf("phoneNumber" to landlord.phoneNumber),
@@ -303,7 +304,7 @@ class UpdateLandlordDetailsJourney(
                     mapOf(
                         "address" to Json.encodeToString(AddressDataModel.fromAddress(landlord.address)),
                     ),
-                UpdateDetailsStepId.UpdateDateOfBirth.urlPathSegment to
+                UpdateLandlordDetailsStepId.UpdateDateOfBirth.urlPathSegment to
                     mapOf(
                         "day" to landlord.dateOfBirth?.dayOfMonth.toString(),
                         "month" to landlord.dateOfBirth?.monthValue.toString(),
