@@ -14,10 +14,10 @@ abstract class UpdateJourney<T : StepId>(
 ) : Journey<T>(journeyType, validator, journeyDataService) {
     abstract val updateStepId: T
 
-    protected val originalDataKey = "ORIGINAL_$journeyType.name"
+    protected val originalDataKey = "ORIGINAL_${journeyType.name}"
 
     override fun getUnreachableStepRedirect(journeyData: JourneyData) =
-        if (journeyData[originalDataKey] == null) {
+        if (!journeyData.containsKey(originalDataKey)) {
             updateStepId.urlPathSegment
         } else {
             last().step.id.urlPathSegment
