@@ -935,4 +935,91 @@ class JourneyTests {
             }
         }
     }
+
+    @Nested
+    inner class JourneyDataManipulationTests {
+        @Test
+        fun `when there is no journey data in the session or the database, journey data is not loaded`() {
+            val principalName = "principalName"
+            val testJourney =
+                PropertyRegistrationJourney(
+                    mock(),
+                    mockJourneyDataService,
+                    mock(),
+                    mock(),
+                    mock(),
+                    mock(),
+                    mock(),
+                    mock(),
+                )
+
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf())
+            whenever(mockJourneyDataService.getContextId(principalName, JourneyType.PROPERTY_REGISTRATION)).thenReturn(
+                null,
+            )
+
+            // Act
+            testJourney.loadJourneyDataIfNotLoaded(principalName)
+
+            // Assert
+            verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any())
+        }
+
+        @Test
+        fun `when the journey data is not in the session it will be loaded into the session from the database`() {
+            val principalName = "principalName"
+            val contextId = 67L
+
+            val testJourney =
+                PropertyRegistrationJourney(
+                    mock(),
+                    mockJourneyDataService,
+                    mock(),
+                    mock(),
+                    mock(),
+                    mock(),
+                    mock(),
+                    mock(),
+                )
+
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf())
+            whenever(mockJourneyDataService.getContextId(principalName, JourneyType.PROPERTY_REGISTRATION)).thenReturn(
+                contextId,
+            )
+
+            // Act
+            testJourney.loadJourneyDataIfNotLoaded(principalName)
+
+            // Assert
+            val captor = argumentCaptor<Long>()
+            verify(mockJourneyDataService).loadJourneyDataIntoSession(captor.capture())
+            assertEquals(contextId, captor.allValues.single())
+        }
+
+        @Test
+        fun `when the journey data is already in the session, journey data is not loaded`() {
+            val principalName = "principalName"
+            val testJourney =
+                PropertyRegistrationJourney(
+                    mock(),
+                    mockJourneyDataService,
+                    mock(),
+                    mock(),
+                    mock(),
+                    mock(),
+                    mock(),
+                    mock(),
+                )
+
+            whenever(mockJourneyDataService.getJourneyDataFromSession(testJourney.journeyType.name)).thenReturn(
+                mapOf("anything" to "Anything else"),
+            )
+
+            // Act
+            testJourney.loadJourneyDataIfNotLoaded(principalName)
+
+            // Assert
+            verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any())
+        }
+    }
 }

@@ -40,6 +40,23 @@ abstract class Journey<T : StepId>(
         return step.id
     }
 
+    fun loadJourneyDataIfNotLoaded(
+        principalName: String,
+        journeyDataKey: String? = null,
+    ) {
+        val data = journeyDataService.getJourneyDataFromSession(journeyDataKeyOrDefault(journeyDataKey))
+        if (data.isEmpty()) {
+            /* TODO PRSD-589 Currently this looks the context up from the database,
+                takes the id, then passes the id to another method which retrieves it
+                from the database. When this is reworked, we should just pass the whole
+                context to an overload of journeyDataService.loadJourneyDataIntoSession().*/
+            val contextId = journeyDataService.getContextId(principalName, journeyType)
+            if (contextId != null) {
+                journeyDataService.loadJourneyDataIntoSession(contextId)
+            }
+        }
+    }
+
     fun populateModelAndGetViewName(
         stepId: StepId,
         model: Model,
