@@ -34,25 +34,25 @@ class JourneyDataService(
     }
 
     fun getJourneyDataFromSession(): JourneyData =
-        try {
-            objectToStringKeyedMap(session.getAttribute(journeyDataKey)) ?: mapOf()
-        } catch (exception: UninitializedPropertyAccessException) {
+        if (!this::journeyDataKey.isInitialized) {
             throw PrsdbWebException("journeyDataKey has not been set")
+        } else {
+            objectToStringKeyedMap(session.getAttribute(journeyDataKey)) ?: mapOf()
         }
 
     fun setJourneyDataInSession(journeyData: JourneyData) {
-        try {
-            session.setAttribute(journeyDataKey, journeyData)
-        } catch (exception: UninitializedPropertyAccessException) {
+        if (!this::journeyDataKey.isInitialized) {
             throw PrsdbWebException("journeyDataKey has not been set")
+        } else {
+            session.setAttribute(journeyDataKey, journeyData)
         }
     }
 
     fun clearJourneyDataFromSession() {
-        try {
-            session.setAttribute(journeyDataKey, null)
-        } catch (exception: UninitializedPropertyAccessException) {
+        if (!this::journeyDataKey.isInitialized) {
             throw PrsdbWebException("journeyDataKey has not been set")
+        } else {
+            session.setAttribute(journeyDataKey, null)
         }
     }
 
