@@ -22,7 +22,7 @@ abstract class JourneyWithTaskList<T : StepId>(
         model: Model,
         journeyDataKey: String? = null,
     ): String {
-        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKeyOrDefault(journeyDataKey))
+        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey ?: defaultJourneyDataKey)
         model.addAttribute("taskListViewModel", taskListFactory.getTaskListViewModel(journeyData))
         return "taskList"
     }

@@ -245,7 +245,7 @@ class UpdateLandlordDetailsJourney(
     }
 
     fun initialiseJourneyDataIfNotInitialised(landlordId: String) {
-        val journeyData = journeyDataService.getJourneyDataFromSession(journeyType.name)
+        val journeyData = journeyDataService.getJourneyDataFromSession(defaultJourneyDataKey)
         if (!journeyData.containsKey(originalDataKey)) {
             val landlord = landlordService.retrieveLandlordByBaseUserId(landlordId)!!
             val newJourneyData =

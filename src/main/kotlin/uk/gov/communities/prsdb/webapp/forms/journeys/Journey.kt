@@ -29,6 +29,8 @@ abstract class Journey<T : StepId>(
 
     protected abstract val journeyPathSegment: String
 
+    protected val defaultJourneyDataKey = journeyType.name
+
     fun getStepId(stepName: String): T {
         val step = steps.singleOrNull { step -> step.id.urlPathSegment == stepName }
         if (step == null) {
@@ -44,7 +46,7 @@ abstract class Journey<T : StepId>(
         principalName: String,
         journeyDataKey: String? = null,
     ) {
-        val data = journeyDataService.getJourneyDataFromSession(journeyDataKeyOrDefault(journeyDataKey))
+        val data = journeyDataService.getJourneyDataFromSession(journeyDataKey ?: defaultJourneyDataKey)
         if (data.isEmpty()) {
             /* TODO PRSD-589 Currently this looks the context up from the database,
                 takes the id, then passes the id to another method which retrieves it
@@ -65,7 +67,7 @@ abstract class Journey<T : StepId>(
         journeyDataKey: String? = null,
     ): String {
         val journeyData: JourneyData =
-            journeyDataService.getJourneyDataFromSession(journeyDataKeyOrDefault(journeyDataKey))
+            journeyDataService.getJourneyDataFromSession(journeyDataKey ?: defaultJourneyDataKey)
         val requestedStep = getStep(stepId)
         if (!isStepReachable(requestedStep, subPageNumber)) {
             return "redirect:${getUnreachableStepRedirect(journeyData)}"
@@ -95,12 +97,17 @@ abstract class Journey<T : StepId>(
         principal: Principal,
         journeyDataKey: String? = null,
     ): String {
-        val journeyDataKeyOrDefault = journeyDataKeyOrDefault(journeyDataKey)
-        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKeyOrDefault)
+        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey ?: defaultJourneyDataKey)
 
         val currentStep = getStep(stepId)
         if (!currentStep.isSatisfied(validator, pageData)) {
-            return populateModelAndGetViewName(stepId, model, subPageNumber, pageData, journeyDataKeyOrDefault)
+            return populateModelAndGetViewName(
+                stepId,
+                model,
+                subPageNumber,
+                pageData,
+                journeyDataKey ?: defaultJourneyDataKey,
+            )
         }
 
         val newJourneyData = currentStep.updatedJourneyData(journeyData, pageData, subPageNumber)
@@ -147,8 +154,6 @@ abstract class Journey<T : StepId>(
         initialStepId: T,
         steps: Set<Step<T>>,
     ): List<JourneySection<T>> = listOf(JourneySection.withOneTask(JourneyTask(initialStepId, steps)))
-
-    protected fun journeyDataKeyOrDefault(journeyDataKey: String?) = journeyDataKey ?: journeyType.name
 
     private fun getSectionHeaderInfo(step: Step<T>): SectionHeaderViewModel? {
         val sectionContainingStep = sections.single { it.isStepInSection(step.id) }
