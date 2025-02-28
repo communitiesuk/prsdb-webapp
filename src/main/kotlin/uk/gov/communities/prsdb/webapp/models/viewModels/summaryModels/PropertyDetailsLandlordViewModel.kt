@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
-import uk.gov.communities.prsdb.webapp.helpers.extenstions.addRowWithoutChangeLink
+import uk.gov.communities.prsdb.webapp.helpers.extenstions.addRow
 
 class PropertyDetailsLandlordViewModel(
     private val landlord: Landlord,
@@ -14,38 +14,38 @@ class PropertyDetailsLandlordViewModel(
     val landlordsDetails: List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
-                addRowWithoutChangeLink(
+                addRow(
                     "landlordDetails.personalDetails.name",
                     landlord.name,
                     landlordDetailsUrl,
                 )
-                addRowWithoutChangeLink(
+                addRow(
                     "landlordDetails.personalDetails.dateOfBirth",
                     landlord.dateOfBirth,
                 )
-                addRowWithoutChangeLink(
+                addRow(
                     "landlordDetails.personalDetails.oneLoginVerified",
                     MessageKeyConverter.convert(landlord.isVerified),
                 )
-                addRowWithoutChangeLink(
+                addRow(
                     "landlordDetails.personalDetails.emailAddress",
                     landlord.email,
                 )
-                addRowWithoutChangeLink(
+                addRow(
                     "propertyDetails.landlordDetails.contactNumber",
                     landlord.phoneNumber,
                 )
                 if (isEnglandOrWalesResident) {
-                    addRowWithoutChangeLink(
+                    addRow(
                         "landlordDetails.personalDetails.contactAddress",
                         landlord.address.singleLineAddress,
                     )
                 } else {
-                    addRowWithoutChangeLink(
+                    addRow(
                         "propertyDetails.landlordDetails.addressNonEnglandOrWales",
                         landlord.nonEnglandOrWalesAddress,
                     )
-                    addRowWithoutChangeLink(
+                    addRow(
                         "propertyDetails.landlordDetails.contactAddressInEnglandOrWales",
                         landlord.address.singleLineAddress,
                     )

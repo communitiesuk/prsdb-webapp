@@ -13,7 +13,7 @@ fun MutableList<SummaryListRowViewModel>.addRow(
     add(SummaryListRowViewModel(key, value, changeLinkOrNull, valueUrl))
 }
 
-fun MutableList<SummaryListRowViewModel>.addRowWithoutChangeLink(
+fun MutableList<SummaryListRowViewModel>.addRow(
     key: String,
     value: Any?,
     valueUrl: String? = null,
