@@ -58,7 +58,7 @@ abstract class Journey<T : StepId>(
     }
 
     fun populateModelAndGetViewName(
-        stepId: StepId,
+        stepId: T,
         model: Model,
         subPageNumber: Int?,
         submittedPageData: PageData? = null,
@@ -114,7 +114,7 @@ abstract class Journey<T : StepId>(
         if (currentStep.handleSubmitAndRedirect != null) {
             return "redirect:${currentStep.handleSubmitAndRedirect!!(newJourneyData, subPageNumber)}"
         }
-        val (newStepId: StepId?, newSubPageNumber: Int?) = currentStep.nextAction(newJourneyData, subPageNumber)
+        val (newStepId: T?, newSubPageNumber: Int?) = currentStep.nextAction(newJourneyData, subPageNumber)
         if (newStepId == null) {
             throw IllegalStateException("Cannot compute next step from step ${currentStep.id.urlPathSegment}")
         }
@@ -143,7 +143,7 @@ abstract class Journey<T : StepId>(
 
     protected open fun getUnreachableStepRedirect(journeyData: JourneyData) = initialStepId.urlPathSegment
 
-    protected fun <T : StepId> createSingleSectionWithSingleTaskFromSteps(
+    protected fun createSingleSectionWithSingleTaskFromSteps(
         initialStepId: T,
         steps: Set<Step<T>>,
     ): List<JourneySection<T>> = listOf(JourneySection.withOneTask(JourneyTask(initialStepId, steps)))
@@ -162,7 +162,7 @@ abstract class Journey<T : StepId>(
         )
     }
 
-    private fun getStep(stepId: StepId) =
+    private fun getStep(stepId: T) =
         steps.singleOrNull { step -> step.id == stepId }
             ?: throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,

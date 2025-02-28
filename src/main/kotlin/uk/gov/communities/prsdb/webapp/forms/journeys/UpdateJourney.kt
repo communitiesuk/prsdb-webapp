@@ -12,7 +12,7 @@ abstract class UpdateJourney<T : StepId>(
     validator: Validator,
     journeyDataService: JourneyDataService,
 ) : Journey<T>(journeyType, validator, journeyDataService) {
-    abstract val updateStepId: StepId
+    abstract val updateStepId: T
 
     protected val originalDataKey = "ORIGINAL_$journeyType.name"
 
