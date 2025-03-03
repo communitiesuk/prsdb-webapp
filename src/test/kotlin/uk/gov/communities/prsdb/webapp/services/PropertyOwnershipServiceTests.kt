@@ -36,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData
 import uk.gov.communities.prsdb.webapp.mockObjects.MockOneLoginUserData
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyViewModel
 
@@ -490,5 +491,40 @@ class PropertyOwnershipServiceTests {
 
         assertEquals(expectedPage1SearchResults, searchResults1.content)
         assertEquals(expectedPage2SearchResults, searchResults2.content)
+    }
+
+    @Test
+    fun `updatePropertyOwnership does not change the fields associated with the given update model's null values`() {
+        // Arrange
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1, ownershipType = OwnershipType.FREEHOLD)
+        val originalOwnershipType = propertyOwnership.ownershipType
+        val updateModel = PropertyOwnershipUpdateModel(ownershipType = null)
+
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+
+        // Act
+        propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel)
+
+        // Assert
+        assertEquals(originalOwnershipType, propertyOwnership.ownershipType)
+    }
+
+    @Test
+    fun `updatePropertyOwnership changes the fields associated with the given update model's non-null values`() {
+        // Arrange
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1, ownershipType = OwnershipType.FREEHOLD)
+        val updateModel = PropertyOwnershipUpdateModel(ownershipType = OwnershipType.LEASEHOLD)
+
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+
+        // Act
+        propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel)
+
+        // Assert
+        assertEquals(updateModel.ownershipType, propertyOwnership.ownershipType)
     }
 }

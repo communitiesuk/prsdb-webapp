@@ -73,6 +73,7 @@ class MockLandlordData {
         )
 
         fun createPropertyOwnership(
+            id: Long = 1,
             occupancyType: OccupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
             ownershipType: OwnershipType = OwnershipType.FREEHOLD,
             currentNumHouseholds: Int = 0,
@@ -85,6 +86,7 @@ class MockLandlordData {
         ): PropertyOwnership {
             val propertyOwnership =
                 PropertyOwnership(
+                    id = id,
                     occupancyType = occupancyType,
                     ownershipType = ownershipType,
                     currentNumHouseholds = currentNumHouseholds,
