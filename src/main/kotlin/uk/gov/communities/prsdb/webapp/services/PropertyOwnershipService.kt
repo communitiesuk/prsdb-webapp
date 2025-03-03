@@ -77,7 +77,7 @@ class PropertyOwnershipService(
         return propertyOwnership
     }
 
-    private fun getPropertyOwnership(propertyOwnershipId: Long): PropertyOwnership =
+    fun getPropertyOwnership(propertyOwnershipId: Long): PropertyOwnership =
         retrievePropertyOwnershipById(propertyOwnershipId)
             ?: throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
