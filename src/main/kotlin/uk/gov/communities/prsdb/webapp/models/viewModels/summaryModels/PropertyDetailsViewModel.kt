@@ -4,6 +4,7 @@ import kotlinx.datetime.toKotlinInstant
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
@@ -13,7 +14,7 @@ class PropertyDetailsViewModel(
     private val propertyOwnership: PropertyOwnership,
     private val withChangeLinks: Boolean = true,
     private val hideNullUprn: Boolean = true,
-    private val landlordDetailsUrl: String = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
+    landlordDetailsUrl: String = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
 ) {
     val address: String = propertyOwnership.property.address.singleLineAddress
 
@@ -66,8 +67,7 @@ class PropertyDetailsViewModel(
                 addRow(
                     "propertyDetails.propertyRecord.ownershipType",
                     MessageKeyConverter.convert(propertyOwnership.ownershipType),
-                    // TODO PRSD-689: Add update link
-                    "#",
+                    UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment,
                     withChangeLinks,
                 )
                 addRow(
@@ -80,25 +80,19 @@ class PropertyDetailsViewModel(
                         }
                     } ?: MessageKeyConverter.convert(LicensingType.NO_LICENSING),
                     // TODO PRSD-798: Add update link
-                    "#",
-                    withChangeLinks,
                 )
                 // TODO PRSD-799: Add update link
-                addRow("propertyDetails.propertyRecord.occupied", isTenantedKey, "#", withChangeLinks)
+                addRow("propertyDetails.propertyRecord.occupied", isTenantedKey)
                 if (propertyOwnership.currentNumTenants > 0) {
                     // TODO PRSD-800: Add update link
                     addRow(
                         "propertyDetails.propertyRecord.numberOfHouseholds",
                         propertyOwnership.currentNumHouseholds,
-                        "#",
-                        withChangeLinks,
                     )
                     // TODO PRSD-801: Add update link
                     addRow(
                         "propertyDetails.propertyRecord.numberOfPeople",
                         propertyOwnership.currentNumTenants,
-                        "#",
-                        withChangeLinks,
                     )
                 }
             }.toList()
