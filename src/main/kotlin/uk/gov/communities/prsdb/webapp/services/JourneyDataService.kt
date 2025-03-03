@@ -22,7 +22,14 @@ class JourneyDataService(
     private val objectMapper: ObjectMapper,
 ) {
     // This service can have class attributes as it is request scoped
-    final lateinit var journeyDataKey: String private set
+    private lateinit var journeyDataKey: String
+
+    fun getJourneyDataKey(): String =
+        if (this::journeyDataKey.isInitialized) {
+            journeyDataKey
+        } else {
+            throw PrsdbWebException("journeyDataKey has not been set")
+        }
 
     fun getJourneyDataFromSession(journeyDataKey: String): JourneyData {
         if (this::journeyDataKey.isInitialized && journeyDataKey != this.journeyDataKey) {
@@ -33,27 +40,19 @@ class JourneyDataService(
         return getJourneyDataFromSession()
     }
 
-    fun getJourneyDataFromSession(): JourneyData =
-        if (!this::journeyDataKey.isInitialized) {
-            throw PrsdbWebException("journeyDataKey has not been set")
-        } else {
-            objectToStringKeyedMap(session.getAttribute(journeyDataKey)) ?: mapOf()
-        }
+    fun getJourneyDataFromSession(): JourneyData {
+        val journeyDataKey = getJourneyDataKey()
+        return objectToStringKeyedMap(session.getAttribute(journeyDataKey)) ?: mapOf()
+    }
 
     fun setJourneyDataInSession(journeyData: JourneyData) {
-        if (!this::journeyDataKey.isInitialized) {
-            throw PrsdbWebException("journeyDataKey has not been set")
-        } else {
-            session.setAttribute(journeyDataKey, journeyData)
-        }
+        val journeyDataKey = getJourneyDataKey()
+        session.setAttribute(journeyDataKey, journeyData)
     }
 
     fun clearJourneyDataFromSession() {
-        if (!this::journeyDataKey.isInitialized) {
-            throw PrsdbWebException("journeyDataKey has not been set")
-        } else {
-            session.setAttribute(journeyDataKey, null)
-        }
+        val journeyDataKey = getJourneyDataKey()
+        session.setAttribute(journeyDataKey, null)
     }
 
     fun getContextId(): Long? = session.getAttribute("contextId") as? Long

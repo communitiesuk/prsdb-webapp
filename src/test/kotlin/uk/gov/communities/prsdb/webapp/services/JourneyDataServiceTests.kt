@@ -53,6 +53,26 @@ class JourneyDataServiceTests {
     }
 
     @Nested
+    inner class JourneyDataKeyTests {
+        @Test
+        fun `getJourneyDataKey returns journeyDataKey if it is initialized`() {
+            val journeyDataKey = "journeyDataKey"
+
+            journeyDataService.getJourneyDataFromSession(journeyDataKey)
+
+            val retrievedJourneyDataKey = journeyDataService.getJourneyDataKey()
+
+            assertEquals(journeyDataKey, retrievedJourneyDataKey)
+        }
+
+        @Test
+        fun `getJourneyDataKey throws an error if journeyDataKey is not initialized`() {
+            val exception = assertThrows<PrsdbWebException> { journeyDataService.getJourneyDataKey() }
+            assertContains(exception.message!!, "journeyDataKey has not been set")
+        }
+    }
+
+    @Nested
     inner class SessionJourneyDataTests {
         @Suppress("ktlint:standard:max-line-length")
         @Test
