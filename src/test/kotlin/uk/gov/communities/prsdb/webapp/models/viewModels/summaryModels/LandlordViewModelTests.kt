@@ -322,16 +322,20 @@ class LandlordViewModelTests {
         TODO("PRSD-746")
     }
 
-    @Test
-    fun `LandlordViewModel populates change links in rows that should have them for an unverified landlord`() {
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `LandlordViewModel populates change links in rows when landlord`(isVerified: Boolean) {
         // Arrange
-        val testLandlord = MockLandlordData.createLandlord(isVerified = false)
-        val changeablePersonalDetailKeys =
+        val testLandlord = MockLandlordData.createLandlord(isVerified = isVerified)
+        val changeableByAllLandlordsPersonalDetailKeys =
             listOf(
-                "landlordDetails.personalDetails.name",
                 "landlordDetails.personalDetails.emailAddress",
                 "landlordDetails.personalDetails.telephoneNumber",
                 "landlordDetails.personalDetails.contactAddress",
+            )
+        val changeableByUnverifiedLandlordsPersonalDetailKeys =
+            listOf(
+                "landlordDetails.personalDetails.name",
                 "landlordDetails.personalDetails.dateOfBirth",
             )
 
@@ -339,39 +343,28 @@ class LandlordViewModelTests {
         val viewModel = LandlordViewModel(testLandlord)
 
         // Assert
-        for (i in viewModel.personalDetails.filter { detail -> detail.fieldHeading in changeablePersonalDetailKeys }) {
+        for (i in viewModel.personalDetails.filter { detail -> detail.fieldHeading in changeableByAllLandlordsPersonalDetailKeys }) {
             assertNotNull(i.changeUrl)
         }
 
-        for (i in viewModel.personalDetails.filter { detail -> detail.fieldHeading !in changeablePersonalDetailKeys }) {
-            assertNull(i.changeUrl)
-        }
-
-        // TODO PRSD-746 change assertion for consentInformation once links have been added
-        viewModel.consentInformation.forEach { consentInformation -> assertNull(consentInformation.changeUrl) }
-    }
-
-    @Test
-    fun `LandlordViewModel populates change links in rows that should have them for a verified landlord`() {
-        // Arrange
-        val testLandlord = MockLandlordData.createLandlord(isVerified = true)
-        val changeablePersonalDetailKeys =
-            listOf(
-                "landlordDetails.personalDetails.emailAddress",
-                "landlordDetails.personalDetails.telephoneNumber",
-                "landlordDetails.personalDetails.contactAddress",
-            )
-
-        // Act
-        val viewModel = LandlordViewModel(testLandlord)
-
-        // Assert
-        for (i in viewModel.personalDetails.filter { detail -> detail.fieldHeading in changeablePersonalDetailKeys }) {
-            assertNotNull(i.changeUrl)
-        }
-
-        for (i in viewModel.personalDetails.filter { detail -> detail.fieldHeading !in changeablePersonalDetailKeys }) {
-            assertNull(i.changeUrl)
+        if (isVerified) {
+            for (i in viewModel.personalDetails.filter { detail ->
+                detail.fieldHeading !in changeableByAllLandlordsPersonalDetailKeys
+            }) {
+                assertNull(i.changeUrl)
+            }
+        } else {
+            for (i in viewModel.personalDetails.filter { detail ->
+                detail.fieldHeading in changeableByUnverifiedLandlordsPersonalDetailKeys
+            }) {
+                assertNotNull(i.changeUrl)
+            }
+            for (i in viewModel.personalDetails.filter { detail ->
+                detail.fieldHeading !in
+                    changeableByAllLandlordsPersonalDetailKeys + changeableByUnverifiedLandlordsPersonalDetailKeys
+            }) {
+                assertNull(i.changeUrl)
+            }
         }
 
         // TODO PRSD-746 change assertion for consentInformation once links have been added

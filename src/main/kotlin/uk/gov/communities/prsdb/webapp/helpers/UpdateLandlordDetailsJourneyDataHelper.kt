@@ -11,7 +11,7 @@ import java.time.LocalDate
 class UpdateLandlordDetailsJourneyDataHelper : JourneyDataHelper() {
     companion object {
         fun getIsIdentityVerified(journeyData: JourneyData): Boolean =
-            getValueByKey(journeyData, UpdateLandlordDetailsJourney.IS_IDENTITY_VERIFIED_KEY).toBoolean()
+            getStringValueByKey(journeyData, UpdateLandlordDetailsJourney.IS_IDENTITY_VERIFIED_KEY).toBoolean()
 
         fun getEmailUpdateIfPresent(journeyData: JourneyData) =
             getFieldStringValue(

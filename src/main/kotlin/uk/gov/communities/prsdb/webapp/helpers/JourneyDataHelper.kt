@@ -82,7 +82,7 @@ open class JourneyDataHelper {
             )
         }
 
-        fun getValueByKey(
+        fun getStringValueByKey(
             journeyData: JourneyData,
             key: String,
         ): String? = journeyData[key]?.toString()

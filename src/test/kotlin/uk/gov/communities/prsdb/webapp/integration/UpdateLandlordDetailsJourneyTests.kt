@@ -12,6 +12,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.helpers.getFormattedUkPhoneNumber
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
@@ -182,6 +183,30 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
             assertThat(landlordDetailsPage.personalDetailsSummaryList.emailRow.value).containsText(landlordEmail)
             assertThat(landlordDetailsPage.personalDetailsSummaryList.phoneNumberRow.value).containsText(landlordPhoneNumber)
             assertThat(landlordDetailsPage.personalDetailsSummaryList.addressRow.value).containsText(selectedAddress)
+        }
+
+        @Test
+        fun `A verified Landlord can not view the date of birth page on the Update Details Journey`(page: Page) {
+            // Go to landlord details update page (initializes journey data)
+            navigator.goToUpdateLandlordDetailsPage()
+
+            // Go to update date of birth page
+            navigator.navigate("${LandlordDetailsController.UPDATE_ROUTE}/date-of-birth")
+
+            // Check redirection to landlord details update page
+            assertPageIs(page, LandlordUpdateDetailsPage::class)
+        }
+
+        @Test
+        fun `A verified Landlord can not view the name page on the Update Details Journey`(page: Page) {
+            // Go to landlord details update page (initializes journey data)
+            navigator.goToUpdateLandlordDetailsPage()
+
+            // Go to update name page
+            navigator.navigate("${LandlordDetailsController.UPDATE_ROUTE}/name")
+
+            // Check redirection to landlord details update page
+            assertPageIs(page, LandlordUpdateDetailsPage::class)
         }
     }
 

@@ -110,13 +110,7 @@ class UpdateLandlordDetailsJourney(
                         ),
                 ),
             handleSubmitAndRedirect = { _, _ -> UpdateDetailsStepId.UpdateDetails.urlPathSegment },
-            nextAction = { journeyData, _ ->
-                if (UpdateLandlordDetailsJourneyDataHelper.getIsIdentityVerified(journeyData)) {
-                    Pair(UpdateDetailsStepId.UpdatePhoneNumber, null)
-                } else {
-                    Pair(UpdateDetailsStepId.UpdateDateOfBirth, null)
-                }
-            },
+            nextAction = { _, _ -> Pair(UpdateDetailsStepId.UpdateDateOfBirth, null) },
             saveAfterSubmit = false,
         )
 

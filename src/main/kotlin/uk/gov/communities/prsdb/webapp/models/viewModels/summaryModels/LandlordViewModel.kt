@@ -82,7 +82,7 @@ class LandlordViewModel(
                 addRow(
                     "landlordDetails.personalDetails.englandOrWalesResident",
                     isEnglandOrWalesResident,
-                    // TODO: PRSD-688 toggleChangeLink("$UPDATE_ROUTE/country-of-residence"),
+                    // TODO: PRSD-688 "$UPDATE_ROUTE/country-of-residence",
                     null,
                     withChangeLinks,
                 )
@@ -97,21 +97,21 @@ class LandlordViewModel(
                     addRow(
                         "landlordDetails.personalDetails.country",
                         landlord.countryOfResidence,
-                        // TODO: PRSD-688 toggleChangeLink("$UPDATE_ROUTE/country-of-residence"),
+                        // TODO: PRSD-688 "$UPDATE_ROUTE/country-of-residence",
                         null,
                         withChangeLinks,
                     )
                     addRow(
                         "landlordDetails.personalDetails.nonEnglandOrWalesAddress",
                         landlord.nonEnglandOrWalesAddress,
-                        // TODO: PRSD-688 toggleChangeLink("$UPDATE_ROUTE/address"),
+                        // TODO: PRSD-688 "$UPDATE_ROUTE/address",
                         null,
                         withChangeLinks,
                     )
                     addRow(
                         "landlordDetails.personalDetails.englandOrWalesAddress",
                         landlord.address.singleLineAddress,
-                        // TODO: PRSD-688 toggleChangeLink("$UPDATE_ROUTE/contact-address"),
+                        // TODO: PRSD-688 "$UPDATE_ROUTE/contact-address",
                         null,
                         withChangeLinks,
                     )

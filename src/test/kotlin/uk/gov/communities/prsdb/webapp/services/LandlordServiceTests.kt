@@ -389,14 +389,13 @@ class LandlordServiceTests {
                 dateOfBirth = LocalDate.of(1991, 1, 1),
             )
         val newAddress = createAddress("new address")
-        val newDateOfBirth = LocalDate.of(1992, 2, 2)
         val updateModel =
             LandlordUpdateModel(
                 "newEmail",
                 "newName",
                 "new phone number",
                 AddressDataModel.fromAddress(newAddress),
-                newDateOfBirth,
+                LocalDate.of(1992, 2, 2),
             )
 
         whenever(mockAddressService.findOrCreateAddress(updateModel.address!!)).thenReturn(newAddress)
