@@ -15,12 +15,15 @@ abstract class UpdateJourney<T : StepId>(
 ) : Journey<T>(journeyType, validator, journeyDataService) {
     abstract val updateStepId: T
 
-    private val originalDataKey = "ORIGINAL_${journeyType.name}"
+    protected val originalDataKey = "ORIGINAL_${journeyType.name}"
 
     protected abstract fun createOriginalJourneyData(updateEntityId: String): JourneyData
 
-    protected open fun initialiseJourneyDataIfNotInitialised(updateEntityId: String) {
-        val journeyData = journeyDataService.getJourneyDataFromSession(defaultJourneyDataKey)
+    protected open fun initialiseJourneyDataIfNotInitialised(
+        updateEntityId: String,
+        journeyDataKey: String? = null,
+    ) {
+        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey ?: defaultJourneyDataKey)
         if (!isJourneyDataInitialised(journeyData)) {
             val newJourneyData = journeyData + (originalDataKey to createOriginalJourneyData(updateEntityId))
             journeyDataService.setJourneyDataInSession(newJourneyData)
@@ -34,7 +37,7 @@ abstract class UpdateJourney<T : StepId>(
         submittedPageData: PageData? = null,
         journeyDataKey: String? = null,
     ): String {
-        initialiseJourneyDataIfNotInitialised(updateEntityId)
+        initialiseJourneyDataIfNotInitialised(updateEntityId, journeyDataKey)
         return super.populateModelAndGetViewName(updateStepId, model, subPageNumber, submittedPageData, journeyDataKey)
     }
 
@@ -61,5 +64,10 @@ abstract class UpdateJourney<T : StepId>(
         return ReachableStepDetailsIterator(updatedData, steps, initialStepId, validator)
     }
 
-    protected fun isJourneyDataInitialised(journeyData: JourneyData): Boolean = journeyData.containsKey(originalDataKey)
+    private fun isJourneyDataInitialised(journeyData: JourneyData): Boolean = journeyData.containsKey(originalDataKey)
+
+    protected fun isJourneyDataInitialised(journeyDataKey: String? = null): Boolean {
+        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey ?: defaultJourneyDataKey)
+        return isJourneyDataInitialised(journeyData)
+    }
 }

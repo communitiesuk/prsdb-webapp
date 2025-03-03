@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
@@ -13,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
+import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.UpdateLandlordDetailsJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -260,6 +263,10 @@ class UpdateLandlordDetailsJourney(
                     mapOf(
                         "address" to landlord.address.getSelectedAddress(),
                     ),
+                ORIGINAL_ADDRESS_DATA_KEY to
+                    mapOf(
+                        "address" to Json.encodeToString(AddressDataModel.fromAddress(landlord.address)),
+                    ),
             )
 
         if (landlord.address.uprn == null) {
@@ -274,14 +281,14 @@ class UpdateLandlordDetailsJourney(
         return originalLandlordData
     }
 
-    override fun initialiseJourneyDataIfNotInitialised(updateEntityId: String) {
-        val journeyData = journeyDataService.getJourneyDataFromSession(defaultJourneyDataKey)
-        if (!isJourneyDataInitialised(journeyData)) {
-            val landlord = landlordService.retrieveLandlordByBaseUserId(updateEntityId)!!
-            addressDataService.setAddressData(listOf(AddressDataModel.fromAddress(landlord.address)))
+    override fun initialiseJourneyDataIfNotInitialised(
+        updateEntityId: String,
+        journeyDataKey: String?,
+    ) {
+        if (!isJourneyDataInitialised(journeyDataKey)) {
+            super.initialiseJourneyDataIfNotInitialised(updateEntityId, journeyDataKey)
+            addressDataService.setAddressData(getOriginalAddressData())
         }
-
-        super.initialiseJourneyDataIfNotInitialised(updateEntityId)
     }
 
     private fun Address.getHouseNameOrNumber(): String = buildingName ?: buildingNumber ?: singleLineAddress
@@ -291,4 +298,15 @@ class UpdateLandlordDetailsJourney(
     private fun Address.getSelectedAddress(): String = if (uprn == null) MANUAL_ADDRESS_CHOSEN else singleLineAddress
 
     private fun Address.getTownOrCity(): String = townName ?: singleLineAddress
+
+    private fun getOriginalAddressData(): List<AddressDataModel> {
+        val journeyData = journeyDataService.getJourneyDataFromSession()
+        val originalJourneyData = JourneyDataHelper.getPageData(journeyData, originalDataKey)!!
+        val originalAddressData = JourneyDataHelper.getPageData(originalJourneyData, ORIGINAL_ADDRESS_DATA_KEY)!!
+        return listOf(Json.decodeFromString(originalAddressData["address"] as String))
+    }
+
+    companion object {
+        private const val ORIGINAL_ADDRESS_DATA_KEY = "original-address-data"
+    }
 }
