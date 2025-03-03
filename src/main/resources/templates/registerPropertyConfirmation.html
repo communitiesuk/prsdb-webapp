@@ -23,8 +23,7 @@
                 registerProperty.confirmation.whatHappensNext.paragraph.two
             </p>
         </section>
-        <!-- TODO PRSD-670: Replace with link to dashboard -->
-        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/}, #{common.confirmationPage.goToDashboard})}">
+        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${landlordDashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
             common.confirmationPage.goToDashboard
         </a>
     </div>

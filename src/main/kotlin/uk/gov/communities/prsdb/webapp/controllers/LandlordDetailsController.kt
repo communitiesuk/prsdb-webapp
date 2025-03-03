@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.UpdateLandlordDetailsJourney
@@ -79,9 +80,7 @@ class LandlordDetailsController(
         val registeredPropertiesList = propertyOwnershipService.getRegisteredPropertiesForLandlordUser(principal.name)
 
         model.addAttribute("registeredPropertiesList", registeredPropertiesList)
-
-        // TODO PRSD-670: Replace with link to dashboard
-        model.addAttribute("backUrl", "/")
+        model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
     }
 
     @PreAuthorize("hasRole('LANDLORD')")
