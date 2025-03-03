@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
@@ -20,9 +21,11 @@ import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import java.security.Principal
 import java.util.Optional
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
@@ -47,6 +50,91 @@ class JourneyDataServiceTests {
                 mockOneLoginUserRepository,
                 ObjectMapper(),
             )
+    }
+
+    @Nested
+    inner class SessionJourneyDataTests {
+        @Suppress("ktlint:standard:max-line-length")
+        @Test
+        fun `getJourneyDataFromSession sets the given journeyDataKey and returns the journey data from session if journeyDataKey is not initialized`() {
+            val journeyDataKey = "journeyDataKey"
+            val journeyData = mapOf("key" to "value")
+
+            whenever(mockHttpSession.getAttribute(journeyDataKey)).thenReturn(journeyData)
+
+            val retrievedJourneyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
+
+            verify(mockHttpSession).getAttribute(journeyDataKey)
+            assertEquals(journeyData, retrievedJourneyData)
+        }
+
+        @Test
+        fun `getJourneyDataFromSession throws an error if the given journeyDataKey does not match the stored one`() {
+            val journeyDataKey = "journeyDataKey"
+            val differentJourneyDataKey = "differentJourneyDataKey"
+
+            whenever(mockHttpSession.getAttribute(journeyDataKey)).thenReturn(emptyMap<String, Any?>())
+            journeyDataService.getJourneyDataFromSession(journeyDataKey)
+
+            val exception =
+                assertThrows<PrsdbWebException> { journeyDataService.getJourneyDataFromSession(differentJourneyDataKey) }
+            assertContains(exception.message!!, "journeyDataKey has already been set to $journeyDataKey")
+        }
+
+        @Test
+        fun `getJourneyDataFromSession returns the journey data from session if journeyDataKey is initialized`() {
+            val journeyDataKey = "journeyDataKey"
+            val journeyData = mapOf("key" to "value")
+
+            whenever(mockHttpSession.getAttribute(journeyDataKey)).thenReturn(journeyData)
+            journeyDataService.getJourneyDataFromSession(journeyDataKey)
+
+            val retrievedJourneyData = journeyDataService.getJourneyDataFromSession()
+
+            verify(mockHttpSession, times(2)).getAttribute(journeyDataKey)
+            assertEquals(journeyData, retrievedJourneyData)
+        }
+
+        @Test
+        fun `getJourneyDataFromSession throws an error if the journeyDataKey is not initialized`() {
+            val exception = assertThrows<PrsdbWebException> { journeyDataService.getJourneyDataFromSession() }
+            assertContains(exception.message!!, "journeyDataKey has not been set")
+        }
+
+        @Test
+        fun `setJourneyDataFromSession sets the given journey data in session if journeyDataKey is initialized`() {
+            val journeyDataKey = "journeyDataKey"
+            val journeyData = mapOf("key" to "value")
+
+            journeyDataService.getJourneyDataFromSession(journeyDataKey)
+
+            journeyDataService.setJourneyDataInSession(journeyData)
+
+            verify(mockHttpSession).setAttribute(journeyDataKey, journeyData)
+        }
+
+        @Test
+        fun `setJourneyDataFromSession throws an error if the journeyDataKey is not initialized`() {
+            val exception = assertThrows<PrsdbWebException> { journeyDataService.setJourneyDataInSession(emptyMap()) }
+            assertContains(exception.message!!, "journeyDataKey has not been set")
+        }
+
+        @Test
+        fun `clearJourneyDataFromSession clears the journey data from session if journeyDataKey is initialized`() {
+            val journeyDataKey = "journeyDataKey"
+
+            journeyDataService.getJourneyDataFromSession(journeyDataKey)
+
+            journeyDataService.clearJourneyDataFromSession()
+
+            verify(mockHttpSession).setAttribute(journeyDataKey, null)
+        }
+
+        @Test
+        fun `clearJourneyDataFromSession throws an error if the journeyDataKey is not initialized`() {
+            val exception = assertThrows<PrsdbWebException> { journeyDataService.clearJourneyDataFromSession() }
+            assertContains(exception.message!!, "journeyDataKey has not been set")
+        }
     }
 
     @Nested
