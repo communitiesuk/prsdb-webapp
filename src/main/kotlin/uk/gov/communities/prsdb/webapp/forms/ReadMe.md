@@ -7,7 +7,7 @@ The entire multi-page form is represented by the `Journey` class, and each point
 
 ## Steps
 A journey is made up of a collection of steps, each of which represents a single transaction where we ask the user for
-some information and the user provides it. Each has a unique ID, which is an emum value where each journey has its own 
+some information and the user provides it. Each has a unique ID, which is an enum value where each journey has its own 
 enum. The step is also responsible for the journey flow via the `nextAction` and `handleSubmitAndRedirect` functions. 
 
 Most of the flow is managed by the former, but the decision to save the journey to the database is determined by the 
@@ -17,7 +17,8 @@ Most of the journeys in the service are not that simple and have branching paths
 In this case the `nextAction` function looks at the data the user has submitted so far to determine which step should be
 visited next. 
 The `handleSubmitAndRedirect` function can also be used if the user should be "jumped" to another point in the journey
-when completing a `Step`.
+when completing a `Step`. The main use of this currently is to skip steps that already have valid data (in update 
+journeys, see below). 
 
 Each step also has a `Page` class which represents the step's form page. It is responsible for providing the Thymeleaf 
 template name, the content attributes for the template and for validating the data submitted on that page. 
@@ -27,15 +28,15 @@ The `Step` by default delegates all data validation to the `Page`, but custom va
 Some steps are repeatable an indeterminate number of times, for example if you need to specify all interested parties
 or list all of your addresses for the past 5 years. In these cases `subpage` can be specified while using those steps.
 This is just an integer submitted as a URL parameter that is tracked as part of the `StepDetails` and used to record the
-step data as separate. All the above logic should handle subpages for steps to which it applies, and can specify a 
-specific subpage as the next step or redirect destination.
+step data separately from other submission of that step. All the above logic should handle subpages for steps to which 
+it applies, and can specify a specific subpage as the next step or redirect destination.
 
 At time of writing there are no uses of this in the service, so it has not been thoroughly tested.
 
 ### Sections and tasks
 Each step belongs to a task. A task is a logical unit of data that may take multiple steps to submit. For example, a
 task could be to submit your licensing information which is made up of a step for selecting your licence type then a
-step for submitting your licence number. Currently tasks are only used by the task-list page for the relevant journeys.
+step for submitting your licence number. Currently, tasks are only used by the task-list page for the relevant journeys.
 
 Each task belongs to a section. A section is related set of tasks, for example the LandlordRegistrationJourney has three
 sections: "privacy notice", "register details", "check and submit". These sections are used both on the task-list page
