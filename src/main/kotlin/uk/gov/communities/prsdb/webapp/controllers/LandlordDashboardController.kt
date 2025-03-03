@@ -38,7 +38,7 @@ class LandlordDashboardController(
         model.addAttribute("lrn", RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber))
 
         model.addAttribute("registerPropertyUrl", "/$REGISTER_PROPERTY_JOURNEY_URL")
-        model.addAttribute("viewPropertiesUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT#/$REGISTERED_PROPERTIES_PATH_SEGMENT")
+        model.addAttribute("viewPropertiesUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT#$REGISTERED_PROPERTIES_PATH_SEGMENT")
         model.addAttribute("viewLandlordRecordUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT")
 
         model.addAttribute("updatesToPilotUrl", "#")
