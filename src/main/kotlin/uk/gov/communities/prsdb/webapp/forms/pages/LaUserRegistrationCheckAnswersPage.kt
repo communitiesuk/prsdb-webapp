@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
@@ -47,12 +46,12 @@ class LaUserRegistrationCheckAnswersPage(
                 SummaryListRowViewModel(
                     "registerLaUser.checkAnswers.rowHeading.name",
                     LaUserRegistrationJourneyDataHelper.getName(journeyData),
-                    "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Name.urlPathSegment}",
+                    RegisterLaUserStepId.Name.urlPathSegment,
                 ),
                 SummaryListRowViewModel(
                     "registerLaUser.checkAnswers.rowHeading.email",
                     LaUserRegistrationJourneyDataHelper.getEmail(journeyData),
-                    "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/${RegisterLaUserStepId.Email.urlPathSegment}",
+                    RegisterLaUserStepId.Email.urlPathSegment,
                 ),
             ),
         )

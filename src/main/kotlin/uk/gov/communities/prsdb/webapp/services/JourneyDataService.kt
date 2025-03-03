@@ -2,31 +2,58 @@ package uk.gov.communities.prsdb.webapp.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.HttpSession
-import org.springframework.context.annotation.Scope
-import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Service
-import org.springframework.web.context.WebApplicationContext
+import org.springframework.web.context.annotation.RequestScope
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
 import java.security.Principal
 
 @Service
-@Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+@RequestScope
 class JourneyDataService(
     private val session: HttpSession,
     private val formContextRepository: FormContextRepository,
     private val oneLoginUserRepository: OneLoginUserRepository,
     private val objectMapper: ObjectMapper,
 ) {
-    fun getJourneyDataFromSession(): JourneyData = objectToStringKeyedMap(session.getAttribute("journeyData")) ?: mapOf()
+    // This service can have class attributes as it is request scoped
+    final lateinit var journeyDataKey: String private set
 
-    fun setJourneyData(journeyData: PageData) {
-        session.setAttribute("journeyData", journeyData)
+    fun getJourneyDataFromSession(journeyDataKey: String): JourneyData {
+        if (this::journeyDataKey.isInitialized && journeyDataKey != this.journeyDataKey) {
+            throw PrsdbWebException("journeyDataKey has already been set to ${this.journeyDataKey}")
+        } else {
+            this.journeyDataKey = journeyDataKey
+        }
+        return getJourneyDataFromSession()
+    }
+
+    fun getJourneyDataFromSession(): JourneyData =
+        if (!this::journeyDataKey.isInitialized) {
+            throw PrsdbWebException("journeyDataKey has not been set")
+        } else {
+            objectToStringKeyedMap(session.getAttribute(journeyDataKey)) ?: mapOf()
+        }
+
+    fun setJourneyDataInSession(journeyData: JourneyData) {
+        if (!this::journeyDataKey.isInitialized) {
+            throw PrsdbWebException("journeyDataKey has not been set")
+        } else {
+            session.setAttribute(journeyDataKey, journeyData)
+        }
+    }
+
+    fun clearJourneyDataFromSession() {
+        if (!this::journeyDataKey.isInitialized) {
+            throw PrsdbWebException("journeyDataKey has not been set")
+        } else {
+            session.setAttribute(journeyDataKey, null)
+        }
     }
 
     fun getContextId(): Long? = session.getAttribute("contextId") as? Long
@@ -75,7 +102,7 @@ class JourneyDataService(
                 .orElseThrow { IllegalStateException("FormContext with ID $contextId not found") }!!
         val loadedJourneyData =
             objectToStringKeyedMap(objectMapper.readValue(formContext.context, Any::class.java)) ?: mapOf()
-        setJourneyData(loadedJourneyData)
+        setJourneyDataInSession(loadedJourneyData)
         setContextId(contextId)
     }
 
@@ -85,9 +112,5 @@ class JourneyDataService(
 
         session.removeAttribute("contextId")
         clearJourneyDataFromSession()
-    }
-
-    fun clearJourneyDataFromSession() {
-        session.setAttribute("journeyData", null)
     }
 }

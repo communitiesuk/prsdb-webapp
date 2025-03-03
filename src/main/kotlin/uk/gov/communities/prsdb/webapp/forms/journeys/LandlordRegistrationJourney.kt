@@ -68,6 +68,8 @@ class LandlordRegistrationJourney(
             ),
         )
 
+    override val journeyPathSegment = REGISTER_LANDLORD_JOURNEY_URL
+
     private fun privacyNoticeTasks(): List<JourneyTask<LandlordRegistrationStepId>> = emptyList()
 
     private fun registerDetailsTasks(): List<JourneyTask<LandlordRegistrationStepId>> =
@@ -86,7 +88,7 @@ class LandlordRegistrationJourney(
         )
 
     private fun identityTask() =
-        JourneyTask<LandlordRegistrationStepId>(
+        JourneyTask(
             LandlordRegistrationStepId.VerifyIdentity,
             setOf(
                 verifyIdentityStep(),
@@ -138,7 +140,7 @@ class LandlordRegistrationJourney(
                             "fieldSetHint" to "forms.name.fieldSetHint",
                             "label" to "forms.name.label",
                             "submitButtonText" to "forms.buttons.continue",
-                            "backUrl" to "/${JourneyType.LANDLORD_REGISTRATION.urlPathSegment}",
+                            "backUrl" to "/$journeyPathSegment",
                         ),
                     shouldDisplaySectionHeader = true,
                 ),

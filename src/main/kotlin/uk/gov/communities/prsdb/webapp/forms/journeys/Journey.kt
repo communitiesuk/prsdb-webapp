@@ -6,7 +6,6 @@ import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
-import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
@@ -17,41 +16,59 @@ import java.security.Principal
 import java.util.Optional
 
 abstract class Journey<T : StepId>(
-    private val journeyType: JourneyType,
+    protected val journeyType: JourneyType,
     protected val validator: Validator,
     protected val journeyDataService: JourneyDataService,
 ) : Iterable<StepDetails<T>> {
     abstract val initialStepId: T
-    val steps: Set<Step<T>>
-        get() = sections.flatMap { section -> section.tasks }.flatMap { task -> task.steps }.toSet()
 
     abstract val sections: List<JourneySection<T>>
 
-    open fun getUnreachableStepRedirect(journeyData: JourneyData) = "/${journeyType.urlPathSegment}/${initialStepId.urlPathSegment}"
+    protected val steps: Set<Step<T>>
+        get() = sections.flatMap { section -> section.tasks }.flatMap { task -> task.steps }.toSet()
+
+    protected abstract val journeyPathSegment: String
+
+    protected val defaultJourneyDataKey = journeyType.name
 
     fun getStepId(stepName: String): T {
         val step = steps.singleOrNull { step -> step.id.urlPathSegment == stepName }
         if (step == null) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "Step $stepName not valid for journey ${journeyType.urlPathSegment}",
+                "Step $stepName not valid for journey ${journeyType.name}",
             )
         }
         return step.id
     }
 
+    fun loadJourneyDataIfNotLoaded(
+        principalName: String,
+        journeyDataKey: String? = null,
+    ) {
+        val data = journeyDataService.getJourneyDataFromSession(journeyDataKey ?: defaultJourneyDataKey)
+        if (data.isEmpty()) {
+            /* TODO PRSD-589 Currently this looks the context up from the database,
+                takes the id, then passes the id to another method which retrieves it
+                from the database. When this is reworked, we should just pass the whole
+                context to an overload of journeyDataService.loadJourneyDataIntoSession().*/
+            val contextId = journeyDataService.getContextId(principalName, journeyType)
+            if (contextId != null) {
+                journeyDataService.loadJourneyDataIntoSession(contextId)
+            }
+        }
+    }
+
     fun populateModelAndGetViewName(
-        stepId: StepId,
+        stepId: T,
         model: Model,
         subPageNumber: Int?,
         submittedPageData: PageData? = null,
+        journeyDataKey: String? = null,
     ): String {
-        val journeyData: JourneyData = journeyDataService.getJourneyDataFromSession()
-        val requestedStep =
-            steps.singleOrNull { step -> step.id == stepId } ?: throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Step ${stepId.urlPathSegment} not valid for journey ${journeyType.urlPathSegment}",
-            )
+        val journeyData: JourneyData =
+            journeyDataService.getJourneyDataFromSession(journeyDataKey ?: defaultJourneyDataKey)
+        val requestedStep = getStep(stepId)
         if (!isStepReachable(requestedStep, subPageNumber)) {
             return "redirect:${getUnreachableStepRedirect(journeyData)}"
         }
@@ -72,7 +89,73 @@ abstract class Journey<T : StepId>(
         )
     }
 
-    fun getSectionHeaderInfo(step: Step<T>): SectionHeaderViewModel? {
+    fun updateJourneyDataAndGetViewNameOrRedirect(
+        stepId: T,
+        pageData: PageData,
+        model: Model,
+        subPageNumber: Int?,
+        principal: Principal,
+        journeyDataKey: String? = null,
+    ): String {
+        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey ?: defaultJourneyDataKey)
+
+        val currentStep = getStep(stepId)
+        if (!currentStep.isSatisfied(validator, pageData)) {
+            return populateModelAndGetViewName(
+                stepId,
+                model,
+                subPageNumber,
+                pageData,
+                journeyDataKey ?: defaultJourneyDataKey,
+            )
+        }
+
+        val newJourneyData = currentStep.updatedJourneyData(journeyData, pageData, subPageNumber)
+        journeyDataService.setJourneyDataInSession(newJourneyData)
+
+        if (currentStep.saveAfterSubmit) {
+            val journeyDataContextId = journeyDataService.getContextId()
+            journeyDataService.saveJourneyData(journeyDataContextId, newJourneyData, journeyType, principal)
+        }
+
+        if (currentStep.handleSubmitAndRedirect != null) {
+            return "redirect:${currentStep.handleSubmitAndRedirect!!(newJourneyData, subPageNumber)}"
+        }
+        val (newStepId: T?, newSubPageNumber: Int?) = currentStep.nextAction(newJourneyData, subPageNumber)
+        if (newStepId == null) {
+            throw IllegalStateException("Cannot compute next step from step ${currentStep.id.urlPathSegment}")
+        }
+        val redirectUrl =
+            UriComponentsBuilder
+                .newInstance()
+                .path("/$journeyPathSegment/${newStepId.urlPathSegment}")
+                .queryParamIfPresent("subpage", Optional.ofNullable(newSubPageNumber))
+                .build(true)
+                .toUriString()
+        return "redirect:$redirectUrl"
+    }
+
+    override fun iterator(): Iterator<StepDetails<T>> =
+        ReachableStepDetailsIterator(journeyDataService.getJourneyDataFromSession(), steps, initialStepId, validator)
+
+    protected fun isStepReachable(
+        targetStep: Step<T>,
+        targetSubPageNumber: Int? = null,
+    ): Boolean {
+        // Initial page is always reachable
+        if (targetStep.id == initialStepId) return true
+        // All other steps are reachable if and only if we can find their previous step by traversal
+        return getPrevStep(targetStep, targetSubPageNumber) != null
+    }
+
+    protected open fun getUnreachableStepRedirect(journeyData: JourneyData) = initialStepId.urlPathSegment
+
+    protected fun createSingleSectionWithSingleTaskFromSteps(
+        initialStepId: T,
+        steps: Set<Step<T>>,
+    ): List<JourneySection<T>> = listOf(JourneySection.withOneTask(JourneyTask(initialStepId, steps)))
+
+    private fun getSectionHeaderInfo(step: Step<T>): SectionHeaderViewModel? {
         val sectionContainingStep = sections.single { it.isStepInSection(step.id) }
         if (sectionContainingStep.headingKey == null) {
             return null
@@ -84,56 +167,12 @@ abstract class Journey<T : StepId>(
         )
     }
 
-    fun updateJourneyDataAndGetViewNameOrRedirect(
-        stepId: T,
-        pageData: PageData,
-        model: Model,
-        subPageNumber: Int?,
-        principal: Principal,
-    ): String {
-        val currentStep =
-            steps.singleOrNull { step -> step.id == stepId } ?: throw ResponseStatusException(
+    private fun getStep(stepId: T) =
+        steps.singleOrNull { step -> step.id == stepId }
+            ?: throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "Step ${stepId.urlPathSegment} not valid for journey ${journeyType.urlPathSegment}",
+                "Step $stepId not valid for journey ${journeyType.name}",
             )
-        if (!currentStep.isSatisfied(validator, pageData)) {
-            return populateModelAndGetViewName(stepId, model, subPageNumber, pageData)
-        }
-        val journeyData = journeyDataService.getJourneyDataFromSession()
-        val newJourneyData = currentStep.updatedJourneyData(journeyData, pageData, subPageNumber)
-        journeyDataService.setJourneyData(newJourneyData)
-
-        if (currentStep.saveAfterSubmit) {
-            val journeyDataContextId = journeyDataService.getContextId()
-            journeyDataService.saveJourneyData(journeyDataContextId, newJourneyData, journeyType, principal)
-        }
-
-        if (currentStep.handleSubmitAndRedirect != null) {
-            return "redirect:${currentStep.handleSubmitAndRedirect!!(newJourneyData, subPageNumber)}"
-        }
-        val (newStepId: StepId?, newSubPageNumber: Int?) = currentStep.nextAction(newJourneyData, subPageNumber)
-        if (newStepId == null) {
-            throw IllegalStateException("Cannot compute next step from step ${currentStep.id.urlPathSegment}")
-        }
-        val redirectUrl =
-            UriComponentsBuilder
-                .newInstance()
-                .path("/${journeyType.urlPathSegment}/${newStepId.urlPathSegment}")
-                .queryParamIfPresent("subpage", Optional.ofNullable(newSubPageNumber))
-                .build(true)
-                .toUriString()
-        return "redirect:$redirectUrl"
-    }
-
-    fun isStepReachable(
-        targetStep: Step<T>,
-        targetSubPageNumber: Int? = null,
-    ): Boolean {
-        // Initial page is always reachable
-        if (targetStep.id == initialStepId) return true
-        // All other steps are reachable if and only if we can find their previous step by traversal
-        return getPrevStep(targetStep, targetSubPageNumber) != null
-    }
 
     private fun getPrevStep(
         targetStep: Step<T>,
@@ -156,20 +195,4 @@ abstract class Journey<T : StepId>(
             .build(true)
             .toUriString()
     }
-
-    fun getTaskStatus(
-        task: JourneyTask<T>,
-        journeyData: JourneyData,
-    ): TaskStatus {
-        val canTaskBeStarted = isStepReachable(task.steps.single { it.id == task.startingStepId })
-        return task.getTaskStatus(journeyData, validator, canTaskBeStarted)
-    }
-
-    protected fun <T : StepId> createSingleSectionWithSingleTaskFromSteps(
-        initialStepId: T,
-        steps: Set<Step<T>>,
-    ): List<JourneySection<T>> = listOf(JourneySection.withOneTask(JourneyTask(initialStepId, steps)))
-
-    override fun iterator(): Iterator<StepDetails<T>> =
-        ReachableStepDetailsIterator(journeyDataService.getJourneyDataFromSession(), steps, initialStepId, validator)
 }

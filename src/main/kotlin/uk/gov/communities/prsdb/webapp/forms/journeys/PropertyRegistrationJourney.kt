@@ -72,6 +72,8 @@ class PropertyRegistrationJourney(
             JourneySection(checkAndSubmitPropertiesTasks(), "registerProperty.taskList.checkAndSubmit.heading"),
         )
 
+    override val journeyPathSegment = REGISTER_PROPERTY_JOURNEY_URL
+
     override val taskListFactory =
         getTaskListViewModelFactory(
             "registerProperty.title",
@@ -611,20 +613,6 @@ class PropertyRegistrationJourney(
             return CONFIRMATION_PAGE_PATH_SEGMENT
         } catch (exception: EntityExistsException) {
             return RegisterPropertyStepId.AlreadyRegistered.urlPathSegment
-        }
-    }
-
-    fun initialiseJourneyDataIfNotInitialised(principalName: String) {
-        val data = journeyDataService.getJourneyDataFromSession()
-        if (data.isEmpty()) {
-            /* TODO PRSD-589 Currently this looks the context up from the database,
-                takes the id, then passes the id to another method which retrieves it
-                from the database. When this is reworked, we should just pass the whole
-                context to an overload of journeyDataService.loadJourneyDataIntoSession().*/
-            val contextId = journeyDataService.getContextId(principalName, journeyType)
-            if (contextId != null) {
-                journeyDataService.loadJourneyDataIntoSession(contextId)
-            }
         }
     }
 }

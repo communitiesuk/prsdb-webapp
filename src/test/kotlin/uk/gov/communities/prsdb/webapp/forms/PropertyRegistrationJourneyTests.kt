@@ -7,14 +7,11 @@ import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
-import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -35,7 +32,6 @@ import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import java.net.URI
-import kotlin.test.assertEquals
 
 class PropertyRegistrationJourneyTests {
     @Mock
@@ -183,7 +179,10 @@ class PropertyRegistrationJourneyTests {
                 JourneyDataBuilder
                     .propertyDefault(addressDataService, localAuthorityService)
                     .withLicensingType(LicensingType.SELECTIVE_LICENCE, LicensingType.SELECTIVE_LICENCE.toString())
-                    .withLicensingType(LicensingType.HMO_MANDATORY_LICENCE, LicensingType.HMO_MANDATORY_LICENCE.toString())
+                    .withLicensingType(
+                        LicensingType.HMO_MANDATORY_LICENCE,
+                        LicensingType.HMO_MANDATORY_LICENCE.toString(),
+                    )
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData.build())
 
@@ -241,94 +240,6 @@ class PropertyRegistrationJourneyTests {
                 principal = mock(),
                 model = mock(),
             )
-        }
-    }
-
-    @Nested
-    inner class JourneyDataManipulationTests {
-        @Test
-        fun `when there is no journey data in the session or the database, journey data is not loaded`() {
-            val principalName = "principalName"
-            val testJourney =
-                PropertyRegistrationJourney(
-                    validator = alwaysTrueValidator,
-                    journeyDataService = mockJourneyDataService,
-                    addressLookupService = addressLookupService,
-                    addressDataService = addressDataService,
-                    propertyRegistrationService = mockPropertyRegistrationService,
-                    localAuthorityService = localAuthorityService,
-                    landlordService = landlordService,
-                    confirmationEmailSender = confirmationEmailSender,
-                    absoluteUrlProvider = mock(),
-                )
-
-            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf())
-            whenever(mockJourneyDataService.getContextId(principalName, JourneyType.PROPERTY_REGISTRATION)).thenReturn(
-                null,
-            )
-
-            // Act
-            testJourney.initialiseJourneyDataIfNotInitialised(principalName)
-
-            // Assert
-            verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any())
-        }
-
-        @Test
-        fun `when the journey data is not in the session it will be loaded into the session from the database`() {
-            val principalName = "principalName"
-            val contextId = 67L
-
-            val testJourney =
-                PropertyRegistrationJourney(
-                    mock(),
-                    mockJourneyDataService,
-                    mock(),
-                    mock(),
-                    mock(),
-                    mock(),
-                    mock(),
-                    mock(),
-                    mock(),
-                )
-
-            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf())
-            whenever(mockJourneyDataService.getContextId(principalName, JourneyType.PROPERTY_REGISTRATION)).thenReturn(
-                contextId,
-            )
-
-            // Act
-            testJourney.initialiseJourneyDataIfNotInitialised(principalName)
-
-            // Assert
-            val captor = argumentCaptor<Long>()
-            verify(mockJourneyDataService).loadJourneyDataIntoSession(captor.capture())
-            assertEquals(contextId, captor.allValues.single())
-        }
-
-        @Test
-        fun `when the journey data is already in the session, journey data is not loaded`() {
-            val principalName = "principalName"
-            val testJourney =
-                PropertyRegistrationJourney(
-                    mock(),
-                    mockJourneyDataService,
-                    mock(),
-                    mock(),
-                    mock(),
-                    mock(),
-                    mock(),
-                    mock(),
-                    mock(),
-                )
-
-            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf("anything" to "Anything else"))
-
-            // Act
-            testJourney.initialiseJourneyDataIfNotInitialised(principalName)
-
-            // Assert
-            verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any())
         }
     }
 }
