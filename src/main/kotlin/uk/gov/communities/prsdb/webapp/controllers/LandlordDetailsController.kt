@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
@@ -57,6 +58,7 @@ class LandlordDetailsController(
         principal: Principal,
     ): String {
         addLandlordDetailsToModel(model, principal, includeChangeLinks = false)
+        model.addAttribute("registeredPropertiesUrlSegment", REGISTERED_PROPERTIES_PATH_SEGMENT)
         return "landlordDetailsView"
     }
 
@@ -128,6 +130,7 @@ class LandlordDetailsController(
         model.addAttribute("name", landlordViewModel.name)
         model.addAttribute("lastModifiedDate", lastModifiedDate)
         model.addAttribute("landlord", landlordViewModel)
+        model.addAttribute("registeredPropertiesUrlSegment", REGISTERED_PROPERTIES_PATH_SEGMENT)
 
         val registeredPropertiesList = propertyOwnershipService.getRegisteredPropertiesForLandlord(id)
 

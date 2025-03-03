@@ -2,7 +2,83 @@
 <html th:replace="~{fragments/layout :: layout(#{${title}}, ~{::main}, false)}">
 <main class="govuk-main-wrapper">
     <div id="page-content">
-        <h1>Landlord dashboard</h1>
+        <div id="dashboard-banner"
+             th:replace="~{fragments/dashboardBanner :: dashboardBanner(${landlordName}, ~{::#dashboard-banner/content()})}">
+            <strong th:text="#{landlord.dashboard.banner.subheading}">landlord.dashboard.banner.subheading</strong>
+            <span th:text="${lrn}">LRN</span>
+        </div>
+        <section class="prsd-dashboard__section">
+            <h2 class="govuk-heading-l" th:text="#{landlord.dashboard.registerProperties.heading}">landlord.dashboard.registerProperties.heading</h2>
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-one-third prsd-dashboard__stretched-button-container">
+                    <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${registerPropertyUrl}, #{landlord.dashboard.registerProperty.button})}">
+                        landlord.dashboard.registerProperty.button
+                    </a>
+                </div>
+            </div>
+        </section>
+        <section class="prsd-dashboard__section">
+            <h2 class="govuk-heading-l" th:text="#{landlord.dashboard.viewAndUpdateRecords.heading}">landlord.dashboard.viewAndUpdateRecords.heading</h2>
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-one-third prsd-dashboard__stretched-button-container">
+                    <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${viewPropertiesUrl}, #{landlord.dashboard.viewPropertyRecords.button})}">
+                        landlord.dashboard.viewPropertyRecords.button
+                    </a>
+                </div>
+                <div class="govuk-grid-column-one-third prsd-dashboard__stretched-button-container">
+                    <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${viewLandlordRecordUrl}, #{landlord.dashboard.viewLandlordRecord.button})}">
+                        landlord.dashboard.viewLandlordRecord.button
+                    </a>
+                </div>
+            </div>
+        </section>
+        <section class="prsd-dashboard__section">
+            <h2 class="govuk-heading-l" th:text="#{landlord.dashboard.aboutTheDatabase.heading}">landlord.dashboard.aboutTheDatabase.heading</h2>
+            <div class="govuk-grid-row">
+                <div th:replace="~{fragments/dashboardAction :: dashboardAction(
+                    'landlord.dashboard.action.updatesToPilot.linkText',
+                    ${updatesToPilotUrl},
+                    'landlord.dashboard.action.updatesToPilot.descriptionText')}">
+                        Updates to Pilot content link
+                </div>
+                <div th:replace="~{fragments/dashboardAction :: dashboardAction(
+                    'landlord.dashboard.action.policyUpdates.linkText',
+                    ${policyUpdatesUrl},
+                    'landlord.dashboard.action.policyUpdates.descriptionText')}">
+                        Policy updates content link
+                </div>
+                <div th:replace="~{fragments/dashboardAction :: dashboardAction(
+                    'landlord.dashboard.action.privacyNotice.linkText',
+                    ${privacyNoticeUrl},
+                    'landlord.dashboard.action.privacyNotice.descriptionText')}">
+                    Privacy notice content link
+                </div>
+            </div>
+        </section>
+        <section class="prsd-dashboard__section">
+            <h2 class="govuk-heading-l" th:text="#{landlord.dashboard.guidance.heading}">landlord.dashboard.guidance.heading</h2>
+            <div class="govuk-grid-row">
+                <div th:replace="~{fragments/dashboardAction :: dashboardAction(
+                    'landlord.dashboard.action.howToLet.linkText',
+                    ${howToLetUrl},
+                    'landlord.dashboard.action.howToLet.descriptionText')}">
+                    How to let content link
+                </div>
+                <div th:replace="~{fragments/dashboardAction :: dashboardAction(
+                    'landlord.dashboard.action.rentersRightsBill.linkText',
+                    ${rentersRightsBillUrl},
+                    'landlord.dashboard.action.rentersRightsBill.descriptionText')}">
+                    Renters' rights bill content link
+                </div>
+                <div th:replace="~{fragments/dashboardAction :: dashboardAction(
+                    'landlord.dashboard.action.keepingPropertyCompliant.linkText',
+                    ${keepingPropertyCompliantUrl},
+                    'landlord.dashboard.action.keepingPropertyCompliant.descriptionText')}">
+                    Keeping properties compliant content link
+                </div>
+            </div>
+        </section>
+
     </div>
 </main>
 </html>
