@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.urlProviders
 
 import org.mockito.Mockito
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -68,7 +69,7 @@ class LandlordDashboardUrlTests(
     lateinit var mockLocalAuthorityService: LocalAuthorityService
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = ["LANDLORD"])
     fun `The sign in url generated when a landlord is registered is routed to the landlord dashboard`() {
         // Arrange
         val testEmail = "test@example.com"
@@ -77,14 +78,20 @@ class LandlordDashboardUrlTests(
         val mockJourneyData = JourneyDataBuilder.landlordDefault(mockAddressDataService, mockLocalAuthorityService).build()
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mockJourneyData)
 
-        whenever(
-            landlordRegistrationJourney
-                .landlordService,
-        ).thenReturn(mockLandlordService)
-
         // It's not using this, it's trying to call the real function - looks like it's using a real bean?
-        whenever(mockLandlordService.createLandlord(any(), any(), any(), any(), any(), any(), any(), any(), any()))
-            .thenReturn(landlord)
+        whenever(
+            mockLandlordService.createLandlord(
+                baseUserId = anyOrNull(),
+                name = anyOrNull(),
+                email = anyOrNull(),
+                phoneNumber = anyOrNull(),
+                addressDataModel = anyOrNull(),
+                countryOfResidence = anyOrNull(),
+                isVerified = anyOrNull(),
+                nonEnglandOrWalesAddress = anyOrNull(),
+                dateOfBirth = anyOrNull(),
+            ),
+        ).thenReturn(landlord)
 
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri())
             .thenCallRealMethod()
@@ -107,6 +114,7 @@ class LandlordDashboardUrlTests(
                 with(csrf())
             }.andExpect { status { is3xxRedirection() } }
 
+        println(confirmationCaptor.firstValue.prsdURL)
         mvc
             .get(confirmationCaptor.firstValue.prsdURL)
             .andExpect { status { is3xxRedirection() } }
