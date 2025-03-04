@@ -1,17 +1,15 @@
-package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
-class PeopleFormPagePropertyRegistration(
+abstract class NumberOfPeopleFormPage(
     page: Page,
+    urlSegment: String,
 ) : BasePage(
         page,
-        "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.NumberOfPeople.urlPathSegment}",
+        urlSegment,
     ) {
     val form = NumOfPeopleForm(page)
 
