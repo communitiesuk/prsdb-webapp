@@ -134,12 +134,11 @@ class LandlordRegistrationJourneyTests {
             stepId: LandlordRegistrationStepId,
             pageData: PageData = mapOf(),
         ) {
-            testJourney.updateJourneyDataAndGetViewNameOrRedirect(
+            testJourney.completeStep(
                 stepId = stepId,
                 pageData = pageData,
                 subPageNumber = null,
                 principal = mock(),
-                model = mock(),
             )
         }
     }

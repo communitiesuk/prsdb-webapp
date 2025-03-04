@@ -9,7 +9,6 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.validation.BindingResult
 import org.springframework.validation.Validator
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter
-import org.springframework.validation.support.BindingAwareModelMap
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -77,36 +76,34 @@ class PageTests {
     fun `populateModelAndGetTemplateName populates the model and returns the template name`() {
         // Arrange
         val formData = mapOf("testProperty" to "testPropertyValue")
-        val model = BindingAwareModelMap()
         val previousUrl = "/previous"
 
         // Act
-        val result = testPage.populateModelAndGetTemplateName(validator, model, formData, previousUrl)
+        val result = testPage.getModelAndView(validator, formData, previousUrl)
 
         // Assert
-        assertIs<BindingResult>(model[BindingResult.MODEL_KEY_PREFIX + "formModel"])
-        val bindingResult: BindingResult = model[BindingResult.MODEL_KEY_PREFIX + "formModel"] as BindingResult
-        assertContains(model, "testKey")
-        assertEquals("testValue", model["testKey"])
-        assertContains(model, "backUrl")
-        assertEquals(previousUrl, model["backUrl"])
+        assertIs<BindingResult>(result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"])
+        val bindingResult: BindingResult = result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"] as BindingResult
+        assertContains(result.model, "testKey")
+        assertEquals("testValue", result.model["testKey"])
+        assertContains(result.model, "backUrl")
+        assertEquals(previousUrl, result.model["backUrl"])
         val propertyValue = bindingResult.getRawFieldValue("testProperty")
         assertEquals("testPropertyValue", propertyValue)
-        assertEquals("index", result)
+        assertEquals("index", result.viewName)
     }
 
     @Test
     fun `populateModelAndGetTemplateName throws an error if the section heading is requested but not found`() {
         // Arrange
         val formData = mapOf("testProperty" to "testPropertyValue")
-        val model = BindingAwareModelMap()
         val previousUrl = "/previous"
         val journeyData: JourneyData = mapOf()
         val sectionHeaderInfo = null
 
         // Act, Assert
         assertThrows<PrsdbWebException> {
-            testPage.populateModelAndGetTemplateName(validator, model, formData, previousUrl, journeyData, sectionHeaderInfo)
+            testPage.getModelAndView(validator, formData, previousUrl, journeyData, sectionHeaderInfo)
         }
     }
 }

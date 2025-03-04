@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
-import org.springframework.ui.Model
 import org.springframework.validation.Validator
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectLocalAuthorityFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.SelectViewModel
@@ -17,12 +17,11 @@ class SelectLocalAuthorityPage(
         content = content,
         shouldDisplaySectionHeader = displaySectionHeader,
     ) {
-    override fun populateModelAndGetTemplateName(
+    override fun getModelAndView(
         validator: Validator,
-        model: Model,
         pageData: PageData?,
         prevStepUrl: String?,
-    ): String {
+    ): ModelAndView {
         val localAuthoritiesSelectOptions =
             localAuthorityService.retrieveAllLocalAuthorities().map {
                 SelectViewModel(
@@ -31,8 +30,9 @@ class SelectLocalAuthorityPage(
                 )
             }
 
-        model.addAttribute("selectOptions", localAuthoritiesSelectOptions)
+        val modelAndView = super.getModelAndView(validator, pageData, prevStepUrl)
+        modelAndView.addObject("selectOptions", localAuthoritiesSelectOptions)
 
-        return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)
+        return modelAndView
     }
 }

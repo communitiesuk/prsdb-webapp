@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
@@ -45,16 +46,15 @@ class RegisterLAUserController(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
         model: Model,
-    ): String {
+    ): ModelAndView {
         val token = invitationService.getTokenFromSession()
         if (token == null || !invitationService.tokenIsValid(token)) {
             invitationService.clearTokenFromSession()
-            return "redirect:$INVALID_LINK_PAGE_PATH_SEGMENT"
+            return ModelAndView("redirect:$INVALID_LINK_PAGE_PATH_SEGMENT")
         }
 
-        return laUserRegistrationJourney.populateModelAndGetViewName(
+        return laUserRegistrationJourney.getModelAndViewForStep(
             laUserRegistrationJourney.getStepId(stepName),
-            model,
             subpage,
         )
     }
@@ -66,11 +66,10 @@ class RegisterLAUserController(
         @RequestParam formData: PageData,
         model: Model,
         principal: Principal,
-    ): String =
-        laUserRegistrationJourney.updateJourneyDataAndGetViewNameOrRedirect(
+    ): ModelAndView =
+        laUserRegistrationJourney.completeStep(
             laUserRegistrationJourney.getStepId(stepName),
             formData,
-            model,
             subpage,
             principal,
         )

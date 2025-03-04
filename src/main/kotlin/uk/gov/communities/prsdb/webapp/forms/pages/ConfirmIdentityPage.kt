@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
-import org.springframework.ui.Model
 import org.springframework.validation.Validator
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
@@ -15,13 +15,12 @@ class ConfirmIdentityPage(
     content: Map<String, Any>,
     displaySectionHeader: Boolean = false,
 ) : Page(formModel, templateName, content, displaySectionHeader) {
-    override fun populateModelAndGetTemplateName(
+    override fun getModelAndView(
         validator: Validator,
-        model: Model,
         pageData: PageData?,
         prevStepUrl: String?,
         journeyData: JourneyData?,
-    ): String {
+    ): ModelAndView {
         journeyData!!
 
         val formData =
@@ -37,8 +36,9 @@ class ConfirmIdentityPage(
                     null,
                 ),
             )
+        val modelAndView = super.getModelAndView(validator, pageData, prevStepUrl)
+        modelAndView.addObject("formData", formData)
 
-        model.addAttribute("formData", formData)
-        return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)
+        return modelAndView
     }
 }

@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
-import org.springframework.ui.Model
 import org.springframework.validation.Validator
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
@@ -18,13 +18,12 @@ class LaUserRegistrationCheckAnswersPage(
     content: Map<String, Any>,
     private val invitationService: LocalAuthorityInvitationService,
 ) : Page(formModel, templateName, content) {
-    override fun populateModelAndGetTemplateName(
+    override fun getModelAndView(
         validator: Validator,
-        model: Model,
         pageData: PageData?,
         prevStepUrl: String?,
         journeyData: JourneyData?,
-    ): String {
+    ): ModelAndView {
         journeyData!!
         val formData = mutableListOf<SummaryListRowViewModel>()
         val sessionToken = invitationService.getTokenFromSession()
@@ -56,7 +55,9 @@ class LaUserRegistrationCheckAnswersPage(
             ),
         )
 
-        model.addAttribute("formData", formData)
-        return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)
+        val modelAndView = super.getModelAndView(validator, pageData, prevStepUrl)
+        modelAndView.addObject("formData", formData)
+
+        return modelAndView
     }
 }

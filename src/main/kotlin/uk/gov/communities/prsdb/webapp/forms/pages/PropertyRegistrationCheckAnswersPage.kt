@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
-import org.springframework.ui.Model
 import org.springframework.validation.Validator
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
@@ -28,29 +28,30 @@ class PropertyRegistrationCheckAnswersPage(
         ),
         shouldDisplaySectionHeader = displaySectionHeader,
     ) {
-    override fun populateModelAndGetTemplateName(
+    override fun getModelAndView(
         validator: Validator,
-        model: Model,
         pageData: PageData?,
         prevStepUrl: String?,
         journeyData: JourneyData?,
         sectionHeaderInfo: SectionHeaderViewModel?,
-    ): String {
+    ): ModelAndView {
         journeyData!!
-        addPropertyDetailsToModel(model, journeyData)
-        return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData, sectionHeaderInfo)
+        val modelAndView = super.getModelAndView(validator, pageData, prevStepUrl, journeyData, sectionHeaderInfo)
+        addPropertyDetailsToModel(modelAndView, journeyData)
+
+        return modelAndView
     }
 
     private fun addPropertyDetailsToModel(
-        model: Model,
+        model: ModelAndView,
         journeyData: JourneyData,
     ) {
         val propertyName = getPropertyName(journeyData)
         val propertyDetails = getPropertyDetailsSummary(journeyData)
 
-        model.addAttribute("propertyDetails", propertyDetails)
-        model.addAttribute("propertyName", propertyName)
-        model.addAttribute("showUprnDetail", !DataHelper.isManualAddressChosen(journeyData))
+        model.addObject("propertyDetails", propertyDetails)
+        model.addObject("propertyName", propertyName)
+        model.addObject("showUprnDetail", !DataHelper.isManualAddressChosen(journeyData))
     }
 
     private fun getPropertyName(journeyData: JourneyData) = DataHelper.getAddress(journeyData, addressDataService)!!.singleLineAddress

@@ -1,10 +1,10 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.springframework.beans.MutablePropertyValues
-import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import org.springframework.validation.Validator
 import org.springframework.web.bind.WebDataBinder
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
@@ -20,55 +20,55 @@ open class Page(
     private val content: Map<String, Any>,
     val shouldDisplaySectionHeader: Boolean = false,
 ) {
-    open fun populateModelAndGetTemplateName(
+    open fun getModelAndView(
         validator: Validator,
-        model: Model,
         pageData: PageData?,
         prevStepUrl: String?,
-    ): String {
-        var bindingResult = bindDataToFormModel(validator, pageData)
-        model.addAttribute(BindingResult.MODEL_KEY_PREFIX + "formModel", bindingResult)
+    ): ModelAndView {
+        val modelAndView = ModelAndView(templateName)
+
+        val bindingResult = bindDataToFormModel(validator, pageData)
+        modelAndView.addObject(BindingResult.MODEL_KEY_PREFIX + "formModel", bindingResult)
 
         if (prevStepUrl != null) {
-            model.addAttribute(BACK_URL_ATTR_NAME, prevStepUrl)
+            modelAndView.addObject(BACK_URL_ATTR_NAME, prevStepUrl)
         }
 
         for ((key, value) in content) {
-            model.addAttribute(key, value)
+            modelAndView.addObject(key, value)
         }
-        return templateName
+        return modelAndView
     }
 
-    open fun populateModelAndGetTemplateName(
+    open fun getModelAndView(
         validator: Validator,
-        model: Model,
         pageData: PageData?,
         prevStepUrl: String?,
         journeyData: JourneyData?,
-    ): String = populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)
+    ) = getModelAndView(validator, pageData, prevStepUrl)
 
-    open fun populateModelAndGetTemplateName(
+    open fun getModelAndView(
         validator: Validator,
-        model: Model,
         pageData: PageData?,
         prevStepUrl: String?,
         journeyData: JourneyData?,
         sectionHeaderInfo: SectionHeaderViewModel?,
-    ): String {
-        addSectionHeaderInfoToModel(model, sectionHeaderInfo)
-        return populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData)
+    ): ModelAndView {
+        val modelAndView = getModelAndView(validator, pageData, prevStepUrl, journeyData)
+        return addSectionHeaderInfoToModel(modelAndView, sectionHeaderInfo)
     }
 
     private fun addSectionHeaderInfoToModel(
-        model: Model,
+        modelAndView: ModelAndView,
         sectionHeaderInfo: SectionHeaderViewModel?,
-    ) {
+    ): ModelAndView {
         if (shouldDisplaySectionHeader) {
             if (sectionHeaderInfo == null) {
                 throw PrsdbWebException("Section heading requested but heading message key not found")
             }
-            model.addAttribute("sectionHeaderInfo", sectionHeaderInfo)
+            modelAndView.addObject("sectionHeaderInfo", sectionHeaderInfo)
         }
+        return modelAndView
     }
 
     open fun isSatisfied(

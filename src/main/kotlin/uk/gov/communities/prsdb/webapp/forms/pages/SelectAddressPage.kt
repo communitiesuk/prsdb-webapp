@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
-import org.springframework.ui.Model
 import org.springframework.validation.Validator
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
@@ -23,13 +23,12 @@ class SelectAddressPage(
     private val addressLookupService: AddressLookupService,
     private val addressDataService: AddressDataService,
 ) : Page(formModel, templateName, content, displaySectionHeader) {
-    override fun populateModelAndGetTemplateName(
+    override fun getModelAndView(
         validator: Validator,
-        model: Model,
         pageData: PageData?,
         prevStepUrl: String?,
         journeyData: JourneyData?,
-    ): String {
+    ): ModelAndView {
         journeyData!!
 
         val (houseNameOrNumber, postcode) =
@@ -56,12 +55,13 @@ class SelectAddressPage(
             ),
         )
 
-        model.addAttribute("houseNameOrNumber", houseNameOrNumber)
-        model.addAttribute("postcode", postcode)
-        model.addAttribute("addressCount", addressLookupResults.size)
-        model.addAttribute("options", addressRadiosViewModel)
+        val modelAndView = super.getModelAndView(validator, pageData, prevStepUrl)
+        modelAndView.addObject("houseNameOrNumber", houseNameOrNumber)
+        modelAndView.addObject("postcode", postcode)
+        modelAndView.addObject("addressCount", addressLookupResults.size)
+        modelAndView.addObject("options", addressRadiosViewModel)
 
-        return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)
+        return modelAndView
     }
 
     override fun isSatisfied(

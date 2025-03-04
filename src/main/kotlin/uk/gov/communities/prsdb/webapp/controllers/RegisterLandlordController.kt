@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourney
@@ -42,13 +43,12 @@ class RegisterLandlordController(
         model: Model,
         principal: Principal,
         @AuthenticationPrincipal oidcUser: OidcUser,
-    ): String {
+    ): ModelAndView {
         var identity = identityService.getVerifiedIdentityData(oidcUser) ?: mapOf()
 
-        return landlordRegistrationJourney.updateJourneyDataAndGetViewNameOrRedirect(
+        return landlordRegistrationJourney.completeStep(
             landlordRegistrationJourney.getStepId(IDENTITY_VERIFICATION_PATH_SEGMENT),
             identity,
-            model,
             null,
             principal,
         )
@@ -59,10 +59,9 @@ class RegisterLandlordController(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
         model: Model,
-    ): String =
-        landlordRegistrationJourney.populateModelAndGetViewName(
+    ): ModelAndView =
+        landlordRegistrationJourney.getModelAndViewForStep(
             landlordRegistrationJourney.getStepId(stepName),
-            model,
             subpage,
         )
 
@@ -73,11 +72,10 @@ class RegisterLandlordController(
         @RequestParam formData: PageData,
         model: Model,
         principal: Principal,
-    ): String =
-        landlordRegistrationJourney.updateJourneyDataAndGetViewNameOrRedirect(
+    ): ModelAndView =
+        landlordRegistrationJourney.completeStep(
             landlordRegistrationJourney.getStepId(stepName),
             formData,
-            model,
             subpage,
             principal,
         )

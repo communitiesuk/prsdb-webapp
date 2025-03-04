@@ -55,12 +55,12 @@ Each final child of `Journey` represents a particular multi-page form in the ser
 journey are specified, including the `nextAction` and `handleSubmitAndRedirect` logic for each.
 The base class has two main functions for progressing through the multi-page form:
 
-### `populateModelAndGetViewName`
+### `getModelAndViewForStep`
 returns the name of the ThymeLeaf template for a step and populates the model for it, or returns a 
 redirect if the requested step is unreachable. This includes validation errors for the page if data has been submitted
 for it.
 
-### `updateJourneyDataAndGetViewNameOrRedirect`
+### `completeStep`
 validates the data submitted for the step and either adds it to the journey data and redirects to the next step or
 returns the page for the current step with validation errors. If a `handleSubmitAndRedirect` has been set for the step
 that will be called instead of moving to the next step.

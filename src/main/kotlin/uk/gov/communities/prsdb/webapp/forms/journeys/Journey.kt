@@ -1,9 +1,9 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.http.HttpStatus
-import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
+import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
@@ -59,18 +59,17 @@ abstract class Journey<T : StepId>(
         }
     }
 
-    fun populateModelAndGetViewName(
+    fun getModelAndViewForStep(
         stepId: T,
-        model: Model,
         subPageNumber: Int?,
         submittedPageData: PageData? = null,
         journeyDataKey: String? = null,
-    ): String {
+    ): ModelAndView {
         val journeyData: JourneyData =
             journeyDataService.getJourneyDataFromSession(journeyDataKey ?: defaultJourneyDataKey)
         val requestedStep = getStep(stepId)
         if (!isStepReachable(requestedStep, subPageNumber)) {
-            return "redirect:${getUnreachableStepRedirect(journeyData)}"
+            return ModelAndView("redirect:${getUnreachableStepRedirect(journeyData)}")
         }
         val prevStepDetails = getPrevStep(requestedStep, subPageNumber)
         val prevStepUrl = getPrevStepUrl(prevStepDetails?.step, prevStepDetails?.subPageNumber)
@@ -79,9 +78,8 @@ abstract class Journey<T : StepId>(
 
         val sectionHeaderInfo = getSectionHeaderInfo(requestedStep)
 
-        return requestedStep.page.populateModelAndGetTemplateName(
+        return requestedStep.page.getModelAndView(
             validator,
-            model,
             pageData,
             prevStepUrl,
             prevStepDetails?.filteredJourneyData,
@@ -89,21 +87,19 @@ abstract class Journey<T : StepId>(
         )
     }
 
-    fun updateJourneyDataAndGetViewNameOrRedirect(
+    fun completeStep(
         stepId: T,
         pageData: PageData,
-        model: Model,
         subPageNumber: Int?,
         principal: Principal,
         journeyDataKey: String? = null,
-    ): String {
+    ): ModelAndView {
         val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey ?: defaultJourneyDataKey)
 
         val currentStep = getStep(stepId)
         if (!currentStep.isSatisfied(validator, pageData)) {
-            return populateModelAndGetViewName(
+            return getModelAndViewForStep(
                 stepId,
-                model,
                 subPageNumber,
                 pageData,
                 journeyDataKey ?: defaultJourneyDataKey,
@@ -119,7 +115,7 @@ abstract class Journey<T : StepId>(
         }
 
         if (currentStep.handleSubmitAndRedirect != null) {
-            return "redirect:${currentStep.handleSubmitAndRedirect!!(newJourneyData, subPageNumber)}"
+            return ModelAndView("redirect:${currentStep.handleSubmitAndRedirect!!(newJourneyData, subPageNumber)}")
         }
         val (newStepId: T?, newSubPageNumber: Int?) = currentStep.nextAction(newJourneyData, subPageNumber)
         if (newStepId == null) {
@@ -132,7 +128,7 @@ abstract class Journey<T : StepId>(
                 .queryParamIfPresent("subpage", Optional.ofNullable(newSubPageNumber))
                 .build(true)
                 .toUriString()
-        return "redirect:$redirectUrl"
+        return ModelAndView("redirect:$redirectUrl")
     }
 
     override fun iterator(): Iterator<StepDetails<T>> =

@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
-import org.springframework.ui.Model
 import org.springframework.validation.Validator
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
@@ -24,13 +24,12 @@ class LandlordRegistrationCheckAnswersPage(
             ),
         shouldDisplaySectionHeader = displaySectionHeader,
     ) {
-    override fun populateModelAndGetTemplateName(
+    override fun getModelAndView(
         validator: Validator,
-        model: Model,
         pageData: PageData?,
         prevStepUrl: String?,
         journeyData: JourneyData?,
-    ): String {
+    ): ModelAndView {
         journeyData!!
 
         val formData =
@@ -38,8 +37,10 @@ class LandlordRegistrationCheckAnswersPage(
                 getEmailAndPhoneFormData(journeyData) +
                 getAddressFormData(journeyData)
 
-        model.addAttribute("formData", formData)
-        return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)
+        val modelAndView = super.getModelAndView(validator, pageData, prevStepUrl)
+        modelAndView.addObject("formData", formData)
+
+        return modelAndView
     }
 
     private fun getIdentityFormData(journeyData: JourneyData): List<SummaryListRowViewModel> {

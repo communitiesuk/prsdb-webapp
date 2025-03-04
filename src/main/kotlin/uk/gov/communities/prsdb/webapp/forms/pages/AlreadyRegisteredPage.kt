@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
-import org.springframework.ui.Model
 import org.springframework.validation.Validator
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
@@ -14,18 +14,17 @@ class AlreadyRegisteredPage(
     content: Map<String, Any>,
     private val selectedAddressPathSegment: String,
 ) : Page(formModel, templateName, content) {
-    override fun populateModelAndGetTemplateName(
+    override fun getModelAndView(
         validator: Validator,
-        model: Model,
         pageData: PageData?,
         prevStepUrl: String?,
         journeyData: JourneyData?,
-    ): String {
-        model.addAttribute(
+    ): ModelAndView {
+        val modelAndView = super.getModelAndView(validator, pageData, prevStepUrl)
+        modelAndView.addObject(
             "singleLineAddress",
             JourneyDataHelper.getFieldStringValue(journeyData!!, selectedAddressPathSegment, "address"),
         )
-
-        return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)
+        return modelAndView
     }
 }

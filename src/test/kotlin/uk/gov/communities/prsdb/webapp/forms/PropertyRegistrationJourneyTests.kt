@@ -233,12 +233,11 @@ class PropertyRegistrationJourneyTests {
             stepId: RegisterPropertyStepId,
             pageData: PageData = mapOf(),
         ) {
-            testJourney.updateJourneyDataAndGetViewNameOrRedirect(
+            testJourney.completeStep(
                 stepId = stepId,
                 pageData = pageData,
                 subPageNumber = null,
                 principal = mock(),
-                model = mock(),
             )
         }
     }

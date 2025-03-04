@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
-import org.springframework.ui.Model
 import org.springframework.validation.Validator
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
@@ -30,15 +30,14 @@ abstract class UpdateJourney<T : StepId>(
         }
     }
 
-    fun populateModelAndGetViewNameForUpdateStep(
+    fun getModelAndViewNameForUpdateStep(
         updateEntityId: String,
-        model: Model,
         subPageNumber: Int? = null,
         submittedPageData: PageData? = null,
         journeyDataKey: String? = null,
-    ): String {
+    ): ModelAndView {
         initialiseJourneyDataIfNotInitialised(updateEntityId, journeyDataKey)
-        return super.populateModelAndGetViewName(updateStepId, model, subPageNumber, submittedPageData, journeyDataKey)
+        return super.getModelAndViewForStep(updateStepId, subPageNumber, submittedPageData, journeyDataKey)
     }
 
     override fun getUnreachableStepRedirect(journeyData: JourneyData) =
