@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getOwnershipTypeUpdateIfPresent
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.propertyDetailsUpdateJourneyDataExtensions
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
 import kotlin.test.assertEquals
 
@@ -23,7 +22,7 @@ class PropertyDetailsUpdateJourneyDataExtensionsTests {
         val testJourneyData = journeyDataBuilder.withOwnershipTypeUpdate(newOwnershipType).build()
 
         val ownershipTypeUpdate =
-            testJourneyData.propertyDetailsUpdateJourneyDataExtensions.getOwnershipTypeUpdateIfPresent()
+            testJourneyData.getOwnershipTypeUpdateIfPresent()
 
         assertEquals(newOwnershipType, ownershipTypeUpdate)
     }
@@ -33,7 +32,7 @@ class PropertyDetailsUpdateJourneyDataExtensionsTests {
         val testJourneyData = journeyDataBuilder.build()
 
         val ownershipTypeUpdate =
-            testJourneyData.propertyDetailsUpdateJourneyDataExtensions.getOwnershipTypeUpdateIfPresent()
+            testJourneyData.getOwnershipTypeUpdateIfPresent()
 
         assertEquals(null, ownershipTypeUpdate)
     }

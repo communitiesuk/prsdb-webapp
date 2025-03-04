@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getOwnershipTypeUpdateIfPresent
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.propertyDetailsUpdateJourneyDataExtensions
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
@@ -84,7 +83,7 @@ class PropertyDetailsUpdateJourney(
     private fun updatePropertyAndRedirect(journeyData: JourneyData): String {
         val propertyUpdate =
             PropertyOwnershipUpdateModel(
-                ownershipType = journeyData.propertyDetailsUpdateJourneyDataExtensions.getOwnershipTypeUpdateIfPresent(),
+                ownershipType = journeyData.getOwnershipTypeUpdateIfPresent(),
             )
 
         propertyOwnershipService.updatePropertyOwnership(getPropertyOwnershipIdFromJourneyKey(), propertyUpdate)

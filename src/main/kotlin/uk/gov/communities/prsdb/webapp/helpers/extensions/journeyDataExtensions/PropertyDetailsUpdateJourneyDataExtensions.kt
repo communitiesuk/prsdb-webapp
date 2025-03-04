@@ -5,16 +5,11 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 
-class PropertyDetailsUpdateJourneyDataExtensions private constructor(
-    private val journeyData: JourneyData,
-) {
+class PropertyDetailsUpdateJourneyDataExtensions {
     companion object {
-        val JourneyData.propertyDetailsUpdateJourneyDataExtensions
-            get() = PropertyDetailsUpdateJourneyDataExtensions(this)
-
-        fun PropertyDetailsUpdateJourneyDataExtensions.getOwnershipTypeUpdateIfPresent() =
+        fun JourneyData.getOwnershipTypeUpdateIfPresent() =
             JourneyDataHelper.getFieldEnumValue<OwnershipType>(
-                journeyData,
+                this,
                 UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment,
                 "ownershipType",
             )
