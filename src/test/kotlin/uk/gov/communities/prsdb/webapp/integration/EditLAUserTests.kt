@@ -28,7 +28,7 @@ class EditLAUserTests : IntegrationTest() {
         manageUsersPage.getChangeLink(rowIndex = 0).clickAndWait()
         var editUserPage = assertPageIs(page, EditLaUserPage::class)
         assertThat(editUserPage.name).containsText("Arthur Dent")
-        assertThat(editUserPage.email).containsText("Arthur Dent@ISLE OF MAN.gov.uk")
+        assertThat(editUserPage.email).containsText("Arthur.Dent@test.com")
         assertFalse(editUserPage.isManagerSelected)
 
         // Update the user's access level to admin
@@ -58,7 +58,7 @@ class EditLAUserTests : IntegrationTest() {
         editUserPage.removeAccountButton.clickAndWait()
         val confirmDeletePage = assertPageIs(page, ConfirmDeleteLaUserPage::class)
         assertThat(confirmDeletePage.userDetailsSection).containsText("Arthur Dent")
-        assertThat(confirmDeletePage.userDetailsSection).containsText("Arthur Dent@ISLE OF MAN.gov.uk")
+        assertThat(confirmDeletePage.userDetailsSection).containsText("Arthur.Dent@test.com")
         confirmDeletePage.form.submit()
         val successPage = assertPageIs(page, DeleteLaUserSuccessPage::class)
 

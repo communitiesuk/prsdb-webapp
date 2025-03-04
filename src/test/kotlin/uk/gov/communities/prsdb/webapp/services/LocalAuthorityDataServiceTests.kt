@@ -33,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Compan
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.mockObjects.MockOneLoginUserData.Companion.createOneLoginUser
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserOrInvitationDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
 import java.util.Optional
 import kotlin.test.assertEquals
@@ -77,6 +78,7 @@ class LocalAuthorityDataServiceTests {
                 localAuthorityUser.name,
                 localAuthority.name,
                 localAuthorityUser.isManager,
+                localAuthorityUser.email,
             ),
             returnedUserModel,
         )
@@ -128,6 +130,7 @@ class LocalAuthorityDataServiceTests {
                 localAuthorityUser.name,
                 localAuthority.name,
                 localAuthorityUser.isManager,
+                localAuthorityUser.email,
             )
 
         whenever(localAuthorityUserRepository.findById(DEFAULT_LA_USER_ID)).thenReturn(Optional.of(localAuthorityUser))
@@ -192,9 +195,9 @@ class LocalAuthorityDataServiceTests {
             .thenReturn(PageImpl(listOf(user1, user2, invitation), pageRequest, 3))
         val expectedLaUserList =
             listOf(
-                LocalAuthorityUserDataModel(1, "User 1", localAuthority.name, true, false),
-                LocalAuthorityUserDataModel(2, "User 2", localAuthority.name, false, false),
-                LocalAuthorityUserDataModel(3, "invite@test.com", localAuthority.name, false, true),
+                LocalAuthorityUserOrInvitationDataModel(1, "User 1", localAuthority.name, true, false),
+                LocalAuthorityUserOrInvitationDataModel(2, "User 2", localAuthority.name, false, false),
+                LocalAuthorityUserOrInvitationDataModel(3, "invite@test.com", localAuthority.name, false, true),
             )
 
         // Act
@@ -261,13 +264,13 @@ class LocalAuthorityDataServiceTests {
         whenever(localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest2))
             .thenReturn(PageImpl(usersFromRepository.subList(10, 20).toList(), pageRequest2, 3))
 
-        val expectedUserListPage1 = mutableListOf<LocalAuthorityUserDataModel>()
-        val expectedUserListPage2 = mutableListOf<LocalAuthorityUserDataModel>()
+        val expectedUserListPage1 = mutableListOf<LocalAuthorityUserOrInvitationDataModel>()
+        val expectedUserListPage2 = mutableListOf<LocalAuthorityUserOrInvitationDataModel>()
         for (i in 1..10) {
-            expectedUserListPage1.add(LocalAuthorityUserDataModel(i.toLong(), "User $i", "name", false, false))
+            expectedUserListPage1.add(LocalAuthorityUserOrInvitationDataModel(i.toLong(), "User $i", "name", false, false))
         }
         for (i in 11..20) {
-            expectedUserListPage2.add(LocalAuthorityUserDataModel(i.toLong(), "User $i", "name", false, false))
+            expectedUserListPage2.add(LocalAuthorityUserOrInvitationDataModel(i.toLong(), "User $i", "name", false, false))
         }
 
         // Act
