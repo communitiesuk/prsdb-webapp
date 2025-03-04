@@ -44,7 +44,7 @@ class RegisterPropertyController(
         model: Model,
     ): String =
         propertyRegistrationJourney.populateModelAndGetViewName(
-            propertyRegistrationJourney.getStepId(stepName),
+            stepName,
             model,
             subpage,
         )
@@ -68,7 +68,7 @@ class RegisterPropertyController(
         principal: Principal,
     ): String =
         propertyRegistrationJourney.updateJourneyDataAndGetViewNameOrRedirect(
-            propertyRegistrationJourney.getStepId(stepName),
+            stepName,
             formData,
             model,
             subpage,

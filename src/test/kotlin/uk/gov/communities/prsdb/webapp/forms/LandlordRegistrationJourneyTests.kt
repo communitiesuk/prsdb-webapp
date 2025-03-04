@@ -67,7 +67,17 @@ class LandlordRegistrationJourneyTests {
         @BeforeEach
         fun beforeEach() {
             whenever(
-                landlordService.createLandlord(any(), any(), any(), any(), any(), any(), any(), anyOrNull(), anyOrNull()),
+                landlordService.createLandlord(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    anyOrNull(),
+                    anyOrNull(),
+                ),
             ).thenReturn(MockLandlordData.createLandlord())
             whenever(urlProvider.buildLandlordDashboardUri()).thenReturn(URI.create("https://gov.uk"))
 
@@ -135,7 +145,7 @@ class LandlordRegistrationJourneyTests {
             pageData: PageData = mapOf(),
         ) {
             testJourney.updateJourneyDataAndGetViewNameOrRedirect(
-                stepId = stepId,
+                stepPathSegment = stepId.urlPathSegment,
                 pageData = pageData,
                 subPageNumber = null,
                 principal = mock(),

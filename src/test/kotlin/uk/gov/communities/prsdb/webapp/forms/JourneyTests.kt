@@ -112,68 +112,6 @@ class JourneyTests {
     }
 
     @Nested
-    inner class GetStepIdTests {
-        @Test
-        fun `returns correct step id when present`() {
-            // Arrange
-            val testJourney =
-                TestJourney(
-                    JourneyType.LANDLORD_REGISTRATION,
-                    initialStepId = TestStepId.StepOne,
-                    journeyDataService = mockJourneyDataService,
-                    validator = validator,
-                    steps =
-                        setOf(
-                            Step(
-                                TestStepId.StepOne,
-                                page =
-                                    Page(
-                                        TestFormModel::class,
-                                        "index",
-                                        mapOf("testKey" to "testValue"),
-                                    ),
-                            ),
-                        ),
-                )
-
-            // Act
-            val foundStepId = testJourney.getStepId(TestStepId.StepOne.urlPathSegment)
-
-            // Assert
-            assertEquals(TestStepId.StepOne, foundStepId)
-        }
-
-        @Test
-        fun `throws not found exception when step is missing`() {
-            // Arrange
-            val testJourney =
-                TestJourney(
-                    JourneyType.LANDLORD_REGISTRATION,
-                    initialStepId = TestStepId.StepOne,
-                    journeyDataService = mockJourneyDataService,
-                    validator = validator,
-                    steps =
-                        setOf(
-                            Step(
-                                TestStepId.StepOne,
-                                page =
-                                    Page(
-                                        TestFormModel::class,
-                                        "index",
-                                        mapOf("testKey" to "testValue"),
-                                    ),
-                            ),
-                        ),
-                )
-
-            // Act and Assert
-            val exception =
-                assertThrows<ResponseStatusException> { testJourney.getStepId(TestStepId.StepTwo.urlPathSegment) }
-            assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
-        }
-    }
-
-    @Nested
     inner class PopulateModelAndGetViewNameTests {
         @Test
         fun `throws not found exception when step is missing`() {
@@ -203,7 +141,7 @@ class JourneyTests {
             val exception =
                 assertThrows<ResponseStatusException> {
                     testJourney.populateModelAndGetViewName(
-                        TestStepId.StepTwo,
+                        TestStepId.StepTwo.urlPathSegment,
                         model,
                         null,
                     )
@@ -260,7 +198,7 @@ class JourneyTests {
 
             // Act
             val result =
-                testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, null)
+                testJourney.populateModelAndGetViewName(TestStepId.StepTwo.urlPathSegment, model, null, null)
 
             // Assert
             assertEquals("redirect:${TestStepId.StepOne.urlPathSegment}", result)
@@ -305,7 +243,7 @@ class JourneyTests {
 
             // Act
             val result =
-                testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, null)
+                testJourney.populateModelAndGetViewName(TestStepId.StepTwo.urlPathSegment, model, null, null)
 
             // Assert
             assertEquals("redirect:${TestStepId.StepOne.urlPathSegment}", result)
@@ -351,7 +289,7 @@ class JourneyTests {
 
             // Act
             val result =
-                testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, pageData)
+                testJourney.populateModelAndGetViewName(TestStepId.StepTwo.urlPathSegment, model, null, pageData)
 
             // Assert
             assertIs<BindingResult>(model[BindingResult.MODEL_KEY_PREFIX + "formModel"])
@@ -399,7 +337,7 @@ class JourneyTests {
 
             val model = BindingAwareModelMap()
 
-            testJourney.populateModelAndGetViewName(TestStepId.StepOne, model, null)
+            testJourney.populateModelAndGetViewName(TestStepId.StepOne.urlPathSegment, model, null)
 
             val expectedSectionHeader = SectionHeaderViewModel("Test section heading name key", 1, 1)
             assertTrue(ReflectionEquals(expectedSectionHeader).matches(model["sectionHeaderInfo"]))
@@ -432,7 +370,7 @@ class JourneyTests {
 
             val model = BindingAwareModelMap()
 
-            testJourney.populateModelAndGetViewName(TestStepId.StepOne, model, null)
+            testJourney.populateModelAndGetViewName(TestStepId.StepOne.urlPathSegment, model, null)
 
             assertNull(model["sectionHeaderInfo"])
         }
@@ -541,7 +479,7 @@ class JourneyTests {
 
             // Act
             testJourney.populateModelAndGetViewName(
-                TestStepId.StepFour,
+                TestStepId.StepFour.urlPathSegment,
                 model,
                 null,
                 pageDataStepFour,
@@ -591,7 +529,7 @@ class JourneyTests {
             val exception =
                 assertThrows<ResponseStatusException> {
                     testJourney.updateJourneyDataAndGetViewNameOrRedirect(
-                        TestStepId.StepTwo,
+                        TestStepId.StepTwo.urlPathSegment,
                         pageData,
                         model,
                         null,
@@ -644,7 +582,7 @@ class JourneyTests {
             // Act
             val result =
                 testJourney.updateJourneyDataAndGetViewNameOrRedirect(
-                    TestStepId.StepOne,
+                    TestStepId.StepOne.urlPathSegment,
                     pageData,
                     model,
                     null,
@@ -703,7 +641,7 @@ class JourneyTests {
             // Act
             val result =
                 testJourney.updateJourneyDataAndGetViewNameOrRedirect(
-                    TestStepId.StepOne,
+                    TestStepId.StepOne.urlPathSegment,
                     pageData,
                     model,
                     null,
@@ -762,7 +700,7 @@ class JourneyTests {
             // Act
             val result =
                 testJourney.updateJourneyDataAndGetViewNameOrRedirect(
-                    TestStepId.StepOne,
+                    TestStepId.StepOne.urlPathSegment,
                     pageData,
                     model,
                     null,
@@ -826,7 +764,7 @@ class JourneyTests {
             // Act
             val result =
                 testJourney.updateJourneyDataAndGetViewNameOrRedirect(
-                    TestStepId.StepOne,
+                    TestStepId.StepOne.urlPathSegment,
                     pageData,
                     model,
                     null,
@@ -886,7 +824,7 @@ class JourneyTests {
             // Act
             val result =
                 testJourney.updateJourneyDataAndGetViewNameOrRedirect(
-                    TestStepId.StepOne,
+                    TestStepId.StepOne.urlPathSegment,
                     pageData,
                     model,
                     null,
@@ -930,7 +868,7 @@ class JourneyTests {
             // Act and Assert
             assertThrows<IllegalStateException> {
                 testJourney.updateJourneyDataAndGetViewNameOrRedirect(
-                    TestStepId.StepOne,
+                    TestStepId.StepOne.urlPathSegment,
                     pageData,
                     model,
                     null,
