@@ -4,5 +4,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 
 data class PropertyOwnershipUpdateModel(
     val ownershipType: OwnershipType?,
+    val numberOfHouseholds: Int?,
     val numberOfPeople: Int?,
 )

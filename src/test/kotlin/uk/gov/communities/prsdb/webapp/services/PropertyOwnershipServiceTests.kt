@@ -500,11 +500,14 @@ class PropertyOwnershipServiceTests {
             MockLandlordData.createPropertyOwnership(
                 id = 1,
                 ownershipType = OwnershipType.FREEHOLD,
+                currentNumHouseholds = 2,
                 currentNumTenants = 4,
             )
         val originalOwnershipType = propertyOwnership.ownershipType
+        val originalNumberOfHouseholds = propertyOwnership.currentNumHouseholds
         val originalNumberOfPeople = propertyOwnership.currentNumTenants
-        val updateModel = PropertyOwnershipUpdateModel(ownershipType = null, numberOfPeople = null)
+        val updateModel =
+            PropertyOwnershipUpdateModel(ownershipType = null, numberOfHouseholds = null, numberOfPeople = null)
 
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
             propertyOwnership,
@@ -515,6 +518,7 @@ class PropertyOwnershipServiceTests {
 
         // Assert
         assertEquals(originalOwnershipType, propertyOwnership.ownershipType)
+        assertEquals(originalNumberOfHouseholds, propertyOwnership.currentNumHouseholds)
         assertEquals(originalNumberOfPeople, propertyOwnership.currentNumTenants)
     }
 
@@ -525,9 +529,15 @@ class PropertyOwnershipServiceTests {
             MockLandlordData.createPropertyOwnership(
                 id = 1,
                 ownershipType = OwnershipType.FREEHOLD,
+                currentNumHouseholds = 2,
                 currentNumTenants = 6,
             )
-        val updateModel = PropertyOwnershipUpdateModel(ownershipType = OwnershipType.LEASEHOLD, numberOfPeople = 2)
+        val updateModel =
+            PropertyOwnershipUpdateModel(
+                ownershipType = OwnershipType.LEASEHOLD,
+                numberOfHouseholds = 1,
+                numberOfPeople = 2,
+            )
 
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
             propertyOwnership,
@@ -538,6 +548,7 @@ class PropertyOwnershipServiceTests {
 
         // Assert
         assertEquals(updateModel.ownershipType, propertyOwnership.ownershipType)
+        assertEquals(updateModel.numberOfHouseholds, propertyOwnership.currentNumHouseholds)
         assertEquals(updateModel.numberOfPeople, propertyOwnership.currentNumTenants)
     }
 }
