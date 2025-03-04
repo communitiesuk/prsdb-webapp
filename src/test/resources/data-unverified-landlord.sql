@@ -1,9 +1,6 @@
 INSERT INTO one_login_user (id, created_date)
 VALUES ('urn:fdc:gov.uk:2022:UVWXY', '10/14/24');
 
-INSERT INTO landlord_user (subject_identifier, phone_number, date_of_birth, created_date, last_modified_date)
-VALUES ('urn:fdc:gov.uk:2022:UVWXY', '01406946277', '06/16/84', '10/14/24', '10/14/24');
-
 INSERT INTO registration_number (id, created_date, number, type)
 VALUES (1, '09/13/24', 2001001001, 1);
 
