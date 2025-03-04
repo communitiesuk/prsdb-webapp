@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_BASE_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -17,7 +18,7 @@ import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LANDLORD')")
 @Controller
-@RequestMapping("/$LANDLORD_PATH_SEGMENT")
+@RequestMapping(LANDLORD_BASE_URL)
 class LandlordDashboardController(
     private val landlordService: LandlordService,
 ) {

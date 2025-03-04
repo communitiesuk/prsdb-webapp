@@ -15,16 +15,22 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_BASE_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
+import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourney
+import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createLandlord
+import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
@@ -33,16 +39,20 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
-import java.net.URLEncoder
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import kotlin.test.Test
 import kotlin.test.assertContains
 
-@WebMvcTest(controllers = [LandlordDashboardController::class, RegisterLandlordController::class])
+@WebMvcTest(controllers = [LandlordDashboardController::class, RegisterLandlordController::class, RegisterPropertyController::class])
 class LandlordDashboardUrlTests(
     context: WebApplicationContext,
 ) : ControllerTest(context) {
     @SpyBean
     private lateinit var landlordRegistrationJourney: LandlordRegistrationJourney
+
+    @SpyBean
+    private lateinit var propertyRegistrationJourney: PropertyRegistrationJourney
 
     @MockBean
     lateinit var anyEmailNotificationService: EmailNotificationService<EmailTemplateModel>
@@ -68,17 +78,21 @@ class LandlordDashboardUrlTests(
     @MockBean
     lateinit var mockLocalAuthorityService: LocalAuthorityService
 
+    @MockBean
+    lateinit var mockPropertyOwnershipService: PropertyOwnershipService
+
+    @MockBean
+    lateinit var mockPropertyRegistrationService: PropertyRegistrationService
+
     @Test
     @WithMockUser(roles = ["LANDLORD"])
     fun `The sign in url generated when a landlord is registered is routed to the landlord dashboard`() {
         // Arrange
-        val testEmail = "test@example.com"
-        val landlord = createLandlord(email = testEmail)
+        val landlord = createLandlord()
 
         val mockJourneyData = JourneyDataBuilder.landlordDefault(mockAddressDataService, mockLocalAuthorityService).build()
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mockJourneyData)
 
-        // It's not using this, it's trying to call the real function - looks like it's using a real bean?
         whenever(
             mockLandlordService.createLandlord(
                 baseUserId = anyOrNull(),
@@ -103,10 +117,9 @@ class LandlordDashboardUrlTests(
                 anyEmailNotificationService,
             ).sendEmail(any(), confirmationCaptor.capture())
 
-        // TODO: PRSD-670 Can this just be "agreesToDeclaration=true" ? It's cribbed from the invitationUrlTests version but might not need to be so complicated...
-        val encodedDeclarationContent = "agreesToDeclaration=${URLEncoder.encode("true", "UTF-8")}"
+        val encodedDeclarationContent = "agreesToDeclaration=true"
 
-        // Act
+        // Act, Assert
         mvc
             .post("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.Declaration.urlPathSegment}") {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
@@ -114,7 +127,6 @@ class LandlordDashboardUrlTests(
                 with(csrf())
             }.andExpect { status { is3xxRedirection() } }
 
-        println(confirmationCaptor.firstValue.prsdURL)
         mvc
             .get(confirmationCaptor.firstValue.prsdURL)
             .andExpect { status { is3xxRedirection() } }
@@ -126,5 +138,53 @@ class LandlordDashboardUrlTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"])
     fun `The sign in url generated when a property is registered is routed to the landlord dashboard`() {
+        // Arrange
+        val propertyOwnership = createPropertyOwnership()
+        val landlord = createLandlord()
+
+        val mockJourneyData = JourneyDataBuilder.propertyDefault(mockAddressDataService, mockLocalAuthorityService).build()
+        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mockJourneyData)
+
+        whenever(
+            mockPropertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(
+                address = anyOrNull(),
+                propertyType = anyOrNull(),
+                licenseType = anyOrNull(),
+                licenceNumber = anyOrNull(),
+                ownershipType = anyOrNull(),
+                numberOfHouseholds = anyOrNull(),
+                numberOfPeople = anyOrNull(),
+                baseUserId = anyOrNull(),
+            ),
+        ).thenReturn(propertyOwnership.registrationNumber)
+
+        whenever(mockLandlordService.retrieveLandlordByBaseUserId(anyOrNull())).thenReturn(landlord)
+
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri())
+            .thenCallRealMethod()
+
+        val confirmationCaptor = argumentCaptor<PropertyRegistrationConfirmationEmail>()
+        Mockito
+            .doNothing()
+            .whenever(
+                anyEmailNotificationService,
+            ).sendEmail(any(), confirmationCaptor.capture())
+
+        val encodedDeclarationContent = "agreesToDeclaration=true"
+
+        // Act, Assert
+        mvc
+            .post("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.Declaration.urlPathSegment}") {
+                contentType = MediaType.APPLICATION_FORM_URLENCODED
+                content = encodedDeclarationContent
+                with(csrf())
+            }.andExpect { status { is3xxRedirection() } }
+
+        mvc
+            .get(confirmationCaptor.firstValue.prsdUrl)
+            .andExpect { status { is3xxRedirection() } }
+
+        // Assert
+        assertContains(confirmationCaptor.firstValue.prsdUrl, LANDLORD_BASE_URL)
     }
 }
