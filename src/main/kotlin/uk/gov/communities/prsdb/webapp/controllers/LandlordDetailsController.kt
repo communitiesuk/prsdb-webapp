@@ -56,7 +56,7 @@ class LandlordDetailsController(
         principal: Principal,
     ): String {
         addLandlordDetailsToModel(model, principal, includeChangeLinks = false)
-        model.addAttribute("registeredPropertiesUrlSegment", REGISTERED_PROPERTIES_PATH_SEGMENT)
+
         return "landlordDetailsView"
     }
 
@@ -78,6 +78,7 @@ class LandlordDetailsController(
 
         model.addAttribute("registeredPropertiesList", registeredPropertiesList)
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
+        model.addAttribute("registeredPropertiesUrlSegment", REGISTERED_PROPERTIES_PATH_SEGMENT)
     }
 
     @PreAuthorize("hasRole('LANDLORD')")

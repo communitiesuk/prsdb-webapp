@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_BASE_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -48,8 +49,7 @@ class LandlordDashboardController(
         model.addAttribute("howToLetUrl", "#")
         model.addAttribute(
             "rentersRightsBillUrl",
-            "https://www.gov.uk/government/publications/" +
-                "guide-to-the-renters-rights-bill/82ffc7fb-64b0-4af5-a72e-c24701a5f12a#private-rented-sector-database",
+            RENTERS_RIGHTS_BILL_URL,
         )
         model.addAttribute("keepingPropertyCompliantUrl", "#")
 
