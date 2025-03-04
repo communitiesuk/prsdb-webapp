@@ -10,12 +10,12 @@ A journey is made up of a collection of steps, each of which represents a single
 some information and the user provides it. Each has a unique ID, which is an enum value where each journey has its own 
 enum. The step is also responsible for the journey flow via the `nextAction` and `handleSubmitAndRedirect` functions. 
 
-Most of the flow is managed by the former, but the decision to save the journey to the database is determined by the 
-presence of the latter. For a simpler journeys, each step's `nextAction` would just return the fixed next step in the 
-flow with the last having a `handleSubmitAndRedirect`. 
+Most of the flow is managed by the former, but the decision to complete the overall submission of the form is determined
+by the presence of the latter. For a simpler journeys, each step's `nextAction` would just return the fixed next step in
+the flow with the last having a `handleSubmitAndRedirect`.
 Most of the journeys in the service are not that simple and have branching paths based on the users previous answers. 
 In this case the `nextAction` function looks at the data the user has submitted so far to determine which step should be
-visited next. 
+visited next.
 The `handleSubmitAndRedirect` function can also be used if the user should be "jumped" to another point in the journey
 when completing a `Step`. The main use of this currently is to skip steps that already have valid data (in update 
 journeys, see below). 
@@ -23,6 +23,12 @@ journeys, see below).
 Each step also has a `Page` class which represents the step's form page. It is responsible for providing the Thymeleaf 
 template name, the content attributes for the template and for validating the data submitted on that page. 
 The `Step` by default delegates all data validation to the `Page`, but custom validation can be set on a `Step`.
+
+### Step Details
+Where a `Step` represents a point in a journey that a user can visit, a `StepDetails` represents a concrete point in a
+particular user's traversal of a journey.
+It fully specifies both the step and subpage (see below), but also all necessary data the user has submitted to reach 
+that point in the journey.
 
 ### Subpages
 Some steps are repeatable an indeterminate number of times, for example if you need to specify all interested parties
@@ -44,22 +50,24 @@ to display tasks in logical groupings and on the pages of the journey to show th
 belongs to.
 
 ## The Journey base class
-The `Journey` class is responsible for marshalling the steps. The base class has two main functions for progressing 
-through the multi-page form:
+The `Journey` class is responsible for marshalling the steps. 
+Each final child of `Journey` represents a particular multi-page form in the service. The actual steps that make up that
+journey are specified, including the `nextAction` and `handleSubmitAndRedirect` logic for each.
+The base class has two main functions for progressing through the multi-page form:
 
-### `getPageForStep`/`populateModelAndGetViewName`
+### `populateModelAndGetViewName`
 returns the name of the ThymeLeaf template for a step and populates the model for it, or returns a 
 redirect if the requested step is unreachable. This includes validation errors for the page if data has been submitted
 for it.
 
-### `completeStep`/`updateJourneyDataAndGetViewNameOrRedirect`
+### `updateJourneyDataAndGetViewNameOrRedirect`
 validates the data submitted for the step and either adds it to the journey data and redirects to the next step or
 returns the page for the current step with validation errors. If a `handleSubmitAndRedirect` has been set for the step
 that will be called instead of moving to the next step.
 
 ### Saving journey progress
-A step can be set to `saveAfterSubmit` - if this is set to true, then whenever that step is completed a copy of the 
-`JourneyData` is saved to the database as a JSON encoded string. 
+A step can be set to `saveAfterSubmit` - if this is set to true, then whenever that step is completed a copy of the
+data representing the user's progress through the journey so far is saved to the database as a JSON encoded string. 
 That journey can be restored by calling `loadJourneyDataIfNotLoaded` on the `Journey`, which will return the data to the
 session to allow the user to resume the in progress journey.
 
@@ -75,6 +83,7 @@ each page reached in turn.
 
 ## Journey's Subclasses
 There are a couple of abstract subclasses of journey:
+
 ### The JourneyWithTaskList
 the JourneyWithTaskList adds a task-list page, which is like
 a contents page for the journey - it shows the list of all tasks in the journey along with their current status. If the
@@ -86,7 +95,3 @@ proceeds through all the steps in the usual way, the iterator takes into account
 new journey data to determine whether a step is reachable. Many of the steps set a `handleSubmitAndRedirect` to redirect
 the user to the equivalent of the "check your answers" page in other journeys. This allows us to check the new combined 
 data is valid when multiple changes are made, and to direct the user to the correct page if there is a problem. 
-
-### Final children
-Each final child of `Journey` represents a particular multi-page form in the service. The actual steps that make up that
-journey are specified, including the `nextAction` and `handleSubmitAndRedirect` logic for each. 
