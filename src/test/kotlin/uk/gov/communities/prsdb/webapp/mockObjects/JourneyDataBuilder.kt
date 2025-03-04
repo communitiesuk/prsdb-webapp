@@ -344,4 +344,10 @@ class JourneyDataBuilder(
             mutableMapOf("ownershipType" to ownershipType.name)
         return this
     }
+
+    fun withNumberOfPeopleUpdate(numberOfPeople: Int): JourneyDataBuilder {
+        journeyData[UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment] =
+            mutableMapOf("numberOfPeople" to numberOfPeople)
+        return this
+    }
 }
