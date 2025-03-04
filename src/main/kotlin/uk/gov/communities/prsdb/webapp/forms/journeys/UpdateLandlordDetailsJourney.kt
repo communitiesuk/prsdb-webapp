@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHe
 import uk.gov.communities.prsdb.webapp.helpers.UpdateLandlordDetailsJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DateOfBirthFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
@@ -81,7 +82,13 @@ class UpdateLandlordDetailsJourney(
                         ),
                 ),
             handleSubmitAndRedirect = { _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
-            nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.UpdateName, null) },
+            nextAction = { journeyData, _ ->
+                if (UpdateLandlordDetailsJourneyDataHelper.getIsIdentityVerified(journeyData)) {
+                    Pair(UpdateLandlordDetailsStepId.UpdatePhoneNumber, null)
+                } else {
+                    Pair(UpdateLandlordDetailsStepId.UpdateName, null)
+                }
+            },
             saveAfterSubmit = false,
         )
 
@@ -98,6 +105,27 @@ class UpdateLandlordDetailsJourney(
                             "fieldSetHeading" to "forms.update.name.fieldSetHeading",
                             "fieldSetHint" to "forms.name.fieldSetHint",
                             "label" to "forms.name.label",
+                            "submitButtonText" to "forms.buttons.continue",
+                            BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
+                        ),
+                ),
+            handleSubmitAndRedirect = { _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
+            nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.UpdateDateOfBirth, null) },
+            saveAfterSubmit = false,
+        )
+
+    private val dateOfBirthStep =
+        Step(
+            id = UpdateLandlordDetailsStepId.UpdateDateOfBirth,
+            page =
+                Page(
+                    formModel = DateOfBirthFormModel::class,
+                    templateName = "forms/dateForm",
+                    content =
+                        mapOf(
+                            "title" to "forms.update.title",
+                            "fieldSetHeading" to "forms.update.dateOfBirth.fieldSetHeading",
+                            "fieldSetHint" to "forms.dateOfBirth.fieldSetHint",
                             "submitButtonText" to "forms.buttons.continue",
                             BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
                         ),
@@ -219,6 +247,7 @@ class UpdateLandlordDetailsJourney(
             setOf(
                 emailStep,
                 nameStep,
+                dateOfBirthStep,
                 phoneNumberStep,
                 lookupAddressStep,
                 selectAddressStep,
@@ -234,6 +263,7 @@ class UpdateLandlordDetailsJourney(
                 name = UpdateLandlordDetailsJourneyDataHelper.getNameUpdateIfPresent(journeyData),
                 phoneNumber = UpdateLandlordDetailsJourneyDataHelper.getPhoneNumberIfPresent(journeyData),
                 address = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(journeyData, addressDataService),
+                dateOfBirth = UpdateLandlordDetailsJourneyDataHelper.getDateOfBirthIfPresent(journeyData),
             )
 
         landlordService.updateLandlordForBaseUserId(
@@ -251,6 +281,7 @@ class UpdateLandlordDetailsJourney(
 
         val originalLandlordData =
             mutableMapOf(
+                IS_IDENTITY_VERIFIED_KEY to landlord.isVerified,
                 UpdateLandlordDetailsStepId.UpdateEmail.urlPathSegment to mapOf("emailAddress" to landlord.email),
                 UpdateLandlordDetailsStepId.UpdateName.urlPathSegment to mapOf("name" to landlord.name),
                 UpdateLandlordDetailsStepId.UpdatePhoneNumber.urlPathSegment to mapOf("phoneNumber" to landlord.phoneNumber),
@@ -266,6 +297,12 @@ class UpdateLandlordDetailsJourney(
                 ORIGINAL_ADDRESS_DATA_KEY to
                     mapOf(
                         "address" to Json.encodeToString(AddressDataModel.fromAddress(landlord.address)),
+                    ),
+                UpdateLandlordDetailsStepId.UpdateDateOfBirth.urlPathSegment to
+                    mapOf(
+                        "day" to landlord.dateOfBirth?.dayOfMonth.toString(),
+                        "month" to landlord.dateOfBirth?.monthValue.toString(),
+                        "year" to landlord.dateOfBirth?.year.toString(),
                     ),
             )
 
@@ -308,5 +345,6 @@ class UpdateLandlordDetailsJourney(
 
     companion object {
         private const val ORIGINAL_ADDRESS_DATA_KEY = "original-address-data"
+        const val IS_IDENTITY_VERIFIED_KEY = "isIdentityVerified"
     }
 }

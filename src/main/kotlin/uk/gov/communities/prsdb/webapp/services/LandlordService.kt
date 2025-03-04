@@ -81,6 +81,7 @@ class LandlordService(
         landlordUpdate.address?.let {
             landlordEntity.address = addressService.findOrCreateAddress(it)
         }
+        landlordUpdate.dateOfBirth?.let { landlordEntity.dateOfBirth = it }
 
         return landlordEntity
     }

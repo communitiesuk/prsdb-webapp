@@ -48,7 +48,6 @@ class Landlord() : ModifiableAuditableEntity() {
         private set
 
     var dateOfBirth: LocalDate? = null
-        private set
 
     @OneToOne(optional = false)
     @JoinColumn(
