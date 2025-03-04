@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserOrInvitationDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
 
 @Service
@@ -39,6 +40,7 @@ class LocalAuthorityDataService(
                 localAuthorityUser.name,
                 localAuthorityUser.localAuthority.name,
                 localAuthorityUser.isManager,
+                localAuthorityUser.email,
             )
 
         if (localAuthorityUser.localAuthority.id != localAuthorityId) {
@@ -67,6 +69,7 @@ class LocalAuthorityDataService(
             localAuthorityUser.name,
             localAuthorityUser.localAuthority.name,
             localAuthorityUser.isManager,
+            localAuthorityUser.email,
         )
     }
 
@@ -74,7 +77,7 @@ class LocalAuthorityDataService(
         localAuthority: LocalAuthority,
         currentPageNumber: Int,
         pageSize: Int = MAX_ENTRIES_IN_LA_USERS_TABLE_PAGE,
-    ): Page<LocalAuthorityUserDataModel> {
+    ): Page<LocalAuthorityUserOrInvitationDataModel> {
         val pageRequest =
             PageRequest.of(
                 currentPageNumber,
@@ -82,9 +85,9 @@ class LocalAuthorityDataService(
                 Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("name")),
             )
         return localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest).map {
-            LocalAuthorityUserDataModel(
+            LocalAuthorityUserOrInvitationDataModel(
                 id = it.id,
-                userName = it.name,
+                userNameOrEmail = it.name,
                 localAuthorityName = localAuthority.name,
                 isManager = it.isManager,
                 isPending = it.entityType == "local_authority_invitation",

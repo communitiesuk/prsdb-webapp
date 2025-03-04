@@ -18,7 +18,7 @@
                     ">
                 <tbody class="govuk-table__body">
                 <tr class="govuk_table__row" th:each="user: ${userList}">
-                    <td class="govuk-table__cell" th:text="${user.userName}"></td>
+                    <td class="govuk-table__cell" th:text="${user.userNameOrEmail}"></td>
                     <td class="govuk-table__cell"
                         th:text="${user.manager} ? #{manageLAUsers.table.admin} : #{manageLAUsers.table.basic}">
                     </td>
