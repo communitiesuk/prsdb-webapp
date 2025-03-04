@@ -89,10 +89,11 @@ class PropertyDetailsViewModel(
                         "propertyDetails.propertyRecord.numberOfHouseholds",
                         propertyOwnership.currentNumHouseholds,
                     )
-                    // TODO PRSD-801: Add update link
                     addRow(
                         "propertyDetails.propertyRecord.numberOfPeople",
                         propertyOwnership.currentNumTenants,
+                        UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment,
+                        withChangeLinks,
                     )
                 }
             }.toList()
