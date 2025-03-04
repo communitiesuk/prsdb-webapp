@@ -10,11 +10,13 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfHouseholdsUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfPeopleUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getOwnershipTypeUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.propertyDetailsUpdateJourneyDataExtensions
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
@@ -65,6 +67,26 @@ class PropertyDetailsUpdateJourney(
                         ),
                 ),
             handleSubmitAndRedirect = { _, _ -> UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment },
+            nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds, null) },
+            saveAfterSubmit = false,
+        )
+
+    private val numberOfHouseholdsStep =
+        Step(
+            id = UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds,
+            page =
+                Page(
+                    formModel = NumberOfHouseholdsFormModel::class,
+                    templateName = "forms/numberOfHouseholdsForm",
+                    content =
+                        mapOf(
+                            "title" to "propertyDetails.update.title",
+                            "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading",
+                            "label" to "forms.numberOfHouseholds.label",
+                            BACK_URL_ATTR_NAME to UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment,
+                        ),
+                ),
+            handleSubmitAndRedirect = { _, _ -> UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment },
             nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateNumberOfPeople, null) },
             saveAfterSubmit = false,
         )
@@ -108,6 +130,7 @@ class PropertyDetailsUpdateJourney(
         val propertyUpdate =
             PropertyOwnershipUpdateModel(
                 ownershipType = journeyData.propertyDetailsUpdateJourneyDataExtensions.getOwnershipTypeUpdateIfPresent(),
+                numberOfHouseholds = journeyData.propertyDetailsUpdateJourneyDataExtensions.getNumberOfHouseholdsUpdateIfPresent(),
                 numberOfPeople = journeyData.propertyDetailsUpdateJourneyDataExtensions.getNumberOfPeopleUpdateIfPresent(),
             )
 
@@ -122,7 +145,7 @@ class PropertyDetailsUpdateJourney(
     override val sections =
         createSingleSectionWithSingleTaskFromSteps(
             initialStepId,
-            setOf(ownershipTypeStep, numberOfPeopleStep, updateDetailsStep),
+            setOf(ownershipTypeStep, numberOfHouseholdsStep, numberOfPeopleStep, updateDetailsStep),
         )
 
     override fun createOriginalJourneyData(updateEntityId: String): JourneyData {
@@ -130,6 +153,8 @@ class PropertyDetailsUpdateJourney(
 
         return mapOf(
             UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment to mapOf("ownershipType" to propertyOwnership.ownershipType),
+            UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment to
+                mapOf("numberOfHouseholds" to propertyOwnership.currentNumHouseholds),
             UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment to
                 mapOf("numberOfPeople" to propertyOwnership.currentNumTenants),
         )
