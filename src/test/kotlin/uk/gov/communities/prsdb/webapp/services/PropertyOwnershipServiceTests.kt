@@ -496,9 +496,15 @@ class PropertyOwnershipServiceTests {
     @Test
     fun `updatePropertyOwnership does not change the fields associated with the given update model's null values`() {
         // Arrange
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1, ownershipType = OwnershipType.FREEHOLD)
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                ownershipType = OwnershipType.FREEHOLD,
+                currentNumTenants = 4,
+            )
         val originalOwnershipType = propertyOwnership.ownershipType
-        val updateModel = PropertyOwnershipUpdateModel(ownershipType = null)
+        val originalNumberOfPeople = propertyOwnership.currentNumTenants
+        val updateModel = PropertyOwnershipUpdateModel(ownershipType = null, numberOfPeople = null)
 
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
             propertyOwnership,
@@ -509,13 +515,19 @@ class PropertyOwnershipServiceTests {
 
         // Assert
         assertEquals(originalOwnershipType, propertyOwnership.ownershipType)
+        assertEquals(originalNumberOfPeople, propertyOwnership.currentNumTenants)
     }
 
     @Test
     fun `updatePropertyOwnership changes the fields associated with the given update model's non-null values`() {
         // Arrange
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1, ownershipType = OwnershipType.FREEHOLD)
-        val updateModel = PropertyOwnershipUpdateModel(ownershipType = OwnershipType.LEASEHOLD)
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                ownershipType = OwnershipType.FREEHOLD,
+                currentNumTenants = 6,
+            )
+        val updateModel = PropertyOwnershipUpdateModel(ownershipType = OwnershipType.LEASEHOLD, numberOfPeople = 2)
 
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
             propertyOwnership,
@@ -526,5 +538,6 @@ class PropertyOwnershipServiceTests {
 
         // Assert
         assertEquals(updateModel.ownershipType, propertyOwnership.ownershipType)
+        assertEquals(updateModel.numberOfPeople, propertyOwnership.currentNumTenants)
     }
 }
