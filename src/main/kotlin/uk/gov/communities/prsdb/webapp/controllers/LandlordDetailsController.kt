@@ -42,7 +42,7 @@ class LandlordDetailsController(
         addLandlordDetailsToModel(model, principal, includeChangeLinks = true)
         // TODO: PRSD-355 Remove this way of showing submit button
         model.addAttribute("shouldShowSubmitButton", true)
-        return updateDetailsJourney.getModelAndViewNameForUpdateStep(
+        return updateDetailsJourney.getModelAndViewForUpdateStep(
             updateEntityId = principal.name,
         )
     }

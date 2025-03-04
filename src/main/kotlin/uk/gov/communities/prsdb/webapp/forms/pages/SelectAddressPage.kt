@@ -22,13 +22,11 @@ class SelectAddressPage(
     private val lookupAddressPathSegment: String,
     private val addressLookupService: AddressLookupService,
     private val addressDataService: AddressDataService,
-) : Page(formModel, templateName, content, displaySectionHeader) {
-    override fun getModelAndView(
-        validator: Validator,
-        pageData: PageData?,
-        prevStepUrl: String?,
+) : AbstractPage(formModel, templateName, content, displaySectionHeader) {
+    override fun enrichModel(
+        modelAndView: ModelAndView,
         journeyData: JourneyData?,
-    ): ModelAndView {
+    ) {
         journeyData!!
 
         val (houseNameOrNumber, postcode) =
@@ -55,13 +53,10 @@ class SelectAddressPage(
             ),
         )
 
-        val modelAndView = super.getModelAndView(validator, pageData, prevStepUrl)
         modelAndView.addObject("houseNameOrNumber", houseNameOrNumber)
         modelAndView.addObject("postcode", postcode)
         modelAndView.addObject("addressCount", addressLookupResults.size)
         modelAndView.addObject("options", addressRadiosViewModel)
-
-        return modelAndView
     }
 
     override fun isSatisfied(

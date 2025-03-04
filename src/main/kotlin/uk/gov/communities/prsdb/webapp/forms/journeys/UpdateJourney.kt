@@ -30,7 +30,7 @@ abstract class UpdateJourney<T : StepId>(
         }
     }
 
-    fun getModelAndViewNameForUpdateStep(
+    fun getModelAndViewForUpdateStep(
         updateEntityId: String,
         subPageNumber: Int? = null,
         submittedPageData: PageData? = null,

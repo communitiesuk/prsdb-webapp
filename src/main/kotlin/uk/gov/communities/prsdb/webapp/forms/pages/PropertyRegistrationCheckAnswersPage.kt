@@ -1,15 +1,12 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
-import org.springframework.validation.Validator
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
@@ -19,7 +16,7 @@ class PropertyRegistrationCheckAnswersPage(
     private val addressDataService: AddressDataService,
     private val localAuthorityService: LocalAuthorityService,
     displaySectionHeader: Boolean = false,
-) : Page(
+) : AbstractPage(
         NoInputFormModel::class,
         "forms/propertyRegistrationCheckAnswersForm",
         mapOf(
@@ -28,18 +25,12 @@ class PropertyRegistrationCheckAnswersPage(
         ),
         shouldDisplaySectionHeader = displaySectionHeader,
     ) {
-    override fun getModelAndView(
-        validator: Validator,
-        pageData: PageData?,
-        prevStepUrl: String?,
+    override fun enrichModel(
+        modelAndView: ModelAndView,
         journeyData: JourneyData?,
-        sectionHeaderInfo: SectionHeaderViewModel?,
-    ): ModelAndView {
+    ) {
         journeyData!!
-        val modelAndView = super.getModelAndView(validator, pageData, prevStepUrl, journeyData, sectionHeaderInfo)
         addPropertyDetailsToModel(modelAndView, journeyData)
-
-        return modelAndView
     }
 
     private fun addPropertyDetailsToModel(

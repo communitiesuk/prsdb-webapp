@@ -1,9 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
-import org.springframework.validation.Validator
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
@@ -13,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.services.AddressDataService
 class LandlordRegistrationCheckAnswersPage(
     private val addressDataService: AddressDataService,
     displaySectionHeader: Boolean = false,
-) : Page(
+) : AbstractPage(
         formModel = CheckAnswersFormModel::class,
         templateName = "forms/checkAnswersForm",
         content =
@@ -24,12 +22,10 @@ class LandlordRegistrationCheckAnswersPage(
             ),
         shouldDisplaySectionHeader = displaySectionHeader,
     ) {
-    override fun getModelAndView(
-        validator: Validator,
-        pageData: PageData?,
-        prevStepUrl: String?,
+    override fun enrichModel(
+        modelAndView: ModelAndView,
         journeyData: JourneyData?,
-    ): ModelAndView {
+    ) {
         journeyData!!
 
         val formData =
@@ -37,10 +33,7 @@ class LandlordRegistrationCheckAnswersPage(
                 getEmailAndPhoneFormData(journeyData) +
                 getAddressFormData(journeyData)
 
-        val modelAndView = super.getModelAndView(validator, pageData, prevStepUrl)
         modelAndView.addObject("formData", formData)
-
-        return modelAndView
     }
 
     private fun getIdentityFormData(journeyData: JourneyData): List<SummaryListRowViewModel> {
