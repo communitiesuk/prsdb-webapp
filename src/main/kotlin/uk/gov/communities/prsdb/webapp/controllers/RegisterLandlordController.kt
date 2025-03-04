@@ -43,7 +43,7 @@ class RegisterLandlordController(
         principal: Principal,
         @AuthenticationPrincipal oidcUser: OidcUser,
     ): String {
-        var identity = identityService.getVerifiedIdentityData(oidcUser) ?: mapOf()
+        val identity = identityService.getVerifiedIdentityData(oidcUser) ?: mapOf()
 
         return landlordRegistrationJourney.updateJourneyDataAndGetViewNameOrRedirect(
             IDENTITY_VERIFICATION_PATH_SEGMENT,

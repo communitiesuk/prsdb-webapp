@@ -108,7 +108,7 @@ abstract class Journey<T : StepId>(
         }
 
         if (currentStep.handleSubmitAndRedirect != null) {
-            return "redirect:${currentStep.handleSubmitAndRedirect!!(newJourneyData, subPageNumber)}"
+            return "redirect:${currentStep.handleSubmitAndRedirect.invoke(newJourneyData, subPageNumber)}"
         }
         val (newStepId: T?, newSubPageNumber: Int?) = currentStep.nextAction(newJourneyData, subPageNumber)
         if (newStepId == null) {
