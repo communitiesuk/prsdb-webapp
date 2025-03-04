@@ -41,9 +41,8 @@ class PropertyDetailsController(
 
         val landlordViewModel =
             PropertyDetailsLandlordViewModel(
-                landlord = propertyOwnership.primaryLandlord,
-                withChangeLinks = true,
-                landlordDetailsUrl = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
+                propertyOwnership.primaryLandlord,
+                LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
             )
 
         model.addAttribute("propertyDetails", propertyDetails)
@@ -77,9 +76,8 @@ class PropertyDetailsController(
 
         val landlordViewModel =
             PropertyDetailsLandlordViewModel(
-                landlord = propertyOwnership.primaryLandlord,
-                withChangeLinks = false,
-                landlordDetailsUrl = "${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/${propertyOwnership.primaryLandlord.id}",
+                propertyOwnership.primaryLandlord,
+                "${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/${propertyOwnership.primaryLandlord.id}",
             )
 
         model.addAttribute("propertyDetails", propertyDetails)

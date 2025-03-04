@@ -16,6 +16,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
@@ -28,7 +29,6 @@ import org.springframework.validation.Validator
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter
 import org.springframework.validation.support.BindingAwareModelMap
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
@@ -55,6 +55,10 @@ class JourneyTests {
     private lateinit var validatorFactory: ValidatorFactory
     private lateinit var validator: Validator
 
+    companion object {
+        const val JOURNEY_PATH_SEGMENT = "journey-path-segment"
+    }
+
     enum class TestStepId(
         override val urlPathSegment: String,
     ) : StepId {
@@ -73,6 +77,8 @@ class JourneyTests {
     ) : Journey<TestStepId>(journeyType, validator, journeyDataService) {
         override val sections: List<JourneySection<TestStepId>> =
             createSingleSectionWithSingleTaskFromSteps(initialStepId, steps)
+
+        override val journeyPathSegment = JOURNEY_PATH_SEGMENT
     }
 
     class TestJourneyWithSections(
@@ -81,7 +87,9 @@ class JourneyTests {
         override val initialStepId: TestStepId,
         validator: Validator,
         journeyDataService: JourneyDataService,
-    ) : Journey<TestStepId>(journeyType, validator, journeyDataService)
+    ) : Journey<TestStepId>(journeyType, validator, journeyDataService) {
+        override val journeyPathSegment = JOURNEY_PATH_SEGMENT
+    }
 
     class TestFormModel : FormModel {
         @NotNull
@@ -251,10 +259,11 @@ class JourneyTests {
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
-            val result = testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, null)
+            val result =
+                testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, null)
 
             // Assert
-            assertEquals("redirect:/${REGISTER_LANDLORD_JOURNEY_URL}/${TestStepId.StepOne.urlPathSegment}", result)
+            assertEquals("redirect:${TestStepId.StepOne.urlPathSegment}", result)
         }
 
         @Test
@@ -295,10 +304,11 @@ class JourneyTests {
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
-            val result = testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, null)
+            val result =
+                testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, null)
 
             // Assert
-            assertEquals("redirect:/${REGISTER_LANDLORD_JOURNEY_URL}/${TestStepId.StepOne.urlPathSegment}", result)
+            assertEquals("redirect:${TestStepId.StepOne.urlPathSegment}", result)
         }
 
         @Test
@@ -340,7 +350,8 @@ class JourneyTests {
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
-            val result = testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, pageData)
+            val result =
+                testJourney.populateModelAndGetViewName(TestStepId.StepTwo, model, null, pageData)
 
             // Assert
             assertIs<BindingResult>(model[BindingResult.MODEL_KEY_PREFIX + "formModel"])
@@ -367,6 +378,7 @@ class JourneyTests {
                             TestFormModel::class,
                             "index",
                             mapOf("testKey" to "testValue"),
+                            shouldDisplaySectionHeader = true,
                         ),
                 )
 
@@ -385,10 +397,12 @@ class JourneyTests {
                     validator = validator,
                 )
 
-            val expectedSectionHeader = SectionHeaderViewModel("Test section heading name key", 1, 1)
-            val sectionHeader = testJourney.getSectionHeaderInfo(testStep)
+            val model = BindingAwareModelMap()
 
-            assertTrue(ReflectionEquals(expectedSectionHeader).matches(sectionHeader))
+            testJourney.populateModelAndGetViewName(TestStepId.StepOne, model, null)
+
+            val expectedSectionHeader = SectionHeaderViewModel("Test section heading name key", 1, 1)
+            assertTrue(ReflectionEquals(expectedSectionHeader).matches(model["sectionHeaderInfo"]))
         }
 
         @Test
@@ -416,7 +430,11 @@ class JourneyTests {
                     validator = validator,
                 )
 
-            assertNull(testJourney.getSectionHeaderInfo(testStep))
+            val model = BindingAwareModelMap()
+
+            testJourney.populateModelAndGetViewName(TestStepId.StepOne, model, null)
+
+            assertNull(model["sectionHeaderInfo"])
         }
     }
 
@@ -516,10 +534,19 @@ class JourneyTests {
                     TestStepId.StepOne.urlPathSegment to pageDataStepOne,
                     TestStepId.StepThree.urlPathSegment to pageDataStepThree,
                 )
+            val journeyDataKey = "journey-data-key"
+
+            whenever(spiedOnJourneyDataService.getJourneyDataFromSession(journeyDataKey)).thenReturn(journeyData)
             whenever(spiedOnJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
-            testJourney.populateModelAndGetViewName(TestStepId.StepFour, model, null, pageDataStepFour)
+            testJourney.populateModelAndGetViewName(
+                TestStepId.StepFour,
+                model,
+                null,
+                pageDataStepFour,
+                journeyDataKey,
+            )
 
             // Assert
             verify(spiedOnPage).populateModelAndGetTemplateName(
@@ -683,10 +710,10 @@ class JourneyTests {
                     principal,
                 )
             val journeyDataCaptor = argumentCaptor<JourneyData>()
-            verify(mockJourneyDataService).setJourneyData(journeyDataCaptor.capture())
+            verify(mockJourneyDataService).setJourneyDataInSession(journeyDataCaptor.capture())
 
             // Assert
-            assertEquals("redirect:/${REGISTER_LANDLORD_JOURNEY_URL}/${TestStepId.StepTwo.urlPathSegment}", result)
+            assertEquals("redirect:/${JOURNEY_PATH_SEGMENT}/${TestStepId.StepTwo.urlPathSegment}", result)
             assertIs<PageData>(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment]!!)
             val resultPageData = objectToStringKeyedMap(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment])
             assertEquals("testPropertyValue", resultPageData?.get("testProperty"))
@@ -750,7 +777,7 @@ class JourneyTests {
             )
 
             // Assert
-            assertEquals("redirect:/${REGISTER_LANDLORD_JOURNEY_URL}/${TestStepId.StepTwo.urlPathSegment}", result)
+            assertEquals("redirect:/${JOURNEY_PATH_SEGMENT}/${TestStepId.StepTwo.urlPathSegment}", result)
             assertIs<PageData>(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment]!!)
             val resultPageData = objectToStringKeyedMap(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment])
             assertEquals("testPropertyValue", resultPageData?.get("testProperty"))
@@ -814,7 +841,7 @@ class JourneyTests {
                 eq(JourneyType.LANDLORD_REGISTRATION),
                 eq(principal),
             )
-            assertEquals("redirect:/${REGISTER_LANDLORD_JOURNEY_URL}/${TestStepId.StepTwo.urlPathSegment}", result)
+            assertEquals("redirect:/${JOURNEY_PATH_SEGMENT}/${TestStepId.StepTwo.urlPathSegment}", result)
         }
 
         @Test
@@ -910,6 +937,88 @@ class JourneyTests {
                     principal,
                 )
             }
+        }
+    }
+
+    @Nested
+    inner class JourneyDataManipulationTests {
+        @Test
+        fun `when there is no journey data in the session or the database, journey data is not loaded`() {
+            val journeyType = JourneyType.PROPERTY_REGISTRATION
+            val principalName = "principalName"
+            val journeyDataKey = "journey-data-key"
+            val testJourney =
+                TestJourney(
+                    journeyType,
+                    mock(),
+                    mock(),
+                    mock(),
+                    mockJourneyDataService,
+                )
+
+            whenever(mockJourneyDataService.getJourneyDataFromSession(journeyDataKey)).thenReturn(mapOf())
+            whenever(mockJourneyDataService.getContextId(principalName, journeyType)).thenReturn(
+                null,
+            )
+
+            // Act
+            testJourney.loadJourneyDataIfNotLoaded(principalName, journeyDataKey)
+
+            // Assert
+            verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any())
+        }
+
+        @Test
+        fun `when the journey data is not in the session it will be loaded into the session from the database`() {
+            val journeyType = JourneyType.PROPERTY_REGISTRATION
+            val principalName = "principalName"
+            val journeyDataKey = "journey-data-key"
+            val contextId = 67L
+            val testJourney =
+                TestJourney(
+                    journeyType,
+                    mock(),
+                    mock(),
+                    mock(),
+                    mockJourneyDataService,
+                )
+
+            whenever(mockJourneyDataService.getJourneyDataFromSession(journeyDataKey)).thenReturn(mapOf())
+            whenever(mockJourneyDataService.getContextId(principalName, journeyType)).thenReturn(
+                contextId,
+            )
+
+            // Act
+            testJourney.loadJourneyDataIfNotLoaded(principalName, journeyDataKey)
+
+            // Assert
+            val captor = argumentCaptor<Long>()
+            verify(mockJourneyDataService).loadJourneyDataIntoSession(captor.capture())
+            assertEquals(contextId, captor.allValues.single())
+        }
+
+        @Test
+        fun `when the journey data is already in the session, journey data is not loaded`() {
+            val principalName = "principalName"
+            val journeyDataKey = "journey-data-key"
+            val testJourney =
+                TestJourney(
+                    JourneyType.PROPERTY_REGISTRATION,
+                    mock(),
+                    mock(),
+                    mock(),
+                    mockJourneyDataService,
+                )
+
+            whenever(mockJourneyDataService.getJourneyDataFromSession(journeyDataKey)).thenReturn(
+                mapOf("anything" to "Anything else"),
+            )
+
+            // Act
+            testJourney.loadJourneyDataIfNotLoaded(principalName, journeyDataKey)
+
+            // Assert
+            verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any())
         }
     }
 }

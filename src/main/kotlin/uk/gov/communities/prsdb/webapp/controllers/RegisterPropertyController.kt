@@ -55,7 +55,7 @@ class RegisterPropertyController(
         model: Model,
         principal: Principal,
     ): String {
-        propertyRegistrationJourney.initialiseJourneyDataIfNotInitialised(principal.name)
+        propertyRegistrationJourney.loadJourneyDataIfNotLoaded(principal.name)
 
         return propertyRegistrationJourney.populateModelAndGetTaskListViewName(model)
     }

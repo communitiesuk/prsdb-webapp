@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
-import uk.gov.communities.prsdb.webapp.forms.steps.UpdateDetailsStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
@@ -80,6 +80,7 @@ class JourneyDataBuilder(
 
         private val defaultLandlordJourneyData: JourneyData =
             mapOf(
+                LandlordRegistrationStepId.VerifyIdentity.urlPathSegment to mapOf(),
                 LandlordRegistrationStepId.Name.urlPathSegment to mapOf("name" to "Arthur Dent"),
                 LandlordRegistrationStepId.DateOfBirth.urlPathSegment to
                     mapOf(
@@ -90,6 +91,8 @@ class JourneyDataBuilder(
                 LandlordRegistrationStepId.Email.urlPathSegment to mapOf("emailAddress" to "test@example.com"),
                 LandlordRegistrationStepId.PhoneNumber.urlPathSegment to mapOf("phoneNumber" to "07123456789"),
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment to mapOf("livesInEnglandOrWales" to true),
+                LandlordRegistrationStepId.LookupAddress.urlPathSegment to
+                    mapOf("address" to mapOf("houseNameOrNumber" to "44", "postcode" to "EG1 1GE")),
                 LandlordRegistrationStepId.SelectAddress.urlPathSegment to mapOf("address" to DEFAULT_ADDRESS),
             )
 
@@ -129,6 +132,10 @@ class JourneyDataBuilder(
 
         whenever(mockLocalAuthorityService.retrieveLocalAuthorityById(localAuthority.id)).thenReturn(localAuthority)
 
+        if (!isContactAddress) {
+            withEnglandOrWalesResidence()
+        }
+
         val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
         journeyData[selectAddressKey] = mapOf("address" to singleLineAddress)
         return this
@@ -152,6 +159,10 @@ class JourneyDataBuilder(
                 "postcode" to postcode,
             )
 
+        if (!isContactAddress) {
+            withEnglandOrWalesResidence()
+        }
+
         if (localAuthority != null) {
             whenever(mockLocalAuthorityService.retrieveLocalAuthorityById(localAuthority.id)).thenReturn(localAuthority)
         }
@@ -159,6 +170,14 @@ class JourneyDataBuilder(
         journeyData["local-authority"] =
             mapOf("localAuthorityId" to localAuthority?.id)
 
+        return this
+    }
+
+    private fun withEnglandOrWalesResidence(): JourneyDataBuilder {
+        journeyData[LandlordRegistrationStepId.CountryOfResidence.urlPathSegment] =
+            mapOf(
+                "livesInEnglandOrWales" to true,
+            )
         return this
     }
 
@@ -204,12 +223,16 @@ class JourneyDataBuilder(
     }
 
     fun withNoTenants(): JourneyDataBuilder {
+        journeyData.remove("number-of-households")
+        journeyData.remove("number-of-people")
+        return withOccupiedSetToFalse()
+    }
+
+    fun withOccupiedSetToFalse(): JourneyDataBuilder {
         journeyData["occupancy"] =
             mapOf(
                 "occupied" to "false",
             )
-        journeyData.remove("number-of-households")
-        journeyData.remove("number-of-people")
         return this
     }
 
@@ -300,12 +323,12 @@ class JourneyDataBuilder(
     }
 
     fun withEmailAddressUpdate(newEmail: String): JourneyDataBuilder {
-        journeyData[UpdateDetailsStepId.UpdateEmail.urlPathSegment] = mapOf("emailAddress" to newEmail)
+        journeyData[UpdateLandlordDetailsStepId.UpdateEmail.urlPathSegment] = mapOf("emailAddress" to newEmail)
         return this
     }
 
     fun withNameUpdate(newName: String): JourneyDataBuilder {
-        journeyData[UpdateDetailsStepId.UpdateName.urlPathSegment] = mapOf("name" to newName)
+        journeyData[UpdateLandlordDetailsStepId.UpdateName.urlPathSegment] = mapOf("name" to newName)
         return this
     }
 }

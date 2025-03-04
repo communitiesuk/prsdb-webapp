@@ -19,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.C
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.UpdateLandlordDetailsJourney
-import uk.gov.communities.prsdb.webapp.forms.steps.UpdateDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
@@ -41,14 +40,12 @@ class LandlordDetailsController(
         model: Model,
         principal: Principal,
     ): String {
-        updateDetailsJourney.initialiseJourneyDataIfNotInitialised(principal.name)
+        addLandlordDetailsToModel(model, principal, includeChangeLinks = true)
         // TODO: PRSD-355 Remove this way of showing submit button
         model.addAttribute("shouldShowSubmitButton", true)
-        addLandlordDetailsToModel(model, principal, includeChangeLinks = true)
-        return updateDetailsJourney.populateModelAndGetViewName(
-            UpdateDetailsStepId.UpdateDetails,
-            model,
-            null,
+        return updateDetailsJourney.populateModelAndGetViewNameForUpdateStep(
+            updateEntityId = principal.name,
+            model = model,
         )
     }
 

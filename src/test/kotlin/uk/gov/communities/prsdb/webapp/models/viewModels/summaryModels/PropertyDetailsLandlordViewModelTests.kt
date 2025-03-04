@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertIterableEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.database.entity.Address
@@ -192,34 +191,12 @@ class PropertyDetailsLandlordViewModelTests {
     }
 
     @Test
-    fun `LandlordViewModel populates change links in rows that should have them`() {
-        // Arrange
-        val testLandlord = MockLandlordData.createLandlord()
-        val rowHeadingsWithoutChangeLinks =
-            listOf(
-                "landlordDetails.personalDetails.oneLoginVerified",
-            )
-
-        // Act
-        val viewModel = PropertyDetailsLandlordViewModel(testLandlord)
-
-        // Assert
-        for (row in viewModel.landlordsDetails) {
-            if (rowHeadingsWithoutChangeLinks.contains(row.fieldHeading)) {
-                assertNull(row.changeUrl)
-            } else {
-                assertNotNull(row.changeUrl)
-            }
-        }
-    }
-
-    @Test
     fun `LandlordViewModel returns all rows without change links`() {
         // Arrange
         val testLandlord = MockLandlordData.createLandlord()
 
         // Act
-        val viewModel = PropertyDetailsLandlordViewModel(testLandlord, withChangeLinks = false)
+        val viewModel = PropertyDetailsLandlordViewModel(testLandlord)
 
         // Assert
         viewModel.landlordsDetails.forEach { personalDetails -> assertNull(personalDetails.changeUrl) }

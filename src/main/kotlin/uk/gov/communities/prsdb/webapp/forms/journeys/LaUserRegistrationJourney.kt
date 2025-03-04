@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.pages.LaUserRegistrationCheckAnswersPage
@@ -42,13 +43,15 @@ class LaUserRegistrationJourney(
             ),
         )
 
+    override val journeyPathSegment = REGISTER_LA_USER_JOURNEY_URL
+
     fun initialiseJourneyData(token: String) {
-        val journeyData = journeyDataService.getJourneyDataFromSession()
+        val journeyData = journeyDataService.getJourneyDataFromSession(defaultJourneyDataKey)
         val formData: PageData = mapOf("emailAddress" to invitationService.getEmailAddressForToken(token))
         val emailStep = steps.single { step -> step.id == RegisterLaUserStepId.Email }
 
         val newJourneyData = emailStep.updatedJourneyData(journeyData, formData, null)
-        journeyDataService.setJourneyData(newJourneyData)
+        journeyDataService.setJourneyDataInSession(newJourneyData)
     }
 
     private fun landingPageStep() =
@@ -81,7 +84,7 @@ class LaUserRegistrationJourney(
                             "fieldSetHint" to "forms.name.fieldSetHint",
                             "label" to "forms.name.label",
                             "submitButtonText" to "forms.buttons.continue",
-                            "backUrl" to "/${JourneyType.LA_USER_REGISTRATION.urlPathSegment}/",
+                            "backUrl" to "/$journeyPathSegment/",
                         ),
                 ),
             nextAction = { _, _ -> Pair(RegisterLaUserStepId.Email, null) },
