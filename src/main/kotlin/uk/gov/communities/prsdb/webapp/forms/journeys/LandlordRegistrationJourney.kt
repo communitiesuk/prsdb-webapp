@@ -45,7 +45,7 @@ class LandlordRegistrationJourney(
     journeyDataService: JourneyDataService,
     addressLookupService: AddressLookupService,
     addressDataService: AddressDataService,
-    landlordService: LandlordService,
+    val landlordService: LandlordService,
     absoluteUrlProvider: AbsoluteUrlProvider,
     emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
 ) : Journey<LandlordRegistrationStepId>(
@@ -63,7 +63,7 @@ class LandlordRegistrationJourney(
                 "registerAsALandlord.section.yourDetails.heading",
             ),
             JourneySection(
-                checkAndSubmitDetailsTasks(addressDataService, landlordService, absoluteUrlProvider, emailNotificationService),
+                checkAndSubmitDetailsTasks(addressDataService, absoluteUrlProvider, emailNotificationService),
                 "registerAsALandlord.section.checkAndSubmit.heading",
             ),
         )
@@ -84,14 +84,13 @@ class LandlordRegistrationJourney(
 
     private fun checkAndSubmitDetailsTasks(
         addressDataService: AddressDataService,
-        landlordService: LandlordService,
         absoluteUrlProvider: AbsoluteUrlProvider,
         emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
     ): List<JourneyTask<LandlordRegistrationStepId>> =
         listOf(
             JourneyTask.withOneStep(checkAnswersStep(addressDataService)),
             JourneyTask.withOneStep(
-                declarationStep(journeyDataService, landlordService, addressDataService, absoluteUrlProvider, emailNotificationService),
+                declarationStep(journeyDataService, addressDataService, absoluteUrlProvider, emailNotificationService),
             ),
         )
 
@@ -460,7 +459,6 @@ class LandlordRegistrationJourney(
 
     private fun declarationStep(
         journeyDataService: JourneyDataService,
-        landlordService: LandlordService,
         addressDataService: AddressDataService,
         absoluteUrlProvider: AbsoluteUrlProvider,
         emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
@@ -490,7 +488,6 @@ class LandlordRegistrationJourney(
             declarationHandleSubmitAndRedirect(
                 journeyData,
                 journeyDataService,
-                landlordService,
                 addressDataService,
                 absoluteUrlProvider,
                 emailNotificationService,
@@ -524,7 +521,6 @@ class LandlordRegistrationJourney(
     private fun declarationHandleSubmitAndRedirect(
         journeyData: JourneyData,
         journeyDataService: JourneyDataService,
-        landlordService: LandlordService,
         addressDataService: AddressDataService,
         absoluteUrlProvider: AbsoluteUrlProvider,
         emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
