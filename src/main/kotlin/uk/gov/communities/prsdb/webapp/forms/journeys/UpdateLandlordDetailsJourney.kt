@@ -81,12 +81,12 @@ class UpdateLandlordDetailsJourney(
                             BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> UpdateDetailsStepId.UpdateDetails.urlPathSegment },
+            handleSubmitAndRedirect = { _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
             nextAction = { journeyData, _ ->
                 if (UpdateLandlordDetailsJourneyDataHelper.getIsIdentityVerified(journeyData)) {
-                    Pair(UpdateDetailsStepId.UpdatePhoneNumber, null)
+                    Pair(UpdateLandlordDetailsStepId.UpdatePhoneNumber, null)
                 } else {
-                    Pair(UpdateDetailsStepId.UpdateName, null)
+                    Pair(UpdateLandlordDetailsStepId.UpdateName, null)
                 }
             },
             saveAfterSubmit = false,
@@ -109,14 +109,14 @@ class UpdateLandlordDetailsJourney(
                             BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> UpdateDetailsStepId.UpdateDetails.urlPathSegment },
-            nextAction = { _, _ -> Pair(UpdateDetailsStepId.UpdateDateOfBirth, null) },
+            handleSubmitAndRedirect = { _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
+            nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.UpdateDateOfBirth, null) },
             saveAfterSubmit = false,
         )
 
     private val dateOfBirthStep =
         Step(
-            id = UpdateDetailsStepId.UpdateDateOfBirth,
+            id = UpdateLandlordDetailsStepId.UpdateDateOfBirth,
             page =
                 Page(
                     formModel = DateOfBirthFormModel::class,
@@ -127,11 +127,11 @@ class UpdateLandlordDetailsJourney(
                             "fieldSetHeading" to "forms.update.dateOfBirth.fieldSetHeading",
                             "fieldSetHint" to "forms.dateOfBirth.fieldSetHint",
                             "submitButtonText" to "forms.buttons.continue",
-                            BACK_URL_ATTR_NAME to UpdateDetailsStepId.UpdateDetails.urlPathSegment,
+                            BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> UpdateDetailsStepId.UpdateDetails.urlPathSegment },
-            nextAction = { _, _ -> Pair(UpdateDetailsStepId.UpdatePhoneNumber, null) },
+            handleSubmitAndRedirect = { _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
+            nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.UpdatePhoneNumber, null) },
             saveAfterSubmit = false,
         )
 
