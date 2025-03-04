@@ -91,8 +91,7 @@ class JourneyDataBuilder(
                 LandlordRegistrationStepId.Email.urlPathSegment to mapOf("emailAddress" to "test@example.com"),
                 LandlordRegistrationStepId.PhoneNumber.urlPathSegment to mapOf("phoneNumber" to "07123456789"),
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment to mapOf("livesInEnglandOrWales" to true),
-                LandlordRegistrationStepId.LookupAddress.urlPathSegment to
-                    mapOf("address" to mapOf("houseNameOrNumber" to "44", "postcode" to "EG1 1GE")),
+                LandlordRegistrationStepId.LookupAddress.urlPathSegment to mapOf("houseNameOrNumber" to "44", "postcode" to "EG1 1GE"),
                 LandlordRegistrationStepId.SelectAddress.urlPathSegment to mapOf("address" to DEFAULT_ADDRESS),
             )
 
