@@ -10,10 +10,7 @@ class PropertyDetailsUpdateJourneyDataExtensions private constructor(
 ) {
     companion object {
         val JourneyData.propertyDetailsUpdateJourneyDataExtensions
-            get() =
-                PropertyDetailsUpdateJourneyDataExtensions(
-                    this,
-                )
+            get() = PropertyDetailsUpdateJourneyDataExtensions(this)
 
         fun PropertyDetailsUpdateJourneyDataExtensions.getOwnershipTypeUpdateIfPresent() =
             JourneyDataHelper.getFieldEnumValue<OwnershipType>(
