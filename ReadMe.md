@@ -133,7 +133,7 @@ again).
 
 For local dev, you can add your account by modifying the `data-local.sql` file. Insert an entry into the
 `one_login_user` database with a subject_identifier matching your real one login id (see below).
-Then you can add entries to any other user database that you need access to (e.g. landlord_user, local_authority_user
+Then you can add entries to any other user database that you need access to (e.g. landlord, local_authority_user
 with is_manager set to true to see local authority admin pages).
 
 #### Finding your One Login id
