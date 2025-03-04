@@ -18,9 +18,10 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController
-import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_BASE_URL
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
+import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
@@ -42,7 +43,6 @@ import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import kotlin.test.Test
-import kotlin.test.assertContains
 
 @WebMvcTest(controllers = [LandlordDashboardController::class, RegisterLandlordController::class, RegisterPropertyController::class])
 class LandlordDashboardUrlTests(
@@ -54,35 +54,35 @@ class LandlordDashboardUrlTests(
     @SpyBean
     private lateinit var propertyRegistrationJourney: PropertyRegistrationJourney
 
-    @MockBean
-    lateinit var anyEmailNotificationService: EmailNotificationService<EmailTemplateModel>
+    @SpyBean
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     @MockBean
-    lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
+    private lateinit var anyEmailNotificationService: EmailNotificationService<EmailTemplateModel>
 
     @MockBean
-    lateinit var mockLandlordService: LandlordService
+    private lateinit var mockLandlordService: LandlordService
 
     @MockBean
-    lateinit var mockIdentityService: OneLoginIdentityService
+    private lateinit var mockIdentityService: OneLoginIdentityService
 
     @MockBean
-    lateinit var mockJourneyDataService: JourneyDataService
+    private lateinit var mockJourneyDataService: JourneyDataService
 
     @MockBean
-    lateinit var mockAddressLookupService: AddressLookupService
+    private lateinit var mockAddressLookupService: AddressLookupService
 
     @MockBean
-    lateinit var mockAddressDataService: AddressDataService
+    private lateinit var mockAddressDataService: AddressDataService
 
     @MockBean
-    lateinit var mockLocalAuthorityService: LocalAuthorityService
+    private lateinit var mockLocalAuthorityService: LocalAuthorityService
 
     @MockBean
-    lateinit var mockPropertyOwnershipService: PropertyOwnershipService
+    private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @MockBean
-    lateinit var mockPropertyRegistrationService: PropertyRegistrationService
+    private lateinit var mockPropertyRegistrationService: PropertyRegistrationService
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
@@ -107,9 +107,6 @@ class LandlordDashboardUrlTests(
             ),
         ).thenReturn(landlord)
 
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri())
-            .thenCallRealMethod()
-
         val confirmationCaptor = argumentCaptor<LandlordRegistrationConfirmationEmail>()
         Mockito
             .doNothing()
@@ -126,13 +123,12 @@ class LandlordDashboardUrlTests(
                 content = encodedDeclarationContent
                 with(csrf())
             }.andExpect { status { is3xxRedirection() } }
+            .andExpect { redirectedUrl("/$REGISTER_LANDLORD_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT") }
 
         mvc
             .get(confirmationCaptor.firstValue.prsdURL)
             .andExpect { status { is3xxRedirection() } }
-
-        // Assert
-        assertContains(confirmationCaptor.firstValue.prsdURL, LANDLORD_BASE_URL)
+            .andExpect { redirectedUrl(LANDLORD_DASHBOARD_URL) }
     }
 
     @Test
@@ -160,9 +156,6 @@ class LandlordDashboardUrlTests(
 
         whenever(mockLandlordService.retrieveLandlordByBaseUserId(anyOrNull())).thenReturn(landlord)
 
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri())
-            .thenCallRealMethod()
-
         val confirmationCaptor = argumentCaptor<PropertyRegistrationConfirmationEmail>()
         Mockito
             .doNothing()
@@ -179,12 +172,11 @@ class LandlordDashboardUrlTests(
                 content = encodedDeclarationContent
                 with(csrf())
             }.andExpect { status { is3xxRedirection() } }
+            .andExpect { redirectedUrl("/$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT") }
 
         mvc
             .get(confirmationCaptor.firstValue.prsdUrl)
             .andExpect { status { is3xxRedirection() } }
-
-        // Assert
-        assertContains(confirmationCaptor.firstValue.prsdUrl, LANDLORD_BASE_URL)
+            .andExpect { redirectedUrl(LANDLORD_DASHBOARD_URL) }
     }
 }

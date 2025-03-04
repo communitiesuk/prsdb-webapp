@@ -13,7 +13,7 @@ import kotlin.test.assertEquals
 @Sql("/data-local.sql")
 class LandlordDashboardTests : IntegrationTest() {
     @Test
-    fun `the dashboard loads displaying the user's name and lrn`(page: Page) {
+    fun `the dashboard loads displaying the user's name and lrn`() {
         val dashboard = navigator.goToLandlordDashboard()
         assertThat(dashboard.bannerHeading).containsText("Alexander Smith")
         assertThat(dashboard.bannerSubHeading).containsText("Landlord registration number")
