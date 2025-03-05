@@ -35,5 +35,6 @@ abstract class PropertyDetailsBasePage(
         page: Page,
     ) : SummaryList(page) {
         val ownershipTypeRow = getRow("Ownership type")
+        val numberOfPeopleRow = getRow("Number of people")
     }
 }

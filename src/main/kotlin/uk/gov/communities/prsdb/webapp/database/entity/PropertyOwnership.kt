@@ -40,7 +40,6 @@ class PropertyOwnership(
 
     @Column(nullable = false)
     var currentNumTenants: Int = 0
-        private set
 
     @OneToOne(optional = false)
     @JoinColumn(

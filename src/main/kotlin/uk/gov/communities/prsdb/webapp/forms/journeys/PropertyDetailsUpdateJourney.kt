@@ -10,9 +10,11 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfPeopleUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getOwnershipTypeUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -33,20 +35,6 @@ class PropertyDetailsUpdateJourney(
 
     override val journeyPathSegment: String
         get() = PropertyDetailsController.getUpdatePropertyDetailsPath(getPropertyOwnershipIdFromJourneyKey())
-
-    private val updateDetailsStep =
-        Step(
-            id = UpdatePropertyDetailsStepId.UpdateDetails,
-            page =
-                Page(
-                    NoInputFormModel::class,
-                    "propertyDetailsView",
-                    mapOf(
-                        BACK_URL_ATTR_NAME to PropertyDetailsController.PROPERTY_DETAILS_ROUTE,
-                    ),
-                ),
-            handleSubmitAndRedirect = { journeyData, _ -> updatePropertyAndRedirect(journeyData) },
-        )
 
     private val ownershipTypeStep =
         Step(
@@ -76,14 +64,50 @@ class PropertyDetailsUpdateJourney(
                         ),
                 ),
             handleSubmitAndRedirect = { _, _ -> UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment },
+            nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateNumberOfPeople, null) },
+            saveAfterSubmit = false,
+        )
+
+    private val numberOfPeopleStep =
+        Step(
+            id = UpdatePropertyDetailsStepId.UpdateNumberOfPeople,
+            page =
+                Page(
+                    formModel = NumberOfPeopleFormModel::class,
+                    templateName = "forms/numberOfPeopleForm",
+                    content =
+                        mapOf(
+                            "title" to "propertyDetails.update.title",
+                            "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading",
+                            "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
+                            "label" to "forms.numberOfPeople.label",
+                            BACK_URL_ATTR_NAME to UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment,
+                        ),
+                ),
+            handleSubmitAndRedirect = { _, _ -> UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment },
             nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateDetails, null) },
             saveAfterSubmit = false,
+        )
+
+    private val updateDetailsStep =
+        Step(
+            id = UpdatePropertyDetailsStepId.UpdateDetails,
+            page =
+                Page(
+                    NoInputFormModel::class,
+                    "propertyDetailsView",
+                    mapOf(
+                        BACK_URL_ATTR_NAME to PropertyDetailsController.PROPERTY_DETAILS_ROUTE,
+                    ),
+                ),
+            handleSubmitAndRedirect = { journeyData, _ -> updatePropertyAndRedirect(journeyData) },
         )
 
     private fun updatePropertyAndRedirect(journeyData: JourneyData): String {
         val propertyUpdate =
             PropertyOwnershipUpdateModel(
                 ownershipType = journeyData.getOwnershipTypeUpdateIfPresent(),
+                numberOfPeople = journeyData.getNumberOfPeopleUpdateIfPresent(),
             )
 
         propertyOwnershipService.updatePropertyOwnership(getPropertyOwnershipIdFromJourneyKey(), propertyUpdate)
@@ -95,13 +119,18 @@ class PropertyDetailsUpdateJourney(
 
     // The next action flow must have the `updateDetailsStep` after all data changing steps to ensure that validation for all of them is run
     override val sections =
-        createSingleSectionWithSingleTaskFromSteps(initialStepId, setOf(ownershipTypeStep, updateDetailsStep))
+        createSingleSectionWithSingleTaskFromSteps(
+            initialStepId,
+            setOf(ownershipTypeStep, numberOfPeopleStep, updateDetailsStep),
+        )
 
     override fun createOriginalJourneyData(updateEntityId: String): JourneyData {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(updateEntityId.toLong())
 
         return mapOf(
             UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment to mapOf("ownershipType" to propertyOwnership.ownershipType),
+            UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment to
+                mapOf("numberOfPeople" to propertyOwnership.currentNumTenants),
         )
     }
 
