@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import org.springframework.ui.ExtendedModelMap
-import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -28,7 +26,6 @@ class PropertyRegistrationCheckAnswersPageTests {
     private lateinit var addressService: AddressDataService
     private lateinit var localAuthorityService: LocalAuthorityService
     private lateinit var validator: Validator
-    private lateinit var model: Model
     private lateinit var pageData: PageData
     private lateinit var prevStepUrl: String
     private lateinit var journeyDataBuilder: JourneyDataBuilder
@@ -40,16 +37,15 @@ class PropertyRegistrationCheckAnswersPageTests {
         page = PropertyRegistrationCheckAnswersPage(addressService, localAuthorityService)
         validator = mock()
         whenever(validator.supports(any<Class<*>>())).thenReturn(true)
-        model = ExtendedModelMap()
         pageData = mock()
         prevStepUrl = "mock"
         journeyDataBuilder = JourneyDataBuilder.propertyDefault(addressService, localAuthorityService)
     }
 
     private fun getPropertyDetails(journeyData: JourneyData): List<SummaryListRowViewModel> {
-        page.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData, null)
+        val result = page.getModelAndView(validator, pageData, prevStepUrl, journeyData, null)
 
-        val propertyDetails = model.asMap()["propertyDetails"] as List<*>
+        val propertyDetails = result.model["propertyDetails"] as List<*>
         return propertyDetails.filterIsInstance<SummaryListRowViewModel>()
     }
 

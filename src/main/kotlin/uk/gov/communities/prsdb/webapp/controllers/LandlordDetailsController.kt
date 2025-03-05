@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_PATH_SEGMENT
@@ -39,13 +40,12 @@ class LandlordDetailsController(
     fun getUpdateUserLandlordDetails(
         model: Model,
         principal: Principal,
-    ): String {
+    ): ModelAndView {
         addLandlordDetailsToModel(model, principal, includeChangeLinks = true)
         // TODO: PRSD-355 Remove this way of showing submit button
         model.addAttribute("shouldShowSubmitButton", true)
-        return updateDetailsJourney.populateModelAndGetViewNameForUpdateStep(
+        return updateDetailsJourney.getModelAndViewForUpdateStep(
             updateEntityId = principal.name,
-            model = model,
         )
     }
 
@@ -87,10 +87,9 @@ class LandlordDetailsController(
         @PathVariable("stepName") stepName: String,
         model: Model,
         principal: Principal,
-    ): String =
-        updateDetailsJourney.populateModelAndGetViewName(
+    ): ModelAndView =
+        updateDetailsJourney.getModelAndViewForStep(
             stepName,
-            model,
             null,
         )
 
@@ -101,11 +100,10 @@ class LandlordDetailsController(
         @RequestParam formData: PageData,
         model: Model,
         principal: Principal,
-    ): String =
-        updateDetailsJourney.updateJourneyDataAndGetViewNameOrRedirect(
+    ): ModelAndView =
+        updateDetailsJourney.completeStep(
             stepName,
             formData,
-            model,
             null,
             principal,
         )

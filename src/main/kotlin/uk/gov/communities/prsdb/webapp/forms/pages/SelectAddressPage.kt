@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
-import org.springframework.ui.Model
 import org.springframework.validation.Validator
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
@@ -22,14 +22,11 @@ class SelectAddressPage(
     private val lookupAddressPathSegment: String,
     private val addressLookupService: AddressLookupService,
     private val addressDataService: AddressDataService,
-) : Page(formModel, templateName, content, displaySectionHeader) {
-    override fun populateModelAndGetTemplateName(
-        validator: Validator,
-        model: Model,
-        pageData: PageData?,
-        prevStepUrl: String?,
+) : AbstractPage(formModel, templateName, content, displaySectionHeader) {
+    override fun enrichModel(
+        modelAndView: ModelAndView,
         journeyData: JourneyData?,
-    ): String {
+    ) {
         journeyData!!
 
         val (houseNameOrNumber, postcode) =
@@ -56,12 +53,10 @@ class SelectAddressPage(
             ),
         )
 
-        model.addAttribute("houseNameOrNumber", houseNameOrNumber)
-        model.addAttribute("postcode", postcode)
-        model.addAttribute("addressCount", addressLookupResults.size)
-        model.addAttribute("options", addressRadiosViewModel)
-
-        return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)
+        modelAndView.addObject("houseNameOrNumber", houseNameOrNumber)
+        modelAndView.addObject("postcode", postcode)
+        modelAndView.addObject("addressCount", addressLookupResults.size)
+        modelAndView.addObject("options", addressRadiosViewModel)
     }
 
     override fun isSatisfied(

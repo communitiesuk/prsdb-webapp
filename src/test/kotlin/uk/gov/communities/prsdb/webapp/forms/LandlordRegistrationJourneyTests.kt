@@ -68,15 +68,15 @@ class LandlordRegistrationJourneyTests {
         fun beforeEach() {
             whenever(
                 landlordService.createLandlord(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    anyOrNull(),
-                    anyOrNull(),
+                    baseUserId = anyOrNull(),
+                    name = anyOrNull(),
+                    email = anyOrNull(),
+                    phoneNumber = anyOrNull(),
+                    addressDataModel = anyOrNull(),
+                    countryOfResidence = anyOrNull(),
+                    isVerified = anyOrNull(),
+                    nonEnglandOrWalesAddress = anyOrNull(),
+                    dateOfBirth = anyOrNull(),
                 ),
             ).thenReturn(MockLandlordData.createLandlord())
             whenever(urlProvider.buildLandlordDashboardUri()).thenReturn(URI.create("https://gov.uk"))
@@ -144,12 +144,11 @@ class LandlordRegistrationJourneyTests {
             stepId: LandlordRegistrationStepId,
             pageData: PageData = mapOf(),
         ) {
-            testJourney.updateJourneyDataAndGetViewNameOrRedirect(
+            testJourney.completeStep(
                 stepPathSegment = stepId.urlPathSegment,
                 pageData = pageData,
                 subPageNumber = null,
                 principal = mock(),
-                model = mock(),
             )
         }
     }
