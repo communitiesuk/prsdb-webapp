@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.PROPERTY_DEREGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
@@ -26,10 +27,9 @@ class DeregisterPropertyController(
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
         model: Model,
-    ): String =
-        propertyDeregistrationJourney.populateModelAndGetViewName(
+    ): ModelAndView =
+        propertyDeregistrationJourney.getModelAndViewForStep(
             stepName,
-            model,
             subpage,
         )
 
@@ -41,11 +41,10 @@ class DeregisterPropertyController(
         @RequestParam formData: PageData,
         model: Model,
         principal: Principal,
-    ): String =
-        propertyDeregistrationJourney.updateJourneyDataAndGetViewNameOrRedirect(
+    ): ModelAndView =
+        propertyDeregistrationJourney.completeStep(
             stepName,
             formData,
-            model,
             subpage,
             principal,
         )
