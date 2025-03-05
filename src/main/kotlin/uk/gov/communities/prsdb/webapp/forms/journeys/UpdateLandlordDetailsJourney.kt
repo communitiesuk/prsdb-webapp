@@ -317,12 +317,9 @@ class UpdateLandlordDetailsJourney(
         return originalLandlordData
     }
 
-    override fun initialiseJourneyDataIfNotInitialised(
-        updateEntityId: String,
-        journeyDataKey: String?,
-    ) {
-        if (!isJourneyDataInitialised(journeyDataKey)) {
-            super.initialiseJourneyDataIfNotInitialised(updateEntityId, journeyDataKey)
+    override fun initialiseJourneyDataIfNotInitialised(updateEntityId: String) {
+        if (!isJourneyDataInitialised()) {
+            super.initialiseJourneyDataIfNotInitialised(updateEntityId)
             addressDataService.setAddressData(getOriginalAddressData())
         }
     }
