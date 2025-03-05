@@ -22,8 +22,8 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.C
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourney
-import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
+import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
@@ -49,10 +49,10 @@ class LandlordDashboardUrlTests(
     context: WebApplicationContext,
 ) : ControllerTest(context) {
     @SpyBean
-    private lateinit var landlordRegistrationJourney: LandlordRegistrationJourney
+    private lateinit var landlordRegistrationJourneyFactory: LandlordRegistrationJourneyFactory
 
     @SpyBean
-    private lateinit var propertyRegistrationJourney: PropertyRegistrationJourney
+    private lateinit var propertyRegistrationJourneyFactory: PropertyRegistrationJourneyFactory
 
     @SpyBean
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
@@ -90,7 +90,8 @@ class LandlordDashboardUrlTests(
         // Arrange
         val landlord = createLandlord()
 
-        val mockJourneyData = JourneyDataBuilder.landlordDefault(mockAddressDataService, mockLocalAuthorityService).build()
+        val mockJourneyData =
+            JourneyDataBuilder.landlordDefault(mockAddressDataService, mockLocalAuthorityService).build()
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mockJourneyData)
 
         whenever(
@@ -138,7 +139,8 @@ class LandlordDashboardUrlTests(
         val propertyOwnership = createPropertyOwnership()
         val landlord = createLandlord()
 
-        val mockJourneyData = JourneyDataBuilder.propertyDefault(mockAddressDataService, mockLocalAuthorityService).build()
+        val mockJourneyData =
+            JourneyDataBuilder.propertyDefault(mockAddressDataService, mockLocalAuthorityService).build()
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mockJourneyData)
 
         whenever(
