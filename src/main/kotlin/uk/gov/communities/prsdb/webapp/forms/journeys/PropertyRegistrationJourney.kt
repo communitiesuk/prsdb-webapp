@@ -60,7 +60,7 @@ class PropertyRegistrationJourney(
     private val confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
 ) : JourneyWithTaskList<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
-        journeyPathSegment = REGISTER_PROPERTY_JOURNEY_URL,
+        journeyDataKey = REGISTER_PROPERTY_JOURNEY_URL,
         initialStepId = RegisterPropertyStepId.LookupAddress,
         validator = validator,
         journeyDataService = journeyDataService,

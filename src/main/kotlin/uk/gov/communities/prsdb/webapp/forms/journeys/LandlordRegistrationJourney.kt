@@ -51,7 +51,7 @@ class LandlordRegistrationJourney(
     val emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
 ) : Journey<LandlordRegistrationStepId>(
         journeyType = JourneyType.LANDLORD_REGISTRATION,
-        journeyPathSegment = REGISTER_LANDLORD_JOURNEY_URL,
+        journeyDataKey = REGISTER_LANDLORD_JOURNEY_URL,
         initialStepId = LandlordRegistrationStepId.VerifyIdentity,
         validator = validator,
         journeyDataService = journeyDataService,
@@ -139,7 +139,7 @@ class LandlordRegistrationJourney(
                             "fieldSetHint" to "forms.name.fieldSetHint",
                             "label" to "forms.name.label",
                             "submitButtonText" to "forms.buttons.continue",
-                            "backUrl" to "/$journeyPathSegment",
+                            "backUrl" to "/$REGISTER_LANDLORD_JOURNEY_URL",
                         ),
                     shouldDisplaySectionHeader = true,
                 ),

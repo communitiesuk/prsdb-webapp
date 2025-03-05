@@ -626,7 +626,7 @@ class JourneyTests {
             verify(mockJourneyDataService).setJourneyDataInSession(journeyDataCaptor.capture())
 
             // Assert
-            assertEquals("redirect:/$JOURNEY_PATH_SEGMENT/${TestStepId.StepTwo.urlPathSegment}", result.viewName)
+            assertEquals("redirect:${TestStepId.StepTwo.urlPathSegment}", result.viewName)
             assertIs<PageData>(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment]!!)
             val resultPageData = objectToStringKeyedMap(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment])
             assertEquals("testPropertyValue", resultPageData?.get("testProperty"))
@@ -688,7 +688,7 @@ class JourneyTests {
             )
 
             // Assert
-            assertEquals("redirect:/$JOURNEY_PATH_SEGMENT/${TestStepId.StepTwo.urlPathSegment}", result.viewName)
+            assertEquals("redirect:${TestStepId.StepTwo.urlPathSegment}", result.viewName)
             assertIs<PageData>(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment]!!)
             val resultPageData = objectToStringKeyedMap(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment])
             assertEquals("testPropertyValue", resultPageData?.get("testProperty"))
@@ -750,7 +750,7 @@ class JourneyTests {
                 eq(JourneyType.LANDLORD_REGISTRATION),
                 eq(principal),
             )
-            assertEquals("redirect:/$JOURNEY_PATH_SEGMENT/${TestStepId.StepTwo.urlPathSegment}", result.viewName)
+            assertEquals("redirect:${TestStepId.StepTwo.urlPathSegment}", result.viewName)
         }
 
         @Test

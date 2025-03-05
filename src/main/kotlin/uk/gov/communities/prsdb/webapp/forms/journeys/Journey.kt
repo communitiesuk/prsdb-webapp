@@ -22,7 +22,7 @@ import java.util.Optional
 
 abstract class Journey<T : StepId>(
     private val journeyType: JourneyType,
-    protected val journeyPathSegment: String,
+    protected val journeyDataKey: String,
     val initialStepId: T,
     protected val validator: Validator,
     protected val journeyDataService: JourneyDataService,
@@ -33,7 +33,7 @@ abstract class Journey<T : StepId>(
         get() = sections.flatMap { section -> section.tasks }.flatMap { task -> task.steps }.toSet()
 
     fun loadJourneyDataIfNotLoaded(principalName: String) {
-        val data = journeyDataService.getJourneyDataFromSession(journeyPathSegment)
+        val data = journeyDataService.getJourneyDataFromSession(journeyDataKey)
         if (data.isEmpty()) {
             /* TODO PRSD-589 Currently this looks the context up from the database,
                 takes the id, then passes the id to another method which retrieves it
@@ -51,7 +51,7 @@ abstract class Journey<T : StepId>(
         subPageNumber: Int?,
         submittedPageData: PageData? = null,
     ): ModelAndView {
-        val journeyData = journeyDataService.getJourneyDataFromSession(journeyPathSegment)
+        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
         val requestedStep = getStep(stepPathSegment)
         if (!isStepReachable(requestedStep, subPageNumber)) {
             return ModelAndView("redirect:${getUnreachableStepRedirect(journeyData)}")
@@ -78,7 +78,7 @@ abstract class Journey<T : StepId>(
         subPageNumber: Int?,
         principal: Principal,
     ): ModelAndView {
-        val journeyData = journeyDataService.getJourneyDataFromSession(journeyPathSegment)
+        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
 
         val currentStep = getStep(stepPathSegment)
         if (!currentStep.isSatisfied(validator, pageData)) {
@@ -107,7 +107,7 @@ abstract class Journey<T : StepId>(
         val redirectUrl =
             UriComponentsBuilder
                 .newInstance()
-                .path("/$journeyPathSegment/${newStepId.urlPathSegment}")
+                .path(newStepId.urlPathSegment)
                 .queryParamIfPresent("subpage", Optional.ofNullable(newSubPageNumber))
                 .build(true)
                 .toUriString()

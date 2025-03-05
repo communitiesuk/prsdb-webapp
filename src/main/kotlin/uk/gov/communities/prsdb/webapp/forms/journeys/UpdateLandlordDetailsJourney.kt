@@ -41,7 +41,7 @@ class UpdateLandlordDetailsJourney(
     private val addressDataService: AddressDataService,
 ) : UpdateJourney<UpdateLandlordDetailsStepId>(
         journeyType = JourneyType.LANDLORD_DETAILS_UPDATE,
-        journeyPathSegment = UPDATE_LANDLORD_DETAILS_URL,
+        journeyDataKey = UPDATE_LANDLORD_DETAILS_URL,
         initialStepId = UpdateLandlordDetailsStepId.UpdateEmail,
         validator = validator,
         journeyDataService = journeyDataService,

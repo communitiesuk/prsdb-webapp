@@ -27,7 +27,7 @@ class LaUserRegistrationJourney(
     private val localAuthorityDataService: LocalAuthorityDataService,
 ) : Journey<RegisterLaUserStepId>(
         journeyType = JourneyType.LA_USER_REGISTRATION,
-        journeyPathSegment = REGISTER_LA_USER_JOURNEY_URL,
+        journeyDataKey = REGISTER_LA_USER_JOURNEY_URL,
         initialStepId = RegisterLaUserStepId.LandingPage,
         validator = validator,
         journeyDataService = journeyDataService,
@@ -44,7 +44,7 @@ class LaUserRegistrationJourney(
         )
 
     fun initialiseJourneyData(token: String) {
-        val journeyData = journeyDataService.getJourneyDataFromSession(journeyPathSegment)
+        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
         val formData: PageData = mapOf("emailAddress" to invitationService.getEmailAddressForToken(token))
         val emailStep = steps.single { step -> step.id == RegisterLaUserStepId.Email }
 
@@ -82,7 +82,7 @@ class LaUserRegistrationJourney(
                             "fieldSetHint" to "forms.name.fieldSetHint",
                             "label" to "forms.name.label",
                             "submitButtonText" to "forms.buttons.continue",
-                            "backUrl" to "/$journeyPathSegment/",
+                            "backUrl" to "/$REGISTER_LA_USER_JOURNEY_URL/",
                         ),
                 ),
             nextAction = { _, _ -> Pair(RegisterLaUserStepId.Email, null) },
