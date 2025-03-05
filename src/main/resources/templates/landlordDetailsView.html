@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{landlordDetails.title}, ~{::main}, false)}">
-<main class="govuk-main-wrapper" id="main-content">
+<html id="main-content" th:replace="~{fragments/layout :: layout(#{landlordDetails.title},~{::#main-content/content()}, false)}">
+<a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+<main class="govuk-main-wrapper">
     <div id="page-contents">
         <h2 class="govuk-heading-m" th:text="#{landlordDetails.heading}">landlordDetails.heading</h2>
 
@@ -16,7 +17,7 @@
                     <th:block id="tab-headings">
                         <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('personal-details', #{landlordDetails.personalDetails.heading})}">
                         </li>
-                        <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('registered-properties', #{landlordDetails.registeredProperties.heading})}">
+                        <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${registeredPropertiesTabId}, #{landlordDetails.registeredProperties.heading})}">
                         </li>
                     </th:block>
                 </ul>
@@ -34,7 +35,7 @@
                     </th:block>
                 </div>
 
-                <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('registered-properties', ~{:: #registered-properties-panel-content})}">
+                <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${registeredPropertiesTabId}, ~{:: #registered-properties-panel-content})}">
                     <th:block id="registered-properties-panel-content">
                         <table th:replace="~{fragments/tables/table :: table(
                             ${ { 'landlordDetails.registeredProperties.table.addressHeading', 'landlordDetails.registeredProperties.table.localAuthorityHeading', 'landlordDetails.registeredProperties.table.licenceHeading', 'landlordDetails.registeredProperties.table.tenantedHeading' } },

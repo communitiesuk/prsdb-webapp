@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
@@ -67,9 +68,7 @@ class PropertyDetailsTests : IntegrationTest() {
         fun `the back link returns to the dashboard`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
             detailsPage.backLink.clickAndWait()
-
-            // TODO: PRSD-670 add link to the dashboard
-            Assertions.assertEquals("/property-details/1", URI(page.url()).path)
+            assertPageIs(page, LandlordDashboardPage::class)
         }
 
         @Test

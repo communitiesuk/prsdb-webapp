@@ -7,6 +7,7 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
@@ -21,6 +22,31 @@ class LocalAuthorityDashboardControllerTests(
 
     @Test
     fun `index returns a redirect for unauthenticated user`() {
+        mvc
+            .get("/$LOCAL_AUTHORITY_PATH_SEGMENT")
+            .andExpect {
+                status { is3xxRedirection() }
+            }
+    }
+
+    @WithMockUser
+    @Test
+    fun `index returns 403 for unauthorized user`() {
+        mvc.get("/$LOCAL_AUTHORITY_PATH_SEGMENT").andExpect {
+            status { isForbidden() }
+        }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_ADMIN"])
+    fun `index returns a redirect for authorised user`() {
+        mvc.get("/$LOCAL_AUTHORITY_PATH_SEGMENT").andExpect {
+            status { is3xxRedirection() }
+        }
+    }
+
+    @Test
+    fun `localAuthorityDashboard returns a redirect for unauthenticated user`() {
         mvc.get(LOCAL_AUTHORITY_DASHBOARD_URL).andExpect {
             status { is3xxRedirection() }
         }
@@ -28,7 +54,7 @@ class LocalAuthorityDashboardControllerTests(
 
     @Test
     @WithMockUser
-    fun `index returns 403 for unauthorized user`() {
+    fun `localAuthorityDashboard returns 403 for unauthorized user`() {
         mvc
             .get(LOCAL_AUTHORITY_DASHBOARD_URL)
             .andExpect {
@@ -38,7 +64,7 @@ class LocalAuthorityDashboardControllerTests(
 
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
-    fun `index returns 200 for authorised local authority admin user`() {
+    fun `localAuthorityDashboard returns 200 for authorised local authority admin user`() {
         val localAuthorityUser = createLocalAuthorityUser()
         whenever(localAuthorityDataService.getLocalAuthorityUser("user")).thenReturn(localAuthorityUser)
 
@@ -51,7 +77,7 @@ class LocalAuthorityDashboardControllerTests(
 
     @Test
     @WithMockUser(roles = ["LA_USER"])
-    fun `index returns 200 for authorised local authority user`() {
+    fun `localAuthorityDashboard returns 200 for authorised local authority user`() {
         val localAuthorityUser = createLocalAuthorityUser()
         whenever(localAuthorityDataService.getLocalAuthorityUser("user")).thenReturn(localAuthorityUser)
 
