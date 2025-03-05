@@ -26,9 +26,6 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourne
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
-import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createLandlord
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
@@ -42,6 +39,9 @@ import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import kotlin.test.Test
 
 @WebMvcTest(controllers = [LandlordDashboardController::class, RegisterLandlordController::class, RegisterPropertyController::class])

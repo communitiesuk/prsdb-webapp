@@ -11,8 +11,8 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 
 @WebMvcTest(LandlordDashboardController::class)
 class LandlordDashboardControllerTests(

@@ -1,13 +1,11 @@
-package uk.gov.communities.prsdb.webapp.forms
+package uk.gov.communities.prsdb.webapp.forms.steps
 
 import org.mockito.Mock
 import org.mockito.Mockito.mock
-import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.PageData
+import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
-import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

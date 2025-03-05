@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
-import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.helpers.LaUserRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel

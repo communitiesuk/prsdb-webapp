@@ -6,6 +6,8 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.LaUserRegistrationCheckAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId

@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.forms
+package uk.gov.communities.prsdb.webapp.forms.tasks
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertIterableEquals
@@ -12,12 +12,9 @@ import org.springframework.ui.ExtendedModelMap
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
-import uk.gov.communities.prsdb.webapp.forms.journeys.JourneySection
-import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyTask
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyWithTaskList
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
-import uk.gov.communities.prsdb.webapp.forms.tasks.TaskListViewModelFactory
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import kotlin.test.Test

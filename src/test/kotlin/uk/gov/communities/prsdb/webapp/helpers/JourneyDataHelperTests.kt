@@ -4,12 +4,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
-import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
-import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 

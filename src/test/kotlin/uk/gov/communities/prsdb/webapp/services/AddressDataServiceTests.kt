@@ -15,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

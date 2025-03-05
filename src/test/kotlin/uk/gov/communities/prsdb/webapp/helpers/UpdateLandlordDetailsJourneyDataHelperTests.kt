@@ -5,9 +5,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
-import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import java.time.LocalDate
 import kotlin.test.assertEquals
 

@@ -27,14 +27,14 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUserOrInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_ID
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_USER_ID
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthorityUser
-import uk.gov.communities.prsdb.webapp.mockObjects.MockOneLoginUserData.Companion.createOneLoginUser
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserOrInvitationDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_ID
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_USER_ID
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthorityUser
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockOneLoginUserData.Companion.createOneLoginUser
 import java.util.Optional
 import kotlin.test.assertEquals
 
