@@ -90,8 +90,7 @@ class LandlordDashboardUrlTests(
         // Arrange
         val landlord = createLandlord()
 
-        val mockJourneyData =
-            JourneyDataBuilder.landlordDefault(mockAddressDataService, mockLocalAuthorityService).build()
+        val mockJourneyData = JourneyDataBuilder.landlordDefault(mockAddressDataService, mockLocalAuthorityService).build()
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mockJourneyData)
 
         whenever(
@@ -139,8 +138,7 @@ class LandlordDashboardUrlTests(
         val propertyOwnership = createPropertyOwnership()
         val landlord = createLandlord()
 
-        val mockJourneyData =
-            JourneyDataBuilder.propertyDefault(mockAddressDataService, mockLocalAuthorityService).build()
+        val mockJourneyData = JourneyDataBuilder.propertyDefault(mockAddressDataService, mockLocalAuthorityService).build()
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mockJourneyData)
 
         whenever(

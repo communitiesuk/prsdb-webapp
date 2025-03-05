@@ -361,12 +361,7 @@ class LandlordServiceTests {
         val originalPhoneNumber = "original phone number"
         val originalDateOfBirth = LocalDate.of(1991, 1, 1)
         val landlordEntity =
-            createLandlord(
-                name = originalName,
-                email = originalEmail,
-                phoneNumber = originalPhoneNumber,
-                dateOfBirth = originalDateOfBirth,
-            )
+            createLandlord(name = originalName, email = originalEmail, phoneNumber = originalPhoneNumber, dateOfBirth = originalDateOfBirth)
         val updateModel = LandlordUpdateModel(null, null, null, null, null)
 
         whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)

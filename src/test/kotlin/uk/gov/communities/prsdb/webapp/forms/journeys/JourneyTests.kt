@@ -286,8 +286,7 @@ class JourneyTests {
 
             // Assert
             assertIs<BindingResult>(result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"])
-            val bindingResult: BindingResult =
-                result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"] as BindingResult
+            val bindingResult: BindingResult = result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"] as BindingResult
             assertContains(result.model, "testKey")
             assertEquals("testValue", result.model["testKey"])
             assertContains(result.model, "backUrl")
@@ -575,8 +574,7 @@ class JourneyTests {
 
             // Assert
             assertIs<BindingResult>(result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"])
-            val bindingResult: BindingResult =
-                result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"] as BindingResult
+            val bindingResult: BindingResult = result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"] as BindingResult
             assertContains(result.model, "testKey")
             assertEquals("testValue", result.model["testKey"])
             val propertyValue = bindingResult.getRawFieldValue("testProperty")

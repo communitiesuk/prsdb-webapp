@@ -9,6 +9,5 @@ class AlwaysTrueValidator : Validator {
     override fun validate(
         target: Any,
         errors: Errors,
-    ) {
-    }
+    ) {}
 }

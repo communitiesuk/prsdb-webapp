@@ -188,8 +188,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
         countryOfResidencePage.submitNonUkCountrySelectedByPartialName("Zi", "Zimbabwe")
 
-        val nonEnglandOrWalesAddressPage =
-            assertPageIs(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
+        val nonEnglandOrWalesAddressPage = assertPageIs(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
         assertThat(nonEnglandOrWalesAddressPage.form.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
         nonEnglandOrWalesAddressPage.submitAddress("Zimbabwe address")
 
@@ -241,8 +240,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
         countryOfResidencePage.submitNonUkCountrySelectedByPartialName("Zi", "Zimbabwe")
 
-        val nonEnglandOrWalesAddressPage =
-            assertPageIs(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
+        val nonEnglandOrWalesAddressPage = assertPageIs(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
         nonEnglandOrWalesAddressPage.submitAddress("test address")
 
         val lookupContactAddressPage = assertPageIs(page, LookupContactAddressFormPageLandlordRegistration::class)
@@ -520,9 +518,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         fun `Submitting with a too long address returns an error`(page: Page) {
             val nonEnglandOrWalesAddressPage = navigator.goToLandlordRegistrationNonEnglandOrWalesAddressPage()
             nonEnglandOrWalesAddressPage.submitAddress("too long address".repeat(1001))
-            assertThat(
-                nonEnglandOrWalesAddressPage.form.getErrorMessage().nth(0),
-            ).containsText("Address must be 1000 characters or fewer")
+            assertThat(nonEnglandOrWalesAddressPage.form.getErrorMessage().nth(0)).containsText("Address must be 1000 characters or fewer")
         }
     }
 

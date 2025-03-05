@@ -267,26 +267,10 @@ class LocalAuthorityDataServiceTests {
         val expectedUserListPage1 = mutableListOf<LocalAuthorityUserOrInvitationDataModel>()
         val expectedUserListPage2 = mutableListOf<LocalAuthorityUserOrInvitationDataModel>()
         for (i in 1..10) {
-            expectedUserListPage1.add(
-                LocalAuthorityUserOrInvitationDataModel(
-                    i.toLong(),
-                    "User $i",
-                    "name",
-                    false,
-                    false,
-                ),
-            )
+            expectedUserListPage1.add(LocalAuthorityUserOrInvitationDataModel(i.toLong(), "User $i", "name", false, false))
         }
         for (i in 11..20) {
-            expectedUserListPage2.add(
-                LocalAuthorityUserOrInvitationDataModel(
-                    i.toLong(),
-                    "User $i",
-                    "name",
-                    false,
-                    false,
-                ),
-            )
+            expectedUserListPage2.add(LocalAuthorityUserOrInvitationDataModel(i.toLong(), "User $i", "name", false, false))
         }
 
         // Act

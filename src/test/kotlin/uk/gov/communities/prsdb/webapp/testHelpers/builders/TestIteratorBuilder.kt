@@ -37,26 +37,14 @@ class TestIteratorBuilder {
         initialStepModel = stepModel
         journeyData =
             journeyData +
-            (
-                stepModel.urlPathSegment to
-                    mapOf(
-                        "urlPathSegment" to stepModel.urlPathSegment,
-                        "isSatisfied" to stepModel.isSatisfied,
-                    )
-            )
+            (stepModel.urlPathSegment to mapOf("urlPathSegment" to stepModel.urlPathSegment, "isSatisfied" to stepModel.isSatisfied))
         return this
     }
 
     fun withNextStep(stepModel: TestStepModel): TestIteratorBuilder {
         journeyData =
             journeyData +
-            (
-                stepModel.urlPathSegment to
-                    mapOf(
-                        "urlPathSegment" to stepModel.urlPathSegment,
-                        "isSatisfied" to stepModel.isSatisfied,
-                    )
-            )
+            (stepModel.urlPathSegment to mapOf("urlPathSegment" to stepModel.urlPathSegment, "isSatisfied" to stepModel.isSatisfied))
         return withNextStepWithoutPageData(stepModel)
     }
 

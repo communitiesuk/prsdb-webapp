@@ -64,12 +64,10 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
             landlordDetailsUpdatePage = updateLandlordEmailAndReturn(landlordDetailsUpdatePage, landlordEmail)
 
             val landlordPhoneNumber = phoneNumberUtil.getFormattedUkPhoneNumber()
-            landlordDetailsUpdatePage =
-                updateLandlordPhoneNumberAndReturn(landlordDetailsUpdatePage, landlordPhoneNumber)
+            landlordDetailsUpdatePage = updateLandlordPhoneNumberAndReturn(landlordDetailsUpdatePage, landlordPhoneNumber)
 
             val landlordDateOfBirth = LocalDate(1990, 1, 1)
-            landlordDetailsUpdatePage =
-                updateLandlordDateOfBirthAndReturn(landlordDetailsUpdatePage, landlordDateOfBirth)
+            landlordDetailsUpdatePage = updateLandlordDateOfBirthAndReturn(landlordDetailsUpdatePage, landlordDateOfBirth)
 
             val selectedAddress = addressFound
             landlordDetailsUpdatePage = updateLandlordAddressAndReturn(landlordDetailsUpdatePage, selectedAddress)
@@ -81,16 +79,11 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
             // Check changes have occurred
             assertThat(landlordDetailsPage.personalDetailsSummaryList.nameRow.value).containsText(landlordName)
             assertThat(landlordDetailsPage.personalDetailsSummaryList.emailRow.value).containsText(landlordEmail)
-            assertThat(landlordDetailsPage.personalDetailsSummaryList.phoneNumberRow.value).containsText(
-                landlordPhoneNumber,
-            )
+            assertThat(landlordDetailsPage.personalDetailsSummaryList.phoneNumberRow.value).containsText(landlordPhoneNumber)
             assertThat(landlordDetailsPage.personalDetailsSummaryList.addressRow.value).containsText(selectedAddress)
             assertThat(
                 landlordDetailsPage.personalDetailsSummaryList.dateOfBirthRow.value,
-            ).containsText(
-                formatDateOfBirth(landlordDateOfBirth),
-                LocatorAssertions.ContainsTextOptions().setIgnoreCase(true),
-            )
+            ).containsText(formatDateOfBirth(landlordDateOfBirth), LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
         }
 
         @Test
@@ -134,17 +127,14 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
             assertThat(landlordDetailsUpdatePage.heading).containsText("Alexander Smith")
 
             val landlordPhoneNumber = phoneNumberUtil.getFormattedUkPhoneNumber()
-            landlordDetailsUpdatePage =
-                updateLandlordPhoneNumberAndReturn(landlordDetailsUpdatePage, landlordPhoneNumber)
+            landlordDetailsUpdatePage = updateLandlordPhoneNumberAndReturn(landlordDetailsUpdatePage, landlordPhoneNumber)
 
             // Submit changes TODO PRSD-355 add proper submit button and declaration page
             landlordDetailsUpdatePage.submitButton.clickAndWait()
             val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
 
             // Check changes have occurred
-            assertThat(landlordDetailsPage.personalDetailsSummaryList.phoneNumberRow.value).containsText(
-                landlordPhoneNumber,
-            )
+            assertThat(landlordDetailsPage.personalDetailsSummaryList.phoneNumberRow.value).containsText(landlordPhoneNumber)
         }
 
         @Test
@@ -154,8 +144,7 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
             assertThat(landlordDetailsUpdatePage.heading).containsText("Alexander Smith")
 
             val landlordDateOfBirth = LocalDate(1990, 1, 1)
-            landlordDetailsUpdatePage =
-                updateLandlordDateOfBirthAndReturn(landlordDetailsUpdatePage, landlordDateOfBirth)
+            landlordDetailsUpdatePage = updateLandlordDateOfBirthAndReturn(landlordDetailsUpdatePage, landlordDateOfBirth)
 
             // Submit changes TODO PRSD-355 add proper submit button and declaration page
             landlordDetailsUpdatePage.submitButton.clickAndWait()
@@ -164,10 +153,7 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
             // Check changes have occurred
             assertThat(
                 landlordDetailsPage.personalDetailsSummaryList.dateOfBirthRow.value,
-            ).containsText(
-                formatDateOfBirth(landlordDateOfBirth),
-                LocatorAssertions.ContainsTextOptions().setIgnoreCase(true),
-            )
+            ).containsText(formatDateOfBirth(landlordDateOfBirth), LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
         }
     }
 
@@ -184,8 +170,7 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
             landlordDetailsUpdatePage = updateLandlordEmailAndReturn(landlordDetailsUpdatePage, landlordEmail)
 
             val landlordPhoneNumber = phoneNumberUtil.getFormattedUkPhoneNumber()
-            landlordDetailsUpdatePage =
-                updateLandlordPhoneNumberAndReturn(landlordDetailsUpdatePage, landlordPhoneNumber)
+            landlordDetailsUpdatePage = updateLandlordPhoneNumberAndReturn(landlordDetailsUpdatePage, landlordPhoneNumber)
 
             val selectedAddress = addressFound
             landlordDetailsUpdatePage = updateLandlordAddressAndReturn(landlordDetailsUpdatePage, selectedAddress)
@@ -196,9 +181,7 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
 
             // Check changes have occurred
             assertThat(landlordDetailsPage.personalDetailsSummaryList.emailRow.value).containsText(landlordEmail)
-            assertThat(landlordDetailsPage.personalDetailsSummaryList.phoneNumberRow.value).containsText(
-                landlordPhoneNumber,
-            )
+            assertThat(landlordDetailsPage.personalDetailsSummaryList.phoneNumberRow.value).containsText(landlordPhoneNumber)
             assertThat(landlordDetailsPage.personalDetailsSummaryList.addressRow.value).containsText(selectedAddress)
         }
 
@@ -239,19 +222,15 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
             val newFirstLine = "3 Example Road"
             val newTown = "Vilton"
             val newPostcode = "AB1 9YZ"
-            landlordDetailsUpdatePage =
-                updateLandlordAddressAndReturn(landlordDetailsUpdatePage, null, newFirstLine, newTown, newPostcode)
+            landlordDetailsUpdatePage = updateLandlordAddressAndReturn(landlordDetailsUpdatePage, null, newFirstLine, newTown, newPostcode)
 
             // Submit changes TODO PRSD-355 add proper submit button and declaration page
             landlordDetailsUpdatePage.submitButton.clickAndWait()
             val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
 
             // Check changes have occurred
-            val newSingleLineAddress =
-                AddressDataModel.manualAddressDataToSingleLineAddress(newFirstLine, newTown, newPostcode)
-            assertThat(landlordDetailsPage.personalDetailsSummaryList.addressRow.value).containsText(
-                newSingleLineAddress,
-            )
+            val newSingleLineAddress = AddressDataModel.manualAddressDataToSingleLineAddress(newFirstLine, newTown, newPostcode)
+            assertThat(landlordDetailsPage.personalDetailsSummaryList.addressRow.value).containsText(newSingleLineAddress)
         }
     }
 

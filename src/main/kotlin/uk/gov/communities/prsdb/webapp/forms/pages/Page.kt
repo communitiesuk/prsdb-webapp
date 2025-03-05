@@ -14,6 +14,5 @@ class Page(
     override fun enrichModel(
         modelAndView: ModelAndView,
         journeyData: JourneyData?,
-    ) {
-    }
+    ) {}
 }
