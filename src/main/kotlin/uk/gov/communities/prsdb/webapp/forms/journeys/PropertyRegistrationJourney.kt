@@ -348,12 +348,12 @@ class PropertyRegistrationJourney(
                                 listOf(
                                     RadiosButtonViewModel(
                                         value = true,
-                                        labelMsgKey = "forms.occupancy.radios.option.yes.label",
+                                        labelMsgKey = "forms.radios.option.yes.label",
                                         hintMsgKey = "forms.occupancy.radios.option.yes.hint",
                                     ),
                                     RadiosButtonViewModel(
                                         value = false,
-                                        labelMsgKey = "forms.occupancy.radios.option.no.label",
+                                        labelMsgKey = "forms.radios.option.no.label",
                                         hintMsgKey = "forms.occupancy.radios.option.no.hint",
                                     ),
                                 ),

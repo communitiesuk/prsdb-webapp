@@ -4,10 +4,12 @@ import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.PROPERTY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 @Component
@@ -41,6 +43,21 @@ class PropertyDeregistrationJourney(
                     content =
                         mapOf(
                             "title" to "deRegisterProperty.title",
+                            "fieldSetHeading" to "deregisterProperty.areYouSure.fieldSetHeading",
+                            "propertyAddress" to "HARDCODED ADDRESS",
+                            "radioOptions" to
+                                listOf(
+                                    RadiosButtonViewModel(
+                                        value = true,
+                                        labelMsgKey = "forms.radios.option.yes.label",
+                                    ),
+                                    RadiosButtonViewModel(
+                                        value = false,
+                                        labelMsgKey = "forms.radios.option.no.label",
+                                    ),
+                                ),
+                            // TODO PRSD-696 - this one isn't working at the moment
+                            "backUrl" to PROPERTY_DETAILS_ROUTE,
                         ),
                 ),
         )

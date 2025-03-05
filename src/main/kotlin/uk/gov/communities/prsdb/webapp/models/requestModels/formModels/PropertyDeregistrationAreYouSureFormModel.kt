@@ -15,5 +15,5 @@ class PropertyDeregistrationAreYouSureFormModel : FormModel {
             ),
         ],
     )
-    var areYouSure: Boolean? = null
+    var wantsToProceed: Boolean? = null
 }
