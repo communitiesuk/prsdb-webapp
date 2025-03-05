@@ -16,7 +16,7 @@ import java.security.Principal
 import java.util.Optional
 
 abstract class Journey<T : StepId>(
-    protected val journeyType: JourneyType,
+    private val journeyType: JourneyType,
     protected val journeyPathSegment: String,
     val initialStepId: T,
     protected val validator: Validator,
