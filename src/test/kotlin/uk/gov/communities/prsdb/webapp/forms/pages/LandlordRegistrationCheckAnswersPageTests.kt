@@ -7,18 +7,17 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import org.springframework.ui.ExtendedModelMap
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
-import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
-import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder.Companion.DEFAULT_ADDRESS
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder.Companion.DEFAULT_ADDRESS
 import java.time.LocalDate
 
 class LandlordRegistrationCheckAnswersPageTests {
@@ -38,16 +37,15 @@ class LandlordRegistrationCheckAnswersPageTests {
         page = LandlordRegistrationCheckAnswersPage(addressService)
         validator = mock()
         whenever(validator.supports(any<Class<*>>())).thenReturn(true)
-        model = ExtendedModelMap()
         pageData = mock()
         prevStepUrl = "mock"
         journeyDataBuilder = JourneyDataBuilder.landlordDefault(addressService, localAuthorityService)
     }
 
     private fun getFormData(journeyData: JourneyData): List<SummaryListRowViewModel> {
-        page.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl, journeyData)
+        val result = page.getModelAndView(validator, pageData, prevStepUrl, journeyData, null)
 
-        val formData = model.asMap()["formData"] as List<*>
+        val formData = result.model["formData"] as List<*>
         return formData.filterIsInstance<SummaryListRowViewModel>()
     }
 

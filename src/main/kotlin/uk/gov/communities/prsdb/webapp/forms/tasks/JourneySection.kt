@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.forms.journeys
+package uk.gov.communities.prsdb.webapp.forms.tasks
 
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId

@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.forms.journeys
+package uk.gov.communities.prsdb.webapp.forms
 
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.forms.steps.Step

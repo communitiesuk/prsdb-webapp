@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.mockObjects
+package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation

@@ -1,8 +1,8 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels
 
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertEquals
 
 class PropertySearchResultViewModelTests {

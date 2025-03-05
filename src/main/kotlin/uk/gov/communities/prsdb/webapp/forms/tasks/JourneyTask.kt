@@ -1,7 +1,8 @@
-package uk.gov.communities.prsdb.webapp.forms.journeys
+package uk.gov.communities.prsdb.webapp.forms.tasks
 
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper

@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpSession
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.springframework.stereotype.Service
-import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
+import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
 @Service

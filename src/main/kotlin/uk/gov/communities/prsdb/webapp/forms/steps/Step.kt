@@ -1,14 +1,14 @@
 package uk.gov.communities.prsdb.webapp.forms.steps
 
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
-import uk.gov.communities.prsdb.webapp.forms.pages.Page
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.PageData
+import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
+import uk.gov.communities.prsdb.webapp.forms.pages.AbstractPage
 
 class Step<T : StepId>(
     val id: T,
-    val page: Page,
+    val page: AbstractPage,
     val handleSubmitAndRedirect: ((journeyData: JourneyData, subPageNumber: Int?) -> String)? = null,
     val isSatisfied: (validator: Validator, pageData: PageData) -> Boolean = { validator, pageData ->
         page.isSatisfied(

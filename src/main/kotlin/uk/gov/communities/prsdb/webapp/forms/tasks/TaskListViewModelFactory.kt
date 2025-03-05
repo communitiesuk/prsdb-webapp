@@ -1,9 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.tasks
 
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
-import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.journeys.JourneySection
-import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyTask
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListItemViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListViewModel
