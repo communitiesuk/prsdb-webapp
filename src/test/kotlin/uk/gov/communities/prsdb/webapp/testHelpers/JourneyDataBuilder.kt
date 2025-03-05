@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.mockObjects
+package uk.gov.communities.prsdb.webapp.testHelpers
 
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
@@ -9,10 +9,10 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.testHelpers.MockLocalAuthorityData.Companion.createLocalAuthority
 import java.time.LocalDate
 
 class JourneyDataBuilder(
@@ -91,7 +91,11 @@ class JourneyDataBuilder(
                 LandlordRegistrationStepId.Email.urlPathSegment to mapOf("emailAddress" to "test@example.com"),
                 LandlordRegistrationStepId.PhoneNumber.urlPathSegment to mapOf("phoneNumber" to "07123456789"),
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment to mapOf("livesInEnglandOrWales" to true),
-                LandlordRegistrationStepId.LookupAddress.urlPathSegment to mapOf("houseNameOrNumber" to "44", "postcode" to "EG1 1GE"),
+                LandlordRegistrationStepId.LookupAddress.urlPathSegment to
+                    mapOf(
+                        "houseNameOrNumber" to "44",
+                        "postcode" to "EG1 1GE",
+                    ),
                 LandlordRegistrationStepId.SelectAddress.urlPathSegment to mapOf("address" to DEFAULT_ADDRESS),
             )
 

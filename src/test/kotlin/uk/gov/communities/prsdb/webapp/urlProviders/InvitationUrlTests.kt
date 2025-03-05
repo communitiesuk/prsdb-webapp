@@ -20,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createdLoggedInUserModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityInvitationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
@@ -28,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
+import uk.gov.communities.prsdb.webapp.testHelpers.MockLocalAuthorityData.Companion.createdLoggedInUserModel
 import java.net.URLEncoder
 import kotlin.test.Test
 

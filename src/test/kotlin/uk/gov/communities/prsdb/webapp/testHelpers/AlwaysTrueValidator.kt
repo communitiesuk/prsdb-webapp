@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.helpers
+package uk.gov.communities.prsdb.webapp.testHelpers
 
 import org.springframework.validation.Errors
 import org.springframework.validation.Validator
@@ -9,5 +9,6 @@ class AlwaysTrueValidator : Validator {
     override fun validate(
         target: Any,
         errors: Errors,
-    ) {}
+    ) {
+    }
 }

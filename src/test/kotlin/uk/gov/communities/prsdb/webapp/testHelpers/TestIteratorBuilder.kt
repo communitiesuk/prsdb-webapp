@@ -1,7 +1,10 @@
-package uk.gov.communities.prsdb.webapp.forms.journeys
+package uk.gov.communities.prsdb.webapp.testHelpers
 
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.journeys.ReachableStepDetailsIterator
+import uk.gov.communities.prsdb.webapp.forms.journeys.TestStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 
 data class TestStepModel(
@@ -34,14 +37,26 @@ class TestIteratorBuilder {
         initialStepModel = stepModel
         journeyData =
             journeyData +
-            (stepModel.urlPathSegment to mapOf("urlPathSegment" to stepModel.urlPathSegment, "isSatisfied" to stepModel.isSatisfied))
+            (
+                stepModel.urlPathSegment to
+                    mapOf(
+                        "urlPathSegment" to stepModel.urlPathSegment,
+                        "isSatisfied" to stepModel.isSatisfied,
+                    )
+            )
         return this
     }
 
     fun withNextStep(stepModel: TestStepModel): TestIteratorBuilder {
         journeyData =
             journeyData +
-            (stepModel.urlPathSegment to mapOf("urlPathSegment" to stepModel.urlPathSegment, "isSatisfied" to stepModel.isSatisfied))
+            (
+                stepModel.urlPathSegment to
+                    mapOf(
+                        "urlPathSegment" to stepModel.urlPathSegment,
+                        "isSatisfied" to stepModel.isSatisfied,
+                    )
+            )
         return withNextStepWithoutPageData(stepModel)
     }
 

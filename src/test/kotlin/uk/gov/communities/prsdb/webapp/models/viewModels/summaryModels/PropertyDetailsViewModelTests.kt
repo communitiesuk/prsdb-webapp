@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.database.entity.License
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createAddress
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createLandlord
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createProperty
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData.Companion.createAddress
+import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData.Companion.createLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData.Companion.createProperty
+import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData.Companion.createPropertyOwnership
 
 class PropertyDetailsViewModelTests {
     @Test

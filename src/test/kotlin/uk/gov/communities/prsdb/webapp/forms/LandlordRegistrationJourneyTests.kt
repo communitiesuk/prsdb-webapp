@@ -17,9 +17,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
-import uk.gov.communities.prsdb.webapp.helpers.AlwaysTrueValidator
-import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
@@ -27,6 +24,9 @@ import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.testHelpers.AlwaysTrueValidator
+import uk.gov.communities.prsdb.webapp.testHelpers.JourneyDataBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData
 import java.net.URI
 
 class LandlordRegistrationJourneyTests {

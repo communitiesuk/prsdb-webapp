@@ -27,14 +27,14 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUserOrInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_ID
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_USER_ID
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthorityUser
-import uk.gov.communities.prsdb.webapp.mockObjects.MockOneLoginUserData.Companion.createOneLoginUser
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserOrInvitationDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
+import uk.gov.communities.prsdb.webapp.testHelpers.MockLocalAuthorityData.Companion.DEFAULT_LA_ID
+import uk.gov.communities.prsdb.webapp.testHelpers.MockLocalAuthorityData.Companion.DEFAULT_LA_USER_ID
+import uk.gov.communities.prsdb.webapp.testHelpers.MockLocalAuthorityData.Companion.createLocalAuthority
+import uk.gov.communities.prsdb.webapp.testHelpers.MockLocalAuthorityData.Companion.createLocalAuthorityUser
+import uk.gov.communities.prsdb.webapp.testHelpers.MockOneLoginUserData.Companion.createOneLoginUser
 import java.util.Optional
 import kotlin.test.assertEquals
 
@@ -267,10 +267,26 @@ class LocalAuthorityDataServiceTests {
         val expectedUserListPage1 = mutableListOf<LocalAuthorityUserOrInvitationDataModel>()
         val expectedUserListPage2 = mutableListOf<LocalAuthorityUserOrInvitationDataModel>()
         for (i in 1..10) {
-            expectedUserListPage1.add(LocalAuthorityUserOrInvitationDataModel(i.toLong(), "User $i", "name", false, false))
+            expectedUserListPage1.add(
+                LocalAuthorityUserOrInvitationDataModel(
+                    i.toLong(),
+                    "User $i",
+                    "name",
+                    false,
+                    false,
+                ),
+            )
         }
         for (i in 11..20) {
-            expectedUserListPage2.add(LocalAuthorityUserOrInvitationDataModel(i.toLong(), "User $i", "name", false, false))
+            expectedUserListPage2.add(
+                LocalAuthorityUserOrInvitationDataModel(
+                    i.toLong(),
+                    "User $i",
+                    "name",
+                    false,
+                    false,
+                ),
+            )
         }
 
         // Act

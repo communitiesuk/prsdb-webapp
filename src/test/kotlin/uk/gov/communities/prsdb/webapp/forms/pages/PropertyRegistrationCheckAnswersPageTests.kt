@@ -14,12 +14,12 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
-import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.testHelpers.JourneyDataBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.MockLocalAuthorityData.Companion.createLocalAuthority
 
 class PropertyRegistrationCheckAnswersPageTests {
     private lateinit var page: PropertyRegistrationCheckAnswersPage

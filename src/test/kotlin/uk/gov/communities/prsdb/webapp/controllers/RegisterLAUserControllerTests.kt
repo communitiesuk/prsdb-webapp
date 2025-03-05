@@ -18,9 +18,9 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLocalAuthorityData
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
+import uk.gov.communities.prsdb.webapp.testHelpers.MockLocalAuthorityData
 
 @WebMvcTest(RegisterLAUserController::class)
 class RegisterLAUserControllerTests(

@@ -21,8 +21,6 @@ import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.getFormattedInternationalPhoneNumber
-import uk.gov.communities.prsdb.webapp.helpers.getFormattedUkPhoneNumber
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -44,6 +42,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.testHelpers.getFormattedInternationalPhoneNumber
+import uk.gov.communities.prsdb.webapp.testHelpers.getFormattedUkPhoneNumber
 import java.net.URI
 import kotlin.test.assertNotNull
 
@@ -188,7 +188,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
         countryOfResidencePage.submitNonUkCountrySelectedByPartialName("Zi", "Zimbabwe")
 
-        val nonEnglandOrWalesAddressPage = assertPageIs(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
+        val nonEnglandOrWalesAddressPage =
+            assertPageIs(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
         assertThat(nonEnglandOrWalesAddressPage.form.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
         nonEnglandOrWalesAddressPage.submitAddress("Zimbabwe address")
 
@@ -240,7 +241,8 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
         countryOfResidencePage.submitNonUkCountrySelectedByPartialName("Zi", "Zimbabwe")
 
-        val nonEnglandOrWalesAddressPage = assertPageIs(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
+        val nonEnglandOrWalesAddressPage =
+            assertPageIs(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
         nonEnglandOrWalesAddressPage.submitAddress("test address")
 
         val lookupContactAddressPage = assertPageIs(page, LookupContactAddressFormPageLandlordRegistration::class)
@@ -518,7 +520,9 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         fun `Submitting with a too long address returns an error`(page: Page) {
             val nonEnglandOrWalesAddressPage = navigator.goToLandlordRegistrationNonEnglandOrWalesAddressPage()
             nonEnglandOrWalesAddressPage.submitAddress("too long address".repeat(1001))
-            assertThat(nonEnglandOrWalesAddressPage.form.getErrorMessage().nth(0)).containsText("Address must be 1000 characters or fewer")
+            assertThat(
+                nonEnglandOrWalesAddressPage.form.getErrorMessage().nth(0),
+            ).containsText("Address must be 1000 characters or fewer")
         }
     }
 

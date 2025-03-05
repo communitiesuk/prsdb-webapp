@@ -26,12 +26,12 @@ import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPropertyCountRepository
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createAddress
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
+import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData.Companion.createAddress
+import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData.Companion.createLandlord
 import java.time.LocalDate
 import kotlin.test.assertNull
 
@@ -361,7 +361,12 @@ class LandlordServiceTests {
         val originalPhoneNumber = "original phone number"
         val originalDateOfBirth = LocalDate.of(1991, 1, 1)
         val landlordEntity =
-            createLandlord(name = originalName, email = originalEmail, phoneNumber = originalPhoneNumber, dateOfBirth = originalDateOfBirth)
+            createLandlord(
+                name = originalName,
+                email = originalEmail,
+                phoneNumber = originalPhoneNumber,
+                dateOfBirth = originalDateOfBirth,
+            )
         val updateModel = LandlordUpdateModel(null, null, null, null, null)
 
         whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
