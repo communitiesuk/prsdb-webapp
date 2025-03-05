@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.forms.journeys
+package uk.gov.communities.prsdb.webapp.forms
 
 typealias JourneyData = Map<String, Any?>
 

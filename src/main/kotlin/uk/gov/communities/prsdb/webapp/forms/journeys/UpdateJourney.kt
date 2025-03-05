@@ -3,6 +3,9 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import org.springframework.validation.Validator
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.PageData
+import uk.gov.communities.prsdb.webapp.forms.ReachableStepDetailsIterator
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
@@ -37,7 +40,12 @@ abstract class UpdateJourney<T : StepId>(
         journeyDataKey: String? = null,
     ): ModelAndView {
         initialiseJourneyDataIfNotInitialised(updateEntityId, journeyDataKey)
-        return super.getModelAndViewForStep(updateStepId.urlPathSegment, subPageNumber, submittedPageData, journeyDataKey)
+        return super.getModelAndViewForStep(
+            updateStepId.urlPathSegment,
+            subPageNumber,
+            submittedPageData,
+            journeyDataKey,
+        )
     }
 
     override fun getUnreachableStepRedirect(journeyData: JourneyData) =

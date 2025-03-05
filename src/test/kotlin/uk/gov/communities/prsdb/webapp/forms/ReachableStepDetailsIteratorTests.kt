@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.forms.journeys
+package uk.gov.communities.prsdb.webapp.forms
 
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.TestIteratorBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.TestStepModel
 import kotlin.test.assertEquals
 
 data class TestStepId(

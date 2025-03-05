@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.forms
+package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -14,12 +14,8 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
-import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourney
-import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
+import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
-import uk.gov.communities.prsdb.webapp.helpers.AlwaysTrueValidator
-import uk.gov.communities.prsdb.webapp.mockObjects.JourneyDataBuilder
-import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
@@ -27,6 +23,9 @@ import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
 
 class LandlordRegistrationJourneyTests {
