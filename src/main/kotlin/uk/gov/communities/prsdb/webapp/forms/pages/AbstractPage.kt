@@ -24,6 +24,8 @@ abstract class AbstractPage(
         validator: Validator,
         pageData: PageData?,
         prevStepUrl: String?,
+        journeyData: JourneyData?,
+        sectionHeaderInfo: SectionHeaderViewModel?,
     ): ModelAndView {
         val modelAndView = ModelAndView(templateName)
 
@@ -37,28 +39,9 @@ abstract class AbstractPage(
         for ((key, value) in content) {
             modelAndView.addObject(key, value)
         }
-        return modelAndView
-    }
 
-    fun getModelAndView(
-        validator: Validator,
-        pageData: PageData?,
-        prevStepUrl: String?,
-        journeyData: JourneyData?,
-    ): ModelAndView {
-        val modelAndView = getModelAndView(validator, pageData, prevStepUrl)
         enrichModel(modelAndView, journeyData)
-        return modelAndView
-    }
 
-    fun getModelAndView(
-        validator: Validator,
-        pageData: PageData?,
-        prevStepUrl: String?,
-        journeyData: JourneyData?,
-        sectionHeaderInfo: SectionHeaderViewModel?,
-    ): ModelAndView {
-        val modelAndView = getModelAndView(validator, pageData, prevStepUrl, journeyData)
         return addSectionHeaderInfoToModel(modelAndView, sectionHeaderInfo)
     }
 

@@ -43,7 +43,7 @@ class LandlordRegistrationCheckAnswersPageTests {
     }
 
     private fun getFormData(journeyData: JourneyData): List<SummaryListRowViewModel> {
-        val result = page.getModelAndView(validator, pageData, prevStepUrl, journeyData)
+        val result = page.getModelAndView(validator, pageData, prevStepUrl, journeyData, null)
 
         val formData = result.model["formData"] as List<*>
         return formData.filterIsInstance<SummaryListRowViewModel>()

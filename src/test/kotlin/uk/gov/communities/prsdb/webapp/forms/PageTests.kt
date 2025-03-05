@@ -79,7 +79,7 @@ class PageTests {
         val previousUrl = "/previous"
 
         // Act
-        val result = testPage.getModelAndView(validator, formData, previousUrl)
+        val result = testPage.getModelAndView(validator, formData, previousUrl, null, null)
 
         // Assert
         assertIs<BindingResult>(result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"])

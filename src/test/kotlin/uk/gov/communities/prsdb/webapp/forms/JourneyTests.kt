@@ -480,6 +480,7 @@ class JourneyTests {
                 pageDataStepFour,
                 TestStepId.StepThree.urlPathSegment,
                 filteredJourneyData,
+                null,
             )
         }
     }
