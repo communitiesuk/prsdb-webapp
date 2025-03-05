@@ -31,17 +31,6 @@ abstract class Journey<T : StepId>(
 
     protected val defaultJourneyDataKey = journeyType.name
 
-    fun getStepId(stepName: String): T {
-        val step = steps.singleOrNull { step -> step.id.urlPathSegment == stepName }
-        if (step == null) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Step $stepName not valid for journey ${journeyType.name}",
-            )
-        }
-        return step.id
-    }
-
     fun loadJourneyDataIfNotLoaded(
         principalName: String,
         journeyDataKey: String? = null,
@@ -60,14 +49,14 @@ abstract class Journey<T : StepId>(
     }
 
     fun getModelAndViewForStep(
-        stepId: T,
+        stepPathSegment: String,
         subPageNumber: Int?,
         submittedPageData: PageData? = null,
         journeyDataKey: String? = null,
     ): ModelAndView {
         val journeyData: JourneyData =
             journeyDataService.getJourneyDataFromSession(journeyDataKey ?: defaultJourneyDataKey)
-        val requestedStep = getStep(stepId)
+        val requestedStep = getStep(stepPathSegment)
         if (!isStepReachable(requestedStep, subPageNumber)) {
             return ModelAndView("redirect:${getUnreachableStepRedirect(journeyData)}")
         }
@@ -88,7 +77,7 @@ abstract class Journey<T : StepId>(
     }
 
     fun completeStep(
-        stepId: T,
+        stepPathSegment: String,
         pageData: PageData,
         subPageNumber: Int?,
         principal: Principal,
@@ -96,10 +85,10 @@ abstract class Journey<T : StepId>(
     ): ModelAndView {
         val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey ?: defaultJourneyDataKey)
 
-        val currentStep = getStep(stepId)
+        val currentStep = getStep(stepPathSegment)
         if (!currentStep.isSatisfied(validator, pageData)) {
             return getModelAndViewForStep(
-                stepId,
+                stepPathSegment,
                 subPageNumber,
                 pageData,
                 journeyDataKey ?: defaultJourneyDataKey,
@@ -115,7 +104,7 @@ abstract class Journey<T : StepId>(
         }
 
         if (currentStep.handleSubmitAndRedirect != null) {
-            return ModelAndView("redirect:${currentStep.handleSubmitAndRedirect!!(newJourneyData, subPageNumber)}")
+            return ModelAndView("redirect:${currentStep.handleSubmitAndRedirect.invoke(newJourneyData, subPageNumber)}")
         }
         val (newStepId: T?, newSubPageNumber: Int?) = currentStep.nextAction(newJourneyData, subPageNumber)
         if (newStepId == null) {
@@ -163,11 +152,11 @@ abstract class Journey<T : StepId>(
         )
     }
 
-    private fun getStep(stepId: T) =
-        steps.singleOrNull { step -> step.id == stepId }
+    private fun getStep(stepPathSegment: String) =
+        steps.singleOrNull { step -> step.id.urlPathSegment == stepPathSegment }
             ?: throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "Step $stepId not valid for journey ${journeyType.name}",
+                "Step path segment '$stepPathSegment' is not valid for journey ${journeyType.name}",
             )
 
     private fun getPrevStep(

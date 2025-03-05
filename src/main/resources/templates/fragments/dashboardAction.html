@@ -1,7 +1,15 @@
-<div th:fragment="dashboardAction(linkTextKey, linkUrl,descriptionKey)"
+<div th:fragment="dashboardAction(linkText, linkUrl, descriptionKey)"
      class="govuk-grid-column-one-third-from-desktop">
-    <a th:href="${linkUrl}"
-    th:text="#{${linkTextKey}}"
-    class="govuk-heading-m govuk-link">linkTextKey</a>
+<!--During development the linkUrl can be set to '#' in the controller if we don't have the real link yet.
+    The link will instead appear as a span to make it clear that is it not yet active-->
+    <a th:unless="${linkUrl} == '#'"
+       th:href="${linkUrl}"
+       th:text="${#messages.msgOrNull(linkText)} ?: ${linkText}"
+        class="govuk-heading-m govuk-link">linkTextKey</a>
+    <span th:if="${linkUrl} == '#'"
+          th:text="${#messages.msgOrNull(linkText)} ?: ${linkText}"
+          class="govuk-heading-m">
+        linkTextKey
+    </span>
     <p class="govuk-body" th:text="#{${descriptionKey}}">descriptionKey</p>
 </div>

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
@@ -44,10 +45,10 @@ class RegisterLandlordController(
         principal: Principal,
         @AuthenticationPrincipal oidcUser: OidcUser,
     ): ModelAndView {
-        var identity = identityService.getVerifiedIdentityData(oidcUser) ?: mapOf()
+        val identity = identityService.getVerifiedIdentityData(oidcUser) ?: mapOf()
 
         return landlordRegistrationJourney.completeStep(
-            landlordRegistrationJourney.getStepId(IDENTITY_VERIFICATION_PATH_SEGMENT),
+            IDENTITY_VERIFICATION_PATH_SEGMENT,
             identity,
             null,
             principal,
@@ -61,7 +62,7 @@ class RegisterLandlordController(
         model: Model,
     ): ModelAndView =
         landlordRegistrationJourney.getModelAndViewForStep(
-            landlordRegistrationJourney.getStepId(stepName),
+            stepName,
             subpage,
         )
 
@@ -74,7 +75,7 @@ class RegisterLandlordController(
         principal: Principal,
     ): ModelAndView =
         landlordRegistrationJourney.completeStep(
-            landlordRegistrationJourney.getStepId(stepName),
+            stepName,
             formData,
             subpage,
             principal,
@@ -93,6 +94,7 @@ class RegisterLandlordController(
             "registrationNumber",
             RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
         )
+        model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
 
         return "registerAsALandlordConfirmation"
     }

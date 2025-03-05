@@ -54,7 +54,7 @@ class RegisterLAUserController(
         }
 
         return laUserRegistrationJourney.getModelAndViewForStep(
-            laUserRegistrationJourney.getStepId(stepName),
+            stepName,
             subpage,
         )
     }
@@ -68,7 +68,7 @@ class RegisterLAUserController(
         principal: Principal,
     ): ModelAndView =
         laUserRegistrationJourney.completeStep(
-            laUserRegistrationJourney.getStepId(stepName),
+            stepName,
             formData,
             subpage,
             principal,

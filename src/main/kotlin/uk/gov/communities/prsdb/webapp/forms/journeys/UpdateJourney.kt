@@ -37,7 +37,7 @@ abstract class UpdateJourney<T : StepId>(
         journeyDataKey: String? = null,
     ): ModelAndView {
         initialiseJourneyDataIfNotInitialised(updateEntityId, journeyDataKey)
-        return super.getModelAndViewForStep(updateStepId, subPageNumber, submittedPageData, journeyDataKey)
+        return super.getModelAndViewForStep(updateStepId.urlPathSegment, subPageNumber, submittedPageData, journeyDataKey)
     }
 
     override fun getUnreachableStepRedirect(journeyData: JourneyData) =
