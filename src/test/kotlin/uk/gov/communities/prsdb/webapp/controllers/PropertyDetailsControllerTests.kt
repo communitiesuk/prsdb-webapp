@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDetailsUpdateJourney
 import uk.gov.communities.prsdb.webapp.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import kotlin.test.Test
@@ -20,6 +21,9 @@ class PropertyDetailsControllerTests(
 ) : ControllerTest(webContext) {
     @MockBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
+
+    @MockBean
+    private lateinit var updateDetailsJourney: PropertyDetailsUpdateJourney
 
     @Nested
     inner class GetPropertyDetailsLandlordViewTests {

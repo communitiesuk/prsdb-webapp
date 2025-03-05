@@ -39,7 +39,7 @@ class RegisteredPropertyViewModelTests {
             RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString()
         val expectedPropertyLicence = "forms.checkPropertyAnswers.propertyDetails.noLicensing"
         val expectedIsTenantedMessageKey = "commonText.no"
-        val expectedRecordLink = PropertyDetailsController.getPropertyDetailsPath(property.id, isLaView)
+        val expectedRecordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLaView)
 
         val expectedRegisteredPropertyViewModel =
             RegisteredPropertyViewModel(
