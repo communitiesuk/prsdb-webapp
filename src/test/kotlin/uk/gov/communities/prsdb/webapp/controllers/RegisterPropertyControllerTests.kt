@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -17,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
+import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
@@ -27,16 +29,20 @@ class RegisterPropertyControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
     @MockBean
-    lateinit var propertyRegistrationJourney: PropertyRegistrationJourney
+    private lateinit var propertyRegistrationJourneyFactory: PropertyRegistrationJourneyFactory
+
+    @Mock
+    private lateinit var propertyRegistrationJourney: PropertyRegistrationJourney
 
     @MockBean
-    lateinit var propertyOwnershipService: PropertyOwnershipService
+    private lateinit var propertyOwnershipService: PropertyOwnershipService
 
     @MockBean
-    lateinit var propertyRegistrationService: PropertyRegistrationService
+    private lateinit var propertyRegistrationService: PropertyRegistrationService
 
     @BeforeEach
     fun setupMocks() {
+        whenever(propertyRegistrationJourneyFactory.create()).thenReturn(propertyRegistrationJourney)
         whenever(propertyRegistrationJourney.initialStepId).thenReturn(RegisterPropertyStepId.PlaceholderPage)
     }
 

@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import jakarta.persistence.EntityExistsException
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
@@ -49,7 +48,6 @@ import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
-@Component
 class PropertyRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,

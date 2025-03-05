@@ -14,7 +14,7 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
+import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
@@ -24,7 +24,7 @@ import java.security.Principal
 @Controller
 @RequestMapping("/$REGISTER_PROPERTY_JOURNEY_URL")
 class RegisterPropertyController(
-    private val propertyRegistrationJourney: PropertyRegistrationJourney,
+    private val propertyRegistrationJourneyFactory: PropertyRegistrationJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyRegistrationService: PropertyRegistrationService,
 ) {
@@ -45,18 +45,20 @@ class RegisterPropertyController(
         @RequestParam(value = "subpage", required = false) subpage: Int?,
         model: Model,
     ): ModelAndView =
-        propertyRegistrationJourney.getModelAndViewForStep(
-            stepName,
-            subpage,
-        )
+        propertyRegistrationJourneyFactory
+            .create()
+            .getModelAndViewForStep(
+                stepName,
+                subpage,
+            )
 
     @GetMapping("/task-list")
     fun getTaskList(
         model: Model,
         principal: Principal,
     ): String {
+        val propertyRegistrationJourney = propertyRegistrationJourneyFactory.create()
         propertyRegistrationJourney.loadJourneyDataIfNotLoaded(principal.name)
-
         return propertyRegistrationJourney.populateModelAndGetTaskListViewName(model)
     }
 
@@ -68,12 +70,14 @@ class RegisterPropertyController(
         model: Model,
         principal: Principal,
     ): ModelAndView =
-        propertyRegistrationJourney.completeStep(
-            stepName,
-            formData,
-            subpage,
-            principal,
-        )
+        propertyRegistrationJourneyFactory
+            .create()
+            .completeStep(
+                stepName,
+                formData,
+                subpage,
+                principal,
+            )
 
     @GetMapping("/$CONFIRMATION_PAGE_PATH_SEGMENT")
     fun getConfirmation(
