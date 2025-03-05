@@ -19,7 +19,7 @@ abstract class UpdateJourney<T : StepId>(
     journeyDataService: JourneyDataService,
     private val updateStepId: T,
 ) : Journey<T>(journeyType, journeyPathSegment, initialStepId, validator, journeyDataService) {
-    protected val originalDataKey = "ORIGINAL_${journeyType.name}"
+    protected val originalDataKey = "ORIGINAL_$journeyPathSegment"
 
     protected abstract fun createOriginalJourneyData(updateEntityId: String): JourneyData
 
