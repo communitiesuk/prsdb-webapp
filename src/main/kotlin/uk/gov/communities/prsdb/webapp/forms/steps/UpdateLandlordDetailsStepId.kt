@@ -11,5 +11,6 @@ enum class UpdateLandlordDetailsStepId(
     LookupEnglandAndWalesAddress("lookup-address"),
     SelectEnglandAndWalesAddress("select-address"),
     ManualEnglandAndWalesAddress("manual-address"),
+    UpdateDateOfBirth("date-of-birth"),
     UpdateDetails(DETAILS_PATH_SEGMENT),
 }

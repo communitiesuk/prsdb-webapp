@@ -3,11 +3,10 @@ package uk.gov.communities.prsdb.webapp.models.dataModels
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class LocalAuthorityUserDataModel(
+data class LocalAuthorityUserOrInvitationDataModel(
     val id: Long,
-    val userName: String,
+    val userNameOrEmail: String,
     val localAuthorityName: String,
     val isManager: Boolean,
-    val email: String,
     val isPending: Boolean = false,
 )

@@ -53,7 +53,7 @@ class RegisterLAUserController(
         }
 
         return laUserRegistrationJourney.populateModelAndGetViewName(
-            laUserRegistrationJourney.getStepId(stepName),
+            stepName,
             model,
             subpage,
         )
@@ -68,7 +68,7 @@ class RegisterLAUserController(
         principal: Principal,
     ): String =
         laUserRegistrationJourney.updateJourneyDataAndGetViewNameOrRedirect(
-            laUserRegistrationJourney.getStepId(stepName),
+            stepName,
             formData,
             model,
             subpage,

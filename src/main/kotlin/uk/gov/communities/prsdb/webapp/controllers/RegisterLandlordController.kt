@@ -44,10 +44,10 @@ class RegisterLandlordController(
         principal: Principal,
         @AuthenticationPrincipal oidcUser: OidcUser,
     ): String {
-        var identity = identityService.getVerifiedIdentityData(oidcUser) ?: mapOf()
+        val identity = identityService.getVerifiedIdentityData(oidcUser) ?: mapOf()
 
         return landlordRegistrationJourney.updateJourneyDataAndGetViewNameOrRedirect(
-            landlordRegistrationJourney.getStepId(IDENTITY_VERIFICATION_PATH_SEGMENT),
+            IDENTITY_VERIFICATION_PATH_SEGMENT,
             identity,
             model,
             null,
@@ -62,7 +62,7 @@ class RegisterLandlordController(
         model: Model,
     ): String =
         landlordRegistrationJourney.populateModelAndGetViewName(
-            landlordRegistrationJourney.getStepId(stepName),
+            stepName,
             model,
             subpage,
         )
@@ -76,7 +76,7 @@ class RegisterLandlordController(
         principal: Principal,
     ): String =
         landlordRegistrationJourney.updateJourneyDataAndGetViewNameOrRedirect(
-            landlordRegistrationJourney.getStepId(stepName),
+            stepName,
             formData,
             model,
             subpage,

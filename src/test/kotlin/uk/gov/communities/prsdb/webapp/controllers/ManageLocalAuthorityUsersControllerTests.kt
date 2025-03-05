@@ -223,6 +223,7 @@ class ManageLocalAuthorityUsersControllerTests(
                     localAuthorityUser.name,
                     localAuthority.name,
                     localAuthorityUser.isManager,
+                    localAuthorityUser.email,
                 ),
             )
 
@@ -293,6 +294,7 @@ class ManageLocalAuthorityUsersControllerTests(
                     localAuthorityUser.name,
                     localAuthority.name,
                     localAuthorityUser.isManager,
+                    localAuthorityUser.email,
                 ),
             )
 
@@ -337,6 +339,7 @@ class ManageLocalAuthorityUsersControllerTests(
                     localAuthorityUser.name,
                     localAuthority.name,
                     localAuthorityUser.isManager,
+                    localAuthorityUser.email,
                 ),
             )
 

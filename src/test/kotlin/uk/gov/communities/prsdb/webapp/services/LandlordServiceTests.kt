@@ -32,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
+import java.time.LocalDate
 import kotlin.test.assertNull
 
 @ExtendWith(MockitoExtension::class)
@@ -358,9 +359,10 @@ class LandlordServiceTests {
         val originalName = "original name"
         val originalEmail = "original email"
         val originalPhoneNumber = "original phone number"
+        val originalDateOfBirth = LocalDate.of(1991, 1, 1)
         val landlordEntity =
-            createLandlord(name = originalName, email = originalEmail, phoneNumber = originalPhoneNumber)
-        val updateModel = LandlordUpdateModel(null, null, null, null)
+            createLandlord(name = originalName, email = originalEmail, phoneNumber = originalPhoneNumber, dateOfBirth = originalDateOfBirth)
+        val updateModel = LandlordUpdateModel(null, null, null, null, null)
 
         whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
 
@@ -371,6 +373,7 @@ class LandlordServiceTests {
         assertEquals(originalName, landlordEntity.name)
         assertEquals(originalEmail, landlordEntity.email)
         assertEquals(originalPhoneNumber, landlordEntity.phoneNumber)
+        assertEquals(originalDateOfBirth, landlordEntity.dateOfBirth)
     }
 
     @Test
@@ -383,10 +386,17 @@ class LandlordServiceTests {
                 email = "original email",
                 phoneNumber = "original phone number",
                 address = createAddress("original address"),
+                dateOfBirth = LocalDate.of(1991, 1, 1),
             )
         val newAddress = createAddress("new address")
         val updateModel =
-            LandlordUpdateModel("newEmail", "newName", "new phone number", AddressDataModel.fromAddress(newAddress))
+            LandlordUpdateModel(
+                "newEmail",
+                "newName",
+                "new phone number",
+                AddressDataModel.fromAddress(newAddress),
+                LocalDate.of(1992, 2, 2),
+            )
 
         whenever(mockAddressService.findOrCreateAddress(updateModel.address!!)).thenReturn(newAddress)
         whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
@@ -399,5 +409,6 @@ class LandlordServiceTests {
         assertEquals(updateModel.email, landlordEntity.email)
         assertEquals(updateModel.phoneNumber, landlordEntity.phoneNumber)
         assertEquals(newAddress, landlordEntity.address)
+        assertEquals(updateModel.dateOfBirth, landlordEntity.dateOfBirth)
     }
 }

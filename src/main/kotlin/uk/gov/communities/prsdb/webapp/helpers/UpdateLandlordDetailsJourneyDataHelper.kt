@@ -2,12 +2,17 @@ package uk.gov.communities.prsdb.webapp.helpers
 
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.journeys.UpdateLandlordDetailsJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
+import java.time.LocalDate
 
 class UpdateLandlordDetailsJourneyDataHelper : JourneyDataHelper() {
     companion object {
+        fun getIsIdentityVerified(journeyData: JourneyData): Boolean =
+            getStringValueByKey(journeyData, UpdateLandlordDetailsJourney.IS_IDENTITY_VERIFIED_KEY).toBoolean()
+
         fun getEmailUpdateIfPresent(journeyData: JourneyData) =
             getFieldStringValue(
                 journeyData,
@@ -47,6 +52,31 @@ class UpdateLandlordDetailsJourneyDataHelper : JourneyDataHelper() {
             } else {
                 null
             }
+        }
+
+        fun getDateOfBirthIfPresent(journeyData: JourneyData): LocalDate? {
+            val day =
+                getFieldIntegerValue(
+                    journeyData,
+                    UpdateLandlordDetailsStepId.UpdateDateOfBirth.urlPathSegment,
+                    "day",
+                ) ?: return null
+
+            val month =
+                getFieldIntegerValue(
+                    journeyData,
+                    UpdateLandlordDetailsStepId.UpdateDateOfBirth.urlPathSegment,
+                    "month",
+                ) ?: return null
+
+            val year =
+                getFieldIntegerValue(
+                    journeyData,
+                    UpdateLandlordDetailsStepId.UpdateDateOfBirth.urlPathSegment,
+                    "year",
+                ) ?: return null
+
+            return LocalDate.of(year, month, day)
         }
     }
 }

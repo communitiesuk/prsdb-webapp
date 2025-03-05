@@ -234,7 +234,7 @@ class PropertyRegistrationJourneyTests {
             pageData: PageData = mapOf(),
         ) {
             testJourney.updateJourneyDataAndGetViewNameOrRedirect(
-                stepId = stepId,
+                stepPathSegment = stepId.urlPathSegment,
                 pageData = pageData,
                 subPageNumber = null,
                 principal = mock(),

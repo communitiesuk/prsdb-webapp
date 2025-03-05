@@ -82,6 +82,11 @@ open class JourneyDataHelper {
             )
         }
 
+        fun getStringValueByKey(
+            journeyData: JourneyData,
+            key: String,
+        ): String? = journeyData[key]?.toString()
+
         fun getPageData(
             journeyData: JourneyData,
             pageName: String,

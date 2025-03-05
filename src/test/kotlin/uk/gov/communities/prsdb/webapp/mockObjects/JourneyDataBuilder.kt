@@ -330,4 +330,10 @@ class JourneyDataBuilder(
         journeyData[UpdateLandlordDetailsStepId.UpdateName.urlPathSegment] = mapOf("name" to newName)
         return this
     }
+
+    fun withDateOfBirthUpdate(dateOfBirth: LocalDate): JourneyDataBuilder {
+        journeyData[LandlordRegistrationStepId.DateOfBirth.urlPathSegment] =
+            mapOf("day" to dateOfBirth.dayOfMonth, "month" to dateOfBirth.monthValue, "year" to dateOfBirth.year)
+        return this
+    }
 }
