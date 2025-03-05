@@ -20,7 +20,7 @@ class LandlordRegistrationJourneyFactory(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
 ) {
-    fun create(): LandlordRegistrationJourney =
+    fun create() =
         LandlordRegistrationJourney(
             validator,
             journeyDataService,
