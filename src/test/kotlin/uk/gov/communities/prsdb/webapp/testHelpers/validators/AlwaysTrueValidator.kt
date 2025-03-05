@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.testHelpers
+package uk.gov.communities.prsdb.webapp.testHelpers.validators
 
 import org.springframework.validation.Errors
 import org.springframework.validation.Validator
