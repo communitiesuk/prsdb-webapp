@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_PLACE_NAMES
 import uk.gov.communities.prsdb.webapp.constants.NON_ENGLAND_OR_WALES_ADDRESS_MAX_LENGTH
@@ -39,7 +38,6 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 
-@Component
 class LandlordRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
@@ -50,11 +48,11 @@ class LandlordRegistrationJourney(
     val emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
 ) : Journey<LandlordRegistrationStepId>(
         journeyType = JourneyType.LANDLORD_REGISTRATION,
+        journeyPathSegment = REGISTER_LANDLORD_JOURNEY_URL,
+        initialStepId = LandlordRegistrationStepId.VerifyIdentity,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
-    final override val initialStepId = LandlordRegistrationStepId.VerifyIdentity
-
     override val sections =
         listOf(
             JourneySection(privacyNoticeTasks(), "registerAsALandlord.section.privacyNotice.heading"),
@@ -67,8 +65,6 @@ class LandlordRegistrationJourney(
                 "registerAsALandlord.section.checkAndSubmit.heading",
             ),
         )
-
-    override val journeyPathSegment = REGISTER_LANDLORD_JOURNEY_URL
 
     private fun privacyNoticeTasks(): List<JourneyTask<LandlordRegistrationStepId>> = emptyList()
 

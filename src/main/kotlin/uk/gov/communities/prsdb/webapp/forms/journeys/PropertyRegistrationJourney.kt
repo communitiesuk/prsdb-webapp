@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import jakarta.persistence.EntityExistsException
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
@@ -46,7 +45,6 @@ import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
-@Component
 class PropertyRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
@@ -59,20 +57,17 @@ class PropertyRegistrationJourney(
     private val confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
 ) : JourneyWithTaskList<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
+        journeyPathSegment = REGISTER_PROPERTY_JOURNEY_URL,
+        initialStepId = RegisterPropertyStepId.LookupAddress,
         validator = validator,
         journeyDataService = journeyDataService,
+        taskListUrlSegment = "task-list",
     ) {
-    override val initialStepId = RegisterPropertyStepId.LookupAddress
-
-    override val taskListUrlSegment: String = "task-list"
-
     override val sections =
         listOf(
             JourneySection(registerPropertyTasks(), "registerProperty.taskList.register.heading"),
             JourneySection(checkAndSubmitPropertiesTasks(), "registerProperty.taskList.checkAndSubmit.heading"),
         )
-
-    override val journeyPathSegment = REGISTER_PROPERTY_JOURNEY_URL
 
     override val taskListFactory =
         getTaskListViewModelFactory(

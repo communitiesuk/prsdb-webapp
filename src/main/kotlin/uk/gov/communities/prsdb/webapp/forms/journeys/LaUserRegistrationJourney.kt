@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
@@ -19,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 
-@Component
 class LaUserRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
@@ -27,11 +25,11 @@ class LaUserRegistrationJourney(
     private val localAuthorityDataService: LocalAuthorityDataService,
 ) : Journey<RegisterLaUserStepId>(
         journeyType = JourneyType.LA_USER_REGISTRATION,
+        journeyPathSegment = REGISTER_LA_USER_JOURNEY_URL,
+        initialStepId = RegisterLaUserStepId.LandingPage,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
-    final override val initialStepId: RegisterLaUserStepId = RegisterLaUserStepId.LandingPage
-
     override val sections =
         createSingleSectionWithSingleTaskFromSteps(
             initialStepId,
@@ -43,10 +41,8 @@ class LaUserRegistrationJourney(
             ),
         )
 
-    override val journeyPathSegment = REGISTER_LA_USER_JOURNEY_URL
-
     fun initialiseJourneyData(token: String) {
-        val journeyData = journeyDataService.getJourneyDataFromSession(defaultJourneyDataKey)
+        val journeyData = journeyDataService.getJourneyDataFromSession(journeyPathSegment)
         val formData: PageData = mapOf("emailAddress" to invitationService.getEmailAddressForToken(token))
         val emailStep = steps.single { step -> step.id == RegisterLaUserStepId.Email }
 
