@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.forms
+package uk.gov.communities.prsdb.webapp.forms.pages
 
 import jakarta.validation.Validation
 import jakarta.validation.ValidatorFactory
@@ -10,8 +10,7 @@ import org.springframework.validation.BindingResult
 import org.springframework.validation.Validator
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
-import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.pages.Page
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import kotlin.test.Test

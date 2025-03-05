@@ -2,9 +2,9 @@ package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
-import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.journeys.ReachableStepDetailsIterator
-import uk.gov.communities.prsdb.webapp.forms.journeys.TestStepId
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.ReachableStepDetailsIterator
+import uk.gov.communities.prsdb.webapp.forms.TestStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 
 data class TestStepModel(

@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.forms
+package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.HttpSession
@@ -31,15 +31,14 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
-import uk.gov.communities.prsdb.webapp.forms.journeys.Journey
-import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.journeys.JourneySection
-import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyTask
-import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.objectToStringKeyedMap
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.PageData
+import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
+import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
+import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -287,7 +286,8 @@ class JourneyTests {
 
             // Assert
             assertIs<BindingResult>(result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"])
-            val bindingResult: BindingResult = result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"] as BindingResult
+            val bindingResult: BindingResult =
+                result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"] as BindingResult
             assertContains(result.model, "testKey")
             assertEquals("testValue", result.model["testKey"])
             assertContains(result.model, "backUrl")
@@ -575,7 +575,8 @@ class JourneyTests {
 
             // Assert
             assertIs<BindingResult>(result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"])
-            val bindingResult: BindingResult = result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"] as BindingResult
+            val bindingResult: BindingResult =
+                result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"] as BindingResult
             assertContains(result.model, "testKey")
             assertEquals("testValue", result.model["testKey"])
             val propertyValue = bindingResult.getRawFieldValue("testProperty")
@@ -633,7 +634,7 @@ class JourneyTests {
             verify(mockJourneyDataService).setJourneyDataInSession(journeyDataCaptor.capture())
 
             // Assert
-            assertEquals("redirect:/${JOURNEY_PATH_SEGMENT}/${TestStepId.StepTwo.urlPathSegment}", result.viewName)
+            assertEquals("redirect:/$JOURNEY_PATH_SEGMENT/${TestStepId.StepTwo.urlPathSegment}", result.viewName)
             assertIs<PageData>(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment]!!)
             val resultPageData = objectToStringKeyedMap(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment])
             assertEquals("testPropertyValue", resultPageData?.get("testProperty"))
@@ -695,7 +696,7 @@ class JourneyTests {
             )
 
             // Assert
-            assertEquals("redirect:/${JOURNEY_PATH_SEGMENT}/${TestStepId.StepTwo.urlPathSegment}", result.viewName)
+            assertEquals("redirect:/$JOURNEY_PATH_SEGMENT/${TestStepId.StepTwo.urlPathSegment}", result.viewName)
             assertIs<PageData>(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment]!!)
             val resultPageData = objectToStringKeyedMap(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment])
             assertEquals("testPropertyValue", resultPageData?.get("testProperty"))
@@ -757,7 +758,7 @@ class JourneyTests {
                 eq(JourneyType.LANDLORD_REGISTRATION),
                 eq(principal),
             )
-            assertEquals("redirect:/${JOURNEY_PATH_SEGMENT}/${TestStepId.StepTwo.urlPathSegment}", result.viewName)
+            assertEquals("redirect:/$JOURNEY_PATH_SEGMENT/${TestStepId.StepTwo.urlPathSegment}", result.viewName)
         }
 
         @Test
