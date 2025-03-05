@@ -27,7 +27,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.validation.BindingResult
 import org.springframework.validation.Validator
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter
-import org.springframework.validation.support.BindingAwareModelMap
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
@@ -135,14 +134,12 @@ class JourneyTests {
                             ),
                         ),
                 )
-            val model = BindingAwareModelMap()
 
             // Act and Assert
             val exception =
                 assertThrows<ResponseStatusException> {
-                    testJourney.populateModelAndGetViewName(
+                    testJourney.getModelAndViewForStep(
                         TestStepId.StepTwo.urlPathSegment,
-                        model,
                         null,
                     )
                 }
@@ -190,7 +187,6 @@ class JourneyTests {
                             ),
                         ),
                 )
-            val model = BindingAwareModelMap()
             val pageData: PageData = mapOf("testProperty" to "testPropertyValue")
             val journeyData: JourneyData = mapOf(TestStepId.StepOne.urlPathSegment to pageData)
 
@@ -198,10 +194,10 @@ class JourneyTests {
 
             // Act
             val result =
-                testJourney.populateModelAndGetViewName(TestStepId.StepTwo.urlPathSegment, model, null, null)
+                testJourney.getModelAndViewForStep(TestStepId.StepTwo.urlPathSegment, null, null)
 
             // Assert
-            assertEquals("redirect:${TestStepId.StepOne.urlPathSegment}", result)
+            assertEquals("redirect:${TestStepId.StepOne.urlPathSegment}", result.viewName)
         }
 
         @Test
@@ -236,17 +232,16 @@ class JourneyTests {
                             ),
                         ),
                 )
-            val model = BindingAwareModelMap()
             val journeyData: JourneyData = mapOf()
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
             val result =
-                testJourney.populateModelAndGetViewName(TestStepId.StepTwo.urlPathSegment, model, null, null)
+                testJourney.getModelAndViewForStep(TestStepId.StepTwo.urlPathSegment, null, null)
 
             // Assert
-            assertEquals("redirect:${TestStepId.StepOne.urlPathSegment}", result)
+            assertEquals("redirect:${TestStepId.StepOne.urlPathSegment}", result.viewName)
         }
 
         @Test
@@ -281,7 +276,6 @@ class JourneyTests {
                             ),
                         ),
                 )
-            val model = BindingAwareModelMap()
             val pageData: PageData = mapOf("testProperty" to "testPropertyValue")
             val journeyData: JourneyData = mapOf(TestStepId.StepOne.urlPathSegment to pageData)
 
@@ -289,18 +283,18 @@ class JourneyTests {
 
             // Act
             val result =
-                testJourney.populateModelAndGetViewName(TestStepId.StepTwo.urlPathSegment, model, null, pageData)
+                testJourney.getModelAndViewForStep(TestStepId.StepTwo.urlPathSegment, null, pageData)
 
             // Assert
-            assertIs<BindingResult>(model[BindingResult.MODEL_KEY_PREFIX + "formModel"])
-            val bindingResult: BindingResult = model[BindingResult.MODEL_KEY_PREFIX + "formModel"] as BindingResult
-            assertContains(model, "testKey")
-            assertEquals("testValue", model["testKey"])
-            assertContains(model, "backUrl")
-            assertEquals(TestStepId.StepOne.urlPathSegment, model["backUrl"])
+            assertIs<BindingResult>(result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"])
+            val bindingResult: BindingResult = result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"] as BindingResult
+            assertContains(result.model, "testKey")
+            assertEquals("testValue", result.model["testKey"])
+            assertContains(result.model, "backUrl")
+            assertEquals(TestStepId.StepOne.urlPathSegment, result.model["backUrl"])
             val propertyValue = bindingResult.getRawFieldValue("testProperty")
             assertEquals("testPropertyValue", propertyValue)
-            assertEquals("templateName", result)
+            assertEquals("templateName", result.viewName)
         }
     }
 
@@ -335,12 +329,10 @@ class JourneyTests {
                     validator = validator,
                 )
 
-            val model = BindingAwareModelMap()
-
-            testJourney.populateModelAndGetViewName(TestStepId.StepOne.urlPathSegment, model, null)
+            val result = testJourney.getModelAndViewForStep(TestStepId.StepOne.urlPathSegment, null)
 
             val expectedSectionHeader = SectionHeaderViewModel("Test section heading name key", 1, 1)
-            assertTrue(ReflectionEquals(expectedSectionHeader).matches(model["sectionHeaderInfo"]))
+            assertTrue(ReflectionEquals(expectedSectionHeader).matches(result.model["sectionHeaderInfo"]))
         }
 
         @Test
@@ -368,11 +360,9 @@ class JourneyTests {
                     validator = validator,
                 )
 
-            val model = BindingAwareModelMap()
+            val result = testJourney.getModelAndViewForStep(TestStepId.StepOne.urlPathSegment, null)
 
-            testJourney.populateModelAndGetViewName(TestStepId.StepOne.urlPathSegment, model, null)
-
-            assertNull(model["sectionHeaderInfo"])
+            assertNull(result.model["sectionHeaderInfo"])
         }
     }
 
@@ -456,7 +446,6 @@ class JourneyTests {
                             ),
                         ),
                 )
-            val model = BindingAwareModelMap()
             val pageDataStepOne: PageData = mapOf("testProperty" to "testProperty")
             val pageDataStepTwo: PageData = mapOf("testPropertyTwo" to "testProperty")
             val pageDataStepThree: PageData = mapOf("testProperty" to "testProperty")
@@ -478,27 +467,26 @@ class JourneyTests {
             whenever(spiedOnJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
-            testJourney.populateModelAndGetViewName(
+            testJourney.getModelAndViewForStep(
                 TestStepId.StepFour.urlPathSegment,
-                model,
                 null,
                 pageDataStepFour,
                 journeyDataKey,
             )
 
             // Assert
-            verify(spiedOnPage).populateModelAndGetTemplateName(
+            verify(spiedOnPage).getModelAndView(
                 validator,
-                model,
                 pageDataStepFour,
                 TestStepId.StepThree.urlPathSegment,
                 filteredJourneyData,
+                null,
             )
         }
     }
 
     @Nested
-    inner class UpdateJourneyDataAndGetViewNameOrRedirectTests {
+    inner class GetModelAndViewForStepTests {
         @Test
         fun `throws not found exception when step is missing`() {
             // Arrange
@@ -521,17 +509,15 @@ class JourneyTests {
                             ),
                         ),
                 )
-            val model = BindingAwareModelMap()
             val pageData: PageData = mapOf()
             val principal = Principal { "testPrincipalId" }
 
             // Act and Assert
             val exception =
                 assertThrows<ResponseStatusException> {
-                    testJourney.updateJourneyDataAndGetViewNameOrRedirect(
+                    testJourney.completeStep(
                         TestStepId.StepTwo.urlPathSegment,
                         pageData,
-                        model,
                         null,
                         principal,
                     )
@@ -571,7 +557,6 @@ class JourneyTests {
                             ),
                         ),
                 )
-            val model = BindingAwareModelMap()
             val principal = Principal { "testPrincipalId" }
             val pageData: PageData = mapOf()
             val journeyData: JourneyData =
@@ -581,22 +566,21 @@ class JourneyTests {
 
             // Act
             val result =
-                testJourney.updateJourneyDataAndGetViewNameOrRedirect(
+                testJourney.completeStep(
                     TestStepId.StepOne.urlPathSegment,
                     pageData,
-                    model,
                     null,
                     principal,
                 )
 
             // Assert
-            assertIs<BindingResult>(model[BindingResult.MODEL_KEY_PREFIX + "formModel"])
-            val bindingResult: BindingResult = model[BindingResult.MODEL_KEY_PREFIX + "formModel"] as BindingResult
-            assertContains(model, "testKey")
-            assertEquals("testValue", model["testKey"])
+            assertIs<BindingResult>(result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"])
+            val bindingResult: BindingResult = result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"] as BindingResult
+            assertContains(result.model, "testKey")
+            assertEquals("testValue", result.model["testKey"])
             val propertyValue = bindingResult.getRawFieldValue("testProperty")
             assertNull(propertyValue)
-            assertEquals("stepOneTemplate", result)
+            assertEquals("stepOneTemplate", result.viewName)
         }
 
         @Test
@@ -631,7 +615,6 @@ class JourneyTests {
                             ),
                         ),
                 )
-            val model = BindingAwareModelMap()
             val principal = Principal { "testPrincipalId" }
             val pageData: PageData = mapOf("testProperty" to "testPropertyValue")
             val journeyData: JourneyData = mapOf()
@@ -640,10 +623,9 @@ class JourneyTests {
 
             // Act
             val result =
-                testJourney.updateJourneyDataAndGetViewNameOrRedirect(
+                testJourney.completeStep(
                     TestStepId.StepOne.urlPathSegment,
                     pageData,
-                    model,
                     null,
                     principal,
                 )
@@ -651,7 +633,7 @@ class JourneyTests {
             verify(mockJourneyDataService).setJourneyDataInSession(journeyDataCaptor.capture())
 
             // Assert
-            assertEquals("redirect:/${JOURNEY_PATH_SEGMENT}/${TestStepId.StepTwo.urlPathSegment}", result)
+            assertEquals("redirect:/${JOURNEY_PATH_SEGMENT}/${TestStepId.StepTwo.urlPathSegment}", result.viewName)
             assertIs<PageData>(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment]!!)
             val resultPageData = objectToStringKeyedMap(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment])
             assertEquals("testPropertyValue", resultPageData?.get("testProperty"))
@@ -690,7 +672,6 @@ class JourneyTests {
                             ),
                         ),
                 )
-            val model = BindingAwareModelMap()
             val principal = Principal { "testPrincipalId" }
             val pageData: PageData = mapOf("testProperty" to "testPropertyValue")
             val journeyData: JourneyData = mapOf()
@@ -699,10 +680,9 @@ class JourneyTests {
 
             // Act
             val result =
-                testJourney.updateJourneyDataAndGetViewNameOrRedirect(
+                testJourney.completeStep(
                     TestStepId.StepOne.urlPathSegment,
                     pageData,
-                    model,
                     null,
                     principal,
                 )
@@ -715,7 +695,7 @@ class JourneyTests {
             )
 
             // Assert
-            assertEquals("redirect:/${JOURNEY_PATH_SEGMENT}/${TestStepId.StepTwo.urlPathSegment}", result)
+            assertEquals("redirect:/${JOURNEY_PATH_SEGMENT}/${TestStepId.StepTwo.urlPathSegment}", result.viewName)
             assertIs<PageData>(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment]!!)
             val resultPageData = objectToStringKeyedMap(journeyDataCaptor.firstValue[TestStepId.StepOne.urlPathSegment])
             assertEquals("testPropertyValue", resultPageData?.get("testProperty"))
@@ -754,7 +734,6 @@ class JourneyTests {
                             ),
                         ),
                 )
-            val model = BindingAwareModelMap()
             val principal = Principal { "testPrincipalId" }
             val pageData: PageData = mapOf("testProperty" to "testPropertyValue")
             val journeyData: JourneyData = mapOf()
@@ -763,10 +742,9 @@ class JourneyTests {
 
             // Act
             val result =
-                testJourney.updateJourneyDataAndGetViewNameOrRedirect(
+                testJourney.completeStep(
                     TestStepId.StepOne.urlPathSegment,
                     pageData,
-                    model,
                     null,
                     principal,
                 )
@@ -779,7 +757,7 @@ class JourneyTests {
                 eq(JourneyType.LANDLORD_REGISTRATION),
                 eq(principal),
             )
-            assertEquals("redirect:/${JOURNEY_PATH_SEGMENT}/${TestStepId.StepTwo.urlPathSegment}", result)
+            assertEquals("redirect:/${JOURNEY_PATH_SEGMENT}/${TestStepId.StepTwo.urlPathSegment}", result.viewName)
         }
 
         @Test
@@ -814,7 +792,6 @@ class JourneyTests {
                             ),
                         ),
                 )
-            val model = BindingAwareModelMap()
             val principal = Principal { "testPrincipalId" }
             val pageData: PageData = mapOf("testProperty" to "testPropertyValue")
             val journeyData: JourneyData = mapOf()
@@ -823,16 +800,15 @@ class JourneyTests {
 
             // Act
             val result =
-                testJourney.updateJourneyDataAndGetViewNameOrRedirect(
+                testJourney.completeStep(
                     TestStepId.StepOne.urlPathSegment,
                     pageData,
-                    model,
                     null,
                     principal,
                 )
 
             // Assert
-            assertEquals("redirect:/customRedirect", result)
+            assertEquals("redirect:/customRedirect", result.viewName)
         }
 
         @Test
@@ -858,7 +834,6 @@ class JourneyTests {
                             ),
                         ),
                 )
-            val model = BindingAwareModelMap()
             val principal = Principal { "testPrincipalId" }
             val pageData: PageData = mapOf("testProperty" to "testPropertyValue")
             val journeyData: JourneyData = mapOf()
@@ -867,10 +842,9 @@ class JourneyTests {
 
             // Act and Assert
             assertThrows<IllegalStateException> {
-                testJourney.updateJourneyDataAndGetViewNameOrRedirect(
+                testJourney.completeStep(
                     TestStepId.StepOne.urlPathSegment,
                     pageData,
-                    model,
                     null,
                     principal,
                 )

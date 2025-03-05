@@ -1,10 +1,8 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
-import org.springframework.ui.Model
-import org.springframework.validation.Validator
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.helpers.LaUserRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
@@ -17,14 +15,11 @@ class LaUserRegistrationCheckAnswersPage(
     templateName: String,
     content: Map<String, Any>,
     private val invitationService: LocalAuthorityInvitationService,
-) : Page(formModel, templateName, content) {
-    override fun populateModelAndGetTemplateName(
-        validator: Validator,
-        model: Model,
-        pageData: PageData?,
-        prevStepUrl: String?,
+) : AbstractPage(formModel, templateName, content) {
+    override fun enrichModel(
+        modelAndView: ModelAndView,
         journeyData: JourneyData?,
-    ): String {
+    ) {
         journeyData!!
         val formData = mutableListOf<SummaryListRowViewModel>()
         val sessionToken = invitationService.getTokenFromSession()
@@ -56,7 +51,6 @@ class LaUserRegistrationCheckAnswersPage(
             ),
         )
 
-        model.addAttribute("formData", formData)
-        return super.populateModelAndGetTemplateName(validator, model, pageData, prevStepUrl)
+        modelAndView.addObject("formData", formData)
     }
 }

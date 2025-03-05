@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.PageData
@@ -43,10 +44,9 @@ class RegisterPropertyController(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
         model: Model,
-    ): String =
-        propertyRegistrationJourney.populateModelAndGetViewName(
+    ): ModelAndView =
+        propertyRegistrationJourney.getModelAndViewForStep(
             stepName,
-            model,
             subpage,
         )
 
@@ -67,11 +67,10 @@ class RegisterPropertyController(
         @RequestParam formData: PageData,
         model: Model,
         principal: Principal,
-    ): String =
-        propertyRegistrationJourney.updateJourneyDataAndGetViewNameOrRedirect(
+    ): ModelAndView =
+        propertyRegistrationJourney.completeStep(
             stepName,
             formData,
-            model,
             subpage,
             principal,
         )
