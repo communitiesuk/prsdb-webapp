@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_PLACE_NAMES
 import uk.gov.communities.prsdb.webapp.constants.NON_ENGLAND_OR_WALES_ADDRESS_MAX_LENGTH
@@ -42,7 +41,6 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 
-@Component
 class LandlordRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,

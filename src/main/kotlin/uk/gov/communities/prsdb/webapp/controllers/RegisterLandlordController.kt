@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourney
+import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
@@ -23,9 +23,9 @@ import java.security.Principal
 @Controller
 @RequestMapping("/${REGISTER_LANDLORD_JOURNEY_URL}")
 class RegisterLandlordController(
-    var landlordRegistrationJourney: LandlordRegistrationJourney,
-    val identityService: OneLoginIdentityService,
-    val landlordService: LandlordService,
+    private val landlordRegistrationJourneyFactory: LandlordRegistrationJourneyFactory,
+    private val identityService: OneLoginIdentityService,
+    private val landlordService: LandlordService,
 ) {
     @GetMapping
     fun index(model: Model): CharSequence {
@@ -47,12 +47,14 @@ class RegisterLandlordController(
     ): ModelAndView {
         val identity = identityService.getVerifiedIdentityData(oidcUser) ?: mapOf()
 
-        return landlordRegistrationJourney.completeStep(
-            IDENTITY_VERIFICATION_PATH_SEGMENT,
-            identity,
-            null,
-            principal,
-        )
+        return landlordRegistrationJourneyFactory
+            .create()
+            .completeStep(
+                IDENTITY_VERIFICATION_PATH_SEGMENT,
+                identity,
+                subPageNumber = null,
+                principal,
+            )
     }
 
     @GetMapping("/{stepName}")
@@ -61,10 +63,9 @@ class RegisterLandlordController(
         @RequestParam(value = "subpage", required = false) subpage: Int?,
         model: Model,
     ): ModelAndView =
-        landlordRegistrationJourney.getModelAndViewForStep(
-            stepName,
-            subpage,
-        )
+        landlordRegistrationJourneyFactory
+            .create()
+            .getModelAndViewForStep(stepName, subpage)
 
     @PostMapping("/{stepName}")
     fun postJourneyData(
@@ -74,12 +75,14 @@ class RegisterLandlordController(
         model: Model,
         principal: Principal,
     ): ModelAndView =
-        landlordRegistrationJourney.completeStep(
-            stepName,
-            formData,
-            subpage,
-            principal,
-        )
+        landlordRegistrationJourneyFactory
+            .create()
+            .completeStep(
+                stepName,
+                formData,
+                subpage,
+                principal,
+            )
 
     @GetMapping("/$CONFIRMATION_PAGE_PATH_SEGMENT")
     fun getConfirmation(

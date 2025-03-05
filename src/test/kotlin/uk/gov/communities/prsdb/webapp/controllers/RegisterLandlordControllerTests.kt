@@ -6,7 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
-import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourney
+import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 
@@ -15,7 +15,7 @@ class RegisterLandlordControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
     @MockBean
-    lateinit var landlordRegistrationJourney: LandlordRegistrationJourney
+    lateinit var landlordRegistrationJourneyFactory: LandlordRegistrationJourneyFactory
 
     @MockBean
     lateinit var identityService: OneLoginIdentityService
