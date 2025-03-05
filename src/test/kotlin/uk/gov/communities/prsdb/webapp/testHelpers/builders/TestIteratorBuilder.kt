@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.testHelpers
+package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException

@@ -29,8 +29,8 @@ import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.testHelpers.AlwaysTrueValidator
-import uk.gov.communities.prsdb.webapp.testHelpers.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import java.net.URI
 
 class PropertyRegistrationJourneyTests {

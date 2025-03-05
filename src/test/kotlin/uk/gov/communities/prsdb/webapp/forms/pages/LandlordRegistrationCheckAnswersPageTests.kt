@@ -16,8 +16,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
-import uk.gov.communities.prsdb.webapp.testHelpers.JourneyDataBuilder
-import uk.gov.communities.prsdb.webapp.testHelpers.JourneyDataBuilder.Companion.DEFAULT_ADDRESS
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder.Companion.DEFAULT_ADDRESS
 import java.time.LocalDate
 
 class LandlordRegistrationCheckAnswersPageTests {
