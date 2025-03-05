@@ -22,17 +22,15 @@ import java.util.Optional
 
 abstract class Journey<T : StepId>(
     protected val journeyType: JourneyType,
+    protected val journeyPathSegment: String,
+    val initialStepId: T,
     protected val validator: Validator,
     protected val journeyDataService: JourneyDataService,
 ) : Iterable<StepDetails<T>> {
-    abstract val initialStepId: T
-
     abstract val sections: List<JourneySection<T>>
 
     protected val steps: Set<Step<T>>
         get() = sections.flatMap { section -> section.tasks }.flatMap { task -> task.steps }.toSet()
-
-    protected abstract val journeyPathSegment: String
 
     protected val defaultJourneyDataKey = journeyType.name
 

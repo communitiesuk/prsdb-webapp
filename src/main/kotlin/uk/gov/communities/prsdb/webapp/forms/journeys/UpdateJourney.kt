@@ -13,11 +13,12 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 abstract class UpdateJourney<T : StepId>(
     journeyType: JourneyType,
+    journeyPathSegment: String,
+    initialStepId: T,
     validator: Validator,
     journeyDataService: JourneyDataService,
-) : Journey<T>(journeyType, validator, journeyDataService) {
-    abstract val updateStepId: T
-
+    private val updateStepId: T,
+) : Journey<T>(journeyType, journeyPathSegment, initialStepId, validator, journeyDataService) {
     protected val originalDataKey = "ORIGINAL_${journeyType.name}"
 
     protected abstract fun createOriginalJourneyData(updateEntityId: String): JourneyData

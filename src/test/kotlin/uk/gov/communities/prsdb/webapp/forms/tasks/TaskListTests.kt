@@ -36,20 +36,23 @@ class TaskListTests {
     class TestJourney(
         validator: Validator,
         journeyDataService: JourneyDataService,
-        override val initialStepId: TestStepId,
+        initialStepId: TestStepId,
         override val sections: List<JourneySection<TestStepId>>,
-    ) : JourneyWithTaskList<TestStepId>(JourneyType.PROPERTY_REGISTRATION, validator, journeyDataService) {
-        override val journeyPathSegment = "any-url-segment"
-        override val taskListFactory: TaskListViewModelFactory<TestStepId>
-            get() =
-                getTaskListViewModelFactory(
-                    "title",
-                    "heading",
-                    "subtitle",
-                    "TODO()",
-                )
-        override val taskListUrlSegment: String
-            get() = "any-url-segment"
+    ) : JourneyWithTaskList<TestStepId>(
+            JourneyType.PROPERTY_REGISTRATION,
+            "any-url-segment",
+            initialStepId,
+            validator,
+            journeyDataService,
+            "any-url-segment",
+        ) {
+        override val taskListFactory: TaskListViewModelFactory<TestStepId> =
+            getTaskListViewModelFactory(
+                "title",
+                "heading",
+                "subtitle",
+                "TODO()",
+            )
     }
 
     @Mock

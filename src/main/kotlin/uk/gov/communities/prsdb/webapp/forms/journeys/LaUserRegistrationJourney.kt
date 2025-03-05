@@ -29,11 +29,11 @@ class LaUserRegistrationJourney(
     private val localAuthorityDataService: LocalAuthorityDataService,
 ) : Journey<RegisterLaUserStepId>(
         journeyType = JourneyType.LA_USER_REGISTRATION,
+        journeyPathSegment = REGISTER_LA_USER_JOURNEY_URL,
+        initialStepId = RegisterLaUserStepId.LandingPage,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
-    final override val initialStepId: RegisterLaUserStepId = RegisterLaUserStepId.LandingPage
-
     override val sections =
         createSingleSectionWithSingleTaskFromSteps(
             initialStepId,
@@ -44,8 +44,6 @@ class LaUserRegistrationJourney(
                 checkAnswersStep(),
             ),
         )
-
-    override val journeyPathSegment = REGISTER_LA_USER_JOURNEY_URL
 
     fun initialiseJourneyData(token: String) {
         val journeyData = journeyDataService.getJourneyDataFromSession(defaultJourneyDataKey)

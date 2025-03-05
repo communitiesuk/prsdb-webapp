@@ -69,25 +69,21 @@ class JourneyTests {
     class TestJourney(
         journeyType: JourneyType,
         steps: Set<Step<TestStepId>>,
-        override val initialStepId: TestStepId,
+        initialStepId: TestStepId,
         validator: Validator,
         journeyDataService: JourneyDataService,
-    ) : Journey<TestStepId>(journeyType, validator, journeyDataService) {
+    ) : Journey<TestStepId>(journeyType, JOURNEY_PATH_SEGMENT, initialStepId, validator, journeyDataService) {
         override val sections: List<JourneySection<TestStepId>> =
             createSingleSectionWithSingleTaskFromSteps(initialStepId, steps)
-
-        override val journeyPathSegment = JOURNEY_PATH_SEGMENT
     }
 
     class TestJourneyWithSections(
         journeyType: JourneyType,
-        override val sections: List<JourneySection<TestStepId>>,
-        override val initialStepId: TestStepId,
+        initialStepId: TestStepId,
         validator: Validator,
         journeyDataService: JourneyDataService,
-    ) : Journey<TestStepId>(journeyType, validator, journeyDataService) {
-        override val journeyPathSegment = JOURNEY_PATH_SEGMENT
-    }
+        override val sections: List<JourneySection<TestStepId>>,
+    ) : Journey<TestStepId>(journeyType, JOURNEY_PATH_SEGMENT, initialStepId, validator, journeyDataService)
 
     class TestFormModel : FormModel {
         @NotNull

@@ -53,11 +53,11 @@ class LandlordRegistrationJourney(
     val emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
 ) : Journey<LandlordRegistrationStepId>(
         journeyType = JourneyType.LANDLORD_REGISTRATION,
+        journeyPathSegment = REGISTER_LANDLORD_JOURNEY_URL,
+        initialStepId = LandlordRegistrationStepId.VerifyIdentity,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
-    final override val initialStepId = LandlordRegistrationStepId.VerifyIdentity
-
     override val sections =
         listOf(
             JourneySection(privacyNoticeTasks(), "registerAsALandlord.section.privacyNotice.heading"),
@@ -70,8 +70,6 @@ class LandlordRegistrationJourney(
                 "registerAsALandlord.section.checkAndSubmit.heading",
             ),
         )
-
-    override val journeyPathSegment = REGISTER_LANDLORD_JOURNEY_URL
 
     private fun privacyNoticeTasks(): List<JourneyTask<LandlordRegistrationStepId>> = emptyList()
 

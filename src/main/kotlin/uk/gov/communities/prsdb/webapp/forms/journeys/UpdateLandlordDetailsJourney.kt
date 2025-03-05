@@ -43,14 +43,12 @@ class UpdateLandlordDetailsJourney(
     addressLookupService: AddressLookupService,
 ) : UpdateJourney<UpdateLandlordDetailsStepId>(
         journeyType = JourneyType.LANDLORD_DETAILS_UPDATE,
+        journeyPathSegment = UPDATE_LANDLORD_DETAILS_URL,
+        initialStepId = UpdateLandlordDetailsStepId.UpdateEmail,
         validator = validator,
         journeyDataService = journeyDataService,
+        updateStepId = UpdateLandlordDetailsStepId.UpdateDetails,
     ) {
-    final override val initialStepId = UpdateLandlordDetailsStepId.UpdateEmail
-    override val updateStepId = UpdateLandlordDetailsStepId.UpdateDetails
-
-    override val journeyPathSegment: String = UPDATE_LANDLORD_DETAILS_URL
-
     private val updateDetailsStep =
         Step(
             id = UpdateLandlordDetailsStepId.UpdateDetails,
