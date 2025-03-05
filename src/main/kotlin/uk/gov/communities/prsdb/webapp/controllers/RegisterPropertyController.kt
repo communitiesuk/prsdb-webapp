@@ -34,7 +34,7 @@ class RegisterPropertyController(
             "registerPropertyInitialStep",
             "/$REGISTER_PROPERTY_JOURNEY_URL/task-list",
         )
-        model.addAttribute("backUrl", "/")
+        model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
         return "registerPropertyStartPage"
     }
