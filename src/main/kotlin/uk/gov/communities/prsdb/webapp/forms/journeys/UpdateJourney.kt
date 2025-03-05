@@ -20,11 +20,8 @@ abstract class UpdateJourney<T : StepId>(
 
     protected abstract fun createOriginalJourneyData(updateEntityId: String): JourneyData
 
-    protected open fun initialiseJourneyDataIfNotInitialised(
-        updateEntityId: String,
-        journeyDataKey: String? = null,
-    ) {
-        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey ?: defaultJourneyDataKey)
+    protected open fun initialiseJourneyDataIfNotInitialised(updateEntityId: String) {
+        val journeyData = journeyDataService.getJourneyDataFromSession(journeyPathSegment)
         if (!isJourneyDataInitialised(journeyData)) {
             val newJourneyData = journeyData + (originalDataKey to createOriginalJourneyData(updateEntityId))
             journeyDataService.setJourneyDataInSession(newJourneyData)
@@ -35,10 +32,9 @@ abstract class UpdateJourney<T : StepId>(
         updateEntityId: String,
         subPageNumber: Int? = null,
         submittedPageData: PageData? = null,
-        journeyDataKey: String? = null,
     ): ModelAndView {
-        initialiseJourneyDataIfNotInitialised(updateEntityId, journeyDataKey)
-        return super.getModelAndViewForStep(updateStepId.urlPathSegment, subPageNumber, submittedPageData, journeyDataKey)
+        initialiseJourneyDataIfNotInitialised(updateEntityId)
+        return super.getModelAndViewForStep(updateStepId.urlPathSegment, subPageNumber, submittedPageData)
     }
 
     override fun getUnreachableStepRedirect(journeyData: JourneyData) =
@@ -66,8 +62,8 @@ abstract class UpdateJourney<T : StepId>(
 
     private fun isJourneyDataInitialised(journeyData: JourneyData): Boolean = journeyData.containsKey(originalDataKey)
 
-    protected fun isJourneyDataInitialised(journeyDataKey: String? = null): Boolean {
-        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey ?: defaultJourneyDataKey)
+    protected fun isJourneyDataInitialised(): Boolean {
+        val journeyData = journeyDataService.getJourneyDataFromSession(journeyPathSegment)
         return isJourneyDataInitialised(journeyData)
     }
 }

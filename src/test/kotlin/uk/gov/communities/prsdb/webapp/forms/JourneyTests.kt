@@ -401,7 +401,7 @@ class JourneyTests {
 
             val testJourney =
                 TestJourney(
-                    JourneyType.LANDLORD_REGISTRATION,
+                    journeyType = JourneyType.LANDLORD_REGISTRATION,
                     initialStepId = TestStepId.StepOne,
                     journeyDataService = spiedOnJourneyDataService,
                     validator = validator,
@@ -457,9 +457,8 @@ class JourneyTests {
                     TestStepId.StepOne.urlPathSegment to pageDataStepOne,
                     TestStepId.StepThree.urlPathSegment to pageDataStepThree,
                 )
-            val journeyDataKey = "journey-data-key"
 
-            whenever(spiedOnJourneyDataService.getJourneyDataFromSession(journeyDataKey)).thenReturn(journeyData)
+            whenever(spiedOnJourneyDataService.getJourneyDataFromSession(JOURNEY_PATH_SEGMENT)).thenReturn(journeyData)
             whenever(spiedOnJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
@@ -467,7 +466,6 @@ class JourneyTests {
                 TestStepId.StepFour.urlPathSegment,
                 null,
                 pageDataStepFour,
-                journeyDataKey,
             )
 
             // Assert
@@ -854,7 +852,6 @@ class JourneyTests {
         fun `when there is no journey data in the session or the database, journey data is not loaded`() {
             val journeyType = JourneyType.PROPERTY_REGISTRATION
             val principalName = "principalName"
-            val journeyDataKey = "journey-data-key"
             val testJourney =
                 TestJourney(
                     journeyType,
@@ -864,13 +861,13 @@ class JourneyTests {
                     mockJourneyDataService,
                 )
 
-            whenever(mockJourneyDataService.getJourneyDataFromSession(journeyDataKey)).thenReturn(mapOf())
+            whenever(mockJourneyDataService.getJourneyDataFromSession(JOURNEY_PATH_SEGMENT)).thenReturn(mapOf())
             whenever(mockJourneyDataService.getContextId(principalName, journeyType)).thenReturn(
                 null,
             )
 
             // Act
-            testJourney.loadJourneyDataIfNotLoaded(principalName, journeyDataKey)
+            testJourney.loadJourneyDataIfNotLoaded(principalName)
 
             // Assert
             verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any())
@@ -880,7 +877,6 @@ class JourneyTests {
         fun `when the journey data is not in the session it will be loaded into the session from the database`() {
             val journeyType = JourneyType.PROPERTY_REGISTRATION
             val principalName = "principalName"
-            val journeyDataKey = "journey-data-key"
             val contextId = 67L
             val testJourney =
                 TestJourney(
@@ -891,13 +887,13 @@ class JourneyTests {
                     mockJourneyDataService,
                 )
 
-            whenever(mockJourneyDataService.getJourneyDataFromSession(journeyDataKey)).thenReturn(mapOf())
+            whenever(mockJourneyDataService.getJourneyDataFromSession(JOURNEY_PATH_SEGMENT)).thenReturn(mapOf())
             whenever(mockJourneyDataService.getContextId(principalName, journeyType)).thenReturn(
                 contextId,
             )
 
             // Act
-            testJourney.loadJourneyDataIfNotLoaded(principalName, journeyDataKey)
+            testJourney.loadJourneyDataIfNotLoaded(principalName)
 
             // Assert
             val captor = argumentCaptor<Long>()
@@ -908,7 +904,6 @@ class JourneyTests {
         @Test
         fun `when the journey data is already in the session, journey data is not loaded`() {
             val principalName = "principalName"
-            val journeyDataKey = "journey-data-key"
             val testJourney =
                 TestJourney(
                     JourneyType.PROPERTY_REGISTRATION,
@@ -918,12 +913,12 @@ class JourneyTests {
                     mockJourneyDataService,
                 )
 
-            whenever(mockJourneyDataService.getJourneyDataFromSession(journeyDataKey)).thenReturn(
+            whenever(mockJourneyDataService.getJourneyDataFromSession(JOURNEY_PATH_SEGMENT)).thenReturn(
                 mapOf("anything" to "Anything else"),
             )
 
             // Act
-            testJourney.loadJourneyDataIfNotLoaded(principalName, journeyDataKey)
+            testJourney.loadJourneyDataIfNotLoaded(principalName)
 
             // Assert
             verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any())
