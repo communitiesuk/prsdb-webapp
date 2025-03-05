@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.whenever
@@ -17,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
+import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
@@ -27,6 +29,9 @@ class RegisterLAUserControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
     @MockBean
+    lateinit var laUserRegistrationJourneyFactory: LaUserRegistrationJourneyFactory
+
+    @Mock
     lateinit var laUserRegistrationJourney: LaUserRegistrationJourney
 
     @MockBean
@@ -41,6 +46,7 @@ class RegisterLAUserControllerTests(
 
     @BeforeEach
     fun setupMocks() {
+        whenever(laUserRegistrationJourneyFactory.create()).thenReturn(laUserRegistrationJourney)
         whenever(laUserRegistrationJourney.initialStepId).thenReturn(RegisterLaUserStepId.LandingPage)
         whenever(invitationService.tokenIsValid(validToken)).thenReturn(true)
         whenever(invitationService.getTokenFromSession()).thenReturn(validToken)

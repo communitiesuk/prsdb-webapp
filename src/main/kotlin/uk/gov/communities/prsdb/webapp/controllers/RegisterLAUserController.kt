@@ -13,7 +13,7 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
+import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import java.security.Principal
@@ -21,7 +21,7 @@ import java.security.Principal
 @Controller
 @RequestMapping("/${REGISTER_LA_USER_JOURNEY_URL}")
 class RegisterLAUserController(
-    val laUserRegistrationJourney: LaUserRegistrationJourney,
+    val laUserRegistrationJourneyFactory: LaUserRegistrationJourneyFactory,
     val invitationService: LocalAuthorityInvitationService,
     val localAuthorityDataService: LocalAuthorityDataService,
 ) {
@@ -34,6 +34,8 @@ class RegisterLAUserController(
         // see https://github.com/spring-projects/spring-hateoas/issues/155 for details
         if (invitationService.tokenIsValid(token)) {
             invitationService.storeTokenInSession(token)
+
+            val laUserRegistrationJourney = laUserRegistrationJourneyFactory.create()
             laUserRegistrationJourney.initialiseJourneyData(token)
             return "redirect:${REGISTER_LA_USER_JOURNEY_URL}/${laUserRegistrationJourney.initialStepId.urlPathSegment}"
         }
@@ -53,10 +55,12 @@ class RegisterLAUserController(
             return ModelAndView("redirect:$INVALID_LINK_PAGE_PATH_SEGMENT")
         }
 
-        return laUserRegistrationJourney.getModelAndViewForStep(
-            stepName,
-            subpage,
-        )
+        return laUserRegistrationJourneyFactory
+            .create()
+            .getModelAndViewForStep(
+                stepName,
+                subpage,
+            )
     }
 
     @PostMapping("/{stepName}")
@@ -67,12 +71,14 @@ class RegisterLAUserController(
         model: Model,
         principal: Principal,
     ): ModelAndView =
-        laUserRegistrationJourney.completeStep(
-            stepName,
-            formData,
-            subpage,
-            principal,
-        )
+        laUserRegistrationJourneyFactory
+            .create()
+            .completeStep(
+                stepName,
+                formData,
+                subpage,
+                principal,
+            )
 
     @GetMapping("/$CONFIRMATION_PAGE_PATH_SEGMENT")
     fun getConfirmation(

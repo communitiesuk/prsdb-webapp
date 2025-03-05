@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
@@ -21,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 
-@Component
 class LaUserRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,

@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.urlProviders
 
+import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
@@ -19,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersCont
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
+import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityInvitationEmail
@@ -51,6 +53,9 @@ class InvitationUrlTests(
     private lateinit var journeyDataService: JourneyDataService
 
     @MockBean
+    private lateinit var laUserRegistrationJourneyFactory: LaUserRegistrationJourneyFactory
+
+    @Mock
     private lateinit var laUserRegistrationJourney: LaUserRegistrationJourney
 
     @Test
@@ -83,6 +88,7 @@ class InvitationUrlTests(
 
         val encodedConfirmedEmailContent = urlEncodedConfirmedEmailDataModel(testEmail)
 
+        whenever(laUserRegistrationJourneyFactory.create()).thenReturn(laUserRegistrationJourney)
         whenever(laUserRegistrationJourney.initialStepId).thenReturn(RegisterLaUserStepId.LandingPage)
 
         // Act
