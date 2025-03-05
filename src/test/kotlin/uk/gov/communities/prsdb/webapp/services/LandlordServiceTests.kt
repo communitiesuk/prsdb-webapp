@@ -30,8 +30,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
-import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData.Companion.createAddress
-import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData.Companion.createLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 import java.time.LocalDate
 import kotlin.test.assertNull
 

@@ -30,7 +30,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData.Companion.createPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 
 @ExtendWith(MockitoExtension::class)
 class PropertyRegistrationServiceTests {

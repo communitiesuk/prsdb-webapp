@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
 
 class PropertyDetailsLandlordViewModelTests {

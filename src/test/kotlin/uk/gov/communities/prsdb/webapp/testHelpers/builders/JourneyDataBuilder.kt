@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
-import uk.gov.communities.prsdb.webapp.testHelpers.MockLocalAuthorityData.Companion.createLocalAuthority
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import java.time.LocalDate
 
 class JourneyDataBuilder(

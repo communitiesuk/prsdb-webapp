@@ -7,9 +7,9 @@ import org.mockito.Mockito
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
-import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData
-import uk.gov.communities.prsdb.webapp.testHelpers.MockLocalAuthorityData
-import uk.gov.communities.prsdb.webapp.testHelpers.MockOneLoginUserData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockOneLoginUserData
 
 class UserRolesServiceTests {
     private lateinit var landlordRepository: LandlordRepository

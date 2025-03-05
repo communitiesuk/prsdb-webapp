@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.testHelpers
+package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 

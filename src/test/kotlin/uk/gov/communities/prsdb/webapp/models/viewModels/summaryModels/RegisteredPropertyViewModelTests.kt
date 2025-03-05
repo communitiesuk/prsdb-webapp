@@ -12,9 +12,9 @@ import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData.Companion.createAddress
-import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData.Companion.createProperty
-import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData.Companion.createPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createProperty
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 
 class RegisteredPropertyViewModelTests {
     @ParameterizedTest

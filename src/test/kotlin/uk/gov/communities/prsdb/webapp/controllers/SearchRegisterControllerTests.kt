@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.Land
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.Test
 
 @WebMvcTest(SearchRegisterController::class)

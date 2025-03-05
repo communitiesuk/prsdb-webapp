@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneId

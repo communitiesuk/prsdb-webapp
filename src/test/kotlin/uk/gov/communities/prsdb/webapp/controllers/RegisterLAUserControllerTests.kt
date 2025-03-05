@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
-import uk.gov.communities.prsdb.webapp.testHelpers.MockLocalAuthorityData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
 
 @WebMvcTest(RegisterLAUserController::class)
 class RegisterLAUserControllerTests(

@@ -27,7 +27,7 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
-import uk.gov.communities.prsdb.webapp.testHelpers.MockLocalAuthorityData.Companion.createdLoggedInUserModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createdLoggedInUserModel
 import java.net.URLEncoder
 import kotlin.test.Test
 

@@ -11,7 +11,7 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData.Companion.createPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import kotlin.test.Test
 
 @WebMvcTest(PropertyDetailsController::class)

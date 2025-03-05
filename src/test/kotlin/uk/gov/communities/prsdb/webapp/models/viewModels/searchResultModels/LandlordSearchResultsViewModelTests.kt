@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropertyCount
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData.Companion.createLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 import kotlin.test.assertEquals
 
 class LandlordSearchResultsViewModelTests {

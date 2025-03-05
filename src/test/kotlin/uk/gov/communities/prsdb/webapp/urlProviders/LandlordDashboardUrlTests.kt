@@ -39,9 +39,9 @@ import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
-import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData.Companion.createLandlord
-import uk.gov.communities.prsdb.webapp.testHelpers.MockLandlordData.Companion.createPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import kotlin.test.Test
 
 @WebMvcTest(controllers = [LandlordDashboardController::class, RegisterLandlordController::class, RegisterPropertyController::class])

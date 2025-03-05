@@ -8,7 +8,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.RateLimitExceededException
-import uk.gov.communities.prsdb.webapp.testHelpers.MockHttpResponse
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockHttpResponse
 import java.net.http.HttpClient
 import java.net.http.HttpResponse
 import kotlin.test.assertEquals

@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.testHelpers
+package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.testHelpers.MockLocalAuthorityData.Companion.createLocalAuthority
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import java.time.Instant
 import java.time.LocalDate
 

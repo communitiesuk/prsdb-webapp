@@ -14,7 +14,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
-import uk.gov.communities.prsdb.webapp.testHelpers.MockOneLoginUserData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockOneLoginUserData
 import java.util.Optional
 import kotlin.test.assertEquals
 
