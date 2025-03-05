@@ -34,15 +34,15 @@ class PropertyRegistrationCheckAnswersPage(
     }
 
     private fun addPropertyDetailsToModel(
-        model: ModelAndView,
+        modelAndView: ModelAndView,
         journeyData: JourneyData,
     ) {
         val propertyName = getPropertyName(journeyData)
         val propertyDetails = getPropertyDetailsSummary(journeyData)
 
-        model.addObject("propertyDetails", propertyDetails)
-        model.addObject("propertyName", propertyName)
-        model.addObject("showUprnDetail", !DataHelper.isManualAddressChosen(journeyData))
+        modelAndView.addObject("propertyDetails", propertyDetails)
+        modelAndView.addObject("propertyName", propertyName)
+        modelAndView.addObject("showUprnDetail", !DataHelper.isManualAddressChosen(journeyData))
     }
 
     private fun getPropertyName(journeyData: JourneyData) = DataHelper.getAddress(journeyData, addressDataService)!!.singleLineAddress
