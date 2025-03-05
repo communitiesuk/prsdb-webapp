@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
@@ -34,13 +33,12 @@ import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 
-@Component
 class UpdateLandlordDetailsJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
+    addressLookupService: AddressLookupService,
     private val landlordService: LandlordService,
     private val addressDataService: AddressDataService,
-    addressLookupService: AddressLookupService,
 ) : UpdateJourney<UpdateLandlordDetailsStepId>(
         journeyType = JourneyType.LANDLORD_DETAILS_UPDATE,
         journeyPathSegment = UPDATE_LANDLORD_DETAILS_URL,
