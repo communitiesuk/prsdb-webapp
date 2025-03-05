@@ -520,6 +520,6 @@ class LandlordRegistrationJourney(
 
         journeyDataService.clearJourneyDataFromSession()
 
-        return "/$REGISTER_LANDLORD_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT"
+        return CONFIRMATION_PAGE_PATH_SEGMENT
     }
 }

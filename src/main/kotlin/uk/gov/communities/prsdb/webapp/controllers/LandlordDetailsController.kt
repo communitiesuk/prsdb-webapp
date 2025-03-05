@@ -78,7 +78,7 @@ class LandlordDetailsController(
 
         model.addAttribute("registeredPropertiesList", registeredPropertiesList)
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
-        model.addAttribute("registeredPropertiesUrlSegment", REGISTERED_PROPERTIES_PATH_SEGMENT)
+        model.addAttribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_PATH_SEGMENT)
     }
 
     @PreAuthorize("hasRole('LANDLORD')")
@@ -127,7 +127,7 @@ class LandlordDetailsController(
         model.addAttribute("name", landlordViewModel.name)
         model.addAttribute("lastModifiedDate", lastModifiedDate)
         model.addAttribute("landlord", landlordViewModel)
-        model.addAttribute("registeredPropertiesUrlSegment", REGISTERED_PROPERTIES_PATH_SEGMENT)
+        model.addAttribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_PATH_SEGMENT)
 
         val registeredPropertiesList = propertyOwnershipService.getRegisteredPropertiesForLandlord(id)
 

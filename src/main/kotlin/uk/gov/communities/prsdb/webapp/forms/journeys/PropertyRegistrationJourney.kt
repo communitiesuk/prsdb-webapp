@@ -610,7 +610,7 @@ class PropertyRegistrationJourney(
 
             journeyDataService.deleteJourneyData()
 
-            return "/$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT"
+            return CONFIRMATION_PAGE_PATH_SEGMENT
         } catch (exception: EntityExistsException) {
             return RegisterPropertyStepId.AlreadyRegistered.urlPathSegment
         }

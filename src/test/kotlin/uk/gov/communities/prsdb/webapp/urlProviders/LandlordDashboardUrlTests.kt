@@ -123,7 +123,7 @@ class LandlordDashboardUrlTests(
                 content = encodedDeclarationContent
                 with(csrf())
             }.andExpect { status { is3xxRedirection() } }
-            .andExpect { redirectedUrl("/$REGISTER_LANDLORD_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT") }
+            .andExpect { redirectedUrl(CONFIRMATION_PAGE_PATH_SEGMENT) }
 
         mvc
             .get(confirmationCaptor.firstValue.prsdURL)
@@ -172,7 +172,7 @@ class LandlordDashboardUrlTests(
                 content = encodedDeclarationContent
                 with(csrf())
             }.andExpect { status { is3xxRedirection() } }
-            .andExpect { redirectedUrl("/$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT") }
+            .andExpect { redirectedUrl(CONFIRMATION_PAGE_PATH_SEGMENT) }
 
         mvc
             .get(confirmationCaptor.firstValue.prsdUrl)

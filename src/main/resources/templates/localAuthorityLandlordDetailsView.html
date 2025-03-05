@@ -17,7 +17,7 @@
                     <th:block id="tab-headings">
                         <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('personal-details', #{landlordDetails.personalDetails.heading})}">
                         </li>
-                        <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${registeredPropertiesUrlSegment}, #{landlordDetails.registeredProperties.heading})}">
+                        <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${registeredPropertiesTabId}, #{landlordDetails.registeredProperties.heading})}">
                         </li>
                     </th:block>
                 </ul>
@@ -32,7 +32,7 @@
                     </th:block>
                 </div>
 
-                <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${registeredPropertiesUrlSegment}, ~{:: #registered-properties-panel-content})}">
+                <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${registeredPropertiesTabId}, ~{:: #registered-properties-panel-content})}">
                     <th:block id="registered-properties-panel-content">
                         <table th:replace="~{fragments/tables/table :: table(
                                 ${ { 'landlordDetails.registeredProperties.table.addressHeading', 'landlordDetails.registeredProperties.table.registrationNumberHeading', 'landlordDetails.registeredProperties.table.localAuthorityHeading', 'landlordDetails.registeredProperties.table.licensingTypeHeading', 'landlordDetails.registeredProperties.table.tenantedHeading' } },
