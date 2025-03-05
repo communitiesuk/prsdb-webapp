@@ -51,9 +51,9 @@ belongs to.
 
 ## The Journey base class
 The `Journey` class is responsible for marshalling the steps. 
-Each final child of `Journey` represents a particular multi-page form in the service. The actual steps that make up that
-journey are specified, including the `nextAction` and `handleSubmitAndRedirect` logic for each.
-The base class has two main functions for progressing through the multi-page form:
+Each final child of `Journey` represents a particular multi-page form in the service. These children are instantiated via
+corresponding factories. The actual steps that make up each journey are specified, including their `nextAction` and 
+`handleSubmitAndRedirect` logic. The base class has two main functions for progressing through the multi-page form:
 
 ### `getModelAndViewForStep`
 returns the name of the ThymeLeaf template for a step and populates the model for it, or returns a 
@@ -82,10 +82,10 @@ current data would result in visiting the current page if, starting on the initi
 each page reached in turn.
 
 ## Journey's Subclasses
-There are a couple of abstract subclasses of journey:
+There are a couple of abstract subclasses of `Journey`:
 
 ### The JourneyWithTaskList
-the JourneyWithTaskList adds a task-list page, which is like
+The `JourneyWithTaskList` adds a task-list page, which is like
 a contents page for the journey - it shows the list of all tasks in the journey along with their current status. If the
 first step of a task is reachable then it will also link to that step.
 
