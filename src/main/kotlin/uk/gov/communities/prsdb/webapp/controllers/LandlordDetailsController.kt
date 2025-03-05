@@ -87,7 +87,7 @@ class LandlordDetailsController(
         principal: Principal,
     ): String =
         updateDetailsJourney.populateModelAndGetViewName(
-            updateDetailsJourney.getStepId(stepName),
+            stepName,
             model,
             null,
         )
@@ -101,7 +101,7 @@ class LandlordDetailsController(
         principal: Principal,
     ): String =
         updateDetailsJourney.updateJourneyDataAndGetViewNameOrRedirect(
-            updateDetailsJourney.getStepId(stepName),
+            stepName,
             formData,
             model,
             null,
