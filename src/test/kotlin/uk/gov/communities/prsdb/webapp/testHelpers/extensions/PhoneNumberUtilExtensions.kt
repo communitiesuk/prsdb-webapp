@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.testHelpers
+package uk.gov.communities.prsdb.webapp.testHelpers.extensions
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 
