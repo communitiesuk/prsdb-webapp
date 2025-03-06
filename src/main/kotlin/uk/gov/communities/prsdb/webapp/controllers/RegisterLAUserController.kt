@@ -54,7 +54,7 @@ class RegisterLAUserController(
         }
 
         return laUserRegistrationJourneyFactory
-            .create(token)
+            .create(invitationService.getInvitationFromToken(token))
             .getModelAndViewForStep(
                 stepName,
                 subpage,
@@ -76,7 +76,7 @@ class RegisterLAUserController(
         }
 
         return laUserRegistrationJourneyFactory
-            .create(token)
+            .create(invitationService.getInvitationFromToken(token))
             .completeStep(
                 stepName,
                 formData,

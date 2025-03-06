@@ -5,6 +5,7 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.LaUserRegistrationCheckAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -42,11 +43,11 @@ class LaUserRegistrationJourney(
             ),
         )
 
-    fun initializeJourneyDataIfNotInitialized(token: String) {
+    fun initializeJourneyDataIfNotInitialized(invitation: LocalAuthorityInvitation) {
         val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
         if (!isJourneyDataInitialized(journeyData)) {
             val emailStep = steps.single { step -> step.id == RegisterLaUserStepId.Email }
-            val emailFormData = mapOf("emailAddress" to invitationService.getEmailAddressForToken(token))
+            val emailFormData = mapOf("emailAddress" to invitation.invitedEmail)
             val newJourneyData = emailStep.updatedJourneyData(journeyData, emailFormData, subPageNumber = null)
             journeyDataService.setJourneyDataInSession(newJourneyData)
         }
