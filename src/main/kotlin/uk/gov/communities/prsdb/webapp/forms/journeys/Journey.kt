@@ -6,7 +6,6 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
-import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.ReachableStepDetailsIterator
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
@@ -32,6 +31,8 @@ abstract class Journey<T : StepId>(
     protected val steps: Set<Step<T>>
         get() = sections.flatMap { section -> section.tasks }.flatMap { task -> task.steps }.toSet()
 
+    protected open val unreachableStepRedirect = initialStepId.urlPathSegment
+
     fun loadJourneyDataIfNotLoaded(principalName: String) {
         val data = journeyDataService.getJourneyDataFromSession(journeyDataKey)
         if (data.isEmpty()) {
@@ -54,7 +55,7 @@ abstract class Journey<T : StepId>(
         val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
         val requestedStep = getStep(stepPathSegment)
         if (!isStepReachable(requestedStep, subPageNumber)) {
-            return ModelAndView("redirect:${getUnreachableStepRedirect(journeyData)}")
+            return ModelAndView("redirect:$unreachableStepRedirect")
         }
         val prevStepDetails = getPrevStep(requestedStep, subPageNumber)
         val prevStepUrl = getPrevStepUrl(prevStepDetails?.step, prevStepDetails?.subPageNumber)
@@ -126,8 +127,6 @@ abstract class Journey<T : StepId>(
         // All other steps are reachable if and only if we can find their previous step by traversal
         return getPrevStep(targetStep, targetSubPageNumber) != null
     }
-
-    protected open fun getUnreachableStepRedirect(journeyData: JourneyData) = initialStepId.urlPathSegment
 
     protected fun createSingleSectionWithSingleTaskFromSteps(
         initialStepId: T,

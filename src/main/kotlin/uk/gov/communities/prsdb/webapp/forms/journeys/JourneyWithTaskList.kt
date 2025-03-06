@@ -20,7 +20,7 @@ abstract class JourneyWithTaskList<T : StepId>(
 ) : Journey<T>(journeyType, journeyDataKey, initialStepId, validator, journeyDataService) {
     protected abstract val taskListFactory: TaskListViewModelFactory<T>
 
-    final override fun getUnreachableStepRedirect(journeyData: JourneyData) = taskListUrlSegment
+    override val unreachableStepRedirect = taskListUrlSegment
 
     fun populateModelAndGetTaskListViewName(model: Model): String {
         val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)

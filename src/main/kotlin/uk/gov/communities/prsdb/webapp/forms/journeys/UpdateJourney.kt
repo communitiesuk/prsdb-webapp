@@ -19,6 +19,8 @@ abstract class UpdateJourney<T : StepId>(
 ) : Journey<T>(journeyType, journeyDataKey, initialStepId, validator, journeyDataService) {
     protected val originalDataKey = "ORIGINAL_$journeyDataKey"
 
+    override val unreachableStepRedirect get() = last().step.id.urlPathSegment
+
     protected abstract fun createOriginalJourneyData(updateEntityId: String): JourneyData
 
     open fun initializeJourneyDataIfNotInitialized(updateEntityId: String) {
@@ -28,13 +30,6 @@ abstract class UpdateJourney<T : StepId>(
             journeyDataService.setJourneyDataInSession(newJourneyData)
         }
     }
-
-    override fun getUnreachableStepRedirect(journeyData: JourneyData) =
-        if (!isJourneyDataInitialised(journeyData)) {
-            updateStepId.urlPathSegment
-        } else {
-            last().step.id.urlPathSegment
-        }
 
     override fun iterator(): Iterator<StepDetails<T>> {
         val journeyData = journeyDataService.getJourneyDataFromSession()
