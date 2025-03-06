@@ -111,18 +111,26 @@ abstract class Journey<T : StepId>(
         if (currentStep.handleSubmitAndRedirect != null) {
             return ModelAndView("redirect:${currentStep.handleSubmitAndRedirect.invoke(newJourneyData, subPageNumber)}")
         }
-        val (newStepId: T?, newSubPageNumber: Int?) = currentStep.nextAction(newJourneyData, subPageNumber)
+
+        val redirectUrl = getRedirectForNextStep(currentStep, newJourneyData, subPageNumber)
+        return ModelAndView("redirect:$redirectUrl")
+    }
+
+    protected fun getRedirectForNextStep(
+        currentStep: Step<T>,
+        newJourneyData: JourneyData,
+        subPageNumber: Int?,
+    ): String {
+        val (newStepId: T?, newSubPageNumber: kotlin.Int?) = currentStep.nextAction(newJourneyData, subPageNumber)
         if (newStepId == null) {
             throw IllegalStateException("Cannot compute next step from step ${currentStep.id.urlPathSegment}")
         }
-        val redirectUrl =
-            UriComponentsBuilder
-                .newInstance()
-                .path("/$journeyPathSegment/${newStepId.urlPathSegment}")
-                .queryParamIfPresent("subpage", Optional.ofNullable(newSubPageNumber))
-                .build(true)
-                .toUriString()
-        return ModelAndView("redirect:$redirectUrl")
+        return UriComponentsBuilder
+            .newInstance()
+            .path("/$journeyPathSegment/${newStepId.urlPathSegment}")
+            .queryParamIfPresent("subpage", Optional.ofNullable(newSubPageNumber))
+            .build(true)
+            .toUriString()
     }
 
     override fun iterator(): Iterator<StepDetails<T>> =

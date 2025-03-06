@@ -4,4 +4,5 @@ enum class DeregisterPropertyStepId(
     override val urlPathSegment: String,
 ) : StepId {
     AreYouSure("are-you-sure"),
+    Reason("reason"),
 }

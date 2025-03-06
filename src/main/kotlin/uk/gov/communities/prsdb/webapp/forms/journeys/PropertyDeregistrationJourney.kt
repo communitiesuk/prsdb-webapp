@@ -4,10 +4,12 @@ import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.PROPERTY_DETAILS_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.getPropertyDetailsPath
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -23,13 +25,18 @@ class PropertyDeregistrationJourney(
     ) {
     final override val initialStepId = DeregisterPropertyStepId.AreYouSure
 
-    override val journeyPathSegment = DEREGISTER_PROPERTY_JOURNEY_URL
+    // TODO: PRSD-696 - get this from journeyPathSegment
+    private val propertyOwnershipId = 1.toLong()
+
+    // TODO: PRSD-696 - Check how this is going to work after refactor - is this getting passed in in the factory and how?
+    override val journeyPathSegment = "$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId"
 
     override val sections =
         createSingleSectionWithSingleTaskFromSteps(
             initialStepId,
             setOf(
                 areYouSureStep(),
+                reasonStep(),
             ),
         )
 
@@ -42,7 +49,7 @@ class PropertyDeregistrationJourney(
                     templateName = "forms/areYouSureForm",
                     content =
                         mapOf(
-                            "title" to "deRegisterProperty.title",
+                            "title" to "deregisterProperty.title",
                             "fieldSetHeading" to "deregisterProperty.areYouSure.fieldSetHeading",
                             "propertyAddress" to "HARDCODED ADDRESS",
                             "radioOptions" to
@@ -56,9 +63,40 @@ class PropertyDeregistrationJourney(
                                         labelMsgKey = "forms.radios.option.no.label",
                                     ),
                                 ),
-                            // TODO PRSD-696 - this one isn't working at the moment
-                            "backUrl" to PROPERTY_DETAILS_ROUTE,
+                            "backUrl" to getPropertyDetailsPath(propertyOwnershipId),
+                        ),
+                ),
+            // handleSubmitAndRedirect is what will execute
+            handleSubmitAndRedirect = { newJourneyData, subPage -> continueToNextActionOrExitJourney(newJourneyData, subPage) },
+            // We need this nextAction to make the next step reachable!
+            nextAction = { _, _ -> Pair(DeregisterPropertyStepId.Reason, null) },
+        )
+
+    private fun reasonStep() =
+        Step(
+            id = DeregisterPropertyStepId.Reason,
+            page =
+                Page(
+                    formModel = NoInputFormModel::class,
+                    templateName = "forms/deregistrationReasonForm",
+                    content =
+                        mapOf(
+                            "title" to "deregisterProperty.title",
                         ),
                 ),
         )
+
+    private fun continueToNextActionOrExitJourney(
+        newJourneyData: JourneyData,
+        subPageNumber: Int?,
+    ): String {
+        // TODO: PRSD-696 - get this from the journey data
+        val wantsToProceed = true
+
+        if (wantsToProceed) {
+            return getRedirectForNextStep(areYouSureStep(), newJourneyData, subPageNumber)
+        }
+
+        return getPropertyDetailsPath(propertyOwnershipId)
+    }
 }
