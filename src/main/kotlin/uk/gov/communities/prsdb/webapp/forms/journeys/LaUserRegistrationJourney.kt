@@ -27,7 +27,7 @@ class LaUserRegistrationJourney(
 ) : Journey<RegisterLaUserStepId>(
         journeyType = JourneyType.LA_USER_REGISTRATION,
         journeyDataKey = REGISTER_LA_USER_JOURNEY_URL,
-        initialStepId = RegisterLaUserStepId.LandingPage,
+        initialStepId = initialStepId,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
@@ -152,5 +152,9 @@ class LaUserRegistrationJourney(
         journeyDataService.clearJourneyDataFromSession()
 
         return CONFIRMATION_PAGE_PATH_SEGMENT
+    }
+
+    companion object {
+        val initialStepId = RegisterLaUserStepId.LandingPage
     }
 }

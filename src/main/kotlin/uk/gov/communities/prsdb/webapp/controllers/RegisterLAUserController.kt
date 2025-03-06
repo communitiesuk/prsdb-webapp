@@ -13,6 +13,7 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
+import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
@@ -34,9 +35,7 @@ class RegisterLAUserController(
         // see https://github.com/spring-projects/spring-hateoas/issues/155 for details
         if (invitationService.tokenIsValid(token)) {
             invitationService.storeTokenInSession(token)
-
-            val laUserRegistrationJourney = laUserRegistrationJourneyFactory.create(token)
-            return "redirect:${REGISTER_LA_USER_JOURNEY_URL}/${laUserRegistrationJourney.initialStepId.urlPathSegment}"
+            return "redirect:${REGISTER_LA_USER_JOURNEY_URL}/${LaUserRegistrationJourney.initialStepId.urlPathSegment}"
         }
 
         return "redirect:$INVALID_LINK_PAGE_PATH_SEGMENT"

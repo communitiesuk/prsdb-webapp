@@ -2,10 +2,8 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -18,9 +16,7 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
@@ -31,9 +27,6 @@ class RegisterLAUserControllerTests(
 ) : ControllerTest(webContext) {
     @MockBean
     lateinit var laUserRegistrationJourneyFactory: LaUserRegistrationJourneyFactory
-
-    @Mock
-    lateinit var laUserRegistrationJourney: LaUserRegistrationJourney
 
     @MockBean
     lateinit var invitationService: LocalAuthorityInvitationService
@@ -47,8 +40,6 @@ class RegisterLAUserControllerTests(
 
     @BeforeEach
     fun setupMocks() {
-        whenever(laUserRegistrationJourneyFactory.create(any())).thenReturn(laUserRegistrationJourney)
-        whenever(laUserRegistrationJourney.initialStepId).thenReturn(RegisterLaUserStepId.LandingPage)
         whenever(invitationService.tokenIsValid(validToken)).thenReturn(true)
         whenever(invitationService.getTokenFromSession()).thenReturn(validToken)
         whenever(invitationService.tokenIsValid(invalidToken)).thenReturn(false)
@@ -56,14 +47,13 @@ class RegisterLAUserControllerTests(
 
     @Test
     @WithMockUser
-    fun `acceptInvitation endpoint stores valid token in session and uses it to initialise the register LA user journey`() {
+    fun `acceptInvitation endpoint stores valid token in session`() {
         mvc.get("/register-local-authority-user?token=$validToken").andExpect {
             status { is3xxRedirection() }
         }
 
         verify(invitationService).tokenIsValid(validToken)
         verify(invitationService).storeTokenInSession(validToken)
-        verify(laUserRegistrationJourneyFactory).create(validToken)
     }
 
     @Test
@@ -75,7 +65,6 @@ class RegisterLAUserControllerTests(
 
         verify(invitationService).tokenIsValid(invalidToken)
         verify(invitationService, never()).storeTokenInSession(invalidToken)
-        verify(laUserRegistrationJourneyFactory, never()).create(invalidToken)
     }
 
     @Test
