@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
+import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.PROPERTY_DEREGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -51,5 +52,11 @@ class DeregisterPropertyController(
 
     companion object {
         const val PROPERTY_DEREGISTRATION_ROUTE = "/$DEREGISTER_PROPERTY_JOURNEY_URL/{propertyOwnershipId}"
+
+        fun getPropertyDeregistrationPath(propertyOwnershipId: Long): String =
+            // TODO: PRSD-696 use hte inital path segment here but maybe after we have journey factories
+            UriTemplate("$PROPERTY_DEREGISTRATION_ROUTE/are-you-sure")
+                .expand(propertyOwnershipId)
+                .toASCIIString()
     }
 }
