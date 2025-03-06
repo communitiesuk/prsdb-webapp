@@ -15,12 +15,16 @@ class LandlordDetailsUpdateJourneyFactory(
     private val landlordService: LandlordService,
     private val addressDataService: AddressDataService,
 ) {
-    fun create() =
-        UpdateLandlordDetailsJourney(
-            validator,
-            journeyDataService,
-            addressLookupService,
-            landlordService,
-            addressDataService,
-        )
+    fun create(landlordBaseUserId: String): UpdateLandlordDetailsJourney {
+        val landlordDetailsUpdateJourney =
+            UpdateLandlordDetailsJourney(
+                validator,
+                journeyDataService,
+                addressLookupService,
+                landlordService,
+                addressDataService,
+            )
+        landlordDetailsUpdateJourney.initializeJourneyDataIfNotInitialized(landlordBaseUserId)
+        return landlordDetailsUpdateJourney
+    }
 }

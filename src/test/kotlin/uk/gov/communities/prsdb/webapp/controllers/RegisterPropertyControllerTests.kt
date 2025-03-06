@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mock
+import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -42,7 +43,7 @@ class RegisterPropertyControllerTests(
 
     @BeforeEach
     fun setupMocks() {
-        whenever(propertyRegistrationJourneyFactory.create()).thenReturn(propertyRegistrationJourney)
+        whenever(propertyRegistrationJourneyFactory.create(any())).thenReturn(propertyRegistrationJourney)
         whenever(propertyRegistrationJourney.initialStepId).thenReturn(RegisterPropertyStepId.PlaceholderPage)
     }
 

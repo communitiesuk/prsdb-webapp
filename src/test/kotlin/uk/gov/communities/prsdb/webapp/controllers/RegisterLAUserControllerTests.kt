@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -46,7 +47,7 @@ class RegisterLAUserControllerTests(
 
     @BeforeEach
     fun setupMocks() {
-        whenever(laUserRegistrationJourneyFactory.create()).thenReturn(laUserRegistrationJourney)
+        whenever(laUserRegistrationJourneyFactory.create(any())).thenReturn(laUserRegistrationJourney)
         whenever(laUserRegistrationJourney.initialStepId).thenReturn(RegisterLaUserStepId.LandingPage)
         whenever(invitationService.tokenIsValid(validToken)).thenReturn(true)
         whenever(invitationService.getTokenFromSession()).thenReturn(validToken)
@@ -55,14 +56,14 @@ class RegisterLAUserControllerTests(
 
     @Test
     @WithMockUser
-    fun `acceptInvitation endpoint stores valid token in session and uses it to initialise journey data`() {
+    fun `acceptInvitation endpoint stores valid token in session and uses it to initialise the register LA user journey`() {
         mvc.get("/register-local-authority-user?token=$validToken").andExpect {
             status { is3xxRedirection() }
         }
 
         verify(invitationService).tokenIsValid(validToken)
         verify(invitationService).storeTokenInSession(validToken)
-        verify(laUserRegistrationJourney).initialiseJourneyData(validToken)
+        verify(laUserRegistrationJourneyFactory).create(validToken)
     }
 
     @Test
@@ -74,7 +75,7 @@ class RegisterLAUserControllerTests(
 
         verify(invitationService).tokenIsValid(invalidToken)
         verify(invitationService, never()).storeTokenInSession(invalidToken)
-        verify(laUserRegistrationJourney, never()).initialiseJourneyData(validToken)
+        verify(laUserRegistrationJourneyFactory, never()).create(invalidToken)
     }
 
     @Test

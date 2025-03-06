@@ -6,7 +6,6 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.LaUserRegistrationCheckAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
@@ -43,14 +42,18 @@ class LaUserRegistrationJourney(
             ),
         )
 
-    fun initialiseJourneyData(token: String) {
+    fun initializeJourneyDataIfNotInitialized(token: String) {
         val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
-        val formData: PageData = mapOf("emailAddress" to invitationService.getEmailAddressForToken(token))
-        val emailStep = steps.single { step -> step.id == RegisterLaUserStepId.Email }
-
-        val newJourneyData = emailStep.updatedJourneyData(journeyData, formData, null)
-        journeyDataService.setJourneyDataInSession(newJourneyData)
+        if (!isJourneyDataInitialized(journeyData)) {
+            val emailStep = steps.single { step -> step.id == RegisterLaUserStepId.Email }
+            val emailFormData = mapOf("emailAddress" to invitationService.getEmailAddressForToken(token))
+            val newJourneyData = emailStep.updatedJourneyData(journeyData, emailFormData, subPageNumber = null)
+            journeyDataService.setJourneyDataInSession(newJourneyData)
+        }
     }
+
+    private fun isJourneyDataInitialized(journeyData: JourneyData): Boolean =
+        journeyData.containsKey(RegisterLaUserStepId.Email.urlPathSegment)
 
     private fun landingPageStep() =
         Step(

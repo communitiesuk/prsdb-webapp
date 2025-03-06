@@ -47,6 +47,55 @@ class UpdateLandlordDetailsJourney(
         journeyDataService = journeyDataService,
         updateStepId = UpdateLandlordDetailsStepId.UpdateDetails,
     ) {
+    override fun createOriginalJourneyData(updateEntityId: String): JourneyData {
+        val landlord = landlordService.retrieveLandlordByBaseUserId(updateEntityId)!!
+
+        val originalLandlordData =
+            mutableMapOf(
+                IS_IDENTITY_VERIFIED_KEY to landlord.isVerified,
+                UpdateLandlordDetailsStepId.UpdateEmail.urlPathSegment to mapOf("emailAddress" to landlord.email),
+                UpdateLandlordDetailsStepId.UpdateName.urlPathSegment to mapOf("name" to landlord.name),
+                UpdateLandlordDetailsStepId.UpdatePhoneNumber.urlPathSegment to mapOf("phoneNumber" to landlord.phoneNumber),
+                UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment to
+                    mapOf(
+                        "postcode" to landlord.address.getPostcodeSearchTerm(),
+                        "houseNameOrNumber" to landlord.address.getHouseNameOrNumber(),
+                    ),
+                UpdateLandlordDetailsStepId.SelectEnglandAndWalesAddress.urlPathSegment to
+                    mapOf(
+                        "address" to landlord.address.getSelectedAddress(),
+                    ),
+                ORIGINAL_ADDRESS_DATA_KEY to
+                    mapOf(
+                        "address" to Json.encodeToString(AddressDataModel.fromAddress(landlord.address)),
+                    ),
+                UpdateLandlordDetailsStepId.UpdateDateOfBirth.urlPathSegment to
+                    mapOf(
+                        "day" to landlord.dateOfBirth?.dayOfMonth.toString(),
+                        "month" to landlord.dateOfBirth?.monthValue.toString(),
+                        "year" to landlord.dateOfBirth?.year.toString(),
+                    ),
+            )
+
+        if (landlord.address.uprn == null) {
+            originalLandlordData[UpdateLandlordDetailsStepId.ManualEnglandAndWalesAddress.urlPathSegment] =
+                mapOf(
+                    "addressLineOne" to landlord.address.singleLineAddress,
+                    "townOrCity" to landlord.address.getTownOrCity(),
+                    "postcode" to landlord.address.getPostcodeSearchTerm(),
+                )
+        }
+
+        return originalLandlordData
+    }
+
+    override fun initializeJourneyDataIfNotInitialized(updateEntityId: String) {
+        if (!isJourneyDataInitialised()) {
+            super.initializeJourneyDataIfNotInitialized(updateEntityId)
+            addressDataService.setAddressData(getOriginalAddressData())
+        }
+    }
+
     private val updateDetailsStep =
         Step(
             id = UpdateLandlordDetailsStepId.UpdateDetails,
@@ -273,55 +322,6 @@ class UpdateLandlordDetailsJourney(
         return LandlordDetailsController.LANDLORD_DETAILS_ROUTE
     }
 
-    override fun createOriginalJourneyData(updateEntityId: String): JourneyData {
-        val landlord = landlordService.retrieveLandlordByBaseUserId(updateEntityId)!!
-
-        val originalLandlordData =
-            mutableMapOf(
-                IS_IDENTITY_VERIFIED_KEY to landlord.isVerified,
-                UpdateLandlordDetailsStepId.UpdateEmail.urlPathSegment to mapOf("emailAddress" to landlord.email),
-                UpdateLandlordDetailsStepId.UpdateName.urlPathSegment to mapOf("name" to landlord.name),
-                UpdateLandlordDetailsStepId.UpdatePhoneNumber.urlPathSegment to mapOf("phoneNumber" to landlord.phoneNumber),
-                UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment to
-                    mapOf(
-                        "postcode" to landlord.address.getPostcodeSearchTerm(),
-                        "houseNameOrNumber" to landlord.address.getHouseNameOrNumber(),
-                    ),
-                UpdateLandlordDetailsStepId.SelectEnglandAndWalesAddress.urlPathSegment to
-                    mapOf(
-                        "address" to landlord.address.getSelectedAddress(),
-                    ),
-                ORIGINAL_ADDRESS_DATA_KEY to
-                    mapOf(
-                        "address" to Json.encodeToString(AddressDataModel.fromAddress(landlord.address)),
-                    ),
-                UpdateLandlordDetailsStepId.UpdateDateOfBirth.urlPathSegment to
-                    mapOf(
-                        "day" to landlord.dateOfBirth?.dayOfMonth.toString(),
-                        "month" to landlord.dateOfBirth?.monthValue.toString(),
-                        "year" to landlord.dateOfBirth?.year.toString(),
-                    ),
-            )
-
-        if (landlord.address.uprn == null) {
-            originalLandlordData[UpdateLandlordDetailsStepId.ManualEnglandAndWalesAddress.urlPathSegment] =
-                mapOf(
-                    "addressLineOne" to landlord.address.singleLineAddress,
-                    "townOrCity" to landlord.address.getTownOrCity(),
-                    "postcode" to landlord.address.getPostcodeSearchTerm(),
-                )
-        }
-
-        return originalLandlordData
-    }
-
-    override fun initialiseJourneyDataIfNotInitialised(updateEntityId: String) {
-        if (!isJourneyDataInitialised()) {
-            super.initialiseJourneyDataIfNotInitialised(updateEntityId)
-            addressDataService.setAddressData(getOriginalAddressData())
-        }
-    }
-
     private fun Address.getHouseNameOrNumber(): String = buildingName ?: buildingNumber ?: singleLineAddress
 
     private fun Address.getPostcodeSearchTerm(): String = postcode ?: singleLineAddress
@@ -331,7 +331,7 @@ class UpdateLandlordDetailsJourney(
     private fun Address.getTownOrCity(): String = townName ?: singleLineAddress
 
     private fun getOriginalAddressData(): List<AddressDataModel> {
-        val journeyData = journeyDataService.getJourneyDataFromSession()
+        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
         val originalJourneyData = JourneyDataHelper.getPageData(journeyData, originalDataKey)!!
         val originalAddressData = JourneyDataHelper.getPageData(originalJourneyData, ORIGINAL_ADDRESS_DATA_KEY)!!
         return listOf(Json.decodeFromString(originalAddressData["address"] as String))

@@ -24,16 +24,20 @@ class PropertyRegistrationJourneyFactory(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
 ) {
-    fun create() =
-        PropertyRegistrationJourney(
-            validator,
-            journeyDataService,
-            addressLookupService,
-            addressDataService,
-            propertyRegistrationService,
-            localAuthorityService,
-            landlordService,
-            absoluteUrlProvider,
-            confirmationEmailSender,
-        )
+    fun create(principalName: String): PropertyRegistrationJourney {
+        val propertyRegistrationJourney =
+            PropertyRegistrationJourney(
+                validator,
+                journeyDataService,
+                addressLookupService,
+                addressDataService,
+                propertyRegistrationService,
+                localAuthorityService,
+                landlordService,
+                absoluteUrlProvider,
+                confirmationEmailSender,
+            )
+        propertyRegistrationJourney.loadJourneyDataIfNotLoaded(principalName)
+        return propertyRegistrationJourney
+    }
 }

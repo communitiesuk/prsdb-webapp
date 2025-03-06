@@ -35,8 +35,7 @@ class RegisterLAUserController(
         if (invitationService.tokenIsValid(token)) {
             invitationService.storeTokenInSession(token)
 
-            val laUserRegistrationJourney = laUserRegistrationJourneyFactory.create()
-            laUserRegistrationJourney.initialiseJourneyData(token)
+            val laUserRegistrationJourney = laUserRegistrationJourneyFactory.create(token)
             return "redirect:${REGISTER_LA_USER_JOURNEY_URL}/${laUserRegistrationJourney.initialStepId.urlPathSegment}"
         }
 
@@ -49,14 +48,14 @@ class RegisterLAUserController(
         @RequestParam(value = "subpage", required = false) subpage: Int?,
         model: Model,
     ): ModelAndView {
-        val token = invitationService.getTokenFromSession()
-        if (token == null || !invitationService.tokenIsValid(token)) {
+        val token = getValidTokenFromSessionOrNull()
+        if (token == null) {
             invitationService.clearTokenFromSession()
             return ModelAndView("redirect:$INVALID_LINK_PAGE_PATH_SEGMENT")
         }
 
         return laUserRegistrationJourneyFactory
-            .create()
+            .create(token)
             .getModelAndViewForStep(
                 stepName,
                 subpage,
@@ -70,15 +69,22 @@ class RegisterLAUserController(
         @RequestParam formData: PageData,
         model: Model,
         principal: Principal,
-    ): ModelAndView =
-        laUserRegistrationJourneyFactory
-            .create()
+    ): ModelAndView {
+        val token = getValidTokenFromSessionOrNull()
+        if (token == null) {
+            invitationService.clearTokenFromSession()
+            return ModelAndView("redirect:$INVALID_LINK_PAGE_PATH_SEGMENT")
+        }
+
+        return laUserRegistrationJourneyFactory
+            .create(token)
             .completeStep(
                 stepName,
                 formData,
                 subpage,
                 principal,
             )
+    }
 
     @GetMapping("/$CONFIRMATION_PAGE_PATH_SEGMENT")
     fun getConfirmation(
@@ -107,6 +113,15 @@ class RegisterLAUserController(
 
     @GetMapping("/$INVALID_LINK_PAGE_PATH_SEGMENT")
     fun invalidToken(model: Model): String = "invalidLaInvitationLink"
+
+    private fun getValidTokenFromSessionOrNull(): String? {
+        val token = invitationService.getTokenFromSession()
+        return if (token == null || !invitationService.tokenIsValid(token)) {
+            null
+        } else {
+            token
+        }
+    }
 
     companion object {
         const val CONFIRMATION_PAGE_PATH_SEGMENT = "confirmation"

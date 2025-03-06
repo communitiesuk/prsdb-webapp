@@ -44,9 +44,10 @@ class RegisterPropertyController(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
         model: Model,
+        principal: Principal,
     ): ModelAndView =
         propertyRegistrationJourneyFactory
-            .create()
+            .create(principal.name)
             .getModelAndViewForStep(
                 stepName,
                 subpage,
@@ -56,11 +57,10 @@ class RegisterPropertyController(
     fun getTaskList(
         model: Model,
         principal: Principal,
-    ): String {
-        val propertyRegistrationJourney = propertyRegistrationJourneyFactory.create()
-        propertyRegistrationJourney.loadJourneyDataIfNotLoaded(principal.name)
-        return propertyRegistrationJourney.populateModelAndGetTaskListViewName(model)
-    }
+    ): String =
+        propertyRegistrationJourneyFactory
+            .create(principal.name)
+            .populateModelAndGetTaskListViewName(model)
 
     @PostMapping("/{stepName}")
     fun postJourneyData(
@@ -71,7 +71,7 @@ class RegisterPropertyController(
         principal: Principal,
     ): ModelAndView =
         propertyRegistrationJourneyFactory
-            .create()
+            .create(principal.name)
             .completeStep(
                 stepName,
                 formData,

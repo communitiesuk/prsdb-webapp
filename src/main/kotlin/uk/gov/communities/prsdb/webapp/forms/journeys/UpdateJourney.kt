@@ -1,10 +1,8 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.validation.Validator
-import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.ReachableStepDetailsIterator
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
@@ -23,21 +21,12 @@ abstract class UpdateJourney<T : StepId>(
 
     protected abstract fun createOriginalJourneyData(updateEntityId: String): JourneyData
 
-    protected open fun initialiseJourneyDataIfNotInitialised(updateEntityId: String) {
+    open fun initializeJourneyDataIfNotInitialized(updateEntityId: String) {
         val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
         if (!isJourneyDataInitialised(journeyData)) {
             val newJourneyData = journeyData + (originalDataKey to createOriginalJourneyData(updateEntityId))
             journeyDataService.setJourneyDataInSession(newJourneyData)
         }
-    }
-
-    fun getModelAndViewForUpdateStep(
-        updateEntityId: String,
-        subPageNumber: Int? = null,
-        submittedPageData: PageData? = null,
-    ): ModelAndView {
-        initialiseJourneyDataIfNotInitialised(updateEntityId)
-        return super.getModelAndViewForStep(updateStepId.urlPathSegment, subPageNumber, submittedPageData)
     }
 
     override fun getUnreachableStepRedirect(journeyData: JourneyData) =
@@ -63,10 +52,10 @@ abstract class UpdateJourney<T : StepId>(
         return ReachableStepDetailsIterator(updatedData, steps, initialStepId, validator)
     }
 
-    private fun isJourneyDataInitialised(journeyData: JourneyData): Boolean = journeyData.containsKey(originalDataKey)
-
     protected fun isJourneyDataInitialised(): Boolean {
         val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
         return isJourneyDataInitialised(journeyData)
     }
+
+    private fun isJourneyDataInitialised(journeyData: JourneyData): Boolean = journeyData.containsKey(originalDataKey)
 }

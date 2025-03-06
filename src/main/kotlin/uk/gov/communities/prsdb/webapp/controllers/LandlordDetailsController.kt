@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.C
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDetailsUpdateJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -43,8 +44,8 @@ class LandlordDetailsController(
         // TODO: PRSD-355 Remove this way of showing submit button
         model.addAttribute("shouldShowSubmitButton", true)
         return landlordDetailsUpdateJourneyFactory
-            .create()
-            .getModelAndViewForUpdateStep(updateEntityId = principal.name)
+            .create(principal.name)
+            .getModelAndViewForStep(UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment, subPageNumber = null)
     }
 
     @PreAuthorize("hasRole('LANDLORD')")
@@ -87,11 +88,8 @@ class LandlordDetailsController(
         principal: Principal,
     ): ModelAndView =
         landlordDetailsUpdateJourneyFactory
-            .create()
-            .getModelAndViewForStep(
-                stepName,
-                null,
-            )
+            .create(principal.name)
+            .getModelAndViewForStep(stepName, subPageNumber = null)
 
     @PreAuthorize("hasRole('LANDLORD')")
     @PostMapping("${UPDATE_PATH_SEGMENT}/{stepName}")
@@ -102,11 +100,11 @@ class LandlordDetailsController(
         principal: Principal,
     ): ModelAndView =
         landlordDetailsUpdateJourneyFactory
-            .create()
+            .create(principal.name)
             .completeStep(
                 stepName,
                 formData,
-                null,
+                subPageNumber = null,
                 principal,
             )
 

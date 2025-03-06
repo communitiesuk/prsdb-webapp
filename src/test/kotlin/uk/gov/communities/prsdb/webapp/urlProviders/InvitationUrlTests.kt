@@ -88,7 +88,7 @@ class InvitationUrlTests(
 
         val encodedConfirmedEmailContent = urlEncodedConfirmedEmailDataModel(testEmail)
 
-        whenever(laUserRegistrationJourneyFactory.create()).thenReturn(laUserRegistrationJourney)
+        whenever(laUserRegistrationJourneyFactory.create(any())).thenReturn(laUserRegistrationJourney)
         whenever(laUserRegistrationJourney.initialStepId).thenReturn(RegisterLaUserStepId.LandingPage)
 
         // Act
