@@ -85,7 +85,6 @@ class LaUserRegistrationJourney(
                             "fieldSetHint" to "forms.name.fieldSetHint",
                             "label" to "forms.name.label",
                             "submitButtonText" to "forms.buttons.continue",
-                            "backUrl" to "/$REGISTER_LA_USER_JOURNEY_URL/",
                         ),
                 ),
             nextAction = { _, _ -> Pair(RegisterLaUserStepId.Email, null) },
