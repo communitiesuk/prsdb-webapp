@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.helpers.PropertyDeregistrationJourneyDataHelper.Companion.getWantsToProceed
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
@@ -90,11 +91,10 @@ class PropertyDeregistrationJourney(
         newJourneyData: JourneyData,
         subPageNumber: Int?,
     ): String {
-        // TODO: PRSD-696 - get this from the journey data
-        val wantsToProceed = true
+        val currentStep = areYouSureStep()
 
-        if (wantsToProceed) {
-            return getRedirectForNextStep(areYouSureStep(), newJourneyData, subPageNumber)
+        if (getWantsToProceed(newJourneyData)!!) {
+            return getRedirectForNextStep(currentStep, newJourneyData, subPageNumber)
         }
 
         return getPropertyDetailsPath(propertyOwnershipId)
