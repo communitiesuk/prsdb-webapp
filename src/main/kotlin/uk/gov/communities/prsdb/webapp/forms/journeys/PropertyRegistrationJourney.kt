@@ -58,6 +58,7 @@ class PropertyRegistrationJourney(
     private val landlordService: LandlordService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
+    principalName: String,
 ) : JourneyWithTaskList<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
         journeyDataKey = REGISTER_PROPERTY_JOURNEY_URL,
@@ -66,6 +67,10 @@ class PropertyRegistrationJourney(
         journeyDataService = journeyDataService,
         taskListUrlSegment = "task-list",
     ) {
+    init {
+        loadJourneyDataIfNotLoaded(principalName)
+    }
+
     override val sections =
         listOf(
             JourneySection(registerPropertyTasks(), "registerProperty.taskList.register.heading"),

@@ -16,7 +16,7 @@ abstract class JourneyWithTaskList<T : StepId>(
     initialStepId: T,
     validator: Validator,
     journeyDataService: JourneyDataService,
-    private val taskListUrlSegment: String,
+    taskListUrlSegment: String,
 ) : Journey<T>(journeyType, journeyDataKey, initialStepId, validator, journeyDataService) {
     protected abstract val taskListFactory: TaskListViewModelFactory<T>
 

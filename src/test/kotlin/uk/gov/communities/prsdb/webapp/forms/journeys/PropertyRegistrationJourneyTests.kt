@@ -75,6 +75,8 @@ class PropertyRegistrationJourneyTests {
     inner class HandleAndSubmitTests {
         private lateinit var testJourney: PropertyRegistrationJourney
 
+        private val principalName = "a-user-name"
+
         @BeforeEach
         fun beforeEach() {
             whenever(landlordService.retrieveLandlordByBaseUserId(any())).thenReturn(MockLandlordData.createLandlord())
@@ -104,14 +106,14 @@ class PropertyRegistrationJourneyTests {
                     landlordService = landlordService,
                     confirmationEmailSender = confirmationEmailSender,
                     absoluteUrlProvider = urlProvider,
+                    principalName = principalName,
                 )
             setMockUser()
         }
 
         private fun setMockUser() {
-            val name = "a-user-name"
             val authentication = mock<Authentication>()
-            whenever(authentication.name).thenReturn(name)
+            whenever(authentication.name).thenReturn(principalName)
             val context = mock<SecurityContext>()
             whenever(context.authentication).thenReturn(authentication)
             SecurityContextHolder.setContext(context)

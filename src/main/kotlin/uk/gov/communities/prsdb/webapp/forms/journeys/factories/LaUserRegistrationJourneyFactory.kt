@@ -15,10 +15,6 @@ class LaUserRegistrationJourneyFactory(
     private val invitationService: LocalAuthorityInvitationService,
     private val localAuthorityDataService: LocalAuthorityDataService,
 ) {
-    fun create(invitation: LocalAuthorityInvitation): LaUserRegistrationJourney {
-        val laUserRegistrationJourney =
-            LaUserRegistrationJourney(validator, journeyDataService, invitationService, localAuthorityDataService)
-        laUserRegistrationJourney.initializeJourneyDataIfNotInitialized(invitation)
-        return laUserRegistrationJourney
-    }
+    fun create(invitation: LocalAuthorityInvitation) =
+        LaUserRegistrationJourney(validator, journeyDataService, invitationService, localAuthorityDataService, invitation)
 }

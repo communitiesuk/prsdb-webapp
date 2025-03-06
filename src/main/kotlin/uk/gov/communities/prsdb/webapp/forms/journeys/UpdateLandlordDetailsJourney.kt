@@ -39,6 +39,7 @@ class UpdateLandlordDetailsJourney(
     addressLookupService: AddressLookupService,
     private val landlordService: LandlordService,
     private val addressDataService: AddressDataService,
+    private val landlordBaseUserId: String,
 ) : UpdateJourney<UpdateLandlordDetailsStepId>(
         journeyType = JourneyType.LANDLORD_DETAILS_UPDATE,
         journeyDataKey = UPDATE_LANDLORD_DETAILS_URL,
@@ -46,9 +47,14 @@ class UpdateLandlordDetailsJourney(
         validator = validator,
         journeyDataService = journeyDataService,
         updateStepId = UpdateLandlordDetailsStepId.UpdateDetails,
+        updateEntityId = landlordBaseUserId,
     ) {
-    override fun createOriginalJourneyData(updateEntityId: String): JourneyData {
-        val landlord = landlordService.retrieveLandlordByBaseUserId(updateEntityId)!!
+    init {
+        initializeJourneyDataIfNotInitialized()
+    }
+
+    override fun createOriginalJourneyData(): JourneyData {
+        val landlord = landlordService.retrieveLandlordByBaseUserId(landlordBaseUserId)!!
 
         val originalLandlordData =
             mutableMapOf(
@@ -89,9 +95,9 @@ class UpdateLandlordDetailsJourney(
         return originalLandlordData
     }
 
-    override fun initializeJourneyDataIfNotInitialized(updateEntityId: String) {
+    override fun initializeJourneyDataIfNotInitialized() {
         if (!isJourneyDataInitialised()) {
-            super.initializeJourneyDataIfNotInitialized(updateEntityId)
+            super.initializeJourneyDataIfNotInitialized()
             addressDataService.setAddressData(getOriginalAddressData())
         }
     }
