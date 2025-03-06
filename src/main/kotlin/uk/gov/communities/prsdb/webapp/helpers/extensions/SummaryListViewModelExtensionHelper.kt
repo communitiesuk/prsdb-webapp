@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.helpers.extenstions
+package uk.gov.communities.prsdb.webapp.helpers.extensions
 
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
