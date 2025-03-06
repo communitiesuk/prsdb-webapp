@@ -28,17 +28,17 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormM
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
 
 class UpdateLandlordDetailsJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     addressLookupService: AddressLookupService,
     private val landlordService: LandlordService,
-    private val addressDataService: AddressDataService,
+    private val registeredAddressCache: RegisteredAddressCache,
     private val landlordBaseUserId: String,
 ) : UpdateJourney<UpdateLandlordDetailsStepId>(
         journeyType = JourneyType.LANDLORD_DETAILS_UPDATE,
@@ -98,7 +98,7 @@ class UpdateLandlordDetailsJourney(
     override fun initializeJourneyDataIfNotInitialized() {
         if (!isJourneyDataInitialised()) {
             super.initializeJourneyDataIfNotInitialized()
-            addressDataService.setAddressData(getOriginalAddressData())
+            registeredAddressCache.setAddressData(getOriginalAddressData())
         }
     }
 
@@ -253,7 +253,7 @@ class UpdateLandlordDetailsJourney(
                         ),
                     lookupAddressPathSegment = UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
                     addressLookupService = addressLookupService,
-                    addressDataService = addressDataService,
+                    registeredAddressCache = registeredAddressCache,
                     displaySectionHeader = false,
                 ),
             nextAction = { journeyData, _ -> selectAddressNextAction(journeyData) },
@@ -314,7 +314,7 @@ class UpdateLandlordDetailsJourney(
                 email = UpdateLandlordDetailsJourneyDataHelper.getEmailUpdateIfPresent(journeyData),
                 name = UpdateLandlordDetailsJourneyDataHelper.getNameUpdateIfPresent(journeyData),
                 phoneNumber = UpdateLandlordDetailsJourneyDataHelper.getPhoneNumberIfPresent(journeyData),
-                address = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(journeyData, addressDataService),
+                address = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(journeyData, registeredAddressCache),
                 dateOfBirth = UpdateLandlordDetailsJourneyDataHelper.getDateOfBirthIfPresent(journeyData),
             )
 

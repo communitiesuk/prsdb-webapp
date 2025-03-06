@@ -20,7 +20,7 @@ class PropertyRegistrationService(
     private val propertyRepository: PropertyRepository,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val landlordRepository: LandlordRepository,
-    private val addressDataService: AddressDataService,
+    private val registeredAddressCache: RegisteredAddressCache,
     private val propertyService: PropertyService,
     private val licenseService: LicenseService,
     private val propertyOwnershipService: PropertyOwnershipService,
@@ -31,18 +31,18 @@ class PropertyRegistrationService(
         ignoreCache: Boolean = false,
     ): Boolean {
         if (!ignoreCache) {
-            val cachedResult = addressDataService.getCachedAddressRegisteredResult(uprn)
+            val cachedResult = registeredAddressCache.getCachedAddressRegisteredResult(uprn)
             if (cachedResult != null) return cachedResult
         }
 
         val property = propertyRepository.findByAddress_Uprn(uprn)
         if (property == null || !property.isActive) {
-            addressDataService.setCachedAddressRegisteredResult(uprn, false)
+            registeredAddressCache.setCachedAddressRegisteredResult(uprn, false)
             return false
         }
 
         val databaseResult = propertyOwnershipRepository.existsByIsActiveTrueAndProperty_Id(property.id)
-        addressDataService.setCachedAddressRegisteredResult(uprn, databaseResult)
+        registeredAddressCache.setCachedAddressRegisteredResult(uprn, databaseResult)
         return databaseResult
     }
 
@@ -84,7 +84,7 @@ class PropertyRegistrationService(
                 license = license,
             )
 
-        address.uprn?.let { addressDataService.setCachedAddressRegisteredResult(it, true) }
+        address.uprn?.let { registeredAddressCache.setCachedAddressRegisteredResult(it, true) }
 
         return propertyOwnership.registrationNumber
     }

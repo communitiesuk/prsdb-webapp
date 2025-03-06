@@ -10,22 +10,22 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import kotlin.test.assertEquals
 
 class PropertyRegistrationJourneyDataHelperTests {
-    private lateinit var mockAddressDataService: AddressDataService
+    private lateinit var mockRegisteredAddressCache: RegisteredAddressCache
     private lateinit var mockLocalAuthorityService: LocalAuthorityService
     private lateinit var journeyDataBuilder: JourneyDataBuilder
 
     @BeforeEach
     fun setup() {
-        mockAddressDataService = mock()
+        mockRegisteredAddressCache = mock()
         mockLocalAuthorityService = mock()
-        journeyDataBuilder = JourneyDataBuilder.propertyDefault(mockAddressDataService, mockLocalAuthorityService)
+        journeyDataBuilder = JourneyDataBuilder.propertyDefault(mockRegisteredAddressCache, mockLocalAuthorityService)
     }
 
     @Test
@@ -36,12 +36,12 @@ class PropertyRegistrationJourneyDataHelperTests {
             journeyDataBuilder.withSelectedAddress(selectedAddress, localAuthority = localAuthority).build()
         val expectedAddressDataModel = AddressDataModel(selectedAddress, localAuthorityId = localAuthority.id)
 
-        whenever(mockAddressDataService.getAddressData(selectedAddress)).thenReturn(expectedAddressDataModel)
+        whenever(mockRegisteredAddressCache.getAddressData(selectedAddress)).thenReturn(expectedAddressDataModel)
 
         val addressDataModel =
             PropertyRegistrationJourneyDataHelper.getAddress(
                 mockJourneyData,
-                mockAddressDataService,
+                mockRegisteredAddressCache,
             )
 
         assertEquals(expectedAddressDataModel, addressDataModel)
@@ -72,7 +72,7 @@ class PropertyRegistrationJourneyDataHelperTests {
         val addressDataModel =
             PropertyRegistrationJourneyDataHelper.getAddress(
                 mockJourneyData,
-                mockAddressDataService,
+                mockRegisteredAddressCache,
             )
         assertEquals(expectedAddressDataModel, addressDataModel)
     }

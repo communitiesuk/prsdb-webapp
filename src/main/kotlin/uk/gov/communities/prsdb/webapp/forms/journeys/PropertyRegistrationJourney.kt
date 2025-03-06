@@ -40,19 +40,19 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxView
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
 
 class PropertyRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     private val addressLookupService: AddressLookupService,
-    private val addressDataService: AddressDataService,
+    private val registeredAddressCache: RegisteredAddressCache,
     private val propertyRegistrationService: PropertyRegistrationService,
     private val localAuthorityService: LocalAuthorityService,
     private val landlordService: LandlordService,
@@ -188,13 +188,13 @@ class PropertyRegistrationJourney(
                         ),
                     lookupAddressPathSegment = RegisterPropertyStepId.LookupAddress.urlPathSegment,
                     addressLookupService = addressLookupService,
-                    addressDataService = addressDataService,
+                    registeredAddressCache = registeredAddressCache,
                     displaySectionHeader = true,
                 ),
             nextAction = { journeyData, _ ->
                 selectAddressNextAction(
                     journeyData,
-                    addressDataService,
+                    registeredAddressCache,
                     propertyRegistrationService,
                 )
             },
@@ -515,7 +515,7 @@ class PropertyRegistrationJourney(
             id = RegisterPropertyStepId.CheckAnswers,
             page =
                 PropertyRegistrationCheckAnswersPage(
-                    addressDataService,
+                    registeredAddressCache,
                     localAuthorityService,
                     displaySectionHeader = true,
                 ),
@@ -557,15 +557,15 @@ class PropertyRegistrationJourney(
 
     private fun selectAddressNextAction(
         journeyData: JourneyData,
-        addressDataService: AddressDataService,
+        registeredAddressCache: RegisteredAddressCache,
         propertyRegistrationService: PropertyRegistrationService,
     ): Pair<RegisterPropertyStepId, Int?> =
         if (PropertyRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
             Pair(RegisterPropertyStepId.ManualAddress, null)
         } else {
             val selectedAddress =
-                PropertyRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!
-            val selectedAddressData = addressDataService.getAddressData(selectedAddress.singleLineAddress)!!
+                PropertyRegistrationJourneyDataHelper.getAddress(journeyData, registeredAddressCache)!!
+            val selectedAddressData = registeredAddressCache.getAddressData(selectedAddress.singleLineAddress)!!
             if (selectedAddressData.uprn != null &&
                 propertyRegistrationService.getIsAddressRegistered(selectedAddressData.uprn)
             ) {
@@ -586,7 +586,7 @@ class PropertyRegistrationJourney(
     private fun checkAnswersSubmitAndRedirect(): String {
         try {
             val filteredJourneyData = last().filteredJourneyData
-            val address = PropertyRegistrationJourneyDataHelper.getAddress(filteredJourneyData, addressDataService)!!
+            val address = PropertyRegistrationJourneyDataHelper.getAddress(filteredJourneyData, registeredAddressCache)!!
             val baseUserId = SecurityContextHolder.getContext().authentication.name
             val propertyRegistrationNumber =
                 propertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(

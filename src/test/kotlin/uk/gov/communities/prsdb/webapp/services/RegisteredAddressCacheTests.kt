@@ -21,18 +21,18 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 @ExtendWith(MockitoExtension::class)
-class AddressDataServiceTests {
+class RegisteredAddressCacheTests {
     @Mock
     private lateinit var mockHttpSession: HttpSession
 
     @Mock
     private lateinit var mockJourneyDataService: JourneyDataService
 
-    private lateinit var addressDataService: AddressDataService
+    private lateinit var registeredAddressCache: RegisteredAddressCache
 
     @BeforeEach
     fun setup() {
-        addressDataService = AddressDataService(mockHttpSession, mockJourneyDataService)
+        registeredAddressCache = RegisteredAddressCache(mockHttpSession, mockJourneyDataService)
     }
 
     @Test
@@ -50,7 +50,7 @@ class AddressDataServiceTests {
 
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf("address-data" to addressDataJSON))
 
-        val addressData = addressDataService.getAddressData("1, Example Road, EG")
+        val addressData = registeredAddressCache.getAddressData("1, Example Road, EG")
 
         assertEquals(expectedAddressData, addressData)
     }
@@ -68,7 +68,7 @@ class AddressDataServiceTests {
 
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf("address-data" to addressDataJSON))
 
-        val addressData = addressDataService.getAddressData("invalid address")
+        val addressData = registeredAddressCache.getAddressData("invalid address")
 
         assertNull(addressData)
     }
@@ -85,7 +85,7 @@ class AddressDataServiceTests {
 
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf())
 
-        addressDataService.setAddressData(addressDataList)
+        registeredAddressCache.setAddressData(addressDataList)
 
         val addressDataStringCaptor = argumentCaptor<JourneyData>()
         verify(mockJourneyDataService).setJourneyDataInSession(addressDataStringCaptor.capture())
@@ -96,28 +96,28 @@ class AddressDataServiceTests {
     fun `getCachedAddressRegisteredResult returns null if no results are cached`() {
         val uprn = 1234.toLong()
         whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(null)
-        assertNull(addressDataService.getCachedAddressRegisteredResult(uprn))
+        assertNull(registeredAddressCache.getCachedAddressRegisteredResult(uprn))
     }
 
     @Test
     fun `getCachedAddressRegisteredResult returns null if no matching result is cached`() {
         val uprn = 1234.toLong()
         whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(mapOf(5678.toString() to true))
-        assertNull(addressDataService.getCachedAddressRegisteredResult(uprn))
+        assertNull(registeredAddressCache.getCachedAddressRegisteredResult(uprn))
     }
 
     @Test
     fun `getCachedAddressRegisteredResult returns true if the cached result is true`() {
         val uprn = 1234.toLong()
         whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(mapOf(uprn.toString() to true))
-        assertTrue(addressDataService.getCachedAddressRegisteredResult(uprn) ?: false)
+        assertTrue(registeredAddressCache.getCachedAddressRegisteredResult(uprn) ?: false)
     }
 
     @Test
     fun `getCachedAddressRegisteredResult returns false if the cached result is false`() {
         val uprn = 1234.toLong()
         whenever(mockHttpSession.getAttribute("addressRegisteredResults")).thenReturn(mapOf(uprn.toString() to false))
-        assertFalse(addressDataService.getCachedAddressRegisteredResult(uprn) ?: true)
+        assertFalse(registeredAddressCache.getCachedAddressRegisteredResult(uprn) ?: true)
     }
 
     @Test
@@ -128,7 +128,7 @@ class AddressDataServiceTests {
 
         val expectedNewCache = mapOf(5678.toString() to true, uprn.toString() to false)
 
-        addressDataService.setCachedAddressRegisteredResult(uprn, false)
+        registeredAddressCache.setCachedAddressRegisteredResult(uprn, false)
         val addressRegisteredResultCaptor = argumentCaptor<MutableMap<String, Boolean>>()
         verify(mockHttpSession).setAttribute(eq("addressRegisteredResults"), addressRegisteredResultCaptor.capture())
         Assertions.assertEquals(expectedNewCache, addressRegisteredResultCaptor.firstValue)

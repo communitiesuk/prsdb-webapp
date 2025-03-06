@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.UpdateLandlordDetailsJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
+import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
 import java.time.LocalDate
 
 class UpdateLandlordDetailsJourneyDataHelper : JourneyDataHelper() {
@@ -36,7 +36,7 @@ class UpdateLandlordDetailsJourneyDataHelper : JourneyDataHelper() {
 
         fun getAddressIfPresent(
             journeyData: JourneyData,
-            addressDataService: AddressDataService,
+            registeredAddressCache: RegisteredAddressCache,
         ): AddressDataModel? {
             val selectedAddress =
                 getFieldStringValue(
@@ -48,7 +48,7 @@ class UpdateLandlordDetailsJourneyDataHelper : JourneyDataHelper() {
             return if (selectedAddress == MANUAL_ADDRESS_CHOSEN) {
                 getManualAddress(journeyData, UpdateLandlordDetailsStepId.ManualEnglandAndWalesAddress.urlPathSegment)
             } else if (selectedAddress != null) {
-                addressDataService.getAddressData(selectedAddress)
+                registeredAddressCache.getAddressData(selectedAddress)
             } else {
                 null
             }

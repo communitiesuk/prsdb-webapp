@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
 @Service
-class AddressDataService(
+class RegisteredAddressCache(
     private val session: HttpSession,
     private val journeyDataService: JourneyDataService,
 ) {

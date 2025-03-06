@@ -18,11 +18,11 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -33,7 +33,7 @@ class LandlordRegistrationJourneyTests {
     lateinit var mockJourneyDataService: JourneyDataService
 
     @Mock
-    lateinit var addressDataService: AddressDataService
+    lateinit var registeredAddressCache: RegisteredAddressCache
 
     @Mock
     lateinit var landlordService: LandlordService
@@ -52,7 +52,7 @@ class LandlordRegistrationJourneyTests {
     @BeforeEach
     fun setup() {
         mockJourneyDataService = mock()
-        addressDataService = mock()
+        registeredAddressCache = mock()
         landlordService = mock()
         addressLookupService = mock()
         confirmationEmailSender = mock()
@@ -85,7 +85,7 @@ class LandlordRegistrationJourneyTests {
                     validator = alwaysTrueValidator,
                     journeyDataService = mockJourneyDataService,
                     addressLookupService = addressLookupService,
-                    addressDataService = addressDataService,
+                    registeredAddressCache = registeredAddressCache,
                     landlordService = landlordService,
                     emailNotificationService = confirmationEmailSender,
                     absoluteUrlProvider = urlProvider,
@@ -109,7 +109,7 @@ class LandlordRegistrationJourneyTests {
             val journeyData =
                 JourneyDataBuilder
                     .landlordDefault(
-                        addressDataService,
+                        registeredAddressCache,
                         localAuthorityService = mock(),
                     ).withNonEnglandOrWalesAndSelectedContactAddress(
                         "Angola",

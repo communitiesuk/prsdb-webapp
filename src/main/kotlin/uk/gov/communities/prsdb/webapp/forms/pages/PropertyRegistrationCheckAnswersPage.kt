@@ -8,12 +8,12 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper as DataHelper
 
 class PropertyRegistrationCheckAnswersPage(
-    private val addressDataService: AddressDataService,
+    private val registeredAddressCache: RegisteredAddressCache,
     private val localAuthorityService: LocalAuthorityService,
     displaySectionHeader: Boolean = false,
 ) : AbstractPage(
@@ -45,7 +45,7 @@ class PropertyRegistrationCheckAnswersPage(
         modelAndView.addObject("showUprnDetail", !DataHelper.isManualAddressChosen(journeyData))
     }
 
-    private fun getPropertyName(journeyData: JourneyData) = DataHelper.getAddress(journeyData, addressDataService)!!.singleLineAddress
+    private fun getPropertyName(journeyData: JourneyData) = DataHelper.getAddress(journeyData, registeredAddressCache)!!.singleLineAddress
 
     private fun getPropertyDetailsSummary(journeyData: JourneyData): List<SummaryListRowViewModel> =
         getAddressDetails(journeyData) +
@@ -55,7 +55,7 @@ class PropertyRegistrationCheckAnswersPage(
             getTenancyDetails(journeyData)
 
     private fun getAddressDetails(journeyData: JourneyData): List<SummaryListRowViewModel> {
-        val address = DataHelper.getAddress(journeyData, addressDataService)!!
+        val address = DataHelper.getAddress(journeyData, registeredAddressCache)!!
         return if (DataHelper.isManualAddressChosen(journeyData)) {
             getManualAddressDetails(address)
         } else {

@@ -10,13 +10,13 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import java.time.LocalDate
 
 class JourneyDataBuilder(
-    private val mockAddressDataService: AddressDataService,
+    private val mockRegisteredAddressCache: RegisteredAddressCache,
     private val mockLocalAuthorityService: LocalAuthorityService,
     initialJourneyData: JourneyData? = null,
 ) {
@@ -70,7 +70,7 @@ class JourneyDataBuilder(
             )
 
         fun propertyDefault(
-            addressService: AddressDataService,
+            addressService: RegisteredAddressCache,
             localAuthorityService: LocalAuthorityService,
         ) = JourneyDataBuilder(addressService, localAuthorityService, defaultPropertyJourneyData).withSelectedAddress(
             DEFAULT_ADDRESS,
@@ -96,7 +96,7 @@ class JourneyDataBuilder(
             )
 
         fun landlordDefault(
-            addressService: AddressDataService,
+            addressService: RegisteredAddressCache,
             localAuthorityService: LocalAuthorityService,
         ) = JourneyDataBuilder(addressService, localAuthorityService, defaultLandlordJourneyData).withSelectedAddress(
             DEFAULT_ADDRESS,
@@ -121,7 +121,7 @@ class JourneyDataBuilder(
         localAuthority: LocalAuthority,
         isContactAddress: Boolean = false,
     ): JourneyDataBuilder {
-        whenever(mockAddressDataService.getAddressData(singleLineAddress)).thenReturn(
+        whenever(mockRegisteredAddressCache.getAddressData(singleLineAddress)).thenReturn(
             AddressDataModel(
                 singleLineAddress,
                 localAuthorityId = localAuthority.id,
