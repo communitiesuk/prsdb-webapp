@@ -14,6 +14,7 @@ class PropertyDeregistrationJourneyTests : IntegrationTest() {
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in`(page: Page) {
         val deregisterPropertyAreYouSurePage = navigator.goToPropertyDeregistrationAreYouSurePage(1.toLong())
+        // TODO: PRSD-696 - maybe check that the address is appearing (currently hardcoded)
         deregisterPropertyAreYouSurePage.submitWantsToProceed()
         val reasonPage = assertPageIs(page, ReasonPagePropertyDeregistration::class)
 
