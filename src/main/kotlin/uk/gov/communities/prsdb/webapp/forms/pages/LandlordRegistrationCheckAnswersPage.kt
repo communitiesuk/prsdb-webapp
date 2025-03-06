@@ -6,10 +6,10 @@ import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
+import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
 
 class LandlordRegistrationCheckAnswersPage(
-    private val addressDataService: AddressDataService,
+    private val registeredAddressCache: RegisteredAddressCache,
     displaySectionHeader: Boolean = false,
 ) : AbstractPage(
         formModel = CheckAnswersFormModel::class,
@@ -72,7 +72,7 @@ class LandlordRegistrationCheckAnswersPage(
 
         return getLivesInEnglandOrWalesFormData(livesInEnglandOrWales) +
             (if (!livesInEnglandOrWales) getNonEnglandOrWalesAddressFormData(journeyData) else emptyList()) +
-            getContactAddressFormData(journeyData, addressDataService, livesInEnglandOrWales)
+            getContactAddressFormData(journeyData, registeredAddressCache, livesInEnglandOrWales)
     }
 
     private fun getLivesInEnglandOrWalesFormData(livesInEnglandOrWales: Boolean): List<SummaryListRowViewModel> =
@@ -100,7 +100,7 @@ class LandlordRegistrationCheckAnswersPage(
 
     private fun getContactAddressFormData(
         journeyData: JourneyData,
-        addressDataService: AddressDataService,
+        registeredAddressCache: RegisteredAddressCache,
         livesInEnglandOrWales: Boolean,
     ): SummaryListRowViewModel =
         SummaryListRowViewModel(
@@ -109,7 +109,7 @@ class LandlordRegistrationCheckAnswersPage(
             } else {
                 "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress"
             },
-            LandlordRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!.singleLineAddress,
+            LandlordRegistrationJourneyDataHelper.getAddress(journeyData, registeredAddressCache)!!.singleLineAddress,
             getContactAddressChangeURLPathSegment(journeyData, livesInEnglandOrWales),
         )
 

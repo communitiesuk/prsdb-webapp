@@ -7,13 +7,13 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
+import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
 
 class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
     companion object {
         fun getAddress(
             journeyData: JourneyData,
-            addressDataService: AddressDataService,
+            registeredAddressCache: RegisteredAddressCache,
         ): AddressDataModel? {
             return if (isManualAddressChosen(journeyData)) {
                 getManualAddress(
@@ -23,7 +23,7 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
                 )
             } else {
                 val selectedAddress = getSelectedAddress(journeyData) ?: return null
-                addressDataService.getAddressData(selectedAddress)
+                registeredAddressCache.getAddressData(selectedAddress)
             }
         }
 

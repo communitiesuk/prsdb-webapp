@@ -35,17 +35,17 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxView
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
 
 class LandlordRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     val addressLookupService: AddressLookupService,
-    val addressDataService: AddressDataService,
+    val registeredAddressCache: RegisteredAddressCache,
     val landlordService: LandlordService,
     val absoluteUrlProvider: AbsoluteUrlProvider,
     val emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
@@ -305,7 +305,7 @@ class LandlordRegistrationJourney(
                         ),
                     lookupAddressPathSegment = LandlordRegistrationStepId.LookupAddress.urlPathSegment,
                     addressLookupService = addressLookupService,
-                    addressDataService = addressDataService,
+                    registeredAddressCache = registeredAddressCache,
                     displaySectionHeader = true,
                 ),
             nextAction = { journeyData, _ -> selectAddressNextAction(journeyData) },
@@ -400,7 +400,7 @@ class LandlordRegistrationJourney(
                         ),
                     lookupAddressPathSegment = LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
                     addressLookupService = addressLookupService,
-                    addressDataService = addressDataService,
+                    registeredAddressCache = registeredAddressCache,
                     displaySectionHeader = true,
                 ),
             nextAction = { journeyData, _ ->
@@ -438,7 +438,7 @@ class LandlordRegistrationJourney(
     private fun checkAnswersStep() =
         Step(
             id = LandlordRegistrationStepId.CheckAnswers,
-            page = LandlordRegistrationCheckAnswersPage(addressDataService, displaySectionHeader = true),
+            page = LandlordRegistrationCheckAnswersPage(registeredAddressCache, displaySectionHeader = true),
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Declaration, null) },
             saveAfterSubmit = false,
         )
@@ -501,7 +501,7 @@ class LandlordRegistrationJourney(
                 email = LandlordRegistrationJourneyDataHelper.getEmail(filteredJourneyData)!!,
                 phoneNumber = LandlordRegistrationJourneyDataHelper.getPhoneNumber(filteredJourneyData)!!,
                 addressDataModel =
-                    LandlordRegistrationJourneyDataHelper.getAddress(filteredJourneyData, addressDataService)!!,
+                    LandlordRegistrationJourneyDataHelper.getAddress(filteredJourneyData, registeredAddressCache)!!,
                 countryOfResidence = LandlordRegistrationJourneyDataHelper.getCountryOfResidence(filteredJourneyData),
                 isVerified = LandlordRegistrationJourneyDataHelper.isIdentityVerified(filteredJourneyData),
                 nonEnglandOrWalesAddress =

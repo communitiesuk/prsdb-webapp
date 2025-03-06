@@ -10,8 +10,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
+import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
 import kotlin.reflect.KClass
 
 class SelectAddressPage(
@@ -21,7 +21,7 @@ class SelectAddressPage(
     displaySectionHeader: Boolean = false,
     private val lookupAddressPathSegment: String,
     private val addressLookupService: AddressLookupService,
-    private val addressDataService: AddressDataService,
+    private val registeredAddressCache: RegisteredAddressCache,
 ) : AbstractPage(formModel, templateName, content, displaySectionHeader) {
     override fun enrichModel(
         modelAndView: ModelAndView,
@@ -36,7 +36,7 @@ class SelectAddressPage(
             )!!
 
         val addressLookupResults = addressLookupService.search(houseNameOrNumber, postcode)
-        addressDataService.setAddressData(addressLookupResults)
+        registeredAddressCache.setAddressData(addressLookupResults)
 
         var addressRadiosViewModel: List<RadiosViewModel> =
             addressLookupResults.mapIndexed { index, address ->
@@ -64,6 +64,6 @@ class SelectAddressPage(
         formData: PageData,
     ): Boolean {
         val selectedAddress = formData["address"].toString()
-        return selectedAddress == MANUAL_ADDRESS_CHOSEN || addressDataService.getAddressData(selectedAddress) != null
+        return selectedAddress == MANUAL_ADDRESS_CHOSEN || registeredAddressCache.getAddressData(selectedAddress) != null
     }
 }

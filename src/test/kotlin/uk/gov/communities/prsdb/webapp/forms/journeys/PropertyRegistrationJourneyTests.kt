@@ -20,13 +20,13 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -40,7 +40,7 @@ class PropertyRegistrationJourneyTests {
     lateinit var mockPropertyRegistrationService: PropertyRegistrationService
 
     @Mock
-    lateinit var addressDataService: AddressDataService
+    lateinit var registeredAddressCache: RegisteredAddressCache
 
     @Mock
     lateinit var localAuthorityService: LocalAuthorityService
@@ -63,7 +63,7 @@ class PropertyRegistrationJourneyTests {
     fun setup() {
         mockJourneyDataService = mock()
         mockPropertyRegistrationService = mock()
-        addressDataService = mock()
+        registeredAddressCache = mock()
         localAuthorityService = mock()
         landlordService = mock()
         addressLookupService = mock()
@@ -100,7 +100,7 @@ class PropertyRegistrationJourneyTests {
                     validator = alwaysTrueValidator,
                     journeyDataService = mockJourneyDataService,
                     addressLookupService = addressLookupService,
-                    addressDataService = addressDataService,
+                    registeredAddressCache = registeredAddressCache,
                     propertyRegistrationService = mockPropertyRegistrationService,
                     localAuthorityService = localAuthorityService,
                     landlordService = landlordService,
@@ -124,7 +124,7 @@ class PropertyRegistrationJourneyTests {
             // Arrange
             val journeyData =
                 JourneyDataBuilder
-                    .propertyDefault(addressDataService, localAuthorityService)
+                    .propertyDefault(registeredAddressCache, localAuthorityService)
                     .withTenants(3, 7)
                     .withOccupiedSetToFalse()
 
@@ -151,7 +151,7 @@ class PropertyRegistrationJourneyTests {
             // Arrange
             val journeyData =
                 JourneyDataBuilder
-                    .propertyDefault(addressDataService, localAuthorityService)
+                    .propertyDefault(registeredAddressCache, localAuthorityService)
                     .withPropertyType(PropertyType.OTHER, "Bungalow")
                     .withPropertyType(PropertyType.FLAT)
 
@@ -178,7 +178,7 @@ class PropertyRegistrationJourneyTests {
             // Arrange
             val journeyData =
                 JourneyDataBuilder
-                    .propertyDefault(addressDataService, localAuthorityService)
+                    .propertyDefault(registeredAddressCache, localAuthorityService)
                     .withLicensingType(LicensingType.SELECTIVE_LICENCE, LicensingType.SELECTIVE_LICENCE.toString())
                     .withLicensingType(
                         LicensingType.HMO_MANDATORY_LICENCE,
@@ -208,7 +208,7 @@ class PropertyRegistrationJourneyTests {
             // Arrange
             val journeyData =
                 JourneyDataBuilder
-                    .propertyDefault(addressDataService, localAuthorityService)
+                    .propertyDefault(registeredAddressCache, localAuthorityService)
                     .withLicensingType(LicensingType.SELECTIVE_LICENCE, LicensingType.SELECTIVE_LICENCE.toString())
                     .withLicensingType(LicensingType.NO_LICENSING)
 
