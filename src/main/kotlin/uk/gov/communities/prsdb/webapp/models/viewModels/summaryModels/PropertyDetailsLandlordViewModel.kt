@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
-import uk.gov.communities.prsdb.webapp.helpers.extenstions.addRow
+import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 
 class PropertyDetailsLandlordViewModel(
     private val landlord: Landlord,
