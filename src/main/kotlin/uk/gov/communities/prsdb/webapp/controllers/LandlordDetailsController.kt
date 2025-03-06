@@ -19,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDetailsUpdateJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordViewModel

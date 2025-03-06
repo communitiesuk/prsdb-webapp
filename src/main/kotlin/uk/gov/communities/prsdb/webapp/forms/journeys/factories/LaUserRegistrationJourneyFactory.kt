@@ -1,7 +1,8 @@
-package uk.gov.communities.prsdb.webapp.forms.journeys
+package uk.gov.communities.prsdb.webapp.forms.journeys.factories
 
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService

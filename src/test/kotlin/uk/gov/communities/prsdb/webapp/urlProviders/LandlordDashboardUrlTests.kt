@@ -22,8 +22,8 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.C
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel

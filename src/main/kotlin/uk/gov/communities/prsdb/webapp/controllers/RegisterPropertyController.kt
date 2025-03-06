@@ -14,7 +14,7 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService

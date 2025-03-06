@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersCont
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
-import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityInvitationEmail

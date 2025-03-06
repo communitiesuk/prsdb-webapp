@@ -19,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
-import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService

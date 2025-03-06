@@ -6,7 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
-import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 
