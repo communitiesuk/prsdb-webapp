@@ -52,6 +52,7 @@ class PropertyDeregistrationJourney(
                         mapOf(
                             "title" to "deregisterProperty.title",
                             "fieldSetHeading" to "deregisterProperty.areYouSure.fieldSetHeading",
+                            // TODO: PRSD-696 - add the actual address here
                             "propertyAddress" to "HARDCODED ADDRESS",
                             "radioOptions" to
                                 listOf(
