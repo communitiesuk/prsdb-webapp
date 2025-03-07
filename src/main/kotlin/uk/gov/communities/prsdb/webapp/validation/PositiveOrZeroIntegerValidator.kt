@@ -4,11 +4,7 @@ import org.hibernate.validator.internal.constraintvalidators.bv.number.sign.Posi
 
 class PositiveOrZeroIntegerValidator : PropertyConstraintValidator {
     override fun isValid(value: Any?): Boolean {
-        try {
-            val integerValue = value.toString().toInt()
-            return PositiveOrZeroValidatorForInteger().isValid(integerValue, null)
-        } catch (e: NumberFormatException) {
-            return false
-        }
+        val integerValue = value.toString().toIntOrNull() ?: return false
+        return PositiveOrZeroValidatorForInteger().isValid(integerValue, null)
     }
 }
