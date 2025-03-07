@@ -23,26 +23,11 @@ class DateValidator {
         year: String,
     ): Boolean = isBlank(day) || isBlank(month) || isBlank(year)
 
-    fun isValidDay(day: String): Boolean =
-        try {
-            day.toInt() in 1..31
-        } catch (e: NumberFormatException) {
-            false
-        }
+    fun isValidDay(day: String): Boolean = day.toIntOrNull() in 1..31
 
-    fun isValidMonth(month: String): Boolean =
-        try {
-            month.toInt() in 1..12
-        } catch (e: NumberFormatException) {
-            false
-        }
+    fun isValidMonth(month: String): Boolean = month.toIntOrNull() in 1..12
 
-    fun isValidYear(year: String): Boolean =
-        try {
-            year.toInt() in 1900..2099
-        } catch (e: NumberFormatException) {
-            false
-        }
+    fun isValidYear(year: String): Boolean = year.toIntOrNull() in 1900..2099
 
     fun isValidDate(
         day: String,
