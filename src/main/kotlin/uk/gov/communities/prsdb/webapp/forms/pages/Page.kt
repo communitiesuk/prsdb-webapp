@@ -13,6 +13,6 @@ class Page(
 ) : AbstractPage(formModel, templateName, content, shouldDisplaySectionHeader) {
     override fun enrichModel(
         modelAndView: ModelAndView,
-        journeyData: JourneyData?,
+        filteredJourneyData: JourneyData?,
     ) {}
 }
