@@ -14,11 +14,11 @@ class AlreadyRegisteredPage(
 ) : AbstractPage(formModel, templateName, content) {
     override fun enrichModel(
         modelAndView: ModelAndView,
-        journeyData: JourneyData?,
+        filteredJourneyData: JourneyData?,
     ) {
         modelAndView.addObject(
             "singleLineAddress",
-            JourneyDataHelper.getFieldStringValue(journeyData!!, selectedAddressPathSegment, "address"),
+            JourneyDataHelper.getFieldStringValue(filteredJourneyData!!, selectedAddressPathSegment, "address"),
         )
     }
 }

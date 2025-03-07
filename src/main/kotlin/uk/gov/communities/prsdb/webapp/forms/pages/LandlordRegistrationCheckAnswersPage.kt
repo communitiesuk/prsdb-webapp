@@ -24,14 +24,14 @@ class LandlordRegistrationCheckAnswersPage(
     ) {
     override fun enrichModel(
         modelAndView: ModelAndView,
-        journeyData: JourneyData?,
+        filteredJourneyData: JourneyData?,
     ) {
-        journeyData!!
+        filteredJourneyData!!
 
         val formData =
-            getIdentityFormData(journeyData) +
-                getEmailAndPhoneFormData(journeyData) +
-                getAddressFormData(journeyData)
+            getIdentityFormData(filteredJourneyData) +
+                getEmailAndPhoneFormData(filteredJourneyData) +
+                getAddressFormData(filteredJourneyData)
 
         modelAndView.addObject("formData", formData)
     }

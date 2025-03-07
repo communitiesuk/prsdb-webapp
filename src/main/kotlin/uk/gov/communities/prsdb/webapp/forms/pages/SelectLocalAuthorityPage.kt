@@ -18,7 +18,7 @@ class SelectLocalAuthorityPage(
     ) {
     override fun enrichModel(
         modelAndView: ModelAndView,
-        journeyData: JourneyData?,
+        filteredJourneyData: JourneyData?,
     ) {
         val localAuthoritiesSelectOptions =
             localAuthorityService.retrieveAllLocalAuthorities().map {

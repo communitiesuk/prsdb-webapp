@@ -585,18 +585,18 @@ class PropertyRegistrationJourney(
 
     private fun checkAnswersSubmitAndRedirect(): String {
         try {
-            val journeyData = last().filteredJourneyData
-            val address = PropertyRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!
+            val filteredJourneyData = last().filteredJourneyData
+            val address = PropertyRegistrationJourneyDataHelper.getAddress(filteredJourneyData, addressDataService)!!
             val baseUserId = SecurityContextHolder.getContext().authentication.name
             val propertyRegistrationNumber =
                 propertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(
                     address = address,
-                    propertyType = PropertyRegistrationJourneyDataHelper.getPropertyType(journeyData)!!,
-                    licenseType = PropertyRegistrationJourneyDataHelper.getLicensingType(journeyData)!!,
-                    licenceNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(journeyData)!!,
-                    ownershipType = PropertyRegistrationJourneyDataHelper.getOwnershipType(journeyData)!!,
-                    numberOfHouseholds = PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(journeyData),
-                    numberOfPeople = PropertyRegistrationJourneyDataHelper.getNumberOfTenants(journeyData),
+                    propertyType = PropertyRegistrationJourneyDataHelper.getPropertyType(filteredJourneyData)!!,
+                    licenseType = PropertyRegistrationJourneyDataHelper.getLicensingType(filteredJourneyData)!!,
+                    licenceNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(filteredJourneyData)!!,
+                    ownershipType = PropertyRegistrationJourneyDataHelper.getOwnershipType(filteredJourneyData)!!,
+                    numberOfHouseholds = PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(filteredJourneyData),
+                    numberOfPeople = PropertyRegistrationJourneyDataHelper.getNumberOfTenants(filteredJourneyData),
                     baseUserId = baseUserId,
                 )
 

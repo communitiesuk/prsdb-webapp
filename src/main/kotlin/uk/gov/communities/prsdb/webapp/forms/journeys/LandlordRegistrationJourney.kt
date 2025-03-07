@@ -493,20 +493,20 @@ class LandlordRegistrationJourney(
         }
 
     private fun declarationHandleSubmitAndRedirect(): String {
-        val journeyData = last().filteredJourneyData
+        val filteredJourneyData = last().filteredJourneyData
         val landlord =
             landlordService.createLandlord(
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
-                name = LandlordRegistrationJourneyDataHelper.getName(journeyData)!!,
-                email = LandlordRegistrationJourneyDataHelper.getEmail(journeyData)!!,
-                phoneNumber = LandlordRegistrationJourneyDataHelper.getPhoneNumber(journeyData)!!,
+                name = LandlordRegistrationJourneyDataHelper.getName(filteredJourneyData)!!,
+                email = LandlordRegistrationJourneyDataHelper.getEmail(filteredJourneyData)!!,
+                phoneNumber = LandlordRegistrationJourneyDataHelper.getPhoneNumber(filteredJourneyData)!!,
                 addressDataModel =
-                    LandlordRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!,
-                countryOfResidence = LandlordRegistrationJourneyDataHelper.getCountryOfResidence(journeyData),
-                isVerified = LandlordRegistrationJourneyDataHelper.isIdentityVerified(journeyData),
+                    LandlordRegistrationJourneyDataHelper.getAddress(filteredJourneyData, addressDataService)!!,
+                countryOfResidence = LandlordRegistrationJourneyDataHelper.getCountryOfResidence(filteredJourneyData),
+                isVerified = LandlordRegistrationJourneyDataHelper.isIdentityVerified(filteredJourneyData),
                 nonEnglandOrWalesAddress =
-                    LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesAddress(journeyData),
-                dateOfBirth = LandlordRegistrationJourneyDataHelper.getDOB(journeyData)!!,
+                    LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesAddress(filteredJourneyData),
+                dateOfBirth = LandlordRegistrationJourneyDataHelper.getDOB(filteredJourneyData)!!,
             )
 
         emailNotificationService.sendEmail(

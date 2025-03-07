@@ -15,20 +15,20 @@ class ConfirmIdentityPage(
 ) : AbstractPage(formModel, templateName, content, displaySectionHeader) {
     override fun enrichModel(
         modelAndView: ModelAndView,
-        journeyData: JourneyData?,
+        filteredJourneyData: JourneyData?,
     ) {
-        journeyData!!
+        filteredJourneyData!!
 
         val formData =
             mutableListOf(
                 SummaryListRowViewModel(
                     "forms.confirmDetails.rowHeading.name",
-                    LandlordRegistrationJourneyDataHelper.getVerifiedName(journeyData)!!,
+                    LandlordRegistrationJourneyDataHelper.getVerifiedName(filteredJourneyData)!!,
                     null,
                 ),
                 SummaryListRowViewModel(
                     "forms.confirmDetails.rowHeading.dob",
-                    LandlordRegistrationJourneyDataHelper.getVerifiedDOB(journeyData)!!,
+                    LandlordRegistrationJourneyDataHelper.getVerifiedDOB(filteredJourneyData)!!,
                     null,
                 ),
             )

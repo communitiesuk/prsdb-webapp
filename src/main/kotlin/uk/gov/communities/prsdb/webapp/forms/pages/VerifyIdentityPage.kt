@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.VerifiedI
 class VerifyIdentityPage : AbstractPage(VerifiedIdentityModel::class, "", mapOf()) {
     override fun enrichModel(
         modelAndView: ModelAndView,
-        journeyData: JourneyData?,
+        filteredJourneyData: JourneyData?,
     ) {
         val bindingResult = modelAndView.model[BindingResult.MODEL_KEY_PREFIX + "formModel"] as? BindingResult
 

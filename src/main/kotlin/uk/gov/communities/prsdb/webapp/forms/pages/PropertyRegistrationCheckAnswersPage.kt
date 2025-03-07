@@ -27,10 +27,10 @@ class PropertyRegistrationCheckAnswersPage(
     ) {
     override fun enrichModel(
         modelAndView: ModelAndView,
-        journeyData: JourneyData?,
+        filteredJourneyData: JourneyData?,
     ) {
-        journeyData!!
-        addPropertyDetailsToModel(modelAndView, journeyData)
+        filteredJourneyData!!
+        addPropertyDetailsToModel(modelAndView, filteredJourneyData)
     }
 
     private fun addPropertyDetailsToModel(

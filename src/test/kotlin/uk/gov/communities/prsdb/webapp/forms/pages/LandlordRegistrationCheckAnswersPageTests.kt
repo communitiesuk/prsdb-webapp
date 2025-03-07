@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -25,7 +24,6 @@ class LandlordRegistrationCheckAnswersPageTests {
     private lateinit var addressService: AddressDataService
     private lateinit var localAuthorityService: LocalAuthorityService
     private lateinit var validator: Validator
-    private lateinit var model: Model
     private lateinit var pageData: PageData
     private lateinit var prevStepUrl: String
     private lateinit var journeyDataBuilder: JourneyDataBuilder
@@ -42,8 +40,8 @@ class LandlordRegistrationCheckAnswersPageTests {
         journeyDataBuilder = JourneyDataBuilder.landlordDefault(addressService, localAuthorityService)
     }
 
-    private fun getFormData(journeyData: JourneyData): List<SummaryListRowViewModel> {
-        val result = page.getModelAndView(validator, pageData, prevStepUrl, journeyData, null)
+    private fun getFormData(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> {
+        val result = page.getModelAndView(validator, pageData, prevStepUrl, filteredJourneyData, null)
 
         val formData = result.model["formData"] as List<*>
         return formData.filterIsInstance<SummaryListRowViewModel>()
