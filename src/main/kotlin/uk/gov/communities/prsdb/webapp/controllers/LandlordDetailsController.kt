@@ -19,10 +19,10 @@ import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.UpdateLandlordDetailsJourney
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDetailsUpdateJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordViewModel
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -30,10 +30,9 @@ import java.security.Principal
 @Controller
 @RequestMapping(LandlordDetailsController.LANDLORD_DETAILS_ROUTE)
 class LandlordDetailsController(
-    val landlordService: LandlordService,
-    val addressDataService: AddressDataService,
-    val propertyOwnershipService: PropertyOwnershipService,
-    val updateDetailsJourney: UpdateLandlordDetailsJourney,
+    private val landlordService: LandlordService,
+    private val propertyOwnershipService: PropertyOwnershipService,
+    private val landlordDetailsUpdateJourneyFactory: LandlordDetailsUpdateJourneyFactory,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping("$UPDATE_PATH_SEGMENT/$DETAILS_PATH_SEGMENT")
@@ -44,9 +43,9 @@ class LandlordDetailsController(
         addLandlordDetailsToModel(model, principal, includeChangeLinks = true)
         // TODO: PRSD-355 Remove this way of showing submit button
         model.addAttribute("shouldShowSubmitButton", true)
-        return updateDetailsJourney.getModelAndViewForUpdateStep(
-            updateEntityId = principal.name,
-        )
+        return landlordDetailsUpdateJourneyFactory
+            .create(principal.name)
+            .getModelAndViewForStep(UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment, subPageNumber = null)
     }
 
     @PreAuthorize("hasRole('LANDLORD')")
@@ -88,10 +87,9 @@ class LandlordDetailsController(
         model: Model,
         principal: Principal,
     ): ModelAndView =
-        updateDetailsJourney.getModelAndViewForStep(
-            stepName,
-            null,
-        )
+        landlordDetailsUpdateJourneyFactory
+            .create(principal.name)
+            .getModelAndViewForStep(stepName, subPageNumber = null)
 
     @PreAuthorize("hasRole('LANDLORD')")
     @PostMapping("${UPDATE_PATH_SEGMENT}/{stepName}")
@@ -101,12 +99,14 @@ class LandlordDetailsController(
         model: Model,
         principal: Principal,
     ): ModelAndView =
-        updateDetailsJourney.completeStep(
-            stepName,
-            formData,
-            null,
-            principal,
-        )
+        landlordDetailsUpdateJourneyFactory
+            .create(principal.name)
+            .completeStep(
+                stepName,
+                formData,
+                subPageNumber = null,
+                principal,
+            )
 
     @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
     @GetMapping("/{id}")

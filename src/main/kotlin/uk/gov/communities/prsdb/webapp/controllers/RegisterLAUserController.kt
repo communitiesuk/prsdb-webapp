@@ -13,7 +13,8 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import java.security.Principal
@@ -21,7 +22,7 @@ import java.security.Principal
 @Controller
 @RequestMapping("/${REGISTER_LA_USER_JOURNEY_URL}")
 class RegisterLAUserController(
-    val laUserRegistrationJourney: LaUserRegistrationJourney,
+    val laUserRegistrationJourneyFactory: LaUserRegistrationJourneyFactory,
     val invitationService: LocalAuthorityInvitationService,
     val localAuthorityDataService: LocalAuthorityDataService,
 ) {
@@ -34,8 +35,7 @@ class RegisterLAUserController(
         // see https://github.com/spring-projects/spring-hateoas/issues/155 for details
         if (invitationService.tokenIsValid(token)) {
             invitationService.storeTokenInSession(token)
-            laUserRegistrationJourney.initialiseJourneyData(token)
-            return "redirect:${REGISTER_LA_USER_JOURNEY_URL}/${laUserRegistrationJourney.initialStepId.urlPathSegment}"
+            return "redirect:${REGISTER_LA_USER_JOURNEY_URL}/${RegisterLaUserStepId.LandingPage.urlPathSegment}"
         }
 
         return "redirect:$INVALID_LINK_PAGE_PATH_SEGMENT"
@@ -47,16 +47,18 @@ class RegisterLAUserController(
         @RequestParam(value = "subpage", required = false) subpage: Int?,
         model: Model,
     ): ModelAndView {
-        val token = invitationService.getTokenFromSession()
-        if (token == null || !invitationService.tokenIsValid(token)) {
+        val token = getValidTokenFromSessionOrNull()
+        if (token == null) {
             invitationService.clearTokenFromSession()
             return ModelAndView("redirect:$INVALID_LINK_PAGE_PATH_SEGMENT")
         }
 
-        return laUserRegistrationJourney.getModelAndViewForStep(
-            stepName,
-            subpage,
-        )
+        return laUserRegistrationJourneyFactory
+            .create(invitationService.getInvitationFromToken(token))
+            .getModelAndViewForStep(
+                stepName,
+                subpage,
+            )
     }
 
     @PostMapping("/{stepName}")
@@ -66,13 +68,22 @@ class RegisterLAUserController(
         @RequestParam formData: PageData,
         model: Model,
         principal: Principal,
-    ): ModelAndView =
-        laUserRegistrationJourney.completeStep(
-            stepName,
-            formData,
-            subpage,
-            principal,
-        )
+    ): ModelAndView {
+        val token = getValidTokenFromSessionOrNull()
+        if (token == null) {
+            invitationService.clearTokenFromSession()
+            return ModelAndView("redirect:$INVALID_LINK_PAGE_PATH_SEGMENT")
+        }
+
+        return laUserRegistrationJourneyFactory
+            .create(invitationService.getInvitationFromToken(token))
+            .completeStep(
+                stepName,
+                formData,
+                subpage,
+                principal,
+            )
+    }
 
     @GetMapping("/$CONFIRMATION_PAGE_PATH_SEGMENT")
     fun getConfirmation(
@@ -101,6 +112,15 @@ class RegisterLAUserController(
 
     @GetMapping("/$INVALID_LINK_PAGE_PATH_SEGMENT")
     fun invalidToken(model: Model): String = "invalidLaInvitationLink"
+
+    private fun getValidTokenFromSessionOrNull(): String? {
+        val token = invitationService.getTokenFromSession()
+        return if (token == null || !invitationService.tokenIsValid(token)) {
+            null
+        } else {
+            token
+        }
+    }
 
     companion object {
         const val CONFIRMATION_PAGE_PATH_SEGMENT = "confirmation"

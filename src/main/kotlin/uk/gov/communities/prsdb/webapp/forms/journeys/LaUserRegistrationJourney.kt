@@ -1,13 +1,12 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.LaUserRegistrationCheckAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
@@ -21,18 +20,27 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 
-@Component
 class LaUserRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     private val invitationService: LocalAuthorityInvitationService,
     private val localAuthorityDataService: LocalAuthorityDataService,
+    private val invitation: LocalAuthorityInvitation,
 ) : Journey<RegisterLaUserStepId>(
         journeyType = JourneyType.LA_USER_REGISTRATION,
+        journeyDataKey = REGISTER_LA_USER_JOURNEY_URL,
+        initialStepId = RegisterLaUserStepId.LandingPage,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
-    final override val initialStepId: RegisterLaUserStepId = RegisterLaUserStepId.LandingPage
+    init {
+        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
+        if (!isJourneyDataInitialized(journeyData)) {
+            val emailFormData = mapOf("emailAddress" to invitation.invitedEmail)
+            val newJourneyData = emailStep().updatedJourneyData(journeyData, emailFormData, subPageNumber = null)
+            journeyDataService.setJourneyDataInSession(newJourneyData)
+        }
+    }
 
     override val sections =
         createSingleSectionWithSingleTaskFromSteps(
@@ -45,16 +53,8 @@ class LaUserRegistrationJourney(
             ),
         )
 
-    override val journeyPathSegment = REGISTER_LA_USER_JOURNEY_URL
-
-    fun initialiseJourneyData(token: String) {
-        val journeyData = journeyDataService.getJourneyDataFromSession(defaultJourneyDataKey)
-        val formData: PageData = mapOf("emailAddress" to invitationService.getEmailAddressForToken(token))
-        val emailStep = steps.single { step -> step.id == RegisterLaUserStepId.Email }
-
-        val newJourneyData = emailStep.updatedJourneyData(journeyData, formData, null)
-        journeyDataService.setJourneyDataInSession(newJourneyData)
-    }
+    private fun isJourneyDataInitialized(journeyData: JourneyData): Boolean =
+        journeyData.containsKey(RegisterLaUserStepId.Email.urlPathSegment)
 
     private fun landingPageStep() =
         Step(
@@ -86,7 +86,6 @@ class LaUserRegistrationJourney(
                             "fieldSetHint" to "forms.name.fieldSetHint",
                             "label" to "forms.name.label",
                             "submitButtonText" to "forms.buttons.continue",
-                            "backUrl" to "/$journeyPathSegment/",
                         ),
                 ),
             nextAction = { _, _ -> Pair(RegisterLaUserStepId.Email, null) },
@@ -135,19 +134,16 @@ class LaUserRegistrationJourney(
         )
 
     private fun checkAnswersHandleSubmitAndRedirect(journeyData: JourneyData): String {
-        val token = invitationService.getTokenFromSession()!!
-
         val localAuthorityUserID =
             localAuthorityDataService.registerUserAndReturnID(
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
-                localAuthority = invitationService.getAuthorityForToken(token),
+                localAuthority = invitation.invitingAuthority,
                 name = LaUserRegistrationJourneyDataHelper.getName(journeyData)!!,
                 email = LaUserRegistrationJourneyDataHelper.getEmail(journeyData)!!,
             )
 
         localAuthorityDataService.setLastUserIdRegisteredThisSession(localAuthorityUserID)
 
-        val invitation = invitationService.getInvitationFromToken(token)
         invitationService.deleteInvitation(invitation)
         invitationService.clearTokenFromSession()
 
