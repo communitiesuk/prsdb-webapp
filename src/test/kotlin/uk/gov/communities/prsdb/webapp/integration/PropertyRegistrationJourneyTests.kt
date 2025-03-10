@@ -459,7 +459,9 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             val peoplePage = assertPageIs(page, PeopleFormPagePropertyRegistration::class)
             peoplePage.submitNumOfPeople(2)
             assertThat(peoplePage.form.getErrorMessage())
-                .containsText("Number of people in your property must not be less than the number of households")
+                .containsText(
+                    "The number of people in the property must be the same as or higher than the number of households in the property",
+                )
         }
     }
 
