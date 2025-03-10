@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.getPropertyDetailsPath
@@ -14,11 +16,13 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @Component
 class PropertyDeregistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
+    private val propertyOwnershipService: PropertyOwnershipService,
 ) : Journey<DeregisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_DEREGISTRATION,
         // TODO: PRSD-696 - check how we actually want to get this
@@ -50,8 +54,7 @@ class PropertyDeregistrationJourney(
                         mapOf(
                             "title" to "deregisterProperty.title",
                             "fieldSetHeading" to "deregisterProperty.areYouSure.fieldSetHeading",
-                            // TODO: PRSD-696 - add the actual address here
-                            "propertyAddress" to "HARDCODED ADDRESS",
+                            "propertyAddress" to retrieveAddressFromDatabase(),
                             "radioOptions" to
                                 listOf(
                                     RadiosButtonViewModel(
@@ -98,4 +101,14 @@ class PropertyDeregistrationJourney(
 
         return getPropertyDetailsPath(propertyOwnershipId)
     }
+
+    private fun retrieveAddressFromDatabase(): String =
+        propertyOwnershipService
+            .retrievePropertyOwnershipById(propertyOwnershipId)
+            ?.property
+            ?.address
+            ?.singleLineAddress ?: throw ResponseStatusException(
+            HttpStatus.NOT_FOUND,
+            "Address for property ownership id $propertyOwnershipId not found",
+        )
 }

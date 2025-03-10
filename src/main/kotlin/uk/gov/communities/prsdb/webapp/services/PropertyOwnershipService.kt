@@ -107,7 +107,7 @@ class PropertyOwnershipService(
         propertyOwnershipRepository
             .findByRegistrationNumber_Number(registrationNumber)
 
-    private fun retrievePropertyOwnershipById(propertyOwnershipId: Long): PropertyOwnership? =
+    fun retrievePropertyOwnershipById(propertyOwnershipId: Long): PropertyOwnership? =
         propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)
 
     fun searchForProperties(
