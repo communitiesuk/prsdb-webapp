@@ -53,10 +53,6 @@ class JourneyTests {
     private lateinit var validatorFactory: ValidatorFactory
     private lateinit var validator: Validator
 
-    companion object {
-        const val JOURNEY_PATH_SEGMENT = "journey-path-segment"
-    }
-
     enum class TestStepId(
         override val urlPathSegment: String,
     ) : StepId {
@@ -83,7 +79,7 @@ class JourneyTests {
                         ),
                 ),
             ),
-    ) : Journey<TestStepId>(journeyType, JOURNEY_PATH_SEGMENT, initialStepId, validator, journeyDataService) {
+    ) : Journey<TestStepId>(journeyType, initialStepId, validator, journeyDataService) {
         override val sections: List<JourneySection<TestStepId>> =
             createSingleSectionWithSingleTaskFromSteps(initialStepId, steps)
     }
@@ -94,7 +90,7 @@ class JourneyTests {
         validator: Validator,
         journeyDataService: JourneyDataService,
         override val sections: List<JourneySection<TestStepId>>,
-    ) : Journey<TestStepId>(journeyType, JOURNEY_PATH_SEGMENT, initialStepId, validator, journeyDataService)
+    ) : Journey<TestStepId>(journeyType, initialStepId, validator, journeyDataService)
 
     class TestFormModel : FormModel {
         @NotNull
@@ -405,6 +401,7 @@ class JourneyTests {
                     mockFormContextRepository,
                     mockOneLoginUserRepository,
                     ObjectMapper(),
+                    "any-key",
                 )
         }
 
@@ -479,7 +476,6 @@ class JourneyTests {
                     TestStepId.StepThree.urlPathSegment to pageDataStepThree,
                 )
 
-            whenever(spiedOnJourneyDataService.getJourneyDataFromSession(JOURNEY_PATH_SEGMENT)).thenReturn(journeyData)
             whenever(spiedOnJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
@@ -874,15 +870,10 @@ class JourneyTests {
             val journeyType = JourneyType.PROPERTY_REGISTRATION
             val principalName = "principalName"
 
-            whenever(mockJourneyDataService.getJourneyDataFromSession(JOURNEY_PATH_SEGMENT)).thenReturn(mapOf())
-            whenever(mockJourneyDataService.getContextId(principalName, journeyType)).thenReturn(
-                null,
-            )
+            whenever(mockJourneyDataService.getContextId(principalName, journeyType)).thenReturn(null)
 
             // Act
-            TestJourneyFactory(journeyType, mockJourneyDataService)
-                .create(principalName)
-                .getModelAndViewForStep(TestStepId.StepOne.urlPathSegment, subPageNumber = null)
+            TestJourneyFactory(journeyType, mockJourneyDataService).create(principalName)
 
             // Assert
             verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any())
@@ -894,13 +885,10 @@ class JourneyTests {
             val contextId = 67L
             val principalName = "principalName"
 
-            whenever(mockJourneyDataService.getJourneyDataFromSession(JOURNEY_PATH_SEGMENT)).thenReturn(mapOf())
             whenever(mockJourneyDataService.getContextId(principalName, journeyType)).thenReturn(contextId)
 
             // Act
-            TestJourneyFactory(journeyType, mockJourneyDataService)
-                .create(principalName)
-                .getModelAndViewForStep(TestStepId.StepOne.urlPathSegment, subPageNumber = null)
+            TestJourneyFactory(journeyType, mockJourneyDataService).create(principalName)
 
             // Assert
             val captor = argumentCaptor<Long>()
@@ -912,14 +900,10 @@ class JourneyTests {
         fun `when the journey data is already in the session, journey data is not loaded`() {
             val principalName = "principalName"
 
-            whenever(mockJourneyDataService.getJourneyDataFromSession(JOURNEY_PATH_SEGMENT)).thenReturn(
-                mapOf("anything" to "Anything else"),
-            )
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf("anything" to "Anything else"))
 
             // Act
-            TestJourneyFactory(JourneyType.PROPERTY_REGISTRATION, mockJourneyDataService)
-                .create(principalName)
-                .getModelAndViewForStep(TestStepId.StepOne.urlPathSegment, subPageNumber = null)
+            TestJourneyFactory(JourneyType.PROPERTY_REGISTRATION, mockJourneyDataService).create(principalName)
 
             // Assert
             verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any())
