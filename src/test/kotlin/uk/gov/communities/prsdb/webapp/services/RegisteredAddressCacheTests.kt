@@ -36,44 +36,6 @@ class RegisteredAddressCacheTests {
     }
 
     @Test
-    fun `getAddressData returns the AddressDataModel that corresponds with the given address`() {
-        val addressDataJSON =
-            Json.encodeToString(
-                listOf(
-                    AddressDataModel("1, Example Road, EG", 1, 1234, buildingNumber = "1", postcode = "EG"),
-                    AddressDataModel("2, Example Road, EG", 2, buildingNumber = "2", postcode = "EG"),
-                    AddressDataModel("Main, Example Road, EG", 3, buildingName = "Main", postcode = "EG"),
-                ).associateBy { it.singleLineAddress },
-            )
-        val expectedAddressData =
-            AddressDataModel("1, Example Road, EG", 1, 1234, buildingNumber = "1", postcode = "EG")
-
-        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf("address-data" to addressDataJSON))
-
-        val addressData = registeredAddressCache.getAddressData("1, Example Road, EG")
-
-        assertEquals(expectedAddressData, addressData)
-    }
-
-    @Test
-    fun `getAddressData returns null when given an invalid address`() {
-        val addressDataJSON =
-            Json.encodeToString(
-                listOf(
-                    AddressDataModel("1, Example Road, EG", 1, 1234, buildingNumber = "1", postcode = "EG"),
-                    AddressDataModel("2, Example Road, EG", 2, buildingNumber = "2", postcode = "EG"),
-                    AddressDataModel("Main, Example Road, EG", 3, buildingName = "Main", postcode = "EG"),
-                ).associateBy { it.singleLineAddress },
-            )
-
-        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf("address-data" to addressDataJSON))
-
-        val addressData = registeredAddressCache.getAddressData("invalid address")
-
-        assertNull(addressData)
-    }
-
-    @Test
     fun `setAddressData stores the given address data as a serialized map`() {
         val addressDataList =
             listOf(

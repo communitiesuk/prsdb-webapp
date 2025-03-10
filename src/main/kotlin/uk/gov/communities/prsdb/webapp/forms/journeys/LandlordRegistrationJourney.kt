@@ -39,13 +39,11 @@ import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
-import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
 
 class LandlordRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     val addressLookupService: AddressLookupService,
-    val registeredAddressCache: RegisteredAddressCache,
     val landlordService: LandlordService,
     val absoluteUrlProvider: AbsoluteUrlProvider,
     val emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
@@ -305,7 +303,7 @@ class LandlordRegistrationJourney(
                         ),
                     lookupAddressPathSegment = LandlordRegistrationStepId.LookupAddress.urlPathSegment,
                     addressLookupService = addressLookupService,
-                    registeredAddressCache = registeredAddressCache,
+                    journeyDataService = journeyDataService,
                     displaySectionHeader = true,
                 ),
             nextAction = { journeyData, _ -> selectAddressNextAction(journeyData) },
@@ -400,7 +398,7 @@ class LandlordRegistrationJourney(
                         ),
                     lookupAddressPathSegment = LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
                     addressLookupService = addressLookupService,
-                    registeredAddressCache = registeredAddressCache,
+                    journeyDataService = journeyDataService,
                     displaySectionHeader = true,
                 ),
             nextAction = { journeyData, _ ->
@@ -438,7 +436,7 @@ class LandlordRegistrationJourney(
     private fun checkAnswersStep() =
         Step(
             id = LandlordRegistrationStepId.CheckAnswers,
-            page = LandlordRegistrationCheckAnswersPage(registeredAddressCache, displaySectionHeader = true),
+            page = LandlordRegistrationCheckAnswersPage(journeyDataService, displaySectionHeader = true),
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Declaration, null) },
             saveAfterSubmit = false,
         )
@@ -500,12 +498,10 @@ class LandlordRegistrationJourney(
                 name = LandlordRegistrationJourneyDataHelper.getName(filteredJourneyData)!!,
                 email = LandlordRegistrationJourneyDataHelper.getEmail(filteredJourneyData)!!,
                 phoneNumber = LandlordRegistrationJourneyDataHelper.getPhoneNumber(filteredJourneyData)!!,
-                addressDataModel =
-                    LandlordRegistrationJourneyDataHelper.getAddress(filteredJourneyData, registeredAddressCache)!!,
+                addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(filteredJourneyData)!!,
                 countryOfResidence = LandlordRegistrationJourneyDataHelper.getCountryOfResidence(filteredJourneyData),
                 isVerified = LandlordRegistrationJourneyDataHelper.isIdentityVerified(filteredJourneyData),
-                nonEnglandOrWalesAddress =
-                    LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesAddress(filteredJourneyData),
+                nonEnglandOrWalesAddress = LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesAddress(filteredJourneyData),
                 dateOfBirth = LandlordRegistrationJourneyDataHelper.getDOB(filteredJourneyData)!!,
             )
 

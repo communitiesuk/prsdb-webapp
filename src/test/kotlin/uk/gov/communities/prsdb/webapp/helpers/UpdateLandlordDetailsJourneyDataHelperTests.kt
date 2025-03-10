@@ -6,19 +6,16 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import java.time.LocalDate
 import kotlin.test.assertEquals
 
 class UpdateLandlordDetailsJourneyDataHelperTests {
     private lateinit var journeyDataBuilder: JourneyDataBuilder
-    private lateinit var registeredAddressCache: RegisteredAddressCache
 
     @BeforeEach
     fun setup() {
-        registeredAddressCache = mock()
-        journeyDataBuilder = JourneyDataBuilder(registeredAddressCache, mock())
+        journeyDataBuilder = JourneyDataBuilder(mock())
     }
 
     @Test
@@ -66,8 +63,7 @@ class UpdateLandlordDetailsJourneyDataHelperTests {
         val authority = LocalAuthority()
         val testJourneyData = journeyDataBuilder.withSelectedAddress(singleLineAddress, uprn, authority).build()
 
-        val addressUpdate =
-            UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(testJourneyData, registeredAddressCache)
+        val addressUpdate = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(testJourneyData)
 
         assertEquals(AddressDataModel(singleLineAddress, uprn = uprn, localAuthorityId = authority.id), addressUpdate)
     }
@@ -79,8 +75,7 @@ class UpdateLandlordDetailsJourneyDataHelperTests {
         val postcode = "EG1 9ZY"
         val testJourneyData = journeyDataBuilder.withManualAddress(lineOne, locality, postcode).build()
 
-        val addressUpdate =
-            UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(testJourneyData, registeredAddressCache)
+        val addressUpdate = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(testJourneyData)
 
         assertEquals(
             AddressDataModel(
@@ -96,8 +91,7 @@ class UpdateLandlordDetailsJourneyDataHelperTests {
     fun `getAddressUpdateIfPresent returns null if the address pages are not journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
-        val addressUpdate =
-            UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(testJourneyData, registeredAddressCache)
+        val addressUpdate = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(testJourneyData)
 
         assertNull(addressUpdate)
     }

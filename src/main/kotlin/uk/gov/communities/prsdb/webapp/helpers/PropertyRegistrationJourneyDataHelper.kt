@@ -6,15 +6,12 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.helpers.extensions.JourneyDataExtensions.Companion.getLookedUpAddress
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
 
 class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
     companion object {
-        fun getAddress(
-            journeyData: JourneyData,
-            registeredAddressCache: RegisteredAddressCache,
-        ): AddressDataModel? {
+        fun getAddress(journeyData: JourneyData): AddressDataModel? {
             return if (isManualAddressChosen(journeyData)) {
                 getManualAddress(
                     journeyData,
@@ -23,7 +20,7 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
                 )
             } else {
                 val selectedAddress = getSelectedAddress(journeyData) ?: return null
-                registeredAddressCache.getAddressData(selectedAddress)
+                journeyData.getLookedUpAddress(selectedAddress)
             }
         }
 

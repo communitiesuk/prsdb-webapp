@@ -26,7 +26,6 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
-import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -38,9 +37,6 @@ class PropertyRegistrationJourneyTests {
 
     @Mock
     lateinit var mockPropertyRegistrationService: PropertyRegistrationService
-
-    @Mock
-    lateinit var registeredAddressCache: RegisteredAddressCache
 
     @Mock
     lateinit var localAuthorityService: LocalAuthorityService
@@ -63,7 +59,6 @@ class PropertyRegistrationJourneyTests {
     fun setup() {
         mockJourneyDataService = mock()
         mockPropertyRegistrationService = mock()
-        registeredAddressCache = mock()
         localAuthorityService = mock()
         landlordService = mock()
         addressLookupService = mock()
@@ -100,7 +95,6 @@ class PropertyRegistrationJourneyTests {
                     validator = alwaysTrueValidator,
                     journeyDataService = mockJourneyDataService,
                     addressLookupService = addressLookupService,
-                    registeredAddressCache = registeredAddressCache,
                     propertyRegistrationService = mockPropertyRegistrationService,
                     localAuthorityService = localAuthorityService,
                     landlordService = landlordService,
@@ -124,11 +118,12 @@ class PropertyRegistrationJourneyTests {
             // Arrange
             val journeyData =
                 JourneyDataBuilder
-                    .propertyDefault(registeredAddressCache, localAuthorityService)
+                    .propertyDefault(localAuthorityService)
                     .withTenants(3, 7)
                     .withOccupiedSetToFalse()
+                    .build()
 
-            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData.build())
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
             completeStep(RegisterPropertyStepId.Declaration)
@@ -151,11 +146,12 @@ class PropertyRegistrationJourneyTests {
             // Arrange
             val journeyData =
                 JourneyDataBuilder
-                    .propertyDefault(registeredAddressCache, localAuthorityService)
+                    .propertyDefault(localAuthorityService)
                     .withPropertyType(PropertyType.OTHER, "Bungalow")
                     .withPropertyType(PropertyType.FLAT)
+                    .build()
 
-            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData.build())
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
             completeStep(RegisterPropertyStepId.Declaration)
@@ -178,14 +174,14 @@ class PropertyRegistrationJourneyTests {
             // Arrange
             val journeyData =
                 JourneyDataBuilder
-                    .propertyDefault(registeredAddressCache, localAuthorityService)
+                    .propertyDefault(localAuthorityService)
                     .withLicensingType(LicensingType.SELECTIVE_LICENCE, LicensingType.SELECTIVE_LICENCE.toString())
                     .withLicensingType(
                         LicensingType.HMO_MANDATORY_LICENCE,
                         LicensingType.HMO_MANDATORY_LICENCE.toString(),
-                    )
+                    ).build()
 
-            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData.build())
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
             completeStep(RegisterPropertyStepId.Declaration)
@@ -208,11 +204,12 @@ class PropertyRegistrationJourneyTests {
             // Arrange
             val journeyData =
                 JourneyDataBuilder
-                    .propertyDefault(registeredAddressCache, localAuthorityService)
+                    .propertyDefault(localAuthorityService)
                     .withLicensingType(LicensingType.SELECTIVE_LICENCE, LicensingType.SELECTIVE_LICENCE.toString())
                     .withLicensingType(LicensingType.NO_LICENSING)
+                    .build()
 
-            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData.build())
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
             completeStep(RegisterPropertyStepId.Declaration)
