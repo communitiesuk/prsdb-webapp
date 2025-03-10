@@ -21,26 +21,21 @@ import java.security.Principal
 import java.util.Optional
 
 abstract class Journey<T : StepId>(
-    protected val journeyType: JourneyType,
+    private val journeyType: JourneyType,
+    protected val journeyDataKey: String,
+    val initialStepId: T,
     protected val validator: Validator,
     protected val journeyDataService: JourneyDataService,
 ) : Iterable<StepDetails<T>> {
-    abstract val initialStepId: T
-
     abstract val sections: List<JourneySection<T>>
 
     protected val steps: Set<Step<T>>
         get() = sections.flatMap { section -> section.tasks }.flatMap { task -> task.steps }.toSet()
 
-    protected abstract val journeyPathSegment: String
+    protected open val unreachableStepRedirect = initialStepId.urlPathSegment
 
-    protected val defaultJourneyDataKey = journeyType.name
-
-    fun loadJourneyDataIfNotLoaded(
-        principalName: String,
-        journeyDataKey: String? = null,
-    ) {
-        val data = journeyDataService.getJourneyDataFromSession(journeyDataKey ?: defaultJourneyDataKey)
+    fun loadJourneyDataIfNotLoaded(principalName: String) {
+        val data = journeyDataService.getJourneyDataFromSession(journeyDataKey)
         if (data.isEmpty()) {
             /* TODO PRSD-589 Currently this looks the context up from the database,
                 takes the id, then passes the id to another method which retrieves it
@@ -57,13 +52,11 @@ abstract class Journey<T : StepId>(
         stepPathSegment: String,
         subPageNumber: Int?,
         submittedPageData: PageData? = null,
-        journeyDataKey: String? = null,
     ): ModelAndView {
-        val journeyData: JourneyData =
-            journeyDataService.getJourneyDataFromSession(journeyDataKey ?: defaultJourneyDataKey)
+        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
         val requestedStep = getStep(stepPathSegment)
         if (!isStepReachable(requestedStep, subPageNumber)) {
-            return ModelAndView("redirect:${getUnreachableStepRedirect(journeyData)}")
+            return ModelAndView("redirect:$unreachableStepRedirect")
         }
         val prevStepDetails = getPrevStep(requestedStep, subPageNumber)
         val prevStepUrl = getPrevStepUrl(prevStepDetails?.step, prevStepDetails?.subPageNumber)
@@ -86,9 +79,8 @@ abstract class Journey<T : StepId>(
         pageData: PageData,
         subPageNumber: Int?,
         principal: Principal,
-        journeyDataKey: String? = null,
     ): ModelAndView {
-        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey ?: defaultJourneyDataKey)
+        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
 
         val currentStep = getStep(stepPathSegment)
         if (!currentStep.isSatisfied(validator, pageData)) {
@@ -96,7 +88,6 @@ abstract class Journey<T : StepId>(
                 stepPathSegment,
                 subPageNumber,
                 pageData,
-                journeyDataKey ?: defaultJourneyDataKey,
             )
         }
 
@@ -127,7 +118,7 @@ abstract class Journey<T : StepId>(
         }
         return UriComponentsBuilder
             .newInstance()
-            .path("/$journeyPathSegment/${newStepId.urlPathSegment}")
+            .path(newStepId.urlPathSegment)
             .queryParamIfPresent("subpage", Optional.ofNullable(newSubPageNumber))
             .build(true)
             .toUriString()
@@ -145,8 +136,6 @@ abstract class Journey<T : StepId>(
         // All other steps are reachable if and only if we can find their previous step by traversal
         return getPrevStep(targetStep, targetSubPageNumber) != null
     }
-
-    protected open fun getUnreachableStepRedirect(journeyData: JourneyData) = initialStepId.urlPathSegment
 
     protected fun createSingleSectionWithSingleTaskFromSteps(
         initialStepId: T,

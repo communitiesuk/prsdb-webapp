@@ -1,10 +1,8 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.validation.Validator
-import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.ReachableStepDetailsIterator
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
@@ -13,47 +11,26 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 abstract class UpdateJourney<T : StepId>(
     journeyType: JourneyType,
+    journeyDataKey: String,
+    initialStepId: T,
     validator: Validator,
     journeyDataService: JourneyDataService,
-) : Journey<T>(journeyType, validator, journeyDataService) {
-    abstract val updateStepId: T
+    private val updateStepId: T,
+    protected val updateEntityId: String,
+) : Journey<T>(journeyType, journeyDataKey, initialStepId, validator, journeyDataService) {
+    protected val originalDataKey = "ORIGINAL_$journeyDataKey"
 
-    protected val originalDataKey = "ORIGINAL_${journeyType.name}"
+    override val unreachableStepRedirect get() = last().step.id.urlPathSegment
 
-    protected abstract fun createOriginalJourneyData(updateEntityId: String): JourneyData
+    protected abstract fun createOriginalJourneyData(): JourneyData
 
-    protected open fun initialiseJourneyDataIfNotInitialised(
-        updateEntityId: String,
-        journeyDataKey: String? = null,
-    ) {
-        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey ?: defaultJourneyDataKey)
+    open fun initializeJourneyDataIfNotInitialized() {
+        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
         if (!isJourneyDataInitialised(journeyData)) {
-            val newJourneyData = journeyData + (originalDataKey to createOriginalJourneyData(updateEntityId))
+            val newJourneyData = journeyData + (originalDataKey to createOriginalJourneyData())
             journeyDataService.setJourneyDataInSession(newJourneyData)
         }
     }
-
-    fun getModelAndViewForUpdateStep(
-        updateEntityId: String,
-        subPageNumber: Int? = null,
-        submittedPageData: PageData? = null,
-        journeyDataKey: String? = null,
-    ): ModelAndView {
-        initialiseJourneyDataIfNotInitialised(updateEntityId, journeyDataKey)
-        return super.getModelAndViewForStep(
-            updateStepId.urlPathSegment,
-            subPageNumber,
-            submittedPageData,
-            journeyDataKey,
-        )
-    }
-
-    override fun getUnreachableStepRedirect(journeyData: JourneyData) =
-        if (!isJourneyDataInitialised(journeyData)) {
-            updateStepId.urlPathSegment
-        } else {
-            last().step.id.urlPathSegment
-        }
 
     override fun iterator(): Iterator<StepDetails<T>> {
         val journeyData = journeyDataService.getJourneyDataFromSession()
@@ -71,10 +48,10 @@ abstract class UpdateJourney<T : StepId>(
         return ReachableStepDetailsIterator(updatedData, steps, initialStepId, validator)
     }
 
-    private fun isJourneyDataInitialised(journeyData: JourneyData): Boolean = journeyData.containsKey(originalDataKey)
-
-    protected fun isJourneyDataInitialised(journeyDataKey: String? = null): Boolean {
-        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey ?: defaultJourneyDataKey)
+    protected fun isJourneyDataInitialised(): Boolean {
+        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
         return isJourneyDataInitialised(journeyData)
     }
+
+    private fun isJourneyDataInitialised(journeyData: JourneyData): Boolean = journeyData.containsKey(originalDataKey)
 }

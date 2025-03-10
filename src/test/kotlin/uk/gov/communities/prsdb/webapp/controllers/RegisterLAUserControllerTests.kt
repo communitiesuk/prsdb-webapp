@@ -16,8 +16,7 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
@@ -27,7 +26,7 @@ class RegisterLAUserControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
     @MockBean
-    lateinit var laUserRegistrationJourney: LaUserRegistrationJourney
+    lateinit var laUserRegistrationJourneyFactory: LaUserRegistrationJourneyFactory
 
     @MockBean
     lateinit var invitationService: LocalAuthorityInvitationService
@@ -41,7 +40,6 @@ class RegisterLAUserControllerTests(
 
     @BeforeEach
     fun setupMocks() {
-        whenever(laUserRegistrationJourney.initialStepId).thenReturn(RegisterLaUserStepId.LandingPage)
         whenever(invitationService.tokenIsValid(validToken)).thenReturn(true)
         whenever(invitationService.getTokenFromSession()).thenReturn(validToken)
         whenever(invitationService.tokenIsValid(invalidToken)).thenReturn(false)
@@ -49,14 +47,13 @@ class RegisterLAUserControllerTests(
 
     @Test
     @WithMockUser
-    fun `acceptInvitation endpoint stores valid token in session and uses it to initialise journey data`() {
+    fun `acceptInvitation endpoint stores valid token in session`() {
         mvc.get("/register-local-authority-user?token=$validToken").andExpect {
             status { is3xxRedirection() }
         }
 
         verify(invitationService).tokenIsValid(validToken)
         verify(invitationService).storeTokenInSession(validToken)
-        verify(laUserRegistrationJourney).initialiseJourneyData(validToken)
     }
 
     @Test
@@ -68,7 +65,6 @@ class RegisterLAUserControllerTests(
 
         verify(invitationService).tokenIsValid(invalidToken)
         verify(invitationService, never()).storeTokenInSession(invalidToken)
-        verify(laUserRegistrationJourney, never()).initialiseJourneyData(validToken)
     }
 
     @Test

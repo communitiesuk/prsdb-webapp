@@ -21,16 +21,14 @@ class PropertyDeregistrationJourney(
     journeyDataService: JourneyDataService,
 ) : Journey<DeregisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_DEREGISTRATION,
+        // TODO: PRSD-696 - check how we actually want to get this
+        journeyDataKey = "${DEREGISTER_PROPERTY_JOURNEY_URL}_1",
+        initialStepId = DeregisterPropertyStepId.AreYouSure,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
-    final override val initialStepId = DeregisterPropertyStepId.AreYouSure
-
     // TODO: PRSD-696 - get this from journeyPathSegment
     private val propertyOwnershipId = 1.toLong()
-
-    // TODO: PRSD-696 - Check how this is going to work after refactor - is this getting passed in in the factory and how?
-    override val journeyPathSegment = "$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId"
 
     override val sections =
         createSingleSectionWithSingleTaskFromSteps(

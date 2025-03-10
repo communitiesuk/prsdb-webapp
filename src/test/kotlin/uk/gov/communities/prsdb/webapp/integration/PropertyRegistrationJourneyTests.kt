@@ -399,6 +399,14 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             assertThat(householdsPage.form.getErrorMessage())
                 .containsText("Number of households in your property must be a positive, whole number, like 3")
         }
+
+        @Test
+        fun `Submitting with a zero integer in the numberOfHouseholds field returns an error`(page: Page) {
+            val householdsPage = navigator.goToPropertyRegistrationHouseholdsPage()
+            householdsPage.submitNumberOfHouseholds(0)
+            assertThat(householdsPage.form.getErrorMessage())
+                .containsText("Number of households in your property must be a positive, whole number, like 3")
+        }
     }
 
     @Nested
