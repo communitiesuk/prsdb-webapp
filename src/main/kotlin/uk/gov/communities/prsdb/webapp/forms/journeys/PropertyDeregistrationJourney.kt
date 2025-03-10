@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.helpers.PropertyDeregistrationJourneyData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
@@ -21,6 +22,7 @@ class PropertyDeregistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val addressDataService: AddressDataService,
     private val propertyOwnershipId: Long,
 ) : Journey<DeregisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_DEREGISTRATION,
@@ -49,7 +51,7 @@ class PropertyDeregistrationJourney(
                         mapOf(
                             "title" to "deregisterProperty.title",
                             "fieldSetHeading" to "deregisterProperty.areYouSure.fieldSetHeading",
-                            "propertyAddress" to retrieveAddressFromDatabase(),
+                            "propertyAddress" to retrieveAddressFromCacheOrDatabase(),
                             "radioOptions" to
                                 listOf(
                                     RadiosButtonViewModel(
@@ -65,7 +67,7 @@ class PropertyDeregistrationJourney(
                         ),
                 ),
             // handleSubmitAndRedirect will execute. It does not have to redirect to the step specified in nextAction.
-            handleSubmitAndRedirect = { newJourneyData, subPage -> continueToNextActionOrExitJourney(newJourneyData, subPage) },
+            handleSubmitAndRedirect = { newJourneyData, subPage -> areYouSureContinueToNextActionOrExitJourney(newJourneyData, subPage) },
             // This gets checked when determining whether the next step is reachable
             nextAction = { _, _ -> Pair(DeregisterPropertyStepId.Reason, null) },
         )
@@ -84,7 +86,7 @@ class PropertyDeregistrationJourney(
                 ),
         )
 
-    private fun continueToNextActionOrExitJourney(
+    private fun areYouSureContinueToNextActionOrExitJourney(
         newJourneyData: JourneyData,
         subPageNumber: Int?,
     ): String {
@@ -94,7 +96,19 @@ class PropertyDeregistrationJourney(
             return getRedirectForNextStep(currentStep, newJourneyData, subPageNumber)
         }
 
+        addressDataService.clearCachedSingleLineAddressForPropertyOwnershipId(propertyOwnershipId)
         return getPropertyDetailsPath(propertyOwnershipId)
+    }
+
+    private fun retrieveAddressFromCacheOrDatabase(): String {
+        val cachedAddress = addressDataService.getCachedSingleLineAddressForPropertyOwnershipId(propertyOwnershipId)
+        if (cachedAddress != null) {
+            return cachedAddress
+        }
+
+        val addressFromDatabase = retrieveAddressFromDatabase()
+        addressDataService.cacheSingleLineAddressForPropertyOwnershipId(propertyOwnershipId, addressFromDatabase)
+        return addressFromDatabase
     }
 
     private fun retrieveAddressFromDatabase(): String =

@@ -44,4 +44,21 @@ class AddressDataService(
 
         session.setAttribute("addressRegisteredResults", newCachedResult)
     }
+
+    fun cacheSingleLineAddressForPropertyOwnershipId(
+        propertyOwnershipId: Long,
+        singleLineAddress: String,
+    ) {
+        session.setAttribute(getSingleLineAddressForPropertyOwnershipIdKey(propertyOwnershipId), singleLineAddress)
+    }
+
+    fun getCachedSingleLineAddressForPropertyOwnershipId(propertyOwnershipId: Long): String? =
+        session.getAttribute(getSingleLineAddressForPropertyOwnershipIdKey(propertyOwnershipId))?.toString()
+
+    // TODO: PRSD-697 - call this to clear the address from the cache when the property ownership is deleted
+    fun clearCachedSingleLineAddressForPropertyOwnershipId(propertyOwnershipId: Long) =
+        session.removeAttribute(getSingleLineAddressForPropertyOwnershipIdKey(propertyOwnershipId))
+
+    private fun getSingleLineAddressForPropertyOwnershipIdKey(propertyOwnershipId: Long): String =
+        "singleLineAddress_propertyOwnershipId_$propertyOwnershipId"
 }

@@ -3,6 +3,8 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.ArgumentMatchers.eq
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -15,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import kotlin.test.assertEquals
 
@@ -30,6 +33,9 @@ class DeregisterPropertyControllerTests(
 
     @MockBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
+
+    @MockBean
+    private lateinit var addressDataService: AddressDataService
 
     @Test
     fun `getJourneyStep for the initial step returns a redirect for an unauthenticated user`() {
@@ -52,7 +58,7 @@ class DeregisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getJourneyStep for the initial step returns 403 for a landlord user who does not own this property`() {
+    fun `getJourneyStep for the initial step clears the cache and returns 403 for a landlord user who does not own this property`() {
         // Arrange
         val propertyOwnershipId = 1.toLong()
         whenever(propertyDeregistrationJourney.initialStepId)
@@ -68,6 +74,8 @@ class DeregisterPropertyControllerTests(
             .andExpect {
                 status { isNotFound() }
             }
+
+        verify(addressDataService, times(1)).clearCachedSingleLineAddressForPropertyOwnershipId(propertyOwnershipId)
     }
 
     @Test

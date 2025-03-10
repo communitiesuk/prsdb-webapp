@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney.Companion.initialStepId
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -26,6 +27,7 @@ import java.security.Principal
 class DeregisterPropertyController(
     private val propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val addressDataService: AddressDataService,
 ) {
     @GetMapping("/{stepName}")
     fun getJourneyStep(
@@ -37,6 +39,7 @@ class DeregisterPropertyController(
     ): ModelAndView {
         if (stepName == initialStepId.urlPathSegment) {
             if (!propertyOwnershipService.getIsAuthorizedToDeleteRecord(propertyOwnershipId, principal.name)) {
+                addressDataService.clearCachedSingleLineAddressForPropertyOwnershipId(propertyOwnershipId)
                 throw ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "Property ownership $propertyOwnershipId not found",
