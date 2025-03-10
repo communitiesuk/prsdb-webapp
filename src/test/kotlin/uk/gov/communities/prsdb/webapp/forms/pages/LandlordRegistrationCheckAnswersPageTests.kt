@@ -8,6 +8,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
@@ -41,6 +42,10 @@ class LandlordRegistrationCheckAnswersPageTests {
     }
 
     private fun getFormData(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> {
+        whenever(journeyDataService.getJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)).thenReturn(
+            LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to filteredJourneyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY],
+        )
+
         val result = page.getModelAndView(validator, pageData, prevStepUrl, filteredJourneyData, null)
 
         val formData = result.model["formData"] as List<*>

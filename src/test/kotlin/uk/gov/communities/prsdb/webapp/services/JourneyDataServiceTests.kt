@@ -27,6 +27,7 @@ import java.security.Principal
 import java.util.Optional
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 @ExtendWith(MockitoExtension::class)
 class JourneyDataServiceTests {
@@ -98,6 +99,39 @@ class JourneyDataServiceTests {
         @Test
         fun `getJourneyDataFromSession throws an error if the journeyDataKey is not initialized`() {
             val exception = assertThrows<PrsdbWebException> { journeyDataService.getJourneyDataFromSession() }
+            assertContains(exception.message!!, "journeyDataKey has not been set")
+        }
+
+        @Test
+        fun `getJourneyDataEntryInSession returns the requested journey data entry in session if journeyDataKey is initialized`() {
+            val journeyDataKey = "journeyDataKey"
+            val journeyDataEntry = ("key" to "value")
+            val journeyData = mapOf(journeyDataEntry)
+
+            whenever(mockHttpSession.getAttribute(journeyDataKey)).thenReturn(journeyData)
+            journeyDataService.getJourneyDataFromSession(journeyDataKey)
+
+            val returnedJourneyDataEntry = journeyDataService.getJourneyDataEntryInSession(journeyDataEntry.first)
+
+            assertEquals(journeyDataEntry, returnedJourneyDataEntry)
+        }
+
+        @Test
+        fun `getJourneyDataEntryInSession returns null when the given key is invalid and journeyDataKey is initialized`() {
+            val journeyDataKey = "journeyDataKey"
+            val journeyData = mapOf("key" to "value")
+
+            whenever(mockHttpSession.getAttribute(journeyDataKey)).thenReturn(journeyData)
+            journeyDataService.getJourneyDataFromSession(journeyDataKey)
+
+            val returnedJourneyDataEntry = journeyDataService.getJourneyDataEntryInSession("not-a-entry-key")
+
+            assertNull(returnedJourneyDataEntry)
+        }
+
+        @Test
+        fun `getJourneyDataEntryInSession throws an error if the journeyDataKey is not initialized`() {
+            val exception = assertThrows<PrsdbWebException> { journeyDataService.getJourneyDataEntryInSession("any-entry-key") }
             assertContains(exception.message!!, "journeyDataKey has not been set")
         }
 

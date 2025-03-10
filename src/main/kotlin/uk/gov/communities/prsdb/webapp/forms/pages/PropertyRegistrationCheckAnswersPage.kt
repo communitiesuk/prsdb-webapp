@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
@@ -29,8 +30,9 @@ class PropertyRegistrationCheckAnswersPage(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData?,
     ) {
-        filteredJourneyData!!
-        addPropertyDetailsToModel(modelAndView, filteredJourneyData)
+        val filteredJourneyDataWithLookedUpAddresses =
+            filteredJourneyData!! + journeyDataService.getJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)!!
+        addPropertyDetailsToModel(modelAndView, filteredJourneyDataWithLookedUpAddresses)
     }
 
     private fun addPropertyDetailsToModel(

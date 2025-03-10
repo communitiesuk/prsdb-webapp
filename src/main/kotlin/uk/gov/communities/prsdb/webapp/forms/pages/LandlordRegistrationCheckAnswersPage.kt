@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
@@ -26,12 +27,13 @@ class LandlordRegistrationCheckAnswersPage(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData?,
     ) {
-        filteredJourneyData!!
+        val filteredJourneyDataWithLookedUpAddresses =
+            filteredJourneyData!! + journeyDataService.getJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)!!
 
         val formData =
-            getIdentityFormData(filteredJourneyData) +
-                getEmailAndPhoneFormData(filteredJourneyData) +
-                getAddressFormData(filteredJourneyData)
+            getIdentityFormData(filteredJourneyDataWithLookedUpAddresses) +
+                getEmailAndPhoneFormData(filteredJourneyDataWithLookedUpAddresses) +
+                getAddressFormData(filteredJourneyDataWithLookedUpAddresses)
 
         modelAndView.addObject("formData", formData)
     }
