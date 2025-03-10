@@ -7,4 +7,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class ReasonPagePropertyDeregistration(
     page: Page,
-) : BasePage(page, "/$DEREGISTER_PROPERTY_JOURNEY_URL/1/${DeregisterPropertyStepId.Reason.urlPathSegment}")
+    urlArguments: Map<String, String>,
+) : BasePage(
+        page,
+        "/$DEREGISTER_PROPERTY_JOURNEY_URL/${urlArguments["propertyOwnershipId"]}/${DeregisterPropertyStepId.Reason.urlPathSegment}",
+    )

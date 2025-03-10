@@ -380,12 +380,20 @@ class Navigator(
 
     fun goToPropertyDetailsLandlordView(id: Long): PropertyDetailsPageLandlordView {
         navigate("/property-details/$id")
-        return createValidPage(page, PropertyDetailsPageLandlordView::class)
+        return createValidPage(
+            page,
+            PropertyDetailsPageLandlordView::class,
+            mapOf("propertyOwnershipId" to id.toString()),
+        )
     }
 
     fun goToPropertyDetailsLocalAuthorityView(id: Long): PropertyDetailsPageLocalAuthorityView {
         navigate("/local-authority/property-details/$id")
-        return createValidPage(page, PropertyDetailsPageLocalAuthorityView::class)
+        return createValidPage(
+            page,
+            PropertyDetailsPageLocalAuthorityView::class,
+            mapOf("propertyOwnershipId" to id.toString()),
+        )
     }
 
     fun goToUpdateLandlordDetailsPage(): LandlordUpdateDetailsPage {
@@ -395,7 +403,11 @@ class Navigator(
 
     fun goToPropertyDeregistrationAreYouSurePage(propertyOwnershipId: Long): AreYouSureFormPagePropertyDeregistration {
         navigate("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/${DeregisterPropertyStepId.AreYouSure.urlPathSegment}")
-        return createValidPage(page, AreYouSureFormPagePropertyDeregistration::class)
+        return createValidPage(
+            page,
+            AreYouSureFormPagePropertyDeregistration::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
     }
 
     fun goToLocalAuthorityDashboard(): LocalAuthorityDashboardPage {

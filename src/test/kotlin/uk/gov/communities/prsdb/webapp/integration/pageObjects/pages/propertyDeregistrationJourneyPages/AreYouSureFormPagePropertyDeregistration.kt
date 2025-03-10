@@ -8,10 +8,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
-// TODO: PRSD-696 - can we make it so we can pass the property ownership id into here? Currently
 class AreYouSureFormPagePropertyDeregistration(
     page: Page,
-) : BasePage(page, "/$DEREGISTER_PROPERTY_JOURNEY_URL/1/${DeregisterPropertyStepId.AreYouSure.urlPathSegment}") {
+    urlArguments: Map<String, String>,
+) : BasePage(
+        page,
+        "/$DEREGISTER_PROPERTY_JOURNEY_URL/${urlArguments["propertyOwnershipId"]}/${DeregisterPropertyStepId.AreYouSure.urlPathSegment}",
+    ) {
     val form = AreYouSureForm(page)
 
     val backLink = BackLink.default(page)

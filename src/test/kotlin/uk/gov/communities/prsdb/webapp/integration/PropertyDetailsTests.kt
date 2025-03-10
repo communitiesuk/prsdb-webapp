@@ -74,9 +74,14 @@ class PropertyDetailsTests : IntegrationTest() {
 
         @Test
         fun `the delete button redirects to the delete record page`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            val propertyOwnershipId = 1
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
             detailsPage.deleteButton.clickAndWait()
-            assertPageIs(page, AreYouSureFormPagePropertyDeregistration::class)
+            assertPageIs(
+                page,
+                AreYouSureFormPagePropertyDeregistration::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+            )
         }
     }
 

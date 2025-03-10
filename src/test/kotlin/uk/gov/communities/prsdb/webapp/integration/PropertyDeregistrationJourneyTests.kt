@@ -14,10 +14,16 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDer
 class PropertyDeregistrationJourneyTests : IntegrationTest() {
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in`(page: Page) {
-        val deregisterPropertyAreYouSurePage = navigator.goToPropertyDeregistrationAreYouSurePage(1.toLong())
+        val propertyOwnershipId = 1
+        val deregisterPropertyAreYouSurePage = navigator.goToPropertyDeregistrationAreYouSurePage(propertyOwnershipId.toLong())
         assertThat(deregisterPropertyAreYouSurePage.form.fieldsetHeading).containsText("1, Example Road, EG")
         deregisterPropertyAreYouSurePage.submitWantsToProceed()
-        val reasonPage = assertPageIs(page, ReasonPagePropertyDeregistration::class)
+        val reasonPage =
+            assertPageIs(
+                page,
+                ReasonPagePropertyDeregistration::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+            )
 
         // TODO: PRSD-697 - add the reason step
 
@@ -28,18 +34,18 @@ class PropertyDeregistrationJourneyTests : IntegrationTest() {
     inner class AreYouSureStep {
         @Test
         fun `User is returned to the property details page if they select No`(page: Page) {
-            val deregisterPropertyAreYouSurePage = navigator.goToPropertyDeregistrationAreYouSurePage(1.toLong())
+            val propertyOwnershipId = 1
+            val deregisterPropertyAreYouSurePage = navigator.goToPropertyDeregistrationAreYouSurePage(propertyOwnershipId.toLong())
             deregisterPropertyAreYouSurePage.submitDoesNotWantToProceed()
-            // TODO: PRSD_696 - can we check that the same propertyOwnershipId appears in the property details url?
-            assertPageIs(page, PropertyDetailsPageLandlordView::class)
+            assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to propertyOwnershipId.toString()))
         }
 
         @Test
         fun `User is returned to the property details page if they click the back link`(page: Page) {
+            val propertyOwnershipId = 1
             val deregisterPropertyAreYouSurePage = navigator.goToPropertyDeregistrationAreYouSurePage(1.toLong())
             deregisterPropertyAreYouSurePage.backLink.clickAndWait()
-            // TODO: PRSD_696 - can we check that the same propertyOwnershipId appears in the property details url?
-            assertPageIs(page, PropertyDetailsPageLandlordView::class)
+            assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to propertyOwnershipId.toString()))
         }
 
         @Test
