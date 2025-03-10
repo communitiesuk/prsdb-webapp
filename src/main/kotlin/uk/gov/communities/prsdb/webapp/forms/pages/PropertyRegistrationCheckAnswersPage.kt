@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
@@ -8,13 +9,13 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper as DataHelper
 
 class PropertyRegistrationCheckAnswersPage(
-    private val addressDataService: AddressDataService,
     private val localAuthorityService: LocalAuthorityService,
+    private val journeyDataService: JourneyDataService,
     displaySectionHeader: Boolean = false,
 ) : AbstractPage(
         NoInputFormModel::class,
@@ -29,8 +30,9 @@ class PropertyRegistrationCheckAnswersPage(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData?,
     ) {
-        filteredJourneyData!!
-        addPropertyDetailsToModel(modelAndView, filteredJourneyData)
+        val filteredJourneyDataWithLookedUpAddresses =
+            filteredJourneyData!! + journeyDataService.getJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)!!
+        addPropertyDetailsToModel(modelAndView, filteredJourneyDataWithLookedUpAddresses)
     }
 
     private fun addPropertyDetailsToModel(
@@ -45,7 +47,7 @@ class PropertyRegistrationCheckAnswersPage(
         modelAndView.addObject("showUprnDetail", !DataHelper.isManualAddressChosen(journeyData))
     }
 
-    private fun getPropertyName(journeyData: JourneyData) = DataHelper.getAddress(journeyData, addressDataService)!!.singleLineAddress
+    private fun getPropertyName(journeyData: JourneyData) = DataHelper.getAddress(journeyData)!!.singleLineAddress
 
     private fun getPropertyDetailsSummary(journeyData: JourneyData): List<SummaryListRowViewModel> =
         getAddressDetails(journeyData) +
@@ -55,7 +57,7 @@ class PropertyRegistrationCheckAnswersPage(
             getTenancyDetails(journeyData)
 
     private fun getAddressDetails(journeyData: JourneyData): List<SummaryListRowViewModel> {
-        val address = DataHelper.getAddress(journeyData, addressDataService)!!
+        val address = DataHelper.getAddress(journeyData)!!
         return if (DataHelper.isManualAddressChosen(journeyData)) {
             getManualAddressDetails(address)
         } else {

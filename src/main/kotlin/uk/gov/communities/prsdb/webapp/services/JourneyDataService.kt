@@ -40,11 +40,26 @@ class JourneyDataService(
             objectToStringKeyedMap(session.getAttribute(journeyDataKey)) ?: mapOf()
         }
 
+    fun getJourneyDataEntryInSession(key: String) = getJourneyDataFromSession().entries.find { it.key == key }?.toPair()
+
     fun setJourneyDataInSession(journeyData: JourneyData) {
         if (!this::journeyDataKey.isInitialized) {
             throw PrsdbWebException("journeyDataKey has not been set")
         } else {
             session.setAttribute(journeyDataKey, journeyData)
+        }
+    }
+
+    fun setJourneyDataEntryInSession(
+        key: String,
+        value: Any,
+    ) {
+        if (!this::journeyDataKey.isInitialized) {
+            throw PrsdbWebException("journeyDataKey has not been set")
+        } else {
+            val journeyData = getJourneyDataFromSession()
+            val updatedJourneyData = journeyData + (key to value)
+            setJourneyDataInSession(updatedJourneyData)
         }
     }
 

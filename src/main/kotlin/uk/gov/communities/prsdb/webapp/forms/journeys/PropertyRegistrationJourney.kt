@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import jakarta.persistence.EntityExistsException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -40,7 +41,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxView
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -52,7 +52,6 @@ class PropertyRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     private val addressLookupService: AddressLookupService,
-    private val addressDataService: AddressDataService,
     private val propertyRegistrationService: PropertyRegistrationService,
     private val localAuthorityService: LocalAuthorityService,
     private val landlordService: LandlordService,
@@ -188,13 +187,12 @@ class PropertyRegistrationJourney(
                         ),
                     lookupAddressPathSegment = RegisterPropertyStepId.LookupAddress.urlPathSegment,
                     addressLookupService = addressLookupService,
-                    addressDataService = addressDataService,
+                    journeyDataService = journeyDataService,
                     displaySectionHeader = true,
                 ),
             nextAction = { journeyData, _ ->
                 selectAddressNextAction(
                     journeyData,
-                    addressDataService,
                     propertyRegistrationService,
                 )
             },
@@ -513,12 +511,7 @@ class PropertyRegistrationJourney(
     private fun checkAnswersStep() =
         Step(
             id = RegisterPropertyStepId.CheckAnswers,
-            page =
-                PropertyRegistrationCheckAnswersPage(
-                    addressDataService,
-                    localAuthorityService,
-                    displaySectionHeader = true,
-                ),
+            page = PropertyRegistrationCheckAnswersPage(localAuthorityService, journeyDataService, displaySectionHeader = true),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.Declaration, null) },
         )
 
@@ -557,17 +550,14 @@ class PropertyRegistrationJourney(
 
     private fun selectAddressNextAction(
         journeyData: JourneyData,
-        addressDataService: AddressDataService,
         propertyRegistrationService: PropertyRegistrationService,
     ): Pair<RegisterPropertyStepId, Int?> =
         if (PropertyRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
             Pair(RegisterPropertyStepId.ManualAddress, null)
         } else {
-            val selectedAddress =
-                PropertyRegistrationJourneyDataHelper.getAddress(journeyData, addressDataService)!!
-            val selectedAddressData = addressDataService.getAddressData(selectedAddress.singleLineAddress)!!
-            if (selectedAddressData.uprn != null &&
-                propertyRegistrationService.getIsAddressRegistered(selectedAddressData.uprn)
+            val selectedAddress = PropertyRegistrationJourneyDataHelper.getAddress(journeyData)!!
+            if (selectedAddress.uprn != null &&
+                propertyRegistrationService.getIsAddressRegistered(selectedAddress.uprn)
             ) {
                 Pair(RegisterPropertyStepId.AlreadyRegistered, null)
             } else {
@@ -585,8 +575,10 @@ class PropertyRegistrationJourney(
 
     private fun checkAnswersSubmitAndRedirect(): String {
         try {
-            val filteredJourneyData = last().filteredJourneyData
-            val address = PropertyRegistrationJourneyDataHelper.getAddress(filteredJourneyData, addressDataService)!!
+            val filteredJourneyData =
+                last().filteredJourneyData + journeyDataService.getJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)!!
+
+            val address = PropertyRegistrationJourneyDataHelper.getAddress(filteredJourneyData)!!
             val baseUserId = SecurityContextHolder.getContext().authentication.name
             val propertyRegistrationNumber =
                 propertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(

@@ -8,6 +8,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -16,15 +17,15 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 
 class PropertyRegistrationCheckAnswersPageTests {
     private lateinit var page: PropertyRegistrationCheckAnswersPage
-    private lateinit var addressService: AddressDataService
     private lateinit var localAuthorityService: LocalAuthorityService
+    private lateinit var journeyDataService: JourneyDataService
     private lateinit var validator: Validator
     private lateinit var pageData: PageData
     private lateinit var prevStepUrl: String
@@ -32,17 +33,21 @@ class PropertyRegistrationCheckAnswersPageTests {
 
     @BeforeEach
     fun setup() {
-        addressService = mock()
         localAuthorityService = mock()
-        page = PropertyRegistrationCheckAnswersPage(addressService, localAuthorityService)
+        journeyDataService = mock()
+        page = PropertyRegistrationCheckAnswersPage(localAuthorityService, journeyDataService)
         validator = mock()
         whenever(validator.supports(any<Class<*>>())).thenReturn(true)
         pageData = mock()
         prevStepUrl = "mock"
-        journeyDataBuilder = JourneyDataBuilder.propertyDefault(addressService, localAuthorityService)
+        journeyDataBuilder = JourneyDataBuilder.propertyDefault(localAuthorityService)
     }
 
     private fun getPropertyDetails(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> {
+        whenever(journeyDataService.getJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)).thenReturn(
+            LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to filteredJourneyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY],
+        )
+
         val result = page.getModelAndView(validator, pageData, prevStepUrl, filteredJourneyData, null)
 
         val propertyDetails = result.model["propertyDetails"] as List<*>
