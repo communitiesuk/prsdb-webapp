@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.AlreadyRegisteredPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationCheckAnswersPage
+import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationNumberOfPeoplePage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
@@ -385,7 +386,7 @@ class PropertyRegistrationJourney(
         Step(
             id = RegisterPropertyStepId.NumberOfPeople,
             page =
-                Page(
+                PropertyRegistrationNumberOfPeoplePage(
                     formModel = NumberOfPeopleFormModel::class,
                     templateName = "forms/numberOfPeopleForm",
                     content =
@@ -396,6 +397,7 @@ class PropertyRegistrationJourney(
                             "label" to "forms.numberOfPeople.label",
                         ),
                     shouldDisplaySectionHeader = true,
+                    journeyDataService = journeyDataService,
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
         )

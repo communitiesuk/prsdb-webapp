@@ -71,7 +71,7 @@ abstract class AbstractPage(
         return !bindingResult.hasErrors()
     }
 
-    protected fun bindDataToFormModel(
+    protected open fun bindDataToFormModel(
         validator: Validator,
         formData: PageData?,
     ): BindingResult {
