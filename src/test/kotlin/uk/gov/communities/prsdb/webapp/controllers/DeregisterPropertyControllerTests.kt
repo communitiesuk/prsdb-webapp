@@ -11,6 +11,7 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
@@ -20,6 +21,9 @@ class DeregisterPropertyControllerTests(
 ) : ControllerTest(webContext) {
     @MockBean
     private lateinit var propertyDeregistrationJourney: PropertyDeregistrationJourney
+
+    @MockBean
+    private lateinit var propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory
 
     @MockBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
@@ -47,14 +51,17 @@ class DeregisterPropertyControllerTests(
     @WithMockUser(roles = ["LANDLORD"])
     fun `getJourneyStep for the initial step returns 403 for a landlord user who does not own this property`() {
         // Arrange
+        val propertyOwnershipId = 1.toLong()
         whenever(propertyDeregistrationJourney.initialStepId)
             .thenReturn(DeregisterPropertyStepId.AreYouSure)
-        whenever(propertyOwnershipService.getIsAuthorizedToDeleteRecord(eq(1.toLong()), anyString()))
+        whenever(propertyDeregistrationJourneyFactory.create(propertyOwnershipId))
+            .thenReturn(propertyDeregistrationJourney)
+        whenever(propertyOwnershipService.getIsAuthorizedToDeleteRecord(eq(propertyOwnershipId), anyString()))
             .thenReturn(false)
 
         // Act, Assert
         mvc
-            .get("/deregister-property/1/are-you-sure")
+            .get("/deregister-property/$propertyOwnershipId/are-you-sure")
             .andExpect {
                 status { isNotFound() }
             }
@@ -64,14 +71,17 @@ class DeregisterPropertyControllerTests(
     @WithMockUser(roles = ["LANDLORD"])
     fun `getJourneyStep for the initial step returns 200 for the landlord who owns this property`() {
         // Arrange
+        val propertyOwnershipId = 1.toLong()
         whenever(propertyDeregistrationJourney.initialStepId)
             .thenReturn(DeregisterPropertyStepId.AreYouSure)
-        whenever(propertyOwnershipService.getIsAuthorizedToDeleteRecord(eq(1.toLong()), anyString()))
+        whenever(propertyDeregistrationJourneyFactory.create(propertyOwnershipId))
+            .thenReturn(propertyDeregistrationJourney)
+        whenever(propertyOwnershipService.getIsAuthorizedToDeleteRecord(eq(propertyOwnershipId), anyString()))
             .thenReturn(true)
 
         // Act, Assert
         mvc
-            .get("/deregister-property/1/are-you-sure")
+            .get("/deregister-property/$propertyOwnershipId/are-you-sure")
             .andExpect {
                 status { isOk() }
             }

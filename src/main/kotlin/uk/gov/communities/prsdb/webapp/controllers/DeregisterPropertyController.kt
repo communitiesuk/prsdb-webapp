@@ -15,7 +15,7 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.PROPERTY_DEREGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -23,7 +23,7 @@ import java.security.Principal
 @Controller
 @RequestMapping(PROPERTY_DEREGISTRATION_ROUTE)
 class DeregisterPropertyController(
-    private val propertyDeregistrationJourney: PropertyDeregistrationJourney,
+    private val propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
     @GetMapping("/{stepName}")
@@ -34,6 +34,8 @@ class DeregisterPropertyController(
         model: Model,
         principal: Principal,
     ): ModelAndView {
+        val propertyDeregistrationJourney = propertyDeregistrationJourneyFactory.create(propertyOwnershipId)
+
         if (stepName == propertyDeregistrationJourney.initialStepId.urlPathSegment) {
             // TODO: PRSD-696 - At the moment you can start a dereg journey on a property you are allowed to delete
             // and still get to the reason step for one you can't delete because everything is under the same key
@@ -48,10 +50,11 @@ class DeregisterPropertyController(
             }
         }
 
-        return propertyDeregistrationJourney.getModelAndViewForStep(
-            stepName,
-            subpage,
-        )
+        return propertyDeregistrationJourney
+            .getModelAndViewForStep(
+                stepName,
+                subpage,
+            )
     }
 
     @PostMapping("/{stepName}")
@@ -63,12 +66,14 @@ class DeregisterPropertyController(
         model: Model,
         principal: Principal,
     ): ModelAndView =
-        propertyDeregistrationJourney.completeStep(
-            stepName,
-            formData,
-            subpage,
-            principal,
-        )
+        propertyDeregistrationJourneyFactory
+            .create(propertyOwnershipId)
+            .completeStep(
+                stepName,
+                formData,
+                subpage,
+                principal,
+            )
 
     companion object {
         const val PROPERTY_DEREGISTRATION_ROUTE = "/$DEREGISTER_PROPERTY_JOURNEY_URL/{propertyOwnershipId}"

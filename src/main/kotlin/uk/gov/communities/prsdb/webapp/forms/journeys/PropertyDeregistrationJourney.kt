@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.http.HttpStatus
-import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
@@ -18,22 +17,18 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-@Component
 class PropertyDeregistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val propertyOwnershipId: Long,
 ) : Journey<DeregisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_DEREGISTRATION,
-        // TODO: PRSD-696 - check how we actually want to get this
-        journeyDataKey = "${DEREGISTER_PROPERTY_JOURNEY_URL}_1",
+        journeyDataKey = "${DEREGISTER_PROPERTY_JOURNEY_URL}_$propertyOwnershipId",
         initialStepId = DeregisterPropertyStepId.AreYouSure,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
-    // TODO: PRSD-696 - get this from journeyPathSegment
-    private val propertyOwnershipId = 1.toLong()
-
     override val sections =
         createSingleSectionWithSingleTaskFromSteps(
             initialStepId,
@@ -69,9 +64,9 @@ class PropertyDeregistrationJourney(
                             "backUrl" to getPropertyDetailsPath(propertyOwnershipId),
                         ),
                 ),
-            // handleSubmitAndRedirect is what will execute
+            // handleSubmitAndRedirect will execute. It does not have to redirect to the step specified in nextAction.
             handleSubmitAndRedirect = { newJourneyData, subPage -> continueToNextActionOrExitJourney(newJourneyData, subPage) },
-            // We need this nextAction to make the next step reachable!
+            // This gets checked when determining whether the next step is reachable
             nextAction = { _, _ -> Pair(DeregisterPropertyStepId.Reason, null) },
         )
 
