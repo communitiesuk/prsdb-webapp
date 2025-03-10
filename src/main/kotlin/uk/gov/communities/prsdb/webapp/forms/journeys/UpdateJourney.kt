@@ -11,21 +11,20 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 abstract class UpdateJourney<T : StepId>(
     journeyType: JourneyType,
-    journeyDataKey: String,
     initialStepId: T,
     validator: Validator,
     journeyDataService: JourneyDataService,
     private val updateStepId: T,
     protected val updateEntityId: String,
-) : Journey<T>(journeyType, journeyDataKey, initialStepId, validator, journeyDataService) {
-    protected val originalDataKey = "ORIGINAL_$journeyDataKey"
+) : Journey<T>(journeyType, initialStepId, validator, journeyDataService) {
+    protected val originalDataKey = "ORIGINAL_${journeyDataService.journeyDataKey}"
 
     override val unreachableStepRedirect get() = last().step.id.urlPathSegment
 
     protected abstract fun createOriginalJourneyData(): JourneyData
 
     open fun initializeJourneyDataIfNotInitialized() {
-        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
+        val journeyData = journeyDataService.getJourneyDataFromSession()
         if (!isJourneyDataInitialised(journeyData)) {
             val newJourneyData = journeyData + (originalDataKey to createOriginalJourneyData())
             journeyDataService.setJourneyDataInSession(newJourneyData)
@@ -49,7 +48,7 @@ abstract class UpdateJourney<T : StepId>(
     }
 
     protected fun isJourneyDataInitialised(): Boolean {
-        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
+        val journeyData = journeyDataService.getJourneyDataFromSession()
         return isJourneyDataInitialised(journeyData)
     }
 
