@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
 import java.net.URI
 import kotlin.test.assertEquals
 
@@ -73,10 +74,14 @@ class PropertyDetailsTests : IntegrationTest() {
 
         @Test
         fun `the delete button redirects to the delete record page`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            val propertyOwnershipId = 1
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
             detailsPage.deleteButton.clickAndWait()
-
-            Assertions.assertEquals("/property-details/delete-record", URI(page.url()).path)
+            assertPageIs(
+                page,
+                AreYouSureFormPagePropertyDeregistration::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+            )
         }
     }
 

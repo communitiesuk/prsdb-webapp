@@ -10,6 +10,9 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import kotlin.test.Test
@@ -20,6 +23,12 @@ class PropertyDetailsControllerTests(
 ) : ControllerTest(webContext) {
     @MockBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
+
+    @MockBean
+    private lateinit var propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory
+
+    @MockBean
+    private lateinit var propertyDeregistrationJourney: PropertyDeregistrationJourney
 
     @Nested
     inner class GetPropertyDetailsLandlordViewTests {
@@ -59,12 +68,18 @@ class PropertyDetailsControllerTests(
         fun `getPropertyDetails returns 200 for a valid request from a landlord`() {
             val propertyOwnership = createPropertyOwnership()
 
-            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(1), any()))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
                 .thenReturn(
                     propertyOwnership,
                 )
 
-            mvc.get("/property-details/1").andExpect {
+            whenever(propertyDeregistrationJourney.initialStepId).thenReturn(
+                DeregisterPropertyStepId.AreYouSure,
+            )
+            whenever(propertyDeregistrationJourneyFactory.create(propertyOwnership.id))
+                .thenReturn(propertyDeregistrationJourney)
+
+            mvc.get("/property-details/${propertyOwnership.id}").andExpect {
                 status { status { isOk() } }
             }
         }
@@ -104,6 +119,10 @@ class PropertyDetailsControllerTests(
                 .thenReturn(
                     propertyOwnership,
                 )
+
+            whenever(propertyDeregistrationJourney.initialStepId).thenReturn(
+                DeregisterPropertyStepId.AreYouSure,
+            )
 
             mvc.get("/local-authority/property-details/1").andExpect {
                 status { status { isOk() } }

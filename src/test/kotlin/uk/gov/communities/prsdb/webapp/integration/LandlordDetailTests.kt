@@ -40,14 +40,15 @@ class LandlordDetailTests : IntegrationTest() {
 
         @Test
         fun `in the registered properties table the property address link goes to the landlord view of the property's details`(page: Page) {
+            val propertyOwnershipId = 1
             val detailsPage = navigator.goToLandlordDetails()
             detailsPage.tabs.goToRegisteredProperties()
 
             detailsPage.getPropertyAddressLink("1, Example Road, EG").clickAndWait()
 
-            assertPageIs(page, PropertyDetailsPageLandlordView::class)
+            assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to propertyOwnershipId.toString()))
             Assertions.assertEquals(
-                PropertyDetailsController.getPropertyDetailsPath(1, isLaView = false),
+                PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId.toLong(), isLaView = false),
                 URI(page.url()).path,
             )
         }
@@ -85,12 +86,17 @@ class LandlordDetailTests : IntegrationTest() {
 
         @Test
         fun `in the registered properties table the property address link goes to the LA view of the property's details`(page: Page) {
-            val detailsPage = navigator.goToLandlordDetailsAsALocalAuthorityUser(1)
+            val propertyOwnershipId = 1
+            val detailsPage = navigator.goToLandlordDetailsAsALocalAuthorityUser(propertyOwnershipId.toLong())
             detailsPage.tabs.goToRegisteredProperties()
 
             detailsPage.getPropertyAddressLink("1, Example Road, EG").clickAndWait()
 
-            assertPageIs(page, PropertyDetailsPageLocalAuthorityView::class)
+            assertPageIs(
+                page,
+                PropertyDetailsPageLocalAuthorityView::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+            )
             Assertions.assertEquals(
                 PropertyDetailsController.getPropertyDetailsPath(1, isLaView = true),
                 URI(page.url()).path,
