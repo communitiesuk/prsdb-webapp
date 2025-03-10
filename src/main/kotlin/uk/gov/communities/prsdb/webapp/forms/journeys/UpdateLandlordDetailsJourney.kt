@@ -58,6 +58,7 @@ class UpdateLandlordDetailsJourney(
         val originalLandlordData =
             mutableMapOf(
                 IS_IDENTITY_VERIFIED_KEY to landlord.isVerified,
+                LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to Json.encodeToString(listOf(AddressDataModel.fromAddress(landlord.address))),
                 UpdateLandlordDetailsStepId.UpdateEmail.urlPathSegment to mapOf("emailAddress" to landlord.email),
                 UpdateLandlordDetailsStepId.UpdateName.urlPathSegment to mapOf("name" to landlord.name),
                 UpdateLandlordDetailsStepId.UpdatePhoneNumber.urlPathSegment to mapOf("phoneNumber" to landlord.phoneNumber),
@@ -67,13 +68,7 @@ class UpdateLandlordDetailsJourney(
                         "houseNameOrNumber" to landlord.address.getHouseNameOrNumber(),
                     ),
                 UpdateLandlordDetailsStepId.SelectEnglandAndWalesAddress.urlPathSegment to
-                    mapOf(
-                        "address" to landlord.address.getSelectedAddress(),
-                    ),
-                ORIGINAL_ADDRESS_DATA_KEY to
-                    mapOf(
-                        "address" to Json.encodeToString(AddressDataModel.fromAddress(landlord.address)),
-                    ),
+                    mapOf("address" to landlord.address.getSelectedAddress()),
                 UpdateLandlordDetailsStepId.UpdateDateOfBirth.urlPathSegment to
                     mapOf(
                         "day" to landlord.dateOfBirth?.dayOfMonth.toString(),
@@ -335,15 +330,13 @@ class UpdateLandlordDetailsJourney(
 
     private fun Address.getTownOrCity(): String = townName ?: singleLineAddress
 
-    private fun getOriginalAddressData(): List<AddressDataModel> {
+    private fun getOriginalLookedUpAddresses(): String {
         val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
         val originalJourneyData = JourneyDataHelper.getPageData(journeyData, originalDataKey)!!
-        val originalAddressData = JourneyDataHelper.getPageData(originalJourneyData, ORIGINAL_ADDRESS_DATA_KEY)!!
-        return listOf(Json.decodeFromString(originalAddressData["address"] as String))
+        return JourneyDataHelper.getStringValueByKey(originalJourneyData, LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)!!
     }
 
     companion object {
-        private const val ORIGINAL_ADDRESS_DATA_KEY = "original-address-data"
         const val IS_IDENTITY_VERIFIED_KEY = "isIdentityVerified"
     }
 }
