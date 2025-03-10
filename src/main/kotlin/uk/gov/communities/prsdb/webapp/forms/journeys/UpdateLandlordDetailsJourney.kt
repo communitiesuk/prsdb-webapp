@@ -5,6 +5,7 @@ import kotlinx.serialization.json.Json
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_LANDLORD_DETAILS_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
@@ -31,14 +32,12 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAdd
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
-import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
 
 class UpdateLandlordDetailsJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     addressLookupService: AddressLookupService,
     private val landlordService: LandlordService,
-    private val registeredAddressCache: RegisteredAddressCache,
     private val landlordBaseUserId: String,
 ) : UpdateJourney<UpdateLandlordDetailsStepId>(
         journeyType = JourneyType.LANDLORD_DETAILS_UPDATE,
@@ -98,7 +97,7 @@ class UpdateLandlordDetailsJourney(
     override fun initializeJourneyDataIfNotInitialized() {
         if (!isJourneyDataInitialised()) {
             super.initializeJourneyDataIfNotInitialized()
-            registeredAddressCache.setAddressData(getOriginalAddressData())
+            journeyDataService.setJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY, getOriginalLookedUpAddresses())
         }
     }
 
@@ -253,7 +252,7 @@ class UpdateLandlordDetailsJourney(
                         ),
                     lookupAddressPathSegment = UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
                     addressLookupService = addressLookupService,
-                    registeredAddressCache = registeredAddressCache,
+                    journeyDataService = journeyDataService,
                     displaySectionHeader = false,
                 ),
             nextAction = { journeyData, _ -> selectAddressNextAction(journeyData) },

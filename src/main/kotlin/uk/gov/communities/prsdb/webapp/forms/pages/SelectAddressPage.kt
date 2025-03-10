@@ -1,7 +1,10 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.springframework.validation.Validator
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -37,7 +40,7 @@ class SelectAddressPage(
             )!!
 
         val addressLookupResults = addressLookupService.search(houseNameOrNumber, postcode)
-        registeredAddressCache.setAddressData(addressLookupResults)
+        journeyDataService.setJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY, Json.encodeToString(addressLookupResults))
 
         var addressRadiosViewModel: List<RadiosViewModel> =
             addressLookupResults.mapIndexed { index, address ->
