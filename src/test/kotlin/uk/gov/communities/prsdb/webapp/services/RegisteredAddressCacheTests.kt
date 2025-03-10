@@ -1,8 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -15,9 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 @ExtendWith(MockitoExtension::class)
@@ -25,33 +20,11 @@ class RegisteredAddressCacheTests {
     @Mock
     private lateinit var mockHttpSession: HttpSession
 
-    @Mock
-    private lateinit var mockJourneyDataService: JourneyDataService
-
     private lateinit var registeredAddressCache: RegisteredAddressCache
 
     @BeforeEach
     fun setup() {
-        registeredAddressCache = RegisteredAddressCache(mockHttpSession, mockJourneyDataService)
-    }
-
-    @Test
-    fun `setAddressData stores the given address data as a serialized map`() {
-        val addressDataList =
-            listOf(
-                AddressDataModel("1, Example Road, EG", 1, 1234, buildingNumber = "1", postcode = "EG"),
-                AddressDataModel("2, Example Road, EG", 2, buildingNumber = "2", postcode = "EG"),
-                AddressDataModel("Main, Example Road, EG", 3, buildingName = "Main", postcode = "EG"),
-            )
-        val expectedAddressDataString = Json.encodeToString(addressDataList.associateBy { it.singleLineAddress })
-
-        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf())
-
-        registeredAddressCache.setAddressData(addressDataList)
-
-        val addressDataStringCaptor = argumentCaptor<JourneyData>()
-        verify(mockJourneyDataService).setJourneyDataInSession(addressDataStringCaptor.capture())
-        Assertions.assertEquals(expectedAddressDataString, addressDataStringCaptor.firstValue["address-data"])
+        registeredAddressCache = RegisteredAddressCache(mockHttpSession)
     }
 
     @Test
