@@ -6,12 +6,13 @@ import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.JourneyDataExtensions.Companion.getLookedUpAddress
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
-import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import kotlin.reflect.KClass
 
 class SelectAddressPage(
@@ -21,7 +22,7 @@ class SelectAddressPage(
     displaySectionHeader: Boolean = false,
     private val lookupAddressPathSegment: String,
     private val addressLookupService: AddressLookupService,
-    private val registeredAddressCache: RegisteredAddressCache,
+    private val journeyDataService: JourneyDataService,
 ) : AbstractPage(formModel, templateName, content, displaySectionHeader) {
     override fun enrichModel(
         modelAndView: ModelAndView,
@@ -64,6 +65,8 @@ class SelectAddressPage(
         formData: PageData,
     ): Boolean {
         val selectedAddress = formData["address"].toString()
-        return selectedAddress == MANUAL_ADDRESS_CHOSEN || registeredAddressCache.getAddressData(selectedAddress) != null
+        val journeyData = journeyDataService.getJourneyDataFromSession()
+
+        return selectedAddress == MANUAL_ADDRESS_CHOSEN || journeyData.getLookedUpAddress(selectedAddress) != null
     }
 }

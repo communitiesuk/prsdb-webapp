@@ -46,13 +46,11 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
-import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
 
 class PropertyRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     private val addressLookupService: AddressLookupService,
-    private val registeredAddressCache: RegisteredAddressCache,
     private val propertyRegistrationService: PropertyRegistrationService,
     private val localAuthorityService: LocalAuthorityService,
     private val landlordService: LandlordService,
@@ -188,13 +186,12 @@ class PropertyRegistrationJourney(
                         ),
                     lookupAddressPathSegment = RegisterPropertyStepId.LookupAddress.urlPathSegment,
                     addressLookupService = addressLookupService,
-                    registeredAddressCache = registeredAddressCache,
+                    journeyDataService = journeyDataService,
                     displaySectionHeader = true,
                 ),
             nextAction = { journeyData, _ ->
                 selectAddressNextAction(
                     journeyData,
-                    registeredAddressCache,
                     propertyRegistrationService,
                 )
             },
@@ -513,12 +510,7 @@ class PropertyRegistrationJourney(
     private fun checkAnswersStep() =
         Step(
             id = RegisterPropertyStepId.CheckAnswers,
-            page =
-                PropertyRegistrationCheckAnswersPage(
-                    registeredAddressCache,
-                    localAuthorityService,
-                    displaySectionHeader = true,
-                ),
+            page = PropertyRegistrationCheckAnswersPage(localAuthorityService, journeyDataService, displaySectionHeader = true),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.Declaration, null) },
         )
 
@@ -557,17 +549,14 @@ class PropertyRegistrationJourney(
 
     private fun selectAddressNextAction(
         journeyData: JourneyData,
-        registeredAddressCache: RegisteredAddressCache,
         propertyRegistrationService: PropertyRegistrationService,
     ): Pair<RegisterPropertyStepId, Int?> =
         if (PropertyRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
             Pair(RegisterPropertyStepId.ManualAddress, null)
         } else {
-            val selectedAddress =
-                PropertyRegistrationJourneyDataHelper.getAddress(journeyData, registeredAddressCache)!!
-            val selectedAddressData = registeredAddressCache.getAddressData(selectedAddress.singleLineAddress)!!
-            if (selectedAddressData.uprn != null &&
-                propertyRegistrationService.getIsAddressRegistered(selectedAddressData.uprn)
+            val selectedAddress = PropertyRegistrationJourneyDataHelper.getAddress(journeyData)!!
+            if (selectedAddress.uprn != null &&
+                propertyRegistrationService.getIsAddressRegistered(selectedAddress.uprn)
             ) {
                 Pair(RegisterPropertyStepId.AlreadyRegistered, null)
             } else {

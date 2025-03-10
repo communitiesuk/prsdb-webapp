@@ -314,7 +314,7 @@ class UpdateLandlordDetailsJourney(
                 email = UpdateLandlordDetailsJourneyDataHelper.getEmailUpdateIfPresent(journeyData),
                 name = UpdateLandlordDetailsJourneyDataHelper.getNameUpdateIfPresent(journeyData),
                 phoneNumber = UpdateLandlordDetailsJourneyDataHelper.getPhoneNumberIfPresent(journeyData),
-                address = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(journeyData, registeredAddressCache),
+                address = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(journeyData),
                 dateOfBirth = UpdateLandlordDetailsJourneyDataHelper.getDateOfBirthIfPresent(journeyData),
             )
 

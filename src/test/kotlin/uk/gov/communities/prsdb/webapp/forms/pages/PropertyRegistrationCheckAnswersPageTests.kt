@@ -16,15 +16,15 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
-import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 
 class PropertyRegistrationCheckAnswersPageTests {
     private lateinit var page: PropertyRegistrationCheckAnswersPage
-    private lateinit var addressService: RegisteredAddressCache
     private lateinit var localAuthorityService: LocalAuthorityService
+    private lateinit var journeyDataService: JourneyDataService
     private lateinit var validator: Validator
     private lateinit var pageData: PageData
     private lateinit var prevStepUrl: String
@@ -32,14 +32,14 @@ class PropertyRegistrationCheckAnswersPageTests {
 
     @BeforeEach
     fun setup() {
-        addressService = mock()
         localAuthorityService = mock()
-        page = PropertyRegistrationCheckAnswersPage(addressService, localAuthorityService)
+        journeyDataService = mock()
+        page = PropertyRegistrationCheckAnswersPage(localAuthorityService, journeyDataService)
         validator = mock()
         whenever(validator.supports(any<Class<*>>())).thenReturn(true)
         pageData = mock()
         prevStepUrl = "mock"
-        journeyDataBuilder = JourneyDataBuilder.propertyDefault(addressService, localAuthorityService)
+        journeyDataBuilder = JourneyDataBuilder.propertyDefault(localAuthorityService)
     }
 
     private fun getPropertyDetails(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> {

@@ -12,16 +12,6 @@ class RegisteredAddressCache(
     private val session: HttpSession,
     private val journeyDataService: JourneyDataService,
 ) {
-    fun getAddressData(singleLineAddress: String): AddressDataModel? {
-        val journeyData = journeyDataService.getJourneyDataFromSession()
-        val addressData = journeyData["address-data"] as String?
-        if (addressData == null) {
-            return null
-        } else {
-            return Json.decodeFromString<Map<String, AddressDataModel>>(addressData)[singleLineAddress]
-        }
-    }
-
     fun setAddressData(addressDataList: List<AddressDataModel>) {
         val journeyData = journeyDataService.getJourneyDataFromSession()
         val newJourneyData =

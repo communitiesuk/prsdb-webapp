@@ -6,10 +6,10 @@ import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
-import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class LandlordRegistrationCheckAnswersPage(
-    private val registeredAddressCache: RegisteredAddressCache,
+    private val journeyDataService: JourneyDataService,
     displaySectionHeader: Boolean = false,
 ) : AbstractPage(
         formModel = CheckAnswersFormModel::class,
@@ -72,7 +72,7 @@ class LandlordRegistrationCheckAnswersPage(
 
         return getLivesInEnglandOrWalesFormData(livesInEnglandOrWales) +
             (if (!livesInEnglandOrWales) getNonEnglandOrWalesAddressFormData(journeyData) else emptyList()) +
-            getContactAddressFormData(journeyData, registeredAddressCache, livesInEnglandOrWales)
+            getContactAddressFormData(journeyData, livesInEnglandOrWales)
     }
 
     private fun getLivesInEnglandOrWalesFormData(livesInEnglandOrWales: Boolean): List<SummaryListRowViewModel> =
@@ -100,7 +100,6 @@ class LandlordRegistrationCheckAnswersPage(
 
     private fun getContactAddressFormData(
         journeyData: JourneyData,
-        registeredAddressCache: RegisteredAddressCache,
         livesInEnglandOrWales: Boolean,
     ): SummaryListRowViewModel =
         SummaryListRowViewModel(
@@ -109,7 +108,7 @@ class LandlordRegistrationCheckAnswersPage(
             } else {
                 "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress"
             },
-            LandlordRegistrationJourneyDataHelper.getAddress(journeyData, registeredAddressCache)!!.singleLineAddress,
+            LandlordRegistrationJourneyDataHelper.getAddress(journeyData)!!.singleLineAddress,
             getContactAddressChangeURLPathSegment(journeyData, livesInEnglandOrWales),
         )
 
