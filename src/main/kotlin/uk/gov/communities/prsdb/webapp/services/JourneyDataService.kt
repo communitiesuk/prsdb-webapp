@@ -40,6 +40,8 @@ class JourneyDataService(
             objectToStringKeyedMap(session.getAttribute(journeyDataKey)) ?: mapOf()
         }
 
+    fun getJourneyDataEntryInSession(key: String) = getJourneyDataFromSession().entries.find { it.key == key }?.toPair()
+
     fun setJourneyDataInSession(journeyData: JourneyData) {
         if (!this::journeyDataKey.isInitialized) {
             throw PrsdbWebException("journeyDataKey has not been set")

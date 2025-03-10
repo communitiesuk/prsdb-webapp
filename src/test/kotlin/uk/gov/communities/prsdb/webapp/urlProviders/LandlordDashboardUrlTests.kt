@@ -14,6 +14,7 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
@@ -38,7 +39,6 @@ import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
-import uk.gov.communities.prsdb.webapp.services.RegisteredAddressCache
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
@@ -73,9 +73,6 @@ class LandlordDashboardUrlTests(
     private lateinit var mockAddressLookupService: AddressLookupService
 
     @MockBean
-    private lateinit var mockRegisteredAddressCache: RegisteredAddressCache
-
-    @MockBean
     private lateinit var mockLocalAuthorityService: LocalAuthorityService
 
     @MockBean
@@ -90,9 +87,11 @@ class LandlordDashboardUrlTests(
         // Arrange
         val landlord = createLandlord()
 
-        val mockJourneyData =
-            JourneyDataBuilder.landlordDefault(mockRegisteredAddressCache, mockLocalAuthorityService).build()
+        val mockJourneyData = JourneyDataBuilder.landlordDefault(mockLocalAuthorityService).build()
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mockJourneyData)
+        whenever(mockJourneyDataService.getJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)).thenReturn(
+            LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to mockJourneyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY],
+        )
 
         whenever(
             mockLandlordService.createLandlord(
@@ -139,9 +138,11 @@ class LandlordDashboardUrlTests(
         val propertyOwnership = createPropertyOwnership()
         val landlord = createLandlord()
 
-        val mockJourneyData =
-            JourneyDataBuilder.propertyDefault(mockRegisteredAddressCache, mockLocalAuthorityService).build()
+        val mockJourneyData = JourneyDataBuilder.propertyDefault(mockLocalAuthorityService).build()
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mockJourneyData)
+        whenever(mockJourneyDataService.getJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)).thenReturn(
+            LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to mockJourneyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY],
+        )
 
         whenever(
             mockPropertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(

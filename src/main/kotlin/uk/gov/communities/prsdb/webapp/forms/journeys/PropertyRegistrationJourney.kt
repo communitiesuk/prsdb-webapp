@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import jakarta.persistence.EntityExistsException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -574,8 +575,10 @@ class PropertyRegistrationJourney(
 
     private fun checkAnswersSubmitAndRedirect(): String {
         try {
-            val filteredJourneyData = last().filteredJourneyData
-            val address = PropertyRegistrationJourneyDataHelper.getAddress(filteredJourneyData, registeredAddressCache)!!
+            val filteredJourneyData =
+                last().filteredJourneyData + journeyDataService.getJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)!!
+
+            val address = PropertyRegistrationJourneyDataHelper.getAddress(filteredJourneyData)!!
             val baseUserId = SecurityContextHolder.getContext().authentication.name
             val propertyRegistrationNumber =
                 propertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(
