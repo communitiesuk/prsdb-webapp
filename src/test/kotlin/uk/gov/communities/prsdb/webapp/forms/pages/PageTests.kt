@@ -122,12 +122,12 @@ class PageTests {
         // Arrange
         val formData = mapOf("testProperty" to "testPropertyValue")
         val previousUrl = "/previous"
-        val journeyData: JourneyData = mapOf()
+        val filteredJourneyData: JourneyData = mapOf()
         val sectionHeaderInfo = null
 
         // Act, Assert
         assertThrows<PrsdbWebException> {
-            testPage.getModelAndView(validator, formData, previousUrl, journeyData, sectionHeaderInfo)
+            testPage.getModelAndView(validator, formData, previousUrl, filteredJourneyData, sectionHeaderInfo)
         }
     }
 }
