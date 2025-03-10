@@ -50,7 +50,6 @@ class LandlordRegistrationJourney(
     val emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
 ) : Journey<LandlordRegistrationStepId>(
         journeyType = JourneyType.LANDLORD_REGISTRATION,
-        journeyDataKey = REGISTER_LANDLORD_JOURNEY_URL,
         initialStepId = LandlordRegistrationStepId.VerifyIdentity,
         validator = validator,
         journeyDataService = journeyDataService,
