@@ -15,6 +15,7 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.PROPERTY_DEREGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
+import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney.Companion.initialStepId
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -34,14 +35,7 @@ class DeregisterPropertyController(
         model: Model,
         principal: Principal,
     ): ModelAndView {
-        val propertyDeregistrationJourney = propertyDeregistrationJourneyFactory.create(propertyOwnershipId)
-
-        if (stepName == propertyDeregistrationJourney.initialStepId.urlPathSegment) {
-            // TODO: PRSD-696 - At the moment you can start a dereg journey on a property you are allowed to delete
-            // and still get to the reason step for one you can't delete because everything is under the same key
-            // in the journeyData.
-            // This might get fixed after refactoring - I think the property ownership id should get included in
-            // the journey data key, but check this!
+        if (stepName == initialStepId.urlPathSegment) {
             if (!propertyOwnershipService.getIsAuthorizedToDeleteRecord(propertyOwnershipId, principal.name)) {
                 throw ResponseStatusException(
                     HttpStatus.NOT_FOUND,
@@ -50,7 +44,8 @@ class DeregisterPropertyController(
             }
         }
 
-        return propertyDeregistrationJourney
+        return propertyDeregistrationJourneyFactory
+            .create(propertyOwnershipId)
             .getModelAndViewForStep(
                 stepName,
                 subpage,
@@ -78,10 +73,15 @@ class DeregisterPropertyController(
     companion object {
         const val PROPERTY_DEREGISTRATION_ROUTE = "/$DEREGISTER_PROPERTY_JOURNEY_URL/{propertyOwnershipId}"
 
-        fun getPropertyDeregistrationPath(propertyOwnershipId: Long): String =
-            // TODO: PRSD-696 use hte inital path segment here but maybe after we have journey factories
-            UriTemplate("$PROPERTY_DEREGISTRATION_ROUTE/are-you-sure")
+        fun getPropertyDeregistrationPath(
+            propertyOwnershipId: Long,
+            propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory,
+        ): String {
+            val initialStepPathSegment = propertyDeregistrationJourneyFactory.create(propertyOwnershipId).initialStepId.urlPathSegment
+
+            return UriTemplate("$PROPERTY_DEREGISTRATION_ROUTE/$initialStepPathSegment")
                 .expand(propertyOwnershipId)
                 .toASCIIString()
+        }
     }
 }

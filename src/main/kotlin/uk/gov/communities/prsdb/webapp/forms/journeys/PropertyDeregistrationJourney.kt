@@ -25,7 +25,7 @@ class PropertyDeregistrationJourney(
 ) : Journey<DeregisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_DEREGISTRATION,
         journeyDataKey = "${DEREGISTER_PROPERTY_JOURNEY_URL}_$propertyOwnershipId",
-        initialStepId = DeregisterPropertyStepId.AreYouSure,
+        initialStepId = initialStepId,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
@@ -106,4 +106,8 @@ class PropertyDeregistrationJourney(
             HttpStatus.NOT_FOUND,
             "Address for property ownership id $propertyOwnershipId not found",
         )
+
+    companion object {
+        val initialStepId = DeregisterPropertyStepId.AreYouSure
+    }
 }

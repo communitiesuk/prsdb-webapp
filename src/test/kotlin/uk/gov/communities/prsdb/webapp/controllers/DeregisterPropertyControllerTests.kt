@@ -10,10 +10,13 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.getPropertyDeregistrationPath
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import kotlin.test.assertEquals
 
 @WebMvcTest(DeregisterPropertyController::class)
 class DeregisterPropertyControllerTests(
@@ -85,5 +88,25 @@ class DeregisterPropertyControllerTests(
             .andExpect {
                 status { isOk() }
             }
+    }
+
+    @Test
+    fun `getPropertyDegistrationPath returns a path to the initial step of the delete journey for this property`() {
+        // Arrange
+
+        val propertyOwnershipId = 1.toLong()
+        whenever(propertyDeregistrationJourney.initialStepId)
+            .thenReturn(DeregisterPropertyStepId.AreYouSure)
+        whenever(propertyDeregistrationJourneyFactory.create(propertyOwnershipId))
+            .thenReturn(propertyDeregistrationJourney)
+
+        // Act
+        val propertyDeregistrationPath = getPropertyDeregistrationPath(propertyOwnershipId, propertyDeregistrationJourneyFactory)
+
+        // Assert
+        assertEquals(
+            "/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/${DeregisterPropertyStepId.AreYouSure.urlPathSegment}",
+            propertyDeregistrationPath,
+        )
     }
 }
