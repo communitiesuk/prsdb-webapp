@@ -4,6 +4,7 @@ import jakarta.persistence.EntityExistsException
 import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
+import jakarta.validation.ValidationException
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DEREGISTRATION_ENTITY_IDS
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
@@ -58,6 +59,10 @@ class PropertyRegistrationService(
         numberOfPeople: Int,
         baseUserId: String,
     ): RegistrationNumber {
+        if (numberOfPeople < numberOfHouseholds) {
+            throw ValidationException("Number of people is less than number of households")
+        }
+
         if (address.uprn != null && getIsAddressRegistered(address.uprn, ignoreCache = true)) {
             throw EntityExistsException("Address already registered")
         }
