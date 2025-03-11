@@ -5,18 +5,21 @@ import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.DEREGISTRATION_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.getPropertyDetailsPath
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
-import uk.gov.communities.prsdb.webapp.forms.pages.PageWithSingleLineAddress
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDeregistrationJourneyDataExtensions.Companion.getWantsToProceed
+import uk.gov.communities.prsdb.webapp.helpers.PropertyDeregistrationJourneyDataHelper.Companion.getWantsToProceed
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeregistrationReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
@@ -79,13 +82,17 @@ class PropertyDeregistrationJourney(
             id = DeregisterPropertyStepId.Reason,
             page =
                 Page(
-                    formModel = NoInputFormModel::class,
+                    formModel = DeregistrationReasonFormModel::class,
                     templateName = "forms/deregistrationReasonForm",
                     content =
                         mapOf(
                             "title" to "deregisterProperty.title",
+                            "fieldSetHeading" to "deregisterProperty.reason.fieldSetHeading",
+                            "limit" to DEREGISTRATION_REASON_MAX_LENGTH,
+                            "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),
+            handleSubmitAndRedirect = { newJourneyData, subPage -> deregisterPropertyAndRedirectToConfirmation(newJourneyData, subPage) },
         )
 
     private fun areYouSureContinueToNextActionOrExitJourney(
@@ -110,6 +117,11 @@ class PropertyDeregistrationJourney(
             HttpStatus.NOT_FOUND,
             "Address for property ownership id $propertyOwnershipId not found",
         )
+
+    private fun deregisterPropertyAndRedirectToConfirmation(
+        newJourneyData: JourneyData,
+        subPageNumber: Int?,
+    ): String = LANDLORD_DASHBOARD_URL
 
     companion object {
         val initialStepId = DeregisterPropertyStepId.AreYouSure
