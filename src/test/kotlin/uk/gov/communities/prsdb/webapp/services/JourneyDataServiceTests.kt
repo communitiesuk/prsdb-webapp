@@ -154,28 +154,6 @@ class JourneyDataServiceTests {
         }
 
         @Test
-        fun `setJourneyDataEntryInSession sets the given journey data entry in session if journeyDataKey is initialized`() {
-            val journeyDataKey = "journeyDataKey"
-            val journeyData = mapOf("key" to "value")
-            val newJourneyDataEntry = ("new-key" to "new-value")
-            val updatedJourneyData = journeyData + newJourneyDataEntry
-
-            whenever(mockHttpSession.getAttribute(journeyDataKey)).thenReturn(journeyData)
-            journeyDataService.getJourneyDataFromSession(journeyDataKey)
-
-            journeyDataService.setJourneyDataEntryInSession(newJourneyDataEntry.first, newJourneyDataEntry.second)
-
-            verify(mockHttpSession).setAttribute(journeyDataKey, updatedJourneyData)
-        }
-
-        @Test
-        fun `setJourneyDataEntryInSession throws an error if the journeyDataKey is not initialized`() {
-            val exception =
-                assertThrows<PrsdbWebException> { journeyDataService.setJourneyDataEntryInSession("any-entry-key", "any-value") }
-            assertContains(exception.message!!, "journeyDataKey has not been set")
-        }
-
-        @Test
         fun `clearJourneyDataFromSession clears the journey data from session if journeyDataKey is initialized`() {
             val journeyDataKey = "journeyDataKey"
 

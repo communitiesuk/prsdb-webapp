@@ -1,15 +1,13 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.springframework.validation.Validator
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.JourneyDataExtensions.Companion.getLookedUpAddress
+import uk.gov.communities.prsdb.webapp.helpers.extensions.JourneyDataExtensions.Companion.updateLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
@@ -40,7 +38,10 @@ class SelectAddressPage(
             )!!
 
         val addressLookupResults = addressLookupService.search(houseNameOrNumber, postcode)
-        journeyDataService.setJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY, Json.encodeToString(addressLookupResults))
+
+        val journeyData = journeyDataService.getJourneyDataFromSession()
+        val updatedJourneyData = journeyData.updateLookedUpAddresses(addressLookupResults)
+        journeyDataService.setJourneyDataInSession(updatedJourneyData)
 
         var addressRadiosViewModel: List<RadiosViewModel> =
             addressLookupResults.mapIndexed { index, address ->

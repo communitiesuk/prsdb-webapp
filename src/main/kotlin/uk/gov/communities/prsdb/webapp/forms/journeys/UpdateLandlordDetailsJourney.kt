@@ -19,6 +19,8 @@ import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.UpdateLandlordDetailsJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.JourneyDataExtensions.Companion.getSerializedLookedUpAddresses
+import uk.gov.communities.prsdb.webapp.helpers.extensions.JourneyDataExtensions.Companion.updateLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DateOfBirthFormModel
@@ -92,7 +94,9 @@ class UpdateLandlordDetailsJourney(
     override fun initializeJourneyDataIfNotInitialized() {
         if (!isJourneyDataInitialised()) {
             super.initializeJourneyDataIfNotInitialized()
-            journeyDataService.setJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY, getOriginalLookedUpAddresses())
+            val journeyData = journeyDataService.getJourneyDataFromSession()
+            val updatedJourneyData = setOriginalLookedUpAddresses(journeyData)
+            journeyDataService.setJourneyDataInSession(updatedJourneyData)
         }
     }
 
@@ -330,10 +334,10 @@ class UpdateLandlordDetailsJourney(
 
     private fun Address.getTownOrCity(): String = townName ?: singleLineAddress
 
-    private fun getOriginalLookedUpAddresses(): String {
-        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
+    private fun setOriginalLookedUpAddresses(journeyData: JourneyData): JourneyData {
         val originalJourneyData = JourneyDataHelper.getPageData(journeyData, originalDataKey)!!
-        return JourneyDataHelper.getStringValueByKey(originalJourneyData, LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)!!
+        val lookedUpAddresses = originalJourneyData.getSerializedLookedUpAddresses()!!
+        return journeyData.updateLookedUpAddresses(lookedUpAddresses)
     }
 
     companion object {

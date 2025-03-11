@@ -50,19 +50,6 @@ class JourneyDataService(
         }
     }
 
-    fun setJourneyDataEntryInSession(
-        key: String,
-        value: Any,
-    ) {
-        if (!this::journeyDataKey.isInitialized) {
-            throw PrsdbWebException("journeyDataKey has not been set")
-        } else {
-            val journeyData = getJourneyDataFromSession()
-            val updatedJourneyData = journeyData + (key to value)
-            setJourneyDataInSession(updatedJourneyData)
-        }
-    }
-
     fun clearJourneyDataFromSession() {
         if (!this::journeyDataKey.isInitialized) {
             throw PrsdbWebException("journeyDataKey has not been set")
