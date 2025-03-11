@@ -168,4 +168,8 @@ class PropertyOwnershipService(
             landlordId,
             RegistrationStatus.REGISTERED,
         )
+
+    fun deletePropertyOwnership(propertyOwnership: PropertyOwnership) {
+        propertyOwnershipRepository.delete(propertyOwnership)
+    }
 }

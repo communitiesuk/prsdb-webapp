@@ -16,17 +16,18 @@ import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.helpers.PropertyDeregistrationJourneyDataHelper.Companion.getWantsToProceed
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeregistrationReasonFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyService
 
 class PropertyDeregistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val propertyService: PropertyService,
     private val propertyOwnershipId: Long,
 ) : Journey<DeregisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_DEREGISTRATION,
@@ -92,7 +93,7 @@ class PropertyDeregistrationJourney(
                             "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),
-            handleSubmitAndRedirect = { newJourneyData, subPage -> deregisterPropertyAndRedirectToConfirmation(newJourneyData, subPage) },
+            handleSubmitAndRedirect = { _, _ -> deregisterPropertyAndRedirectToConfirmation() },
         )
 
     private fun areYouSureContinueToNextActionOrExitJourney(
@@ -118,10 +119,15 @@ class PropertyDeregistrationJourney(
             "Address for property ownership id $propertyOwnershipId not found",
         )
 
-    private fun deregisterPropertyAndRedirectToConfirmation(
-        newJourneyData: JourneyData,
-        subPageNumber: Int?,
-    ): String = LANDLORD_DASHBOARD_URL
+    private fun deregisterPropertyAndRedirectToConfirmation(): String {
+        propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)?.let {
+            propertyOwnershipService.deletePropertyOwnership(it)
+            propertyService.deleteProperty(it.property)
+        }
+
+        // TODO: PRSD-698 - redirect to confirmation page
+        return LANDLORD_DASHBOARD_URL
+    }
 
     companion object {
         val initialStepId = DeregisterPropertyStepId.AreYouSure

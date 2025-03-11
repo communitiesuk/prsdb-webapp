@@ -16,7 +16,9 @@ import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.PROPERTY_DEREGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney
+import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney.Companion.initialStepId
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -44,7 +46,7 @@ class DeregisterPropertyController(
             }
         }
 
-        return propertyDeregistrationJourneyFactory
+        return  propertyDeregistrationJourneyFactory
             .create(propertyOwnershipId)
             .getModelAndViewForStep(
                 stepName,
