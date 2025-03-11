@@ -119,6 +119,11 @@ tasks.register<JavaExec>("playwright") {
     mainClass.set("com.microsoft.playwright.CLI")
 }
 
+tasks.register<Test>("testWithoutIntegration") {
+    group = "verification"
+    exclude("uk/gov/communities/prsdb/webapp/integration/**")
+}
+
 buildscript {
     repositories {
         mavenCentral()
