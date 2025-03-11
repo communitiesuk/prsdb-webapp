@@ -19,7 +19,7 @@ import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LANDLORD')")
 @Controller
-@RequestMapping(LANDLORD_BASE_URL)
+@RequestMapping(LANDLORD_BASE_URL, "/")
 class LandlordDashboardController(
     private val landlordService: LandlordService,
 ) {
