@@ -1,10 +1,11 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.JourneyDataExtensions.Companion.getLookedUpAddresses
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -27,13 +28,13 @@ class LandlordRegistrationCheckAnswersPage(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData?,
     ) {
-        val filteredJourneyDataWithLookedUpAddresses =
-            filteredJourneyData!! + journeyDataService.getJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)!!
+        filteredJourneyData!!
+        val lookedUpAddresses = journeyDataService.getJourneyDataFromSession().getLookedUpAddresses()
 
         val formData =
-            getIdentityFormData(filteredJourneyDataWithLookedUpAddresses) +
-                getEmailAndPhoneFormData(filteredJourneyDataWithLookedUpAddresses) +
-                getAddressFormData(filteredJourneyDataWithLookedUpAddresses)
+            getIdentityFormData(filteredJourneyData) +
+                getEmailAndPhoneFormData(filteredJourneyData) +
+                getAddressFormData(filteredJourneyData, lookedUpAddresses)
 
         modelAndView.addObject("formData", formData)
     }
@@ -69,12 +70,15 @@ class LandlordRegistrationCheckAnswersPage(
             ),
         )
 
-    private fun getAddressFormData(journeyData: JourneyData): List<SummaryListRowViewModel> {
+    private fun getAddressFormData(
+        journeyData: JourneyData,
+        lookedUpAddresses: List<AddressDataModel>,
+    ): List<SummaryListRowViewModel> {
         val livesInEnglandOrWales = LandlordRegistrationJourneyDataHelper.getLivesInEnglandOrWales(journeyData)!!
 
         return getLivesInEnglandOrWalesFormData(livesInEnglandOrWales) +
             (if (!livesInEnglandOrWales) getNonEnglandOrWalesAddressFormData(journeyData) else emptyList()) +
-            getContactAddressFormData(journeyData, livesInEnglandOrWales)
+            getContactAddressFormData(journeyData, lookedUpAddresses, livesInEnglandOrWales)
     }
 
     private fun getLivesInEnglandOrWalesFormData(livesInEnglandOrWales: Boolean): List<SummaryListRowViewModel> =
@@ -102,6 +106,7 @@ class LandlordRegistrationCheckAnswersPage(
 
     private fun getContactAddressFormData(
         journeyData: JourneyData,
+        lookedUpAddresses: List<AddressDataModel>,
         livesInEnglandOrWales: Boolean,
     ): SummaryListRowViewModel =
         SummaryListRowViewModel(
@@ -110,7 +115,7 @@ class LandlordRegistrationCheckAnswersPage(
             } else {
                 "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress"
             },
-            LandlordRegistrationJourneyDataHelper.getAddress(journeyData)!!.singleLineAddress,
+            LandlordRegistrationJourneyDataHelper.getAddress(journeyData, lookedUpAddresses)!!.singleLineAddress,
             getContactAddressChangeURLPathSegment(journeyData, livesInEnglandOrWales),
         )
 

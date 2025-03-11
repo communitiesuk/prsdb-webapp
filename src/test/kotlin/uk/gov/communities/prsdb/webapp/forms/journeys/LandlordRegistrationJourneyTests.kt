@@ -13,7 +13,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
-import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
@@ -114,7 +113,6 @@ class LandlordRegistrationJourneyTests {
                     ).build()
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
-            whenever(mockJourneyDataService.getJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)).thenCallRealMethod()
 
             // Act
             testJourney.completeStep(

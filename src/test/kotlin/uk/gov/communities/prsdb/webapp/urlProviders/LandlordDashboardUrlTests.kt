@@ -14,7 +14,6 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
-import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
@@ -89,9 +88,6 @@ class LandlordDashboardUrlTests(
 
         val mockJourneyData = JourneyDataBuilder.landlordDefault(mockLocalAuthorityService).build()
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mockJourneyData)
-        whenever(mockJourneyDataService.getJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)).thenReturn(
-            LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to mockJourneyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY],
-        )
 
         whenever(
             mockLandlordService.createLandlord(
@@ -140,9 +136,6 @@ class LandlordDashboardUrlTests(
 
         val mockJourneyData = JourneyDataBuilder.propertyDefault(mockLocalAuthorityService).build()
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mockJourneyData)
-        whenever(mockJourneyDataService.getJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)).thenReturn(
-            LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to mockJourneyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY],
-        )
 
         whenever(
             mockPropertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(

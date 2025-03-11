@@ -9,10 +9,12 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
 class JourneyDataExtensions {
     companion object {
-        fun JourneyData.getLookedUpAddress(selectedAddress: String): AddressDataModel? {
-            val serializedLookedUpAddresses = this.getSerializedLookedUpAddresses() ?: return null
-            val lookedUpAddresses = Json.decodeFromString<List<AddressDataModel>>(serializedLookedUpAddresses)
-            return lookedUpAddresses.singleOrNull { it.singleLineAddress == selectedAddress }
+        fun JourneyData.getLookedUpAddress(selectedAddress: String): AddressDataModel? =
+            this.getLookedUpAddresses().singleOrNull { it.singleLineAddress == selectedAddress }
+
+        fun JourneyData.getLookedUpAddresses(): List<AddressDataModel> {
+            val serializedLookedUpAddresses = this.getSerializedLookedUpAddresses() ?: return emptyList()
+            return Json.decodeFromString<List<AddressDataModel>>(serializedLookedUpAddresses)
         }
 
         fun JourneyData.getSerializedLookedUpAddresses(): String? =

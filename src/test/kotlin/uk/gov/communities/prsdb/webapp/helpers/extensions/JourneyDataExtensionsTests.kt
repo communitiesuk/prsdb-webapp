@@ -5,6 +5,7 @@ import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.helpers.extensions.JourneyDataExtensions.Companion.getLookedUpAddress
+import uk.gov.communities.prsdb.webapp.helpers.extensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.helpers.extensions.JourneyDataExtensions.Companion.getSerializedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.helpers.extensions.JourneyDataExtensions.Companion.updateLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -46,6 +47,31 @@ class JourneyDataExtensionsTests {
         val retrievedAddress = journeyData.getLookedUpAddress(requestedSingleLineAddress)
 
         assertNull(retrievedAddress)
+    }
+
+    @Test
+    fun `getLookedUpAddresses returns the looked-up AddressDataModels from journeyData`() {
+        val lookedUpAddresses =
+            listOf(
+                AddressDataModel("1, Example Road, EG", 1, 1234, buildingNumber = "1", postcode = "EG"),
+                AddressDataModel("2, Example Road, EG", 2, buildingNumber = "2", postcode = "EG"),
+                AddressDataModel("Main, Example Road, EG", 3, buildingName = "Main", postcode = "EG"),
+            )
+
+        val journeyData = mapOf(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to Json.encodeToString(lookedUpAddresses))
+
+        val retrievedAddresses = journeyData.getLookedUpAddresses()
+
+        assertEquals(lookedUpAddresses, retrievedAddresses)
+    }
+
+    @Test
+    fun `getLookedUpAddresses returns an empty list when there aren't looked-up addresses in journeyData`() {
+        val journeyData = mapOf("other-key" to "other-value")
+
+        val retrievedAddresses = journeyData.getLookedUpAddresses()
+
+        assertEquals(emptyList(), retrievedAddresses)
     }
 
     @Test

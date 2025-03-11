@@ -12,7 +12,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
-import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -125,7 +124,6 @@ class PropertyRegistrationJourneyTests {
                     .build()
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
-            whenever(mockJourneyDataService.getJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)).thenCallRealMethod()
 
             // Act
             completeStep(RegisterPropertyStepId.Declaration)
@@ -154,7 +152,6 @@ class PropertyRegistrationJourneyTests {
                     .build()
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
-            whenever(mockJourneyDataService.getJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)).thenCallRealMethod()
 
             // Act
             completeStep(RegisterPropertyStepId.Declaration)
@@ -185,7 +182,6 @@ class PropertyRegistrationJourneyTests {
                     ).build()
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
-            whenever(mockJourneyDataService.getJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)).thenCallRealMethod()
 
             // Act
             completeStep(RegisterPropertyStepId.Declaration)
@@ -214,7 +210,6 @@ class PropertyRegistrationJourneyTests {
                     .build()
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
-            whenever(mockJourneyDataService.getJourneyDataEntryInSession(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)).thenCallRealMethod()
 
             // Act
             completeStep(RegisterPropertyStepId.Declaration)

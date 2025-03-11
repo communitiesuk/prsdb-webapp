@@ -9,6 +9,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.helpers.extensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
@@ -33,7 +34,7 @@ class PropertyRegistrationJourneyDataHelperTests {
             journeyDataBuilder.withSelectedAddress(selectedAddress, localAuthority = localAuthority).build()
         val expectedAddressDataModel = AddressDataModel(selectedAddress, localAuthorityId = localAuthority.id)
 
-        val addressDataModel = PropertyRegistrationJourneyDataHelper.getAddress(mockJourneyData)
+        val addressDataModel = PropertyRegistrationJourneyDataHelper.getAddress(mockJourneyData, mockJourneyData.getLookedUpAddresses())
 
         assertEquals(expectedAddressDataModel, addressDataModel)
     }
@@ -60,7 +61,7 @@ class PropertyRegistrationJourneyDataHelperTests {
             localAuthority,
         )
 
-        val addressDataModel = PropertyRegistrationJourneyDataHelper.getAddress(mockJourneyData)
+        val addressDataModel = PropertyRegistrationJourneyDataHelper.getAddress(mockJourneyData, mockJourneyData.getLookedUpAddresses())
         assertEquals(expectedAddressDataModel, addressDataModel)
     }
 

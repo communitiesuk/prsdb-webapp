@@ -6,23 +6,24 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
-import uk.gov.communities.prsdb.webapp.helpers.extensions.JourneyDataExtensions.Companion.getLookedUpAddress
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
 class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
     companion object {
-        fun getAddress(journeyData: JourneyData): AddressDataModel? {
-            return if (isManualAddressChosen(journeyData)) {
+        fun getAddress(
+            journeyData: JourneyData,
+            lookedUpAddresses: List<AddressDataModel>,
+        ): AddressDataModel? =
+            if (isManualAddressChosen(journeyData)) {
                 getManualAddress(
                     journeyData,
                     RegisterPropertyStepId.ManualAddress.urlPathSegment,
                     RegisterPropertyStepId.LocalAuthority.urlPathSegment,
                 )
             } else {
-                val selectedAddress = getSelectedAddress(journeyData) ?: return null
-                journeyData.getLookedUpAddress(selectedAddress)
+                val selectedAddress = getSelectedAddress(journeyData)
+                lookedUpAddresses.singleOrNull { it.singleLineAddress == selectedAddress }
             }
-        }
 
         fun getPropertyType(journeyData: JourneyData): PropertyType? =
             getFieldEnumValue<PropertyType>(
