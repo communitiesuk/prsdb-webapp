@@ -112,7 +112,7 @@ abstract class Journey<T : StepId>(
         newJourneyData: JourneyData,
         subPageNumber: Int?,
     ): String {
-        val (newStepId: T?, newSubPageNumber: kotlin.Int?) = currentStep.nextAction(newJourneyData, subPageNumber)
+        val (newStepId: T?, newSubPageNumber: Int?) = currentStep.nextAction(newJourneyData, subPageNumber)
         if (newStepId == null) {
             throw IllegalStateException("Cannot compute next step from step ${currentStep.id.urlPathSegment}")
         }

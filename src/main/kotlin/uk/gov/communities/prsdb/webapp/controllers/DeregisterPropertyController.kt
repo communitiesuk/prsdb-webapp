@@ -15,7 +15,6 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.PROPERTY_DEREGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney.Companion.initialStepId
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -37,7 +36,11 @@ class DeregisterPropertyController(
         model: Model,
         principal: Principal,
     ): ModelAndView {
-        if (stepName == initialStepId.urlPathSegment) {
+        val propertyDeregistrationJourney =
+            propertyDeregistrationJourneyFactory
+                .create(propertyOwnershipId)
+
+        if (stepName == propertyDeregistrationJourney.initialStepId.urlPathSegment) {
             if (!propertyOwnershipService.getIsAuthorizedToDeleteRecord(propertyOwnershipId, principal.name)) {
                 addressDataService.clearCachedSingleLineAddressForPropertyOwnershipId(propertyOwnershipId)
                 throw ResponseStatusException(
@@ -47,8 +50,7 @@ class DeregisterPropertyController(
             }
         }
 
-        return propertyDeregistrationJourneyFactory
-            .create(propertyOwnershipId)
+        return propertyDeregistrationJourney
             .getModelAndViewForStep(
                 stepName,
                 subpage,
