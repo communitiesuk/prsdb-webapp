@@ -18,9 +18,9 @@ class LaUserRegistrationCheckAnswersPage(
 ) : AbstractPage(formModel, templateName, content) {
     override fun enrichModel(
         modelAndView: ModelAndView,
-        journeyData: JourneyData?,
+        filteredJourneyData: JourneyData?,
     ) {
-        journeyData!!
+        filteredJourneyData!!
         val formData = mutableListOf<SummaryListRowViewModel>()
         val sessionToken = invitationService.getTokenFromSession()
 
@@ -40,12 +40,12 @@ class LaUserRegistrationCheckAnswersPage(
                 ),
                 SummaryListRowViewModel(
                     "registerLaUser.checkAnswers.rowHeading.name",
-                    LaUserRegistrationJourneyDataHelper.getName(journeyData),
+                    LaUserRegistrationJourneyDataHelper.getName(filteredJourneyData),
                     RegisterLaUserStepId.Name.urlPathSegment,
                 ),
                 SummaryListRowViewModel(
                     "registerLaUser.checkAnswers.rowHeading.email",
-                    LaUserRegistrationJourneyDataHelper.getEmail(journeyData),
+                    LaUserRegistrationJourneyDataHelper.getEmail(filteredJourneyData),
                     RegisterLaUserStepId.Email.urlPathSegment,
                 ),
             ),

@@ -25,13 +25,13 @@ class SelectAddressPage(
 ) : AbstractPage(formModel, templateName, content, displaySectionHeader) {
     override fun enrichModel(
         modelAndView: ModelAndView,
-        journeyData: JourneyData?,
+        filteredJourneyData: JourneyData?,
     ) {
-        journeyData!!
+        filteredJourneyData!!
 
         val (houseNameOrNumber, postcode) =
             JourneyDataHelper.getLookupAddressHouseNameOrNumberAndPostcode(
-                journeyData,
+                filteredJourneyData,
                 lookupAddressPathSegment,
             )!!
 
