@@ -3,8 +3,10 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import org.springframework.http.HttpStatus
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.getPropertyDetailsPath
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -56,14 +58,16 @@ class PropertyDeregistrationJourney(
                                 listOf(
                                     RadiosButtonViewModel(
                                         value = true,
+                                        valueStr = "yes",
                                         labelMsgKey = "forms.radios.option.yes.label",
                                     ),
                                     RadiosButtonViewModel(
                                         value = false,
+                                        valueStr = "no",
                                         labelMsgKey = "forms.radios.option.no.label",
                                     ),
                                 ),
-                            "backUrl" to getPropertyDetailsPath(propertyOwnershipId),
+                            BACK_URL_ATTR_NAME to getPropertyDetailsPath(propertyOwnershipId),
                         ),
                 ),
             // handleSubmitAndRedirect will execute. It does not have to redirect to the step specified in nextAction.
@@ -87,17 +91,17 @@ class PropertyDeregistrationJourney(
         )
 
     private fun areYouSureContinueToNextActionOrExitJourney(
-        newJourneyData: JourneyData,
+        journeyData: JourneyData,
         subPageNumber: Int?,
     ): String {
         val currentStep = areYouSureStep()
 
-        if (getWantsToProceed(newJourneyData)!!) {
-            return getRedirectForNextStep(currentStep, newJourneyData, subPageNumber)
+        if (getWantsToProceed(journeyData)!!) {
+            return getRedirectForNextStep(currentStep, journeyData, subPageNumber)
         }
 
         addressDataService.clearCachedSingleLineAddressForPropertyOwnershipId(propertyOwnershipId)
-        return getPropertyDetailsPath(propertyOwnershipId)
+        return PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)
     }
 
     private fun retrieveAddressFromCacheOrDatabase(): String {

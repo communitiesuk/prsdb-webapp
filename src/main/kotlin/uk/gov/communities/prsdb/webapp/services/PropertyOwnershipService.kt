@@ -69,7 +69,7 @@ class PropertyOwnershipService(
         if (!isLocalAuthority && !isPrimaryLandlord) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "Property ownership $propertyOwnershipId not found",
+                "The current user is not authorised to view property ownership $propertyOwnershipId",
             )
         }
 
@@ -88,10 +88,15 @@ class PropertyOwnershipService(
         baseUserId: String,
     ): Boolean = propertyOwnership.primaryLandlord.baseUser.id == baseUserId
 
-    fun getIsAuthorizedToDeleteRecord(
+    fun getIsPrimaryLandlord(
         propertyOwnershipId: Long,
         baseUserId: String,
     ): Boolean = getIsPrimaryLandlord(getPropertyOwnership(propertyOwnershipId), baseUserId)
+
+    fun getIsAuthorizedToDeleteRecord(
+        propertyOwnershipId: Long,
+        baseUserId: String,
+    ): Boolean = getIsPrimaryLandlord(propertyOwnershipId, baseUserId)
 
     fun getRegisteredPropertiesForLandlordUser(baseUserId: String): List<RegisteredPropertyViewModel> =
         retrieveAllRegisteredPropertiesForLandlord(baseUserId).map { propertyOwnership ->

@@ -45,7 +45,7 @@ class DeregisterPropertyController(
                 addressDataService.clearCachedSingleLineAddressForPropertyOwnershipId(propertyOwnershipId)
                 throw ResponseStatusException(
                     HttpStatus.NOT_FOUND,
-                    "Property ownership $propertyOwnershipId not found",
+                    "The current user is not authorised to delete property ownership $propertyOwnershipId",
                 )
             }
         }
