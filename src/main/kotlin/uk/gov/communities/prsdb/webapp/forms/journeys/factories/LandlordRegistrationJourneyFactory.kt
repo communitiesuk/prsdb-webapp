@@ -9,8 +9,8 @@ import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
-import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.services.SecurityContextResetter
+import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
 @Component
 class LandlordRegistrationJourneyFactory(
