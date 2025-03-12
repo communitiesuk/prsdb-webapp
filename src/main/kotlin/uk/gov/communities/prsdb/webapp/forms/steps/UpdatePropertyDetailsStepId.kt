@@ -6,6 +6,7 @@ enum class UpdatePropertyDetailsStepId(
     override val urlPathSegment: String,
 ) : StepId {
     UpdateOwnershipType("ownership-type"),
+    UpdateOccupancy("occupancy"),
     UpdateNumberOfHouseholds("number-of-households"),
     UpdateNumberOfPeople("number-of-people"),
     UpdateDetails(DETAILS_PATH_SEGMENT),
