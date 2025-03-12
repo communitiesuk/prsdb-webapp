@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.http.HttpStatus
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
@@ -12,13 +13,13 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.getPropertyDetailsPath
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
+import uk.gov.communities.prsdb.webapp.forms.pages.PageWithSingleLineAddress
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.helpers.PropertyDeregistrationJourneyDataHelper.Companion.getWantsToProceed
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDeregistrationJourneyDataExtensions.Companion.getWantsToProceed
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeregistrationReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyService
@@ -120,6 +121,8 @@ class PropertyDeregistrationJourney(
         )
 
     private fun deregisterPropertyAndRedirectToConfirmation(): String {
+        checkIfLoggedInUserIsAuthorisedToDeleteRecord(propertyOwnershipId, propertyOwnershipService)
+
         propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)?.let {
             propertyOwnershipService.deletePropertyOwnership(it)
             propertyService.deleteProperty(it.property)
@@ -131,5 +134,18 @@ class PropertyDeregistrationJourney(
 
     companion object {
         val initialStepId = DeregisterPropertyStepId.AreYouSure
+
+        fun checkIfLoggedInUserIsAuthorisedToDeleteRecord(
+            propertyOwnershipId: Long,
+            propertyOwnershipService: PropertyOwnershipService,
+        ) {
+            val baseUserId = SecurityContextHolder.getContext().authentication.name
+            if (!propertyOwnershipService.getIsAuthorizedToDeleteRecord(propertyOwnershipId, baseUserId)) {
+                throw ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "The current user is not authorised to delete property ownership $propertyOwnershipId",
+                )
+            }
+        }
     }
 }
