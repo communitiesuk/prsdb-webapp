@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PageWithSingleLineAddress
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.helpers.PropertyDeregistrationJourneyDataHelper.Companion.getWantsToProceed
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDeregistrationJourneyDataExtensions.Companion.getWantsToProceed
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
@@ -95,7 +95,7 @@ class PropertyDeregistrationJourney(
     ): String {
         val areYouSureStep = steps.single { it.id == DeregisterPropertyStepId.AreYouSure }
 
-        if (getWantsToProceed(journeyData)!!) {
+        if (journeyData.getWantsToProceed()!!) {
             return getRedirectForNextStep(areYouSureStep, journeyData, subPageNumber)
         }
 
