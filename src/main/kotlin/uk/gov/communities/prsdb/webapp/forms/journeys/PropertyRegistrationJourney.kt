@@ -60,7 +60,6 @@ class PropertyRegistrationJourney(
     principalName: String,
 ) : JourneyWithTaskList<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
-        journeyDataKey = REGISTER_PROPERTY_JOURNEY_URL,
         initialStepId = RegisterPropertyStepId.LookupAddress,
         validator = validator,
         journeyDataService = journeyDataService,

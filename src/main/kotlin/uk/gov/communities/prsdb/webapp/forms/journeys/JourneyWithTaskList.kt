@@ -12,18 +12,17 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 abstract class JourneyWithTaskList<T : StepId>(
     journeyType: JourneyType,
-    journeyDataKey: String,
     initialStepId: T,
     validator: Validator,
     journeyDataService: JourneyDataService,
     taskListUrlSegment: String,
-) : Journey<T>(journeyType, journeyDataKey, initialStepId, validator, journeyDataService) {
+) : Journey<T>(journeyType, initialStepId, validator, journeyDataService) {
     protected abstract val taskListFactory: TaskListViewModelFactory<T>
 
     override val unreachableStepRedirect = taskListUrlSegment
 
     fun populateModelAndGetTaskListViewName(model: Model): String {
-        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
+        val journeyData = journeyDataService.getJourneyDataFromSession()
         model.addAttribute("taskListViewModel", taskListFactory.getTaskListViewModel(journeyData))
         return "taskList"
     }

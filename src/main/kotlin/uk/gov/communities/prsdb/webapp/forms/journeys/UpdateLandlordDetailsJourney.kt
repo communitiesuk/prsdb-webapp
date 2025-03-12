@@ -7,7 +7,6 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
-import uk.gov.communities.prsdb.webapp.constants.UPDATE_LANDLORD_DETAILS_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.Address
@@ -43,7 +42,6 @@ class UpdateLandlordDetailsJourney(
     private val landlordBaseUserId: String,
 ) : UpdateJourney<UpdateLandlordDetailsStepId>(
         journeyType = JourneyType.LANDLORD_DETAILS_UPDATE,
-        journeyDataKey = UPDATE_LANDLORD_DETAILS_URL,
         initialStepId = UpdateLandlordDetailsStepId.UpdateEmail,
         validator = validator,
         journeyDataService = journeyDataService,
