@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfHouseholdsUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfPeopleUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getOwnershipTypeUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
@@ -36,6 +37,27 @@ class PropertyDetailsUpdateJourneyDataExtensionsTests {
             testJourneyData.getOwnershipTypeUpdateIfPresent()
 
         assertEquals(null, ownershipTypeUpdate)
+    }
+
+    @Test
+    fun `getNumberOfHouseholdsUpdateIfPresent returns an integer if the corresponding page is in journeyData`() {
+        val newNumberOfHouseholds = 3
+        val testJourneyData = journeyDataBuilder.withNumberOfHouseholdsUpdate(newNumberOfHouseholds).build()
+
+        val numberOfHouseholdsUpdate =
+            testJourneyData.getNumberOfHouseholdsUpdateIfPresent()
+
+        assertEquals(newNumberOfHouseholds, numberOfHouseholdsUpdate)
+    }
+
+    @Test
+    fun `getNumberOfHouseholdsUpdateIfPresent returns null if the corresponding page is in not journeyData`() {
+        val testJourneyData = journeyDataBuilder.build()
+
+        val numberOfHouseholdsUpdate =
+            testJourneyData.getNumberOfHouseholdsUpdateIfPresent()
+
+        assertEquals(null, numberOfHouseholdsUpdate)
     }
 
     @Test
