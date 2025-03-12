@@ -16,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.helpers.PropertyDeregistrationJourneyData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
@@ -24,7 +23,6 @@ class PropertyDeregistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val addressDataService: AddressDataService,
     private val propertyOwnershipId: Long,
 ) : Journey<DeregisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_DEREGISTRATION,
@@ -53,7 +51,7 @@ class PropertyDeregistrationJourney(
                         mapOf(
                             "title" to "deregisterProperty.title",
                             "fieldSetHeading" to "deregisterProperty.areYouSure.fieldSetHeading",
-                            "propertyAddress" to retrieveAddressFromCacheOrDatabase(),
+                            "propertyAddress" to retrieveAddressFromDatabase(),
                             "radioOptions" to
                                 listOf(
                                     RadiosButtonViewModel(
@@ -94,25 +92,13 @@ class PropertyDeregistrationJourney(
         journeyData: JourneyData,
         subPageNumber: Int?,
     ): String {
-        val currentStep = areYouSureStep()
+        val currentStep = steps.first { it.id == DeregisterPropertyStepId.AreYouSure }
 
         if (getWantsToProceed(journeyData)!!) {
             return getRedirectForNextStep(currentStep, journeyData, subPageNumber)
         }
 
-        addressDataService.clearCachedSingleLineAddressForPropertyOwnershipId(propertyOwnershipId)
         return PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)
-    }
-
-    private fun retrieveAddressFromCacheOrDatabase(): String {
-        val cachedAddress = addressDataService.getCachedSingleLineAddressForPropertyOwnershipId(propertyOwnershipId)
-        if (cachedAddress != null) {
-            return cachedAddress
-        }
-
-        val addressFromDatabase = retrieveAddressFromDatabase()
-        addressDataService.cacheSingleLineAddressForPropertyOwnershipId(propertyOwnershipId, addressFromDatabase)
-        return addressFromDatabase
     }
 
     private fun retrieveAddressFromDatabase(): String =

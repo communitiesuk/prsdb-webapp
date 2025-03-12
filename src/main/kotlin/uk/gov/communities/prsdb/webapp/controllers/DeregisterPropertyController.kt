@@ -16,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.PROPERTY_DEREGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -26,7 +25,6 @@ import java.security.Principal
 class DeregisterPropertyController(
     private val propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val addressDataService: AddressDataService,
 ) {
     @GetMapping("/{stepName}")
     fun getJourneyStep(
@@ -42,7 +40,6 @@ class DeregisterPropertyController(
 
         if (stepName == propertyDeregistrationJourney.initialStepId.urlPathSegment) {
             if (!propertyOwnershipService.getIsAuthorizedToDeleteRecord(propertyOwnershipId, principal.name)) {
-                addressDataService.clearCachedSingleLineAddressForPropertyOwnershipId(propertyOwnershipId)
                 throw ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "The current user is not authorised to delete property ownership $propertyOwnershipId",
