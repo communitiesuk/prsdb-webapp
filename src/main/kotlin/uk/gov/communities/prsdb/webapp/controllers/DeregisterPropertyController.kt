@@ -35,11 +35,7 @@ class DeregisterPropertyController(
         model: Model,
         principal: Principal,
     ): ModelAndView {
-        val propertyDeregistrationJourney =
-            propertyDeregistrationJourneyFactory
-                .create(propertyOwnershipId)
-
-        if (stepName == propertyDeregistrationJourney.initialStepId.urlPathSegment) {
+        if (stepName == PropertyDeregistrationJourney.initialStepId.urlPathSegment) {
             if (!propertyOwnershipService.getIsAuthorizedToDeleteRecord(propertyOwnershipId, principal.name)) {
                 throw ResponseStatusException(
                     HttpStatus.NOT_FOUND,
@@ -48,7 +44,8 @@ class DeregisterPropertyController(
             }
         }
 
-        return propertyDeregistrationJourney
+        return propertyDeregistrationJourneyFactory
+            .create(propertyOwnershipId)
             .getModelAndViewForStep(
                 stepName,
                 subpage,

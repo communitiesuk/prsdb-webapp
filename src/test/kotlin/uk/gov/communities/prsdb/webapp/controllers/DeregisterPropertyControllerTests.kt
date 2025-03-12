@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.ArgumentMatchers.eq
-import org.mockito.kotlin.times
+import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -13,7 +13,6 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.getPropertyDeregistrationPath
-import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -23,9 +22,6 @@ import kotlin.test.assertEquals
 class DeregisterPropertyControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
-    @MockBean
-    private lateinit var propertyDeregistrationJourney: PropertyDeregistrationJourney
-
     @MockBean
     private lateinit var propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory
 
@@ -56,10 +52,8 @@ class DeregisterPropertyControllerTests(
     fun `getJourneyStep for the initial step returns 403 for a landlord user who does not own this property`() {
         // Arrange
         val propertyOwnershipId = 1.toLong()
-        whenever(propertyDeregistrationJourney.initialStepId)
-            .thenReturn(DeregisterPropertyStepId.AreYouSure)
         whenever(propertyDeregistrationJourneyFactory.create(propertyOwnershipId))
-            .thenReturn(propertyDeregistrationJourney)
+            .thenReturn(mock())
         whenever(propertyOwnershipService.getIsAuthorizedToDeleteRecord(eq(propertyOwnershipId), anyString()))
             .thenReturn(false)
 
@@ -76,10 +70,8 @@ class DeregisterPropertyControllerTests(
     fun `getJourneyStep for the initial step returns 200 for the landlord who owns this property`() {
         // Arrange
         val propertyOwnershipId = 1.toLong()
-        whenever(propertyDeregistrationJourney.initialStepId)
-            .thenReturn(DeregisterPropertyStepId.AreYouSure)
         whenever(propertyDeregistrationJourneyFactory.create(propertyOwnershipId))
-            .thenReturn(propertyDeregistrationJourney)
+            .thenReturn(mock())
         whenever(propertyOwnershipService.getIsAuthorizedToDeleteRecord(eq(propertyOwnershipId), anyString()))
             .thenReturn(true)
 
@@ -94,12 +86,7 @@ class DeregisterPropertyControllerTests(
     @Test
     fun `getPropertyDegistrationPath returns a path to the initial step of the delete journey for this property`() {
         // Arrange
-
         val propertyOwnershipId = 1.toLong()
-        whenever(propertyDeregistrationJourney.initialStepId)
-            .thenReturn(DeregisterPropertyStepId.AreYouSure)
-        whenever(propertyDeregistrationJourneyFactory.create(propertyOwnershipId))
-            .thenReturn(propertyDeregistrationJourney)
 
         // Act
         val propertyDeregistrationPath = getPropertyDeregistrationPath(propertyOwnershipId)

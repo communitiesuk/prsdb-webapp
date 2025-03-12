@@ -52,7 +52,6 @@ class PropertyDeregistrationJourney(
                         mapOf(
                             "title" to "deregisterProperty.title",
                             "fieldSetHeading" to "deregisterProperty.areYouSure.fieldSetHeading",
-                            //   "propertyAddress" to retrieveAddressFromDatabase(),
                             "radioOptions" to
                                 listOf(
                                     RadiosButtonViewModel(
