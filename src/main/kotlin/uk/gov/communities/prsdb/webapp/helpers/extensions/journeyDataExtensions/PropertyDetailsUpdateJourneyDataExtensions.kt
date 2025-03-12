@@ -14,6 +14,13 @@ class PropertyDetailsUpdateJourneyDataExtensions {
                 "ownershipType",
             )
 
+        fun JourneyData.getIsOccupiedUpdateIfPresent() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment,
+                "occupied",
+            )
+
         fun JourneyData.getNumberOfHouseholdsUpdateIfPresent() =
             JourneyDataHelper.getFieldIntegerValue(
                 this,
