@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.getPropertyDetailsPath
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
+import uk.gov.communities.prsdb.webapp.forms.pages.PageWithSingleLineAddress
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.helpers.PropertyDeregistrationJourneyDataHelper.Companion.getWantsToProceed
@@ -44,14 +45,14 @@ class PropertyDeregistrationJourney(
         Step(
             id = DeregisterPropertyStepId.AreYouSure,
             page =
-                Page(
+                PageWithSingleLineAddress(
                     formModel = PropertyDeregistrationAreYouSureFormModel::class,
                     templateName = "forms/areYouSureForm",
                     content =
                         mapOf(
                             "title" to "deregisterProperty.title",
                             "fieldSetHeading" to "deregisterProperty.areYouSure.fieldSetHeading",
-                            "propertyAddress" to retrieveAddressFromDatabase(),
+                            //   "propertyAddress" to retrieveAddressFromDatabase(),
                             "radioOptions" to
                                 listOf(
                                     RadiosButtonViewModel(
@@ -67,7 +68,7 @@ class PropertyDeregistrationJourney(
                                 ),
                             BACK_URL_ATTR_NAME to getPropertyDetailsPath(propertyOwnershipId),
                         ),
-                ),
+                ) { retrieveAddressFromDatabase() },
             // handleSubmitAndRedirect will execute. It does not have to redirect to the step specified in nextAction.
             handleSubmitAndRedirect = { newJourneyData, subPage -> areYouSureContinueToNextActionOrExitJourney(newJourneyData, subPage) },
             // This gets checked when determining whether the next step is reachable
@@ -92,10 +93,10 @@ class PropertyDeregistrationJourney(
         journeyData: JourneyData,
         subPageNumber: Int?,
     ): String {
-        val currentStep = steps.first { it.id == DeregisterPropertyStepId.AreYouSure }
+        val areYouSureStep = steps.single { it.id == DeregisterPropertyStepId.AreYouSure }
 
         if (getWantsToProceed(journeyData)!!) {
-            return getRedirectForNextStep(currentStep, journeyData, subPageNumber)
+            return getRedirectForNextStep(areYouSureStep, journeyData, subPageNumber)
         }
 
         return PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)
