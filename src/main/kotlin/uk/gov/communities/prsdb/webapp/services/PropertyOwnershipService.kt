@@ -161,6 +161,7 @@ class PropertyOwnershipService(
         val propertyOwnership = getPropertyOwnership(id)
 
         update.ownershipType?.let { propertyOwnership.ownershipType = it }
+        update.numberOfPeople?.let { propertyOwnership.currentNumTenants = it }
     }
 
     private fun retrieveAllRegisteredPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =

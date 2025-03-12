@@ -62,9 +62,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
@@ -348,10 +348,10 @@ class Navigator(
         return createValidPage(page, HouseholdsFormPagePropertyRegistration::class)
     }
 
-    fun goToPropertyRegistrationPeoplePage(): PeopleFormPagePropertyRegistration {
+    fun goToPropertyRegistrationPeoplePage(): NumberOfPeopleFormPagePropertyRegistration {
         val householdsPage = goToPropertyRegistrationHouseholdsPage()
         householdsPage.submitNumberOfHouseholds(2)
-        return createValidPage(page, PeopleFormPagePropertyRegistration::class)
+        return createValidPage(page, NumberOfPeopleFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
