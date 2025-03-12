@@ -94,9 +94,11 @@ class UpdateLandlordDetailsJourney(
     override fun initializeJourneyDataIfNotInitialized() {
         if (!isJourneyDataInitialised()) {
             super.initializeJourneyDataIfNotInitialized()
+
             val journeyData = journeyDataService.getJourneyDataFromSession()
-            val updatedJourneyData = setOriginalLookedUpAddresses(journeyData)
-            journeyDataService.setJourneyDataInSession(updatedJourneyData)
+            val lookedUpAddresses = JourneyDataHelper.getPageData(journeyData, originalDataKey)!!.getSerializedLookedUpAddresses()!!
+            val journeyDataWithLookedUpAddresses = journeyData.withUpdatedLookedUpAddresses(lookedUpAddresses)
+            journeyDataService.setJourneyDataInSession(journeyDataWithLookedUpAddresses)
         }
     }
 
@@ -333,12 +335,6 @@ class UpdateLandlordDetailsJourney(
     private fun Address.getSelectedAddress(): String = if (uprn == null) MANUAL_ADDRESS_CHOSEN else singleLineAddress
 
     private fun Address.getTownOrCity(): String = townName ?: singleLineAddress
-
-    private fun setOriginalLookedUpAddresses(journeyData: JourneyData): JourneyData {
-        val originalJourneyData = JourneyDataHelper.getPageData(journeyData, originalDataKey)!!
-        val lookedUpAddresses = originalJourneyData.getSerializedLookedUpAddresses()!!
-        return journeyData.withUpdatedLookedUpAddresses(lookedUpAddresses)
-    }
 
     companion object {
         const val IS_IDENTITY_VERIFIED_KEY = "isIdentityVerified"
