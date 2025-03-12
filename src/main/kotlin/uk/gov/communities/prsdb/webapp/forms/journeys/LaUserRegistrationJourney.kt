@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
+import uk.gov.communities.prsdb.webapp.services.SecurityContextResetter
 
 class LaUserRegistrationJourney(
     validator: Validator,
@@ -25,6 +26,7 @@ class LaUserRegistrationJourney(
     private val invitationService: LocalAuthorityInvitationService,
     private val localAuthorityDataService: LocalAuthorityDataService,
     private val invitation: LocalAuthorityInvitation,
+    private val securityContextResetter: SecurityContextResetter,
 ) : Journey<RegisterLaUserStepId>(
         journeyType = JourneyType.LA_USER_REGISTRATION,
         initialStepId = RegisterLaUserStepId.LandingPage,
@@ -146,6 +148,8 @@ class LaUserRegistrationJourney(
         invitationService.clearTokenFromSession()
 
         journeyDataService.clearJourneyDataFromSession()
+
+        securityContextResetter.reset()
 
         return CONFIRMATION_PAGE_PATH_SEGMENT
     }
