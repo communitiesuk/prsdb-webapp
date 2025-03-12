@@ -102,7 +102,7 @@ class DeregisterPropertyControllerTests(
             .thenReturn(propertyDeregistrationJourney)
 
         // Act
-        val propertyDeregistrationPath = getPropertyDeregistrationPath(propertyOwnershipId, propertyDeregistrationJourneyFactory)
+        val propertyDeregistrationPath = getPropertyDeregistrationPath(propertyOwnershipId)
 
         // Assert
         assertEquals(

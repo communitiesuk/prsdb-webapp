@@ -11,7 +11,6 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
@@ -23,9 +22,6 @@ class PropertyDetailsControllerTests(
 ) : ControllerTest(webContext) {
     @MockBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
-
-    @MockBean
-    private lateinit var propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory
 
     @MockBean
     private lateinit var propertyDeregistrationJourney: PropertyDeregistrationJourney
@@ -76,8 +72,6 @@ class PropertyDetailsControllerTests(
             whenever(propertyDeregistrationJourney.initialStepId).thenReturn(
                 DeregisterPropertyStepId.AreYouSure,
             )
-            whenever(propertyDeregistrationJourneyFactory.create(propertyOwnership.id))
-                .thenReturn(propertyDeregistrationJourney)
 
             mvc.get("/property-details/${propertyOwnership.id}").andExpect {
                 status { status { isOk() } }

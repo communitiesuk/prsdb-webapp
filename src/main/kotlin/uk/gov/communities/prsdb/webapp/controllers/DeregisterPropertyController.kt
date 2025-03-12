@@ -15,6 +15,7 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.PROPERTY_DEREGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
+import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -75,11 +76,8 @@ class DeregisterPropertyController(
     companion object {
         const val PROPERTY_DEREGISTRATION_ROUTE = "/$DEREGISTER_PROPERTY_JOURNEY_URL/{propertyOwnershipId}"
 
-        fun getPropertyDeregistrationPath(
-            propertyOwnershipId: Long,
-            propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory,
-        ): String {
-            val initialStepPathSegment = propertyDeregistrationJourneyFactory.create(propertyOwnershipId).initialStepId.urlPathSegment
+        fun getPropertyDeregistrationPath(propertyOwnershipId: Long): String {
+            val initialStepPathSegment = PropertyDeregistrationJourney.initialStepId.urlPathSegment
 
             return UriTemplate("$PROPERTY_DEREGISTRATION_ROUTE/$initialStepPathSegment")
                 .expand(propertyOwnershipId)

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
@@ -21,7 +20,6 @@ import java.security.Principal
 @RequestMapping
 class PropertyDetailsController(
     val propertyOwnershipService: PropertyOwnershipService,
-    val propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(PROPERTY_DETAILS_ROUTE)
@@ -51,7 +49,7 @@ class PropertyDetailsController(
         model.addAttribute("landlordDetails", landlordViewModel.landlordsDetails)
         model.addAttribute(
             "deleteRecordLink",
-            DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId, propertyDeregistrationJourneyFactory),
+            DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId),
         )
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
