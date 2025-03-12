@@ -59,6 +59,25 @@ class PropertyDetailsUpdateJourneyDataExtensionsTests {
     }
 
     @Test
+    fun `getNumberOfHouseholdsUpdateIfPresent returns 0 if the occupancy has been updated to false`() {
+        val testJourneyData = journeyDataBuilder.withIsOccupiedUpdate(false).build()
+
+        val numberOfHouseholdsUpdate = testJourneyData.getNumberOfHouseholdsUpdateIfPresent()
+
+        assertEquals(0, numberOfHouseholdsUpdate)
+    }
+
+    @Test
+    fun `getNumberOfHouseholdsUpdateIfPresent returns an integer if the occupancy has been updated to true`() {
+        val newNumberOfHouseholds = 3
+        val testJourneyData = journeyDataBuilder.withIsOccupiedUpdate(true).withNumberOfHouseholdsUpdate(newNumberOfHouseholds).build()
+
+        val numberOfHouseholdsUpdate = testJourneyData.getNumberOfHouseholdsUpdateIfPresent()
+
+        assertEquals(newNumberOfHouseholds, numberOfHouseholdsUpdate)
+    }
+
+    @Test
     fun `getNumberOfHouseholdsUpdateIfPresent returns an integer if the corresponding page is in journeyData`() {
         val newNumberOfHouseholds = 3
         val testJourneyData = journeyDataBuilder.withNumberOfHouseholdsUpdate(newNumberOfHouseholds).build()
@@ -75,6 +94,25 @@ class PropertyDetailsUpdateJourneyDataExtensionsTests {
         val numberOfHouseholdsUpdate = testJourneyData.getNumberOfHouseholdsUpdateIfPresent()
 
         assertNull(numberOfHouseholdsUpdate)
+    }
+
+    @Test
+    fun `getNumberOfPeopleUpdateIfPresent returns 0 if the occupancy has been updated to false`() {
+        val testJourneyData = journeyDataBuilder.withIsOccupiedUpdate(false).build()
+
+        val numberOfPeopleUpdate = testJourneyData.getNumberOfPeopleUpdateIfPresent()
+
+        assertEquals(0, numberOfPeopleUpdate)
+    }
+
+    @Test
+    fun `getNumberOfPeopleUpdateIfPresent returns an integer if the occupancy has been updated to true`() {
+        val newNumberOfPeople = 10
+        val testJourneyData = journeyDataBuilder.withIsOccupiedUpdate(true).withNumberOfPeopleUpdate(newNumberOfPeople).build()
+
+        val numberOfPeopleUpdate = testJourneyData.getNumberOfPeopleUpdateIfPresent()
+
+        assertEquals(newNumberOfPeople, numberOfPeopleUpdate)
     }
 
     @Test

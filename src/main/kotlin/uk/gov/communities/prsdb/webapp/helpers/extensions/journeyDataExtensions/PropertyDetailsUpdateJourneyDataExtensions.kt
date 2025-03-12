@@ -22,17 +22,25 @@ class PropertyDetailsUpdateJourneyDataExtensions {
             )
 
         fun JourneyData.getNumberOfHouseholdsUpdateIfPresent() =
-            JourneyDataHelper.getFieldIntegerValue(
-                this,
-                UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment,
-                "numberOfHouseholds",
-            )
+            if (this.getIsOccupiedUpdateIfPresent() == false) {
+                0
+            } else {
+                JourneyDataHelper.getFieldIntegerValue(
+                    this,
+                    UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment,
+                    "numberOfHouseholds",
+                )
+            }
 
         fun JourneyData.getNumberOfPeopleUpdateIfPresent() =
-            JourneyDataHelper.getFieldIntegerValue(
-                this,
-                UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment,
-                "numberOfPeople",
-            )
+            if (this.getIsOccupiedUpdateIfPresent() == false) {
+                0
+            } else {
+                JourneyDataHelper.getFieldIntegerValue(
+                    this,
+                    UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment,
+                    "numberOfPeople",
+                )
+            }
     }
 }
