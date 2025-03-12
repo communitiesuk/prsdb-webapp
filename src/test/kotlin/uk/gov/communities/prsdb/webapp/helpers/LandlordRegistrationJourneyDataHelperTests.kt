@@ -6,24 +6,21 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mockito.mock
-import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import java.time.LocalDate
 import kotlin.test.assertEquals
 
 class LandlordRegistrationJourneyDataHelperTests {
-    private lateinit var mockAddressDataService: AddressDataService
     private lateinit var mockLocalAuthorityService: LocalAuthorityService
     private lateinit var journeyDataBuilder: JourneyDataBuilder
 
     @BeforeEach
     fun setup() {
-        mockAddressDataService = mock()
         mockLocalAuthorityService = mock()
-        journeyDataBuilder = JourneyDataBuilder.landlordDefault(mockAddressDataService, mockLocalAuthorityService)
+        journeyDataBuilder = JourneyDataBuilder.landlordDefault(mockLocalAuthorityService)
     }
 
     @Test
@@ -110,9 +107,7 @@ class LandlordRegistrationJourneyDataHelperTests {
                 ).build()
         val expectedAddressDataModel = AddressDataModel(selectedAddress)
 
-        whenever(mockAddressDataService.getAddressData(selectedAddress)).thenReturn(expectedAddressDataModel)
-
-        val addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(mockJourneyData, mockAddressDataService)
+        val addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(mockJourneyData, mockJourneyData.getLookedUpAddresses())
 
         assertEquals(expectedAddressDataModel, addressDataModel)
     }
@@ -134,8 +129,7 @@ class LandlordRegistrationJourneyDataHelperTests {
                 ).build()
         val expectedAddressDataModel = AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode)
 
-        val addressDataModel =
-            LandlordRegistrationJourneyDataHelper.getAddress(mockJourneyData, mockAddressDataService)
+        val addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(mockJourneyData, mockJourneyData.getLookedUpAddresses())
 
         assertEquals(expectedAddressDataModel, addressDataModel)
     }

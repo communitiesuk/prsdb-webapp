@@ -5,16 +5,17 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper as DataHelper
 
 class PropertyRegistrationCheckAnswersPage(
-    private val addressDataService: AddressDataService,
     private val localAuthorityService: LocalAuthorityService,
+    private val journeyDataService: JourneyDataService,
     displaySectionHeader: Boolean = false,
 ) : AbstractPage(
         NoInputFormModel::class,
@@ -29,33 +30,43 @@ class PropertyRegistrationCheckAnswersPage(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData?,
     ) {
-        filteredJourneyData!!
-        addPropertyDetailsToModel(modelAndView, filteredJourneyData)
+        val lookedUpAddresses = journeyDataService.getJourneyDataFromSession().getLookedUpAddresses()
+        addPropertyDetailsToModel(modelAndView, filteredJourneyData!!, lookedUpAddresses)
     }
 
     private fun addPropertyDetailsToModel(
         modelAndView: ModelAndView,
         journeyData: JourneyData,
+        lookedUpAddresses: List<AddressDataModel>,
     ) {
-        val propertyName = getPropertyName(journeyData)
-        val propertyDetails = getPropertyDetailsSummary(journeyData)
+        val propertyName = getPropertyName(journeyData, lookedUpAddresses)
+        val propertyDetails = getPropertyDetailsSummary(journeyData, lookedUpAddresses)
 
         modelAndView.addObject("propertyDetails", propertyDetails)
         modelAndView.addObject("propertyName", propertyName)
         modelAndView.addObject("showUprnDetail", !DataHelper.isManualAddressChosen(journeyData))
     }
 
-    private fun getPropertyName(journeyData: JourneyData) = DataHelper.getAddress(journeyData, addressDataService)!!.singleLineAddress
+    private fun getPropertyName(
+        journeyData: JourneyData,
+        lookedUpAddresses: List<AddressDataModel>,
+    ) = DataHelper.getAddress(journeyData, lookedUpAddresses)!!.singleLineAddress
 
-    private fun getPropertyDetailsSummary(journeyData: JourneyData): List<SummaryListRowViewModel> =
-        getAddressDetails(journeyData) +
+    private fun getPropertyDetailsSummary(
+        journeyData: JourneyData,
+        lookedUpAddresses: List<AddressDataModel>,
+    ): List<SummaryListRowViewModel> =
+        getAddressDetails(journeyData, lookedUpAddresses) +
             getPropertyTypeDetails(journeyData) +
             getOwnershipTypeDetails(journeyData) +
             getLicensingTypeDetails(journeyData) +
             getTenancyDetails(journeyData)
 
-    private fun getAddressDetails(journeyData: JourneyData): List<SummaryListRowViewModel> {
-        val address = DataHelper.getAddress(journeyData, addressDataService)!!
+    private fun getAddressDetails(
+        journeyData: JourneyData,
+        lookedUpAddresses: List<AddressDataModel>,
+    ): List<SummaryListRowViewModel> {
+        val address = DataHelper.getAddress(journeyData, lookedUpAddresses)!!
         return if (DataHelper.isManualAddressChosen(journeyData)) {
             getManualAddressDetails(address)
         } else {

@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import java.time.LocalDate
 
 class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
@@ -94,7 +93,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
 
         fun getAddress(
             journeyData: JourneyData,
-            addressDataService: AddressDataService,
+            lookedUpAddresses: List<AddressDataModel>,
         ): AddressDataModel? {
             val livesInEnglandOrWales = getLivesInEnglandOrWales(journeyData) ?: return null
 
@@ -102,7 +101,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
                 getManualAddress(journeyData, !livesInEnglandOrWales)
             } else {
                 val selectedAddress = getSelectedAddress(journeyData, !livesInEnglandOrWales) ?: return null
-                addressDataService.getAddressData(selectedAddress)
+                lookedUpAddresses.singleOrNull { it.singleLineAddress == selectedAddress }
             }
         }
 

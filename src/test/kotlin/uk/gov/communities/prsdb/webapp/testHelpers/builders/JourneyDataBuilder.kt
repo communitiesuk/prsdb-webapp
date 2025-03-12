@@ -1,6 +1,9 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -10,13 +13,11 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import java.time.LocalDate
 
 class JourneyDataBuilder(
-    private val mockAddressDataService: AddressDataService,
     private val mockLocalAuthorityService: LocalAuthorityService,
     initialJourneyData: JourneyData? = null,
 ) {
@@ -69,14 +70,12 @@ class JourneyDataBuilder(
                     ),
             )
 
-        fun propertyDefault(
-            addressService: AddressDataService,
-            localAuthorityService: LocalAuthorityService,
-        ) = JourneyDataBuilder(addressService, localAuthorityService, defaultPropertyJourneyData).withSelectedAddress(
-            DEFAULT_ADDRESS,
-            709902,
-            createLocalAuthority(),
-        )
+        fun propertyDefault(localAuthorityService: LocalAuthorityService) =
+            JourneyDataBuilder(localAuthorityService, defaultPropertyJourneyData).withSelectedAddress(
+                DEFAULT_ADDRESS,
+                709902,
+                createLocalAuthority(),
+            )
 
         private val defaultLandlordJourneyData: JourneyData =
             mapOf(
@@ -95,14 +94,12 @@ class JourneyDataBuilder(
                 LandlordRegistrationStepId.SelectAddress.urlPathSegment to mapOf("address" to DEFAULT_ADDRESS),
             )
 
-        fun landlordDefault(
-            addressService: AddressDataService,
-            localAuthorityService: LocalAuthorityService,
-        ) = JourneyDataBuilder(addressService, localAuthorityService, defaultLandlordJourneyData).withSelectedAddress(
-            DEFAULT_ADDRESS,
-            709902,
-            createLocalAuthority(),
-        )
+        fun landlordDefault(localAuthorityService: LocalAuthorityService) =
+            JourneyDataBuilder(localAuthorityService, defaultLandlordJourneyData).withSelectedAddress(
+                DEFAULT_ADDRESS,
+                709902,
+                createLocalAuthority(),
+            )
     }
 
     fun withLookupAddress(
@@ -118,22 +115,19 @@ class JourneyDataBuilder(
     fun withSelectedAddress(
         singleLineAddress: String,
         uprn: Long? = null,
-        localAuthority: LocalAuthority,
+        localAuthority: LocalAuthority? = null,
         isContactAddress: Boolean = false,
     ): JourneyDataBuilder {
-        whenever(mockAddressDataService.getAddressData(singleLineAddress)).thenReturn(
-            AddressDataModel(
-                singleLineAddress,
-                localAuthorityId = localAuthority.id,
-                uprn = uprn,
-            ),
-        )
-
-        whenever(mockLocalAuthorityService.retrieveLocalAuthorityById(localAuthority.id)).thenReturn(localAuthority)
+        localAuthority?.let {
+            whenever(mockLocalAuthorityService.retrieveLocalAuthorityById(localAuthority.id)).thenReturn(localAuthority)
+        }
 
         if (!isContactAddress) {
             withEnglandOrWalesResidence()
         }
+
+        journeyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY] =
+            Json.encodeToString(listOf(AddressDataModel(singleLineAddress, localAuthorityId = localAuthority?.id, uprn = uprn)))
 
         val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
         journeyData[selectAddressKey] = mapOf("address" to singleLineAddress)
@@ -294,7 +288,7 @@ class JourneyDataBuilder(
     ): JourneyDataBuilder =
         this
             .withNonEnglandOrWalesAddress(countryOfResidence, nonEnglandOrWalesAddress)
-            .withSelectedAddress(selectedAddress, localAuthority = createLocalAuthority(), isContactAddress = true)
+            .withSelectedAddress(selectedAddress, isContactAddress = true)
 
     fun withNonEnglandOrWalesAndManualContactAddress(
         countryOfResidence: String,
