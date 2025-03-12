@@ -1,19 +1,14 @@
-package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
-class HouseholdsFormPagePropertyRegistration(
+abstract class NumberOfHouseholdsFormBasePage(
     page: Page,
-) : BasePage(
-        page,
-        "/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment}",
-    ) {
-    val form = HouseholdsForm(page)
+    urlSegment: String,
+) : BasePage(page, urlSegment) {
+    val form = NumOfHouseholdsForm(page)
 
     fun submitNumberOfHouseholds(num: Int) = submitNumberOfHouseholds(num.toString())
 
@@ -22,7 +17,7 @@ class HouseholdsFormPagePropertyRegistration(
         form.submit()
     }
 
-    class HouseholdsForm(
+    class NumOfHouseholdsForm(
         page: Page,
     ) : FormWithSectionHeader(page) {
         val householdsInput = TextInput.textByFieldName(locator, "numberOfHouseholds")
