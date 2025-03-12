@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import kotlinx.datetime.toKotlinInstant
+import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.constants.DETAILS_PATH_SEGMENT
@@ -65,9 +67,16 @@ class PropertyDetailsController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
     ): ModelAndView =
-        propertyDetailsUpdateJourneyFactory
-            .create(propertyOwnershipId)
-            .getModelAndViewForStep(stepName, subPageNumber = null)
+        if (propertyOwnershipService.getIsPrimaryLandlord(propertyOwnershipId, principal.name)) {
+            propertyDetailsUpdateJourneyFactory
+                .create(propertyOwnershipId)
+                .getModelAndViewForStep(stepName, subPageNumber = null)
+        } else {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Base user ${principal.name} is not the primary landlord of property ownership $propertyOwnershipId",
+            )
+        }
 
     @PreAuthorize("hasRole('LANDLORD')")
     @PostMapping("$UPDATE_PROPERTY_DETAILS_ROUTE/{stepName}")
@@ -78,14 +87,21 @@ class PropertyDetailsController(
         @PathVariable("stepName") stepName: String,
         @RequestParam formData: PageData,
     ): ModelAndView =
-        propertyDetailsUpdateJourneyFactory
-            .create(propertyOwnershipId)
-            .completeStep(
-                stepName,
-                formData,
-                subPageNumber = null,
-                principal,
+        if (propertyOwnershipService.getIsPrimaryLandlord(propertyOwnershipId, principal.name)) {
+            propertyDetailsUpdateJourneyFactory
+                .create(propertyOwnershipId)
+                .completeStep(
+                    stepName,
+                    formData,
+                    subPageNumber = null,
+                    principal,
+                )
+        } else {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Base user ${principal.name} is not the primary landlord of property ownership $propertyOwnershipId",
             )
+        }
 
     @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
     @GetMapping(LA_PROPERTY_DETAILS_ROUTE)

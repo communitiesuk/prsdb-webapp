@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -329,6 +330,53 @@ class PropertyOwnershipServiceTests {
                 propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnership.id, principalName)
 
             assertEquals(result, propertyOwnership)
+        }
+    }
+
+    @Nested
+    inner class GetIsPrimaryLandlord {
+        @Test
+        fun `returns true when the user is the property's primary landlord`() {
+            val baseUserId = "baseUserId"
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(
+                    primaryLandlord =
+                        MockLandlordData.createLandlord(
+                            baseUser = MockLandlordData.createOneLoginUser(baseUserId),
+                        ),
+                )
+
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            val returnedIsPrimaryLandlord = propertyOwnershipService.getIsPrimaryLandlord(propertyOwnership.id, baseUserId)
+
+            assertTrue(returnedIsPrimaryLandlord)
+        }
+
+        @Test
+        fun `returns false when the user is not the property's primary landlord`() {
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(
+                    primaryLandlord =
+                        MockLandlordData.createLandlord(
+                            baseUser = MockLandlordData.createOneLoginUser("baseUserId"),
+                        ),
+                )
+
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            val returnedIsPrimaryLandlord = propertyOwnershipService.getIsPrimaryLandlord(propertyOwnership.id, "differentBaseUserId")
+
+            assertFalse(returnedIsPrimaryLandlord)
+        }
+
+        @Test
+        fun `throws not found error if the property ownership does not exist`() {
+            val errorThrown =
+                assertThrows<ResponseStatusException> {
+                    propertyOwnershipService.getIsPrimaryLandlord(1, "anyBaseUserId")
+                }
+            assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
         }
     }
 

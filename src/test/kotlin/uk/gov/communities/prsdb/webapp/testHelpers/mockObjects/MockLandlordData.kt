@@ -28,8 +28,10 @@ class MockLandlordData {
             uprn: Long? = null,
         ) = Address(AddressDataModel(singleLineAddress = singleLineAddress, uprn = uprn), localAuthority)
 
+        fun createOneLoginUser(id: String = "") = OneLoginUser(id)
+
         fun createLandlord(
-            baseUser: OneLoginUser = OneLoginUser(),
+            baseUser: OneLoginUser = createOneLoginUser(),
             name: String = "name",
             email: String = "example@email.com",
             phoneNumber: String = "07123456789",
