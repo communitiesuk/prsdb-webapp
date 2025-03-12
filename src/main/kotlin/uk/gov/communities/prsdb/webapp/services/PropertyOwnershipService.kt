@@ -156,6 +156,7 @@ class PropertyOwnershipService(
         val propertyOwnership = getPropertyOwnership(id)
 
         update.ownershipType?.let { propertyOwnership.ownershipType = it }
+        update.numberOfHouseholds?.let { propertyOwnership.currentNumHouseholds = it }
         update.numberOfPeople?.let { propertyOwnership.currentNumTenants = it }
     }
 
