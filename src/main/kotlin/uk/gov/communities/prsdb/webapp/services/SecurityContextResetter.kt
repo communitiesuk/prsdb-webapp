@@ -11,9 +11,7 @@ class SecurityContextResetter(
     private val securityContextRepository: SecurityContextRepository,
 ) {
     fun reset() {
-        val attributes =
-            RequestContextHolder.getRequestAttributes() as? ServletRequestAttributes
-                ?: throw Exception("TODO: PRSD-893 Choose the correct exception here!")
+        val attributes = RequestContextHolder.getRequestAttributes() as ServletRequestAttributes
         val request = attributes.request
         val response = attributes.response
         securityContextRepository.saveContext(SecurityContextHolder.createEmptyContext(), request, response)
