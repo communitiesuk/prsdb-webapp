@@ -10,9 +10,6 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContext
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
@@ -28,7 +25,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidat
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
 
-class LandlordRegistrationJourneyTests {
+class LandlordRegistrationJourneyTests : JourneyTest() {
     @Mock
     lateinit var mockJourneyDataService: JourneyDataService
 
@@ -90,16 +87,7 @@ class LandlordRegistrationJourneyTests {
                     emailNotificationService = confirmationEmailSender,
                     absoluteUrlProvider = urlProvider,
                 )
-            setMockUser()
-        }
-
-        private fun setMockUser() {
-            val name = "a-user-name"
-            val authentication = mock<Authentication>()
-            whenever(authentication.name).thenReturn(name)
-            val context = mock<SecurityContext>()
-            whenever(context.authentication).thenReturn(authentication)
-            SecurityContextHolder.setContext(context)
+            setMockUser("a-user-name")
         }
 
         @Suppress("ktlint:standard:max-line-length")

@@ -8,10 +8,8 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContext
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyTest
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -21,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidat
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import kotlin.test.assertContains
 
-class PropertyDeregistrationJourneyTests {
+class PropertyDeregistrationJourneyTests : JourneyTest() {
     val alwaysTrueValidator: AlwaysTrueValidator = AlwaysTrueValidator()
 
     @MockBean
@@ -49,15 +47,6 @@ class PropertyDeregistrationJourneyTests {
                 mockPropertyOwnershipService,
                 mockPropertyService,
             )
-    }
-
-    // TODO: PRSD-697 - should we move this to a JourneyTest class that the others inherit from?
-    private fun setMockUser(principalName: String) {
-        val authentication = mock<Authentication>()
-        whenever(authentication.name).thenReturn(principalName)
-        val context = mock<SecurityContext>()
-        whenever(context.authentication).thenReturn(authentication)
-        SecurityContextHolder.setContext(context)
     }
 
     @Test

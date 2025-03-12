@@ -9,9 +9,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContext
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -32,7 +29,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidat
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
 
-class PropertyRegistrationJourneyTests {
+class PropertyRegistrationJourneyTests : JourneyTest() {
     @Mock
     lateinit var mockJourneyDataService: JourneyDataService
 
@@ -108,15 +105,7 @@ class PropertyRegistrationJourneyTests {
                     absoluteUrlProvider = urlProvider,
                     principalName = principalName,
                 )
-            setMockUser()
-        }
-
-        private fun setMockUser() {
-            val authentication = mock<Authentication>()
-            whenever(authentication.name).thenReturn(principalName)
-            val context = mock<SecurityContext>()
-            whenever(context.authentication).thenReturn(authentication)
-            SecurityContextHolder.setContext(context)
+            setMockUser(principalName)
         }
 
         @Test
