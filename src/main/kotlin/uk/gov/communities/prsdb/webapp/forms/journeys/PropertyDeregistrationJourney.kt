@@ -4,7 +4,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
-import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.getPropertyDetailsPath
@@ -27,7 +26,6 @@ class PropertyDeregistrationJourney(
     private val propertyOwnershipId: Long,
 ) : Journey<DeregisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_DEREGISTRATION,
-        journeyDataKey = "${DEREGISTER_PROPERTY_JOURNEY_URL}_$propertyOwnershipId",
         initialStepId = initialStepId,
         validator = validator,
         journeyDataService = journeyDataService,
