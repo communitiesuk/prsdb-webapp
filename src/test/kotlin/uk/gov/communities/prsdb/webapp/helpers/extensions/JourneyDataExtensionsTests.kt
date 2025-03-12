@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DAT
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.getLookedUpAddress
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.getSerializedLookedUpAddresses
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.updateLookedUpAddresses
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -99,7 +99,7 @@ class JourneyDataExtensionsTests {
         val journeyData = mapOf("other-key" to "other-value")
         val expectedUpdatedJourneyData = journeyData + (LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to serializedAddresses)
 
-        val updatedJourneyData = journeyData.updateLookedUpAddresses(serializedAddresses)
+        val updatedJourneyData = journeyData.withUpdatedLookedUpAddresses(serializedAddresses)
 
         assertEquals(expectedUpdatedJourneyData, updatedJourneyData)
     }
@@ -115,7 +115,7 @@ class JourneyDataExtensionsTests {
         val journeyData = mapOf("other-key" to "other-value")
         val expectedUpdatedJourneyData = journeyData + (LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to Json.encodeToString(addresses))
 
-        val updatedJourneyData = journeyData.updateLookedUpAddresses(addresses)
+        val updatedJourneyData = journeyData.withUpdatedLookedUpAddresses(addresses)
 
         assertEquals(expectedUpdatedJourneyData, updatedJourneyData)
     }

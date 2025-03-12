@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.UpdateLandlordDetailsJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.getSerializedLookedUpAddresses
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.updateLookedUpAddresses
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DateOfBirthFormModel
@@ -337,7 +337,7 @@ class UpdateLandlordDetailsJourney(
     private fun setOriginalLookedUpAddresses(journeyData: JourneyData): JourneyData {
         val originalJourneyData = JourneyDataHelper.getPageData(journeyData, originalDataKey)!!
         val lookedUpAddresses = originalJourneyData.getSerializedLookedUpAddresses()!!
-        return journeyData.updateLookedUpAddresses(lookedUpAddresses)
+        return journeyData.withUpdatedLookedUpAddresses(lookedUpAddresses)
     }
 
     companion object {

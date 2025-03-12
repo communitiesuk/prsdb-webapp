@@ -20,12 +20,12 @@ class JourneyDataExtensions {
         fun JourneyData.getSerializedLookedUpAddresses(): String? =
             JourneyDataHelper.getStringValueByKey(this, LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)
 
-        fun JourneyData.updateLookedUpAddresses(lookedUpAddresses: String): JourneyData {
+        fun JourneyData.withUpdatedLookedUpAddresses(lookedUpAddresses: String): JourneyData {
             val updatedJourneyData = this + (LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to lookedUpAddresses)
             return updatedJourneyData
         }
 
-        fun JourneyData.updateLookedUpAddresses(lookedUpAddresses: List<AddressDataModel>): JourneyData =
-            this.updateLookedUpAddresses(Json.encodeToString(lookedUpAddresses))
+        fun JourneyData.withUpdatedLookedUpAddresses(lookedUpAddresses: List<AddressDataModel>): JourneyData =
+            this.withUpdatedLookedUpAddresses(Json.encodeToString(lookedUpAddresses))
     }
 }

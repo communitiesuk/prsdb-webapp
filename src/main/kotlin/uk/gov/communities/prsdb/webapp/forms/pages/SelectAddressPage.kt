@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.getLookedUpAddress
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.updateLookedUpAddresses
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
@@ -40,7 +40,7 @@ class SelectAddressPage(
         val addressLookupResults = addressLookupService.search(houseNameOrNumber, postcode)
 
         val journeyData = journeyDataService.getJourneyDataFromSession()
-        val updatedJourneyData = journeyData.updateLookedUpAddresses(addressLookupResults)
+        val updatedJourneyData = journeyData.withUpdatedLookedUpAddresses(addressLookupResults)
         journeyDataService.setJourneyDataInSession(updatedJourneyData)
 
         var addressRadiosViewModel: List<RadiosViewModel> =
