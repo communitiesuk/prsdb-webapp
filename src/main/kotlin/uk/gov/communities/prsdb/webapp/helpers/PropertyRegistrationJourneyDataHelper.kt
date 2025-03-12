@@ -7,25 +7,23 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 
 class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
     companion object {
         fun getAddress(
             journeyData: JourneyData,
-            addressDataService: AddressDataService,
-        ): AddressDataModel? {
-            return if (isManualAddressChosen(journeyData)) {
+            lookedUpAddresses: List<AddressDataModel>,
+        ): AddressDataModel? =
+            if (isManualAddressChosen(journeyData)) {
                 getManualAddress(
                     journeyData,
                     RegisterPropertyStepId.ManualAddress.urlPathSegment,
                     RegisterPropertyStepId.LocalAuthority.urlPathSegment,
                 )
             } else {
-                val selectedAddress = getSelectedAddress(journeyData) ?: return null
-                addressDataService.getAddressData(selectedAddress)
+                val selectedAddress = getSelectedAddress(journeyData)
+                lookedUpAddresses.singleOrNull { it.singleLineAddress == selectedAddress }
             }
-        }
 
         fun getPropertyType(journeyData: JourneyData): PropertyType? =
             getFieldEnumValue<PropertyType>(

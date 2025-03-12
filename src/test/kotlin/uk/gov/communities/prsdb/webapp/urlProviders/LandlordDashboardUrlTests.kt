@@ -30,7 +30,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTempla
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -73,9 +72,6 @@ class LandlordDashboardUrlTests(
     private lateinit var mockAddressLookupService: AddressLookupService
 
     @MockBean
-    private lateinit var mockAddressDataService: AddressDataService
-
-    @MockBean
     private lateinit var mockLocalAuthorityService: LocalAuthorityService
 
     @MockBean
@@ -90,8 +86,7 @@ class LandlordDashboardUrlTests(
         // Arrange
         val landlord = createLandlord()
 
-        val mockJourneyData =
-            JourneyDataBuilder.landlordDefault(mockAddressDataService, mockLocalAuthorityService).build()
+        val mockJourneyData = JourneyDataBuilder.landlordDefault(mockLocalAuthorityService).build()
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mockJourneyData)
 
         whenever(
@@ -139,8 +134,7 @@ class LandlordDashboardUrlTests(
         val propertyOwnership = createPropertyOwnership()
         val landlord = createLandlord()
 
-        val mockJourneyData =
-            JourneyDataBuilder.propertyDefault(mockAddressDataService, mockLocalAuthorityService).build()
+        val mockJourneyData = JourneyDataBuilder.propertyDefault(mockLocalAuthorityService).build()
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mockJourneyData)
 
         whenever(

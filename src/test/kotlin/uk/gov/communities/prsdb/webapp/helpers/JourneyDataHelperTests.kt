@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
@@ -14,15 +13,13 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class JourneyDataHelperTests {
-    private lateinit var mockAddressDataService: AddressDataService
     private lateinit var mockLocalAuthorityService: LocalAuthorityService
     private lateinit var journeyDataBuilder: JourneyDataBuilder
 
     @BeforeEach
     fun setup() {
-        mockAddressDataService = mock()
         mockLocalAuthorityService = mock()
-        journeyDataBuilder = JourneyDataBuilder.landlordDefault(mockAddressDataService, mockLocalAuthorityService)
+        journeyDataBuilder = JourneyDataBuilder.landlordDefault(mockLocalAuthorityService)
     }
 
     @Test
