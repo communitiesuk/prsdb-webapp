@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOfResidenceFormModel
@@ -35,7 +36,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxView
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -45,13 +45,11 @@ class LandlordRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     val addressLookupService: AddressLookupService,
-    val addressDataService: AddressDataService,
     val landlordService: LandlordService,
     val absoluteUrlProvider: AbsoluteUrlProvider,
     val emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
 ) : Journey<LandlordRegistrationStepId>(
         journeyType = JourneyType.LANDLORD_REGISTRATION,
-        journeyDataKey = REGISTER_LANDLORD_JOURNEY_URL,
         initialStepId = LandlordRegistrationStepId.VerifyIdentity,
         validator = validator,
         journeyDataService = journeyDataService,
@@ -305,7 +303,7 @@ class LandlordRegistrationJourney(
                         ),
                     lookupAddressPathSegment = LandlordRegistrationStepId.LookupAddress.urlPathSegment,
                     addressLookupService = addressLookupService,
-                    addressDataService = addressDataService,
+                    journeyDataService = journeyDataService,
                     displaySectionHeader = true,
                 ),
             nextAction = { journeyData, _ -> selectAddressNextAction(journeyData) },
@@ -400,7 +398,7 @@ class LandlordRegistrationJourney(
                         ),
                     lookupAddressPathSegment = LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
                     addressLookupService = addressLookupService,
-                    addressDataService = addressDataService,
+                    journeyDataService = journeyDataService,
                     displaySectionHeader = true,
                 ),
             nextAction = { journeyData, _ ->
@@ -438,7 +436,7 @@ class LandlordRegistrationJourney(
     private fun checkAnswersStep() =
         Step(
             id = LandlordRegistrationStepId.CheckAnswers,
-            page = LandlordRegistrationCheckAnswersPage(addressDataService, displaySectionHeader = true),
+            page = LandlordRegistrationCheckAnswersPage(journeyDataService, displaySectionHeader = true),
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Declaration, null) },
             saveAfterSubmit = false,
         )
@@ -494,18 +492,18 @@ class LandlordRegistrationJourney(
 
     private fun declarationHandleSubmitAndRedirect(): String {
         val filteredJourneyData = last().filteredJourneyData
+        val lookedUpAddresses = journeyDataService.getJourneyDataFromSession().getLookedUpAddresses()
+
         val landlord =
             landlordService.createLandlord(
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
                 name = LandlordRegistrationJourneyDataHelper.getName(filteredJourneyData)!!,
                 email = LandlordRegistrationJourneyDataHelper.getEmail(filteredJourneyData)!!,
                 phoneNumber = LandlordRegistrationJourneyDataHelper.getPhoneNumber(filteredJourneyData)!!,
-                addressDataModel =
-                    LandlordRegistrationJourneyDataHelper.getAddress(filteredJourneyData, addressDataService)!!,
+                addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(filteredJourneyData, lookedUpAddresses)!!,
                 countryOfResidence = LandlordRegistrationJourneyDataHelper.getCountryOfResidence(filteredJourneyData),
                 isVerified = LandlordRegistrationJourneyDataHelper.isIdentityVerified(filteredJourneyData),
-                nonEnglandOrWalesAddress =
-                    LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesAddress(filteredJourneyData),
+                nonEnglandOrWalesAddress = LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesAddress(filteredJourneyData),
                 dateOfBirth = LandlordRegistrationJourneyDataHelper.getDOB(filteredJourneyData)!!,
             )
 

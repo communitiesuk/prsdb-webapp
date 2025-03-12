@@ -14,11 +14,9 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
-import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -31,9 +29,6 @@ import java.net.URI
 class LandlordRegistrationJourneyTests {
     @Mock
     lateinit var mockJourneyDataService: JourneyDataService
-
-    @Mock
-    lateinit var addressDataService: AddressDataService
 
     @Mock
     lateinit var landlordService: LandlordService
@@ -52,7 +47,6 @@ class LandlordRegistrationJourneyTests {
     @BeforeEach
     fun setup() {
         mockJourneyDataService = mock()
-        addressDataService = mock()
         landlordService = mock()
         addressLookupService = mock()
         confirmationEmailSender = mock()
@@ -85,7 +79,6 @@ class LandlordRegistrationJourneyTests {
                     validator = alwaysTrueValidator,
                     journeyDataService = mockJourneyDataService,
                     addressLookupService = addressLookupService,
-                    addressDataService = addressDataService,
                     landlordService = landlordService,
                     emailNotificationService = confirmationEmailSender,
                     absoluteUrlProvider = urlProvider,
@@ -109,7 +102,6 @@ class LandlordRegistrationJourneyTests {
             val journeyData =
                 JourneyDataBuilder
                     .landlordDefault(
-                        addressDataService,
                         localAuthorityService = mock(),
                     ).withNonEnglandOrWalesAndSelectedContactAddress(
                         "Angola",
@@ -118,12 +110,17 @@ class LandlordRegistrationJourneyTests {
                     ).withSelectedAddress(
                         "uk residential address",
                         localAuthority = LocalAuthority(),
-                    )
+                    ).build()
 
-            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData.build())
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
-            completeStep(LandlordRegistrationStepId.Declaration)
+            testJourney.completeStep(
+                stepPathSegment = LandlordRegistrationStepId.Declaration.urlPathSegment,
+                pageData = mapOf(),
+                subPageNumber = null,
+                principal = mock(),
+            )
 
             // Assert
             verify(landlordService).createLandlord(
@@ -136,18 +133,6 @@ class LandlordRegistrationJourneyTests {
                 isVerified = any(),
                 nonEnglandOrWalesAddress = argThat { internationalAddress -> internationalAddress.isNullOrBlank() },
                 dateOfBirth = any(),
-            )
-        }
-
-        private fun completeStep(
-            stepId: LandlordRegistrationStepId,
-            pageData: PageData = mapOf(),
-        ) {
-            testJourney.completeStep(
-                stepPathSegment = stepId.urlPathSegment,
-                pageData = pageData,
-                subPageNumber = null,
-                principal = mock(),
             )
         }
     }

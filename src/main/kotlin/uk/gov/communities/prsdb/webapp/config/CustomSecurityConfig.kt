@@ -35,6 +35,8 @@ class CustomSecurityConfig(
                 requests
                     .requestMatchers("/")
                     .permitAll()
+                    .requestMatchers("/healthcheck")
+                    .permitAll()
                     .requestMatchers("/register-as-a-landlord")
                     .permitAll()
                     .requestMatchers("/signout")

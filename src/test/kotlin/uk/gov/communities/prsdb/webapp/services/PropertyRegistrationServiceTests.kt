@@ -44,7 +44,7 @@ class PropertyRegistrationServiceTests {
     private lateinit var mockLandlordRepository: LandlordRepository
 
     @Mock
-    private lateinit var mockAddressDataService: AddressDataService
+    private lateinit var mockRegisteredAddressCache: RegisteredAddressCache
 
     @Mock
     private lateinit var mockPropertyService: PropertyService
@@ -66,7 +66,7 @@ class PropertyRegistrationServiceTests {
     fun `getIsAddressRegistered returns the expected value when the given uprn is cached`(expectedValue: Boolean) {
         val uprn = 0L
 
-        whenever(mockAddressDataService.getCachedAddressRegisteredResult(uprn)).thenReturn(expectedValue)
+        whenever(mockRegisteredAddressCache.getCachedAddressRegisteredResult(uprn)).thenReturn(expectedValue)
 
         val result = propertyRegistrationService.getIsAddressRegistered(uprn)
 
@@ -77,12 +77,12 @@ class PropertyRegistrationServiceTests {
     fun `getIsAddressRegistered caches and returns false when there's no property associated with the given uprn`() {
         val uprn = 0L
 
-        whenever(mockAddressDataService.getCachedAddressRegisteredResult(uprn)).thenReturn(null)
+        whenever(mockRegisteredAddressCache.getCachedAddressRegisteredResult(uprn)).thenReturn(null)
         whenever(mockPropertyRepository.findByAddress_Uprn(uprn)).thenReturn(null)
 
         val result = propertyRegistrationService.getIsAddressRegistered(uprn)
 
-        verify(mockAddressDataService).setCachedAddressRegisteredResult(uprn, false)
+        verify(mockRegisteredAddressCache).setCachedAddressRegisteredResult(uprn, false)
         assertFalse(result)
     }
 
@@ -91,12 +91,12 @@ class PropertyRegistrationServiceTests {
         val uprn = 0L
         val inactiveProperty = Property()
 
-        whenever(mockAddressDataService.getCachedAddressRegisteredResult(uprn)).thenReturn(null)
+        whenever(mockRegisteredAddressCache.getCachedAddressRegisteredResult(uprn)).thenReturn(null)
         whenever(mockPropertyRepository.findByAddress_Uprn(uprn)).thenReturn(inactiveProperty)
 
         val result = propertyRegistrationService.getIsAddressRegistered(uprn)
 
-        verify(mockAddressDataService).setCachedAddressRegisteredResult(uprn, false)
+        verify(mockRegisteredAddressCache).setCachedAddressRegisteredResult(uprn, false)
         assertFalse(result)
     }
 
@@ -108,14 +108,14 @@ class PropertyRegistrationServiceTests {
         val uprn = 0L
         val activeProperty = Property(id = 1, address = Address(), isActive = true)
 
-        whenever(mockAddressDataService.getCachedAddressRegisteredResult(uprn)).thenReturn(null)
+        whenever(mockRegisteredAddressCache.getCachedAddressRegisteredResult(uprn)).thenReturn(null)
         whenever(mockPropertyRepository.findByAddress_Uprn(uprn)).thenReturn(activeProperty)
         whenever(mockPropertyOwnershipRepository.existsByIsActiveTrueAndProperty_Id(activeProperty.id))
             .thenReturn(expectedValue)
 
         val result = propertyRegistrationService.getIsAddressRegistered(uprn)
 
-        verify(mockAddressDataService).setCachedAddressRegisteredResult(uprn, result)
+        verify(mockRegisteredAddressCache).setCachedAddressRegisteredResult(uprn, result)
         assertEquals(expectedValue, result)
     }
 
@@ -132,7 +132,7 @@ class PropertyRegistrationServiceTests {
 
         val result = propertyRegistrationService.getIsAddressRegistered(uprn, ignoreCache = true)
 
-        verify(mockAddressDataService, never()).getCachedAddressRegisteredResult(uprn)
+        verify(mockRegisteredAddressCache, never()).getCachedAddressRegisteredResult(uprn)
         assertEquals(expectedValue, result)
     }
 
