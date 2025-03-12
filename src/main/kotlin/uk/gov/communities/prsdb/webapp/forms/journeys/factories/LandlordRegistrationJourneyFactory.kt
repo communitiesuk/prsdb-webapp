@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
+import uk.gov.communities.prsdb.webapp.services.SecurityContextResetter
 
 @Component
 class LandlordRegistrationJourneyFactory(
@@ -19,6 +20,7 @@ class LandlordRegistrationJourneyFactory(
     private val landlordService: LandlordService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
+    private val securityContextResetter: SecurityContextResetter,
 ) {
     fun create() =
         LandlordRegistrationJourney(
@@ -28,5 +30,6 @@ class LandlordRegistrationJourneyFactory(
             landlordService,
             absoluteUrlProvider,
             emailNotificationService,
+            securityContextResetter,
         )
 }
