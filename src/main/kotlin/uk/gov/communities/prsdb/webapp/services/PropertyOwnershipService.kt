@@ -64,7 +64,7 @@ class PropertyOwnershipService(
 
         val isLocalAuthority = localAuthorityDataService.getIsLocalAuthorityUser(baseUserId)
 
-        val isPrimaryLandlord = getIsPrimaryLandlord(propertyOwnership, baseUserId)
+        val isPrimaryLandlord = propertyOwnership.primaryLandlord.baseUser.id == baseUserId
 
         if (!isLocalAuthority && !isPrimaryLandlord) {
             throw ResponseStatusException(
@@ -83,15 +83,10 @@ class PropertyOwnershipService(
                 "Property ownership $propertyOwnershipId not found",
             )
 
-    private fun getIsPrimaryLandlord(
-        propertyOwnership: PropertyOwnership,
-        baseUserId: String,
-    ): Boolean = propertyOwnership.primaryLandlord.baseUser.id == baseUserId
-
     fun getIsPrimaryLandlord(
         propertyOwnershipId: Long,
         baseUserId: String,
-    ): Boolean = getIsPrimaryLandlord(getPropertyOwnership(propertyOwnershipId), baseUserId)
+    ): Boolean = getPropertyOwnership(propertyOwnershipId).primaryLandlord.baseUser.id == baseUserId
 
     fun getIsAuthorizedToDeleteRecord(
         propertyOwnershipId: Long,
