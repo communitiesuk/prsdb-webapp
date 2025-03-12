@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.helpers.extensions
+package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
