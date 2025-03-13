@@ -82,7 +82,7 @@ class LandlordRegistrationJourneyTests {
                     landlordService = landlordService,
                     emailNotificationService = confirmationEmailSender,
                     absoluteUrlProvider = urlProvider,
-                    securityContextResetter = mock(),
+                    securityContextService = mock(),
                 )
             setMockUser()
         }

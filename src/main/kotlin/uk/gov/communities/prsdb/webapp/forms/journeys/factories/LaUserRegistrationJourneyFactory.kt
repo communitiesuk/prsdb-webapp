@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
-import uk.gov.communities.prsdb.webapp.services.SecurityContextResetter
+import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
 @Component
@@ -16,7 +16,7 @@ class LaUserRegistrationJourneyFactory(
     private val journeyDataServiceFactory: JourneyDataServiceFactory,
     private val invitationService: LocalAuthorityInvitationService,
     private val localAuthorityDataService: LocalAuthorityDataService,
-    private val securityContextResetter: SecurityContextResetter,
+    private val securityContextService: SecurityContextService,
 ) {
     fun create(invitation: LocalAuthorityInvitation) =
         LaUserRegistrationJourney(
@@ -25,6 +25,6 @@ class LaUserRegistrationJourneyFactory(
             invitationService,
             localAuthorityDataService,
             invitation,
-            securityContextResetter,
+            securityContextService,
         )
 }
