@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -85,7 +86,7 @@ class RegisterLAUserController(
             )
     }
 
-    @GetMapping("/$CONFIRMATION_PAGE_PATH_SEGMENT")
+    @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getConfirmation(
         model: Model,
         principal: Principal,
@@ -123,7 +124,6 @@ class RegisterLAUserController(
     }
 
     companion object {
-        const val CONFIRMATION_PAGE_PATH_SEGMENT = "confirmation"
         const val INVALID_LINK_PAGE_PATH_SEGMENT = "invalid-link"
     }
 }
