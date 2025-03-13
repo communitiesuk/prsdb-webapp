@@ -218,7 +218,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `getJourneyStep returns 200 for a valid request from a landlord`() {
-            whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnership.id), any())).thenReturn(true)
+            whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(eq(propertyOwnership.id), any())).thenReturn(true)
 
             mvc.get(updatePropertyOwnershipTypePath).andExpect {
                 status { status { isOk() } }
@@ -228,7 +228,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `getJourneyStep returns 404 for an invalid request from a landlord`() {
-            whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnership.id), any())).thenReturn(false)
+            whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(eq(propertyOwnership.id), any())).thenReturn(false)
 
             mvc.get(updatePropertyOwnershipTypePath).andExpect {
                 status { status { isNotFound() } }
@@ -263,7 +263,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `postJourneyData redirects to the update details page for a valid request from a landlord`() {
-            whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnership.id), any())).thenReturn(true)
+            whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(eq(propertyOwnership.id), any())).thenReturn(true)
 
             whenever(
                 propertyDetailsUpdateJourney.completeStep(
@@ -290,7 +290,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `postJourneyData returns 404 for an invalid request from a landlord`() {
-            whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnership.id), any())).thenReturn(false)
+            whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(eq(propertyOwnership.id), any())).thenReturn(false)
 
             mvc
                 .post(updatePropertyOwnershipTypePath) {

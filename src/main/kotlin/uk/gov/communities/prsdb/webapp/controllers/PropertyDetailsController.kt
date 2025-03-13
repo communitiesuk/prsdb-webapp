@@ -67,7 +67,7 @@ class PropertyDetailsController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
     ): ModelAndView =
-        if (propertyOwnershipService.getIsPrimaryLandlord(propertyOwnershipId, principal.name)) {
+        if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
             propertyDetailsUpdateJourneyFactory
                 .create(propertyOwnershipId)
                 .getModelAndViewForStep(stepName, subPageNumber = null)
@@ -87,7 +87,7 @@ class PropertyDetailsController(
         @PathVariable("stepName") stepName: String,
         @RequestParam formData: PageData,
     ): ModelAndView =
-        if (propertyOwnershipService.getIsPrimaryLandlord(propertyOwnershipId, principal.name)) {
+        if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
             propertyDetailsUpdateJourneyFactory
                 .create(propertyOwnershipId)
                 .completeStep(

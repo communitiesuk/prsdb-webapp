@@ -35,7 +35,7 @@ class DeregisterPropertyController(
         model: Model,
         principal: Principal,
     ): ModelAndView {
-        if (!propertyOwnershipService.getIsAuthorizedToDeleteRecord(propertyOwnershipId, principal.name)) {
+        if (!propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "The current user is not authorised to delete property ownership $propertyOwnershipId",

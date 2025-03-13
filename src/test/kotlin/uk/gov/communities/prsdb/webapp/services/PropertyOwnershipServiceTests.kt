@@ -334,7 +334,7 @@ class PropertyOwnershipServiceTests {
     }
 
     @Nested
-    inner class GetIsPrimaryLandlord {
+    inner class GetIsAuthorizedToEditRecord {
         @Test
         fun `returns true when the user is the property's primary landlord`() {
             val baseUserId = "baseUserId"
@@ -348,7 +348,7 @@ class PropertyOwnershipServiceTests {
 
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
 
-            val returnedIsPrimaryLandlord = propertyOwnershipService.getIsPrimaryLandlord(propertyOwnership.id, baseUserId)
+            val returnedIsPrimaryLandlord = propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnership.id, baseUserId)
 
             assertTrue(returnedIsPrimaryLandlord)
         }
@@ -365,7 +365,11 @@ class PropertyOwnershipServiceTests {
 
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
 
-            val returnedIsPrimaryLandlord = propertyOwnershipService.getIsPrimaryLandlord(propertyOwnership.id, "differentBaseUserId")
+            val returnedIsPrimaryLandlord =
+                propertyOwnershipService.getIsAuthorizedToEditRecord(
+                    propertyOwnership.id,
+                    "differentBaseUserId",
+                )
 
             assertFalse(returnedIsPrimaryLandlord)
         }
@@ -374,7 +378,7 @@ class PropertyOwnershipServiceTests {
         fun `throws not found error if the property ownership does not exist`() {
             val errorThrown =
                 assertThrows<ResponseStatusException> {
-                    propertyOwnershipService.getIsPrimaryLandlord(1, "anyBaseUserId")
+                    propertyOwnershipService.getIsAuthorizedToEditRecord(1, "anyBaseUserId")
                 }
             assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
         }
