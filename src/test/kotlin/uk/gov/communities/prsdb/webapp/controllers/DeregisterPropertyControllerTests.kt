@@ -55,10 +55,10 @@ class DeregisterPropertyControllerTests(
     fun `getJourneyStep for the initial step returns 404 for a landlord user who does not own this property`() {
         // Arrange
         val propertyOwnershipId = 1.toLong()
+
         whenever(propertyDeregistrationJourneyFactory.create(propertyOwnershipId))
             .thenReturn(mock())
-        whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(eq(propertyOwnershipId), anyString()))
-            .thenReturn(false)
+        whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(false)
 
         // Act, Assert
         mvc
@@ -73,10 +73,10 @@ class DeregisterPropertyControllerTests(
     fun `getJourneyStep for the initial step returns 200 for the landlord who owns this property`() {
         // Arrange
         val propertyOwnershipId = 1.toLong()
+
         whenever(propertyDeregistrationJourneyFactory.create(propertyOwnershipId))
             .thenReturn(mock())
-        whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(eq(propertyOwnershipId), anyString()))
-            .thenReturn(true)
+        whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
 
         // Act, Assert
         mvc

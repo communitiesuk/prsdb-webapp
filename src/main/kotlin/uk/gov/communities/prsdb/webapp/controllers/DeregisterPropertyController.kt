@@ -35,12 +35,7 @@ class DeregisterPropertyController(
         model: Model,
         principal: Principal,
     ): ModelAndView {
-        if (!propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "The current user is not authorised to delete property ownership $propertyOwnershipId",
-            )
-        }
+        throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId, principal)
 
         return propertyDeregistrationJourneyFactory
             .create(propertyOwnershipId)
@@ -58,8 +53,10 @@ class DeregisterPropertyController(
         @RequestParam formData: PageData,
         model: Model,
         principal: Principal,
-    ): ModelAndView =
-        propertyDeregistrationJourneyFactory
+    ): ModelAndView {
+        throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId, principal)
+
+        return propertyDeregistrationJourneyFactory
             .create(propertyOwnershipId)
             .completeStep(
                 stepName,
@@ -67,6 +64,26 @@ class DeregisterPropertyController(
                 subpage,
                 principal,
             )
+    }
+
+    private fun throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(
+        propertyOwnershipId: Long,
+        principal: Principal,
+    ) {
+        if (!isCurrentUserAuthorizedToDeregisterProperty(propertyOwnershipId, principal)) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "The current user is not authorised to delete property ownership $propertyOwnershipId",
+            )
+        }
+    }
+
+    private fun isCurrentUserAuthorizedToDeregisterProperty(
+        propertyOwnershipId: Long,
+        principal: Principal,
+    ): Boolean =
+        propertyOwnershipService
+            .getIsPrimaryLandlord(propertyOwnershipId, principal.name)
 
     companion object {
         const val PROPERTY_DEREGISTRATION_ROUTE = "/$DEREGISTER_PROPERTY_JOURNEY_URL/{propertyOwnershipId}"

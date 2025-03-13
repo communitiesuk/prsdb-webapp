@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ReasonPagePropertyDeregistration
@@ -18,16 +19,17 @@ class PropertyDeregistrationJourneyTests : IntegrationTest() {
         val deregisterPropertyAreYouSurePage = navigator.goToPropertyDeregistrationAreYouSurePage(propertyOwnershipId.toLong())
         assertThat(deregisterPropertyAreYouSurePage.form.fieldsetHeading).containsText("1, Example Road, EG")
         deregisterPropertyAreYouSurePage.submitWantsToProceed()
+
         val reasonPage =
             assertPageIs(
                 page,
                 ReasonPagePropertyDeregistration::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-
-        // TODO: PRSD-697 - add the reason step
+        reasonPage.submitReason("No longer own this property")
 
         // TOOD: : PRSD-698 - add the confirmation page
+        assertPageIs(page, LandlordDashboardPage::class)
     }
 
     @Nested
@@ -54,6 +56,30 @@ class PropertyDeregistrationJourneyTests : IntegrationTest() {
             deregisterPropertyAreYouSurePage.form.submit()
             assertThat(deregisterPropertyAreYouSurePage.form.getErrorMessage("wantsToProceed"))
                 .containsText("Select whether you want to delete this property from the database")
+        }
+    }
+
+    @Nested
+    inner class ReasonStep {
+        @Test
+        fun `Reason page can be submitted without being filled in`(page: Page) {
+            val deregisterPropertyReasonPage = navigator.goToPropertyDeregistrationReasonPage(1.toLong())
+            deregisterPropertyReasonPage.form.submit()
+            // TOOD: PRSD-698 - change this to the confirmation page
+            assertPageIs(page, LandlordDashboardPage::class)
+        }
+
+        @Test
+        fun `Submitting with a reason longer than 200 characters returns an error`(page: Page) {
+            val longReason =
+                "This is my life story, it is far too long to go in this field.  " +
+                    "This is my life story, it is far too long to go in this field." +
+                    "This is my life story, it is far too long to go in this field." +
+                    "This is my life story, it is far too long to go in this field."
+            val deregisterPropertyReasonPage = navigator.goToPropertyDeregistrationReasonPage(1.toLong())
+            deregisterPropertyReasonPage.submitReason(longReason)
+            assertThat(deregisterPropertyReasonPage.form.getErrorMessage("reason"))
+                .containsText("Your reason for deleting this property must be 200 characters or fewer")
         }
     }
 }

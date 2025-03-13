@@ -43,4 +43,8 @@ class PropertyService(
         property.propertyBuildType = propertyType
         return propertyRepository.save(property)
     }
+
+    fun deleteProperty(property: Property) {
+        propertyRepository.delete(property)
+    }
 }

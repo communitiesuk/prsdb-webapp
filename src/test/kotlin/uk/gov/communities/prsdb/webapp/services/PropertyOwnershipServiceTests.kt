@@ -603,4 +603,13 @@ class PropertyOwnershipServiceTests {
         assertEquals(updateModel.numberOfHouseholds, propertyOwnership.currentNumHouseholds)
         assertEquals(updateModel.numberOfPeople, propertyOwnership.currentNumTenants)
     }
+
+    @Test
+    fun `deletePropertyOwnership calls delete on the propertyOwnershipRepository`() {
+        val propertyOwnership = MockLandlordData.createPropertyOwnership()
+
+        propertyOwnershipService.deletePropertyOwnership(propertyOwnership)
+
+        verify(mockPropertyOwnershipRepository).delete(propertyOwnership)
+    }
 }

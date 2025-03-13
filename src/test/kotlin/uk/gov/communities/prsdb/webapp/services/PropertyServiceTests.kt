@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertTrue
 
 @ExtendWith(MockitoExtension::class)
@@ -83,5 +84,14 @@ class PropertyServiceTests {
         val propertyCaptor = captor<Property>()
         verify(mockPropertyRepository).save(propertyCaptor.capture())
         assertTrue(ReflectionEquals(expectedProperty).matches(propertyCaptor.value))
+    }
+
+    @Test
+    fun `deleteProperty calls delete on the propertyRepository`() {
+        val property = MockLandlordData.createProperty()
+
+        propertyService.deleteProperty(property)
+
+        verify(mockPropertyRepository).delete(property)
     }
 }

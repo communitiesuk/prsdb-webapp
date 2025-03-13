@@ -89,6 +89,13 @@ class PropertyRegistrationService(
         return propertyOwnership.registrationNumber
     }
 
+    fun deregisterProperty(propertyOwnershipId: Long) {
+        propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)?.let {
+            propertyOwnershipService.deletePropertyOwnership(it)
+            propertyService.deleteProperty(it.property)
+        }
+    }
+
     fun setLastPrnRegisteredThisSession(prn: Long) = session.setAttribute(PROPERTY_REGISTRATION_NUMBER, prn)
 
     fun getLastPrnRegisteredThisSession() = session.getAttribute(PROPERTY_REGISTRATION_NUMBER)?.toString()?.toLong()

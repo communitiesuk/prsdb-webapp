@@ -10,9 +10,6 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContext
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
@@ -21,6 +18,8 @@ import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
+import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper.Companion.setMockUser
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -84,16 +83,7 @@ class LandlordRegistrationJourneyTests {
                     absoluteUrlProvider = urlProvider,
                     securityContextService = mock(),
                 )
-            setMockUser()
-        }
-
-        private fun setMockUser() {
-            val name = "a-user-name"
-            val authentication = mock<Authentication>()
-            whenever(authentication.name).thenReturn(name)
-            val context = mock<SecurityContext>()
-            whenever(context.authentication).thenReturn(authentication)
-            SecurityContextHolder.setContext(context)
+            JourneyTestHelper.setMockUser("a-user-name")
         }
 
         @Suppress("ktlint:standard:max-line-length")
