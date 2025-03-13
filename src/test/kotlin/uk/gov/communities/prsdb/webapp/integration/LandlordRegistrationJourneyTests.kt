@@ -116,7 +116,9 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
         assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
         confirmationPage.goToDashboardButton.clickAndWait()
-        assertPageIs(page, LandlordDashboardPage::class)
+        val dashboard = assertPageIs(page, LandlordDashboardPage::class)
+
+        assertThat(dashboard.bannerSubHeading).containsText("Landlord registration number")
     }
 
     @Test
