@@ -14,9 +14,15 @@ abstract class BasePage(
         fun <T : BasePage> createValidPage(
             page: Page,
             expectedPageClass: KClass<T>,
+            urlArguments: Map<String, String>? = null,
         ): T {
             page.waitForLoadState()
-            val pageInstance = expectedPageClass.constructors.first().call(page)
+            val pageInstance =
+                if (urlArguments != null) {
+                    expectedPageClass.constructors.first().call(page, urlArguments)
+                } else {
+                    expectedPageClass.constructors.first().call(page)
+                }
             pageInstance.validate()
             assertEquals(
                 emptyList(),
@@ -29,7 +35,8 @@ abstract class BasePage(
         fun <T : BasePage> assertPageIs(
             page: Page,
             expectedPageClass: KClass<T>,
-        ) = createValidPage(page, expectedPageClass)
+            urlArguments: Map<String, String>? = null,
+        ) = createValidPage(page, expectedPageClass, urlArguments)
     }
 
     private fun validate() {

@@ -245,12 +245,12 @@ class LandlordRegistrationJourney(
                                     RadiosButtonViewModel(
                                         value = true,
                                         valueStr = "yes",
-                                        labelMsgKey = "forms.countryOfResidence.radios.option.yes.label",
+                                        labelMsgKey = "forms.radios.option.yes.label",
                                     ),
                                     RadiosButtonViewModel(
                                         value = false,
                                         valueStr = "no",
-                                        labelMsgKey = "forms.countryOfResidence.radios.option.no.label",
+                                        labelMsgKey = "forms.radios.option.no.label",
                                         conditionalFragment = "countryOfResidenceSelect",
                                     ),
                                 ),

@@ -59,12 +59,12 @@ class PropertyDetailsControllerTests(
         fun `getPropertyDetails returns 200 for a valid request from a landlord`() {
             val propertyOwnership = createPropertyOwnership()
 
-            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(1), any()))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
                 .thenReturn(
                     propertyOwnership,
                 )
 
-            mvc.get("/property-details/1").andExpect {
+            mvc.get("/property-details/${propertyOwnership.id}").andExpect {
                 status { status { isOk() } }
             }
         }

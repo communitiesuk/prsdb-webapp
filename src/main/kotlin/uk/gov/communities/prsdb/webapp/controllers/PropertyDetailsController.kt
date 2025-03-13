@@ -47,7 +47,10 @@ class PropertyDetailsController(
 
         model.addAttribute("propertyDetails", propertyDetails)
         model.addAttribute("landlordDetails", landlordViewModel.landlordsDetails)
-        model.addAttribute("deleteRecordLink", "delete-record")
+        model.addAttribute(
+            "deleteRecordLink",
+            DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId),
+        )
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
         return "propertyDetailsView"

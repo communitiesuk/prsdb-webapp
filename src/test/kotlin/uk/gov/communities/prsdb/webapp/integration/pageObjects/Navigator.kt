@@ -4,6 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.Response
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
@@ -15,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
@@ -48,6 +50,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.DeclarationFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
@@ -377,17 +380,34 @@ class Navigator(
 
     fun goToPropertyDetailsLandlordView(id: Long): PropertyDetailsPageLandlordView {
         navigate("/property-details/$id")
-        return createValidPage(page, PropertyDetailsPageLandlordView::class)
+        return createValidPage(
+            page,
+            PropertyDetailsPageLandlordView::class,
+            mapOf("propertyOwnershipId" to id.toString()),
+        )
     }
 
     fun goToPropertyDetailsLocalAuthorityView(id: Long): PropertyDetailsPageLocalAuthorityView {
         navigate("/local-authority/property-details/$id")
-        return createValidPage(page, PropertyDetailsPageLocalAuthorityView::class)
+        return createValidPage(
+            page,
+            PropertyDetailsPageLocalAuthorityView::class,
+            mapOf("propertyOwnershipId" to id.toString()),
+        )
     }
 
     fun goToUpdateLandlordDetailsPage(): LandlordUpdateDetailsPage {
         navigate("${LandlordDetailsController.UPDATE_ROUTE}/$DETAILS_PATH_SEGMENT")
         return createValidPage(page, LandlordUpdateDetailsPage::class)
+    }
+
+    fun goToPropertyDeregistrationAreYouSurePage(propertyOwnershipId: Long): AreYouSureFormPagePropertyDeregistration {
+        navigate("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/${DeregisterPropertyStepId.AreYouSure.urlPathSegment}")
+        return createValidPage(
+            page,
+            AreYouSureFormPagePropertyDeregistration::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
     }
 
     fun goToLocalAuthorityDashboard(): LocalAuthorityDashboardPage {

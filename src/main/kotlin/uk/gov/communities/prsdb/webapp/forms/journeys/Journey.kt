@@ -6,6 +6,7 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.ReachableStepDetailsIterator
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
@@ -98,18 +99,26 @@ abstract class Journey<T : StepId>(
         if (currentStep.handleSubmitAndRedirect != null) {
             return ModelAndView("redirect:${currentStep.handleSubmitAndRedirect.invoke(newJourneyData, subPageNumber)}")
         }
+
+        val redirectUrl = getRedirectForNextStep(currentStep, newJourneyData, subPageNumber)
+        return ModelAndView("redirect:$redirectUrl")
+    }
+
+    protected fun getRedirectForNextStep(
+        currentStep: Step<T>,
+        newJourneyData: JourneyData,
+        subPageNumber: Int?,
+    ): String {
         val (newStepId: T?, newSubPageNumber: Int?) = currentStep.nextAction(newJourneyData, subPageNumber)
         if (newStepId == null) {
             throw IllegalStateException("Cannot compute next step from step ${currentStep.id.urlPathSegment}")
         }
-        val redirectUrl =
-            UriComponentsBuilder
-                .newInstance()
-                .path(newStepId.urlPathSegment)
-                .queryParamIfPresent("subpage", Optional.ofNullable(newSubPageNumber))
-                .build(true)
-                .toUriString()
-        return ModelAndView("redirect:$redirectUrl")
+        return UriComponentsBuilder
+            .newInstance()
+            .path(newStepId.urlPathSegment)
+            .queryParamIfPresent("subpage", Optional.ofNullable(newSubPageNumber))
+            .build(true)
+            .toUriString()
     }
 
     override fun iterator(): Iterator<StepDetails<T>> =

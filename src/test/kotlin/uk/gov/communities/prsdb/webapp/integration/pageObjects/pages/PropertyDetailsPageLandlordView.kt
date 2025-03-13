@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.P
 
 class PropertyDetailsPageLandlordView(
     page: Page,
-) : PropertyDetailsBasePage(page, "/property-details") {
+    urlArguments: Map<String, String>,
+) : PropertyDetailsBasePage(page, "/property-details/${urlArguments["propertyOwnershipId"]}") {
     val deleteButton = Button.byText(page, "Delete property record")
 }

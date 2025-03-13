@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.P
 
 class PropertyDetailsPageLocalAuthorityView(
     page: Page,
-) : PropertyDetailsBasePage(page, "/local-authority/property-details") {
+    urlArguments: Map<String, String>,
+) : PropertyDetailsBasePage(page, "/local-authority/property-details/${urlArguments["propertyOwnershipId"]}") {
     val insetText = InsetText(page)
 }
