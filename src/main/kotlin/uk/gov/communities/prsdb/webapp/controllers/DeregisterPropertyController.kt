@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.PROPERTY_DEREGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
@@ -84,6 +86,16 @@ class DeregisterPropertyController(
     ): Boolean =
         propertyOwnershipService
             .getIsPrimaryLandlord(propertyOwnershipId, principal.name)
+
+    @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
+    fun getConfirmation(
+        model: Model,
+        principal: Principal,
+    ): String {
+        model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
+
+        return "deregisterPropertyConfirmation"
+    }
 
     companion object {
         const val PROPERTY_DEREGISTRATION_ROUTE = "/$DEREGISTER_PROPERTY_JOURNEY_URL/{propertyOwnershipId}"
