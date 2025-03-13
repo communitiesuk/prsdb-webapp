@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.C
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
-import uk.gov.communities.prsdb.webapp.forms.pages.PageWithContentProviders
+import uk.gov.communities.prsdb.webapp.forms.pages.PageWithContentProvider
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDeregistrationJourneyDataExtensions.Companion.getWantsToProceed
@@ -46,7 +46,7 @@ class PropertyDeregistrationJourney(
         Step(
             id = DeregisterPropertyStepId.AreYouSure,
             page =
-                PageWithContentProviders(
+                PageWithContentProvider(
                     formModel = PropertyDeregistrationAreYouSureFormModel::class,
                     templateName = "forms/areYouSureForm",
                     content =
@@ -68,8 +68,7 @@ class PropertyDeregistrationJourney(
                                 ),
                             BACK_URL_ATTR_NAME to PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId),
                         ),
-                    contentProviders = listOf { providePropertyAddress() },
-                ),
+                ) { providePropertyAddress() },
             // handleSubmitAndRedirect will execute. It does not have to redirect to the step specified in nextAction.
             handleSubmitAndRedirect = { newJourneyData, subPage -> areYouSureContinueToNextActionOrExitJourney(newJourneyData, subPage) },
             // This gets checked when determining whether the next step is reachable
@@ -109,7 +108,7 @@ class PropertyDeregistrationJourney(
         return PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)
     }
 
-    private fun providePropertyAddress(): Pair<String, String> {
+    private fun providePropertyAddress(): Map<String, String> {
         val propertyAddress =
             propertyOwnershipService
                 .retrievePropertyOwnershipById(propertyOwnershipId)
@@ -120,7 +119,7 @@ class PropertyDeregistrationJourney(
                 "Address for property ownership id $propertyOwnershipId not found",
             )
 
-        return ("singleLineAddress" to propertyAddress)
+        return mapOf("singleLineAddress" to propertyAddress)
     }
 
     private fun deregisterPropertyAndRedirectToConfirmation(): String {

@@ -5,20 +5,17 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import kotlin.reflect.KClass
 
-class PageWithContentProviders(
+class PageWithContentProvider(
     formModel: KClass<out FormModel>,
     templateName: String,
     content: Map<String, Any>,
-    private val contentProviders: List<() -> Pair<String, Any?>>,
     shouldDisplaySectionHeader: Boolean = false,
+    private val contentProvider: () -> Map<String, Any>,
 ) : AbstractPage(formModel, templateName, content, shouldDisplaySectionHeader) {
     override fun enrichModel(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData?,
     ) {
-        contentProviders.forEach { contentProvider ->
-            val contentKeyValuePair = contentProvider()
-            modelAndView.addObject(contentKeyValuePair.first, contentKeyValuePair.second)
-        }
+        contentProvider().forEach { modelAndView.addObject(it.key, it.value) }
     }
 }
