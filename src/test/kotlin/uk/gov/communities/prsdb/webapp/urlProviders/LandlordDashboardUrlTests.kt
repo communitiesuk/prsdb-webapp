@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.urlProviders
 
+import org.junit.jupiter.api.BeforeEach
+import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
@@ -30,7 +32,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTempla
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -39,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
@@ -67,13 +69,13 @@ class LandlordDashboardUrlTests(
     private lateinit var mockIdentityService: OneLoginIdentityService
 
     @MockBean
+    private lateinit var mockJourneyDataServiceFactory: JourneyDataServiceFactory
+
+    @Mock
     private lateinit var mockJourneyDataService: JourneyDataService
 
     @MockBean
     private lateinit var mockAddressLookupService: AddressLookupService
-
-    @MockBean
-    private lateinit var mockAddressDataService: AddressDataService
 
     @MockBean
     private lateinit var mockLocalAuthorityService: LocalAuthorityService
@@ -84,14 +86,18 @@ class LandlordDashboardUrlTests(
     @MockBean
     private lateinit var mockPropertyRegistrationService: PropertyRegistrationService
 
+    @BeforeEach
+    fun setUp() {
+        whenever(mockJourneyDataServiceFactory.create(any())).thenReturn(mockJourneyDataService)
+    }
+
     @Test
     @WithMockUser(roles = ["LANDLORD"])
     fun `The sign in url generated when a landlord is registered is routed to the landlord dashboard`() {
         // Arrange
         val landlord = createLandlord()
 
-        val mockJourneyData =
-            JourneyDataBuilder.landlordDefault(mockAddressDataService, mockLocalAuthorityService).build()
+        val mockJourneyData = JourneyDataBuilder.landlordDefault(mockLocalAuthorityService).build()
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mockJourneyData)
 
         whenever(
@@ -139,8 +145,7 @@ class LandlordDashboardUrlTests(
         val propertyOwnership = createPropertyOwnership()
         val landlord = createLandlord()
 
-        val mockJourneyData =
-            JourneyDataBuilder.propertyDefault(mockAddressDataService, mockLocalAuthorityService).build()
+        val mockJourneyData = JourneyDataBuilder.propertyDefault(mockLocalAuthorityService).build()
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mockJourneyData)
 
         whenever(

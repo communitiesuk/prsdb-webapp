@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.getPropertyDeregistrationPath
+import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -28,10 +29,12 @@ class DeregisterPropertyControllerTests(
     @MockBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
+    private val initialStepIdUrlSegment = PropertyDeregistrationJourney.initialStepId.urlPathSegment
+
     @Test
     fun `getJourneyStep for the initial step returns a redirect for an unauthenticated user`() {
         mvc
-            .get("/deregister-property/1/are-you-sure")
+            .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/1/$initialStepIdUrlSegment")
             .andExpect {
                 status { is3xxRedirection() }
             }
@@ -41,7 +44,7 @@ class DeregisterPropertyControllerTests(
     @WithMockUser
     fun `getJourneyStep for the initial step returns 403 for a user who is not a landlord`() {
         mvc
-            .get("/deregister-property/1/are-you-sure")
+            .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/1/$initialStepIdUrlSegment")
             .andExpect {
                 status { isForbidden() }
             }
@@ -49,7 +52,7 @@ class DeregisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getJourneyStep for the initial step returns 403 for a landlord user who does not own this property`() {
+    fun `getJourneyStep for the initial step returns 404 for a landlord user who does not own this property`() {
         // Arrange
         val propertyOwnershipId = 1.toLong()
         whenever(propertyDeregistrationJourneyFactory.create(propertyOwnershipId))
@@ -59,7 +62,7 @@ class DeregisterPropertyControllerTests(
 
         // Act, Assert
         mvc
-            .get("/deregister-property/$propertyOwnershipId/are-you-sure")
+            .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$initialStepIdUrlSegment")
             .andExpect {
                 status { isNotFound() }
             }
@@ -77,7 +80,7 @@ class DeregisterPropertyControllerTests(
 
         // Act, Assert
         mvc
-            .get("/deregister-property/$propertyOwnershipId/are-you-sure")
+            .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$initialStepIdUrlSegment")
             .andExpect {
                 status { isOk() }
             }

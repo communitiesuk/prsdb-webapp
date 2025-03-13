@@ -5,8 +5,8 @@ import kotlinx.serialization.json.Json
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
-import uk.gov.communities.prsdb.webapp.constants.UPDATE_LANDLORD_DETAILS_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.Address
@@ -18,6 +18,8 @@ import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.UpdateLandlordDetailsJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.getSerializedLookedUpAddresses
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DateOfBirthFormModel
@@ -28,7 +30,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormM
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
-import uk.gov.communities.prsdb.webapp.services.AddressDataService
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -38,11 +39,9 @@ class UpdateLandlordDetailsJourney(
     journeyDataService: JourneyDataService,
     addressLookupService: AddressLookupService,
     private val landlordService: LandlordService,
-    private val addressDataService: AddressDataService,
     private val landlordBaseUserId: String,
 ) : UpdateJourney<UpdateLandlordDetailsStepId>(
         journeyType = JourneyType.LANDLORD_DETAILS_UPDATE,
-        journeyDataKey = UPDATE_LANDLORD_DETAILS_URL,
         initialStepId = UpdateLandlordDetailsStepId.UpdateEmail,
         validator = validator,
         journeyDataService = journeyDataService,
@@ -59,6 +58,7 @@ class UpdateLandlordDetailsJourney(
         val originalLandlordData =
             mutableMapOf(
                 IS_IDENTITY_VERIFIED_KEY to landlord.isVerified,
+                LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to Json.encodeToString(listOf(AddressDataModel.fromAddress(landlord.address))),
                 UpdateLandlordDetailsStepId.UpdateEmail.urlPathSegment to mapOf("emailAddress" to landlord.email),
                 UpdateLandlordDetailsStepId.UpdateName.urlPathSegment to mapOf("name" to landlord.name),
                 UpdateLandlordDetailsStepId.UpdatePhoneNumber.urlPathSegment to mapOf("phoneNumber" to landlord.phoneNumber),
@@ -68,13 +68,7 @@ class UpdateLandlordDetailsJourney(
                         "houseNameOrNumber" to landlord.address.getHouseNameOrNumber(),
                     ),
                 UpdateLandlordDetailsStepId.SelectEnglandAndWalesAddress.urlPathSegment to
-                    mapOf(
-                        "address" to landlord.address.getSelectedAddress(),
-                    ),
-                ORIGINAL_ADDRESS_DATA_KEY to
-                    mapOf(
-                        "address" to Json.encodeToString(AddressDataModel.fromAddress(landlord.address)),
-                    ),
+                    mapOf("address" to landlord.address.getSelectedAddress()),
                 UpdateLandlordDetailsStepId.UpdateDateOfBirth.urlPathSegment to
                     mapOf(
                         "day" to landlord.dateOfBirth?.dayOfMonth.toString(),
@@ -98,7 +92,11 @@ class UpdateLandlordDetailsJourney(
     override fun initializeJourneyDataIfNotInitialized() {
         if (!isJourneyDataInitialised()) {
             super.initializeJourneyDataIfNotInitialized()
-            addressDataService.setAddressData(getOriginalAddressData())
+
+            val journeyData = journeyDataService.getJourneyDataFromSession()
+            val lookedUpAddresses = JourneyDataHelper.getPageData(journeyData, originalDataKey)!!.getSerializedLookedUpAddresses()!!
+            val journeyDataWithLookedUpAddresses = journeyData.withUpdatedLookedUpAddresses(lookedUpAddresses)
+            journeyDataService.setJourneyDataInSession(journeyDataWithLookedUpAddresses)
         }
     }
 
@@ -253,7 +251,7 @@ class UpdateLandlordDetailsJourney(
                         ),
                     lookupAddressPathSegment = UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
                     addressLookupService = addressLookupService,
-                    addressDataService = addressDataService,
+                    journeyDataService = journeyDataService,
                     displaySectionHeader = false,
                 ),
             nextAction = { journeyData, _ -> selectAddressNextAction(journeyData) },
@@ -314,7 +312,7 @@ class UpdateLandlordDetailsJourney(
                 email = UpdateLandlordDetailsJourneyDataHelper.getEmailUpdateIfPresent(journeyData),
                 name = UpdateLandlordDetailsJourneyDataHelper.getNameUpdateIfPresent(journeyData),
                 phoneNumber = UpdateLandlordDetailsJourneyDataHelper.getPhoneNumberIfPresent(journeyData),
-                address = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(journeyData, addressDataService),
+                address = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(journeyData),
                 dateOfBirth = UpdateLandlordDetailsJourneyDataHelper.getDateOfBirthIfPresent(journeyData),
             )
 
@@ -336,15 +334,7 @@ class UpdateLandlordDetailsJourney(
 
     private fun Address.getTownOrCity(): String = townName ?: singleLineAddress
 
-    private fun getOriginalAddressData(): List<AddressDataModel> {
-        val journeyData = journeyDataService.getJourneyDataFromSession(journeyDataKey)
-        val originalJourneyData = JourneyDataHelper.getPageData(journeyData, originalDataKey)!!
-        val originalAddressData = JourneyDataHelper.getPageData(originalJourneyData, ORIGINAL_ADDRESS_DATA_KEY)!!
-        return listOf(Json.decodeFromString(originalAddressData["address"] as String))
-    }
-
     companion object {
-        private const val ORIGINAL_ADDRESS_DATA_KEY = "original-address-data"
         const val IS_IDENTITY_VERIFIED_KEY = "isIdentityVerified"
     }
 }

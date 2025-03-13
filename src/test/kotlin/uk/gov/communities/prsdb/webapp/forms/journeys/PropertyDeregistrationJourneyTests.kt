@@ -1,6 +1,7 @@
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
@@ -15,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyService
+import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import kotlin.test.assertContains
@@ -24,6 +26,9 @@ class PropertyDeregistrationJourneyTests : JourneyTest() {
 
     @MockBean
     private lateinit var mockJourneyDataService: JourneyDataService
+
+    @MockBean
+    private lateinit var mockJourneyDataServiceFactory: JourneyDataServiceFactory
 
     @MockBean
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
@@ -36,14 +41,17 @@ class PropertyDeregistrationJourneyTests : JourneyTest() {
 
     @BeforeEach
     fun setup() {
+        mockJourneyDataServiceFactory = mock()
         mockJourneyDataService = mock()
         mockPropertyOwnershipService = mock()
         mockPropertyService = mock()
 
+        whenever(mockJourneyDataServiceFactory.create(anyString())).thenReturn(mockJourneyDataService)
+
         propertyDeregistrationJourneyFactory =
             PropertyDeregistrationJourneyFactory(
                 alwaysTrueValidator,
-                mockJourneyDataService,
+                mockJourneyDataServiceFactory,
                 mockPropertyOwnershipService,
                 mockPropertyService,
             )
