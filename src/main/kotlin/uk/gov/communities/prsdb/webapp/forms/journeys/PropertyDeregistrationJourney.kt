@@ -8,10 +8,9 @@ import uk.gov.communities.prsdb.webapp.constants.DEREGISTRATION_REASON_MAX_LENGT
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.getPropertyDetailsPath
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
-import uk.gov.communities.prsdb.webapp.forms.pages.PageWithSingleLineAddress
+import uk.gov.communities.prsdb.webapp.forms.pages.PageWithContentProviders
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDeregistrationJourneyDataExtensions.Companion.getWantsToProceed
@@ -47,7 +46,7 @@ class PropertyDeregistrationJourney(
         Step(
             id = DeregisterPropertyStepId.AreYouSure,
             page =
-                PageWithSingleLineAddress(
+                PageWithContentProviders(
                     formModel = PropertyDeregistrationAreYouSureFormModel::class,
                     templateName = "forms/areYouSureForm",
                     content =
@@ -67,9 +66,10 @@ class PropertyDeregistrationJourney(
                                         labelMsgKey = "forms.radios.option.no.label",
                                     ),
                                 ),
-                            BACK_URL_ATTR_NAME to getPropertyDetailsPath(propertyOwnershipId),
+                            BACK_URL_ATTR_NAME to PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId),
                         ),
-                ) { retrieveAddressFromDatabase() },
+                    contentProviders = listOf { providePropertyAddress() },
+                ),
             // handleSubmitAndRedirect will execute. It does not have to redirect to the step specified in nextAction.
             handleSubmitAndRedirect = { newJourneyData, subPage -> areYouSureContinueToNextActionOrExitJourney(newJourneyData, subPage) },
             // This gets checked when determining whether the next step is reachable
@@ -109,15 +109,19 @@ class PropertyDeregistrationJourney(
         return PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)
     }
 
-    private fun retrieveAddressFromDatabase(): String =
-        propertyOwnershipService
-            .retrievePropertyOwnershipById(propertyOwnershipId)
-            ?.property
-            ?.address
-            ?.singleLineAddress ?: throw ResponseStatusException(
-            HttpStatus.NOT_FOUND,
-            "Address for property ownership id $propertyOwnershipId not found",
-        )
+    private fun providePropertyAddress(): Pair<String, String> {
+        val propertyAddress =
+            propertyOwnershipService
+                .retrievePropertyOwnershipById(propertyOwnershipId)
+                ?.property
+                ?.address
+                ?.singleLineAddress ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Address for property ownership id $propertyOwnershipId not found",
+            )
+
+        return ("singleLineAddress" to propertyAddress)
+    }
 
     private fun deregisterPropertyAndRedirectToConfirmation(): String {
         propertyRegistrationService.deregisterProperty(propertyOwnershipId)
