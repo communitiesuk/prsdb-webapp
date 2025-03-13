@@ -5,9 +5,9 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTRATION_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
-import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.getPropertyDetailsPath
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
@@ -126,8 +126,7 @@ class PropertyDeregistrationJourney(
             propertyService.deleteProperty(it.property)
         }
 
-        // TODO: PRSD-698 - redirect to confirmation page
-        return LANDLORD_DASHBOARD_URL
+        return CONFIRMATION_PATH_SEGMENT
     }
 
     companion object {
