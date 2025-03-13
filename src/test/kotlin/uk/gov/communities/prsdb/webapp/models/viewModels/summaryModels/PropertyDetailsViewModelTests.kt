@@ -146,9 +146,11 @@ class PropertyDetailsViewModelTests {
         val viewModel = PropertyDetailsViewModel(propertyOwnership)
 
         val propertyRecordLicenseDetails =
-            viewModel.propertyRecord
-                .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingType" }
-                .fieldValue as List<String>
+            (
+                viewModel.propertyRecord
+                    .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingType" }
+                    .fieldValue as List<*>
+            ).filterIsInstance<String>()
 
         assertEquals("forms.licensingType.radios.option.hmoMandatory.label", propertyRecordLicenseDetails[0])
         assertEquals("L1234", propertyRecordLicenseDetails[1])
@@ -246,7 +248,7 @@ class PropertyDetailsViewModelTests {
 
         val changeLinkCount = viewModel.propertyRecord.count { it.changeUrl != null }
 
-        assertEquals(5, changeLinkCount)
+        assertEquals(2, changeLinkCount)
     }
 
     @Test

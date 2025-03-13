@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyViewModel
 
@@ -76,22 +77,17 @@ class PropertyOwnershipService(
         return propertyOwnership
     }
 
-    private fun getPropertyOwnership(propertyOwnershipId: Long): PropertyOwnership =
+    fun getPropertyOwnership(propertyOwnershipId: Long): PropertyOwnership =
         retrievePropertyOwnershipById(propertyOwnershipId)
             ?: throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Property ownership $propertyOwnershipId not found",
             )
 
-    fun getIsPrimaryLandlord(
+    fun getIsAuthorizedToEditRecord(
         propertyOwnershipId: Long,
         baseUserId: String,
     ): Boolean = getPropertyOwnership(propertyOwnershipId).primaryLandlord.baseUser.id == baseUserId
-
-    fun getIsAuthorizedToDeleteRecord(
-        propertyOwnershipId: Long,
-        baseUserId: String,
-    ): Boolean = getIsPrimaryLandlord(propertyOwnershipId, baseUserId)
 
     fun getRegisteredPropertiesForLandlordUser(baseUserId: String): List<RegisteredPropertyViewModel> =
         retrieveAllRegisteredPropertiesForLandlord(baseUserId).map { propertyOwnership ->
@@ -150,6 +146,17 @@ class PropertyOwnershipService(
             }
 
         return matchingProperties.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
+    }
+
+    @Transactional
+    fun updatePropertyOwnership(
+        id: Long,
+        update: PropertyOwnershipUpdateModel,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+
+        update.ownershipType?.let { propertyOwnership.ownershipType = it }
+        update.numberOfPeople?.let { propertyOwnership.currentNumTenants = it }
     }
 
     private fun retrieveAllRegisteredPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =

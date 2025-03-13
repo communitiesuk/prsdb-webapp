@@ -57,7 +57,7 @@ class DeregisterPropertyControllerTests(
         val propertyOwnershipId = 1.toLong()
         whenever(propertyDeregistrationJourneyFactory.create(propertyOwnershipId))
             .thenReturn(mock())
-        whenever(propertyOwnershipService.getIsAuthorizedToDeleteRecord(eq(propertyOwnershipId), anyString()))
+        whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(eq(propertyOwnershipId), anyString()))
             .thenReturn(false)
 
         // Act, Assert
@@ -75,7 +75,7 @@ class DeregisterPropertyControllerTests(
         val propertyOwnershipId = 1.toLong()
         whenever(propertyDeregistrationJourneyFactory.create(propertyOwnershipId))
             .thenReturn(mock())
-        whenever(propertyOwnershipService.getIsAuthorizedToDeleteRecord(eq(propertyOwnershipId), anyString()))
+        whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(eq(propertyOwnershipId), anyString()))
             .thenReturn(true)
 
         // Act, Assert
