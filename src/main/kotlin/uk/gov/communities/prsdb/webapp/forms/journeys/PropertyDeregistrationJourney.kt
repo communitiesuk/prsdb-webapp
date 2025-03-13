@@ -20,13 +20,13 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyD
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
 class PropertyDeregistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val propertyService: PropertyService,
+    private val propertyRegistrationService: PropertyRegistrationService,
     private val propertyOwnershipId: Long,
 ) : Journey<DeregisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_DEREGISTRATION,
@@ -120,10 +120,7 @@ class PropertyDeregistrationJourney(
         )
 
     private fun deregisterPropertyAndRedirectToConfirmation(): String {
-        propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)?.let {
-            propertyOwnershipService.deletePropertyOwnership(it)
-            propertyService.deleteProperty(it.property)
-        }
+        propertyRegistrationService.deregisterProperty(propertyOwnershipId)
 
         // TODO: PRSD-698 - redirect to confirmation page
         return LANDLORD_DASHBOARD_URL

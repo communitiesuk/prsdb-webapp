@@ -2,7 +2,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -12,11 +11,10 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregist
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 
 class PropertyDeregistrationJourneyTests : JourneyTest() {
     val alwaysTrueValidator: AlwaysTrueValidator = AlwaysTrueValidator()
@@ -31,7 +29,7 @@ class PropertyDeregistrationJourneyTests : JourneyTest() {
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @MockBean
-    private lateinit var mockPropertyService: PropertyService
+    private lateinit var mockPropertyRegistrationService: PropertyRegistrationService
 
     @SpyBean
     private lateinit var propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory
@@ -41,7 +39,7 @@ class PropertyDeregistrationJourneyTests : JourneyTest() {
         mockJourneyDataServiceFactory = mock()
         mockJourneyDataService = mock()
         mockPropertyOwnershipService = mock()
-        mockPropertyService = mock()
+        mockPropertyRegistrationService = mock()
 
         whenever(mockJourneyDataServiceFactory.create(anyString())).thenReturn(mockJourneyDataService)
 
@@ -50,7 +48,7 @@ class PropertyDeregistrationJourneyTests : JourneyTest() {
                 alwaysTrueValidator,
                 mockJourneyDataServiceFactory,
                 mockPropertyOwnershipService,
-                mockPropertyService,
+                mockPropertyRegistrationService,
             )
     }
 
@@ -71,7 +69,6 @@ class PropertyDeregistrationJourneyTests : JourneyTest() {
             .completeStep(DeregisterPropertyStepId.Reason.urlPathSegment, mapOf("reason" to ""), null, mock())
 
         // Assert
-        verify(mockPropertyOwnershipService).deletePropertyOwnership(propertyOwnership)
-        verify(mockPropertyService).deleteProperty(propertyOwnership.property)
+        verify(mockPropertyRegistrationService).deregisterProperty(propertyOwnershipId)
     }
 }

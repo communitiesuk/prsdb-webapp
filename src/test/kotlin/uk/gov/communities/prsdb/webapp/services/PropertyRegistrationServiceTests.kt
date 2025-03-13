@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 
 @ExtendWith(MockitoExtension::class)
@@ -295,5 +296,17 @@ class PropertyRegistrationServiceTests {
             )
 
         assertEquals(expectedPropertyOwnership.registrationNumber, propertyRegistrationNumber)
+    }
+
+    @Test
+    fun `deregisterProperty deletes the property and property ownership`() {
+        val propertyOwnership = MockLandlordData.createPropertyOwnership()
+        val propertyOwnershipId = propertyOwnership.id
+        whenever(mockPropertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)).thenReturn(propertyOwnership)
+        // Act
+        propertyRegistrationService.deregisterProperty(propertyOwnershipId)
+
+        verify(mockPropertyOwnershipService).deletePropertyOwnership(propertyOwnership)
+        verify(mockPropertyService).deleteProperty(propertyOwnership.property)
     }
 }
