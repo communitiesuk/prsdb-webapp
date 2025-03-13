@@ -13,10 +13,10 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
-import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
@@ -93,7 +93,7 @@ class RegisterPropertyControllerTests(
         mvc
             .perform(
                 MockMvcRequestBuilders
-                    .get("/$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT")
+                    .get("/$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
             ).andExpect(MockMvcResultMatchers.status().isOk())
     }
@@ -113,7 +113,7 @@ class RegisterPropertyControllerTests(
         )
 
         mvc
-            .get("/$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT")
+            .get("/$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
             .andExpect { status { isBadRequest() } }
     }
 
@@ -130,7 +130,7 @@ class RegisterPropertyControllerTests(
         mvc
             .perform(
                 MockMvcRequestBuilders
-                    .get("/$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT")
+                    .get("/$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
             ).andExpect(MockMvcResultMatchers.status().isBadRequest)
     }
