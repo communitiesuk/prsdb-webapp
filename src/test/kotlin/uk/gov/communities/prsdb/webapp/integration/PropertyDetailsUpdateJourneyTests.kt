@@ -7,6 +7,7 @@ import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfHouseholdsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfPeopleFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OwnershipTypeFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.PropertyDetailsUpdatePage
@@ -25,6 +26,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
         val newOwnershipType = OwnershipType.LEASEHOLD
         propertyDetailsUpdatePage = updateOwnershipTypeAndReturn(propertyDetailsUpdatePage, newOwnershipType)
 
+        val newNumberOfHouseholds = 2
+        propertyDetailsUpdatePage = updateNumberOfHouseholdsAndReturn(propertyDetailsUpdatePage, newNumberOfHouseholds)
+
         val newNumberOfPeople = 4
         propertyDetailsUpdatePage = updateNumberOfPeopleAndReturn(propertyDetailsUpdatePage, newNumberOfPeople)
 
@@ -34,6 +38,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
 
         // Check changes have occurred
         assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.ownershipTypeRow.value).containsText("Leasehold")
+        assertThat(
+            propertyDetailsUpdatePage.propertyDetailsSummaryList.numberOfHouseholdsRow.value,
+        ).containsText(newNumberOfHouseholds.toString())
         assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.numberOfPeopleRow.value).containsText(
             newNumberOfPeople.toString(),
         )
@@ -54,6 +61,25 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
 
         // Check changes have occurred
         assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.ownershipTypeRow.value).containsText("Leasehold")
+    }
+
+    @Test
+    fun `A property can have just their number of households updated`(page: Page) {
+        // Update details page
+        var propertyDetailsUpdatePage = navigator.goToPropertyDetailsUpdatePage(propertyOwnershipId)
+        assertThat(propertyDetailsUpdatePage.heading).containsText("1, Example Road, EG")
+
+        val newNumberOfHouseholds = 3
+        propertyDetailsUpdatePage = updateNumberOfHouseholdsAndReturn(propertyDetailsUpdatePage, newNumberOfHouseholds)
+
+        // Submit changes TODO PRSD-355 add proper submit button and declaration page
+        propertyDetailsUpdatePage.submitButton.clickAndWait()
+        propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsUpdatePage::class, urlArguments)
+
+        // Check changes have occurred
+        assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.numberOfHouseholdsRow.value).containsText(
+            newNumberOfHouseholds.toString(),
+        )
     }
 
     @Test
@@ -84,6 +110,19 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
 
         val updateOwnershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
         updateOwnershipTypePage.submitOwnershipType(newOwnershipType)
+
+        return assertPageIs(page, PropertyDetailsUpdatePage::class, urlArguments)
+    }
+
+    private fun updateNumberOfHouseholdsAndReturn(
+        detailsPage: PropertyDetailsUpdatePage,
+        newNumberOfHouseholds: Int,
+    ): PropertyDetailsUpdatePage {
+        val page = detailsPage.page
+        detailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickActionLinkAndWait()
+
+        val updateNumberOfHouseholdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, urlArguments)
+        updateNumberOfHouseholdsPage.submitNumberOfHouseholds(newNumberOfHouseholds)
 
         return assertPageIs(page, PropertyDetailsUpdatePage::class, urlArguments)
     }
