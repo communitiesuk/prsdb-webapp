@@ -14,14 +14,14 @@ class ReasonPagePropertyDeregistration(
         page,
         "/$DEREGISTER_PROPERTY_JOURNEY_URL/${urlArguments["propertyOwnershipId"]}/${DeregisterPropertyStepId.Reason.urlPathSegment}",
     ) {
-    val form = DeregistrationReasonPage(page)
+    val form = DeregistrationReasonForm(page)
 
     fun submitReason(reason: String) {
         form.textAreaInput.fill(reason)
         form.submit()
     }
 
-    class DeregistrationReasonPage(
+    class DeregistrationReasonForm(
         page: Page,
     ) : Form(page) {
         val textAreaInput = TextArea.default(locator)

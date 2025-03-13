@@ -15,8 +15,8 @@ import uk.gov.communities.prsdb.webapp.forms.pages.PageWithSingleLineAddress
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDeregistrationJourneyDataExtensions.Companion.getWantsToProceed
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeregistrationReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -53,7 +53,7 @@ class PropertyDeregistrationJourney(
                     content =
                         mapOf(
                             "title" to "deregisterProperty.title",
-                            "fieldSetHeading" to "deregisterProperty.areYouSure.fieldSetHeading",
+                            "fieldSetHeading" to "forms.areYouSure.propertyDeregistration.fieldSetHeading",
                             "radioOptions" to
                                 listOf(
                                     RadiosButtonViewModel(
@@ -82,12 +82,12 @@ class PropertyDeregistrationJourney(
             id = DeregisterPropertyStepId.Reason,
             page =
                 Page(
-                    formModel = DeregistrationReasonFormModel::class,
+                    formModel = PropertyDeregistrationReasonFormModel::class,
                     templateName = "forms/deregistrationReasonForm",
                     content =
                         mapOf(
                             "title" to "deregisterProperty.title",
-                            "fieldSetHeading" to "deregisterProperty.reason.fieldSetHeading",
+                            "fieldSetHeading" to "forms.reason.propertyDeregistration.fieldSetHeading",
                             "limit" to DEREGISTRATION_REASON_MAX_LENGTH,
                             "submitButtonText" to "forms.buttons.continue",
                         ),

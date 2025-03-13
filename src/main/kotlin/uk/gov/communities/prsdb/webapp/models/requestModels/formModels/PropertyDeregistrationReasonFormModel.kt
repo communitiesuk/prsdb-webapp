@@ -6,11 +6,11 @@ import uk.gov.communities.prsdb.webapp.validation.LengthConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class DeregistrationReasonFormModel : FormModel {
+class PropertyDeregistrationReasonFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.reason.deregistration.error.tooLong",
+                messageKey = "forms.reason.propertyDeregistration.error.tooLong",
                 validatorType = LengthConstraintValidator::class,
                 validatorArgs = arrayOf("0", "200"),
             ),

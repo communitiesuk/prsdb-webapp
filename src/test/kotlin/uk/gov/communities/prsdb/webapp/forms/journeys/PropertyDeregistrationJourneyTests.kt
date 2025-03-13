@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 
 class PropertyDeregistrationJourneyTests : JourneyTest() {
@@ -55,7 +56,7 @@ class PropertyDeregistrationJourneyTests : JourneyTest() {
 
     @Test
     fun `When the reason step is submitted by an authorised user, the property is deregistered`() {
-        val propertyOwnership = createPropertyOwnership()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership()
         val propertyOwnershipId = propertyOwnership.id
 
         val currentUserId = propertyOwnership.primaryLandlord.baseUser.id
@@ -70,7 +71,7 @@ class PropertyDeregistrationJourneyTests : JourneyTest() {
             .completeStep(DeregisterPropertyStepId.Reason.urlPathSegment, mapOf("reason" to ""), null, mock())
 
         // Assert
-        verify(mockPropertyOwnershipService, times(1)).deletePropertyOwnership(propertyOwnership)
-        verify(mockPropertyService, times(1)).deleteProperty(propertyOwnership.property)
+        verify(mockPropertyOwnershipService).deletePropertyOwnership(propertyOwnership)
+        verify(mockPropertyService).deleteProperty(propertyOwnership.property)
     }
 }
