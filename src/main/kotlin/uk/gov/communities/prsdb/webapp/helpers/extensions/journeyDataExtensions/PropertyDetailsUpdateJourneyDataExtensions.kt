@@ -14,6 +14,9 @@ class PropertyDetailsUpdateJourneyDataExtensions {
                 "ownershipType",
             )
 
+        fun JourneyData.getOriginalIsOccupied(originalJourneyKey: String) =
+            JourneyDataHelper.getPageData(this, originalJourneyKey)?.getIsOccupiedUpdateIfPresent()
+
         fun JourneyData.getIsOccupiedUpdateIfPresent() =
             JourneyDataHelper.getFieldBooleanValue(
                 this,

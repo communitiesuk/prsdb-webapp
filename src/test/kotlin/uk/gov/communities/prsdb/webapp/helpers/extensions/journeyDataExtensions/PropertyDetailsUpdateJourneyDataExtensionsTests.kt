@@ -7,9 +7,11 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getIsOccupiedUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfHouseholdsUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfPeopleUpdateIfPresent
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getOriginalIsOccupied
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getOwnershipTypeUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -38,6 +40,37 @@ class PropertyDetailsUpdateJourneyDataExtensionsTests {
         val ownershipTypeUpdate = testJourneyData.getOwnershipTypeUpdateIfPresent()
 
         assertNull(ownershipTypeUpdate)
+    }
+
+    @Test
+    fun `getOriginalIsOccupied returns a boolean if the corresponding page is in original journeyData`() {
+        val originalJourneyKey = "original-key"
+        val originalJourneyData = journeyDataBuilder.withIsOccupiedUpdate(false).build()
+        val testJourneyData = mapOf(originalJourneyKey to originalJourneyData)
+
+        val originalOccupancy = testJourneyData.getOriginalIsOccupied(originalJourneyKey)!!
+
+        assertFalse(originalOccupancy)
+    }
+
+    @Test
+    fun `getOriginalIsOccupied returns null if the corresponding page is not in original journeyData`() {
+        val originalJourneyKey = "original-key"
+        val originalJourneyData = journeyDataBuilder.build()
+        val testJourneyData = mapOf(originalJourneyKey to originalJourneyData)
+
+        val originalOccupancy = testJourneyData.getOriginalIsOccupied(originalJourneyKey)
+
+        assertNull(originalOccupancy)
+    }
+
+    @Test
+    fun `getOriginalIsOccupied returns null if the original journeyData is in not journeyData`() {
+        val testJourneyData = journeyDataBuilder.build()
+
+        val occupancyUpdate = testJourneyData.getOriginalIsOccupied("original-key-not-in-journey-data")
+
+        assertNull(occupancyUpdate)
     }
 
     @Test
