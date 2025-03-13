@@ -40,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
@@ -85,6 +86,9 @@ class LandlordDashboardUrlTests(
 
     @MockBean
     private lateinit var mockPropertyRegistrationService: PropertyRegistrationService
+
+    @MockBean
+    private lateinit var resetter: SecurityContextService
 
     @BeforeEach
     fun setUp() {

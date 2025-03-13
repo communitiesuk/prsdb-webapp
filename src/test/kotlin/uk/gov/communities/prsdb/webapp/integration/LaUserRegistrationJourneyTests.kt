@@ -94,7 +94,9 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
 
         // Return to dashboard button
         confirmationPage.returnToDashboardButton.clickAndWait()
-        assertPageIs(page, LocalAuthorityDashboardPage::class)
+        val dashboard = assertPageIs(page, LocalAuthorityDashboardPage::class)
+
+        assertThat(dashboard.bannerSubHeading).containsText("Local authority")
     }
 
     @Nested

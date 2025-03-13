@@ -1,48 +1,39 @@
 <!DOCTYPE html>
 <html id="main-content" th:replace="~{fragments/layout :: layout(#{propertyDetails.title}, ~{::#main-content/content()}, false)}">
-  <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+    <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
     <main class="govuk-main-wrapper">
-      <div id="page-contents">
-        <h2 class="govuk-heading-m" th:text="#{propertyDetails.heading}">propertyDetails.heading</h2>
-        <div th:replace="~{fragments/buttons/pageHeaderActions :: pageHeaderActions(${propertyDetails.address}, ~{:: #delete-record-button})}">
-          <th:block th:if="${deleteRecordLink != null}" id="delete-record-button">
-            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${deleteRecordLink}, #{propertyDetails.deleteRecordButton.text})}"></a>
-          </th:block>
-        </div>
-        <div th:replace="~{fragments/keyDetailsList :: keyDetailsList(${propertyDetails.keyDetails})}">
-        </div>
-        <div th:replace="~{fragments/lastModifiedInsetText :: lastModifiedInsetText(${lastModifiedBy}, ${lastModifiedDate})}">
-        </div>
-
-        <div th:replace="~{fragments/tabs/tabs :: tabs(~{:: #tabs-content})}" >
-          <th:block id="tabs-content">
-            <ul th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{:: #tab-headings})}">
-              <th:block id="tab-headings">
-                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('property-details', #{propertyDetails.propertyDetails.heading})}">
-                </li>
-                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('landlord-details', #{propertyDetails.landlordDetails.heading})}">
-                </li>
-              </th:block>
-            </ul>
-
-            <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('property-details', ~{:: #property-details-panel-content})}">
-              <th:block id="property-details-panel-content">
-                <h2 class="govuk-heading-m" th:text="#{propertyDetails.heading}">propertyDetails.heading</h2>
-                <p class="govuk-hint" th:text="#{propertyDetails.description}">propertyDetails.description</p>
-                <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.propertyRecord})}" ></dl>
-              </th:block>
+        <div id="page-contents">
+            <h2 class="govuk-heading-m" th:text="#{propertyDetails.heading}">propertyDetails.heading</h2>
+            <div th:replace="~{fragments/buttons/pageHeaderActions :: pageHeaderActions(${propertyDetails.address}, ~{::#delete-record-button})}">
+                <th:block th:if="${deleteRecordLink != null}" id="delete-record-button">
+                    <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${deleteRecordLink}, #{propertyDetails.deleteRecordButton.text})}"></a>
+                </th:block>
             </div>
+            <div th:replace="~{fragments/keyDetailsList :: keyDetailsList(${propertyDetails.keyDetails})}"></div>
+            <div th:replace="~{fragments/lastModifiedInsetText :: lastModifiedInsetText(${lastModifiedBy}, ${lastModifiedDate})}"></div>
 
-            <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('landlord-details', ~{:: #landlord-details-panel-content})}">
-          <th:block id="landlord-details-panel-content">
-            <h2 class="govuk-heading-m" th:text="#{propertyDetails.landlordDetails.registeredLandlord.heading}">propertyDetails.landlordDetails.registeredLandlord.heading</h2>
-            <p class="govuk-hint" th:text="#{propertyDetails.landlordDetails.registeredLandlord.hint}">propertyDetails.landlordDetails.registeredLandlord.hint</p>
-            <dl th:replace="~{fragments/summaryList :: summaryList(${landlordDetails})}"></dl>
-              </th:block>
+            <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
+                <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">
+                    <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('property-details', #{propertyDetails.propertyDetails.heading})}"></li>
+                    <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('landlord-details', #{propertyDetails.landlordDetails.heading})}"></li>
+                </ul>
+
+                <div id="property-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('property-details', ~{::#property-details-panel/content()})}">
+                    <h2 class="govuk-heading-m" th:text="#{propertyDetails.heading}">propertyDetails.heading</h2>
+                    <p class="govuk-hint" th:text="#{propertyDetails.description}">propertyDetails.description</p>
+                    <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.propertyRecord})}"></dl>
+
+                    <form th:action="@{''}" method="post" novalidate th:if="${shouldShowSubmitButton}">
+                        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton('TODO: PRSD-355 Confirmation page for update property details')}"></button>
+                    </form>
+                </div>
+
+                <div  id="landlord-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('landlord-details', ~{::#landlord-details-panel/content()})}">
+                    <h2 class="govuk-heading-m" th:text="#{propertyDetails.landlordDetails.registeredLandlord.heading}">propertyDetails.landlordDetails.registeredLandlord.heading</h2>
+                    <p class="govuk-hint" th:text="#{propertyDetails.landlordDetails.registeredLandlord.hint}">propertyDetails.landlordDetails.registeredLandlord.hint</p>
+                    <dl th:replace="~{fragments/summaryList :: summaryList(${landlordDetails})}"></dl>
+                </div>
             </div>
-          </th:block>
         </div>
-
-      </div>
     </main>
 </html>

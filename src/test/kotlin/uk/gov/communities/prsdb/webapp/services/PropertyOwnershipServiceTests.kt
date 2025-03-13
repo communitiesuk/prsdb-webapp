@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -33,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -331,6 +333,57 @@ class PropertyOwnershipServiceTests {
         }
     }
 
+    @Nested
+    inner class GetIsAuthorizedToEditRecord {
+        @Test
+        fun `returns true when the user is the property's primary landlord`() {
+            val baseUserId = "baseUserId"
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(
+                    primaryLandlord =
+                        MockLandlordData.createLandlord(
+                            baseUser = MockLandlordData.createOneLoginUser(baseUserId),
+                        ),
+                )
+
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            val returnedIsPrimaryLandlord = propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnership.id, baseUserId)
+
+            assertTrue(returnedIsPrimaryLandlord)
+        }
+
+        @Test
+        fun `returns false when the user is not the property's primary landlord`() {
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(
+                    primaryLandlord =
+                        MockLandlordData.createLandlord(
+                            baseUser = MockLandlordData.createOneLoginUser("baseUserId"),
+                        ),
+                )
+
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            val returnedIsPrimaryLandlord =
+                propertyOwnershipService.getIsAuthorizedToEditRecord(
+                    propertyOwnership.id,
+                    "differentBaseUserId",
+                )
+
+            assertFalse(returnedIsPrimaryLandlord)
+        }
+
+        @Test
+        fun `throws not found error if the property ownership does not exist`() {
+            val errorThrown =
+                assertThrows<ResponseStatusException> {
+                    propertyOwnershipService.getIsAuthorizedToEditRecord(1, "anyBaseUserId")
+                }
+            assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
+        }
+    }
+
     @Test
     fun `searchForProperties returns a single matching property when the search term is a PRN`() {
         val searchPRN = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 123)
@@ -490,6 +543,65 @@ class PropertyOwnershipServiceTests {
 
         assertEquals(expectedPage1SearchResults, searchResults1.content)
         assertEquals(expectedPage2SearchResults, searchResults2.content)
+    }
+
+    @Test
+    fun `updatePropertyOwnership does not change the fields associated with the given update model's null values`() {
+        // Arrange
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                ownershipType = OwnershipType.FREEHOLD,
+                currentNumHouseholds = 2,
+                currentNumTenants = 4,
+            )
+        val originalOwnershipType = propertyOwnership.ownershipType
+        val originalNumberOfHouseholds = propertyOwnership.currentNumHouseholds
+        val originalNumberOfPeople = propertyOwnership.currentNumTenants
+        val updateModel =
+            PropertyOwnershipUpdateModel(ownershipType = null, numberOfHouseholds = null, numberOfPeople = null)
+
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+
+        // Act
+        propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel)
+
+        // Assert
+        assertEquals(originalOwnershipType, propertyOwnership.ownershipType)
+        assertEquals(originalNumberOfHouseholds, propertyOwnership.currentNumHouseholds)
+        assertEquals(originalNumberOfPeople, propertyOwnership.currentNumTenants)
+    }
+
+    @Test
+    fun `updatePropertyOwnership changes the fields associated with the given update model's non-null values`() {
+        // Arrange
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                ownershipType = OwnershipType.FREEHOLD,
+                currentNumHouseholds = 2,
+                currentNumTenants = 6,
+            )
+        val updateModel =
+            PropertyOwnershipUpdateModel(
+                ownershipType = OwnershipType.LEASEHOLD,
+                numberOfHouseholds = 1,
+                numberOfPeople = 2,
+            )
+
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+
+        // Act
+        propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel)
+
+        // Assert
+        assertEquals(updateModel.ownershipType, propertyOwnership.ownershipType)
+        assertEquals(updateModel.numberOfHouseholds, propertyOwnership.currentNumHouseholds)
+        assertEquals(updateModel.numberOfPeople, propertyOwnership.currentNumTenants)
     }
 
     @Test

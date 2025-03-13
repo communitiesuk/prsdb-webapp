@@ -1,8 +1,8 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.ArgumentMatchers.eq
-import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired

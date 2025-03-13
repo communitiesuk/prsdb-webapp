@@ -36,11 +36,9 @@ class PropertyOwnership(
 
     @Column(nullable = false)
     var currentNumHouseholds: Int = 0
-        private set
 
     @Column(nullable = false)
     var currentNumTenants: Int = 0
-        private set
 
     @OneToOne(optional = false)
     @JoinColumn(
@@ -98,7 +96,6 @@ class PropertyOwnership(
 
     constructor(
         id: Long,
-        isActive: Boolean,
         occupancyType: OccupancyType,
         ownershipType: OwnershipType,
         currentNumHouseholds: Int,
@@ -107,6 +104,7 @@ class PropertyOwnership(
         primaryLandlord: Landlord,
         property: Property,
         license: License?,
+        isActive: Boolean = true,
     ) : this(id) {
         this.isActive = isActive
         this.occupancyType = occupancyType

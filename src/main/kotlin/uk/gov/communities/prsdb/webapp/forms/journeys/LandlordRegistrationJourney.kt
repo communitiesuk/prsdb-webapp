@@ -40,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 
 class LandlordRegistrationJourney(
     validator: Validator,
@@ -48,6 +49,7 @@ class LandlordRegistrationJourney(
     val landlordService: LandlordService,
     val absoluteUrlProvider: AbsoluteUrlProvider,
     val emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
+    val securityContextService: SecurityContextService,
 ) : Journey<LandlordRegistrationStepId>(
         journeyType = JourneyType.LANDLORD_REGISTRATION,
         initialStepId = LandlordRegistrationStepId.VerifyIdentity,
@@ -517,6 +519,12 @@ class LandlordRegistrationJourney(
 
         journeyDataService.clearJourneyDataFromSession()
 
+        refreshUserRoles()
+
         return CONFIRMATION_PAGE_PATH_SEGMENT
+    }
+
+    private fun refreshUserRoles() {
+        securityContextService.refreshContext()
     }
 }
