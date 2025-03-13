@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.http.HttpStatus
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
@@ -75,6 +74,7 @@ class PropertyDeregistrationJourney(
             handleSubmitAndRedirect = { newJourneyData, subPage -> areYouSureContinueToNextActionOrExitJourney(newJourneyData, subPage) },
             // This gets checked when determining whether the next step is reachable
             nextAction = { _, _ -> Pair(DeregisterPropertyStepId.Reason, null) },
+            saveAfterSubmit = false,
         )
 
     private fun reasonStep() =
@@ -93,6 +93,7 @@ class PropertyDeregistrationJourney(
                         ),
                 ),
             handleSubmitAndRedirect = { _, _ -> deregisterPropertyAndRedirectToConfirmation() },
+            saveAfterSubmit = false,
         )
 
     private fun areYouSureContinueToNextActionOrExitJourney(
@@ -119,8 +120,6 @@ class PropertyDeregistrationJourney(
         )
 
     private fun deregisterPropertyAndRedirectToConfirmation(): String {
-        checkIfLoggedInUserIsAuthorisedToDeleteRecord(propertyOwnershipId, propertyOwnershipService)
-
         propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)?.let {
             propertyOwnershipService.deletePropertyOwnership(it)
             propertyService.deleteProperty(it.property)
@@ -132,18 +131,5 @@ class PropertyDeregistrationJourney(
 
     companion object {
         val initialStepId = DeregisterPropertyStepId.AreYouSure
-
-        fun checkIfLoggedInUserIsAuthorisedToDeleteRecord(
-            propertyOwnershipId: Long,
-            propertyOwnershipService: PropertyOwnershipService,
-        ) {
-            val baseUserId = SecurityContextHolder.getContext().authentication.name
-            if (!propertyOwnershipService.getIsAuthorizedToDeleteRecord(propertyOwnershipId, baseUserId)) {
-                throw ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "The current user is not authorised to delete property ownership $propertyOwnershipId",
-                )
-            }
-        }
     }
 }

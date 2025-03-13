@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
@@ -33,7 +35,7 @@ class DeregisterPropertyController(
         model: Model,
         principal: Principal,
     ): ModelAndView {
-        PropertyDeregistrationJourney.checkIfLoggedInUserIsAuthorisedToDeleteRecord(propertyOwnershipId, propertyOwnershipService)
+        throwIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId, principal)
 
         return propertyDeregistrationJourneyFactory
             .create(propertyOwnershipId)
@@ -51,8 +53,10 @@ class DeregisterPropertyController(
         @RequestParam formData: PageData,
         model: Model,
         principal: Principal,
-    ): ModelAndView =
-        propertyDeregistrationJourneyFactory
+    ): ModelAndView {
+        throwIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId, principal)
+
+        return propertyDeregistrationJourneyFactory
             .create(propertyOwnershipId)
             .completeStep(
                 stepName,
@@ -60,6 +64,26 @@ class DeregisterPropertyController(
                 subpage,
                 principal,
             )
+    }
+
+    private fun throwIfCurrentUserIsUnauthorizedToDeregisterProperty(
+        propertyOwnershipId: Long,
+        principal: Principal,
+    ) {
+        if (!isCurrentUserAuthorizedToDeregisterProperty(propertyOwnershipId, principal)) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "The current user is not authorised to delete property ownership $propertyOwnershipId",
+            )
+        }
+    }
+
+    private fun isCurrentUserAuthorizedToDeregisterProperty(
+        propertyOwnershipId: Long,
+        principal: Principal,
+    ): Boolean =
+        propertyOwnershipService
+            .getIsPrimaryLandlord(propertyOwnershipId, principal.name)
 
     companion object {
         const val PROPERTY_DEREGISTRATION_ROUTE = "/$DEREGISTER_PROPERTY_JOURNEY_URL/{propertyOwnershipId}"

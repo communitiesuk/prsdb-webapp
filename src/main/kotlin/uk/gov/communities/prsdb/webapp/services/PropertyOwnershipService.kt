@@ -88,11 +88,6 @@ class PropertyOwnershipService(
         baseUserId: String,
     ): Boolean = getPropertyOwnership(propertyOwnershipId).primaryLandlord.baseUser.id == baseUserId
 
-    fun getIsAuthorizedToDeleteRecord(
-        propertyOwnershipId: Long,
-        baseUserId: String,
-    ): Boolean = getIsPrimaryLandlord(propertyOwnershipId, baseUserId)
-
     fun getRegisteredPropertiesForLandlordUser(baseUserId: String): List<RegisteredPropertyViewModel> =
         retrieveAllRegisteredPropertiesForLandlord(baseUserId).map { propertyOwnership ->
             RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
