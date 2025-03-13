@@ -35,7 +35,7 @@ class DeregisterPropertyController(
         model: Model,
         principal: Principal,
     ): ModelAndView {
-        throwIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId, principal)
+        throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId, principal)
 
         return propertyDeregistrationJourneyFactory
             .create(propertyOwnershipId)
@@ -54,7 +54,7 @@ class DeregisterPropertyController(
         model: Model,
         principal: Principal,
     ): ModelAndView {
-        throwIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId, principal)
+        throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId, principal)
 
         return propertyDeregistrationJourneyFactory
             .create(propertyOwnershipId)
@@ -66,7 +66,7 @@ class DeregisterPropertyController(
             )
     }
 
-    private fun throwIfCurrentUserIsUnauthorizedToDeregisterProperty(
+    private fun throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(
         propertyOwnershipId: Long,
         principal: Principal,
     ) {

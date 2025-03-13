@@ -18,12 +18,14 @@ import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
+import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper.Companion.setMockUser
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
 
-class LandlordRegistrationJourneyTests : JourneyTest() {
+class LandlordRegistrationJourneyTests {
     @Mock
     lateinit var mockJourneyDataService: JourneyDataService
 
@@ -81,7 +83,7 @@ class LandlordRegistrationJourneyTests : JourneyTest() {
                     absoluteUrlProvider = urlProvider,
                     securityContextService = mock(),
                 )
-            setMockUser("a-user-name")
+            JourneyTestHelper.setMockUser("a-user-name")
         }
 
         @Suppress("ktlint:standard:max-line-length")
