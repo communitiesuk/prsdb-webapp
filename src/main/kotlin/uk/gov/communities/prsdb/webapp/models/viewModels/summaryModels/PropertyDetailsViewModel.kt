@@ -84,10 +84,11 @@ class PropertyDetailsViewModel(
                 // TODO PRSD-799: Add update link
                 addRow("propertyDetails.propertyRecord.occupied", isTenantedKey)
                 if (propertyOwnership.currentNumTenants > 0) {
-                    // TODO PRSD-800: Add update link
                     addRow(
                         "propertyDetails.propertyRecord.numberOfHouseholds",
                         propertyOwnership.currentNumHouseholds,
+                        UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment,
+                        withChangeLinks,
                     )
                     addRow(
                         "propertyDetails.propertyRecord.numberOfPeople",

@@ -36,7 +36,6 @@ class PropertyOwnership(
 
     @Column(nullable = false)
     var currentNumHouseholds: Int = 0
-        private set
 
     @Column(nullable = false)
     var currentNumTenants: Int = 0

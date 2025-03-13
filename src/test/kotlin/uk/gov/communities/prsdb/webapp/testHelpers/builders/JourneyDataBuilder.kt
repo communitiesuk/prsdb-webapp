@@ -338,6 +338,12 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withNumberOfHouseholdsUpdate(numberOfHouseholds: Int): JourneyDataBuilder {
+        journeyData[UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment] =
+            mutableMapOf("numberOfHouseholds" to numberOfHouseholds)
+        return this
+    }
+
     fun withNumberOfPeopleUpdate(numberOfPeople: Int): JourneyDataBuilder {
         journeyData[UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment] =
             mutableMapOf("numberOfPeople" to numberOfPeople)
