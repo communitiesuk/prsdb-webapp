@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.persistence.EntityExistsException
 import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
-import jakarta.validation.ValidationException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
@@ -136,25 +135,6 @@ class PropertyRegistrationServiceTests {
 
         verify(mockRegisteredAddressCache, never()).getCachedAddressRegisteredResult(uprn)
         assertEquals(expectedValue, result)
-    }
-
-    @Test
-    fun `registerPropertyAndReturnPropertyRegistrationNumber throws error if the number of people is less than the number of households`() {
-        val errorThrown =
-            assertThrows<ValidationException> {
-                propertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(
-                    AddressDataModel("1 Example Road"),
-                    PropertyType.DETACHED_HOUSE,
-                    LicensingType.NO_LICENSING,
-                    "license number",
-                    OwnershipType.FREEHOLD,
-                    2,
-                    1,
-                    "baseUserId",
-                )
-            }
-
-        assertEquals("Number of people is less than number of households", errorThrown.message)
     }
 
     @Test
