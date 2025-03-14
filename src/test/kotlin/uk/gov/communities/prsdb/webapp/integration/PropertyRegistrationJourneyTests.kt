@@ -456,7 +456,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         ) {
             val householdsPage = navigator.goToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds(3)
-            val peoplePage = assertPageIs(page, PeopleFormPagePropertyRegistration::class)
+            val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
             peoplePage.submitNumOfPeople(2)
             assertThat(peoplePage.form.getErrorMessage())
                 .containsText(
