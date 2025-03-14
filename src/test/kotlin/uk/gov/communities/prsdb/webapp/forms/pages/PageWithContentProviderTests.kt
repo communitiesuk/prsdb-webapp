@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import kotlin.test.assertEquals
@@ -22,5 +23,16 @@ class PageWithContentProviderTests {
         testPage.enrichModel(modelAndView, filteredJourneyData = null)
 
         assertEquals(providedContent, modelAndView.modelMap.toMap())
+    }
+
+    @Test
+    fun `PageWithContentProvider constructor does not call the content provider`() {
+        assertDoesNotThrow {
+            PageWithContentProvider(
+                formModel = FormModel::class,
+                templateName = "any",
+                content = emptyMap(),
+            ) { throw Exception("contentProvider called during PageWithContentProvider construction") }
+        }
     }
 }
