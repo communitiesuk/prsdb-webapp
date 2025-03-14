@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.springframework.validation.BindingResult
 import org.springframework.validation.Validator
+import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
@@ -14,7 +16,12 @@ class PropertyRegistrationNumberOfPeoplePage(
     content: Map<String, Any>,
     shouldDisplaySectionHeader: Boolean = false,
     private val journeyDataService: JourneyDataService,
-) : Page(formModel, templateName, content, shouldDisplaySectionHeader) {
+) : AbstractPage(formModel, templateName, content, shouldDisplaySectionHeader) {
+    override fun enrichModel(
+        modelAndView: ModelAndView,
+        filteredJourneyData: JourneyData?,
+    ) {}
+
     override fun bindDataToFormModel(
         validator: Validator,
         formData: PageData?,

@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import kotlin.reflect.KClass
 
-open class Page(
+class Page(
     formModel: KClass<out FormModel>,
     templateName: String,
     content: Map<String, Any>,
