@@ -81,8 +81,12 @@ class PropertyDetailsViewModel(
                     } ?: MessageKeyConverter.convert(LicensingType.NO_LICENSING),
                     // TODO PRSD-798: Add update link
                 )
-                // TODO PRSD-799: Add update link
-                addRow("propertyDetails.propertyRecord.occupied", isTenantedKey)
+                addRow(
+                    "propertyDetails.propertyRecord.occupied",
+                    isTenantedKey,
+                    UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment,
+                    withChangeLinks,
+                )
                 if (propertyOwnership.currentNumTenants > 0) {
                     addRow(
                         "propertyDetails.propertyRecord.numberOfHouseholds",
