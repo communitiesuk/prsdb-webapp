@@ -14,18 +14,36 @@ class PropertyDetailsUpdateJourneyDataExtensions {
                 "ownershipType",
             )
 
-        fun JourneyData.getNumberOfHouseholdsUpdateIfPresent() =
-            JourneyDataHelper.getFieldIntegerValue(
+        fun JourneyData.getOriginalIsOccupied(originalJourneyKey: String) =
+            JourneyDataHelper.getPageData(this, originalJourneyKey)?.getIsOccupiedUpdateIfPresent()
+
+        fun JourneyData.getIsOccupiedUpdateIfPresent() =
+            JourneyDataHelper.getFieldBooleanValue(
                 this,
-                UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment,
-                "numberOfHouseholds",
+                UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment,
+                "occupied",
             )
 
+        fun JourneyData.getNumberOfHouseholdsUpdateIfPresent() =
+            if (this.getIsOccupiedUpdateIfPresent() == false) {
+                0
+            } else {
+                JourneyDataHelper.getFieldIntegerValue(
+                    this,
+                    UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment,
+                    "numberOfHouseholds",
+                )
+            }
+
         fun JourneyData.getNumberOfPeopleUpdateIfPresent() =
-            JourneyDataHelper.getFieldIntegerValue(
-                this,
-                UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment,
-                "numberOfPeople",
-            )
+            if (this.getIsOccupiedUpdateIfPresent() == false) {
+                0
+            } else {
+                JourneyDataHelper.getFieldIntegerValue(
+                    this,
+                    UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment,
+                    "numberOfPeople",
+                )
+            }
     }
 }
