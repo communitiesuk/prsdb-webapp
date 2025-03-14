@@ -68,7 +68,7 @@ class PropertyDeregistrationJourney(
                                 ),
                             BACK_URL_ATTR_NAME to PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId),
                         ),
-                ) { providePropertyAddress() },
+                ) { mapOf("singleLineAddress" to getPropertySingleLineAddress()) },
             // handleSubmitAndRedirect will execute. It does not have to redirect to the step specified in nextAction.
             handleSubmitAndRedirect = { newJourneyData, subPage -> areYouSureContinueToNextActionOrExitJourney(newJourneyData, subPage) },
             // This gets checked when determining whether the next step is reachable
@@ -108,19 +108,16 @@ class PropertyDeregistrationJourney(
         return PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)
     }
 
-    private fun providePropertyAddress(): Map<String, String> {
-        val propertyAddress =
-            propertyOwnershipService
-                .retrievePropertyOwnershipById(propertyOwnershipId)
-                ?.property
-                ?.address
-                ?.singleLineAddress ?: throw ResponseStatusException(
+    private fun getPropertySingleLineAddress() =
+        propertyOwnershipService
+            .retrievePropertyOwnershipById(propertyOwnershipId)
+            ?.property
+            ?.address
+            ?.singleLineAddress
+            ?: throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Address for property ownership id $propertyOwnershipId not found",
             )
-
-        return mapOf("singleLineAddress" to propertyAddress)
-    }
 
     private fun deregisterPropertyAndRedirectToConfirmation(): String {
         propertyRegistrationService.deregisterProperty(propertyOwnershipId)
