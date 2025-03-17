@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TaskList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
@@ -9,7 +10,7 @@ class TaskListPagePropertyRegistration(
     page: Page,
 ) : BasePage(
         page,
-        "/$REGISTER_PROPERTY_JOURNEY_URL/task-list",
+        "/$REGISTER_PROPERTY_JOURNEY_URL/$TASK_LIST_PATH_SEGMENT",
     ) {
     private val registerTasks = TaskList.byIndex(page, 0)
     private val checkAndSubmitTasks = TaskList.byIndex(page, 1)

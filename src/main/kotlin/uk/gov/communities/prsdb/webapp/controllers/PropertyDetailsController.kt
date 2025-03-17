@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.constants.DETAILS_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
@@ -173,7 +174,7 @@ class PropertyDetailsController(
 
         const val UPDATE_PROPERTY_DETAILS_ROUTE = "$PROPERTY_DETAILS_ROUTE/$UPDATE_PATH_SEGMENT"
 
-        const val LA_PROPERTY_DETAILS_ROUTE = "/local-authority$PROPERTY_DETAILS_ROUTE"
+        const val LA_PROPERTY_DETAILS_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT$PROPERTY_DETAILS_ROUTE"
 
         fun getPropertyDetailsPath(
             propertyOwnershipId: Long,

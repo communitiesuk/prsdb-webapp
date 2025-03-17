@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.requestModels.ConfirmedEmailRequestModel
@@ -32,7 +33,7 @@ import java.security.Principal
 
 @PreAuthorize("hasRole('LA_ADMIN')")
 @Controller
-@RequestMapping("/local-authority/{localAuthorityId}")
+@RequestMapping("/$LOCAL_AUTHORITY_PATH_SEGMENT/{localAuthorityId}")
 class ManageLocalAuthorityUsersController(
     var invitationEmailSender: EmailNotificationService<LocalAuthorityInvitationEmail>,
     var cancellationEmailSender: EmailNotificationService<LocalAuthorityInvitationCancellationEmail>,
