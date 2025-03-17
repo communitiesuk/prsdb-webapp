@@ -116,4 +116,7 @@ class PropertyOwnership(
         this.property = property
         this.license = license
     }
+
+    val isOccupied: Boolean
+        get() = currentNumTenants > 0
 }

@@ -44,11 +44,10 @@ class PropertyDetailsUpdateJourney(
 
     override fun createOriginalJourneyData(): JourneyData {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
-        val isOccupied = propertyOwnership.currentNumTenants > 0
 
         return mapOf(
             UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment to mapOf("ownershipType" to propertyOwnership.ownershipType),
-            UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment to mapOf("occupied" to isOccupied),
+            UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment to mapOf("occupied" to propertyOwnership.isOccupied),
             UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment to
                 mapOf("numberOfHouseholds" to propertyOwnership.currentNumHouseholds),
             UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment to
