@@ -15,14 +15,9 @@ class PropertyDetailsUpdateJourneyDataExtensions {
             )
 
         fun JourneyData.getOriginalIsOccupied(originalJourneyKey: String) =
-            JourneyDataHelper.getPageData(this, originalJourneyKey)?.getIsOccupiedUpdateIfPresent()
+            JourneyDataHelper.getPageData(this, originalJourneyKey)?.getIsOccupied()
 
-        fun JourneyData.getIsOccupiedUpdateIfPresent() =
-            JourneyDataHelper.getFieldBooleanValue(
-                this,
-                UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment,
-                "occupied",
-            )
+        fun JourneyData.getIsOccupiedUpdateIfPresent() = this.getIsOccupied()
 
         fun JourneyData.getNumberOfHouseholdsUpdateIfPresent() =
             if (this.getIsOccupiedUpdateIfPresent() == false) {
@@ -45,5 +40,12 @@ class PropertyDetailsUpdateJourneyDataExtensions {
                     "numberOfPeople",
                 )
             }
+
+        private fun JourneyData.getIsOccupied() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment,
+                "occupied",
+            )
     }
 }

@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
-import uk.gov.communities.prsdb.webapp.forms.pages.PageWithContentProvider
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getIsOccupiedUpdateIfPresent
@@ -105,12 +104,13 @@ class PropertyDetailsUpdateJourney(
         Step(
             id = UpdatePropertyDetailsStepId.UpdateOccupancy,
             page =
-                PageWithContentProvider(
+                Page(
                     formModel = OccupancyFormModel::class,
                     templateName = "forms/propertyOccupancyForm",
                     content =
                         mapOf(
                             "title" to "propertyDetails.update.title",
+                            "fieldSetHeading" to getOccupancyStepFieldSetHeading(),
                             "radioOptions" to
                                 listOf(
                                     RadiosButtonViewModel(
@@ -128,7 +128,7 @@ class PropertyDetailsUpdateJourney(
                                 ),
                             BACK_URL_ATTR_NAME to UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment,
                         ),
-                ) { mapOf("fieldSetHeading" to getOccupancyStepFieldSetHeading()) },
+                ),
             nextAction = { journeyData, _ -> occupancyNextAction(journeyData) },
             saveAfterSubmit = false,
         )
@@ -137,20 +137,17 @@ class PropertyDetailsUpdateJourney(
         Step(
             id = UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds,
             page =
-                PageWithContentProvider(
+                Page(
                     formModel = NumberOfHouseholdsFormModel::class,
                     templateName = "forms/numberOfHouseholdsForm",
                     content =
                         mapOf(
                             "title" to "propertyDetails.update.title",
+                            "fieldSetHeading" to getNumberOfHouseholdsStepFieldSetHeading(),
                             "label" to "forms.numberOfHouseholds.label",
+                            BACK_URL_ATTR_NAME to getNumberOfHouseholdsStepBackUrl(),
                         ),
-                ) {
-                    mapOf(
-                        "fieldSetHeading" to getNumberOfHouseholdsStepFieldSetHeading(),
-                        BACK_URL_ATTR_NAME to getNumberOfHouseholdsStepBackUrl(),
-                    )
-                },
+                ),
             nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateNumberOfPeople, null) },
             saveAfterSubmit = false,
         )
@@ -159,21 +156,18 @@ class PropertyDetailsUpdateJourney(
         Step(
             id = UpdatePropertyDetailsStepId.UpdateNumberOfPeople,
             page =
-                PageWithContentProvider(
+                Page(
                     formModel = NumberOfPeopleFormModel::class,
                     templateName = "forms/numberOfPeopleForm",
                     content =
                         mapOf(
                             "title" to "propertyDetails.update.title",
+                            "fieldSetHeading" to getNumberOfPeopleStepFieldSetHeading(),
                             "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
                             "label" to "forms.numberOfPeople.label",
+                            BACK_URL_ATTR_NAME to getNumberOfPeopleStepBackUrl(),
                         ),
-                ) {
-                    mapOf(
-                        "fieldSetHeading" to getNumberOfPeopleStepFieldSetHeading(),
-                        BACK_URL_ATTR_NAME to getNumberOfPeopleStepBackUrl(),
-                    )
-                },
+                ),
             nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateDetails, null) },
             saveAfterSubmit = false,
         )
@@ -186,50 +180,45 @@ class PropertyDetailsUpdateJourney(
         )
 
     private fun getOccupancyStepFieldSetHeading() =
-        if (journeyDataService.getJourneyDataFromSession().getOriginalIsOccupied(originalDataKey)!!) {
-            "forms.update.occupancy.fieldSetHeading"
+        if (wasPropertyOriginallyOccupied()) {
+            "forms.update.occupancy.occupied.fieldSetHeading"
         } else {
             "forms.occupancy.fieldSetHeading"
         }
 
     private fun getNumberOfHouseholdsStepFieldSetHeading() =
-        if (journeyDataService.getJourneyDataFromSession().getOriginalIsOccupied(originalDataKey)!!) {
+        if (wasPropertyOriginallyOccupied()) {
             "forms.update.numberOfHouseholds.fieldSetHeading"
         } else {
             "forms.numberOfHouseholds.fieldSetHeading"
         }
 
     private fun getNumberOfPeopleStepFieldSetHeading() =
-        if (journeyDataService.getJourneyDataFromSession().getOriginalIsOccupied(originalDataKey)!!) {
+        if (wasPropertyOriginallyOccupied()) {
             "forms.update.numberOfPeople.fieldSetHeading"
         } else {
             "forms.numberOfPeople.fieldSetHeading"
         }
 
     private fun getNumberOfHouseholdsStepBackUrl() =
-        if (journeyDataService.getJourneyDataFromSession().getIsOccupiedUpdateIfPresent() != null) {
+        if (hasPropertyOccupancyBeenUpdated()) {
             UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment
         } else {
             UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment
         }
 
     private fun getNumberOfPeopleStepBackUrl() =
-        if (journeyDataService.getJourneyDataFromSession().getIsOccupiedUpdateIfPresent() != null) {
+        if (hasPropertyOccupancyBeenUpdated()) {
             UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment
         } else {
             UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment
         }
 
     private fun occupancyNextAction(journeyData: JourneyData) =
-        when (journeyData.getIsOccupiedUpdateIfPresent()) {
-            true -> Pair(UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds, null)
-            false -> Pair(UpdatePropertyDetailsStepId.UpdateDetails, null)
-            null ->
-                if (journeyData.getOriginalIsOccupied(originalDataKey)!!) {
-                    Pair(UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds, null)
-                } else {
-                    Pair(UpdatePropertyDetailsStepId.UpdateDetails, null)
-                }
+        if (journeyData.getIsOccupiedUpdateIfPresent()!!) {
+            Pair(UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds, null)
+        } else {
+            Pair(UpdatePropertyDetailsStepId.UpdateDetails, null)
         }
 
     private fun updatePropertyAndRedirect(journeyData: JourneyData): String {
@@ -246,4 +235,8 @@ class PropertyDetailsUpdateJourney(
 
         return UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment
     }
+
+    private fun wasPropertyOriginallyOccupied() = journeyDataService.getJourneyDataFromSession().getOriginalIsOccupied(originalDataKey)!!
+
+    private fun hasPropertyOccupancyBeenUpdated() = journeyDataService.getJourneyDataFromSession().getIsOccupiedUpdateIfPresent() != null
 }
