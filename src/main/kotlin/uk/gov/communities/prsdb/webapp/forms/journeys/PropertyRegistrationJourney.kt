@@ -5,6 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -63,7 +64,7 @@ class PropertyRegistrationJourney(
         initialStepId = RegisterPropertyStepId.LookupAddress,
         validator = validator,
         journeyDataService = journeyDataService,
-        taskListUrlSegment = "task-list",
+        taskListUrlSegment = TASK_LIST_PATH_SEGMENT,
     ) {
     init {
         loadJourneyDataIfNotLoaded(principalName)

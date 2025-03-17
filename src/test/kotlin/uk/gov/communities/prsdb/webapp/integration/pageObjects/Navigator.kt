@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -267,7 +268,7 @@ class Navigator(
     }
 
     fun goToPropertyRegistrationTaskList(): TaskListPagePropertyRegistration {
-        navigate("/register-property/task-list")
+        navigate("/register-property/$TASK_LIST_PATH_SEGMENT")
         return createValidPage(page, TaskListPagePropertyRegistration::class)
     }
 
