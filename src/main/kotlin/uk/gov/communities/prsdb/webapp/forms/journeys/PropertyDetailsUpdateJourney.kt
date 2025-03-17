@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
+import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationNumberOfPeoplePage
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfHouseholdsUpdateIfPresent
@@ -46,7 +47,10 @@ class PropertyDetailsUpdateJourney(
             UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment to
                 mapOf("numberOfHouseholds" to propertyOwnership.currentNumHouseholds),
             UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment to
-                mapOf("numberOfPeople" to propertyOwnership.currentNumTenants),
+                mapOf(
+                    "numberOfPeople" to propertyOwnership.currentNumTenants,
+                    "numberOfHouseholds" to propertyOwnership.currentNumHouseholds,
+                ),
         )
     }
 
@@ -120,7 +124,7 @@ class PropertyDetailsUpdateJourney(
         Step(
             id = UpdatePropertyDetailsStepId.UpdateNumberOfPeople,
             page =
-                Page(
+                PropertyRegistrationNumberOfPeoplePage(
                     formModel = NumberOfPeopleFormModel::class,
                     templateName = "forms/numberOfPeopleForm",
                     content =
@@ -131,6 +135,7 @@ class PropertyDetailsUpdateJourney(
                             "label" to "forms.numberOfPeople.label",
                             BACK_URL_ATTR_NAME to UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment,
                         ),
+                    journeyDataService = journeyDataService,
                 ),
             handleSubmitAndRedirect = { _, _ -> UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment },
             nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateDetails, null) },

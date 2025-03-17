@@ -84,4 +84,6 @@ class JourneyDataService(
         session.removeAttribute("contextId")
         clearJourneyDataFromSession()
     }
+
+    fun getOriginalJourneyDataOrNull(journeyData: JourneyData) = journeyData.getOrDefault("ORIGINAL_$journeyDataKey", null)
 }
