@@ -5,7 +5,8 @@ import org.springframework.validation.Validator
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper.Companion.getFieldIntegerValue
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import kotlin.reflect.KClass
@@ -36,7 +37,31 @@ class PropertyRegistrationNumberOfPeoplePage(
 
     private fun getNumberOfHouseholds(): String {
         val journeyData = journeyDataService.getJourneyDataFromSession()
-        val numberOfHouseholds = PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(journeyData)
+        val journeyDataValue = getNumberOfHouseholdsOrNull(journeyData)
+        val originalJourneyDataValue = getNumberOfHouseholdsFromOriginalJourneyDataIfPresent(journeyData)
+        val numberOfHouseholds = getLatestValue(journeyDataValue, originalJourneyDataValue)
         return numberOfHouseholds.toString()
     }
+
+    private fun getLatestValue(
+        journeyDataValue: Int?,
+        originalJourneyDataValue: Int?,
+    ): Int {
+        if (originalJourneyDataValue != null && journeyDataValue == null) {
+            return originalJourneyDataValue
+        }
+        return journeyDataValue ?: 0
+    }
+
+    private fun getNumberOfHouseholdsFromOriginalJourneyDataIfPresent(journeyData: JourneyData): Int? {
+        val originalJourneyData = journeyDataService.getOriginalJourneyDataOrNull(journeyData) as JourneyData? ?: return null
+        return getNumberOfHouseholdsOrNull(originalJourneyData)
+    }
+
+    private fun getNumberOfHouseholdsOrNull(journeyData: JourneyData): Int? =
+        getFieldIntegerValue(
+            journeyData,
+            RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment,
+            "numberOfHouseholds",
+        )
 }
