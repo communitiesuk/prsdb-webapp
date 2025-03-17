@@ -69,7 +69,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
         var propertyDetailsUpdatePage = navigator.goToPropertyDetailsUpdatePage(propertyOwnershipId)
         assertThat(propertyDetailsUpdatePage.heading).containsText("1, Example Road, EG")
 
-        val newNumberOfHouseholds = 3
+        val newNumberOfHouseholds = 2
         propertyDetailsUpdatePage = updateNumberOfHouseholdsAndReturn(propertyDetailsUpdatePage, newNumberOfHouseholds)
 
         // Submit changes TODO PRSD-355 add proper submit button and declaration page
