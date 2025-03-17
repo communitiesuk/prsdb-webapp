@@ -4,7 +4,6 @@ import jakarta.persistence.EntityExistsException
 import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
-import jakarta.validation.ValidationException
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -58,13 +57,6 @@ class PropertyRegistrationService(
         numberOfPeople: Int,
         baseUserId: String,
     ): RegistrationNumber {
-        if (numberOfHouseholds == 0 && numberOfPeople != 0) {
-            throw ValidationException("Number of people must be 0 if number of households is 0")
-        }
-        if (numberOfPeople < numberOfHouseholds) {
-            throw ValidationException("Number of people is less than number of households")
-        }
-
         if (address.uprn != null && getIsAddressRegistered(address.uprn, ignoreCache = true)) {
             throw EntityExistsException("Address already registered")
         }

@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.validation.ValidationException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -602,6 +603,62 @@ class PropertyOwnershipServiceTests {
         assertEquals(updateModel.ownershipType, propertyOwnership.ownershipType)
         assertEquals(updateModel.numberOfHouseholds, propertyOwnership.currentNumHouseholds)
         assertEquals(updateModel.numberOfPeople, propertyOwnership.currentNumTenants)
+    }
+
+    @Test
+    fun `updatePropertyOwnership throws error when number of households is 0 and number of people is not 0`() {
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                ownershipType = OwnershipType.FREEHOLD,
+                currentNumHouseholds = 2,
+                currentNumTenants = 6,
+            )
+        val updateModel =
+            PropertyOwnershipUpdateModel(
+                ownershipType = OwnershipType.LEASEHOLD,
+                numberOfHouseholds = 0,
+                numberOfPeople = 2,
+            )
+
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+
+        val errorThrown =
+            assertThrows<ValidationException> {
+                propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel)
+            }
+
+        assertEquals("Number of people must be 0 if number of households is 0", errorThrown.message)
+    }
+
+    @Test
+    fun `updatePropertyOwnership throws error if the number of people is less than the number of households`() {
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                ownershipType = OwnershipType.FREEHOLD,
+                currentNumHouseholds = 2,
+                currentNumTenants = 6,
+            )
+        val updateModel =
+            PropertyOwnershipUpdateModel(
+                ownershipType = OwnershipType.LEASEHOLD,
+                numberOfHouseholds = 4,
+                numberOfPeople = 2,
+            )
+
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+
+        val errorThrown =
+            assertThrows<ValidationException> {
+                propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel)
+            }
+
+        assertEquals("Number of people is less than number of households", errorThrown.message)
     }
 
     @Test

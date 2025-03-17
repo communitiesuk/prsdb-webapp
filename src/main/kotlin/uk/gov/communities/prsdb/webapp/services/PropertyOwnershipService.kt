@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
+import jakarta.validation.ValidationException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
@@ -160,6 +161,8 @@ class PropertyOwnershipService(
     ) {
         val propertyOwnership = getPropertyOwnership(id)
 
+        validateNumberOfPeopleWithNumberOfHouseholds(update, propertyOwnership)
+
         update.ownershipType?.let { propertyOwnership.ownershipType = it }
         update.numberOfHouseholds?.let { propertyOwnership.currentNumHouseholds = it }
         update.numberOfPeople?.let { propertyOwnership.currentNumTenants = it }
@@ -176,6 +179,21 @@ class PropertyOwnershipService(
             landlordId,
             RegistrationStatus.REGISTERED,
         )
+
+    private fun validateNumberOfPeopleWithNumberOfHouseholds(
+        update: PropertyOwnershipUpdateModel,
+        propertyOwnership: PropertyOwnership,
+    ) {
+        val numberOfHouseholds = update.numberOfHouseholds ?: propertyOwnership.currentNumHouseholds
+        val numberOfPeople = update.numberOfPeople ?: propertyOwnership.currentNumTenants
+
+        if (numberOfHouseholds == 0 && numberOfPeople != 0) {
+            throw ValidationException("Number of people must be 0 if number of households is 0")
+        }
+        if (numberOfPeople < numberOfHouseholds) {
+            throw ValidationException("Number of people is less than number of households")
+        }
+    }
 
     fun deletePropertyOwnership(propertyOwnership: PropertyOwnership) {
         propertyOwnershipRepository.delete(propertyOwnership)
