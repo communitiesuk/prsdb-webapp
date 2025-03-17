@@ -54,7 +54,7 @@ class PropertyDeregistrationJourneyTests {
     }
 
     @Test
-    fun `When the reason step is submitted, the property is deregistered`() {
+    fun `When the reason step is submitted, the property is deregistered and the propertyOwnershipId is stored in the session`() {
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
         val propertyOwnershipId = propertyOwnership.id
 
@@ -71,5 +71,6 @@ class PropertyDeregistrationJourneyTests {
 
         // Assert
         verify(mockPropertyRegistrationService).deregisterProperty(propertyOwnershipId)
+        verify(mockPropertyRegistrationService).setDeregisteredPropertyOwnershipIdInSession(propertyOwnershipId)
     }
 }

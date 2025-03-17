@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import java.security.Principal
 
 @PreAuthorize("hasRole('LANDLORD')")
@@ -28,6 +29,7 @@ import java.security.Principal
 class DeregisterPropertyController(
     private val propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val propertyRegistrationService: PropertyRegistrationService,
 ) {
     @GetMapping("/{stepName}")
     fun getJourneyStep(
@@ -91,8 +93,15 @@ class DeregisterPropertyController(
     fun getConfirmation(
         model: Model,
         principal: Principal,
-        @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
     ): String {
+        val propertyOwnershipId =
+            propertyRegistrationService.getDeregisteredPropertyOwnershipIdFromSession()
+                ?: throw ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "A deregistered property id was not found in the session",
+                )
+        propertyRegistrationService.clearDeregisteredPropertyOwnershipIdFromSession()
+
         val propertyOwnershipExists = propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId) != null
         if (propertyOwnershipExists) {
             throw ResponseStatusException(
