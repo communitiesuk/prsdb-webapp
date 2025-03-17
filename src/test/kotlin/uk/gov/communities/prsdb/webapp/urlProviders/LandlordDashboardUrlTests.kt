@@ -16,6 +16,7 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
@@ -23,7 +24,6 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
-import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
@@ -134,7 +134,7 @@ class LandlordDashboardUrlTests(
                 content = encodedDeclarationContent
                 with(csrf())
             }.andExpect { status { is3xxRedirection() } }
-            .andExpect { redirectedUrl(CONFIRMATION_PAGE_PATH_SEGMENT) }
+            .andExpect { redirectedUrl(CONFIRMATION_PATH_SEGMENT) }
 
         mvc
             .get(confirmationCaptor.firstValue.prsdURL)
@@ -183,7 +183,7 @@ class LandlordDashboardUrlTests(
                 content = encodedDeclarationContent
                 with(csrf())
             }.andExpect { status { is3xxRedirection() } }
-            .andExpect { redirectedUrl(CONFIRMATION_PAGE_PATH_SEGMENT) }
+            .andExpect { redirectedUrl(CONFIRMATION_PATH_SEGMENT) }
 
         mvc
             .get(confirmationCaptor.firstValue.prsdUrl)

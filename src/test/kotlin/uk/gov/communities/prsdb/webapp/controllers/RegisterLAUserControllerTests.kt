@@ -13,9 +13,9 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
@@ -79,7 +79,7 @@ class RegisterLAUserControllerTests(
         mvc
             .perform(
                 MockMvcRequestBuilders
-                    .get("/$REGISTER_LA_USER_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT")
+                    .get("/$REGISTER_LA_USER_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
                     .sessionAttr(LA_USER_ID, laUserId),
             ).andExpect(MockMvcResultMatchers.status().isOk())
     }
@@ -94,7 +94,7 @@ class RegisterLAUserControllerTests(
         whenever(localAuthorityDataService.getLocalAuthorityUserOrNull(laUserId)).thenReturn(localAuthorityUser)
 
         mvc
-            .get("/$REGISTER_LA_USER_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT")
+            .get("/$REGISTER_LA_USER_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
             .andExpect { status { isBadRequest() } }
     }
 
@@ -109,7 +109,7 @@ class RegisterLAUserControllerTests(
         mvc
             .perform(
                 MockMvcRequestBuilders
-                    .get("/$REGISTER_LA_USER_JOURNEY_URL/$CONFIRMATION_PAGE_PATH_SEGMENT")
+                    .get("/$REGISTER_LA_USER_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
                     .sessionAttr(LA_USER_ID, laUserId),
             ).andExpect(MockMvcResultMatchers.status().isBadRequest)
     }

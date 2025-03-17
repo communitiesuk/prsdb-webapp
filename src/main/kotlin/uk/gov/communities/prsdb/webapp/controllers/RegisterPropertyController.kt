@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
@@ -32,7 +34,7 @@ class RegisterPropertyController(
     fun index(model: Model): String {
         model.addAttribute(
             "registerPropertyInitialStep",
-            "/$REGISTER_PROPERTY_JOURNEY_URL/task-list",
+            "/$REGISTER_PROPERTY_JOURNEY_URL/$TASK_LIST_PATH_SEGMENT",
         )
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
@@ -53,7 +55,7 @@ class RegisterPropertyController(
                 subpage,
             )
 
-    @GetMapping("/task-list")
+    @GetMapping("/$TASK_LIST_PATH_SEGMENT")
     fun getTaskList(
         model: Model,
         principal: Principal,
@@ -79,7 +81,7 @@ class RegisterPropertyController(
                 principal,
             )
 
-    @GetMapping("/$CONFIRMATION_PAGE_PATH_SEGMENT")
+    @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getConfirmation(
         model: Model,
         principal: Principal,
@@ -105,9 +107,5 @@ class RegisterPropertyController(
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
 
         return "registerPropertyConfirmation"
-    }
-
-    companion object {
-        const val CONFIRMATION_PAGE_PATH_SEGMENT = "confirmation"
     }
 }
