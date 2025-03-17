@@ -11,12 +11,14 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.getPropertyDeregistrationPath
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertEquals
 
 @WebMvcTest(DeregisterPropertyController::class)
@@ -99,5 +101,33 @@ class DeregisterPropertyControllerTests(
             "/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/${DeregisterPropertyStepId.AreYouSure.urlPathSegment}",
             propertyDeregistrationPath,
         )
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation returns 200 if the property ownership is not in the database`() {
+        val propertyOwnershipId = 1.toLong()
+
+        mvc
+            .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$CONFIRMATION_PATH_SEGMENT")
+            .andExpect {
+                status { isOk() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation returns 400 if the property ownership is found in the database`() {
+        // Arrange
+        val propertyOwnership = MockLandlordData.createPropertyOwnership()
+        val propertyOwnershipId = propertyOwnership.id
+        whenever(propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)).thenReturn(propertyOwnership)
+
+        // Act, Assert
+        mvc
+            .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$CONFIRMATION_PATH_SEGMENT")
+            .andExpect {
+                status { isBadRequest() }
+            }
     }
 }

@@ -91,7 +91,16 @@ class DeregisterPropertyController(
     fun getConfirmation(
         model: Model,
         principal: Principal,
+        @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
     ): String {
+        val propertyOwnershipExists = propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId) != null
+        if (propertyOwnershipExists) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Property ownership $propertyOwnershipId was found in the database",
+            )
+        }
+
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
 
         return "deregisterPropertyConfirmation"
