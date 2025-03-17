@@ -93,20 +93,28 @@ class DeregisterPropertyController(
     fun getConfirmation(
         model: Model,
         principal: Principal,
+        @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
     ): String {
-        val propertyOwnershipId =
+        val deregisteredPropertyOwnershipId =
             propertyRegistrationService.getDeregisteredPropertyOwnershipIdFromSession()
                 ?: throw ResponseStatusException(
                     HttpStatus.NOT_FOUND,
-                    "A deregistered property id was not found in the session",
+                    "A deregistered propertyOwnershipId was not found in the session",
                 )
+
+        if (deregisteredPropertyOwnershipId != propertyOwnershipId) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "The deregistered propertyOwnershipId in the session does not match the propertyOwnershipId in the url",
+            )
+        }
         propertyRegistrationService.clearDeregisteredPropertyOwnershipIdFromSession()
 
-        val propertyOwnershipExists = propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId) != null
+        val propertyOwnershipExists = propertyOwnershipService.retrievePropertyOwnershipById(deregisteredPropertyOwnershipId) != null
         if (propertyOwnershipExists) {
             throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
-                "Property ownership $propertyOwnershipId was found in the database",
+                "Property ownership $deregisteredPropertyOwnershipId was found in the database",
             )
         }
 

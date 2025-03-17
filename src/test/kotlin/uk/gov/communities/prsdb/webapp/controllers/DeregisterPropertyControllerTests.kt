@@ -138,6 +138,20 @@ class DeregisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation returns 404 if the deregistered propertyOwnershipId from the session does not match the url parameter`() {
+        val deregisteredPropertyOwnershipId = 1.toLong()
+        val propertyOwnershipId = 2.toLong()
+        whenever(propertyRegistrationService.getDeregisteredPropertyOwnershipIdFromSession()).thenReturn(deregisteredPropertyOwnershipId)
+
+        mvc
+            .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$CONFIRMATION_PATH_SEGMENT")
+            .andExpect {
+                status { isNotFound() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
     fun `getConfirmation returns 400 if the property ownership is found in the database`() {
         // Arrange
         val propertyOwnership = MockLandlordData.createPropertyOwnership()

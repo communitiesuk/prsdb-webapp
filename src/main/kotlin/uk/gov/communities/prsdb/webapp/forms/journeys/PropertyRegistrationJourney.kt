@@ -3,12 +3,13 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import jakarta.persistence.EntityExistsException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
-import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.CONFIRMATION_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.AlreadyRegisteredPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -63,7 +64,7 @@ class PropertyRegistrationJourney(
         initialStepId = RegisterPropertyStepId.LookupAddress,
         validator = validator,
         journeyDataService = journeyDataService,
-        taskListUrlSegment = "task-list",
+        taskListUrlSegment = TASK_LIST_PATH_SEGMENT,
     ) {
     init {
         loadJourneyDataIfNotLoaded(principalName)
@@ -603,7 +604,7 @@ class PropertyRegistrationJourney(
 
             journeyDataService.deleteJourneyData()
 
-            return CONFIRMATION_PAGE_PATH_SEGMENT
+            return CONFIRMATION_PATH_SEGMENT
         } catch (exception: EntityExistsException) {
             return RegisterPropertyStepId.AlreadyRegistered.urlPathSegment
         }

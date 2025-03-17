@@ -8,7 +8,7 @@
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, null)}">
 <th:block id="form-content">
     <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'reason', #{${fieldSetHeading}}, null)}">
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'reason', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
         <div th:replace="~{fragments/forms/textArea :: textArea(null, 'reason', null, ${limit})}">
         </div>
     </th:block>
