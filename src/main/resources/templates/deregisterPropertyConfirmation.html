@@ -6,8 +6,13 @@
         <div id="confirmation-banner"
              th:replace="~{fragments/confirmationPageBanner :: confirmationPageBanner(#{deregisterProperty.confirmation.banner.heading}, null)}">
         </div>
-
-
+        <h1 class="govuk-heading-l" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h1>
+        <p class="govuk-body" th:text="#{deregisterProperty.confirmation.whatHappensNext.paragraph.one}">
+            deregisterProperty.confirmation.whatHappensNext.paragraph.one
+        </p>
+        <p class="govuk-body" th:text="#{deregisterProperty.confirmation.whatHappensNext.paragraph.two}">
+            deregisterProperty.confirmation.whatHappensNext.paragraph.two
+        </p>
         <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${landlordDashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
             common.confirmationPage.goToDashboard
         </a>
