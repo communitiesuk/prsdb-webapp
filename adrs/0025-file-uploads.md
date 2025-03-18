@@ -2,9 +2,9 @@
 
 ## Status
 
-Draft
+Final
 
-Date of decision: {date}
+Date of decision: 18/03/25
 
 ## Context and Problem Statement
 
@@ -22,11 +22,11 @@ We need the service to be able to receive uploads of files from the front end (i
 
 ## Decision Outcome
 
-{Title of Option X}, because {summary justification / rationale}.
+`Stream file via WebApp` (while keeping option of moving to `Stream file via separate ECS task` open if performance testing requires it), because, while it requires a more complex initial implementation than using pre-signed URLs, it is inherently more robust and so doesn't require as much work to cover off edge cases and protecting against misuse by users/ bad actors.
 
 ## Pros and Cons of the Options
 
-### Load file via WebApp (with CloudFront file size check)
+### Load file via WebApp (with WAF rule to block large uploads)
 
 We could simply load the file into memory in the WebApp and forward it to the s3 bucket. To protect against someone crashing the application by trying to upload a very large file, we could add a WAF rule that will reject the request with a redirect to a specific error page.
 
