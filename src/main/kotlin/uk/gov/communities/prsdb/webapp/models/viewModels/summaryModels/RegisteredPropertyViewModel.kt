@@ -33,7 +33,7 @@ data class RegisteredPropertyViewModel(
                     MessageKeyConverter.convert(
                         propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING,
                     ),
-                isTenantedMessageKey = MessageKeyConverter.convert(propertyOwnership.currentNumTenants > 0),
+                isTenantedMessageKey = MessageKeyConverter.convert(propertyOwnership.isOccupied),
                 recordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLaView),
             )
     }
