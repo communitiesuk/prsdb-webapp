@@ -133,8 +133,10 @@ class PropertyDeregistrationJourney(
         val propertyAddress = propertyOwnership.property.address.singleLineAddress
 
         propertyRegistrationService.deregisterProperty(propertyOwnershipId)
-        propertyRegistrationService.addDeregisteredPropertyOwnershipIdToSession(propertyOwnershipId)
-        propertyRegistrationService.setDeregisteredPropertyIdInSession(propertyOwnership.property.id)
+
+        propertyRegistrationService.addDeregisteredPropertyEntityIdsToSession(
+            Pair(propertyOwnershipId, propertyOwnership.property.id),
+        )
 
         confirmationEmailSender.sendEmail(
             primaryLandlordEmailAddress,

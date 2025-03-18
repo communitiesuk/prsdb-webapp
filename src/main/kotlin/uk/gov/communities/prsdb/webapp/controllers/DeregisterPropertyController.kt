@@ -98,7 +98,10 @@ class DeregisterPropertyController(
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
     ): String {
         checkWasCurrentUserAuthorisedToDeregisterProperty(propertyOwnershipId)
-        val propertyId = getPropertyIdFromSession()
+        val propertyId =
+            getDeregisteredPropertyEntityIdsFromSession()
+                .find { it.first == propertyOwnershipId }!!
+                .second
         checkPropertyHasBeenDeregistered(propertyId, propertyOwnershipId)
 
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
@@ -106,21 +109,26 @@ class DeregisterPropertyController(
         return "deregisterPropertyConfirmation"
     }
 
-    private fun checkWasCurrentUserAuthorisedToDeregisterProperty(propertyOwnershipId: Long) {
-        checkPropertyOwnershipIdWasStoredInSessionOnDeregistration(propertyOwnershipId)
+    private fun getDeregisteredPropertyEntityIdsFromSession(): MutableList<Pair<Long, Long>> {
+        val deregisteredEntityIds = propertyRegistrationService.getDeregisteredPropertyEntityIdsFromSession()
+        if (deregisteredEntityIds.isEmpty()) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No deregistered Pair(propertyOwnershipId, propertyId) were found in the session",
+            )
+        }
+        return deregisteredEntityIds
     }
+
+    private fun checkWasCurrentUserAuthorisedToDeregisterProperty(propertyOwnershipId: Long) =
+        checkPropertyOwnershipIdWasStoredInSessionOnDeregistration(propertyOwnershipId)
 
     private fun checkPropertyOwnershipIdWasStoredInSessionOnDeregistration(propertyOwnershipId: Long) {
         // A list of propertyOwnershipIds deregistered in this session is stored in the session.
         // This could only be done by a user who was authorised to deregister them.
         // If the propertyOwnershipId appears in the list, it is safe to show the confirmation page
+        val deregisteredPropertyOwnershipIds = getDeregisteredPropertyEntityIdsFromSession().map { it.first }
 
-        val deregisteredPropertyOwnershipIds =
-            propertyRegistrationService.getDeregisteredPropertyOwnershipIdsFromSession()
-                ?: throw ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "No deregistered propertyOwnershipIds were found in the session",
-                )
         if (!deregisteredPropertyOwnershipIds.contains(propertyOwnershipId)) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
@@ -128,13 +136,6 @@ class DeregisterPropertyController(
             )
         }
     }
-
-    private fun getPropertyIdFromSession(): Long =
-        propertyRegistrationService.getDeregisteredPropertyIdFromSession()
-            ?: throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "The deregistered propertyId was not found in the session",
-            )
 
     private fun checkPropertyHasBeenDeregistered(
         propertyId: Long,

@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito.mock
-import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -117,9 +116,10 @@ class DeregisterPropertyControllerTests(
     @WithMockUser(roles = ["LANDLORD"])
     fun `getConfirmation returns 200 if the property ownership is not in the database`() {
         val propertyOwnershipId = 1.toLong()
+        val propertyId = 2.toLong()
         whenever(
-            propertyRegistrationService.getDeregisteredPropertyOwnershipIdsFromSession(),
-        ).thenReturn(mutableListOf(propertyOwnershipId))
+            propertyRegistrationService.getDeregisteredPropertyEntityIdsFromSession(),
+        ).thenReturn(mutableListOf(Pair(propertyOwnershipId, propertyId)))
 
         mvc
             .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$CONFIRMATION_PATH_SEGMENT")
@@ -128,14 +128,13 @@ class DeregisterPropertyControllerTests(
             }
 
         verify(propertyOwnershipService).retrievePropertyOwnershipById(propertyOwnershipId)
-        verify(propertyService).retrievePropertyById(any())
+        verify(propertyService).retrievePropertyById(propertyId)
     }
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation returns 404 if no deregistered propertyOwnershipIds are in the session`() {
+    fun `getConfirmation returns 404 if no deregistered Pair(propertyOwnershipId, propertyId) are in the session`() {
         val propertyOwnershipId = 1.toLong()
-        whenever(propertyRegistrationService.getDeregisteredPropertyOwnershipIdsFromSession()).thenReturn(null)
 
         mvc
             .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$CONFIRMATION_PATH_SEGMENT")
@@ -147,23 +146,10 @@ class DeregisterPropertyControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"])
     fun `getConfirmation returns 404 if the propertyOwnershipId is not in the list of deregistered propertyOwnershipIds in the session`() {
-        val deregisteredPropertyOwnershipId = 1.toLong()
-        val propertyOwnershipId = 2.toLong()
-        whenever(propertyRegistrationService.getDeregisteredPropertyOwnershipIdsFromSession())
-            .thenReturn(mutableListOf(deregisteredPropertyOwnershipId))
-
-        mvc
-            .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$CONFIRMATION_PATH_SEGMENT")
-            .andExpect {
-                status { isNotFound() }
-            }
-    }
-
-    @Test
-    @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation returns 404 if the deregistered propertyId is not in the session`() {
+        val deregisteredPropertyEntities = mutableListOf(Pair(2.toLong(), 3.toLong()))
         val propertyOwnershipId = 1.toLong()
-        whenever(propertyRegistrationService.getDeregisteredPropertyIdFromSession()).thenReturn(null)
+        whenever(propertyRegistrationService.getDeregisteredPropertyEntityIdsFromSession())
+            .thenReturn(deregisteredPropertyEntities)
 
         mvc
             .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$CONFIRMATION_PATH_SEGMENT")
@@ -179,8 +165,8 @@ class DeregisterPropertyControllerTests(
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
         val propertyOwnershipId = propertyOwnership.id
         whenever(
-            propertyRegistrationService.getDeregisteredPropertyOwnershipIdsFromSession(),
-        ).thenReturn(mutableListOf(propertyOwnershipId))
+            propertyRegistrationService.getDeregisteredPropertyEntityIdsFromSession(),
+        ).thenReturn(mutableListOf(Pair(propertyOwnershipId, propertyOwnership.property.id)))
         whenever(propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)).thenReturn(propertyOwnership)
 
         // Act, Assert
@@ -200,8 +186,8 @@ class DeregisterPropertyControllerTests(
         val property = propertyOwnership.property
 
         whenever(
-            propertyRegistrationService.getDeregisteredPropertyOwnershipIdsFromSession(),
-        ).thenReturn(mutableListOf(propertyOwnershipId))
+            propertyRegistrationService.getDeregisteredPropertyEntityIdsFromSession(),
+        ).thenReturn(mutableListOf(Pair(propertyOwnershipId, propertyOwnership.property.id)))
         whenever(propertyService.retrievePropertyById(property.id)).thenReturn(property)
 
         // Act, Assert
