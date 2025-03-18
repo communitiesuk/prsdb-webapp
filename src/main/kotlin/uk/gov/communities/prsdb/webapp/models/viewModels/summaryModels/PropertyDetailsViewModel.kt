@@ -18,7 +18,7 @@ class PropertyDetailsViewModel(
 ) {
     val address: String = propertyOwnership.property.address.singleLineAddress
 
-    val isTenantedKey: String = MessageKeyConverter.convert(propertyOwnership.currentNumTenants > 0)
+    val isTenantedKey: String = MessageKeyConverter.convert(propertyOwnership.isOccupied)
 
     val keyDetails: List<SummaryListRowViewModel> =
         listOf(
@@ -81,9 +81,13 @@ class PropertyDetailsViewModel(
                     } ?: MessageKeyConverter.convert(LicensingType.NO_LICENSING),
                     // TODO PRSD-798: Add update link
                 )
-                // TODO PRSD-799: Add update link
-                addRow("propertyDetails.propertyRecord.occupied", isTenantedKey)
-                if (propertyOwnership.currentNumTenants > 0) {
+                addRow(
+                    "propertyDetails.propertyRecord.occupied",
+                    isTenantedKey,
+                    UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment,
+                    withChangeLinks,
+                )
+                if (propertyOwnership.isOccupied) {
                     addRow(
                         "propertyDetails.propertyRecord.numberOfHouseholds",
                         propertyOwnership.currentNumHouseholds,
