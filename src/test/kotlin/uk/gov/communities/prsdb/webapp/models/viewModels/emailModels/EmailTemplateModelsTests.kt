@@ -33,6 +33,13 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/PropertyRegistrationConfirmation.md",
                 ),
+                EmailTemplateTestData(
+                    PropertyDeregistrationConfirmationEmail(
+                        "P-XXX-YYY",
+                        "1 Street Name, Town, Country, AB1 2CD",
+                    ),
+                    "/emails/PropertyDeregistrationConfirmation.md",
+                ),
             )
 
         private fun createLocalAuthority(
