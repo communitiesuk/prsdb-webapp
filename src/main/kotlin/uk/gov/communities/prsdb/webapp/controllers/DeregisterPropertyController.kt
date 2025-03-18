@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJour
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.PropertyService
 import java.security.Principal
 
 @PreAuthorize("hasRole('LANDLORD')")
@@ -29,6 +30,7 @@ import java.security.Principal
 class DeregisterPropertyController(
     private val propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val propertyService: PropertyService,
     private val propertyRegistrationService: PropertyRegistrationService,
 ) {
     @GetMapping("/{stepName}")
@@ -95,20 +97,49 @@ class DeregisterPropertyController(
         principal: Principal,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
     ): String {
+        checkWasCurrentUserAuthorisedToDeregisterProperty(propertyOwnershipId)
+        val propertyId = getPropertyIdFromSession()
+        checkPropertyHasBeenDeregistered(propertyId, propertyOwnershipId)
+
+        model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
+
+        return "deregisterPropertyConfirmation"
+    }
+
+    private fun checkWasCurrentUserAuthorisedToDeregisterProperty(propertyOwnershipId: Long) {
+        checkPropertyOwnershipIdWasStoredInSessionOnDeregistration(propertyOwnershipId)
+    }
+
+    private fun checkPropertyOwnershipIdWasStoredInSessionOnDeregistration(propertyOwnershipId: Long) {
+        // A list of propertyOwnershipIds deregistered in this session is stored in the session.
+        // This could only be done by a user who was authorised to deregister them.
+        // If the propertyOwnershipId appears in the list, it is safe to show the confirmation page
+
         val deregisteredPropertyOwnershipIds =
             propertyRegistrationService.getDeregisteredPropertyOwnershipIdsFromSession()
                 ?: throw ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "No deregistered propertyOwnershipIds were found in the session",
                 )
-
         if (!deregisteredPropertyOwnershipIds.contains(propertyOwnershipId)) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "The deregistered propertyOwnershipId in the session does not match the propertyOwnershipId in the url",
             )
         }
+    }
 
+    private fun getPropertyIdFromSession(): Long =
+        propertyRegistrationService.getDeregisteredPropertyIdFromSession()
+            ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "The deregistered propertyId was not found in the session",
+            )
+
+    private fun checkPropertyHasBeenDeregistered(
+        propertyId: Long,
+        propertyOwnershipId: Long,
+    ) {
         val propertyOwnershipExists = propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId) != null
         if (propertyOwnershipExists) {
             throw ResponseStatusException(
@@ -117,9 +148,13 @@ class DeregisterPropertyController(
             )
         }
 
-        model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
-
-        return "deregisterPropertyConfirmation"
+        val propertyExists = propertyService.retrievePropertyById(propertyId) != null
+        if (propertyExists) {
+            throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Property $propertyId was found in the database",
+            )
+        }
     }
 
     companion object {
