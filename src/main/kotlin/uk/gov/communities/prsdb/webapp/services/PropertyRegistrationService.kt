@@ -5,7 +5,7 @@ import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_OWNERSHIP_ID
+import uk.gov.communities.prsdb.webapp.constants.DEREGISTERED_PROPERTY_OWNERSHIP_IDS
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -101,10 +101,13 @@ class PropertyRegistrationService(
 
     fun getLastPrnRegisteredThisSession() = session.getAttribute(PROPERTY_REGISTRATION_NUMBER)?.toString()?.toLong()
 
-    fun setDeregisteredPropertyOwnershipIdInSession(propertyOwnershipId: Long) =
-        session.setAttribute(PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
+    fun addDeregisteredPropertyOwnershipIdToSession(propertyOwnershipId: Long) {
+        val idsToStoreInSession =
+            getDeregisteredPropertyOwnershipIdsFromSession()?.plus(propertyOwnershipId)
+                ?: mutableListOf(propertyOwnershipId)
+        session.setAttribute(DEREGISTERED_PROPERTY_OWNERSHIP_IDS, idsToStoreInSession)
+    }
 
-    fun getDeregisteredPropertyOwnershipIdFromSession() = session.getAttribute(PROPERTY_OWNERSHIP_ID)?.toString()?.toLong()
-
-    fun clearDeregisteredPropertyOwnershipIdFromSession() = session.removeAttribute(PROPERTY_OWNERSHIP_ID)
+    fun getDeregisteredPropertyOwnershipIdsFromSession(): MutableList<Long>? =
+        session.getAttribute(DEREGISTERED_PROPERTY_OWNERSHIP_IDS) as MutableList<Long>?
 }

@@ -122,7 +122,7 @@ class PropertyDeregistrationJourney(
 
     private fun deregisterPropertyAndRedirectToConfirmation(): String {
         propertyRegistrationService.deregisterProperty(propertyOwnershipId)
-        propertyRegistrationService.setDeregisteredPropertyOwnershipIdInSession(propertyOwnershipId)
+        propertyRegistrationService.addDeregisteredPropertyOwnershipIdToSession(propertyOwnershipId)
 
         return CONFIRMATION_PATH_SEGMENT
     }

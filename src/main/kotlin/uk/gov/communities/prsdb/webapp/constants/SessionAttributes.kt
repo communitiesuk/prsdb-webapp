@@ -8,4 +8,4 @@ const val PROPERTY_REGISTRATION_NUMBER = "propertyRegistrationNumber"
 
 const val LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY = "looked-up-addresses"
 
-const val PROPERTY_OWNERSHIP_ID = "propertyOwnershipId"
+const val DEREGISTERED_PROPERTY_OWNERSHIP_IDS = "deregisteredPropertyOwnershipIds"

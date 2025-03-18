@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito.mock
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -112,22 +111,22 @@ class DeregisterPropertyControllerTests(
     @WithMockUser(roles = ["LANDLORD"])
     fun `getConfirmation returns 200 if the property ownership is not in the database`() {
         val propertyOwnershipId = 1.toLong()
-        whenever(propertyRegistrationService.getDeregisteredPropertyOwnershipIdFromSession()).thenReturn(propertyOwnershipId)
+        whenever(
+            propertyRegistrationService.getDeregisteredPropertyOwnershipIdsFromSession(),
+        ).thenReturn(mutableListOf(propertyOwnershipId))
 
         mvc
             .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$CONFIRMATION_PATH_SEGMENT")
             .andExpect {
                 status { isOk() }
             }
-
-        verify(propertyRegistrationService).clearDeregisteredPropertyOwnershipIdFromSession()
     }
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation returns 404 if the deregistered propertyOwnershipId is not in the session`() {
+    fun `getConfirmation returns 404 if no deregistered propertyOwnershipIds are in the session`() {
         val propertyOwnershipId = 1.toLong()
-        whenever(propertyRegistrationService.getDeregisteredPropertyOwnershipIdFromSession()).thenReturn(null)
+        whenever(propertyRegistrationService.getDeregisteredPropertyOwnershipIdsFromSession()).thenReturn(null)
 
         mvc
             .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$CONFIRMATION_PATH_SEGMENT")
@@ -138,10 +137,11 @@ class DeregisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation returns 404 if the deregistered propertyOwnershipId from the session does not match the url parameter`() {
+    fun `getConfirmation returns 404 if the propertyOwnershipId is not in the list of deregistered propertyOwnershipIds in the session`() {
         val deregisteredPropertyOwnershipId = 1.toLong()
         val propertyOwnershipId = 2.toLong()
-        whenever(propertyRegistrationService.getDeregisteredPropertyOwnershipIdFromSession()).thenReturn(deregisteredPropertyOwnershipId)
+        whenever(propertyRegistrationService.getDeregisteredPropertyOwnershipIdsFromSession())
+            .thenReturn(mutableListOf(deregisteredPropertyOwnershipId))
 
         mvc
             .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$CONFIRMATION_PATH_SEGMENT")
@@ -156,7 +156,9 @@ class DeregisterPropertyControllerTests(
         // Arrange
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
         val propertyOwnershipId = propertyOwnership.id
-        whenever(propertyRegistrationService.getDeregisteredPropertyOwnershipIdFromSession()).thenReturn(propertyOwnershipId)
+        whenever(
+            propertyRegistrationService.getDeregisteredPropertyOwnershipIdsFromSession(),
+        ).thenReturn(mutableListOf(propertyOwnershipId))
         whenever(propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)).thenReturn(propertyOwnership)
 
         // Act, Assert
@@ -165,7 +167,5 @@ class DeregisterPropertyControllerTests(
             .andExpect {
                 status { is5xxServerError() }
             }
-
-        verify(propertyRegistrationService).clearDeregisteredPropertyOwnershipIdFromSession()
     }
 }
