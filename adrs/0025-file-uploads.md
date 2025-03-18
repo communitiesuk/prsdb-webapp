@@ -41,7 +41,7 @@ We could simply load the file into memory in the WebApp and forward it to the s3
 We could stream the uploaded file into the s3 bucket through the WebApp. With careful management this would avoid the full file being loaded into memory and so would not require a separate WAF rule. 
 
 * Good, because it allows the WebApp to handle other file validation e.g. store the fact that the user has uploaded a file, return any relevant validation errors (including the file being too large) etc
-* Neutral, because it is more complex to implement, although there is (slightly hard to find) documentation to draw on, e.g. https://docs.aws.amazon.com/code-library/latest/ug/s3_example_s3_Scenario_UploadStream_section.html
+* Neutral, because it is more complex to implement, especially for checking that the size limit is not exceeded, although there is (slightly hard to find) documentation to draw on for the s3 upload, e.g. https://docs.aws.amazon.com/code-library/latest/ug/s3_example_s3_Scenario_UploadStream_section.html
 * Neutral, because it could still cause some performance issues for the WebApp - these would need to be checked for during performance testing
 * Neutral, because while it potentially means loading malicious code into memory there is very little risk of that code being executed in the transfer process (and less so as the file is not all loaded at once)
 
@@ -67,7 +67,7 @@ We could stream the file into s3 via a separate ECS task
 * Good, because unscanned files would be isolated from the main WebApp
 * [Optional] Good, because it could be combined with the virus scanning task, scanning the file as it is streamed before transferring it to the final s3 bucket - removing the need for a more complex architecture around virus scanning.
   * Note: Not 100% clear from the ClamAV docs whether the function that takes a stream loads/ retains the file in memory
-* Neutral, because it is more complex to implement, although there is (slightly hard to find) documentation to draw on, e.g. https://docs.aws.amazon.com/code-library/latest/ug/s3_example_s3_Scenario_UploadStream_section.html
+* Neutral, because it is more complex to implement, especially for checking that the size limit is not exceeded, although there is (slightly hard to find) documentation to draw on for the s3 upload, e.g. https://docs.aws.amazon.com/code-library/latest/ug/s3_example_s3_Scenario_UploadStream_section.html
 * Neutral, because while it could report validation errors back to the user this would require a subset of the WebApp code to reside to also reside in the separate ECS task
 * Good, because it could handle or report the successful upload (and scan result if applicable) either writing directly to the database or via an API call to the main WebApp
 * Neutral, because we would need similar auto-scaling rules to those we'd have with the main WebApp to avoid upload requests timing out
