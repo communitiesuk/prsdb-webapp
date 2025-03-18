@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.any
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -19,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregist
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.PropertyService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertEquals
 
@@ -31,6 +34,9 @@ class DeregisterPropertyControllerTests(
 
     @MockBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
+
+    @MockBean
+    private lateinit var propertyService: PropertyService
 
     @MockBean
     private lateinit var propertyRegistrationService: PropertyRegistrationService
@@ -120,6 +126,9 @@ class DeregisterPropertyControllerTests(
             .andExpect {
                 status { isOk() }
             }
+
+        verify(propertyOwnershipService).retrievePropertyOwnershipById(propertyOwnershipId)
+        verify(propertyService).retrievePropertyById(any())
     }
 
     @Test
@@ -152,6 +161,19 @@ class DeregisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation returns 404 if the deregistered propertyId is not in the session`() {
+        val propertyOwnershipId = 1.toLong()
+        whenever(propertyRegistrationService.getDeregisteredPropertyIdFromSession()).thenReturn(null)
+
+        mvc
+            .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$CONFIRMATION_PATH_SEGMENT")
+            .andExpect {
+                status { isNotFound() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
     fun `getConfirmation returns 500 if the property ownership is found in the database`() {
         // Arrange
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
@@ -160,6 +182,27 @@ class DeregisterPropertyControllerTests(
             propertyRegistrationService.getDeregisteredPropertyOwnershipIdsFromSession(),
         ).thenReturn(mutableListOf(propertyOwnershipId))
         whenever(propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)).thenReturn(propertyOwnership)
+
+        // Act, Assert
+        mvc
+            .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$CONFIRMATION_PATH_SEGMENT")
+            .andExpect {
+                status { is5xxServerError() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation returns 500 if the property is found in the database`() {
+        // Arrange
+        val propertyOwnership = MockLandlordData.createPropertyOwnership()
+        val propertyOwnershipId = propertyOwnership.id
+        val property = propertyOwnership.property
+
+        whenever(
+            propertyRegistrationService.getDeregisteredPropertyOwnershipIdsFromSession(),
+        ).thenReturn(mutableListOf(propertyOwnershipId))
+        whenever(propertyService.retrievePropertyById(property.id)).thenReturn(property)
 
         // Act, Assert
         mvc
