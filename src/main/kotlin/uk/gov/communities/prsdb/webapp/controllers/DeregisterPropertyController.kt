@@ -124,7 +124,7 @@ class DeregisterPropertyController(
         if (!deregisteredPropertyOwnershipIds.contains(propertyOwnershipId)) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "The deregistered propertyOwnershipId in the session does not match the propertyOwnershipId in the url",
+                "PropertyOwnershipId $propertyOwnershipId was not found in the list of deregistered propertyOwnershipIds in the session",
             )
         }
     }
