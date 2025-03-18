@@ -6,8 +6,13 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
+import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
@@ -32,6 +37,9 @@ class PropertyDeregistrationJourneyTests {
     @MockBean
     private lateinit var mockPropertyRegistrationService: PropertyRegistrationService
 
+    @MockBean
+    lateinit var mockConfirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmail>
+
     @SpyBean
     private lateinit var propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory
 
@@ -41,6 +49,7 @@ class PropertyDeregistrationJourneyTests {
         mockJourneyDataService = mock()
         mockPropertyOwnershipService = mock()
         mockPropertyRegistrationService = mock()
+        mockConfirmationEmailSender = mock()
 
         whenever(mockJourneyDataServiceFactory.create(anyString())).thenReturn(mockJourneyDataService)
 
@@ -50,6 +59,7 @@ class PropertyDeregistrationJourneyTests {
                 mockJourneyDataServiceFactory,
                 mockPropertyOwnershipService,
                 mockPropertyRegistrationService,
+                mockConfirmationEmailSender,
             )
     }
 
@@ -71,5 +81,34 @@ class PropertyDeregistrationJourneyTests {
 
         // Assert
         verify(mockPropertyRegistrationService).deregisterProperty(propertyOwnershipId)
+    }
+
+    @Test
+    fun `When the property is deregistered, a confirmation email is sent`() {
+        val propertyOwnership = MockLandlordData.createPropertyOwnership()
+        val propertyOwnershipId = propertyOwnership.id
+
+        val currentUserId = propertyOwnership.primaryLandlord.baseUser.id
+        JourneyTestHelper.setMockUser(currentUserId)
+
+        whenever(mockPropertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId))
+            .thenReturn(propertyOwnership)
+
+        // Act
+        propertyDeregistrationJourneyFactory
+            .create(propertyOwnershipId)
+            .completeStep(DeregisterPropertyStepId.Reason.urlPathSegment, mapOf("reason" to ""), null, mock())
+
+        verify(mockConfirmationEmailSender).sendEmail(
+            "example@email.com",
+            PropertyDeregistrationConfirmationEmail(
+                prn =
+                    RegistrationNumberDataModel
+                        .fromRegistrationNumber(
+                            RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
+                        ).toString(),
+                singleLineAddress = "1 Example Road, EG1 2AB",
+            ),
+        )
     }
 }
