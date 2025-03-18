@@ -107,11 +107,16 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
         var propertyDetailsUpdatePage = navigator.goToPropertyDetailsUpdatePage(propertyOwnershipId)
         assertThat(propertyDetailsUpdatePage.heading).containsText("1, Example Road, EG")
 
+        propertyDetailsUpdatePage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickActionLinkAndWait()
+        val updateNumberOfHouseholdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, urlArguments)
+
         val newNumberOfHouseholds = 3
-        val numberOfPeopleUpdatePage = updateNumberOfHouseholdsAndReturnNumberOfPeople(propertyDetailsUpdatePage, newNumberOfHouseholds)
+        updateNumberOfHouseholdsPage.submitNumberOfHouseholds(newNumberOfHouseholds)
+        val numberOfPeopleUpdatePage = assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, urlArguments)
 
         val newNumberOfPeople = 4
-        propertyDetailsUpdatePage = updateNumberOfPeopleAndReturn(page, numberOfPeopleUpdatePage, newNumberOfPeople)
+        numberOfPeopleUpdatePage.submitNumOfPeople(newNumberOfPeople)
+        propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsUpdatePage::class, urlArguments)
 
         // Submit changes TODO PRSD-355 add proper submit button and declaration page
         propertyDetailsUpdatePage.submitButton.clickAndWait()
@@ -136,7 +141,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
         val updateOwnershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
         updateOwnershipTypePage.submitOwnershipType(newOwnershipType)
 
-        return assertPageIsPropertyDetailsUpdatePage(page)
+        return assertPageIs(page, PropertyDetailsUpdatePage::class, urlArguments)
     }
 
     private fun updateNumberOfHouseholdsAndReturn(
@@ -149,20 +154,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
         val updateNumberOfHouseholdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, urlArguments)
         updateNumberOfHouseholdsPage.submitNumberOfHouseholds(newNumberOfHouseholds)
 
-        return assertPageIsPropertyDetailsUpdatePage(page)
-    }
-
-    private fun updateNumberOfHouseholdsAndReturnNumberOfPeople(
-        detailsPage: PropertyDetailsUpdatePage,
-        newNumberOfHouseholds: Int,
-    ): NumberOfPeopleFormPagePropertyDetailsUpdate {
-        val page = detailsPage.page
-        detailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickActionLinkAndWait()
-
-        val updateNumberOfHouseholdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, urlArguments)
-        updateNumberOfHouseholdsPage.submitNumberOfHouseholds(newNumberOfHouseholds)
-
-        return assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, urlArguments)
+        return assertPageIs(page, PropertyDetailsUpdatePage::class, urlArguments)
     }
 
     private fun updateNumberOfPeopleAndReturn(
@@ -173,19 +165,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
         detailsPage.propertyDetailsSummaryList.numberOfPeopleRow.clickActionLinkAndWait()
 
         val updateNumberOfPeoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, urlArguments)
+        updateNumberOfPeoplePage.submitNumOfPeople(newNumberOfPeople)
 
-        return updateNumberOfPeopleAndReturn(page, updateNumberOfPeoplePage, newNumberOfPeople)
+        return assertPageIs(page, PropertyDetailsUpdatePage::class, urlArguments)
     }
-
-    private fun updateNumberOfPeopleAndReturn(
-        page: Page,
-        numberOfPeopleUpdatePage: NumberOfPeopleFormPagePropertyDetailsUpdate,
-        newNumberOfPeople: Int,
-    ): PropertyDetailsUpdatePage {
-        numberOfPeopleUpdatePage.submitNumOfPeople(newNumberOfPeople)
-
-        return assertPageIsPropertyDetailsUpdatePage(page)
-    }
-
-    private fun assertPageIsPropertyDetailsUpdatePage(page: Page) = assertPageIs(page, PropertyDetailsUpdatePage::class, urlArguments)
 }

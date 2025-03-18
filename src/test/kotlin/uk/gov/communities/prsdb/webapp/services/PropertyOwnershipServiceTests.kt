@@ -4,12 +4,14 @@ import jakarta.validation.ValidationException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.InjectMocks
 import org.mockito.Mock
@@ -46,6 +48,73 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockOneLoginUserD
 
 @ExtendWith(MockitoExtension::class)
 class PropertyOwnershipServiceTests {
+    companion object {
+        @JvmStatic
+        fun provideNumbersAndErrorMessages() =
+            listOf(
+                Arguments.of(
+                    Named.of(
+                        "number of households is 0 and number of people is not 0",
+                        "Number of people must be 0 if number of households is 0",
+                    ),
+                    Named.of("currentNumberOfHouseholds", 0),
+                    Named.of("currentNumberOfPeople", 0),
+                    Named.of("numberOfHouseholds", null),
+                    Named.of("numberOfPeople", 2),
+                ),
+                Arguments.of(
+                    Named.of(
+                        "number of households is 0 and number of people is not 0",
+                        "Number of people must be 0 if number of households is 0",
+                    ),
+                    Named.of("currentNumberOfHouseholds", 0),
+                    Named.of("currentNumberOfPeople", 0),
+                    Named.of("numberOfHouseholds", 0),
+                    Named.of("numberOfPeople", 3),
+                ),
+                Arguments.of(
+                    Named.of(
+                        "number of households is 0 and number of people is not 0",
+                        "Number of people must be 0 if number of households is 0",
+                    ),
+                    Named.of("currentNumberOfHouseholds", 1),
+                    Named.of("currentNumberOfPeople", 2),
+                    Named.of("numberOfHouseholds", 0),
+                    Named.of("numberOfPeople", null),
+                ),
+                Arguments.of(
+                    Named.of(
+                        "the number of people is less than the number of households",
+                        "Number of people is less than number of households",
+                    ),
+                    Named.of("currentNumberOfHouseholds", 1),
+                    Named.of("currentNumberOfPeople", 2),
+                    Named.of("numberOfHouseholds", 4),
+                    Named.of("numberOfPeople", null),
+                ),
+                Arguments.of(
+                    Named.of(
+                        "the number of people is less than the number of households",
+                        "Number of people is less than number of households",
+                    ),
+                    Named.of("currentNumberOfHouseholds", 1),
+                    Named.of("currentNumberOfPeople", 2),
+                    Named.of("numberOfHouseholds", 4),
+                    Named.of("numberOfPeople", 3),
+                ),
+                Arguments.of(
+                    Named.of(
+                        "the number of people is less than the number of households",
+                        "Number of people is less than number of households",
+                    ),
+                    Named.of("currentNumberOfHouseholds", 4),
+                    Named.of("currentNumberOfPeople", 5),
+                    Named.of("numberOfHouseholds", null),
+                    Named.of("numberOfPeople", 2),
+                ),
+            )
+    }
+
     @Mock
     private lateinit var mockPropertyOwnershipRepository: PropertyOwnershipRepository
 
@@ -608,17 +677,11 @@ class PropertyOwnershipServiceTests {
     }
 
     @ParameterizedTest
-    @CsvSource(
-        value = [
-            "0,0,null,2",
-            "0,0,0,3",
-            "1,2,0,null",
-        ],
-        nullValues = ["null"],
-    )
-    fun `updatePropertyOwnership throws error when number of households is 0 and number of people is not 0`(
-        currentNumHouseholds: Int,
-        currentNumTenants: Int,
+    @MethodSource("provideNumbersAndErrorMessages")
+    fun `updatePropertyOwnership throws error when`(
+        expectedErrorMessage: String,
+        currentNumberOfHouseholds: Int,
+        currentNumberOfPeople: Int,
         numberOfHouseholds: Int?,
         numberOfPeople: Int?,
     ) {
@@ -626,8 +689,8 @@ class PropertyOwnershipServiceTests {
             MockLandlordData.createPropertyOwnership(
                 id = 1,
                 ownershipType = OwnershipType.FREEHOLD,
-                currentNumHouseholds = currentNumHouseholds,
-                currentNumTenants = currentNumTenants,
+                currentNumHouseholds = currentNumberOfHouseholds,
+                currentNumTenants = currentNumberOfPeople,
             )
         val updateModel =
             PropertyOwnershipUpdateModel(
@@ -645,48 +708,7 @@ class PropertyOwnershipServiceTests {
                 propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel)
             }
 
-        assertEquals("Number of people must be 0 if number of households is 0", errorThrown.message)
-    }
-
-    @ParameterizedTest
-    @CsvSource(
-        value = [
-            "1,2,4,null",
-            "1,2,4,3",
-            "4,5,null,2",
-        ],
-        nullValues = ["null"],
-    )
-    fun `updatePropertyOwnership throws error if the number of people is less than the number of households`(
-        currentNumHouseholds: Int,
-        currentNumTenants: Int,
-        numberOfHouseholds: Int?,
-        numberOfPeople: Int?,
-    ) {
-        val propertyOwnership =
-            MockLandlordData.createPropertyOwnership(
-                id = 1,
-                ownershipType = OwnershipType.FREEHOLD,
-                currentNumHouseholds = currentNumHouseholds,
-                currentNumTenants = currentNumTenants,
-            )
-        val updateModel =
-            PropertyOwnershipUpdateModel(
-                ownershipType = OwnershipType.LEASEHOLD,
-                numberOfHouseholds = numberOfHouseholds,
-                numberOfPeople = numberOfPeople,
-            )
-
-        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
-            propertyOwnership,
-        )
-
-        val errorThrown =
-            assertThrows<ValidationException> {
-                propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel)
-            }
-
-        assertEquals("Number of people is less than number of households", errorThrown.message)
+        assertEquals(expectedErrorMessage, errorThrown.message)
     }
 
     @Test
