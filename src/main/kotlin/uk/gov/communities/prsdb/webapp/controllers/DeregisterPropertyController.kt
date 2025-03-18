@@ -98,8 +98,7 @@ class DeregisterPropertyController(
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
     ): String {
         checkWasCurrentUserAuthorisedToDeregisterProperty(propertyOwnershipId)
-        val propertyId = getDeregisteredPropertyEntityIdsFromSession().find { it.first == propertyOwnershipId }!!.second
-        checkPropertyHasBeenDeregistered(propertyId, propertyOwnershipId)
+        checkPropertyHasBeenDeregistered(propertyOwnershipId)
 
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
 
@@ -121,7 +120,7 @@ class DeregisterPropertyController(
         checkPropertyOwnershipIdWasStoredInSessionOnDeregistration(propertyOwnershipId)
 
     private fun checkPropertyOwnershipIdWasStoredInSessionOnDeregistration(propertyOwnershipId: Long) {
-        // A list of propertyOwnershipIds deregistered in this session is stored in the session.
+        // A list of Pair(propertyOwnershipId, propertyId) deregistered in this session is stored in the session.
         // This could only be done by a user who was authorised to deregister them.
         // If the propertyOwnershipId appears in the list, it is safe to show the confirmation page
         val deregisteredPropertyOwnershipIds = getDeregisteredPropertyEntityIdsFromSession().map { it.first }
@@ -134,10 +133,7 @@ class DeregisterPropertyController(
         }
     }
 
-    private fun checkPropertyHasBeenDeregistered(
-        propertyId: Long,
-        propertyOwnershipId: Long,
-    ) {
+    private fun checkPropertyHasBeenDeregistered(propertyOwnershipId: Long) {
         if (propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId) != null) {
             throw ResponseStatusException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
@@ -145,6 +141,7 @@ class DeregisterPropertyController(
             )
         }
 
+        val propertyId = getDeregisteredPropertyEntityIdsFromSession().find { it.first == propertyOwnershipId }!!.second
         if (propertyService.retrievePropertyById(propertyId) != null) {
             throw ResponseStatusException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
