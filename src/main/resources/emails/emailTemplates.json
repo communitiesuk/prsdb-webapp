@@ -28,5 +28,11 @@
     "name": "Property Registration Confirmation",
     "subject": "GOV.UK - Your registered property on the PRS Database",
     "bodyLocation": "/emails/PropertyRegistrationConfirmation.md"
+  },
+  {
+    "id": "96a2f7a8-26b2-4377-944c-6f68c96d7ebe",
+    "name": "Property Deregistration Confirmation",
+    "subject": "GOV.UK - You have deleted a property from the PRS database",
+    "bodyLocation": "/emails/PropertyDeregistrationConfirmation.md"
   }
 ]

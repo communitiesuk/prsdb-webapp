@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -9,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfHouseholdsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfPeopleFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OwnershipTypeFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.PropertyDetailsUpdatePage
 
@@ -26,11 +28,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
         val newOwnershipType = OwnershipType.LEASEHOLD
         propertyDetailsUpdatePage = updateOwnershipTypeAndReturn(propertyDetailsUpdatePage, newOwnershipType)
 
-        val newNumberOfHouseholds = 2
-        propertyDetailsUpdatePage = updateNumberOfHouseholdsAndReturn(propertyDetailsUpdatePage, newNumberOfHouseholds)
-
-        val newNumberOfPeople = 4
-        propertyDetailsUpdatePage = updateNumberOfPeopleAndReturn(propertyDetailsUpdatePage, newNumberOfPeople)
+        propertyDetailsUpdatePage = updateOccupancyToVacantAndReturn(propertyDetailsUpdatePage)
 
         // Submit changes TODO PRSD-355 add proper submit button and declaration page
         propertyDetailsUpdatePage.submitButton.clickAndWait()
@@ -38,12 +36,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
 
         // Check changes have occurred
         assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.ownershipTypeRow.value).containsText("Leasehold")
-        assertThat(
-            propertyDetailsUpdatePage.propertyDetailsSummaryList.numberOfHouseholdsRow.value,
-        ).containsText(newNumberOfHouseholds.toString())
-        assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.numberOfPeopleRow.value).containsText(
-            newNumberOfPeople.toString(),
-        )
+        assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
     }
 
     @Test
@@ -64,13 +57,15 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
     }
 
     @Test
-    fun `A property can have just their number of households updated`(page: Page) {
+    fun `A property can have just their number of households and people updated`(page: Page) {
         // Update details page
         var propertyDetailsUpdatePage = navigator.goToPropertyDetailsUpdatePage(propertyOwnershipId)
         assertThat(propertyDetailsUpdatePage.heading).containsText("1, Example Road, EG")
 
         val newNumberOfHouseholds = 3
-        propertyDetailsUpdatePage = updateNumberOfHouseholdsAndReturn(propertyDetailsUpdatePage, newNumberOfHouseholds)
+        val newNumberOfPeople = 5
+        propertyDetailsUpdatePage =
+            updateNumberOfHouseholdsAndPeopleAndReturn(propertyDetailsUpdatePage, newNumberOfHouseholds, newNumberOfPeople)
 
         // Submit changes TODO PRSD-355 add proper submit button and declaration page
         propertyDetailsUpdatePage.submitButton.clickAndWait()
@@ -80,22 +75,6 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
         assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.numberOfHouseholdsRow.value).containsText(
             newNumberOfHouseholds.toString(),
         )
-    }
-
-    @Test
-    fun `A property can have just their number of people updated`(page: Page) {
-        // Update details page
-        var propertyDetailsUpdatePage = navigator.goToPropertyDetailsUpdatePage(propertyOwnershipId)
-        assertThat(propertyDetailsUpdatePage.heading).containsText("1, Example Road, EG")
-
-        val newNumberOfPeople = 3
-        propertyDetailsUpdatePage = updateNumberOfPeopleAndReturn(propertyDetailsUpdatePage, newNumberOfPeople)
-
-        // Submit changes TODO PRSD-355 add proper submit button and declaration page
-        propertyDetailsUpdatePage.submitButton.clickAndWait()
-        propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsUpdatePage::class, urlArguments)
-
-        // Check changes have occurred
         assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.numberOfPeopleRow.value).containsText(
             newNumberOfPeople.toString(),
         )
@@ -114,9 +93,20 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
         return assertPageIs(page, PropertyDetailsUpdatePage::class, urlArguments)
     }
 
-    private fun updateNumberOfHouseholdsAndReturn(
+    private fun updateOccupancyToVacantAndReturn(detailsPage: PropertyDetailsUpdatePage): PropertyDetailsUpdatePage {
+        val page = detailsPage.page
+        detailsPage.propertyDetailsSummaryList.occupancyRow.clickActionLinkAndWait()
+
+        val updateOccupancyPage = assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, urlArguments)
+        updateOccupancyPage.submitIsVacant()
+
+        return assertPageIs(page, PropertyDetailsUpdatePage::class, urlArguments)
+    }
+
+    private fun updateNumberOfHouseholdsAndPeopleAndReturn(
         detailsPage: PropertyDetailsUpdatePage,
         newNumberOfHouseholds: Int,
+        newNumberOfPeople: Int,
     ): PropertyDetailsUpdatePage {
         val page = detailsPage.page
         detailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickActionLinkAndWait()
@@ -124,19 +114,107 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
         val updateNumberOfHouseholdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, urlArguments)
         updateNumberOfHouseholdsPage.submitNumberOfHouseholds(newNumberOfHouseholds)
 
-        return assertPageIs(page, PropertyDetailsUpdatePage::class, urlArguments)
-    }
-
-    private fun updateNumberOfPeopleAndReturn(
-        detailsPage: PropertyDetailsUpdatePage,
-        newNumberOfPeople: Int,
-    ): PropertyDetailsUpdatePage {
-        val page = detailsPage.page
-        detailsPage.propertyDetailsSummaryList.numberOfPeopleRow.clickActionLinkAndWait()
-
         val updateNumberOfPeoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, urlArguments)
         updateNumberOfPeoplePage.submitNumOfPeople(newNumberOfPeople)
 
         return assertPageIs(page, PropertyDetailsUpdatePage::class, urlArguments)
+    }
+
+    @Nested
+    inner class OccupancyUpdates {
+        private val occupiedPropertyOwnershipId = 1L
+        private val occupiedPropertyUrlArguments = mapOf("propertyOwnershipId" to occupiedPropertyOwnershipId.toString())
+
+        private val vacantPropertyOwnershipId = 7L
+        private val vacantPropertyUrlArguments = mapOf("propertyOwnershipId" to vacantPropertyOwnershipId.toString())
+
+        @Test
+        fun `Step access and fieldset headings work correctly when a property is updated from occupied to vacant`(page: Page) {
+            // Update details page
+            var propertyDetailsUpdatePage = navigator.goToPropertyDetailsUpdatePage(occupiedPropertyOwnershipId)
+            assertThat(propertyDetailsUpdatePage.heading).containsText("1, Example Road, EG")
+
+            // Check number of households/people pages can be reached
+            navigator.skipToPropertyDetailsUpdateNumberOfHouseholdsPage(occupiedPropertyOwnershipId)
+            val updateNumberOfHouseholdsPage =
+                assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+            assertThat(updateNumberOfHouseholdsPage.form.fieldsetHeading).containsText("Update the number of households in the property")
+
+            navigator.skipToPropertyDetailsUpdateNumberOfPeoplePage(occupiedPropertyOwnershipId)
+            val updateNumberOfPeoplePage =
+                assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+            assertThat(updateNumberOfPeoplePage.form.fieldsetHeading).containsText("Update how many people live in your property")
+
+            // Update occupancy to vacant
+            propertyDetailsUpdatePage = navigator.goToPropertyDetailsUpdatePage(occupiedPropertyOwnershipId)
+            propertyDetailsUpdatePage.propertyDetailsSummaryList.occupancyRow.clickActionLinkAndWait()
+            val updateOccupancyPage = assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+            assertThat(updateOccupancyPage.form.fieldsetHeading).containsText("Is your property still occupied by tenants?")
+            updateOccupancyPage.submitIsVacant()
+            assertPageIs(page, PropertyDetailsUpdatePage::class, occupiedPropertyUrlArguments)
+
+            // Check number of households/people pages can't be reached
+            navigator.skipToPropertyDetailsUpdateNumberOfHouseholdsPage(occupiedPropertyOwnershipId)
+            assertPageIs(page, PropertyDetailsUpdatePage::class, occupiedPropertyUrlArguments)
+
+            navigator.skipToPropertyDetailsUpdateNumberOfPeoplePage(occupiedPropertyOwnershipId)
+            propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsUpdatePage::class, occupiedPropertyUrlArguments)
+
+            // Submit changes TODO PRSD-355 add proper submit button and declaration page
+            propertyDetailsUpdatePage.submitButton.clickAndWait()
+            propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsUpdatePage::class, occupiedPropertyUrlArguments)
+
+            // Check changes have occurred
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
+        }
+
+        @Test
+        fun `Step access and fieldset headings work correctly when a property is updated from vacant to occupied`(page: Page) {
+            // Update details page
+            var propertyDetailsUpdatePage = navigator.goToPropertyDetailsUpdatePage(vacantPropertyOwnershipId)
+            assertThat(propertyDetailsUpdatePage.heading).containsText("6 Mythical Place")
+
+            // Check number of households/people pages can't be reached
+            navigator.skipToPropertyDetailsUpdateNumberOfHouseholdsPage(vacantPropertyOwnershipId)
+            assertPageIs(page, PropertyDetailsUpdatePage::class, vacantPropertyUrlArguments)
+
+            navigator.skipToPropertyDetailsUpdateNumberOfPeoplePage(vacantPropertyOwnershipId)
+            propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsUpdatePage::class, vacantPropertyUrlArguments)
+
+            // Update occupancy to occupied
+            propertyDetailsUpdatePage.propertyDetailsSummaryList.occupancyRow.clickActionLinkAndWait()
+            val updateOccupancyPage = assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
+            assertThat(updateOccupancyPage.form.fieldsetHeading).containsText("Is your property occupied by tenants?")
+            updateOccupancyPage.submitIsOccupied()
+            assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
+
+            // Check number of people page can't be reached
+            navigator.skipToPropertyDetailsUpdateNumberOfPeoplePage(vacantPropertyOwnershipId)
+            val updateNumberOfHouseholdsPage =
+                assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
+
+            // Update number of households/people
+            val newNumberOfHouseholds = 1
+            val newNumberOfPeople = 3
+            assertThat(updateNumberOfHouseholdsPage.form.fieldsetHeading).containsText("How many households live in your property?")
+            updateNumberOfHouseholdsPage.submitNumberOfHouseholds(newNumberOfHouseholds)
+            val updateNumberOfPeoplePage =
+                assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
+            assertThat(updateNumberOfPeoplePage.form.fieldsetHeading).containsText("How many people live in your property?")
+            updateNumberOfPeoplePage.submitNumOfPeople(newNumberOfPeople)
+
+            // Submit changes TODO PRSD-355 add proper submit button and declaration page
+            propertyDetailsUpdatePage.submitButton.clickAndWait()
+            propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsUpdatePage::class, vacantPropertyUrlArguments)
+
+            // Check changes have occurred
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.numberOfHouseholdsRow.value).containsText(
+                newNumberOfHouseholds.toString(),
+            )
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.numberOfPeopleRow.value).containsText(
+                newNumberOfPeople.toString(),
+            )
+        }
     }
 }
