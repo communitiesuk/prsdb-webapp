@@ -1,4 +1,4 @@
-# ADR-0025: file-uploads
+# ADR-0025: File-Uploads
 
 ## Status
 
