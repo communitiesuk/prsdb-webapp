@@ -312,9 +312,10 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `addDeregisteredPropertyEntityIdsToSession appends a new pair of entity ids if some are already stored in the session`() {
+    fun `addDeregisteredPropertyAndOwnershipIdsToSession appends a new pair of entity ids if some are already stored in the session`() {
         // Arrange
-        val newPropertyEntityIdPair = Pair(123.toLong(), 234.toLong())
+        val propertyOwnershipId = 123.toLong()
+        val propertyId = 234.toLong()
         val existingPropertyEntityIdPairs =
             mutableListOf(
                 Pair(456.toLong(), 567.toLong()),
@@ -323,7 +324,7 @@ class PropertyRegistrationServiceTests {
         whenever(mockHttpSession.getAttribute(PROPERTY_DEREGISTRATION_ENTITY_IDS)).thenReturn(existingPropertyEntityIdPairs)
 
         // Act
-        propertyRegistrationService.addDeregisteredPropertyEntityIdsToSession(newPropertyEntityIdPair)
+        propertyRegistrationService.addDeregisteredPropertyAndOwnershipIdsToSession(propertyOwnershipId, propertyId)
 
         // Assert
         verify(mockHttpSession).setAttribute(
@@ -337,16 +338,17 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `addDeregisteredPropertyEntityIdsToSession stores a list of entity pairs in the session`() {
+    fun `addDeregisteredPropertyAndOwnershipIdsToSession stores a list of entity pairs in the session`() {
         // Arrange
-        val newPropertyEntityIdPair = Pair(123.toLong(), 234.toLong())
+        val propertyOwnershipId = 123.toLong()
+        val propertyId = 234.toLong()
         whenever(mockHttpSession.getAttribute(PROPERTY_DEREGISTRATION_ENTITY_IDS))
             .thenReturn(mutableListOf<Pair<Long, Long>>())
 
         // Act
-        propertyRegistrationService.addDeregisteredPropertyEntityIdsToSession(newPropertyEntityIdPair)
+        propertyRegistrationService.addDeregisteredPropertyAndOwnershipIdsToSession(propertyOwnershipId, propertyId)
 
         // Assert
-        verify(mockHttpSession).setAttribute(PROPERTY_DEREGISTRATION_ENTITY_IDS, mutableListOf(Pair(123.toLong(), 234.toLong())))
+        verify(mockHttpSession).setAttribute(PROPERTY_DEREGISTRATION_ENTITY_IDS, mutableListOf(Pair(propertyOwnershipId, propertyId)))
     }
 }

@@ -107,7 +107,7 @@ class DeregisterPropertyController(
     }
 
     private fun getDeregisteredPropertyEntityIdsFromSession(): MutableList<Pair<Long, Long>> {
-        val deregisteredEntityIds = propertyRegistrationService.getDeregisteredPropertyEntityIdsFromSession()
+        val deregisteredEntityIds = propertyRegistrationService.getDeregisteredPropertyAndOwnershipIdsFromSession()
         if (deregisteredEntityIds.isEmpty()) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,

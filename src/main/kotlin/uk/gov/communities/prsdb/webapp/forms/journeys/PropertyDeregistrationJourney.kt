@@ -134,9 +134,7 @@ class PropertyDeregistrationJourney(
 
         propertyRegistrationService.deregisterProperty(propertyOwnershipId)
 
-        propertyRegistrationService.addDeregisteredPropertyEntityIdsToSession(
-            Pair(propertyOwnershipId, propertyOwnership.property.id),
-        )
+        propertyRegistrationService.addDeregisteredPropertyAndOwnershipIdsToSession(propertyOwnershipId, propertyOwnership.property.id)
 
         confirmationEmailSender.sendEmail(
             primaryLandlordEmailAddress,

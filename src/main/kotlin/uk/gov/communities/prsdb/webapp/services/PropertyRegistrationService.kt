@@ -101,13 +101,15 @@ class PropertyRegistrationService(
         }
     }
 
-    fun addDeregisteredPropertyEntityIdsToSession(deregisteredEntityIds: Pair<Long, Long>) =
-        session.setAttribute(
-            PROPERTY_DEREGISTRATION_ENTITY_IDS,
-            getDeregisteredPropertyEntityIdsFromSession().plus(deregisteredEntityIds),
-        )
+    fun addDeregisteredPropertyAndOwnershipIdsToSession(
+        propertyOwnershipId: Long,
+        propertyId: Long,
+    ) = session.setAttribute(
+        PROPERTY_DEREGISTRATION_ENTITY_IDS,
+        getDeregisteredPropertyAndOwnershipIdsFromSession().plus(Pair(propertyOwnershipId, propertyId)),
+    )
 
-    fun getDeregisteredPropertyEntityIdsFromSession(): MutableList<Pair<Long, Long>> =
+    fun getDeregisteredPropertyAndOwnershipIdsFromSession(): MutableList<Pair<Long, Long>> =
         session.getAttribute(PROPERTY_DEREGISTRATION_ENTITY_IDS) as MutableList<Pair<Long, Long>>?
             ?: mutableListOf()
 }

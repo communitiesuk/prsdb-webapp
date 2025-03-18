@@ -118,7 +118,7 @@ class DeregisterPropertyControllerTests(
         val propertyOwnershipId = 1.toLong()
         val propertyId = 2.toLong()
         whenever(
-            propertyRegistrationService.getDeregisteredPropertyEntityIdsFromSession(),
+            propertyRegistrationService.getDeregisteredPropertyAndOwnershipIdsFromSession(),
         ).thenReturn(mutableListOf(Pair(propertyOwnershipId, propertyId)))
 
         mvc
@@ -148,7 +148,7 @@ class DeregisterPropertyControllerTests(
     fun `getConfirmation returns 404 if the propertyOwnershipId is not in the list of deregistered propertyOwnershipIds in the session`() {
         val deregisteredPropertyEntities = mutableListOf(Pair(2.toLong(), 3.toLong()))
         val propertyOwnershipId = 1.toLong()
-        whenever(propertyRegistrationService.getDeregisteredPropertyEntityIdsFromSession())
+        whenever(propertyRegistrationService.getDeregisteredPropertyAndOwnershipIdsFromSession())
             .thenReturn(deregisteredPropertyEntities)
 
         mvc
@@ -165,7 +165,7 @@ class DeregisterPropertyControllerTests(
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
         val propertyOwnershipId = propertyOwnership.id
         whenever(
-            propertyRegistrationService.getDeregisteredPropertyEntityIdsFromSession(),
+            propertyRegistrationService.getDeregisteredPropertyAndOwnershipIdsFromSession(),
         ).thenReturn(mutableListOf(Pair(propertyOwnershipId, propertyOwnership.property.id)))
         whenever(propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)).thenReturn(propertyOwnership)
 
@@ -186,7 +186,7 @@ class DeregisterPropertyControllerTests(
         val property = propertyOwnership.property
 
         whenever(
-            propertyRegistrationService.getDeregisteredPropertyEntityIdsFromSession(),
+            propertyRegistrationService.getDeregisteredPropertyAndOwnershipIdsFromSession(),
         ).thenReturn(mutableListOf(Pair(propertyOwnershipId, propertyOwnership.property.id)))
         whenever(propertyService.retrievePropertyById(property.id)).thenReturn(property)
 
