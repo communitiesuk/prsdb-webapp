@@ -17,6 +17,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.DEREGISTERED_PROPERTY_OWNERSHIP_IDS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -308,5 +309,49 @@ class PropertyRegistrationServiceTests {
 
         verify(mockPropertyOwnershipService).deletePropertyOwnership(propertyOwnership)
         verify(mockPropertyService).deleteProperty(propertyOwnership.property)
+    }
+
+    @Test
+    fun `addDeregisteredPropertyOwnershipIdToSession stores a list of propertyOwnershipId if none are already in the session`() {
+        // Arrange
+        val propertyOwnershipId = 123.toLong()
+        whenever(mockHttpSession.getAttribute(DEREGISTERED_PROPERTY_OWNERSHIP_IDS)).thenReturn(null)
+
+        // Act
+        propertyRegistrationService.addDeregisteredPropertyOwnershipIdToSession(propertyOwnershipId)
+
+        // Assert
+        verify(mockHttpSession).setAttribute(DEREGISTERED_PROPERTY_OWNERSHIP_IDS, mutableListOf(propertyOwnershipId))
+    }
+
+    @Test
+    fun `addDeregisteredPropertyOwnershipIdToSession appends the new propertyOwnershipId if some are already stored in the session`() {
+        // Arrange
+        val newPropertyOwnershipId = 123.toLong()
+        val existingPropertyOwnershipIds = mutableListOf(456.toLong(), 789.toLong())
+        whenever(mockHttpSession.getAttribute(DEREGISTERED_PROPERTY_OWNERSHIP_IDS)).thenReturn(existingPropertyOwnershipIds)
+
+        // Act
+        propertyRegistrationService.addDeregisteredPropertyOwnershipIdToSession(newPropertyOwnershipId)
+
+        // Assert
+        verify(mockHttpSession).setAttribute(
+            DEREGISTERED_PROPERTY_OWNERSHIP_IDS,
+            mutableListOf(456.toLong(), 789.toLong(), newPropertyOwnershipId),
+        )
+    }
+
+    @Test
+    fun `getDeregisteredPropertyOwnershipIdsFromSession returns a mutable list of propertyOwnershipIds`() {
+        // Arrange
+        val propertyOwnershipIdList = mutableListOf(123.toLong(), 456.toLong(), 789.toLong())
+        whenever(mockHttpSession.getAttribute(DEREGISTERED_PROPERTY_OWNERSHIP_IDS))
+            .thenReturn(propertyOwnershipIdList)
+
+        // Act
+        val retrievedIds = propertyRegistrationService.getDeregisteredPropertyOwnershipIdsFromSession()
+
+        // Assert
+        assertEquals(retrievedIds, propertyOwnershipIdList)
     }
 }
