@@ -98,10 +98,7 @@ class DeregisterPropertyController(
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
     ): String {
         checkWasCurrentUserAuthorisedToDeregisterProperty(propertyOwnershipId)
-        val propertyId =
-            getDeregisteredPropertyEntityIdsFromSession()
-                .find { it.first == propertyOwnershipId }!!
-                .second
+        val propertyId = getDeregisteredPropertyEntityIdsFromSession().find { it.first == propertyOwnershipId }!!.second
         checkPropertyHasBeenDeregistered(propertyId, propertyOwnershipId)
 
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
@@ -141,16 +138,14 @@ class DeregisterPropertyController(
         propertyId: Long,
         propertyOwnershipId: Long,
     ) {
-        val propertyOwnershipExists = propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId) != null
-        if (propertyOwnershipExists) {
+        if (propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId) != null) {
             throw ResponseStatusException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Property ownership $propertyOwnershipId was found in the database",
             )
         }
 
-        val propertyExists = propertyService.retrievePropertyById(propertyId) != null
-        if (propertyExists) {
+        if (propertyService.retrievePropertyById(propertyId) != null) {
             throw ResponseStatusException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Property $propertyId was found in the database",
