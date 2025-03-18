@@ -152,7 +152,7 @@ class DeregisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation returns 400 if the property ownership is found in the database`() {
+    fun `getConfirmation returns 500 if the property ownership is found in the database`() {
         // Arrange
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
         val propertyOwnershipId = propertyOwnership.id
@@ -163,7 +163,7 @@ class DeregisterPropertyControllerTests(
         mvc
             .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$CONFIRMATION_PATH_SEGMENT")
             .andExpect {
-                status { isBadRequest() }
+                status { is5xxServerError() }
             }
 
         verify(propertyRegistrationService).clearDeregisteredPropertyOwnershipIdFromSession()

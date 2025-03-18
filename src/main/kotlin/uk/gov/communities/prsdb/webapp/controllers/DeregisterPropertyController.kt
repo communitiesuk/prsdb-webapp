@@ -113,7 +113,7 @@ class DeregisterPropertyController(
         val propertyOwnershipExists = propertyOwnershipService.retrievePropertyOwnershipById(deregisteredPropertyOwnershipId) != null
         if (propertyOwnershipExists) {
             throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.INTERNAL_SERVER_ERROR,
                 "Property ownership $deregisteredPropertyOwnershipId was found in the database",
             )
         }
