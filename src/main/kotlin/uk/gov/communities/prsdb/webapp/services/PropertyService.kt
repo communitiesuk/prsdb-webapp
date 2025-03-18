@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
@@ -48,5 +49,5 @@ class PropertyService(
         propertyRepository.delete(property)
     }
 
-    fun retrievePropertyById(propertyId: Long): Property? = propertyRepository.findByIdAndIsActiveTrue(propertyId)
+    fun retrievePropertyById(propertyId: Long): Property? = propertyRepository.findByIdOrNull(propertyId)
 }

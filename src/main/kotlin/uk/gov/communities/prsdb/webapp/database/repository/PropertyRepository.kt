@@ -7,6 +7,4 @@ interface PropertyRepository : JpaRepository<Property?, Long?> {
     // The underscore tells JPA to access fields relating to the referenced table
     @Suppress("ktlint:standard:function-naming")
     fun findByAddress_Uprn(uprn: Long): Property?
-
-    fun findByIdAndIsActiveTrue(id: Long): Property?
 }

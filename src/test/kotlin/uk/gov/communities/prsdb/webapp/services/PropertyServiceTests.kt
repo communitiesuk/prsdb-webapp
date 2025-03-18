@@ -10,7 +10,7 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.util.ReflectionTestUtils
@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import java.util.Optional
 import kotlin.test.assertTrue
 
 @ExtendWith(MockitoExtension::class)
@@ -103,7 +104,7 @@ class PropertyServiceTests {
         // Arrange
         val property = MockLandlordData.createProperty()
         val propertyId = property.id
-        whenever(mockPropertyRepository.findByIdAndIsActiveTrue(propertyId)).thenReturn(property)
+        doReturn(Optional.of(property)).whenever(mockPropertyRepository).findById(propertyId)
 
         // Act
         val retrievedProperty = propertyService.retrievePropertyById(propertyId)
@@ -114,8 +115,6 @@ class PropertyServiceTests {
 
     @Test
     fun `retrievePropertyById returns null if no matching property is in the database`() {
-        whenever(mockPropertyRepository.findByIdAndIsActiveTrue(anyOrNull())).thenReturn(null)
-
         assertNull(propertyService.retrievePropertyById(1))
     }
 }
