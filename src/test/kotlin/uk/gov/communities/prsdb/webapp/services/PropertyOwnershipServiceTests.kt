@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.InjectMocks
 import org.mockito.Mock
@@ -605,20 +607,33 @@ class PropertyOwnershipServiceTests {
         assertEquals(updateModel.numberOfPeople, propertyOwnership.currentNumTenants)
     }
 
-    @Test
-    fun `updatePropertyOwnership throws error when number of households is 0 and number of people is not 0`() {
+    @ParameterizedTest
+    @CsvSource(
+        value = [
+            "0,0,null,2",
+            "0,0,0,3",
+            "1,2,0,null",
+        ],
+        nullValues = ["null"],
+    )
+    fun `updatePropertyOwnership throws error when number of households is 0 and number of people is not 0`(
+        currentNumHouseholds: Int,
+        currentNumTenants: Int,
+        numberOfHouseholds: Int?,
+        numberOfPeople: Int?,
+    ) {
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
                 id = 1,
                 ownershipType = OwnershipType.FREEHOLD,
-                currentNumHouseholds = 2,
-                currentNumTenants = 6,
+                currentNumHouseholds = currentNumHouseholds,
+                currentNumTenants = currentNumTenants,
             )
         val updateModel =
             PropertyOwnershipUpdateModel(
                 ownershipType = OwnershipType.LEASEHOLD,
-                numberOfHouseholds = 0,
-                numberOfPeople = 2,
+                numberOfHouseholds = numberOfHouseholds,
+                numberOfPeople = numberOfPeople,
             )
 
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
@@ -633,20 +648,33 @@ class PropertyOwnershipServiceTests {
         assertEquals("Number of people must be 0 if number of households is 0", errorThrown.message)
     }
 
-    @Test
-    fun `updatePropertyOwnership throws error if the number of people is less than the number of households`() {
+    @ParameterizedTest
+    @CsvSource(
+        value = [
+            "1,2,4,null",
+            "1,2,4,3",
+            "4,5,null,2",
+        ],
+        nullValues = ["null"],
+    )
+    fun `updatePropertyOwnership throws error if the number of people is less than the number of households`(
+        currentNumHouseholds: Int,
+        currentNumTenants: Int,
+        numberOfHouseholds: Int?,
+        numberOfPeople: Int?,
+    ) {
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
                 id = 1,
                 ownershipType = OwnershipType.FREEHOLD,
-                currentNumHouseholds = 2,
-                currentNumTenants = 6,
+                currentNumHouseholds = currentNumHouseholds,
+                currentNumTenants = currentNumTenants,
             )
         val updateModel =
             PropertyOwnershipUpdateModel(
                 ownershipType = OwnershipType.LEASEHOLD,
-                numberOfHouseholds = 4,
-                numberOfPeople = 2,
+                numberOfHouseholds = numberOfHouseholds,
+                numberOfPeople = numberOfPeople,
             )
 
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
