@@ -114,16 +114,14 @@ class DeregisterPropertyController(
             )
         }
 
-        val deregisteredPropertyOwnershipIds = entityIdsDeregisteredThisSession.map { it.first }
-        if (!deregisteredPropertyOwnershipIds.contains(propertyOwnershipId)) {
+        val deregisteredPropertyIdPair = entityIdsDeregisteredThisSession.find { it.first == propertyOwnershipId }
+        if (deregisteredPropertyIdPair == null) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "PropertyOwnershipId $propertyOwnershipId was not found in the list of deregistered propertyOwnershipIds in the session",
             )
         }
-        return entityIdsDeregisteredThisSession
-            .find { it.first == propertyOwnershipId }!!
-            .second
+        return deregisteredPropertyIdPair.second
     }
 
     private fun checkPropertyHasBeenDeregistered(
