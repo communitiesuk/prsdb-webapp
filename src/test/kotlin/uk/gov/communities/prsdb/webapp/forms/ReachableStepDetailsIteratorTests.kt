@@ -4,26 +4,79 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import uk.gov.communities.prsdb.webapp.forms.steps.StepId
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.TestIteratorBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.TestStepModel
 import kotlin.test.assertEquals
 
-data class TestStepId(
-    override val urlPathSegment: String,
-) : StepId
+class ReachableStepDetailsIteratorTests {
+    @Nested
+    inner class ConstructionTests {
+        @Test
+        fun `ReachableStepDetailsIterator cannot be constructed if the given initial step is invalid (doesn't exist)`() {
+            // Arrange
+            val testIteratorBuilder =
+                TestIteratorBuilder()
+                    .withNextStep(TestStepModel("2", isSatisfied = true))
 
-class ReachableStepDetailsIteratorTest {
+            // Act && assert
+            assertThrows<NoSuchElementException> { testIteratorBuilder.build() }
+        }
+
+        @Test
+        fun `ReachableStepDetailsIterator cannot be constructed if the given initial step is invalid (not unique)`() {
+            // Arrange
+            val initialStepUrlSegment = "initial step segment"
+            val testIteratorBuilder =
+                TestIteratorBuilder()
+                    .withInitialStep(TestStepModel(initialStepUrlSegment, isSatisfied = true))
+                    .withNextStep(TestStepModel(initialStepUrlSegment, isSatisfied = false))
+
+            // Act && assert
+            assertThrows<NoSuchElementException> { testIteratorBuilder.build() }
+        }
+
+        @Test
+        fun `ReachableStepDetailsIterator can be constructed if the given initial step is valid`() {
+            // Arrange
+            val testIteratorBuilder =
+                TestIteratorBuilder()
+                    .withInitialStep(TestStepModel("1", isSatisfied = true))
+
+            // Act && assert
+            assertDoesNotThrow { testIteratorBuilder.build() }
+        }
+    }
+
     @Nested
     inner class HasNextTests {
         @Test
-        fun `hasNext returns false if the journey is completed and the current step is the last step`() {
+        fun `hasNext returns false if the current step is a leaf and its ancestors have no unvisited children`() {
             // Arrange
+            val leftReachableStepUrlSegment = "leftReachableStepUrlSegment"
+            val rightReachableStepUrlSegment = "rightReachableStepUrlSegment"
             val testIterator =
                 TestIteratorBuilder()
-                    .initialised()
-                    .withFirstStep(TestStepModel("1"))
+                    .withInitialStep(
+                        TestStepModel(
+                            "1",
+                            isSatisfied = true,
+                            customReachableStepUrlSegments = listOf(leftReachableStepUrlSegment, rightReachableStepUrlSegment),
+                        ),
+                    ).withNextStep(
+                        TestStepModel(
+                            leftReachableStepUrlSegment,
+                            customReachableStepUrlSegments = emptyList(),
+                        ),
+                    ).withNextStep(
+                        TestStepModel(
+                            rightReachableStepUrlSegment,
+                            customReachableStepUrlSegments = emptyList(),
+                        ),
+                    ).onStep(3)
                     .build()
 
             // Act && assert
@@ -31,14 +84,36 @@ class ReachableStepDetailsIteratorTest {
         }
 
         @Test
-        fun `hasNext returns false if the current step hasn't been completed`() {
+        fun `hasNext returns false if the current step is an incomplete parent and its ancestors have no unvisited children`() {
             // Arrange
+            val leftReachableStepUrlSegment = "leftReachableStepUrlSegment"
+            val rightReachableStepUrlSegment = "rightReachableStepUrlSegment"
+            val childOfRightReachableStepUrlSegment = "childOfRightReachableStepUrlSegment"
             val testIterator =
                 TestIteratorBuilder()
-                    .onStep(2)
-                    .withFirstStep(TestStepModel("1", isSatisfied = true))
-                    .withNextStepWithoutPageData(TestStepModel("2", isSatisfied = true))
-                    .withNextStepWithoutPageData(TestStepModel("3", isSatisfied = true))
+                    .withInitialStep(
+                        TestStepModel(
+                            "1",
+                            isSatisfied = true,
+                            customReachableStepUrlSegments = listOf(leftReachableStepUrlSegment, rightReachableStepUrlSegment),
+                        ),
+                    ).withNextStep(
+                        TestStepModel(
+                            leftReachableStepUrlSegment,
+                            customReachableStepUrlSegments = emptyList(),
+                        ),
+                    ).withNextStep(
+                        TestStepModel(
+                            rightReachableStepUrlSegment,
+                            isSatisfied = false,
+                            customReachableStepUrlSegments = listOf(childOfRightReachableStepUrlSegment),
+                        ),
+                    ).withNextStep(
+                        TestStepModel(
+                            childOfRightReachableStepUrlSegment,
+                            customReachableStepUrlSegments = emptyList(),
+                        ),
+                    ).onStep(3)
                     .build()
 
             // Act && assert
@@ -46,27 +121,29 @@ class ReachableStepDetailsIteratorTest {
         }
 
         @Test
-        fun `hasNext returns false if the current step has been completed with invalid data`() {
+        fun `hasNext returns true if the current step is a leaf and its ancestors have unvisited children`() {
             // Arrange
+            val leftReachableStepUrlSegment = "leftReachableStepUrlSegment"
+            val rightReachableStepUrlSegment = "rightReachableStepUrlSegment"
             val testIterator =
                 TestIteratorBuilder()
-                    .initialised()
-                    .withFirstStep(TestStepModel("1", isSatisfied = false))
-                    .withNextStep(TestStepModel("2", isSatisfied = false))
-                    .build()
-
-            // Act && assert
-            assertFalse(testIterator.hasNext())
-        }
-
-        @Test
-        fun `hasNext returns true if the current step has been completed with valid data and isn't the last step in the journey`() {
-            // Arrange
-            val testIterator =
-                TestIteratorBuilder()
-                    .initialised()
-                    .withFirstStep(TestStepModel("1", isSatisfied = true))
-                    .withNextStep(TestStepModel("2", isSatisfied = false))
+                    .withInitialStep(
+                        TestStepModel(
+                            "1",
+                            isSatisfied = true,
+                            customReachableStepUrlSegments = listOf(leftReachableStepUrlSegment, rightReachableStepUrlSegment),
+                        ),
+                    ).withNextStep(
+                        TestStepModel(
+                            leftReachableStepUrlSegment,
+                            customReachableStepUrlSegments = emptyList(),
+                        ),
+                    ).withNextStep(
+                        TestStepModel(
+                            rightReachableStepUrlSegment,
+                            customReachableStepUrlSegments = emptyList(),
+                        ),
+                    ).onStep(2)
                     .build()
 
             // Act && assert
@@ -74,40 +151,50 @@ class ReachableStepDetailsIteratorTest {
         }
 
         @Test
-        fun `hasNext returns false if it hasn't been initialised and there is no initial step`() {
+        fun `hasNext returns true if the current step is an incomplete parent and its ancestors have unvisited children`() {
             // Arrange
+            val leftReachableStepUrlSegment = "leftReachableStepUrlSegment"
+            val rightReachableStepUrlSegment = "rightReachableStepUrlSegment"
+            val childOfLeftReachableStepUrlSegment = "childOfLeftReachableStepUrlSegment"
             val testIterator =
                 TestIteratorBuilder()
-                    .withNextStep(TestStepModel("1", isSatisfied = true))
-                    .withNextStep(TestStepModel("2", isSatisfied = false))
+                    .withInitialStep(
+                        TestStepModel(
+                            "1",
+                            isSatisfied = true,
+                            customReachableStepUrlSegments = listOf(leftReachableStepUrlSegment, rightReachableStepUrlSegment),
+                        ),
+                    ).withNextStep(
+                        TestStepModel(
+                            leftReachableStepUrlSegment,
+                            isSatisfied = false,
+                            customReachableStepUrlSegments = listOf(childOfLeftReachableStepUrlSegment),
+                        ),
+                    ).withNextStep(
+                        TestStepModel(
+                            rightReachableStepUrlSegment,
+                            customReachableStepUrlSegments = emptyList(),
+                        ),
+                    ).withNextStep(
+                        TestStepModel(
+                            childOfLeftReachableStepUrlSegment,
+                            customReachableStepUrlSegments = emptyList(),
+                        ),
+                    ).onStep(2)
                     .build()
 
             // Act && assert
-            assertFalse(testIterator.hasNext())
+            assertTrue(testIterator.hasNext())
         }
 
         @Test
-        fun `hasNext returns false if it hasn't been initialised and there are multiple initial steps`() {
-            // Arrange
-            val initialStepSegment = "initial step segment"
-            val testIterator =
-                TestIteratorBuilder()
-                    .withFirstStep(TestStepModel(initialStepSegment, isSatisfied = true))
-                    .withNextStep(TestStepModel("2", isSatisfied = false))
-                    .withNextStep(TestStepModel(initialStepSegment, isSatisfied = true))
-                    .build()
-
-            // Act && assert
-            assertFalse(testIterator.hasNext())
-        }
-
-        @Test
-        fun `hasNext returns true if it hasn't been initialised and there is a valid initial step`() {
+        fun `hasNext returns true if the current step is a completed parent`() {
             // Arrange
             val testIterator =
                 TestIteratorBuilder()
-                    .withFirstStep(TestStepModel("1", isSatisfied = true))
-                    .withNextStep(TestStepModel("2", isSatisfied = false))
+                    .withInitialStep(TestStepModel("1", isSatisfied = true))
+                    .withNextStep(TestStepModel("2"))
+                    .onStep(1)
                     .build()
 
             // Act && assert
@@ -118,71 +205,209 @@ class ReachableStepDetailsIteratorTest {
     @Nested
     inner class NextTests {
         @Test
-        fun `next returns the initial step if it hasn't been initialised`() {
+        fun `next returns the initial step the first time it is called`() {
             // Arrange
-            val firstUrlSegment = "test step id"
+            val initialStepUrlSegment = "test step id"
             val testIterator =
                 TestIteratorBuilder()
-                    .withFirstStep(TestStepModel(firstUrlSegment, isSatisfied = true))
+                    .withInitialStep(TestStepModel(initialStepUrlSegment, isSatisfied = true))
                     .withNextStep(TestStepModel("2", isSatisfied = false))
-                    .build()
-
-            // Act && assert
-            assertEquals(TestStepId(firstUrlSegment), testIterator.next().step.id)
-        }
-
-        @Test
-        fun `next returns the the current step's next action if it has initialised`() {
-            // Arrange
-            val subsequentUrlSegment = "test step id"
-            val testIterator =
-                TestIteratorBuilder()
-                    .initialised()
-                    .withFirstStep(TestStepModel("1", isSatisfied = true))
-                    .withNextStep(TestStepModel(subsequentUrlSegment, isSatisfied = false))
                     .build()
 
             // Act
             val nextStepDetails = testIterator.next()
 
             // Assert
-            assertEquals(TestStepId(subsequentUrlSegment), nextStepDetails.step.id)
+            assertEquals(initialStepUrlSegment, nextStepDetails.step.id.urlPathSegment)
+        }
+
+        @Test
+        fun `next returns an incomplete parent step's closest unvisited reachable step (horizontally) if it has been called before`() {
+            // Arrange
+            // Arrange
+            val leftReachableStepUrlSegment = "leftReachableStepUrlSegment"
+            val middleReachableStepUrlSegment = "middleReachableStepUrlSegment"
+            val rightReachableStepUrlSegment = "rightReachableStepUrlSegment"
+            val childOfLeftReachableStepUrlSegment = "childOfLeftReachableStepUrlSegment"
+            val testIterator =
+                TestIteratorBuilder()
+                    .withInitialStep(
+                        TestStepModel(
+                            "1",
+                            isSatisfied = true,
+                            customReachableStepUrlSegments =
+                                listOf(
+                                    leftReachableStepUrlSegment,
+                                    middleReachableStepUrlSegment,
+                                    rightReachableStepUrlSegment,
+                                ),
+                        ),
+                    ).withNextStep(
+                        TestStepModel(
+                            leftReachableStepUrlSegment,
+                            isSatisfied = false,
+                            customReachableStepUrlSegments = listOf(childOfLeftReachableStepUrlSegment),
+                        ),
+                    ).withNextStep(
+                        TestStepModel(
+                            middleReachableStepUrlSegment,
+                            customReachableStepUrlSegments = emptyList(),
+                        ),
+                    ).withNextStep(
+                        TestStepModel(
+                            rightReachableStepUrlSegment,
+                            customReachableStepUrlSegments = emptyList(),
+                        ),
+                    ).withNextStep(
+                        TestStepModel(
+                            childOfLeftReachableStepUrlSegment,
+                            customReachableStepUrlSegments = emptyList(),
+                        ),
+                    ).onStep(2)
+                    .build()
+
+            // Act
+            val nextStepDetails = testIterator.next()
+
+            // Assert
+            assertEquals(middleReachableStepUrlSegment, nextStepDetails.step.id.urlPathSegment)
+        }
+
+        @Test
+        fun `next returns a leaf step's closest unvisited reachable step (vertically) if it has been called before`() {
+            // Arrange
+            // Arrange
+            val leftReachableStepUrlSegment = "leftReachableStepUrlSegment"
+            val rightReachableStepUrlSegment = "rightReachableStepUrlSegment"
+            val leftChildOfLeftReachableStepUrlSegment = "leftChildOfLeftReachableStepUrlSegment"
+            val rightChildOfLeftReachableStepUrlSegment = "rightChildOfLeftReachableStepUrlSegment"
+            val testIterator =
+                TestIteratorBuilder()
+                    .withInitialStep(
+                        TestStepModel(
+                            "1",
+                            isSatisfied = true,
+                            customReachableStepUrlSegments =
+                                listOf(
+                                    leftReachableStepUrlSegment,
+                                    rightReachableStepUrlSegment,
+                                ),
+                        ),
+                    ).withNextStep(
+                        TestStepModel(
+                            leftReachableStepUrlSegment,
+                            isSatisfied = true,
+                            customReachableStepUrlSegments =
+                                listOf(
+                                    leftChildOfLeftReachableStepUrlSegment,
+                                    rightChildOfLeftReachableStepUrlSegment,
+                                ),
+                        ),
+                    ).withNextStep(
+                        TestStepModel(
+                            rightReachableStepUrlSegment,
+                            customReachableStepUrlSegments = emptyList(),
+                        ),
+                    ).withNextStep(
+                        TestStepModel(
+                            leftChildOfLeftReachableStepUrlSegment,
+                            customReachableStepUrlSegments = emptyList(),
+                        ),
+                    ).withNextStep(
+                        TestStepModel(
+                            rightChildOfLeftReachableStepUrlSegment,
+                            customReachableStepUrlSegments = emptyList(),
+                        ),
+                    ).onStep(3)
+                    .build()
+
+            // Act
+            val nextStepDetails = testIterator.next()
+
+            // Assert
+            assertEquals(rightChildOfLeftReachableStepUrlSegment, nextStepDetails.step.id.urlPathSegment)
+        }
+
+        @Test
+        fun `next returns a completed parent step's leftmost child if it has been called before`() {
+            // Arrange
+            val leftReachableStepUrlSegment = "leftReachableStepUrlSegment"
+            val rightReachableStepUrlSegment = "rightReachableStepUrlSegment"
+            val testIterator =
+                TestIteratorBuilder()
+                    .withInitialStep(
+                        TestStepModel(
+                            "1",
+                            isSatisfied = true,
+                            customReachableStepUrlSegments = listOf(leftReachableStepUrlSegment, rightReachableStepUrlSegment),
+                        ),
+                    ).withNextStep(
+                        TestStepModel(
+                            leftReachableStepUrlSegment,
+                            customReachableStepUrlSegments = emptyList(),
+                        ),
+                    ).withNextStep(
+                        TestStepModel(
+                            rightReachableStepUrlSegment,
+                            customReachableStepUrlSegments = emptyList(),
+                        ),
+                    ).onStep(1)
+                    .build()
+
+            // Act
+            val nextStepDetails = testIterator.next()
+
+            // Assert
+            assertEquals(leftReachableStepUrlSegment, nextStepDetails.step.id.urlPathSegment)
+        }
+
+        @Test
+        fun `next throws an exception if there are no more reachable steps`() {
+            // Arrange
+            val testIterator =
+                TestIteratorBuilder()
+                    .withInitialStep(TestStepModel("1"))
+                    .build()
+
+            val testIteratorSpy = spy(testIterator)
+            whenever(testIteratorSpy.hasNext()).thenReturn(false)
+
+            // Act && assert
+            assertThrows<NoSuchElementException> { testIteratorSpy.next() }
         }
 
         @Test
         fun `next adds the next step's data to the filtered journey data of the next step`() {
             // Arrange
-            val currentStepModel = TestStepModel("2", isSatisfied = true)
-            val builder =
+            val subsequentStepUrlSegment = "test step id"
+            val testIteratorBuilder =
                 TestIteratorBuilder()
+                    .withInitialStep(TestStepModel("1", isSatisfied = true))
+                    .withNextStep(TestStepModel(subsequentStepUrlSegment))
                     .onStep(1)
-                    .withFirstStep(TestStepModel("1", isSatisfied = true))
-                    .withNextStep(currentStepModel)
-            val pageDataForStep = builder.getDataForStep(currentStepModel.urlPathSegment)
-
-            val testIterator = builder.build()
+            val pageDataForStep = testIteratorBuilder.getDataForStep(subsequentStepUrlSegment)
+            val testIterator = testIteratorBuilder.build()
 
             // Act
             val nextStepDetails = testIterator.next()
 
             // Assert
-            assertEquals(pageDataForStep, nextStepDetails.filteredJourneyData[currentStepModel.urlPathSegment])
+            assertEquals(pageDataForStep, nextStepDetails.filteredJourneyData[subsequentStepUrlSegment])
         }
 
         @Test
         fun `next does not change any of the filtered journey data except the for the current steps data`() {
             // Arrange
-            val builder =
+            val testIterator =
                 TestIteratorBuilder()
-                    .onStep(4)
-                    .withFirstStep(TestStepModel("1", isSatisfied = true))
+                    .withInitialStep(TestStepModel("1", isSatisfied = true))
                     .withNextStep(TestStepModel("2", isSatisfied = true))
                     .withNextStep(TestStepModel("3", isSatisfied = true))
                     .withNextStep(TestStepModel("4", isSatisfied = true))
                     .withNextStep(TestStepModel("5", isSatisfied = true))
-                    .withNextStep(TestStepModel("6", isSatisfied = true))
-
-            val testIterator = builder.build()
+                    .withNextStep(TestStepModel("6"))
+                    .onStep(4)
+                    .build()
 
             // Act
             val currentStepDetails = testIterator.next()
@@ -195,33 +420,6 @@ class ReachableStepDetailsIteratorTest {
                     assertEquals(previousFilteredJourneyData[key], nextStepDetails.filteredJourneyData[key])
                 }
             }
-        }
-
-        @Test
-        fun `next throws an exception if the current step does not have valid data`() {
-            // Arrange
-            val testIterator =
-                TestIteratorBuilder()
-                    .initialised()
-                    .withFirstStep(TestStepModel("1", isSatisfied = false))
-                    .withNextStep(TestStepModel("2", isSatisfied = false))
-                    .build()
-
-            // Act && assert
-            assertThrows<NoSuchElementException> { testIterator.next() }
-        }
-
-        @Test
-        fun `next throws an exception if the current step does not have a next action`() {
-            // Arrange
-            val testIterator =
-                TestIteratorBuilder()
-                    .initialised()
-                    .withFirstStep(TestStepModel("1"))
-                    .build()
-
-            // Act && assert
-            assertThrows<NoSuchElementException> { testIterator.next() }
         }
     }
 }
