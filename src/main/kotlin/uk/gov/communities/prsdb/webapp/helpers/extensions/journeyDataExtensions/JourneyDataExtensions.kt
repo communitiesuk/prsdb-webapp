@@ -4,6 +4,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfHouseholdsUpdateIfPresent
@@ -32,12 +33,15 @@ class JourneyDataExtensions {
 
         fun JourneyData.getLatestNumberOfHouseholds(journeyDataKey: String?): Int {
             val journeyDataValue = this.getNumberOfHouseholdsUpdateIfPresent()
-            val originalJourneyData = this["ORIGINAL_$journeyDataKey"] as JourneyData?
+            val originalJourneyData = getOriginalJourneyDataIfPresent(journeyDataKey)
             val originalJourneyDataValue = originalJourneyData?.let { PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(it) }
             if (originalJourneyDataValue != null && journeyDataValue == null) {
                 return originalJourneyDataValue
             }
             return journeyDataValue ?: 0
         }
+
+        private fun JourneyData.getOriginalJourneyDataIfPresent(journeyDataKey: String?): JourneyData? =
+            objectToStringKeyedMap(this["ORIGINAL_$journeyDataKey"])
     }
 }
