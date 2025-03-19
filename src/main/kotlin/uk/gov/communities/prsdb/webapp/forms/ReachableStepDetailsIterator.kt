@@ -5,88 +5,78 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import java.util.Stack
+import kotlin.NoSuchElementException
 
 class ReachableStepDetailsIterator<T : StepId>(
-    journeyData: JourneyData,
+    private val journeyData: JourneyData,
     private val steps: Iterable<Step<T>>,
     private val initialStepId: T,
     private val validator: Validator,
 ) : Iterator<StepDetails<T>> {
     private lateinit var currentStepDetails: StepDetails<T>
-    private var currentFilteredJourneyData: JourneyData = mapOf()
-    private val immutableJourneyData = journeyData.toMap()
+    private val reachableStepStack = Stack<StepDetails<T>>()
+    private val visitedSteps = mutableSetOf<StepDetails<T>>()
 
-    override fun hasNext(): Boolean {
-        if (!this::currentStepDetails.isInitialized) {
-            return steps.count { step -> step.id == initialStepId } == 1
-        }
-
-        return isStepSatisfied(currentStepDetails) && subsequentStepDetailsOrNull(currentStepDetails) != null
+    init {
+        pushInitialStepToStack()
     }
 
-    override fun next(): StepDetails<T> {
-        currentStepDetails =
-            if (!this::currentStepDetails.isInitialized) {
-                initialStepDetails()
-            } else {
-                subsequentStepDetails(currentStepDetails)
-            }
-        currentFilteredJourneyData = currentStepDetails.filteredJourneyData.toMap()
+    override fun hasNext() = reachableStepStack.isNotEmpty()
+
+    override fun next(): StepDetails<T> =
+        if (hasNext()) {
+            visitNextReachableStep()
+        } else {
+            throw NoSuchElementException("The current step of the journey is the last step")
+        }
+
+    private fun pushInitialStepToStack() {
+        val initialStepDetails = reachableStepDetails(initialStepId)
+        if (initialStepDetails != null) {
+            reachableStepStack.push(initialStepDetails)
+        } else {
+            throw NoSuchElementException("$initialStepId is not a valid initial step")
+        }
+    }
+
+    private fun visitNextReachableStep(): StepDetails<T> {
+        currentStepDetails = reachableStepStack.pop()
+        if (currentStepDetails !in visitedSteps) {
+            visitedSteps.add(currentStepDetails)
+            pushReachableStepsToStack(currentStepDetails)
+        }
         return currentStepDetails
     }
 
-    private fun initialStepDetails() =
-        steps.singleOrNull { step -> step.id == initialStepId }?.let {
-            StepDetails(
-                it,
-                null,
-                subsequentFilteredJourneyData(currentFilteredJourneyData, it.name).toMutableMap(),
-            )
-        } ?: throw NoSuchElementException("Journey does not have initial step")
+    private fun pushReachableStepsToStack(currentStep: StepDetails<T>) {
+        if (!isStepSatisfied(currentStep)) return
 
-    private fun subsequentStepDetails(currentStep: StepDetails<T>): StepDetails<T> {
-        if (!isStepSatisfied(currentStep)) {
-            throw NoSuchElementException("The previous step of the journey has not been validly completed")
-        }
-        return subsequentStepDetailsOrNull(currentStep)
-            ?: throw NoSuchElementException("The previous step of the journey is the last step")
-    }
-
-    private fun subsequentStepDetailsOrNull(currentStep: StepDetails<T>): StepDetails<T>? {
-        val (nextStepId, nextSubPageNumber) =
-            currentStep.step.nextAction(
-                immutableJourneyData.toMutableMap(),
-                currentStep.subPageNumber,
-            )
-        val nextStep = steps.singleOrNull { step -> step.id == nextStepId }
-
-        if (nextStep == null) {
-            return null
-        }
-        val nextFilteredJourneyData = subsequentFilteredJourneyData(currentFilteredJourneyData, nextStep.name)
-        return StepDetails(nextStep, nextSubPageNumber, nextFilteredJourneyData.toMutableMap())
-    }
-
-    private fun subsequentFilteredJourneyData(
-        filteredJourneyData: JourneyData,
-        stepName: String,
-    ): JourneyData {
-        val stepData =
-            JourneyDataHelper.getPageData(
-                immutableJourneyData,
-                stepName,
-                null,
-            )
-        return filteredJourneyData + Pair(stepName, stepData)
+        // We reverse the reachableActions so they are visited from left to right
+        currentStep.step
+            .reachableActions(journeyData, currentStep.subPageNumber)
+            .reversed()
+            .forEach { (stepId, subPageNumber) ->
+                reachableStepDetails(stepId, subPageNumber)?.let { if (it !in visitedSteps) reachableStepStack.push(it) }
+            }
     }
 
     private fun isStepSatisfied(step: StepDetails<T>): Boolean {
-        val subPageData =
-            JourneyDataHelper.getPageData(
-                immutableJourneyData,
-                step.step.name,
-                step.subPageNumber,
-            )
-        return subPageData != null && step.step.isSatisfied(validator, subPageData)
+        val subPageData = JourneyDataHelper.getPageData(journeyData, step.step.name, step.subPageNumber) ?: emptyMap()
+        return step.step.isSatisfied(validator, subPageData)
+    }
+
+    private fun reachableStepDetails(
+        reachableStepId: T,
+        subPageNumber: Int? = null,
+    ): StepDetails<T>? {
+        val reachableStep = steps.singleOrNull { step -> step.id == reachableStepId } ?: return null
+        return StepDetails(reachableStep, subPageNumber, reachableStepFilteredJourneyData(reachableStep.name))
+    }
+
+    private fun reachableStepFilteredJourneyData(stepName: String): JourneyData {
+        val currentFilteredJourneyData = if (::currentStepDetails.isInitialized) currentStepDetails.filteredJourneyData else emptyMap()
+        val stepData = JourneyDataHelper.getPageData(journeyData, stepName, null)
+        return currentFilteredJourneyData + Pair(stepName, stepData)
     }
 }
