@@ -2,7 +2,11 @@
     <h1 class="govuk-panel__title" th:text="${heading}">
         Heading
     </h1>
-    <div class="govuk-panel__body" th:insert="${body}">
-        Body text that goes in the banner
-    </div>
+    <th:block th:unless="${body} == null">
+        <div
+             class="govuk-panel__body"
+             th:insert="${body}">
+            Body text that goes in the banner
+        </div>
+    </th:block>
 </div>
