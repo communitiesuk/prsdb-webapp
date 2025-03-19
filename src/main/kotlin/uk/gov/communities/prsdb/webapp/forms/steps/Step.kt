@@ -11,16 +11,13 @@ class Step<T : StepId>(
     val page: AbstractPage,
     val handleSubmitAndRedirect: ((journeyData: JourneyData, subPageNumber: Int?) -> String)? = null,
     val isSatisfied: (validator: Validator, pageData: PageData) -> Boolean = { validator, pageData ->
-        page.isSatisfied(
-            validator,
-            pageData,
-        )
+        page.isSatisfied(validator, pageData)
     },
     val nextAction: (journeyData: JourneyData, subPageNumber: Int?) -> Pair<T?, Int?> = { _, _ ->
-        Pair(
-            null,
-            null,
-        )
+        Pair(null, null)
+    },
+    val reachableActions: (journeyData: JourneyData, subPageNumber: Int?) -> List<Pair<T, Int?>> = { journeyData, subPageNumber ->
+        listOf(nextAction(journeyData, subPageNumber)).filterIsInstance<Pair<T, Int?>>()
     },
     val saveAfterSubmit: Boolean = true,
 ) {
