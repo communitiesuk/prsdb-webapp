@@ -6,14 +6,16 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.pages.LandlordDeregistrationAreYouSurePage
 import uk.gov.communities.prsdb.webapp.forms.pages.LandlordDeregistrationCheckUserPropertiesPage
-import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.DeregistrationJourneyDataExtensions.Companion.getWantsToProceedLandlordDeregistration
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordWithNoPropertiesDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import kotlin.reflect.KClass
 
 class LandlordDeregistrationJourney(
     validator: Validator,
@@ -45,13 +47,10 @@ class LandlordDeregistrationJourney(
         Step(
             id = DeregisterLandlordStepId.AreYouSure,
             page =
-                Page(
-                    formModel = LandlordWithNoPropertiesDeregistrationAreYouSureFormModel::class,
-                    templateName = "forms/areYouSureForm",
-                    content =
+                LandlordDeregistrationAreYouSurePage(
+                    commonContent =
                         mapOf(
                             "title" to "deregisterLandlord.title",
-                            "fieldSetHeading" to "forms.areYouSure.landlordDeregistration.noProperties.fieldSetHeading",
                             "radioOptions" to
                                 listOf(
                                     RadiosButtonViewModel(
@@ -67,10 +66,15 @@ class LandlordDeregistrationJourney(
                                 ),
                             BACK_URL_ATTR_NAME to LANDLORD_DETAILS_PATH_SEGMENT,
                         ),
-                ),
+                ) { getAreYouSureFormModel() },
             handleSubmitAndRedirect = { newJourneyData, _ -> areYouSureContinueOrExitJourney(newJourneyData) },
             saveAfterSubmit = false,
         )
+
+    // TODO: PRSD-703 - check if the user has registered properties and return this version if they have none
+    // TODO: PRSD-705 - return a "with properties" version if the user has registered properties
+    // The error messages are different on the two versions but have to be compile time constants so I think we need different form models,
+    private fun getAreYouSureFormModel(): KClass<out FormModel> = LandlordWithNoPropertiesDeregistrationAreYouSureFormModel::class
 
     private fun areYouSureContinueOrExitJourney(journeyData: JourneyData): String {
         if (journeyData.getWantsToProceedLandlordDeregistration()!!) {
