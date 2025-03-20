@@ -72,7 +72,7 @@ class LandlordDeregistrationJourney(
             saveAfterSubmit = false,
         )
 
-    // TODO: PRSD-703 - check if the user has registered properties and return this version if they have none
+    // TODO: PRSD-703 - check in journeyData if the user has registered properties and return this version if they have none
     // TODO: PRSD-705 - return a "with properties" version if the user has registered properties
     private fun getAreYouSureFormModel(): KClass<out FormModel> = LandlordWithNoPropertiesDeregistrationAreYouSureFormModel::class
 
