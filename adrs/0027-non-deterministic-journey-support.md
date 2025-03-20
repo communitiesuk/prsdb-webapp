@@ -1,4 +1,4 @@
-# ADR-0026: Non-deterministic Journey Support
+# ADR-0027: Non-deterministic Journey Support
 
 ## Status
 
