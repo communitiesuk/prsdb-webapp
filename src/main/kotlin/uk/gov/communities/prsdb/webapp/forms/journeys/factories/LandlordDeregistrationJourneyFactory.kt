@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys.factories
 
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController.Companion.LANDLORD_DEREGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
@@ -14,6 +14,6 @@ class LandlordDeregistrationJourneyFactory(
     fun create() =
         LandlordDeregistrationJourney(
             validator,
-            journeyDataServiceFactory.create(LANDLORD_DEREGISTRATION_ROUTE),
+            journeyDataServiceFactory.create(DEREGISTER_LANDLORD_JOURNEY_URL),
         )
 }

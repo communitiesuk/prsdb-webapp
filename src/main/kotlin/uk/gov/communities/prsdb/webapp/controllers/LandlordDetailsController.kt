@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.constants.DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController.Companion.LANDLORD_DEREGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController.Companion.getLandlordDeregistrationPath
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -56,7 +56,7 @@ class LandlordDetailsController(
         principal: Principal,
     ): String {
         addLandlordDetailsToModel(model, principal, includeChangeLinks = false)
-        model.addAttribute("deleteLandlordRecordUrl", LANDLORD_DEREGISTRATION_ROUTE)
+        model.addAttribute("deleteLandlordRecordUrl", DeregisterLandlordController.getLandlordDeregistrationPath())
 
         return "landlordDetailsView"
     }
