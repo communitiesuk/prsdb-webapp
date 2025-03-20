@@ -1,5 +1,9 @@
 @import "govuk/base";
 
 .prsd-warning {
-  border-color: govuk-colour("red");
+  border-color: $govuk-error-colour;
+}
+
+.prsd-warning-text {
+  color: $govuk-error-colour;
 }
