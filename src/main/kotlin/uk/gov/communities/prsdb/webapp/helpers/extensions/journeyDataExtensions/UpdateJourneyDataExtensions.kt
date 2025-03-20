@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 
 class UpdateJourneyDataExtensions {
     companion object {
-        fun JourneyData.getOriginalJourneyDataIfPresent(journeyDataKey: String?): JourneyData? =
-            objectToStringKeyedMap(this["ORIGINAL_$journeyDataKey"])
+        fun JourneyData.getOriginalJourneyDataIfPresent(originalJourneyDataKey: String?): JourneyData? =
+            objectToStringKeyedMap(this[originalJourneyDataKey])
     }
 }

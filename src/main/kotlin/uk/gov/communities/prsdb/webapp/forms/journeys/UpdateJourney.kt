@@ -17,7 +17,11 @@ abstract class UpdateJourney<T : StepId>(
     private val updateStepId: T,
     protected val updateEntityId: String,
 ) : Journey<T>(journeyType, initialStepId, validator, journeyDataService) {
-    protected val originalDataKey = "ORIGINAL_${journeyDataService.journeyDataKey}"
+    companion object {
+        fun getOriginalJourneyDataKey(journeyDataService: JourneyDataService) = "ORIGINAL_${journeyDataService.journeyDataKey}"
+    }
+
+    protected val originalDataKey = getOriginalJourneyDataKey(journeyDataService)
 
     override val unreachableStepRedirect get() = last().step.id.urlPathSegment
 

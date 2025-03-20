@@ -31,9 +31,9 @@ class JourneyDataExtensions {
         fun JourneyData.withUpdatedLookedUpAddresses(lookedUpAddresses: List<AddressDataModel>): JourneyData =
             this.withUpdatedLookedUpAddresses(Json.encodeToString(lookedUpAddresses))
 
-        fun JourneyData.getLatestNumberOfHouseholds(journeyDataKey: String?): Int {
+        fun JourneyData.getLatestNumberOfHouseholds(originalJourneyDataKey: String?): Int {
             val journeyDataValue = this.getNumberOfHouseholdsUpdateIfPresent()
-            val originalJourneyData = this.getOriginalJourneyDataIfPresent(journeyDataKey)
+            val originalJourneyData = this.getOriginalJourneyDataIfPresent(originalJourneyDataKey)
             val originalJourneyDataValue = originalJourneyData?.let { PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(it) }
             if (originalJourneyDataValue != null && journeyDataValue == null) {
                 return originalJourneyDataValue
