@@ -75,7 +75,7 @@ services to use) and search on that (instead of via OS Places API).
 Regularly ingest OS NGD (National Geographic Database - the newest data product for addresses (and much more) that OS encourage
 services to use) but continue to use OS Places API for address lookups.
 
-* Bad, because existing although address lookup journeys will stay the same, we'll still need to update the LA search
+* Bad, because although existing address lookup journeys will stay the same, we'll still need to update the LA search
   logic - meaning maintaining two ways of doing very similar things
 * Neutral, because extra complexity is needed to regularly download and ingest the NGD data.
 * Good, because data updates are automatic and frequent (we believe daily).
