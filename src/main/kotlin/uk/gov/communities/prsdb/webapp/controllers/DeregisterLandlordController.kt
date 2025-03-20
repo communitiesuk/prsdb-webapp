@@ -35,6 +35,27 @@ class DeregisterLandlordController(
     }
 
     @PreAuthorize("hasRole('LANDLORD')")
+    @GetMapping("/${CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT}")
+    fun checkForRegisteredProperties(
+        principal: Principal,
+        @RequestParam(value = "subpage", required = false) subpage: Int?,
+        @RequestParam formData: PageData,
+    ): ModelAndView {
+        val newFormData = formData.toMutableMap()
+        // TODO: PRSD-703
+        newFormData["userHasRegisteredProperties"] = true.toString()
+
+        return landlordDeregistrationJourneyFactory
+            .create()
+            .completeStep(
+                CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT,
+                newFormData,
+                subpage,
+                principal,
+            )
+    }
+
+    @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping("/{stepName}")
     fun getJourneyStep(
         @PathVariable("stepName") stepName: String,
@@ -78,6 +99,7 @@ class DeregisterLandlordController(
     }
 
     companion object {
+        const val CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT = "check-user-properties"
         const val LANDLORD_DEREGISTRATION_ROUTE = "/$DEREGISTER_LANDLORD_JOURNEY_URL"
     }
 }
