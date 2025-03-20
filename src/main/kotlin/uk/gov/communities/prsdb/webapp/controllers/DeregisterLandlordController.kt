@@ -29,7 +29,7 @@ class DeregisterLandlordController(
     ): ModelAndView {
         val newFormData = formData.toMutableMap()
         // TODO: PRSD-703
-        newFormData["userHasRegisteredProperties"] = true.toString()
+        newFormData[USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY] = false.toString()
 
         return landlordDeregistrationJourneyFactory
             .create()
@@ -76,6 +76,8 @@ class DeregisterLandlordController(
 
     companion object {
         const val CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT = "check-user-properties"
+
+        const val USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY = "userHasRegisteredProperties"
 
         fun getLandlordDeregistrationPath(): String =
             "/$DEREGISTER_LANDLORD_JOURNEY_URL/${LandlordDeregistrationJourney.initialStepId.urlPathSegment}"
