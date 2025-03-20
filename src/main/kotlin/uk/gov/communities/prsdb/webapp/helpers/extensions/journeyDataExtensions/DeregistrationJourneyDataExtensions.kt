@@ -19,5 +19,7 @@ class DeregistrationJourneyDataExtensions {
                 urlPathSegment,
                 "wantsToProceed",
             )
+
+        // fun JourneyData.get
     }
 }
