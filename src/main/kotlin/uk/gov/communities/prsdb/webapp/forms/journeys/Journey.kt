@@ -57,7 +57,7 @@ abstract class Journey<T : StepId>(
             return ModelAndView("redirect:$unreachableStepRedirect")
         }
         val prevStepDetails = getPrevStep(requestedStep, subPageNumber)
-        val prevStepUrl = getPrevStepUrl(prevStepDetails?.step, prevStepDetails?.subPageNumber)
+        val prevStepUrl = prevStepDetails?.let { getStepUrl(it.step.id, it.subPageNumber) }
         val pageData =
             submittedPageData
                 ?: JourneyDataHelper.getPageData(journeyDataService.getJourneyDataFromSession(), requestedStep.name, subPageNumber)
@@ -113,12 +113,7 @@ abstract class Journey<T : StepId>(
         if (newStepId == null) {
             throw IllegalStateException("Cannot compute next step from step ${currentStep.id.urlPathSegment}")
         }
-        return UriComponentsBuilder
-            .newInstance()
-            .path(newStepId.urlPathSegment)
-            .queryParamIfPresent("subpage", Optional.ofNullable(newSubPageNumber))
-            .build(true)
-            .toUriString()
+        return getStepUrl(newStepId, newSubPageNumber)
     }
 
     override fun iterator(): Iterator<StepDetails<T>> =
@@ -166,17 +161,14 @@ abstract class Journey<T : StepId>(
             .singleOrNull { (_, next) -> next.step == targetStep && next.subPageNumber == targetSubPageNumber }
             ?.first
 
-    private fun getPrevStepUrl(
-        prevStep: Step<T>?,
-        prevSubPageNumber: Int?,
-    ): String? {
-        if (prevStep == null) return null
-        val optionalPrevSubPageNumber = Optional.ofNullable(prevSubPageNumber)
-        return UriComponentsBuilder
+    private fun getStepUrl(
+        stepId: T,
+        subPageNumber: Int?,
+    ): String =
+        UriComponentsBuilder
             .newInstance()
-            .path(prevStep.id.urlPathSegment)
-            .queryParamIfPresent("subpage", optionalPrevSubPageNumber)
+            .path(stepId.urlPathSegment)
+            .queryParamIfPresent("subpage", Optional.ofNullable(subPageNumber))
             .build(true)
             .toUriString()
-    }
 }

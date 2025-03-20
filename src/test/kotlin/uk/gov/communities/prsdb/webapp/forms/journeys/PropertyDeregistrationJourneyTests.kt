@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
-import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper.Companion.setMockUser
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
@@ -64,7 +63,7 @@ class PropertyDeregistrationJourneyTests {
     }
 
     @Test
-    fun `When the reason step is submitted, the property is deregistered`() {
+    fun `When the reason step is submitted, the property is deregistered and the propertyOwnershipId is stored in the session`() {
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
         val propertyOwnershipId = propertyOwnership.id
 
@@ -81,6 +80,8 @@ class PropertyDeregistrationJourneyTests {
 
         // Assert
         verify(mockPropertyRegistrationService).deregisterProperty(propertyOwnershipId)
+        verify(mockPropertyRegistrationService)
+            .addDeregisteredPropertyAndOwnershipIdsToSession(propertyOwnershipId, propertyOwnership.property.id)
     }
 
     @Test

@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Superseded by 0026-address-lookups-revisited
 
 Date of decision: 2024-08-23
 

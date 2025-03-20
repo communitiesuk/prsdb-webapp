@@ -12,12 +12,16 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.PROPERTY_DEREGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.PropertyService
 import java.security.Principal
 
 @PreAuthorize("hasRole('LANDLORD')")
@@ -26,6 +30,8 @@ import java.security.Principal
 class DeregisterPropertyController(
     private val propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val propertyService: PropertyService,
+    private val propertyRegistrationService: PropertyRegistrationService,
 ) {
     @GetMapping("/{stepName}")
     fun getJourneyStep(
@@ -84,6 +90,58 @@ class DeregisterPropertyController(
     ): Boolean =
         propertyOwnershipService
             .getIsPrimaryLandlord(propertyOwnershipId, principal.name)
+
+    @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
+    fun getConfirmation(
+        model: Model,
+        principal: Principal,
+        @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
+    ): String {
+        val propertyId = getPropertyIdIfPropertyWasDeregisteredThisSession(propertyOwnershipId)
+        checkPropertyHasBeenDeregistered(propertyOwnershipId, propertyId)
+
+        model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
+
+        return "deregisterPropertyConfirmation"
+    }
+
+    private fun getPropertyIdIfPropertyWasDeregisteredThisSession(propertyOwnershipId: Long): Long {
+        val entityIdsDeregisteredThisSession = propertyRegistrationService.getDeregisteredPropertyAndOwnershipIdsFromSession()
+        if (entityIdsDeregisteredThisSession.isEmpty()) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No deregistered Pair(propertyOwnershipId, propertyId) were found in the session",
+            )
+        }
+
+        val deregisteredPropertyIdPair = entityIdsDeregisteredThisSession.find { it.first == propertyOwnershipId }
+        if (deregisteredPropertyIdPair == null) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "PropertyOwnershipId $propertyOwnershipId was not found in the list of deregistered propertyOwnershipIds in the session",
+            )
+        }
+        return deregisteredPropertyIdPair.second
+    }
+
+    private fun checkPropertyHasBeenDeregistered(
+        propertyOwnershipId: Long,
+        propertyId: Long,
+    ) {
+        if (propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId) != null) {
+            throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Property ownership $propertyOwnershipId was found in the database",
+            )
+        }
+
+        if (propertyService.retrievePropertyById(propertyId) != null) {
+            throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Property $propertyId was found in the database",
+            )
+        }
+    }
 
     companion object {
         const val PROPERTY_DEREGISTRATION_ROUTE = "/$DEREGISTER_PROPERTY_JOURNEY_URL/{propertyOwnershipId}"

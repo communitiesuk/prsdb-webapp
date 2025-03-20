@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor.captor
@@ -8,6 +10,7 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.util.ReflectionTestUtils
@@ -18,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import java.util.Optional
 import kotlin.test.assertTrue
 
 @ExtendWith(MockitoExtension::class)
@@ -93,5 +97,24 @@ class PropertyServiceTests {
         propertyService.deleteProperty(property)
 
         verify(mockPropertyRepository).delete(property)
+    }
+
+    @Test
+    fun `retrievePropertyById returns the property if it is in the database`() {
+        // Arrange
+        val property = MockLandlordData.createProperty()
+        val propertyId = property.id
+        doReturn(Optional.of(property)).whenever(mockPropertyRepository).findById(propertyId)
+
+        // Act
+        val retrievedProperty = propertyService.retrievePropertyById(propertyId)
+
+        // Assert
+        assertEquals(property, retrievedProperty)
+    }
+
+    @Test
+    fun `retrievePropertyById returns null if no matching property is in the database`() {
+        assertNull(propertyService.retrievePropertyById(1))
     }
 }

@@ -441,6 +441,28 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             assertThat(peoplePage.form.getErrorMessage())
                 .containsText("Number of people in your property must be a positive, whole number, like 3")
         }
+
+        @Test
+        fun `Submitting with a zero integer in the numberOfPeople field returns an error`(page: Page) {
+            val peoplePage = navigator.goToPropertyRegistrationPeoplePage()
+            peoplePage.submitNumOfPeople(0)
+            assertThat(peoplePage.form.getErrorMessage())
+                .containsText("Number of people in your property must be a positive, whole number, like 3")
+        }
+
+        @Test
+        fun `Submitting with an integer in the numberOfPeople field that is less than the numberOfHouseholds returns an error`(
+            page: Page,
+        ) {
+            val householdsPage = navigator.goToPropertyRegistrationHouseholdsPage()
+            householdsPage.submitNumberOfHouseholds(3)
+            val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
+            peoplePage.submitNumOfPeople(2)
+            assertThat(peoplePage.form.getErrorMessage())
+                .containsText(
+                    "The number of people in the property must be the same as or higher than the number of households in the property",
+                )
+        }
     }
 
     @Nested
