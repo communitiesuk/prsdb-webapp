@@ -5,7 +5,7 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckUserPropertiesModel
 
-class CheckUserPropertiesPage : AbstractPage(CheckUserPropertiesModel::class, "", mapOf()) {
+class LandlordDeregistrationCheckUserPropertiesPage : AbstractPage(CheckUserPropertiesModel::class, "", mapOf()) {
     override fun enrichModel(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData?,

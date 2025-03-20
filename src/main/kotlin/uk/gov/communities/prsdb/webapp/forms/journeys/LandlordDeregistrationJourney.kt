@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.pages.CheckUserPropertiesPage
+import uk.gov.communities.prsdb.webapp.forms.pages.LandlordDeregistrationCheckUserPropertiesPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
@@ -36,7 +36,7 @@ class LandlordDeregistrationJourney(
     private fun checkForUserPropertiesStep() =
         Step(
             id = DeregisterLandlordStepId.CheckForUserProperties,
-            page = CheckUserPropertiesPage(),
+            page = LandlordDeregistrationCheckUserPropertiesPage(),
             nextAction = { _, _ -> Pair(DeregisterLandlordStepId.AreYouSure, null) },
             saveAfterSubmit = false,
         )
