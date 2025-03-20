@@ -52,7 +52,7 @@ class PropertyDeregistrationJourney(
             page =
                 PageWithContentProvider(
                     formModel = PropertyDeregistrationAreYouSureFormModel::class,
-                    templateName = "forms/areYouSureForm",
+                    templateName = "forms/propertyDeregistrationAreYouSureForm",
                     content =
                         mapOf(
                             "title" to "deregisterProperty.title",

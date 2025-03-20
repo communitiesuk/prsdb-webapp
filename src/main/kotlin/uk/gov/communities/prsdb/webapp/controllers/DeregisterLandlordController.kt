@@ -28,7 +28,8 @@ class DeregisterLandlordController(
         @RequestParam formData: PageData,
     ): ModelAndView {
         val newFormData = formData.toMutableMap()
-        // TODO: PRSD-703
+
+        // TODO: PRSD-703 - check the database to see if the principal has any registered properties
         newFormData[USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY] = false.toString()
 
         return landlordDeregistrationJourneyFactory

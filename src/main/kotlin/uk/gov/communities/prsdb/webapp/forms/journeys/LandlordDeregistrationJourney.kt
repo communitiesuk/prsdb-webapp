@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.LandlordDeregistrationAreYouS
 import uk.gov.communities.prsdb.webapp.forms.pages.LandlordDeregistrationCheckUserPropertiesPage
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.DeregistrationJourneyDataExtensions.Companion.getLandlordUserHasRegisteredProperties
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.DeregistrationJourneyDataExtensions.Companion.getWantsToProceedLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordWithNoPropertiesDeregistrationAreYouSureFormModel
@@ -73,18 +74,23 @@ class LandlordDeregistrationJourney(
 
     // TODO: PRSD-703 - check if the user has registered properties and return this version if they have none
     // TODO: PRSD-705 - return a "with properties" version if the user has registered properties
-    // The error messages are different on the two versions but have to be compile time constants so I think we need different form models,
     private fun getAreYouSureFormModel(): KClass<out FormModel> = LandlordWithNoPropertiesDeregistrationAreYouSureFormModel::class
 
     private fun areYouSureContinueOrExitJourney(journeyData: JourneyData): String {
         if (journeyData.getWantsToProceedLandlordDeregistration()!!) {
-            return deregisterLandlord()
+            if (!journeyData.getLandlordUserHasRegisteredProperties()!!) {
+                return deregisterLandlord()
+            }
+            // TODO: PRSD-704 - continue to reason page if user has registered properties
         }
         return "/$LANDLORD_DETAILS_PATH_SEGMENT"
     }
 
     private fun deregisterLandlord(): String {
-        // TODO: PRSD-703
+        // TODO: PRSD-703 - implement this
+        //      delete from landlord table
+        //      delete from one-login table (check if they are another type of user first)
+        //      refresh user roles to remove landlord permissions
 
         // TODO: PRSD-705 - redirect to confirmation page
         return "/${REGISTER_LANDLORD_JOURNEY_URL}"
