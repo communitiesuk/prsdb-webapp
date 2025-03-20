@@ -5,9 +5,6 @@ import kotlinx.serialization.json.Json
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfHouseholdsUpdateIfPresent
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.UpdateJourneyDataExtensions.Companion.getOriginalJourneyDataIfPresent
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
 open class JourneyDataExtensions {

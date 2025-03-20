@@ -331,7 +331,6 @@ class PropertyRegistrationJourney(
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.LicensingType, null) },
         )
-
     private fun licensingTypeStep() =
         Step(
             id = RegisterPropertyStepId.LicensingType,
