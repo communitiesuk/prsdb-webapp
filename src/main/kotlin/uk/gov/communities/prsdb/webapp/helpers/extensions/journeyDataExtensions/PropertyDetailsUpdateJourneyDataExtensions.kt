@@ -4,6 +4,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.UpdateJourneyDataExtensions.Companion.getOriginalJourneyDataIfPresent
 
 class PropertyDetailsUpdateJourneyDataExtensions {
     companion object {
@@ -47,5 +49,17 @@ class PropertyDetailsUpdateJourneyDataExtensions {
                 UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment,
                 "occupied",
             )
+
+        fun JourneyData.getLatestNumberOfHouseholds(originalJourneyDataKey: String?): Int {
+            val journeyDataValue = this.getNumberOfHouseholdsUpdateIfPresent()
+            return journeyDataValue?.let {
+                this
+                    .getOriginalJourneyDataIfPresent(
+                        originalJourneyDataKey,
+                    )?.let {
+                        PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(it)
+                    }
+            } ?: 0
+        }
     }
 }

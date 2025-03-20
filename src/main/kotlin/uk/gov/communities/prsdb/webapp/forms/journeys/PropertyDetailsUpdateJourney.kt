@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationNumberOfP
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getIsOccupiedUpdateIfPresent
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getLatestNumberOfHouseholds
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfHouseholdsUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfPeopleUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getOriginalIsOccupied
@@ -171,7 +172,10 @@ class PropertyDetailsUpdateJourney(
                             "label" to "forms.numberOfPeople.label",
                             BACK_URL_ATTR_NAME to getNumberOfPeopleStepBackUrl(),
                         ),
-                    journeyDataService = journeyDataService,
+                    latestNumberOfHouseholds =
+                        journeyDataService.getJourneyDataFromSession().getLatestNumberOfHouseholds(
+                            getOriginalJourneyDataKey(journeyDataService),
+                        ),
                 ),
             nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateDetails, null) },
             saveAfterSubmit = false,
