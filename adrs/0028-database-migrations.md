@@ -2,9 +2,9 @@
 
 ## Status
 
-Proposed (To be updated to Accepted before merging)
+Accepted
 
-Date of decision: {date}
+Date of decision: 21/03/25
 
 ## Context and Problem Statement
 
@@ -16,11 +16,10 @@ At the moment we run our migrations (and populate any seed data) every time the 
 * Run migrations and seeding data on start up, automatically cleaning the database each time
 * Run migrations and seeding data on start up, with a Github Action to clean data in the database on demand
 * Run migrations as a separate step in the deployment pipeline, seeding data on start up, with a Github Action to clean data in the database on demand
-* Run migrations as a separate step in the deployment pipeline, including a re-runable migration to seed data, with a Github Action to clean data in the database on demand
 
 ## Decision Outcome
 
-Run migrations as a separate step in the deployment pipeline, seeding data on start up, with a Github Action to clean data in the database on demand, because while it requires a bit more work to set up, it gives separates out the concern of starting up the application and running the migrations, which could be useful in multiple different scenarios, including preventing concurrency issues. Also, being able to clean the database in lower environments in a controlled, predictable way gives us the right balance of being able to control when we clean the database without the inherent risks of doing so manually each time.
+Run migrations as a separate step in the deployment pipeline, seeding data on start up, with a Github Action to clean data in the database on demand, because while it requires a bit more work to set up, it separates out the concern of starting up the application and running the migrations, which could be useful in multiple different scenarios, including preventing concurrency issues. Also, being able to clean the database in lower environments in a controlled, predictable way gives us the right balance of being able to control when we clean the database without the inherent risks of doing so manually each time.
 
 ## Pros and Cons of the Options
 
@@ -55,5 +54,4 @@ Add an extra step, likely as a separate callable action, in our pipeline that ru
 * Neutral, because it requires some extra development time in the short term.
 * Good, because it would allow us to clean the database as required in a safe and trackable way, with a record that the Action was run and when remaining on Github.
 * Good, because we know the migrations will run once per deployment even if we are starting up multiple instances.
-* Neutral, because we will need to think carefully about when to run the migrations (trading off the risk of the application and db being out of sync vs. overall downtime during deployments)
 
