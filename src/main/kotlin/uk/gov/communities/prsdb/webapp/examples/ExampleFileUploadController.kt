@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.controllers
+package uk.gov.communities.prsdb.webapp.examples
 
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
