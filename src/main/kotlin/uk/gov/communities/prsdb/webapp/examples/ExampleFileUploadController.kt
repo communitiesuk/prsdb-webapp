@@ -11,7 +11,9 @@ import org.springframework.web.multipart.MultipartFile
 
 @Controller
 @RequestMapping("example/file-upload")
-class ExampleFileUploadController {
+class ExampleFileUploadController(
+    val fileUploader: FileUploader,
+) {
     @GetMapping
     fun getFileUploadForm() = "example/fileUpload"
 
@@ -20,10 +22,13 @@ class ExampleFileUploadController {
         @RequestParam("uploaded-file") file: MultipartFile,
         model: Model,
     ): String {
+        val extension = file.originalFilename?.let { it.substring(it.lastIndexOf('.') + 1) }
+        val uploadOutcome = fileUploader.uploadFile(file.inputStream, extension)
         model.addAttribute(
             "fileUploadResponse",
             mapOf(
-                "name" to file.originalFilename,
+                "uploadedName" to file.originalFilename,
+                "uploadReturnValue" to uploadOutcome,
                 "size" to file.size,
                 "contentType" to file.contentType,
             ),
