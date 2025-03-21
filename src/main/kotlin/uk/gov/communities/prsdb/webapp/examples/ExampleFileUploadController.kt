@@ -16,7 +16,7 @@ class ExampleFileUploadController {
     fun getFileUploadForm() = "example/fileUpload"
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun postmappedvalue(
+    fun uploadFile(
         @RequestParam("uploaded-file") file: MultipartFile,
         model: Model,
     ): String {
