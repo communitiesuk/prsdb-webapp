@@ -2,9 +2,9 @@
 
 ## Status
 
-Proposed
+Accepted
 
-Date of decision: {date - TODO update after PR approved}
+Date of decision: 20/03/2025
 
 ## Context and Problem Statement
 
