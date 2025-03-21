@@ -12,5 +12,6 @@ class ConfirmationPagePropertyRegistration(
 ) : BasePage(page, "$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT") {
     private val detailTable = Table(page)
     val registrationNumberText: String = detailTable.getCell(0, 1).innerText()
+    val addComplianceButton = Button.byText(page, "Add compliance for this property")
     val goToDashboardButton = Button.byText(page, "Go to Dashboard")
 }
