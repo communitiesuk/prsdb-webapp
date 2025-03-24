@@ -35,7 +35,7 @@ class LandlordDeregistrationAreYouSurePage(
 
         if (!userHasRegisteredProperties) {
             modelAndView.addObject("fieldSetHeading", "forms.areYouSure.landlordDeregistration.noProperties.fieldSetHeading")
-            modelAndView.addObject("fieldSetHintList", emptyList<String>())
+            // modelAndView.addObject("fieldSetHintList", emptyList<String>())
         } else {
             modelAndView.addObject("fieldSetHeading", "forms.areYouSure.landlordDeregistration.hasProperties.fieldSetHeading")
             modelAndView.addObject("fieldSetHintList", listOf("forms.areYouSure.landlordDeregistration.hasProperties.fieldSetHint"))
