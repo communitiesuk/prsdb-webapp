@@ -16,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.constants.DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController.Companion.getLandlordDeregistrationPath
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -80,7 +79,7 @@ class LandlordDetailsController(
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
         model.addAttribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_PATH_SEGMENT)
 
-        model.addAttribute("deleteLandlordRecordUrl", DeregisterLandlordController.getLandlordDeregistrationPath())
+        model.addAttribute("deleteLandlordRecordUrl", DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
     }
 
     @PreAuthorize("hasRole('LANDLORD')")

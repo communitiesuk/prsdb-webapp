@@ -80,7 +80,6 @@ class DeregisterLandlordController(
 
         const val USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY = "userHasRegisteredProperties"
 
-        fun getLandlordDeregistrationPath(): String =
-            "/$DEREGISTER_LANDLORD_JOURNEY_URL/${LandlordDeregistrationJourney.initialStepId.urlPathSegment}"
+        val LANDLORD_DEREGISTRATION_PATH = "/$DEREGISTER_LANDLORD_JOURNEY_URL/${LandlordDeregistrationJourney.initialStepId.urlPathSegment}"
     }
 }

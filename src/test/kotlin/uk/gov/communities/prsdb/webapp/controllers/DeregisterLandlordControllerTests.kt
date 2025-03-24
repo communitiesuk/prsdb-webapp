@@ -14,7 +14,6 @@ import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController.Companion.CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController.Companion.USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY
-import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController.Companion.getLandlordDeregistrationPath
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDeregistrationJourneyFactory
 
@@ -31,7 +30,7 @@ class DeregisterLandlordControllerTests(
     @Test
     fun `checkForRegisteredProperties returns a redirect for an unauthenticated user`() {
         mvc
-            .get(getLandlordDeregistrationPath())
+            .get(DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
             .andExpect {
                 status { is3xxRedirection() }
             }
@@ -41,7 +40,7 @@ class DeregisterLandlordControllerTests(
     @WithMockUser
     fun `checkForRegisteredProperties returns 403 for a user who is not a landlord`() {
         mvc
-            .get(getLandlordDeregistrationPath())
+            .get(DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
             .andExpect {
                 status { isForbidden() }
             }
@@ -68,7 +67,7 @@ class DeregisterLandlordControllerTests(
         ).thenReturn(ModelAndView("redirect:/are-you-sure"))
 
         mvc
-            .get(getLandlordDeregistrationPath())
+            .get(DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
             .andExpect { status { is3xxRedirection() } }
             .andExpect { redirectedUrl("/are-you-sure") }
     }
