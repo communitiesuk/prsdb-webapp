@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -36,5 +37,26 @@ class LicenseServiceTests {
         val licenseCaptor = captor<License>()
         verify(mockLicenseRepository).save(licenseCaptor.capture())
         assertTrue(ReflectionEquals(expectedLicense).matches(licenseCaptor.value))
+    }
+
+    @Test
+    fun `deleteLicence calls delete on the licenseRepository`() {
+        val licence = License(LicensingType.HMO_MANDATORY_LICENCE, "LN123456")
+
+        licenseService.deleteLicence(licence)
+
+        verify(mockLicenseRepository).delete(licence)
+    }
+
+    @Test
+    fun `updateLicence calls update on the licenseRepository`() {
+        val newLicenceType = LicensingType.SELECTIVE_LICENCE
+        val newLicenceNumber = "SL123456"
+        val licence = License(LicensingType.HMO_MANDATORY_LICENCE, "LN123456")
+
+        val updatedLicence = licenseService.updateLicence(licence, newLicenceType, newLicenceNumber)
+
+        assertEquals(updatedLicence.licenseType, newLicenceType)
+        assertEquals(updatedLicence.licenseNumber, newLicenceNumber)
     }
 }

@@ -28,6 +28,7 @@ class PropertyOwnershipService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val registrationNumberService: RegistrationNumberService,
     private val localAuthorityDataService: LocalAuthorityDataService,
+    private val licenseService: LicenseService,
 ) {
     @Transactional
     fun createPropertyOwnership(
@@ -163,7 +164,31 @@ class PropertyOwnershipService(
         update.ownershipType?.let { propertyOwnership.ownershipType = it }
         update.numberOfHouseholds?.let { propertyOwnership.currentNumHouseholds = it }
         update.numberOfPeople?.let { propertyOwnership.currentNumTenants = it }
+
+        if (update.licenceType != null || update.licenceNumber != null) {
+            val updatedLicence =
+                getUpdatedLicenceOrNull(
+                    propertyOwnership.license,
+                    update.licenceType,
+                    update.licenceNumber,
+                )
+            propertyOwnership.license = updatedLicence
+        }
     }
+
+    private fun getUpdatedLicenceOrNull(
+        license: License?,
+        updateLicenceType: LicensingType?,
+        updateLicenceNumber: String?,
+    ): License? =
+        if (license != null && updateLicenceType == LicensingType.NO_LICENSING) {
+            licenseService.deleteLicence(license)
+            null
+        } else if (license == null) {
+            licenseService.createLicense(updateLicenceType!!, updateLicenceNumber!!)
+        } else {
+            licenseService.updateLicence(license, updateLicenceType, updateLicenceNumber)
+        }
 
     private fun retrieveAllRegisteredPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
         propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(

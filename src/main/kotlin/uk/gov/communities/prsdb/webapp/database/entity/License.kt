@@ -15,11 +15,9 @@ class License(
 ) : ModifiableAuditableEntity() {
     @Column(nullable = false)
     lateinit var licenseType: LicensingType
-        private set
 
     @Column(nullable = false)
     lateinit var licenseNumber: String
-        private set
 
     constructor(licenseType: LicensingType, licenseNumber: String) : this() {
         this.licenseType = licenseType

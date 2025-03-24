@@ -3,8 +3,11 @@ package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getIsOccupiedUpdateIfPresent
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getLicenceNumberIfPresent
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getLicensingTypeIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfHouseholdsUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfPeopleUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getOriginalIsOccupied
@@ -165,5 +168,75 @@ class PropertyDetailsUpdateJourneyDataExtensionsTests {
         val numberOfPeopleUpdate = testJourneyData.getNumberOfPeopleUpdateIfPresent()
 
         assertNull(numberOfPeopleUpdate)
+    }
+
+    @Test
+    fun `getLicensingTypeIfPresent return null if the corresponding page is in not journeyData`() {
+        val testJourneyData = journeyDataBuilder.build()
+
+        val licenceTypeUpdate = testJourneyData.getLicensingTypeIfPresent()
+
+        assertNull(licenceTypeUpdate)
+    }
+
+    @Test
+    fun `getLicensingTypeIfPresent return a licence type if corresponding page is in journeyData`() {
+        val newLicenceType = LicensingType.SELECTIVE_LICENCE
+        val testJourneyData = journeyDataBuilder.withLicensingType(newLicenceType).build()
+
+        val licenceTypeUpdate = testJourneyData.getLicensingTypeIfPresent()
+
+        assertEquals(newLicenceType, licenceTypeUpdate)
+    }
+
+    @Test
+    fun `getLicenceNumberIfPresent return null if the corresponding page is in not journeyData`() {
+        val testJourneyData = journeyDataBuilder.build()
+
+        val licenceNumberUpdate = testJourneyData.getLicenceNumberIfPresent("originalJourneyKey")
+
+        assertNull(licenceNumberUpdate)
+    }
+
+    @Test
+    fun `getLicenceNumberIfPresent return null if the licence type is NO_LICENSING in the journeyData`() {
+        val testJourneyData = journeyDataBuilder.withLicensingType(LicensingType.NO_LICENSING).build()
+
+        val licenceNumberUpdate = testJourneyData.getLicenceNumberIfPresent("originalJourneyKey")
+
+        assertNull(licenceNumberUpdate)
+    }
+
+    @Test
+    fun `getLicensingTypeIfPresent return a licence number if corresponding page is in journeyData`() {
+        val newLicenceNumber = "LN123456"
+        val testJourneyData = journeyDataBuilder.withLicensingType(LicensingType.SELECTIVE_LICENCE, newLicenceNumber).build()
+
+        val licenceNumberUpdate = testJourneyData.getLicenceNumberIfPresent("originalJourneyKey")
+
+        assertEquals(newLicenceNumber, licenceNumberUpdate)
+    }
+
+    @Test
+    fun `getLicensingTypeIfPresent return a licence number if licence type is in the original journey data`() {
+        val originalJourneyKey = "originalJourneyKey"
+        val originalJourneyData =
+            mapOf(
+                "licensing-type" to mapOf("licensingType" to LicensingType.SELECTIVE_LICENCE),
+                "selective-licence" to mapOf("licenceNumber" to "LN00000000"),
+            )
+
+        val newLicenceNumber = "LN123456"
+        val testJourneyData =
+            journeyDataBuilder
+                .withLicenceNumber(
+                    "selective-licence",
+                    newLicenceNumber,
+                ).withOriginalData(originalJourneyKey, originalJourneyData)
+                .build()
+
+        val licenceNumberUpdate = testJourneyData.getLicenceNumberIfPresent(originalJourneyKey)
+
+        assertEquals(newLicenceNumber, licenceNumberUpdate)
     }
 }

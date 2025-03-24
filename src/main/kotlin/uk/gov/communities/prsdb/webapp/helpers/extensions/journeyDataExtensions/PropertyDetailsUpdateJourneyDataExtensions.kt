@@ -1,9 +1,12 @@
 package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions
 
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper.Companion.getFieldEnumValue
+import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper.Companion.getFieldStringValue
 
 class PropertyDetailsUpdateJourneyDataExtensions {
     companion object {
@@ -41,11 +44,37 @@ class PropertyDetailsUpdateJourneyDataExtensions {
                 )
             }
 
+        fun JourneyData.getLicensingTypeIfPresent(): LicensingType? =
+            getFieldEnumValue<LicensingType>(
+                this,
+                UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment,
+                "licensingType",
+            )
+
+        fun JourneyData.getLicenceNumberIfPresent(originalJourneyKey: String): String? {
+            val licensingType = getLicensingTypeIfPresent() ?: this.getOriginalLicensingType(originalJourneyKey)
+
+            val licenseNumberPathSegment = getLicenceNumberKey(licensingType)
+
+            return licenseNumberPathSegment?.let { getFieldStringValue(this, it, "licenceNumber") }
+        }
+
+        fun getLicenceNumberKey(licensingType: LicensingType?): String? =
+            when (licensingType) {
+                LicensingType.SELECTIVE_LICENCE -> UpdatePropertyDetailsStepId.UpdateSelectiveLicence.urlPathSegment
+                LicensingType.HMO_MANDATORY_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence.urlPathSegment
+                LicensingType.HMO_ADDITIONAL_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoAdditionalLicence.urlPathSegment
+                else -> null
+            }
+
         private fun JourneyData.getIsOccupied() =
             JourneyDataHelper.getFieldBooleanValue(
                 this,
                 UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment,
                 "occupied",
             )
+
+        private fun JourneyData.getOriginalLicensingType(originalJourneyKey: String) =
+            JourneyDataHelper.getPageData(this, originalJourneyKey)?.getLicensingTypeIfPresent()
     }
 }

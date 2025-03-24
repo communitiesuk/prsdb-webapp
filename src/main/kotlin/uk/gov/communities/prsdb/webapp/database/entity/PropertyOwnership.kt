@@ -70,7 +70,6 @@ class PropertyOwnership(
     @OneToOne
     @JoinColumn(name = "license_id", nullable = true, foreignKey = ForeignKey(name = "FK_PROPERTY_OWNERSHIP_LICENSE"))
     var license: License? = null
-        private set
 
     constructor(
         occupancyType: OccupancyType,
