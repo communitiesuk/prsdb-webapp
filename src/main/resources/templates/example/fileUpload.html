@@ -1,0 +1,9 @@
+<th:block id="main-content" th:replace="~{fragments/layout :: layout('Example Form Page', ~{::#main-content/content()}, null)}">
+    <form th:action="@{''}" novalidate method="post" enctype="multipart/form-data">
+        <input type="file" name="uploaded-file">
+        <input type="submit" value="Upload">
+    </form>
+    <div th:unless="${fileUploadResponse} == null">
+        <div th:text="${fileUploadResponse}"></div>
+    </div>
+</th:block>
