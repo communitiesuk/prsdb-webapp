@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.examples
 
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -15,7 +14,7 @@ class ExampleFileUploadController {
     @GetMapping
     fun getFileUploadForm() = "example/fileUpload"
 
-    @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping
     fun uploadFile(
         @RequestParam("uploaded-file") file: MultipartFile,
         model: Model,
