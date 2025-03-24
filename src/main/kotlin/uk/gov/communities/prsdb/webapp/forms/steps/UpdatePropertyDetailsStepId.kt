@@ -9,5 +9,9 @@ enum class UpdatePropertyDetailsStepId(
     UpdateOccupancy("occupancy"),
     UpdateNumberOfHouseholds("number-of-households"),
     UpdateNumberOfPeople("number-of-people"),
+    UpdateLicensingType("licensing-type"),
+    UpdateSelectiveLicence("selective-licence"),
+    UpdateHmoMandatoryLicence("hmo-mandatory-licence"),
+    UpdateHmoAdditionalLicence("hmo-additional-licence"),
     UpdateDetails(DETAILS_PATH_SEGMENT),
 }

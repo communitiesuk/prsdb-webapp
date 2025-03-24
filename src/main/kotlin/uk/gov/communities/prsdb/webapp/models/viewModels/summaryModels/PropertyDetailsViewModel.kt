@@ -79,7 +79,8 @@ class PropertyDetailsViewModel(
                             listOf(MessageKeyConverter.convert(it.licenseType), it.licenseNumber)
                         }
                     } ?: MessageKeyConverter.convert(LicensingType.NO_LICENSING),
-                    // TODO PRSD-798: Add update link
+                    UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment,
+                    withChangeLinks,
                 )
                 addRow(
                     "propertyDetails.propertyRecord.occupied",
