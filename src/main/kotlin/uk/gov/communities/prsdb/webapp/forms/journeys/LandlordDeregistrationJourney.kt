@@ -10,8 +10,8 @@ import uk.gov.communities.prsdb.webapp.forms.pages.LandlordDeregistrationAreYouS
 import uk.gov.communities.prsdb.webapp.forms.pages.LandlordDeregistrationCheckUserPropertiesPage
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.DeregistrationJourneyDataExtensions.Companion.getLandlordUserHasRegisteredProperties
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.DeregistrationJourneyDataExtensions.Companion.getWantsToProceedLandlordDeregistration
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.LandlordDeregistrationJourneyDataExtensions.Companion.getLandlordUserHasRegisteredProperties
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.LandlordDeregistrationJourneyDataExtensions.Companion.getWantsToProceed
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
@@ -71,7 +71,7 @@ class LandlordDeregistrationJourney(
         )
 
     private fun areYouSureContinueOrExitJourney(journeyData: JourneyData): String {
-        if (journeyData.getWantsToProceedLandlordDeregistration()!!) {
+        if (journeyData.getWantsToProceed()!!) {
             if (!journeyData.getLandlordUserHasRegisteredProperties()!!) {
                 return deregisterLandlord()
             }
