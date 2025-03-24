@@ -12,11 +12,8 @@ import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.DeregistrationJourneyDataExtensions.Companion.getLandlordUserHasRegisteredProperties
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.DeregistrationJourneyDataExtensions.Companion.getWantsToProceedLandlordDeregistration
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordWithNoPropertiesDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import kotlin.reflect.KClass
 
 class LandlordDeregistrationJourney(
     validator: Validator,
@@ -67,14 +64,11 @@ class LandlordDeregistrationJourney(
                                 ),
                             BACK_URL_ATTR_NAME to LANDLORD_DETAILS_PATH_SEGMENT,
                         ),
-                ) { getAreYouSureFormModel() },
+                    journeyDataService = journeyDataService,
+                ),
             handleSubmitAndRedirect = { newJourneyData, _ -> areYouSureContinueOrExitJourney(newJourneyData) },
             saveAfterSubmit = false,
         )
-
-    // TODO: PRSD-703 - check in journeyData if the user has registered properties and return this version if they have none
-    // TODO: PRSD-705 - return a "with properties" version if the user has registered properties
-    private fun getAreYouSureFormModel(): KClass<out FormModel> = LandlordWithNoPropertiesDeregistrationAreYouSureFormModel::class
 
     private fun areYouSureContinueOrExitJourney(journeyData: JourneyData): String {
         if (journeyData.getWantsToProceedLandlordDeregistration()!!) {

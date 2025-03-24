@@ -1,18 +1,21 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.springframework.http.HttpStatus
+import org.springframework.validation.BindingResult
+import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.DeregistrationJourneyDataExtensions.Companion.getLandlordUserHasRegisteredProperties
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
-import kotlin.reflect.KClass
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationAreYouSureFormModel
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class LandlordDeregistrationAreYouSurePage(
     commonContent: Map<String, Any>,
-    private val formModelProvider: () -> KClass<out FormModel>,
+    private val journeyDataService: JourneyDataService,
 ) : AbstractPage(
-        formModelProvider(),
+        LandlordDeregistrationAreYouSureFormModel::class,
         "forms/areYouSureForm",
         commonContent,
         shouldDisplaySectionHeader = false,
@@ -37,5 +40,19 @@ class LandlordDeregistrationAreYouSurePage(
             modelAndView.addObject("fieldSetHeading", "forms.areYouSure.landlordDeregistration.hasProperties.fieldSetHeading")
             modelAndView.addObject("fieldSetHint", "forms.areYouSure.landlordDeregistration.hasProperties.fieldSetHint")
         }
+    }
+
+    override fun bindDataToFormModel(
+        validator: Validator,
+        formData: PageData?,
+    ): BindingResult {
+        val newFormData = formData?.toMutableMap()
+        if (newFormData != null) {
+            val journeyData = journeyDataService.getJourneyDataFromSession()
+            val landlordHasRegisteredProperties = journeyData.getLandlordUserHasRegisteredProperties()
+            newFormData["landlordHasProperties"] = landlordHasRegisteredProperties
+        }
+
+        return super.bindDataToFormModel(validator, newFormData)
     }
 }
