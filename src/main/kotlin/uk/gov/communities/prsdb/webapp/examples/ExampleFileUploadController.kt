@@ -38,14 +38,13 @@ class ExampleFileUploadController(
         @CookieValue(value = COOKIE_NAME) token: String,
         model: Model,
         @PathVariable("freeSegment") freeSegment: String,
-    ): String {
+    ): String {.
         if (!tokenService.checkTokenIsFor(token, freeSegment)) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid upload token")
         }
 
         val extension = file.originalFilename?.let { it.substring(it.lastIndexOf('.') + 1) }
         val uploadOutcome = fileUploader.uploadFile(file.inputStream, extension)
-
         model.addAttribute(
             "fileUploadResponse",
             mapOf(
