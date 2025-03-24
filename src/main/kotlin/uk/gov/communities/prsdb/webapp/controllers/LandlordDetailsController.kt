@@ -56,7 +56,6 @@ class LandlordDetailsController(
         principal: Principal,
     ): String {
         addLandlordDetailsToModel(model, principal, includeChangeLinks = false)
-        model.addAttribute("deleteLandlordRecordUrl", DeregisterLandlordController.getLandlordDeregistrationPath())
 
         return "landlordDetailsView"
     }
@@ -80,6 +79,8 @@ class LandlordDetailsController(
         model.addAttribute("registeredPropertiesList", registeredPropertiesList)
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
         model.addAttribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_PATH_SEGMENT)
+
+        model.addAttribute("deleteLandlordRecordUrl", DeregisterLandlordController.getLandlordDeregistrationPath())
     }
 
     @PreAuthorize("hasRole('LANDLORD')")

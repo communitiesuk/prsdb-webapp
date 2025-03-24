@@ -25,18 +25,18 @@ class DeregisterLandlordController(
     fun checkForRegisteredProperties(
         principal: Principal,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
-        @RequestParam formData: PageData,
     ): ModelAndView {
-        val newFormData = formData.toMutableMap()
-
-        // TODO: PRSD-703 - check the database to see if the principal has any registered properties
-        newFormData[USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY] = true.toString()
+        val formData =
+            mutableMapOf(
+                // TODO: PRSD-703 - check the database to see if the principal has any registered properties
+                USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY to false.toString(),
+            )
 
         return landlordDeregistrationJourneyFactory
             .create()
             .completeStep(
                 CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT,
-                newFormData,
+                formData,
                 subpage,
                 principal,
             )

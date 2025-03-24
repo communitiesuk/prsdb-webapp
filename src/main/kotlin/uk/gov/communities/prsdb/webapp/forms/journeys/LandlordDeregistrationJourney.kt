@@ -66,7 +66,7 @@ class LandlordDeregistrationJourney(
                         ),
                     journeyDataService = journeyDataService,
                 ),
-            handleSubmitAndRedirect = { newJourneyData, _ -> areYouSureContinueOrExitJourney(newJourneyData) },
+            handleSubmitAndRedirect = { journeyData, _ -> areYouSureContinueOrExitJourney(journeyData) },
             saveAfterSubmit = false,
         )
 
