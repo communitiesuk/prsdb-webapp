@@ -13,12 +13,14 @@ import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDeregistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.security.Principal
 
 @Controller
 @RequestMapping("/$DEREGISTER_LANDLORD_JOURNEY_URL")
 class DeregisterLandlordController(
     private val landlordDeregistrationJourneyFactory: LandlordDeregistrationJourneyFactory,
+    private val landlordService: LandlordService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping("/${CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT}")
@@ -28,8 +30,7 @@ class DeregisterLandlordController(
     ): ModelAndView {
         val formData =
             mutableMapOf(
-                // TODO: PRSD-703 - check the database to see if the principal has any registered properties
-                USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY to false.toString(),
+                USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY to landlordService.getLandlordHasRegisteredProperties(principal.name),
             )
 
         return landlordDeregistrationJourneyFactory

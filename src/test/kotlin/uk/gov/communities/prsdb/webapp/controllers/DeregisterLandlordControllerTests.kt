@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
@@ -16,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController.
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController.Companion.USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDeregistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.services.LandlordService
 
 @WebMvcTest(DeregisterLandlordController::class)
 class DeregisterLandlordControllerTests(
@@ -23,6 +25,9 @@ class DeregisterLandlordControllerTests(
 ) : ControllerTest(webContext) {
     @MockBean
     private lateinit var landlordDeregistrationJourneyFactory: LandlordDeregistrationJourneyFactory
+
+    @MockBean
+    private lateinit var landlordService: LandlordService
 
     @MockBean
     private lateinit var landlordDeregistrationJourney: LandlordDeregistrationJourney
@@ -51,14 +56,14 @@ class DeregisterLandlordControllerTests(
     fun `checkForRegisteredProperties caches userHasRegisteredProperties then returns a redirect to the are you sure step`() {
         landlordDeregistrationJourney = mock()
         whenever(landlordDeregistrationJourneyFactory.create()).thenReturn(landlordDeregistrationJourney)
+        whenever(landlordService.getLandlordHasRegisteredProperties(anyString())).thenReturn(false)
         whenever(
             landlordDeregistrationJourney
                 .completeStep(
                     eq(CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT),
-                    // TODO: PRSD-703 - Replace this with a service mock when we are checking the database for the user's registered properties
                     eq(
                         mutableMapOf(
-                            USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY to false.toString(),
+                            USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY to false,
                         ),
                     ),
                     eq(null),
