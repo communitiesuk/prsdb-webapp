@@ -23,13 +23,13 @@ class LandlordDeregistrationAreYouSureFormModel(
         ],
     )
     var wantsToProceed: Boolean? = null,
-    var landlordHasProperties: Boolean? = null,
+    var userHasRegisteredProperties: Boolean? = null,
 ) : FormModel {
     fun isNotNullWhenLandlordHasRegisteredProperties(): Boolean =
-        (NotNullValidator().isValid(wantsToProceed, null) && landlordHasProperties == true) ||
-            landlordHasProperties == false
+        (NotNullValidator().isValid(wantsToProceed, null) && userHasRegisteredProperties == true) ||
+            userHasRegisteredProperties == false
 
     fun isNotNullWhenLandlordHasNoProperties(): Boolean =
-        (NotNullValidator().isValid(wantsToProceed, null) && landlordHasProperties == false) ||
-            landlordHasProperties == true
+        (NotNullValidator().isValid(wantsToProceed, null) && userHasRegisteredProperties == false) ||
+            userHasRegisteredProperties == true
 }

@@ -35,7 +35,6 @@ class LandlordDeregistrationAreYouSurePage(
 
         if (!userHasRegisteredProperties) {
             modelAndView.addObject("fieldSetHeading", "forms.areYouSure.landlordDeregistration.noProperties.fieldSetHeading")
-            // modelAndView.addObject("fieldSetHintList", emptyList<String>())
         } else {
             modelAndView.addObject("fieldSetHeading", "forms.areYouSure.landlordDeregistration.hasProperties.fieldSetHeading")
             modelAndView.addObject("fieldSetHintList", listOf("forms.areYouSure.landlordDeregistration.hasProperties.fieldSetHint"))
@@ -50,7 +49,7 @@ class LandlordDeregistrationAreYouSurePage(
         if (newFormData != null) {
             val journeyData = journeyDataService.getJourneyDataFromSession()
             val landlordHasRegisteredProperties = journeyData.getLandlordUserHasRegisteredProperties()
-            newFormData["landlordHasProperties"] = landlordHasRegisteredProperties
+            newFormData["userHasRegisteredProperties"] = landlordHasRegisteredProperties
         }
 
         return super.bindDataToFormModel(validator, newFormData)
