@@ -54,7 +54,7 @@ class PropertyDetailsUpdateJourney(
     override fun createOriginalJourneyData(): JourneyData {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
 
-        val licenceType = propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING
+        val licensingType = propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING
 
         val originalPropertyData =
             mutableMapOf(
@@ -67,10 +67,10 @@ class PropertyDetailsUpdateJourney(
                         "numberOfPeople" to propertyOwnership.currentNumTenants,
                         "numberOfHouseholds" to propertyOwnership.currentNumHouseholds,
                     ),
-                UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment to mapOf("licensingType" to licenceType),
+                UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment to mapOf("licensingType" to licensingType),
             )
 
-        val licenceNumberTypeKey = PropertyDetailsUpdateJourneyDataExtensions.getLicenceNumberKey(licenceType)
+        val licenceNumberTypeKey = PropertyDetailsUpdateJourneyDataExtensions.getLicenceNumberKey(licensingType)
         licenceNumberTypeKey?.let { originalPropertyData[it] = mapOf("licenceNumber" to propertyOwnership.license?.licenseNumber!!) }
 
         return originalPropertyData
@@ -375,7 +375,7 @@ class PropertyDetailsUpdateJourney(
                 ownershipType = journeyData.getOwnershipTypeUpdateIfPresent(),
                 numberOfHouseholds = journeyData.getNumberOfHouseholdsUpdateIfPresent(),
                 numberOfPeople = journeyData.getNumberOfPeopleUpdateIfPresent(),
-                licenceType = journeyData.getLicensingTypeIfPresent(),
+                licensingType = journeyData.getLicensingTypeIfPresent(),
                 licenceNumber = journeyData.getLicenceNumberIfPresent(originalDataKey),
             )
 

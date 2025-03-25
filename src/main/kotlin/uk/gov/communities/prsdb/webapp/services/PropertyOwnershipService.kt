@@ -165,11 +165,11 @@ class PropertyOwnershipService(
         update.numberOfHouseholds?.let { propertyOwnership.currentNumHouseholds = it }
         update.numberOfPeople?.let { propertyOwnership.currentNumTenants = it }
 
-        if (update.licenceType != null || update.licenceNumber != null) {
+        if (update.licensingType != null || update.licenceNumber != null) {
             val updatedLicence =
                 getUpdatedLicenceOrNull(
                     propertyOwnership.license,
-                    update.licenceType,
+                    update.licensingType,
                     update.licenceNumber,
                 )
             propertyOwnership.license = updatedLicence

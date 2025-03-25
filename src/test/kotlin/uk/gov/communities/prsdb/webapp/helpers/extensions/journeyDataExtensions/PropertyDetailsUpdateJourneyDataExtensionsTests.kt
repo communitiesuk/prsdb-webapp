@@ -174,19 +174,19 @@ class PropertyDetailsUpdateJourneyDataExtensionsTests {
     fun `getLicensingTypeIfPresent return null if the corresponding page is in not journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
-        val licenceTypeUpdate = testJourneyData.getLicensingTypeIfPresent()
+        val licensingTypeUpdate = testJourneyData.getLicensingTypeIfPresent()
 
-        assertNull(licenceTypeUpdate)
+        assertNull(licensingTypeUpdate)
     }
 
     @Test
     fun `getLicensingTypeIfPresent return a licence type if corresponding page is in journeyData`() {
-        val newLicenceType = LicensingType.SELECTIVE_LICENCE
-        val testJourneyData = journeyDataBuilder.withLicensingType(newLicenceType).build()
+        val newLicensingType = LicensingType.SELECTIVE_LICENCE
+        val testJourneyData = journeyDataBuilder.withLicensingType(newLicensingType).build()
 
-        val licenceTypeUpdate = testJourneyData.getLicensingTypeIfPresent()
+        val licensingTypeUpdate = testJourneyData.getLicensingTypeIfPresent()
 
-        assertEquals(newLicenceType, licenceTypeUpdate)
+        assertEquals(newLicensingType, licensingTypeUpdate)
     }
 
     @Test

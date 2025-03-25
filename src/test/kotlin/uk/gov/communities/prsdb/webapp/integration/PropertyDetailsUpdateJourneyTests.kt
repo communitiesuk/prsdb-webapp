@@ -250,9 +250,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
             propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.clickActionLinkAndWait()
 
             // Update licence to selective
-            val updateLicenceTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
-            assertThat(updateLicenceTypePage.form.fieldsetHeading).containsText("Update the type of licensing you have for your property")
-            updateLicenceTypePage.submitLicensingType(newLicensingType)
+            val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
+            assertThat(updateLicensingTypePage.form.fieldsetHeading).containsText("Update the type of licensing you have for your property")
+            updateLicensingTypePage.submitLicensingType(newLicensingType)
 
             // Update licence number
             val updateLicenceNumberPage = assertPageIs(page, SelectiveLicenceFormPagePropertyDetailsUpdate::class, urlArguments)
@@ -284,9 +284,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
             propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.clickActionLinkAndWait()
 
             // Update licence to hmp mandatory
-            val updateLicenceTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
-            assertThat(updateLicenceTypePage.form.fieldsetHeading).containsText("Update the type of licensing you have for your property")
-            updateLicenceTypePage.submitLicensingType(newLicensingType)
+            val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
+            assertThat(updateLicensingTypePage.form.fieldsetHeading).containsText("Update the type of licensing you have for your property")
+            updateLicensingTypePage.submitLicensingType(newLicensingType)
 
             val updateLicenceNumberPage = assertPageIs(page, HmoMandatoryLicenceFormPagePropertyDetailsUpdate::class, urlArguments)
             assertThat(updateLicenceNumberPage.form.fieldsetHeading).containsText("What is your HMO mandatory licence number?")
@@ -317,9 +317,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
             propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.clickActionLinkAndWait()
 
             // Update licence to selective
-            val updateLicenceTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
-            assertThat(updateLicenceTypePage.form.fieldsetHeading).containsText("Update the type of licensing you have for your property")
-            updateLicenceTypePage.submitLicensingType(newLicensingType)
+            val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
+            assertThat(updateLicensingTypePage.form.fieldsetHeading).containsText("Update the type of licensing you have for your property")
+            updateLicensingTypePage.submitLicensingType(newLicensingType)
 
             val updateLicenceNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyDetailsUpdate::class, urlArguments)
             assertThat(updateLicenceNumberPage.form.fieldsetHeading).containsText("What is your HMO additional licence number?")

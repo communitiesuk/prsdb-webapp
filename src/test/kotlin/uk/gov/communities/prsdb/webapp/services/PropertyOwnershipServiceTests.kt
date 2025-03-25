@@ -600,7 +600,7 @@ class PropertyOwnershipServiceTests {
                 ownershipType = OwnershipType.LEASEHOLD,
                 numberOfHouseholds = 1,
                 numberOfPeople = 2,
-                licenceType = updateLicence.licenseType,
+                licensingType = updateLicence.licenseType,
                 licenceNumber = updateLicence.licenseNumber,
             )
 
@@ -608,7 +608,7 @@ class PropertyOwnershipServiceTests {
             propertyOwnership,
         )
         whenever(
-            mockLicenseService.updateLicence(propertyOwnership.license!!, updateModel.licenceType, updateModel.licenceNumber),
+            mockLicenseService.updateLicence(propertyOwnership.license!!, updateModel.licensingType, updateModel.licenceNumber),
         ).thenReturn(updateLicence)
 
         // Act
@@ -618,7 +618,7 @@ class PropertyOwnershipServiceTests {
         assertEquals(updateModel.ownershipType, propertyOwnership.ownershipType)
         assertEquals(updateModel.numberOfHouseholds, propertyOwnership.currentNumHouseholds)
         assertEquals(updateModel.numberOfPeople, propertyOwnership.currentNumTenants)
-        assertEquals(updateModel.licenceType, propertyOwnership.license?.licenseType)
+        assertEquals(updateModel.licensingType, propertyOwnership.license?.licenseType)
         assertEquals(updateModel.licenceNumber, propertyOwnership.license?.licenseNumber)
     }
 
@@ -635,7 +635,7 @@ class PropertyOwnershipServiceTests {
                 ownershipType = OwnershipType.LEASEHOLD,
                 numberOfHouseholds = 1,
                 numberOfPeople = 2,
-                licenceType = LicensingType.NO_LICENSING,
+                licensingType = LicensingType.NO_LICENSING,
                 licenceNumber = null,
             )
 
