@@ -5,7 +5,7 @@
       <option value="$PROJECT_DIR$/.env" />
     </option>
     <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
-    <module name="uk.gov.communities.prsdb.prsdb-webapp.main" />
+    <module name="prsdb-webapp.main" />
     <selectedOptions>
       <option name="environmentVariables" />
     </selectedOptions>
