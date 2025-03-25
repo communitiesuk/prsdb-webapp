@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropertyCount
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
@@ -60,6 +61,15 @@ class MockLandlordData {
             ReflectionTestUtils.setField(landlord, "createdDate", createdDate)
 
             return landlord
+        }
+
+        fun createLandlordWithListedPropertyCount(listedPropertyCount: Int = 0): LandlordWithListedPropertyCount {
+            val landlord = createLandlord()
+            return LandlordWithListedPropertyCount(
+                landlord.id,
+                landlord,
+                listedPropertyCount,
+            )
         }
 
         fun createProperty(
