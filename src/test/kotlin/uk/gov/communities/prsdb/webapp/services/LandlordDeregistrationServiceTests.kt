@@ -11,6 +11,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPropertyCountRepository
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlordWithListedPropertyCount
 
 @ExtendWith(MockitoExtension::class)
@@ -30,7 +31,7 @@ class LandlordDeregistrationServiceTests {
     @Test
     fun `getLandlordHasRegisteredProperties returns true if listedPropertyCount is greater than 0`() {
         // Arrange
-        val landlordWithListedPropertyCount = createLandlordWithListedPropertyCount(5)
+        val landlordWithListedPropertyCount = MockLandlordData.createLandlordWithListedPropertyCount(5)
         val baseUserId = landlordWithListedPropertyCount.landlord.baseUser.id
         whenever(mockLandlordWithListedPropertyCountRepository.findByLandlord_BaseUser_Id(baseUserId))
             .thenReturn(landlordWithListedPropertyCount)
@@ -42,7 +43,7 @@ class LandlordDeregistrationServiceTests {
     @Test
     fun `getLandlordHasRegisteredProperties returns false true if listedPropertyCount is 0`() {
         // Arrange
-        val landlordWithListedPropertyCount = createLandlordWithListedPropertyCount(0)
+        val landlordWithListedPropertyCount = MockLandlordData.createLandlordWithListedPropertyCount(0)
         val baseUserId = landlordWithListedPropertyCount.landlord.baseUser.id
         whenever(mockLandlordWithListedPropertyCountRepository.findByLandlord_BaseUser_Id(baseUserId))
             .thenReturn(landlordWithListedPropertyCount)
