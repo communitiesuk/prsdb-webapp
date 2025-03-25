@@ -21,8 +21,8 @@ VALUES (1, '10/15/24', 2001001001, 1),
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
 INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id)
-VALUES (1, '10/15/24', '10/15/24', 1, '1 Fictional Road', 1),
-       (2, '09/13/24', '09/13/24', 2, '2 Fake Way', 1);
+VALUES (1, '10/15/24', '10/15/24', 2, '1 Fictional Road', 1),
+       (2, '09/13/24', '09/13/24', 3, '2 Fake Way', 1);
 
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
@@ -41,6 +41,6 @@ SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM pro
 
 INSERT INTO property_ownership (id, is_active, occupancy_type, ownership_type, current_num_households,
                                 current_num_tenants, registration_number_id, primary_landlord_id, property_id)
-VALUES (1, true, 0, 1, 1, 2, 6, 1, 1);
+VALUES (1, true, 0, 1, 1, 2, 2, 1, 1);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
