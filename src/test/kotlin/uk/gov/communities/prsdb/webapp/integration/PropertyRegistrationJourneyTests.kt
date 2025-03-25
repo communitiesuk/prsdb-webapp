@@ -11,6 +11,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -53,7 +54,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     @SpyBean
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
 
-    @SpyBean
+    @MockitoBean
     private lateinit var confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>
 
     @BeforeEach

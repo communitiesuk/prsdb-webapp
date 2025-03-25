@@ -17,7 +17,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -55,7 +55,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     @Autowired
     private lateinit var landlordService: LandlordService
 
-    @SpyBean
+    @MockitoBean
     private lateinit var confirmationEmailSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>
 
     @BeforeEach
