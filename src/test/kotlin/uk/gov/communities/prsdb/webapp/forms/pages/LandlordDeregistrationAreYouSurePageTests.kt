@@ -15,9 +15,9 @@ import org.springframework.validation.BindingResult
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController.Companion.CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
+import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationCheckUserPropertiesFormModel.Companion.USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -39,7 +39,7 @@ class LandlordDeregistrationAreYouSurePageTests {
     fun `enrichModel adds the no properties fieldset heading if the user has no registered properties`() {
         val journeyData =
             mutableMapOf(
-                CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT to
+                DeregisterLandlordStepId.CheckForUserProperties.urlPathSegment to
                     mutableMapOf(
                         USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY to false,
                     ),
@@ -56,7 +56,7 @@ class LandlordDeregistrationAreYouSurePageTests {
     fun `enrichModel adds the with properties fieldset heading and hint if the user has registered properties`() {
         val journeyData =
             mutableMapOf(
-                CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT to
+                DeregisterLandlordStepId.CheckForUserProperties.urlPathSegment to
                     mutableMapOf(
                         USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY to true,
                     ),
@@ -85,7 +85,7 @@ class LandlordDeregistrationAreYouSurePageTests {
             ) as PageData
         val journeyData =
             mutableMapOf(
-                CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT to
+                DeregisterLandlordStepId.CheckForUserProperties.urlPathSegment to
                     mutableMapOf(
                         USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY to true,
                     ),
@@ -100,7 +100,7 @@ class LandlordDeregistrationAreYouSurePageTests {
             page.getModelAndView(
                 mockValidator,
                 formData,
-                CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT,
+                DeregisterLandlordStepId.CheckForUserProperties.urlPathSegment,
                 journeyData,
                 null,
             )

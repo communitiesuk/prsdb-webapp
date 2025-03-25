@@ -13,9 +13,9 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController.Companion.CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDeregistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationCheckUserPropertiesFormModel.Companion.USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 
@@ -60,7 +60,7 @@ class DeregisterLandlordControllerTests(
         whenever(
             landlordDeregistrationJourney
                 .completeStep(
-                    eq(CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT),
+                    eq(DeregisterLandlordStepId.CheckForUserProperties.urlPathSegment),
                     eq(
                         mutableMapOf(
                             USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY to false,

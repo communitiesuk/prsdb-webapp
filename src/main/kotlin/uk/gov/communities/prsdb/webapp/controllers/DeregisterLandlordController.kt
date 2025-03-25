@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDeregistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationCheckUserPropertiesFormModel.Companion.USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import java.security.Principal
@@ -38,7 +39,7 @@ class DeregisterLandlordController(
         return landlordDeregistrationJourneyFactory
             .create()
             .completeStep(
-                CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT,
+                DeregisterLandlordStepId.CheckForUserProperties.urlPathSegment,
                 formData,
                 subpage,
                 principal,
