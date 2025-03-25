@@ -74,6 +74,6 @@ class DeregisterLandlordControllerTests(
         mvc
             .get(DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
             .andExpect { status { is3xxRedirection() } }
-            .andExpect { redirectedUrl("/are-you-sure") }
+            .andExpect { redirectedUrl("/${DeregisterLandlordStepId.AreYouSure.urlPathSegment}") }
     }
 }

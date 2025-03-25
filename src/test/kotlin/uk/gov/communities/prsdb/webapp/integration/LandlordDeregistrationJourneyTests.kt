@@ -3,9 +3,11 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.whenever
@@ -75,15 +77,11 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
         assertPageIs(page, LandlordDetailsPage::class)
     }
 
-    @ParameterizedTest
-    @CsvSource(
-        "true, Select whether you want to delete your landlord record and properties",
-        "false, Select whether you want to delete your account from the database",
-    )
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideErrorMessages")
     fun `Submitting with no option selected returns an error`(
         userHasRegisteredProperties: Boolean,
         expectedErrorMessage: String,
-        page: Page,
     ) {
         whenever(landlordService.getLandlordHasRegisteredProperties(anyString())).thenReturn(userHasRegisteredProperties)
 
@@ -91,5 +89,20 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
         areYouSurePage.form.submit()
         assertThat(areYouSurePage.form.getErrorMessage("wantsToProceed"))
             .containsText(expectedErrorMessage)
+    }
+
+    companion object {
+        @JvmStatic
+        fun provideErrorMessages() =
+            listOf(
+                Arguments.of(
+                    Named.of("for a user with properties", true),
+                    Named.of("for a user with properties", "Select whether you want to delete your landlord record and properties"),
+                ),
+                Arguments.of(
+                    Named.of("for a user with no properties", false),
+                    Named.of("for a user with no properties", "Select whether you want to delete your account from the database"),
+                ),
+            )
     }
 }
