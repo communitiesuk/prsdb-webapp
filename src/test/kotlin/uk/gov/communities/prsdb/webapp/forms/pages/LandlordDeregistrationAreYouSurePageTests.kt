@@ -49,7 +49,7 @@ class LandlordDeregistrationAreYouSurePageTests {
         page.enrichModel(modelAndView, journeyData)
 
         assertEquals("forms.areYouSure.landlordDeregistration.noProperties.fieldSetHeading", modelAndView.model["fieldSetHeading"])
-        assertNull(modelAndView.model["fieldSetHintList"])
+        assertNull(modelAndView.model["fieldSetHint"])
     }
 
     @Test
@@ -66,7 +66,7 @@ class LandlordDeregistrationAreYouSurePageTests {
         page.enrichModel(modelAndView, journeyData)
 
         assertEquals("forms.areYouSure.landlordDeregistration.hasProperties.fieldSetHeading", modelAndView.model["fieldSetHeading"])
-        assertEquals(listOf("forms.areYouSure.landlordDeregistration.hasProperties.fieldSetHint"), modelAndView.model["fieldSetHintList"])
+        assertEquals("forms.areYouSure.landlordDeregistration.hasProperties.fieldSetHint", modelAndView.model["fieldSetHint"])
     }
 
     @Test
