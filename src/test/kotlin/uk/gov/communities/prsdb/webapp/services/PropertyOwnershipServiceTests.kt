@@ -607,6 +607,9 @@ class PropertyOwnershipServiceTests {
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
             propertyOwnership,
         )
+        whenever(
+            mockLicenseService.updateLicence(propertyOwnership.license!!, updateModel.licenceType, updateModel.licenceNumber),
+        ).thenReturn(updateLicence)
 
         // Act
         propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel)
@@ -639,13 +642,6 @@ class PropertyOwnershipServiceTests {
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
             propertyOwnership,
         )
-        whenever(
-            mockLicenseService.getUpdatedLicenceForPropertyOwnershipOrNull(
-                propertyOwnership.license,
-                updateModel.licenceType,
-                updateModel.licenceNumber,
-            ),
-        ).thenReturn(null)
 
         // Act
         propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel)

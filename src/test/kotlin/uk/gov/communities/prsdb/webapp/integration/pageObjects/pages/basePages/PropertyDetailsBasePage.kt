@@ -38,5 +38,6 @@ abstract class PropertyDetailsBasePage(
         val occupancyRow = getRow("Occupied by tenants")
         val numberOfHouseholdsRow = getRow("Number of households")
         val numberOfPeopleRow = getRow("Number of people")
+        val licensingRow = getRow("Licensing type")
     }
 }

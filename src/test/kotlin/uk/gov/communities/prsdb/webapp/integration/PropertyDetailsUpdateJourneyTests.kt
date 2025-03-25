@@ -5,14 +5,19 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HmoAdditionalLicenceFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HmoMandatoryLicenceFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.LicensingTypeFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfHouseholdsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfPeopleFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OwnershipTypeFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.PropertyDetailsUpdatePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.SelectiveLicenceFormPagePropertyDetailsUpdate
 
 @Sql("/data-local.sql")
 class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
@@ -28,6 +33,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
         val newOwnershipType = OwnershipType.LEASEHOLD
         propertyDetailsUpdatePage = updateOwnershipTypeAndReturn(propertyDetailsUpdatePage, newOwnershipType)
 
+        propertyDetailsUpdatePage = updateLicensingTypeToNoneAndReturn(propertyDetailsUpdatePage)
+
         propertyDetailsUpdatePage = updateOccupancyToVacantAndReturn(propertyDetailsUpdatePage)
 
         // Submit changes TODO PRSD-355 add proper submit button and declaration page
@@ -37,6 +44,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
         // Check changes have occurred
         assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.ownershipTypeRow.value).containsText("Leasehold")
         assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
+        assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.value).containsText("None")
     }
 
     @Test
@@ -89,6 +97,16 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
 
         val updateOwnershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
         updateOwnershipTypePage.submitOwnershipType(newOwnershipType)
+
+        return assertPageIs(page, PropertyDetailsUpdatePage::class, urlArguments)
+    }
+
+    private fun updateLicensingTypeToNoneAndReturn(detailsPage: PropertyDetailsUpdatePage): PropertyDetailsUpdatePage {
+        val page = detailsPage.page
+        detailsPage.propertyDetailsSummaryList.licensingRow.clickActionLinkAndWait()
+
+        val updateLicensingType = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
+        updateLicensingType.submitLicensingType(LicensingType.NO_LICENSING)
 
         return assertPageIs(page, PropertyDetailsUpdatePage::class, urlArguments)
     }
@@ -214,6 +232,109 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
             )
             assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.numberOfPeopleRow.value).containsText(
                 newNumberOfPeople.toString(),
+            )
+        }
+    }
+
+    @Nested
+    inner class LicenceUpdates {
+        @Test
+        fun `A property can have their licence type and number updated for selective licence`(page: Page) {
+            val newLicensingType = LicensingType.SELECTIVE_LICENCE
+            val newLicenceNumber = "SL123"
+
+            // Update details page
+            var propertyDetailsUpdatePage = navigator.goToPropertyDetailsUpdatePage(propertyOwnershipId)
+            assertThat(propertyDetailsUpdatePage.heading).containsText("1, Example Road, EG")
+
+            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.clickActionLinkAndWait()
+
+            // Update licence to selective
+            val updateLicenceTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
+            assertThat(updateLicenceTypePage.form.fieldsetHeading).containsText("Update the type of licensing you have for your property")
+            updateLicenceTypePage.submitLicensingType(newLicensingType)
+
+            // Update licence number
+            val updateLicenceNumberPage = assertPageIs(page, SelectiveLicenceFormPagePropertyDetailsUpdate::class, urlArguments)
+            assertThat(updateLicenceNumberPage.form.fieldsetHeading).containsText("What is your selective licence number?")
+            updateLicenceNumberPage.submitLicenseNumber(newLicenceNumber)
+
+            // Submit changes TODO PRSD-355 add proper submit button and declaration page
+            propertyDetailsUpdatePage.submitButton.clickAndWait()
+            propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsUpdatePage::class, urlArguments)
+
+            // Check changes have occurred
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.value).containsText(
+                "Selective licence",
+            )
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.value).containsText(
+                newLicenceNumber,
+            )
+        }
+
+        @Test
+        fun `A property can have their licence type and number updated for HMO Mandatory licence`(page: Page) {
+            val newLicensingType = LicensingType.HMO_MANDATORY_LICENCE
+            val newLicenceNumber = "MAND123"
+
+            // Update details page
+            var propertyDetailsUpdatePage = navigator.goToPropertyDetailsUpdatePage(propertyOwnershipId)
+            assertThat(propertyDetailsUpdatePage.heading).containsText("1, Example Road, EG")
+
+            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.clickActionLinkAndWait()
+
+            // Update licence to hmp mandatory
+            val updateLicenceTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
+            assertThat(updateLicenceTypePage.form.fieldsetHeading).containsText("Update the type of licensing you have for your property")
+            updateLicenceTypePage.submitLicensingType(newLicensingType)
+
+            val updateLicenceNumberPage = assertPageIs(page, HmoMandatoryLicenceFormPagePropertyDetailsUpdate::class, urlArguments)
+            assertThat(updateLicenceNumberPage.form.fieldsetHeading).containsText("What is your HMO mandatory licence number?")
+            updateLicenceNumberPage.submitLicenseNumber(newLicenceNumber)
+
+            // Submit changes TODO PRSD-355 add proper submit button and declaration page
+            propertyDetailsUpdatePage.submitButton.clickAndWait()
+            propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsUpdatePage::class, urlArguments)
+
+            // Check changes have occurred
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.value).containsText(
+                "HMO mandatory licence",
+            )
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.value).containsText(
+                newLicenceNumber,
+            )
+        }
+
+        @Test
+        fun `A property can have their licence type and number updated for HMO additional licence`(page: Page) {
+            val newLicensingType = LicensingType.HMO_ADDITIONAL_LICENCE
+            val newLicenceNumber = "ADD123"
+
+            // Update details page
+            var propertyDetailsUpdatePage = navigator.goToPropertyDetailsUpdatePage(propertyOwnershipId)
+            assertThat(propertyDetailsUpdatePage.heading).containsText("1, Example Road, EG")
+
+            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.clickActionLinkAndWait()
+
+            // Update licence to selective
+            val updateLicenceTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
+            assertThat(updateLicenceTypePage.form.fieldsetHeading).containsText("Update the type of licensing you have for your property")
+            updateLicenceTypePage.submitLicensingType(newLicensingType)
+
+            val updateLicenceNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyDetailsUpdate::class, urlArguments)
+            assertThat(updateLicenceNumberPage.form.fieldsetHeading).containsText("What is your HMO additional licence number?")
+            updateLicenceNumberPage.submitLicenseNumber(newLicenceNumber)
+
+            // Submit changes TODO PRSD-355 add proper submit button and declaration page
+            propertyDetailsUpdatePage.submitButton.clickAndWait()
+            propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsUpdatePage::class, urlArguments)
+
+            // Check changes have occurred
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.value).containsText(
+                "HMO additional licence",
+            )
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.value).containsText(
+                newLicenceNumber,
             )
         }
     }

@@ -181,8 +181,8 @@ class PropertyOwnershipService(
         updateLicenceType: LicensingType?,
         updateLicenceNumber: String?,
     ): License? =
-        if (license != null && updateLicenceType == LicensingType.NO_LICENSING) {
-            licenseService.deleteLicence(license)
+        if (updateLicenceType == LicensingType.NO_LICENSING) {
+            license?.let { licenseService.deleteLicence(license) }
             null
         } else if (license == null) {
             licenseService.createLicense(updateLicenceType!!, updateLicenceNumber!!)

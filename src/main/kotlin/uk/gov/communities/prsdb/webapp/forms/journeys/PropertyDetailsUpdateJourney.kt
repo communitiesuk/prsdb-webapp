@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationNumberOfPeoplePage
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
-import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getIsOccupiedUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getLicenceNumberIfPresent
@@ -119,7 +118,7 @@ class PropertyDetailsUpdateJourney(
                         ),
                 ),
             handleSubmitAndRedirect = { _, _ -> UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment },
-            nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateOccupancy, null) },
+            nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateLicensingType, null) },
             saveAfterSubmit = false,
         )
 
@@ -192,7 +191,7 @@ class PropertyDetailsUpdateJourney(
                         ),
                     journeyDataService = journeyDataService,
                 ),
-            nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateLicensingType, null) },
+            nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateDetails, null) },
             saveAfterSubmit = false,
         )
 
@@ -234,6 +233,7 @@ class PropertyDetailsUpdateJourney(
                             BACK_URL_ATTR_NAME to UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment,
                         ),
                 ),
+            handleSubmitAndRedirect = { journeyData, _ -> licensingTypeHandleSubmitAndRedirect(journeyData) },
             nextAction = { journeyData, _ -> licensingTypeNextAction(journeyData) },
             saveAfterSubmit = false,
         )
@@ -255,7 +255,8 @@ class PropertyDetailsUpdateJourney(
                             BACK_URL_ATTR_NAME to UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment,
                         ),
                 ),
-            nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateDetails, null) },
+            handleSubmitAndRedirect = { _, _ -> UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment },
+            nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateOccupancy, null) },
             saveAfterSubmit = false,
         )
 
@@ -282,7 +283,8 @@ class PropertyDetailsUpdateJourney(
                             BACK_URL_ATTR_NAME to UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment,
                         ),
                 ),
-            nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateDetails, null) },
+            handleSubmitAndRedirect = { _, _ -> UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment },
+            nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateOccupancy, null) },
             saveAfterSubmit = false,
         )
 
@@ -303,7 +305,8 @@ class PropertyDetailsUpdateJourney(
                             BACK_URL_ATTR_NAME to UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment,
                         ),
                 ),
-            nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateDetails, null) },
+            handleSubmitAndRedirect = { _, _ -> UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment },
+            nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateOccupancy, null) },
             saveAfterSubmit = false,
         )
 
@@ -313,13 +316,13 @@ class PropertyDetailsUpdateJourney(
             initialStepId,
             setOf(
                 ownershipTypeStep,
-                occupancyStep,
-                numberOfHouseholdsStep,
-                numberOfPeopleStep,
                 licensingTypeStep,
                 selectiveLicenceStep,
                 hmoMandatoryLicenceStep,
                 hmoAdditionalLicenceStep,
+                occupancyStep,
+                numberOfHouseholdsStep,
+                numberOfPeopleStep,
                 updateDetailsStep,
             ),
         )
@@ -363,7 +366,7 @@ class PropertyDetailsUpdateJourney(
         if (journeyData.getIsOccupiedUpdateIfPresent()!!) {
             Pair(UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds, null)
         } else {
-            Pair(UpdatePropertyDetailsStepId.UpdateLicensingType, null)
+            Pair(UpdatePropertyDetailsStepId.UpdateDetails, null)
         }
 
     private fun updatePropertyAndRedirect(journeyData: JourneyData): String {
@@ -388,10 +391,18 @@ class PropertyDetailsUpdateJourney(
     private fun hasPropertyOccupancyBeenUpdated() = journeyDataService.getJourneyDataFromSession().getIsOccupiedUpdateIfPresent() != null
 
     private fun licensingTypeNextAction(journeyData: JourneyData): Pair<UpdatePropertyDetailsStepId, Int?> =
-        when (PropertyRegistrationJourneyDataHelper.getLicensingType(journeyData)!!) {
+        when (journeyData.getLicensingTypeIfPresent()!!) {
             LicensingType.SELECTIVE_LICENCE -> Pair(UpdatePropertyDetailsStepId.UpdateSelectiveLicence, null)
             LicensingType.HMO_MANDATORY_LICENCE -> Pair(UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence, null)
             LicensingType.HMO_ADDITIONAL_LICENCE -> Pair(UpdatePropertyDetailsStepId.UpdateHmoAdditionalLicence, null)
-            LicensingType.NO_LICENSING -> Pair(UpdatePropertyDetailsStepId.UpdateDetails, null)
+            LicensingType.NO_LICENSING -> Pair(UpdatePropertyDetailsStepId.UpdateOccupancy, null)
+        }
+
+    private fun licensingTypeHandleSubmitAndRedirect(journeyData: JourneyData): String =
+        when (journeyData.getLicensingTypeIfPresent()!!) {
+            LicensingType.SELECTIVE_LICENCE -> UpdatePropertyDetailsStepId.UpdateSelectiveLicence.urlPathSegment
+            LicensingType.HMO_MANDATORY_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence.urlPathSegment
+            LicensingType.HMO_ADDITIONAL_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoAdditionalLicence.urlPathSegment
+            LicensingType.NO_LICENSING -> UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment
         }
 }
