@@ -22,6 +22,15 @@ on:
         description: "Id of the AWS account containing the target environment"
         required: true
         type: string
+    secrets:
+      ONE_LOGIN_PRIVATE_KEY:
+        required: true
+      ONE_LOGIN_PUBLIC_KEY:
+        required: true
+      NOTIFY_KEY:
+        required: true
+      SLACK_WEBHOOK:
+        required: true
 
 jobs:
   build-and-deploy:
