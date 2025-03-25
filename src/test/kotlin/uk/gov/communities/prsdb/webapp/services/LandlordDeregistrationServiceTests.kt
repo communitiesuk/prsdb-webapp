@@ -19,12 +19,12 @@ class LandlordDeregistrationServiceTests {
     private lateinit var mockLandlordWithListedPropertyCountRepository: LandlordWithListedPropertyCountRepository
 
     @InjectMocks
-    private lateinit var landlordDeregistrationService: LandlordDeregistrationService
+    private lateinit var landlordService: LandlordService
 
     @Test
     fun `getLandlordHasRegisteredProperties throws an error if the landlord is not found`() {
         val baseUserId = "one-login-id"
-        assertThrows<EntityNotFoundException> { landlordDeregistrationService.getLandlordHasRegisteredProperties(baseUserId) }
+        assertThrows<EntityNotFoundException> { landlordService.getLandlordHasRegisteredProperties(baseUserId) }
     }
 
     @Test
@@ -36,7 +36,7 @@ class LandlordDeregistrationServiceTests {
             .thenReturn(landlordWithListedPropertyCount)
 
         // Act, Assert
-        assertTrue(landlordDeregistrationService.getLandlordHasRegisteredProperties(baseUserId))
+        assertTrue(landlordService.getLandlordHasRegisteredProperties(baseUserId))
     }
 
     @Test
@@ -48,6 +48,6 @@ class LandlordDeregistrationServiceTests {
             .thenReturn(landlordWithListedPropertyCount)
 
         // Act, Assert
-        assertFalse(landlordDeregistrationService.getLandlordHasRegisteredProperties(baseUserId))
+        assertFalse(landlordService.getLandlordHasRegisteredProperties(baseUserId))
     }
 }
