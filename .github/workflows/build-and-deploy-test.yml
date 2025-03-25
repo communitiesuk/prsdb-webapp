@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - test
-      - feat/PRSD-970-commonise-deployment-workflow
 
 jobs:
   build-and-deploy-integration:
