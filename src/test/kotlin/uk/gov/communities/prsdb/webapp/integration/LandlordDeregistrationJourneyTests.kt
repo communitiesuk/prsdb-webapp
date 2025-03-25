@@ -14,16 +14,16 @@ import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 
 @Sql("/data-local.sql")
 class LandlordDeregistrationJourneyTests : IntegrationTest() {
     @MockBean
-    lateinit var landlordService: LandlordService
+    lateinit var landlordDeregistrationService: LandlordDeregistrationService
 
     @Test
     fun `User with properties can navigate the whole journey`(page: Page) {
-        whenever(landlordService.getLandlordHasRegisteredProperties(anyString())).thenReturn(true)
+        whenever(landlordDeregistrationService.getLandlordHasRegisteredProperties(anyString())).thenReturn(true)
         val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
         assertThat(areYouSurePage.form.fieldsetHeading)
             .containsText("Are you sure you want to delete your account and all your properties on the database?")
@@ -35,7 +35,7 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
 
     @Test
     fun `User with no properties can navigate the whole journey`(page: Page) {
-        whenever(landlordService.getLandlordHasRegisteredProperties(anyString())).thenReturn(false)
+        whenever(landlordDeregistrationService.getLandlordHasRegisteredProperties(anyString())).thenReturn(false)
 
         val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
         assertThat(areYouSurePage.form.fieldsetHeading).containsText("Are you sure you want to delete your account from the database?")
@@ -56,7 +56,7 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
         userHasRegisteredProperties: Boolean,
         page: Page,
     ) {
-        whenever(landlordService.getLandlordHasRegisteredProperties(anyString())).thenReturn(userHasRegisteredProperties)
+        whenever(landlordDeregistrationService.getLandlordHasRegisteredProperties(anyString())).thenReturn(userHasRegisteredProperties)
         val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
         areYouSurePage.submitDoesNotWantToProceed()
 
@@ -69,7 +69,7 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
         userHasRegisteredProperties: Boolean,
         page: Page,
     ) {
-        whenever(landlordService.getLandlordHasRegisteredProperties(anyString())).thenReturn(userHasRegisteredProperties)
+        whenever(landlordDeregistrationService.getLandlordHasRegisteredProperties(anyString())).thenReturn(userHasRegisteredProperties)
         val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
         areYouSurePage.backLink.clickAndWait()
         assertPageIs(page, LandlordDetailsPage::class)
@@ -85,7 +85,7 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
         expectedErrorMessage: String,
         page: Page,
     ) {
-        whenever(landlordService.getLandlordHasRegisteredProperties(anyString())).thenReturn(userHasRegisteredProperties)
+        whenever(landlordDeregistrationService.getLandlordHasRegisteredProperties(anyString())).thenReturn(userHasRegisteredProperties)
 
         val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
         areYouSurePage.form.submit()
