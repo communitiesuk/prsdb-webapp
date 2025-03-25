@@ -7,6 +7,6 @@ data class PropertyOwnershipUpdateModel(
     val ownershipType: OwnershipType?,
     val numberOfHouseholds: Int?,
     val numberOfPeople: Int?,
-    val licenceType: LicensingType?,
+    val licensingType: LicensingType?,
     val licenceNumber: String?,
 )
