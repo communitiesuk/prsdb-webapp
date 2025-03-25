@@ -62,7 +62,7 @@ class LandlordDeregistrationJourney(
                                         labelMsgKey = "forms.radios.option.no.label",
                                     ),
                                 ),
-                            BACK_URL_ATTR_NAME to LANDLORD_DETAILS_PATH_SEGMENT,
+                            BACK_URL_ATTR_NAME to "/$LANDLORD_DETAILS_PATH_SEGMENT",
                         ),
                     journeyDataService = journeyDataService,
                 ),
