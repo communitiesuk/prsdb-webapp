@@ -54,16 +54,16 @@ class PropertyDetailsUpdateJourneyDataExtensions {
         fun JourneyData.getLicenceNumberIfPresent(originalJourneyKey: String): String? {
             val licensingType = getLicensingTypeIfPresent() ?: this.getOriginalLicensingType(originalJourneyKey)
 
-            val licenseNumberPathSegment = getLicenceNumberKey(licensingType)
+            val licenseNumberPathSegment = getUpdateStepUrlPathSegmentForLicensingType(licensingType)
 
-            return licenseNumberPathSegment?.let { getFieldStringValue(this, it, "licenceNumber") }
+            return licenseNumberPathSegment?.let { getFieldStringValue(this, it.urlPathSegment, "licenceNumber") }
         }
 
-        fun getLicenceNumberKey(licensingType: LicensingType?): String? =
+        fun getUpdateStepUrlPathSegmentForLicensingType(licensingType: LicensingType?): UpdatePropertyDetailsStepId? =
             when (licensingType) {
-                LicensingType.SELECTIVE_LICENCE -> UpdatePropertyDetailsStepId.UpdateSelectiveLicence.urlPathSegment
-                LicensingType.HMO_MANDATORY_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence.urlPathSegment
-                LicensingType.HMO_ADDITIONAL_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoAdditionalLicence.urlPathSegment
+                LicensingType.SELECTIVE_LICENCE -> UpdatePropertyDetailsStepId.UpdateSelectiveLicence
+                LicensingType.HMO_MANDATORY_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence
+                LicensingType.HMO_ADDITIONAL_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoAdditionalLicence
                 else -> null
             }
 

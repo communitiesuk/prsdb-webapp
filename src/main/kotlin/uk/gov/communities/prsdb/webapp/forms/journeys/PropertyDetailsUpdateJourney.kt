@@ -70,8 +70,11 @@ class PropertyDetailsUpdateJourney(
                 UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment to mapOf("licensingType" to licensingType),
             )
 
-        val licenceNumberTypeKey = PropertyDetailsUpdateJourneyDataExtensions.getLicenceNumberKey(licensingType)
-        licenceNumberTypeKey?.let { originalPropertyData[it] = mapOf("licenceNumber" to propertyOwnership.license?.licenseNumber!!) }
+        val licenceNumberTypeKey = PropertyDetailsUpdateJourneyDataExtensions.getUpdateStepUrlPathSegmentForLicensingType(licensingType)
+        licenceNumberTypeKey?.let {
+            originalPropertyData[it.urlPathSegment] =
+                mapOf("licenceNumber" to propertyOwnership.license?.licenseNumber!!)
+        }
 
         return originalPropertyData
     }
@@ -390,19 +393,23 @@ class PropertyDetailsUpdateJourney(
 
     private fun hasPropertyOccupancyBeenUpdated() = journeyDataService.getJourneyDataFromSession().getIsOccupiedUpdateIfPresent() != null
 
-    private fun licensingTypeNextAction(journeyData: JourneyData): Pair<UpdatePropertyDetailsStepId, Int?> =
-        when (journeyData.getLicensingTypeIfPresent()!!) {
-            LicensingType.SELECTIVE_LICENCE -> Pair(UpdatePropertyDetailsStepId.UpdateSelectiveLicence, null)
-            LicensingType.HMO_MANDATORY_LICENCE -> Pair(UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence, null)
-            LicensingType.HMO_ADDITIONAL_LICENCE -> Pair(UpdatePropertyDetailsStepId.UpdateHmoAdditionalLicence, null)
-            LicensingType.NO_LICENSING -> Pair(UpdatePropertyDetailsStepId.UpdateOccupancy, null)
-        }
+    private fun licensingTypeNextAction(journeyData: JourneyData): Pair<UpdatePropertyDetailsStepId, Int?> {
+        val licensingType = journeyData.getLicensingTypeIfPresent()!!
 
-    private fun licensingTypeHandleSubmitAndRedirect(journeyData: JourneyData): String =
-        when (journeyData.getLicensingTypeIfPresent()!!) {
-            LicensingType.SELECTIVE_LICENCE -> UpdatePropertyDetailsStepId.UpdateSelectiveLicence.urlPathSegment
-            LicensingType.HMO_MANDATORY_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence.urlPathSegment
-            LicensingType.HMO_ADDITIONAL_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoAdditionalLicence.urlPathSegment
-            LicensingType.NO_LICENSING -> UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment
-        }
+        val nextActionStepId =
+            PropertyDetailsUpdateJourneyDataExtensions.getUpdateStepUrlPathSegmentForLicensingType(licensingType)
+                ?: UpdatePropertyDetailsStepId.UpdateOccupancy
+
+        return Pair(nextActionStepId, null)
+    }
+
+    private fun licensingTypeHandleSubmitAndRedirect(journeyData: JourneyData): String {
+        val licensingType = journeyData.getLicensingTypeIfPresent()!!
+
+        val redirectUrlSegment =
+            PropertyDetailsUpdateJourneyDataExtensions.getUpdateStepUrlPathSegmentForLicensingType(licensingType)
+                ?: UpdatePropertyDetailsStepId.UpdateDetails
+
+        return redirectUrlSegment.urlPathSegment
+    }
 }
