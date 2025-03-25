@@ -111,7 +111,4 @@ class LandlordService(
             landlordPage.totalElements,
         )
     }
-
-    // TODO: PRSD-703 - check the database to see if the principal has any registered properties
-    fun getLandlordHasRegisteredProperties(baseUserId: String): Boolean = false
 }
