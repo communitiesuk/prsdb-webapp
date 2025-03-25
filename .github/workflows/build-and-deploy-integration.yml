@@ -1,8 +1,9 @@
-name: Build and Deploy
+name: Build and Deploy Integration
 on:
   push:
     branches:
       - main
+      - feat/PRSD-970-commonise-deployment-workflow
 
 jobs:
   call-workflow-passing-data:
