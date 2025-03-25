@@ -1,8 +1,27 @@
 name: Build and Deploy
 on:
-  push:
-    branches:
-      - main
+  workflow_call:
+    inputs:
+      environment:
+        description: "Select deployment environment"
+        required: true
+        type: string
+      build-and-deploy-role:
+        description: "Developer role used to deploy the environment"
+        required: true
+        type: string
+      update-ecs-role:
+        description: "Developer role used to update the ecs task definition"
+        required: true
+        type: string
+      ecr-repository:
+        description: "Name of the ecr repository for the build image"
+        required: true
+        type: string
+      account-id:
+        description: "Id of the AWS account containing the target environment"
+        required: true
+        type: string
 
 jobs:
   build-and-deploy:
@@ -53,7 +72,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::794038239680:role/integration-push-image
+          role-to-assume: ${{ inputs.build-and-deploy-role }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
@@ -64,7 +83,7 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: "integration-webapp"
+          ECR_REPOSITORY: ${{ inputs.ecr_repository }}
           IMAGE_TAG: "${{ steps.get-latest-tag.outputs.tag }}-${{ github.sha }}"
         run: |
           ./gradlew bootBuildImage
@@ -81,8 +100,8 @@ jobs:
       contents: read
     uses: communitiesuk/prsdb-infra/.github/workflows/update-task-definition.yml@main
     with:
-      environment_name: integration
-      account_id: 794038239680
+      environment_name: ${{ inputs.environment }}
+      account_id: ${{ inputs.account-id }}
       image_name: ${{ needs.build-and-deploy.outputs.image_name }}
 
   update-ecs-service:
@@ -98,12 +117,12 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::794038239680:role/github-actions-terraform-admin
+          role-to-assume:  ${{ inputs.update-ecs-role }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Redeploy ECS service
         run: |
-          aws ecs update-service --cluster integration-app --service integration-app --task-definition prsdb-webapp-integration --force-new-deployment
+          aws ecs update-service --cluster ${{ inputs.environment }}-app --service ${{ inputs.environment }}-app --task-definition prsdb-webapp-${{ inputs.environment }} --force-new-deployment
   
   report-pipeline-status:
     runs-on: ubuntu-latest
