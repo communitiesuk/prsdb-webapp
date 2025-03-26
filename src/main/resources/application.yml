@@ -59,6 +59,9 @@ server:
   error:
     path: /error
 
+aws:
+  s3:
+    quarantineBucket: ${AWS_QUARANTINE_BUCKET}
 ---
 
 spring:
