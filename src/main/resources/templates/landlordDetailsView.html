@@ -7,7 +7,7 @@
 
         <div th:replace="~{fragments/buttons/pageHeaderActions :: pageHeaderActions(${name}, ~{:: #delete-record-button})}">
             <th:block id="delete-record-button">
-                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink('delete-record', #{landlordDetails.removeRecord})}"></a>
+                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${deleteLandlordRecordUrl}, #{landlordDetails.removeRecord})}"></a>
             </th:block>
         </div>
 

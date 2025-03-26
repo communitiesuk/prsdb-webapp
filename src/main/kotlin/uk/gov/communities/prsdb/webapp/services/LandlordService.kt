@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -110,5 +111,12 @@ class LandlordService(
             pageRequest,
             landlordPage.totalElements,
         )
+    }
+
+    fun getLandlordHasRegisteredProperties(baseUserId: String): Boolean {
+        val landlordWithListedPropertyCount =
+            landlordWithListedPropertyCountRepository.findByLandlord_BaseUser_Id(baseUserId)
+                ?: throw EntityNotFoundException("Landlord with baseUserId $baseUserId not found")
+        return landlordWithListedPropertyCount.listedPropertyCount > 0
     }
 }

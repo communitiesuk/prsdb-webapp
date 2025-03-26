@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.UpdateJourneyDataExtensions.Companion.getOriginalJourneyDataIfPresent
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
-class JourneyDataExtensions {
+open class JourneyDataExtensions {
     companion object {
         fun JourneyData.getLookedUpAddress(selectedAddress: String): AddressDataModel? =
             this.getLookedUpAddresses().singleOrNull { it.singleLineAddress == selectedAddress }
@@ -40,5 +40,13 @@ class JourneyDataExtensions {
             }
             return journeyDataValue ?: 0
         }
+
+        @JvmStatic
+        protected fun JourneyData.getWantsToProceed(urlPathSegment: String): Boolean? =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                urlPathSegment,
+                "wantsToProceed",
+            )
     }
 }

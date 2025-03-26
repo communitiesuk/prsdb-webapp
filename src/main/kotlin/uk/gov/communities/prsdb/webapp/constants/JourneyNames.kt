@@ -4,6 +4,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 
 // These need to be constants as we cannot use the urlPathSegment from the JourneyType directly in the RequestMapping Annotation
 const val REGISTER_LANDLORD_JOURNEY_URL: String = "register-as-a-landlord"
+const val DEREGISTER_LANDLORD_JOURNEY_URL: String = "deregister-landlord"
 const val REGISTER_LA_USER_JOURNEY_URL: String = "register-local-authority-user"
 const val REGISTER_PROPERTY_JOURNEY_URL: String = "register-property"
 const val DEREGISTER_PROPERTY_JOURNEY_URL: String = "deregister-property"
