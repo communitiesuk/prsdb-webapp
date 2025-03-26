@@ -16,11 +16,13 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
+import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 
 class LandlordDeregistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     val landlordDeregistrationService: LandlordDeregistrationService,
+    val securityContextService: SecurityContextService,
 ) : Journey<DeregisterLandlordStepId>(
         journeyType = JourneyType.LANDLORD_DEREGISTRATION,
         initialStepId = initialStepId,
@@ -91,8 +93,14 @@ class LandlordDeregistrationJourney(
         val baseUserId = SecurityContextHolder.getContext().authentication.name
         landlordDeregistrationService.deregisterLandlord(baseUserId)
 
+        refreshUserRoles()
+
         // TODO: PRSD-705 - redirect to confirmation page
         return "/${REGISTER_LANDLORD_JOURNEY_URL}"
+    }
+
+    private fun refreshUserRoles() {
+        securityContextService.refreshContext()
     }
 
     companion object {
