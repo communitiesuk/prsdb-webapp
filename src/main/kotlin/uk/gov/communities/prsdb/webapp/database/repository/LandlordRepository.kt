@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 interface LandlordRepository : JpaRepository<Landlord?, Long?> {
     fun findByRegistrationNumber_Number(registrationNumber: Long): Landlord?
 
-    fun findByBaseUser_Id(subjectId: String): Landlord
+    fun findByBaseUser_Id(subjectId: String): Landlord?
 
     fun deleteByBaseUser_Id(subjectId: String)
 
