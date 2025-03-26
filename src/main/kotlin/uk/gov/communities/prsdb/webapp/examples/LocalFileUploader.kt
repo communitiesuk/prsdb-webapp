@@ -10,7 +10,7 @@ import java.io.InputStream
 @Primary
 @Profile("local")
 class LocalFileUploader : FileUploader {
-    private val forbiddenFilenameCharacters = listOf(':', '<', '>', '"', '?', '*', '&')
+    private val forbiddenFilenameCharacters = listOf(':', '<', '>', '"', '?', '*', '&', '/', '\\', ',')
 
     override fun uploadFile(
         objectKey: String,
