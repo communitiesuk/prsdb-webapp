@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.persistence.EntityNotFoundException
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -30,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 import java.time.LocalDate
@@ -410,5 +413,35 @@ class LandlordServiceTests {
         assertEquals(updateModel.phoneNumber, landlordEntity.phoneNumber)
         assertEquals(newAddress, landlordEntity.address)
         assertEquals(updateModel.dateOfBirth, landlordEntity.dateOfBirth)
+    }
+
+    @Test
+    fun `getLandlordHasRegisteredProperties throws an error if the landlord is not found`() {
+        val baseUserId = "one-login-id"
+        assertThrows<EntityNotFoundException> { landlordService.getLandlordHasRegisteredProperties(baseUserId) }
+    }
+
+    @Test
+    fun `getLandlordHasRegisteredProperties returns true if listedPropertyCount is greater than 0`() {
+        // Arrange
+        val landlordWithListedPropertyCount = MockLandlordData.createLandlordWithListedPropertyCount(5)
+        val baseUserId = landlordWithListedPropertyCount.landlord.baseUser.id
+        whenever(mockLandlordWithListedPropertyCountRepository.findByLandlord_BaseUser_Id(baseUserId))
+            .thenReturn(landlordWithListedPropertyCount)
+
+        // Act, Assert
+        assertTrue(landlordService.getLandlordHasRegisteredProperties(baseUserId))
+    }
+
+    @Test
+    fun `getLandlordHasRegisteredProperties returns false true if listedPropertyCount is 0`() {
+        // Arrange
+        val landlordWithListedPropertyCount = MockLandlordData.createLandlordWithListedPropertyCount(0)
+        val baseUserId = landlordWithListedPropertyCount.landlord.baseUser.id
+        whenever(mockLandlordWithListedPropertyCountRepository.findByLandlord_BaseUser_Id(baseUserId))
+            .thenReturn(landlordWithListedPropertyCount)
+
+        // Act, Assert
+        assertFalse(landlordService.getLandlordHasRegisteredProperties(baseUserId))
     }
 }

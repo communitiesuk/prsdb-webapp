@@ -72,7 +72,7 @@ class PropertyDeregistrationJourney(
                                 ),
                             BACK_URL_ATTR_NAME to PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId),
                         ),
-                ) { mapOf("singleLineAddress" to getPropertySingleLineAddress()) },
+                ) { mapOf("optionalFieldSetHeadingParam" to getPropertySingleLineAddress()) },
             // handleSubmitAndRedirect will execute. It does not have to redirect to the step specified in nextAction.
             handleSubmitAndRedirect = { newJourneyData, subPage -> areYouSureContinueToNextActionOrExitJourney(newJourneyData, subPage) },
             // This gets checked when determining whether the next step is reachable

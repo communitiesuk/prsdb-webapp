@@ -78,6 +78,8 @@ class LandlordDetailsController(
         model.addAttribute("registeredPropertiesList", registeredPropertiesList)
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
         model.addAttribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_PATH_SEGMENT)
+
+        model.addAttribute("deleteLandlordRecordUrl", DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
     }
 
     @PreAuthorize("hasRole('LANDLORD')")

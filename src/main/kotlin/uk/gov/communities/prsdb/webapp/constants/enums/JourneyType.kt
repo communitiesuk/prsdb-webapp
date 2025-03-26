@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.constants.enums
 
 enum class JourneyType {
     LANDLORD_REGISTRATION,
+    LANDLORD_DEREGISTRATION,
     LA_USER_REGISTRATION,
     PROPERTY_REGISTRATION,
     PROPERTY_DEREGISTRATION,
