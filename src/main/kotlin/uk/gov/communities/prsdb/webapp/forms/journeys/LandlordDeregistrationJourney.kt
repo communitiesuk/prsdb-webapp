@@ -1,8 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
-import org.springframework.http.HttpStatus
 import org.springframework.validation.Validator
-import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
@@ -67,32 +65,10 @@ class LandlordDeregistrationJourney(
                             BACK_URL_ATTR_NAME to "/$LANDLORD_DETAILS_PATH_SEGMENT",
                         ),
                     journeyDataService = journeyDataService,
-                ) { getHeadingsAndHintsForAreYouSureStep() },
+                ),
             handleSubmitAndRedirect = { journeyData, _ -> areYouSureContinueOrExitJourney(journeyData) },
             saveAfterSubmit = false,
         )
-
-    fun getHeadingsAndHintsForAreYouSureStep(): Map<String, Any> {
-        val journeyData = journeyDataService.getJourneyDataFromSession()
-        val userHasRegisteredProperties =
-            journeyData.getLandlordUserHasRegisteredProperties()
-                ?: throw (
-                    ResponseStatusException(
-                        HttpStatus.INTERNAL_SERVER_ERROR,
-                        "userHasRegisteredProperties was not found in journeyData",
-                    )
-                )
-
-        if (!userHasRegisteredProperties) {
-            return mapOf(
-                "fieldSetHeading" to "forms.areYouSure.landlordDeregistration.noProperties.fieldSetHeading",
-            )
-        }
-        return mapOf(
-            "fieldSetHeading" to "forms.areYouSure.landlordDeregistration.hasProperties.fieldSetHeading",
-            "fieldSetHint" to "forms.areYouSure.landlordDeregistration.hasProperties.fieldSetHint",
-        )
-    }
 
     private fun areYouSureContinueOrExitJourney(journeyData: JourneyData): String {
         if (journeyData.getWantsToProceed()!!) {
