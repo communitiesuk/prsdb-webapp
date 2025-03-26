@@ -13,15 +13,16 @@ import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDeregistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationCheckUserPropertiesFormModel.Companion.USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY
-import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
+import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.security.Principal
 
 @Controller
 @RequestMapping("/$DEREGISTER_LANDLORD_JOURNEY_URL")
 class DeregisterLandlordController(
     private val landlordDeregistrationJourneyFactory: LandlordDeregistrationJourneyFactory,
-    private val landlordDeregistrationService: LandlordDeregistrationService,
+    private val landlordService: LandlordService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping("/${CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT}")
@@ -32,13 +33,13 @@ class DeregisterLandlordController(
         val formData =
             mutableMapOf(
                 USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY
-                    to landlordDeregistrationService.getLandlordHasRegisteredProperties(principal.name),
+                    to landlordService.getLandlordHasRegisteredProperties(principal.name),
             )
 
         return landlordDeregistrationJourneyFactory
             .create()
             .completeStep(
-                CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT,
+                DeregisterLandlordStepId.CheckForUserProperties.urlPathSegment,
                 formData,
                 subpage,
                 principal,
