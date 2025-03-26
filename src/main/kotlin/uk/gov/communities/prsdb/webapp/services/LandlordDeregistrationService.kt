@@ -18,7 +18,7 @@ class LandlordDeregistrationService(
         deleteFromOneLoginIfNotAnotherTypeOfUser(baseUserId)
     }
 
-    fun deleteFromOneLoginIfNotAnotherTypeOfUser(baseUserId: String) {
+    private fun deleteFromOneLoginIfNotAnotherTypeOfUser(baseUserId: String) {
         val userIsLocalAuthorityUser = localAuthorityUserRepository.findByBaseUser_Id(baseUserId) != null
         if (!userIsLocalAuthorityUser) {
             oneLoginUserRepository.deleteById(baseUserId)

@@ -86,10 +86,6 @@ class LandlordDeregistrationJourney(
     }
 
     private fun deregisterLandlord(): String {
-        // TODO: PRSD-703 - implement this
-        //      delete from landlord table
-        //      delete from one-login table (check if they are another type of user first)
-        //      refresh user roles to remove landlord
         val baseUserId = SecurityContextHolder.getContext().authentication.name
         landlordDeregistrationService.deregisterLandlord(baseUserId)
 
