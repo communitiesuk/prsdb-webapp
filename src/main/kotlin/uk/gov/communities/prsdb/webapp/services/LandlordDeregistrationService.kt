@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPropertyCountRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 
 @Service
@@ -12,6 +13,7 @@ class LandlordDeregistrationService(
     private val landlordWithListedPropertyCountRepository: LandlordWithListedPropertyCountRepository,
     private val landlordRepository: LandlordRepository,
     private val oneLoginUserRepository: OneLoginUserRepository,
+    private val localAuthorityUserRepository: LocalAuthorityUserRepository,
 ) {
     fun getLandlordHasRegisteredProperties(baseUserId: String): Boolean {
         val landlordWithListedPropertyCount =
@@ -27,7 +29,9 @@ class LandlordDeregistrationService(
     }
 
     fun deleteFromOneLoginIfNotAnotherTypeOfUser(baseUserId: String) {
-        // TODO: PRSD-703
-        //  oneLoginUserRepository.deleteById(baseUserId)
+        val userIsLocalAuthorityUser = localAuthorityUserRepository.findByBaseUser_Id(baseUserId) != null
+        if (!userIsLocalAuthorityUser) {
+            oneLoginUserRepository.deleteById(baseUserId)
+        }
     }
 }
