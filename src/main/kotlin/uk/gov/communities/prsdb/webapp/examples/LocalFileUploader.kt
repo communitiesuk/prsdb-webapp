@@ -15,13 +15,12 @@ class LocalFileUploader : FileUploader {
     override fun uploadFile(
         objectKey: String,
         inputStream: InputStream,
-        streamSize: Long,
     ): String {
         val cleanObjectKey =
             objectKey
                 .map { char -> if (char in forbiddenFilenameCharacters) "" else char }
                 .joinToString("")
-        File(".local-uploads/${cleanObjectKey.substring(0, cleanObjectKey.lastIndexOf('/'))}").mkdirs()
+        File(".local-uploads").mkdir()
         val destinationRoute = ".local-uploads/$cleanObjectKey"
         val destinationFile = File(destinationRoute)
         destinationFile.outputStream().use { outputStream ->

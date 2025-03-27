@@ -47,7 +47,7 @@ class ExampleFileUploadController(
 
         val key = "${principal.name}/$freeSegment/${file.originalFilename}"
 
-        val uploadOutcome = fileUploader.uploadFile(key, file.inputStream, file.size)
+        val uploadOutcome = fileUploader.uploadFile(key, file.inputStream)
         model.addAttribute(
             "fileUploadResponse",
             mapOf(

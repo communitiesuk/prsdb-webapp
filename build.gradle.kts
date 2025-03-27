@@ -61,6 +61,7 @@ dependencies {
     implementation("uk.gov.service.notify:notifications-java-client:5.2.1-RELEASE")
     implementation("software.amazon.awssdk:s3:2.31.5")
     implementation("software.amazon.awssdk.crt:aws-crt:0.36.3")
+    implementation("software.amazon.awssdk:s3-transfer-manager:2.22.0")
 
     // Development
     developmentOnly("org.springframework.boot:spring-boot-devtools")
