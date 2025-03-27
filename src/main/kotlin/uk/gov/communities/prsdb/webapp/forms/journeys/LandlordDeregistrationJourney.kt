@@ -21,8 +21,8 @@ import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 class LandlordDeregistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
-    val landlordDeregistrationService: LandlordDeregistrationService,
-    val securityContextService: SecurityContextService,
+    private val landlordDeregistrationService: LandlordDeregistrationService,
+    private val securityContextService: SecurityContextService,
 ) : Journey<DeregisterLandlordStepId>(
         journeyType = JourneyType.LANDLORD_DEREGISTRATION,
         initialStepId = initialStepId,
