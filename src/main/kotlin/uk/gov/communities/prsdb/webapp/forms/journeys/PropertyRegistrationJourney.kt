@@ -79,7 +79,7 @@ class PropertyRegistrationJourney(
         getTaskListViewModelFactory(
             "registerProperty.title",
             "registerProperty.taskList.heading",
-            "registerProperty.taskList.subtitle",
+            listOf("registerProperty.taskList.subtitle"),
             "register-property-task",
         )
 

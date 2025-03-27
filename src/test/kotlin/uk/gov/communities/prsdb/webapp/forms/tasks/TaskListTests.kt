@@ -48,7 +48,7 @@ class TaskListTests {
             getTaskListViewModelFactory(
                 "title",
                 "heading",
-                "subtitle",
+                listOf("subtitle"),
                 "TODO()",
             )
     }

@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskSectionV
 class TaskListViewModelFactory<T : StepId>(
     private val titleKey: String,
     private val headingKey: String,
-    private val subtitleKey: String,
+    private val subtitleKeys: List<String>,
     private val rootId: String,
     private val sections: List<JourneySection<T>>,
     val getTaskStatus: (task: JourneyTask<T>, journeyData: JourneyData) -> TaskStatus,
@@ -34,6 +34,6 @@ class TaskListViewModelFactory<T : StepId>(
                 }
             }
 
-        return TaskListViewModel(titleKey, headingKey, subtitleKey, rootId, sectionViewModels)
+        return TaskListViewModel(titleKey, headingKey, subtitleKeys, rootId, sectionViewModels)
     }
 }
