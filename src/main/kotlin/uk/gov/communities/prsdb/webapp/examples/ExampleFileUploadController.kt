@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.server.ResponseStatusException
+import java.security.Principal
 
 @Controller
 // This free segment allows the example controller to simulate multiple journeys in parallel
@@ -38,13 +39,15 @@ class ExampleFileUploadController(
         @CookieValue(value = COOKIE_NAME) token: String,
         model: Model,
         @PathVariable("freeSegment") freeSegment: String,
+        principal: Principal,
     ): String {
         if (!tokenService.checkTokenIsFor(token, freeSegment)) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid upload token")
         }
 
-        val extension = file.originalFilename?.let { it.substring(it.lastIndexOf('.') + 1) }
-        val uploadOutcome = fileUploader.uploadFile(file.inputStream, extension)
+        val key = "${principal.name}/$freeSegment/${file.originalFilename}"
+
+        val uploadOutcome = fileUploader.uploadFile(key, file.inputStream, file.size)
         model.addAttribute(
             "fileUploadResponse",
             mapOf(

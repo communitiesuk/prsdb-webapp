@@ -14,6 +14,8 @@ interface LandlordRepository : JpaRepository<Landlord?, Long?> {
 
     fun findByBaseUser_Id(subjectId: String): Landlord?
 
+    fun deleteByBaseUser_Id(subjectId: String)
+
     @Query(
         "SELECT l.* " +
             "FROM landlord l  " +

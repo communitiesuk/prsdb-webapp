@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
@@ -14,10 +15,14 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.LandlordDeregistrationJourneyDataExtensions.Companion.getWantsToProceed
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
+import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 
 class LandlordDeregistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
+    private val landlordDeregistrationService: LandlordDeregistrationService,
+    private val securityContextService: SecurityContextService,
 ) : Journey<DeregisterLandlordStepId>(
         journeyType = JourneyType.LANDLORD_DEREGISTRATION,
         initialStepId = initialStepId,
@@ -81,13 +86,17 @@ class LandlordDeregistrationJourney(
     }
 
     private fun deregisterLandlord(): String {
-        // TODO: PRSD-703 - implement this
-        //      delete from landlord table
-        //      delete from one-login table (check if they are another type of user first)
-        //      refresh user roles to remove landlord permissions
+        val baseUserId = SecurityContextHolder.getContext().authentication.name
+        landlordDeregistrationService.deregisterLandlord(baseUserId)
+
+        refreshUserRoles()
 
         // TODO: PRSD-705 - redirect to confirmation page
         return "/${REGISTER_LANDLORD_JOURNEY_URL}"
+    }
+
+    private fun refreshUserRoles() {
+        securityContextService.refreshContext()
     }
 
     companion object {
