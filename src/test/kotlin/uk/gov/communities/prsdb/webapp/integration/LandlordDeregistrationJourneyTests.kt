@@ -9,6 +9,7 @@ import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.ReasonFormPageLandlordDeregistration
 
 class LandlordDeregistrationJourneyTests : IntegrationTest() {
     @Nested
@@ -21,8 +22,8 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
                 .containsText("Are you sure you want to delete your account and all your properties on the database?")
             areYouSurePage.submitWantsToProceed()
 
-            // TODO PRSD-704 - redirect to reason page if the user with properties selects "yes"
-            assertPageIs(page, LandlordDetailsPage::class)
+            val reasonPage = assertPageIs(page, ReasonFormPageLandlordDeregistration::class)
+            // TODO PRSD-891 - continue the journey by submitting the reason page
         }
 
         @Test
