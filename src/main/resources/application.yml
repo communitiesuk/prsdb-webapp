@@ -61,7 +61,7 @@ server:
 
 aws:
   s3:
-    quarantineBucket: ${AWS_QUARANTINE_BUCKET}
+    quarantineBucket: ${AWS_QUARANTINE_BUCKET:prsdb-quarantine-integration}
 ---
 
 spring:
