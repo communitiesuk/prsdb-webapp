@@ -89,6 +89,9 @@ dependencies {
 
     // CSV Data Loading
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv")
+
+    // Streaming upload without storing on local system
+    implementation("org.apache.commons:commons-fileupload2-jakarta:2.0.0-M1")
 }
 
 kotlin {

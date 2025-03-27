@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.examples
 
 import jakarta.servlet.http.Cookie
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.apache.commons.fileupload2.jakarta.JakartaServletFileUpload
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -10,8 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.server.ResponseStatusException
 import java.security.Principal
 
@@ -35,7 +35,7 @@ class ExampleFileUploadController(
 
     @PostMapping
     fun uploadFile(
-        @RequestParam("uploaded-file") file: MultipartFile,
+        request: HttpServletRequest,
         @CookieValue(value = COOKIE_NAME) token: String,
         model: Model,
         @PathVariable("freeSegment") freeSegment: String,
@@ -45,16 +45,29 @@ class ExampleFileUploadController(
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid upload token")
         }
 
-        val key = "${principal.name}/$freeSegment/${file.originalFilename}"
+        if (!JakartaServletFileUpload.isMultipartContent(request)) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a multipart file upload")
+        }
 
-        val uploadOutcome = fileUploader.uploadFile(key, file.inputStream)
+        val upload = JakartaServletFileUpload()
+
+        val itemIterator = upload.getItemIterator(request)
+
+        if (!itemIterator.hasNext()) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No files in upload")
+        }
+        val singleItem = itemIterator.next()
+
+        val key = "${principal.name}/$freeSegment/${singleItem.name}"
+
+        val uploadOutcome = fileUploader.uploadFile(key, singleItem.inputStream)
         model.addAttribute(
             "fileUploadResponse",
             mapOf(
-                "uploadedName" to file.originalFilename,
+                "uploadedName" to singleItem.name,
                 "uploadReturnValue" to uploadOutcome,
-                "size" to file.size,
-                "contentType" to file.contentType,
+                "size" to request.contentLength,
+                "contentType" to request.contentType,
                 "cookie-value" to token,
             ),
         )
