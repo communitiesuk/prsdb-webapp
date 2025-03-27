@@ -23,6 +23,7 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
             areYouSurePage.submitWantsToProceed()
 
             val reasonPage = assertPageIs(page, ReasonFormPageLandlordDeregistration::class)
+            // TODO PRSD-891 - continue the journey by submitting the reason page
         }
 
         @Test
