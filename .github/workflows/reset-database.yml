@@ -1,5 +1,16 @@
 name: Reset Database
-on: workflow_dispatch
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      branch:
+        required: true
+        type: string
+      aws-account-id:
+        required: true
+        type: string
 
 permissions:
   id-token: write
@@ -7,26 +18,41 @@ permissions:
 
 env:
   AWS_REGION: eu-west-2
+  IAM_ROLE: arn:aws:iam::${{ inputs.aws-account-id }}:role/github-actions-terraform-admin
 
 jobs:
+  validate-target-environment:
+    name: Validate Target Environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Throw Invalid Target Environment Error
+        if: inputs.environment != 'integration' && inputs.environment != 'test'
+        run: |
+          echo "::error ::Invalid Target Environment: ${{ inputs.environment }}. This action can only target integration and test environments."
+          exit 1
+
   clean-database:
     name: Clean Database
+    needs: validate-target-environment
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::794038239680:role/github-actions-terraform-admin
+          role-to-assume: ${{ env.IAM_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Start SSM port-forwarding Session
+        id: start-session
         run: |
-          BASTION_ID=$(aws ec2 describe-instances --output text --filters "Name=tag:Name,Values=integration-bastion-1" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[].InstanceId | [0]")
+          BASTION_ID=$(aws ec2 describe-instances --output text --filters "Name=tag:Name,Values=${{ inputs.environment }}-bastion-1" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[].InstanceId | [0]")
 
-          DB_URL=$(aws ssm get-parameter --output text --name "integration-prsdb-database-url" --query "Parameter.Value")
+          DB_URL=$(aws ssm get-parameter --output text --name "${{ inputs.environment }}-prsdb-database-url" --query "Parameter.Value")
 
           DB_ENDPOINT="${DB_URL%:*}"
 
@@ -39,16 +65,16 @@ jobs:
               echo "Session Id not found in the output."
               exit 1
           fi
-          echo "SSM_SESSION_ID=$SESSION_ID" >> $GITHUB_ENV
+          echo "SSM_SESSION_ID=$SESSION_ID" >> $GITHUB_OUTPUT
 
       - name: Set DB username in ENV
-        run: echo "FLYWAY_USER=$(aws ssm get-parameter --output text --name "integration-prsdb-database-username" --query "Parameter.Value")" >> $GITHUB_ENV
+        run: echo "FLYWAY_USER=$(aws ssm get-parameter --output text --name "${{ inputs.environment }}-prsdb-database-username" --query "Parameter.Value")" >> $GITHUB_ENV
 
       - name: Set DB password in ENV
         uses: aws-actions/aws-secretsmanager-get-secrets@v2.0.8
         with:
           secret-ids: |
-            FLYWAY_PASSWORD, tf-integration-prsdb-database-password
+            FLYWAY_PASSWORD, tf-${{ inputs.environment }}-prsdb-database-password
 
       - name: Run gradle flywayClean
         env:
@@ -57,8 +83,8 @@ jobs:
         run: ./gradlew flywayClean --no-daemon
 
       - name: Terminate SSM port-forwarding session
-        if: success() || failure()
-        run: aws ssm terminate-session --session-id $SSM_SESSION_ID
+        if: (success() || failure()) && steps.start-session.outputs.SSM_SESSION_ID != ''
+        run: aws ssm terminate-session --session-id ${{ steps.start-session.outputs.SSM_SESSION_ID }}
 
   restart-ecs:
     name: Restart ECS
@@ -68,8 +94,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::794038239680:role/github-actions-terraform-admin
+          role-to-assume: ${{ env.IAM_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Redeploy ECS service
-        run: aws ecs update-service --cluster integration-app --service integration-app --task-definition prsdb-webapp-integration --force-new-deployment
+        run: aws ecs update-service --cluster ${{ inputs.environment }}-app --service ${{ inputs.environment }}-app --task-definition prsdb-webapp-${{ inputs.environment }} --force-new-deployment
