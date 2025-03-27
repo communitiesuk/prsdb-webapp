@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys
 import uk.gov.communities.prsdb.webapp.exceptions.InvalidCoreIdentityException
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedCredentialModel
+import kotlin.reflect.full.memberProperties
 
 private const val VERIFIED_IDENTITY_CACHE_KEY = "verified-identity-cache"
 
@@ -43,8 +44,8 @@ class OneLoginIdentityService(
         val verifiableCredential = VerifiedCredentialModel.fromUnknownMap(verifiableCredentialMap)
 
         return mapOf(
-            "name" to verifiableCredential.credentialSubject.getCurrentName(),
-            "birthDate" to verifiableCredential.credentialSubject.birthDate,
+            VerifiedCredentialModel::class.memberProperties.last().name to verifiableCredential.credentialSubject.getCurrentName(),
+            VerifiedCredentialModel::class.memberProperties.first().name to verifiableCredential.credentialSubject.birthDate,
         )
     }
 

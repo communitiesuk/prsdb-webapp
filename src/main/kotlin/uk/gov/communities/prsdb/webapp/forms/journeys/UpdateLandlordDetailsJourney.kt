@@ -79,8 +79,8 @@ class UpdateLandlordDetailsJourney(
                     mapOf(SelectAddressFormModel::class.memberProperties.first().name to landlord.address.getSelectedAddress()),
                 UpdateLandlordDetailsStepId.UpdateDateOfBirth.urlPathSegment to
                     mapOf(
-                        DateOfBirthFormModel::class.memberProperties.elementAt(1) to landlord.dateOfBirth?.dayOfMonth.toString(),
-                        DateOfBirthFormModel::class.memberProperties.elementAt(2) to landlord.dateOfBirth?.monthValue.toString(),
+                        DateOfBirthFormModel::class.memberProperties.elementAt(1).name to landlord.dateOfBirth?.dayOfMonth.toString(),
+                        DateOfBirthFormModel::class.memberProperties.elementAt(2).name to landlord.dateOfBirth?.monthValue.toString(),
                         DateOfBirthFormModel::class.memberProperties.last().name to landlord.dateOfBirth?.year.toString(),
                     ),
             )

@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormM
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NonEnglandOrWalesAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.VerifiedIdentityModel
 import java.time.LocalDate
 import kotlin.reflect.full.memberProperties
 
@@ -30,7 +31,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             getFieldStringValue(
                 journeyData,
                 LandlordRegistrationStepId.VerifyIdentity.urlPathSegment,
-                "name",
+                VerifiedIdentityModel::class.memberProperties.last().name,
             )
 
         fun getDOB(journeyData: JourneyData) = getVerifiedDOB(journeyData) ?: getManualDOB(journeyData)
@@ -39,7 +40,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             getFieldLocalDateValue(
                 journeyData,
                 LandlordRegistrationStepId.VerifyIdentity.urlPathSegment,
-                "birthDate",
+                VerifiedIdentityModel::class.memberProperties.first().name,
             )
 
         private fun getManualDOB(journeyData: JourneyData): LocalDate? {
