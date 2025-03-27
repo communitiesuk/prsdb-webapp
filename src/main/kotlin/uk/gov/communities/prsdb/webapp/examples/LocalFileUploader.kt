@@ -1,20 +1,28 @@
 package uk.gov.communities.prsdb.webapp.examples
 
+import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import java.io.File
 import java.io.InputStream
 
 @Service
+@Primary
 @Profile("local")
 class LocalFileUploader : FileUploader {
+    private val forbiddenFilenameCharacters = listOf(':', '<', '>', '"', '?', '*', '&', '/', '\\', ',')
+
     override fun uploadFile(
+        objectKey: String,
         inputStream: InputStream,
-        extension: String?,
+        streamSize: Long,
     ): String {
-        File(".local-uploads").mkdir()
-        val extensionWithDot = if (extension != null) ".$extension" else ""
-        val destinationRoute = ".local-uploads/destination$extensionWithDot"
+        val cleanObjectKey =
+            objectKey
+                .map { char -> if (char in forbiddenFilenameCharacters) "" else char }
+                .joinToString("")
+        File(".local-uploads/${cleanObjectKey.substring(0, cleanObjectKey.lastIndexOf('/'))}").mkdirs()
+        val destinationRoute = ".local-uploads/$cleanObjectKey"
         val destinationFile = File(destinationRoute)
         destinationFile.outputStream().use { outputStream ->
             inputStream.use { inputStream ->
