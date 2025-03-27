@@ -4,7 +4,11 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectLocalAuthorityFormModel
 import java.time.LocalDate
+import kotlin.reflect.full.memberProperties
 
 open class JourneyDataHelper {
     companion object {
@@ -13,11 +17,11 @@ open class JourneyDataHelper {
             lookupAddressPathSegment: String,
         ): Pair<String, String>? {
             val houseNameOrNumber =
-                getFieldStringValue(journeyData, lookupAddressPathSegment, "houseNameOrNumber")
+                getFieldStringValue(journeyData, lookupAddressPathSegment, LookupAddressFormModel::class.memberProperties.first().name)
                     ?: return null
 
             val postcode =
-                getFieldStringValue(journeyData, lookupAddressPathSegment, "postcode")
+                getFieldStringValue(journeyData, lookupAddressPathSegment, LookupAddressFormModel::class.memberProperties.last().name)
                     ?: return null
 
             return Pair(houseNameOrNumber, postcode)
@@ -32,35 +36,35 @@ open class JourneyDataHelper {
                 getFieldStringValue(
                     journeyData,
                     manualAddressPathSegment,
-                    "addressLineOne",
+                    ManualAddressFormModel::class.memberProperties.first().name,
                 ) ?: return null
 
             val townOrCity =
                 getFieldStringValue(
                     journeyData,
                     manualAddressPathSegment,
-                    "townOrCity",
+                    ManualAddressFormModel::class.memberProperties.last().name,
                 ) ?: return null
 
             val postcode =
                 getFieldStringValue(
                     journeyData,
                     manualAddressPathSegment,
-                    "postcode",
+                    ManualAddressFormModel::class.memberProperties.elementAt(3).name,
                 ) ?: return null
 
             val addressLineTwo =
                 getFieldStringValue(
                     journeyData,
                     manualAddressPathSegment,
-                    "addressLineTwo",
+                    ManualAddressFormModel::class.memberProperties.elementAt(1).name,
                 )
 
             val county =
                 getFieldStringValue(
                     journeyData,
                     manualAddressPathSegment,
-                    "county",
+                    ManualAddressFormModel::class.memberProperties.elementAt(2).name,
                 )
 
             val localAuthorityId =
@@ -68,7 +72,7 @@ open class JourneyDataHelper {
                     getFieldIntegerValue(
                         journeyData,
                         it,
-                        "localAuthorityId",
+                        SelectLocalAuthorityFormModel::class.memberProperties.first().name,
                     ) ?: return null
                 }
 

@@ -9,12 +9,14 @@ import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.getLookedUpAddress
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import kotlin.reflect.KClass
+import kotlin.reflect.full.memberProperties
 
 class SelectAddressPage(
     formModel: KClass<out FormModel>,
@@ -68,7 +70,7 @@ class SelectAddressPage(
         validator: Validator,
         formData: PageData,
     ): Boolean {
-        val selectedAddress = formData["address"].toString()
+        val selectedAddress = formData[SelectAddressFormModel::class.memberProperties.first().name].toString()
         val journeyData = journeyDataService.getJourneyDataFromSession()
 
         return selectedAddress == MANUAL_ADDRESS_CHOSEN || journeyData.getLookedUpAddress(selectedAddress) != null

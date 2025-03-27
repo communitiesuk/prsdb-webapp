@@ -33,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAdd
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import kotlin.reflect.full.memberProperties
 
 class UpdateLandlordDetailsJourney(
     validator: Validator,
@@ -59,30 +60,37 @@ class UpdateLandlordDetailsJourney(
             mutableMapOf(
                 IS_IDENTITY_VERIFIED_KEY to landlord.isVerified,
                 LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to Json.encodeToString(listOf(AddressDataModel.fromAddress(landlord.address))),
-                UpdateLandlordDetailsStepId.UpdateEmail.urlPathSegment to mapOf("emailAddress" to landlord.email),
-                UpdateLandlordDetailsStepId.UpdateName.urlPathSegment to mapOf("name" to landlord.name),
-                UpdateLandlordDetailsStepId.UpdatePhoneNumber.urlPathSegment to mapOf("phoneNumber" to landlord.phoneNumber),
+                UpdateLandlordDetailsStepId.UpdateEmail.urlPathSegment to
+                    mapOf(
+                        EmailFormModel::class.memberProperties.first().name to landlord.email,
+                    ),
+                UpdateLandlordDetailsStepId.UpdateName.urlPathSegment to
+                    mapOf(NameFormModel::class.memberProperties.first().name to landlord.name),
+                UpdateLandlordDetailsStepId.UpdatePhoneNumber.urlPathSegment to
+                    mapOf(
+                        PhoneNumberFormModel::class.memberProperties.first().name to landlord.phoneNumber,
+                    ),
                 UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment to
                     mapOf(
-                        "postcode" to landlord.address.getPostcodeSearchTerm(),
-                        "houseNameOrNumber" to landlord.address.getHouseNameOrNumber(),
+                        LookupAddressFormModel::class.memberProperties.last().name to landlord.address.getPostcodeSearchTerm(),
+                        LookupAddressFormModel::class.memberProperties.first().name to landlord.address.getHouseNameOrNumber(),
                     ),
                 UpdateLandlordDetailsStepId.SelectEnglandAndWalesAddress.urlPathSegment to
-                    mapOf("address" to landlord.address.getSelectedAddress()),
+                    mapOf(SelectAddressFormModel::class.memberProperties.first().name to landlord.address.getSelectedAddress()),
                 UpdateLandlordDetailsStepId.UpdateDateOfBirth.urlPathSegment to
                     mapOf(
-                        "day" to landlord.dateOfBirth?.dayOfMonth.toString(),
-                        "month" to landlord.dateOfBirth?.monthValue.toString(),
-                        "year" to landlord.dateOfBirth?.year.toString(),
+                        DateOfBirthFormModel::class.memberProperties.elementAt(1) to landlord.dateOfBirth?.dayOfMonth.toString(),
+                        DateOfBirthFormModel::class.memberProperties.elementAt(2) to landlord.dateOfBirth?.monthValue.toString(),
+                        DateOfBirthFormModel::class.memberProperties.last().name to landlord.dateOfBirth?.year.toString(),
                     ),
             )
 
         if (landlord.address.uprn == null) {
             originalLandlordData[UpdateLandlordDetailsStepId.ManualEnglandAndWalesAddress.urlPathSegment] =
                 mapOf(
-                    "addressLineOne" to landlord.address.singleLineAddress,
-                    "townOrCity" to landlord.address.getTownOrCity(),
-                    "postcode" to landlord.address.getPostcodeSearchTerm(),
+                    ManualAddressFormModel::class.memberProperties.first().name to landlord.address.singleLineAddress,
+                    ManualAddressFormModel::class.memberProperties.last().name to landlord.address.getTownOrCity(),
+                    ManualAddressFormModel::class.memberProperties.elementAt(3).name to landlord.address.getPostcodeSearchTerm(),
                 )
         }
 

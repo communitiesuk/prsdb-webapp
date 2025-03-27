@@ -8,8 +8,10 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.UpdateJourney
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.getLatestNumberOfHouseholds
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import kotlin.reflect.KClass
+import kotlin.reflect.full.memberProperties
 
 class PropertyRegistrationNumberOfPeoplePage(
     formModel: KClass<out FormModel>,
@@ -35,7 +37,7 @@ class PropertyRegistrationNumberOfPeoplePage(
                     .getLatestNumberOfHouseholds(
                         UpdateJourney.getOriginalJourneyDataKey(journeyDataService),
                     ).toString()
-            newFormData["numberOfHouseholds"] = numberOfHouseholds
+            newFormData[NumberOfPeopleFormModel::class.memberProperties.first().name] = numberOfHouseholds
         }
         return super.bindDataToFormModel(validator, newFormData)
     }

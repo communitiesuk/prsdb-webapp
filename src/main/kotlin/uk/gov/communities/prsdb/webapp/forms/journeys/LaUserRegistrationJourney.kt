@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
+import kotlin.reflect.full.memberProperties
 
 class LaUserRegistrationJourney(
     validator: Validator,
@@ -36,7 +37,10 @@ class LaUserRegistrationJourney(
     init {
         val journeyData = journeyDataService.getJourneyDataFromSession()
         if (!isJourneyDataInitialized(journeyData)) {
-            val emailFormData = mapOf("emailAddress" to invitation.invitedEmail)
+            val emailFormData =
+                mapOf(
+                    EmailFormModel::class.memberProperties.first().name to invitation.invitedEmail,
+                )
             val newJourneyData = emailStep().updatedJourneyData(journeyData, emailFormData, subPageNumber = null)
             journeyDataService.setJourneyDataInSession(newJourneyData)
         }
