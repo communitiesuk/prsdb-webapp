@@ -7,4 +7,5 @@ enum class DeregisterLandlordStepId(
 ) : StepId {
     CheckForUserProperties(DeregisterLandlordController.CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT),
     AreYouSure("are-you-sure"),
+    Reason("reason"),
 }

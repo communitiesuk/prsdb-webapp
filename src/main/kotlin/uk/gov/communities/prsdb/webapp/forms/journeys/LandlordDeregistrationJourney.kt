@@ -3,16 +3,19 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.constants.DEREGISTRATION_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.LandlordDeregistrationAreYouSurePage
 import uk.gov.communities.prsdb.webapp.forms.pages.LandlordDeregistrationCheckUserPropertiesPage
+import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.LandlordDeregistrationJourneyDataExtensions.Companion.getLandlordUserHasRegisteredProperties
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.LandlordDeregistrationJourneyDataExtensions.Companion.getWantsToProceed
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
@@ -35,6 +38,7 @@ class LandlordDeregistrationJourney(
             setOf(
                 checkForUserPropertiesStep(),
                 areYouSureStep(),
+                reasonStep(),
             ),
         )
 
@@ -71,18 +75,49 @@ class LandlordDeregistrationJourney(
                         ),
                     journeyDataService = journeyDataService,
                 ),
-            handleSubmitAndRedirect = { journeyData, _ -> areYouSureContinueOrExitJourney(journeyData) },
+            // handleSubmitAndRedirect will execute. It does not have to redirect to the step specified in nextAction.
+            handleSubmitAndRedirect = { journeyData, subPage -> areYouSureContinueOrExitJourney(journeyData, subPage) },
+            // This gets checked when determining whether the next step is reachable
+            nextAction = { _, _ -> Pair(DeregisterLandlordStepId.Reason, null) },
             saveAfterSubmit = false,
         )
 
-    private fun areYouSureContinueOrExitJourney(journeyData: JourneyData): String {
+    private fun reasonStep() =
+        Step(
+            id = DeregisterLandlordStepId.Reason,
+            page =
+                Page(
+                    formModel = LandlordDeregistrationReasonFormModel::class,
+                    templateName = "forms/deregistrationReasonForm",
+                    content =
+                        mapOf(
+                            "title" to "deregisterLandlord.title",
+                            "fieldSetHeading" to "forms.reason.landlordDeregistration.fieldSetHeading",
+                            "limit" to DEREGISTRATION_REASON_MAX_LENGTH,
+                            "submitButtonText" to "forms.buttons.continue",
+                        ),
+                ),
+            handleSubmitAndRedirect = { _, _ -> deregisterLandlordAndProperties() },
+            saveAfterSubmit = false,
+        )
+
+    private fun areYouSureContinueOrExitJourney(
+        journeyData: JourneyData,
+        subPageNumber: Int?,
+    ): String {
         if (journeyData.getWantsToProceed()!!) {
             if (!journeyData.getLandlordUserHasRegisteredProperties()!!) {
                 return deregisterLandlord()
             }
-            // TODO: PRSD-704 - continue to reason page if user has registered properties
+            val areYouSureStep = steps.single { it.id == DeregisterLandlordStepId.AreYouSure }
+            return getRedirectForNextStep(areYouSureStep, journeyData, subPageNumber)
         }
         return "/$LANDLORD_DETAILS_PATH_SEGMENT"
+    }
+
+    private fun deregisterLandlordAndProperties(): String {
+        // TODO: PRSD-891
+        return "/${REGISTER_LANDLORD_JOURNEY_URL}"
     }
 
     private fun deregisterLandlord(): String {
