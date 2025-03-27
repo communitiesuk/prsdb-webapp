@@ -42,6 +42,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Start SSM port-forwarding Session
+        id: start-session
         run: |
           BASTION_ID=$(aws ec2 describe-instances --output text --filters "Name=tag:Name,Values=${{ inputs.environment }}-bastion-1" --query "Reservations[*].Instances[].InstanceId | [0]")
 
@@ -58,7 +59,7 @@ jobs:
               echo "Session Id not found in the output."
               exit 1
           fi
-          echo "SSM_SESSION_ID=$SESSION_ID" >> $GITHUB_ENV
+          echo "SSM_SESSION_ID=$SESSION_ID" >> $GITHUB_OUTPUT
 
       - name: Set DB username in ENV
         run: echo "FLYWAY_USER=$(aws ssm get-parameter --output text --name "${{ inputs.environment }}-prsdb-database-username" --query "Parameter.Value")" >> $GITHUB_ENV
@@ -76,8 +77,8 @@ jobs:
         run: ./gradlew flywayClean --no-daemon
 
       - name: Terminate SSM port-forwarding session
-        if: env.SSM_SESSION_ID != ''
-        run: aws ssm terminate-session --session-id $SSM_SESSION_ID
+        if: (success() || failure()) && steps.start-session.outputs.SSM_SESSION_ID != ''
+        run: aws ssm terminate-session --session-id ${{ steps.start-session.outputs.SSM_SESSION_ID }}
 
   restart-ecs:
     name: Restart ECS
