@@ -10,3 +10,7 @@ notify:
 
 os-places:
   api-key: ${OS_PLACES_API_KEY}
+
+aws:
+  s3:
+    quarantineBucket: 'quarantine-bucket'
