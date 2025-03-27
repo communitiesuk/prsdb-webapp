@@ -5,7 +5,15 @@ import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOfResidenceFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DateOfBirthFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NonEnglandOrWalesAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import java.time.LocalDate
+import kotlin.reflect.full.memberProperties
 
 class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
     companion object {
@@ -15,7 +23,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             getFieldStringValue(
                 journeyData,
                 LandlordRegistrationStepId.Name.urlPathSegment,
-                "name",
+                NameFormModel::class.memberProperties.first().name,
             )
 
         fun getVerifiedName(journeyData: JourneyData) =
@@ -39,21 +47,21 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
                 getFieldIntegerValue(
                     journeyData,
                     LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
-                    "day",
+                    DateOfBirthFormModel::class.memberProperties.elementAt(1).name,
                 ) ?: return null
 
             val month =
                 getFieldIntegerValue(
                     journeyData,
                     LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
-                    "month",
+                    DateOfBirthFormModel::class.memberProperties.elementAt(2).name,
                 ) ?: return null
 
             val year =
                 getFieldIntegerValue(
                     journeyData,
                     LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
-                    "year",
+                    DateOfBirthFormModel::class.memberProperties.last().name,
                 ) ?: return null
 
             return LocalDate.of(year, month, day)
@@ -63,21 +71,21 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             getFieldStringValue(
                 journeyData,
                 LandlordRegistrationStepId.Email.urlPathSegment,
-                "emailAddress",
+                EmailFormModel::class.memberProperties.first().name,
             )
 
         fun getPhoneNumber(journeyData: JourneyData) =
             getFieldStringValue(
                 journeyData,
                 LandlordRegistrationStepId.PhoneNumber.urlPathSegment,
-                "phoneNumber",
+                PhoneNumberFormModel::class.memberProperties.first().name,
             )
 
         fun getLivesInEnglandOrWales(journeyData: JourneyData) =
             getFieldBooleanValue(
                 journeyData,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
-                "livesInEnglandOrWales",
+                CountryOfResidenceFormModel::class.memberProperties.last().name,
             )
 
         fun getNonEnglandOrWalesCountryOfResidence(journeyData: JourneyData) =
@@ -87,7 +95,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
                 getFieldStringValue(
                     journeyData,
                     LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
-                    "countryOfResidence",
+                    CountryOfResidenceFormModel::class.memberProperties.first().name,
                 )
             }
 
@@ -119,7 +127,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             return getFieldStringValue(
                 journeyData,
                 selectAddressPathSegment,
-                "address",
+                SelectAddressFormModel::class.memberProperties.first().name,
             )
         }
 
@@ -141,7 +149,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             getFieldStringValue(
                 journeyData,
                 LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment,
-                "nonEnglandOrWalesAddress",
+                NonEnglandOrWalesAddressFormModel::class.memberProperties.first().name,
             )
 
         fun isIdentityVerified(journeyData: JourneyData) =
