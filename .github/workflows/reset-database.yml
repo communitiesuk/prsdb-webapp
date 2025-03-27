@@ -1,0 +1,75 @@
+name: Reset Database
+on: workflow_dispatch
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: eu-west-2
+
+jobs:
+  clean-database:
+    name: Clean Database
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::794038239680:role/github-actions-terraform-admin
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Start SSM port-forwarding Session
+        run: |
+          BASTION_ID=$(aws ec2 describe-instances --output text --filters "Name=tag:Name,Values=integration-bastion-1" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[].InstanceId | [0]")
+
+          DB_URL=$(aws ssm get-parameter --output text --name "integration-prsdb-database-url" --query "Parameter.Value")
+
+          DB_ENDPOINT="${DB_URL%:*}"
+
+          aws ssm start-session --region $AWS_REGION --target $BASTION_ID --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters host=$DB_ENDPOINT,portNumber="5432",localPortNumber="5432" > ssm_output.txt 2>&1 &
+          sleep 10 # Wait for command to output the session Id
+          cat ssm_output.txt
+
+          SESSION_ID=$(grep -oP 'SessionId: \K[a-zA-Z0-9-]+' ssm_output.txt | head -1)
+          if [ -z "$SESSION_ID" ]; then
+              echo "Session Id not found in the output."
+              exit 1
+          fi
+          echo "SSM_SESSION_ID=$SESSION_ID" >> $GITHUB_ENV
+
+      - name: Set DB username in ENV
+        run: echo "FLYWAY_USER=$(aws ssm get-parameter --output text --name "integration-prsdb-database-username" --query "Parameter.Value")" >> $GITHUB_ENV
+
+      - name: Set DB password in ENV
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2.0.8
+        with:
+          secret-ids: |
+            FLYWAY_PASSWORD, tf-integration-prsdb-database-password
+
+      - name: Run gradle flywayClean
+        env:
+          FLYWAY_URL: jdbc:postgresql://localhost:5432/prsdb
+          FLYWAY_CLEAN_DISABLED: false
+        run: ./gradlew flywayClean --no-daemon
+
+      - name: Terminate SSM port-forwarding session
+        if: success() || failure()
+        run: aws ssm terminate-session --session-id $SSM_SESSION_ID
+
+  restart-ecs:
+    name: Restart ECS
+    needs: clean-database
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::794038239680:role/github-actions-terraform-admin
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Redeploy ECS service
+        run: aws ecs update-service --cluster integration-app --service integration-app --task-definition prsdb-webapp-integration --force-new-deployment
