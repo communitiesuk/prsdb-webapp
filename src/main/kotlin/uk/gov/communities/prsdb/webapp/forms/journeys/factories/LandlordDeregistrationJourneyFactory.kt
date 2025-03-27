@@ -15,12 +15,11 @@ class LandlordDeregistrationJourneyFactory(
     private val landlordDeregistrationService: LandlordDeregistrationService,
     private val securityContextService: SecurityContextService,
 ) {
-    fun create(landlordOneLoginId: String) =
+    fun create() =
         LandlordDeregistrationJourney(
             validator,
             journeyDataServiceFactory.create(DEREGISTER_LANDLORD_JOURNEY_URL),
             landlordDeregistrationService,
             securityContextService,
-            landlordOneLoginId,
         )
 }

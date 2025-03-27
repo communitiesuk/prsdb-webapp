@@ -55,7 +55,7 @@ class DeregisterLandlordControllerTests(
     @WithMockUser(roles = ["LANDLORD"])
     fun `checkForRegisteredProperties caches userHasRegisteredProperties then returns a redirect to the are you sure step`() {
         landlordDeregistrationJourney = mock()
-        whenever(landlordDeregistrationJourneyFactory.create(anyString())).thenReturn(landlordDeregistrationJourney)
+        whenever(landlordDeregistrationJourneyFactory.create()).thenReturn(landlordDeregistrationJourney)
         whenever(landlordService.getLandlordHasRegisteredProperties(anyString())).thenReturn(false)
         whenever(
             landlordDeregistrationJourney
