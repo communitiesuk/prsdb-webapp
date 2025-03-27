@@ -1,0 +1,11 @@
+name: Reset Database - Integration
+on: workflow_dispatch
+
+jobs:
+  reset-database:
+    name: Reset Database
+    uses: ./.github/workflows/reset-database.yml
+    with:
+      branch: main
+      environment: integration
+      iam-role: arn:aws:iam::794038239680:role/github-actions-terraform-admin
