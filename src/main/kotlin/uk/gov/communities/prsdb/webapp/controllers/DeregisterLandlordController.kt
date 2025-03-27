@@ -37,7 +37,7 @@ class DeregisterLandlordController(
             )
 
         return landlordDeregistrationJourneyFactory
-            .create()
+            .create(principal.name)
             .completeStep(
                 DeregisterLandlordStepId.CheckForUserProperties.urlPathSegment,
                 formData,
@@ -55,7 +55,7 @@ class DeregisterLandlordController(
         principal: Principal,
     ): ModelAndView =
         landlordDeregistrationJourneyFactory
-            .create()
+            .create(principal.name)
             .getModelAndViewForStep(
                 stepName,
                 subpage,
@@ -71,7 +71,7 @@ class DeregisterLandlordController(
         principal: Principal,
     ): ModelAndView =
         landlordDeregistrationJourneyFactory
-            .create()
+            .create(principal.name)
             .completeStep(
                 stepName,
                 formData,

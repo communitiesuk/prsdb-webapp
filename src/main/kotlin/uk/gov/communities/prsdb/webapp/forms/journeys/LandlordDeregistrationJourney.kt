@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
@@ -21,8 +20,9 @@ import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 class LandlordDeregistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
-    val landlordDeregistrationService: LandlordDeregistrationService,
-    val securityContextService: SecurityContextService,
+    private val landlordDeregistrationService: LandlordDeregistrationService,
+    private val securityContextService: SecurityContextService,
+    private val landlordOneLoginId: String,
 ) : Journey<DeregisterLandlordStepId>(
         journeyType = JourneyType.LANDLORD_DEREGISTRATION,
         initialStepId = initialStepId,
@@ -86,8 +86,7 @@ class LandlordDeregistrationJourney(
     }
 
     private fun deregisterLandlord(): String {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
-        landlordDeregistrationService.deregisterLandlord(baseUserId)
+        landlordDeregistrationService.deregisterLandlord(landlordOneLoginId)
 
         refreshUserRoles()
 
