@@ -9,6 +9,8 @@ import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHe
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfHouseholdsUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.UpdateJourneyDataExtensions.Companion.getOriginalJourneyDataIfPresent
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
+import kotlin.reflect.full.memberProperties
 
 open class JourneyDataExtensions {
     companion object {
@@ -46,7 +48,7 @@ open class JourneyDataExtensions {
             JourneyDataHelper.getFieldBooleanValue(
                 this,
                 urlPathSegment,
-                "wantsToProceed",
+                PropertyDeregistrationAreYouSureFormModel::class.memberProperties.first().name,
             )
     }
 }
