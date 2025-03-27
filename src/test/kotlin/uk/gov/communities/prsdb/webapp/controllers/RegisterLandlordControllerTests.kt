@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 class RegisterLandlordControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
+
     @MockBean
     lateinit var landlordRegistrationJourneyFactory: LandlordRegistrationJourneyFactory
 
@@ -26,6 +27,13 @@ class RegisterLandlordControllerTests(
     @Test
     fun `RegisterLandlordController returns 200 for unauthenticated user`() {
         mvc.get("/register-as-a-landlord").andExpect {
+            status { isOk() }
+        }
+    }
+
+    @Test
+    fun `RegisterLandlordController returns 200 for authenticated user with trailing slash`() {
+        mvc.get("/register-as-a-landlord/").andExpect {
             status { isOk() }
         }
     }
