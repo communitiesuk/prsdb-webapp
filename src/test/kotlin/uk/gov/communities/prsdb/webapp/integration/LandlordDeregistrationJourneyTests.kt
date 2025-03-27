@@ -11,9 +11,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 
 class LandlordDeregistrationJourneyTests : IntegrationTest() {
- /*   @MockBean
-    lateinit var landlordService: LandlordService*/
-
     @Nested
     @Sql("/data-mockuser-landlord-with-properties.sql")
     inner class LandlordWithProperties {
@@ -29,7 +26,7 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
         }
 
         @Test
-        fun `User with properties is returned to the landlord details page if they submit No`(page: Page) {
+        fun `User is returned to the landlord details page if they submit No`(page: Page) {
             val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
             areYouSurePage.submitDoesNotWantToProceed()
 
@@ -37,7 +34,7 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
         }
 
         @Test
-        fun `User with properties is returned to the landlord details page if they click the back link`(page: Page) {
+        fun `User is returned to the landlord details page if they click the back link`(page: Page) {
             val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
             areYouSurePage.backLink.clickAndWait()
             assertPageIs(page, LandlordDetailsPage::class)
@@ -72,21 +69,6 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
             // Check they can no longer access the landlord dashboard
             val landlordDashboard = navigator.goToLandlordDashboard()
             assertTrue(landlordDashboard.page.content().contains("You do not have permission to access this page"))
-        }
-
-        @Test
-        fun `User with no properties is returned to the landlord details page if they submit No`(page: Page) {
-            val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
-            areYouSurePage.submitDoesNotWantToProceed()
-
-            assertPageIs(page, LandlordDetailsPage::class)
-        }
-
-        @Test
-        fun `User with no properties is returned to the landlord details page if they click the back link`(page: Page) {
-            val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
-            areYouSurePage.backLink.clickAndWait()
-            assertPageIs(page, LandlordDetailsPage::class)
         }
 
         @Test
