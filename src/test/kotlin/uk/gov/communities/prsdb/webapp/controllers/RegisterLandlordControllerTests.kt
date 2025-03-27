@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 class RegisterLandlordControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
-
     @MockBean
     lateinit var landlordRegistrationJourneyFactory: LandlordRegistrationJourneyFactory
 

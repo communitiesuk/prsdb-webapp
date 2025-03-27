@@ -10,19 +10,20 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
+import org.springframework.web.filter.UrlHandlerFilter
 import uk.gov.communities.prsdb.webapp.config.CustomErrorConfig
 import uk.gov.communities.prsdb.webapp.config.CustomSecurityConfig
-import uk.gov.communities.prsdb.webapp.config.filters.TrailingSlashFilter
+import uk.gov.communities.prsdb.webapp.config.filters.TrailingSlashFilterConfiguration
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
-@Import(CustomSecurityConfig::class, CustomErrorConfig::class, TrailingSlashFilter::class)
+@Import(CustomSecurityConfig::class, CustomErrorConfig::class, TrailingSlashFilterConfiguration::class)
 abstract class ControllerTest(
     private val context: WebApplicationContext,
 ) {
     protected lateinit var mvc: MockMvc
 
     @Autowired
-    private lateinit var trailingSlashFilter: TrailingSlashFilter
+    private lateinit var trailingSlashFilter: UrlHandlerFilter
 
     @BeforeEach
     fun setup() {
