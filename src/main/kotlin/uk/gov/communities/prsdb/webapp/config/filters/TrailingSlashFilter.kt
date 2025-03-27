@@ -18,7 +18,7 @@ class TrailingSlashFilter : OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
-        filterChain: FilterChain
+        filterChain: FilterChain,
     ) {
         // Wraps any request with a url that ends in a '/' in a new request without that trailing slash
         val filter: UrlHandlerFilter = UrlHandlerFilter.trailingSlashHandler("/**").wrapRequest().build()
