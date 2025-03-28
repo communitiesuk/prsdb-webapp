@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getIsOccupiedUpdateIfPresent
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getLatestNumberOfHouseholds
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfHouseholdsUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfPeopleUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getOriginalIsOccupied
@@ -165,5 +166,38 @@ class PropertyDetailsUpdateJourneyDataExtensionsTests {
         val numberOfPeopleUpdate = testJourneyData.getNumberOfPeopleUpdateIfPresent()
 
         assertNull(numberOfPeopleUpdate)
+    }
+
+    @Test
+    fun `getLatestNumberOfHouseholds returns number of households from originalJourneyData`() {
+        val originalDataKey = "original-data-key"
+        val expectedNumberOfHouseholds = 2
+
+        val testOriginalJourneyData = journeyDataBuilder.withNumberOfHouseholdsUpdate(expectedNumberOfHouseholds).build()
+
+        val testJourneyData = journeyDataBuilder.withOriginalData(originalDataKey, testOriginalJourneyData).build()
+
+        val latestNumberOfHouseholds = testJourneyData.getLatestNumberOfHouseholds(originalDataKey)
+
+        assertEquals(expectedNumberOfHouseholds, latestNumberOfHouseholds)
+    }
+
+    @Test
+    fun `getLatestNumberOfHouseholds returns number of households from JourneyData`() {
+        val originalDataKey = "original-data-key"
+        val expectedNumberOfHouseholds = 3
+
+        val testOriginalJourneyData = journeyDataBuilder.withNumberOfHouseholdsUpdate(2).build()
+
+        val testJourneyData =
+            journeyDataBuilder
+                .withNumberOfHouseholdsUpdate(
+                    expectedNumberOfHouseholds,
+                ).withOriginalData(originalDataKey, testOriginalJourneyData)
+                .build()
+
+        val latestNumberOfHouseholds = testJourneyData.getLatestNumberOfHouseholds(originalDataKey)
+
+        assertEquals(expectedNumberOfHouseholds, latestNumberOfHouseholds)
     }
 }

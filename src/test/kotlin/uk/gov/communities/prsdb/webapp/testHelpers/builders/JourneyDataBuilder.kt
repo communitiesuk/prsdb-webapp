@@ -355,4 +355,12 @@ class JourneyDataBuilder(
             mutableMapOf("numberOfPeople" to numberOfPeople)
         return this
     }
+
+    fun withOriginalData(
+        originalDataKey: String,
+        originalData: JourneyData,
+    ): JourneyDataBuilder {
+        journeyData[originalDataKey] = originalData
+        return this
+    }
 }

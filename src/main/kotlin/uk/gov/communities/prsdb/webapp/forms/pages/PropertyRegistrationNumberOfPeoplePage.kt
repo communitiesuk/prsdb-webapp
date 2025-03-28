@@ -5,10 +5,7 @@ import org.springframework.validation.Validator
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.UpdateJourney
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.getLatestNumberOfHouseholds
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import kotlin.reflect.KClass
 
 class PropertyRegistrationNumberOfPeoplePage(
@@ -16,7 +13,7 @@ class PropertyRegistrationNumberOfPeoplePage(
     templateName: String,
     content: Map<String, Any>,
     shouldDisplaySectionHeader: Boolean = false,
-    private val journeyDataService: JourneyDataService,
+    private val latestNumberOfHouseholds: Int,
 ) : AbstractPage(formModel, templateName, content, shouldDisplaySectionHeader) {
     override fun enrichModel(
         modelAndView: ModelAndView,
@@ -29,13 +26,7 @@ class PropertyRegistrationNumberOfPeoplePage(
     ): BindingResult {
         val newFormData = formData?.toMutableMap()
         if (newFormData != null) {
-            val journeyData = journeyDataService.getJourneyDataFromSession()
-            val numberOfHouseholds =
-                journeyData
-                    .getLatestNumberOfHouseholds(
-                        UpdateJourney.getOriginalJourneyDataKey(journeyDataService),
-                    ).toString()
-            newFormData["numberOfHouseholds"] = numberOfHouseholds
+            newFormData["numberOfHouseholds"] = latestNumberOfHouseholds.toString()
         }
         return super.bindDataToFormModel(validator, newFormData)
     }
