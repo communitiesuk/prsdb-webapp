@@ -58,14 +58,20 @@ class LandlordRegistrationJourney(
     ) {
     override val sections =
         listOf(
-            JourneySection(privacyNoticeTasks(), "registerAsALandlord.section.privacyNotice.heading"),
+            JourneySection(
+                privacyNoticeTasks(),
+                "registerAsALandlord.section.privacyNotice.heading",
+                "privacy-notice",
+            ),
             JourneySection(
                 registerDetailsTasks(),
                 "registerAsALandlord.section.yourDetails.heading",
+                "your-details",
             ),
             JourneySection(
                 checkAndSubmitDetailsTasks(),
                 "registerAsALandlord.section.checkAndSubmit.heading",
+                "check-and-submit",
             ),
         )
 

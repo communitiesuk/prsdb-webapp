@@ -48,8 +48,7 @@ class TaskListTests {
             getTaskListViewModelFactory(
                 "title",
                 "heading",
-                "subtitle",
-                "TODO()",
+                listOf("subtitle"),
             )
     }
 
@@ -97,10 +96,7 @@ class TaskListTests {
                     TestStepId.MultiPathTaskStart,
                     mock(),
                     isSatisfied = { _, _ -> true },
-                    nextAction = {
-                            _,
-                            _,
-                        ->
+                    nextAction = { _, _ ->
                         Pair(
                             if (useMainline) TestStepId.MultiPathTaskMainline else TestStepId.MultiPathTaskAlternateRoutePartOne,
                             null,
@@ -160,6 +156,7 @@ class TaskListTests {
                             ),
                         ),
                         "section title key",
+                        "section-id",
                     ),
                 ),
             )
@@ -246,6 +243,7 @@ class TaskListTests {
                         ),
                     ),
                     "Section key",
+                    "section-id",
                 ),
             ),
         )
@@ -353,10 +351,12 @@ class TaskListTests {
                             ),
                         ),
                         "Section key",
+                        "section-id",
                     ),
                     JourneySection(
                         listOf(),
                         "Second empty section",
+                        "second-section-id",
                     ),
                 ),
             )
