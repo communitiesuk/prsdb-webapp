@@ -44,22 +44,24 @@ class PropertyDetailsUpdateJourneyDataExtensions {
                 )
             }
 
-        fun JourneyData.getLicensingTypeIfPresent(): LicensingType? =
+        fun JourneyData.getLicensingTypeUpdateIfPresent(): LicensingType? =
             getFieldEnumValue<LicensingType>(
                 this,
                 UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment,
                 "licensingType",
             )
 
-        fun JourneyData.getLicenceNumberIfPresent(originalJourneyKey: String): String? {
-            val licensingType = getLicensingTypeIfPresent() ?: this.getOriginalLicensingType(originalJourneyKey)
-
-            val licenseNumberPathSegment = getUpdateStepUrlPathSegmentForLicensingType(licensingType)
-
-            return licenseNumberPathSegment?.let { getFieldStringValue(this, it.urlPathSegment, "licenceNumber") }
+        fun JourneyData.getLicenceNumberUpdateIfPresent(originalJourneyKey: String): String? {
+            val licensingType = this.getLicensingTypeUpdateIfPresent() ?: this.getOriginalLicensingType(originalJourneyKey) ?: return null
+            if (licensingType == LicensingType.NO_LICENSING) {
+                return null
+            } else {
+                val licenseNumberUpdateStepId = getLicenceNumberUpdateStepId(licensingType)
+                return getFieldStringValue(this, licenseNumberUpdateStepId!!.urlPathSegment, "licenceNumber")
+            }
         }
 
-        fun getUpdateStepUrlPathSegmentForLicensingType(licensingType: LicensingType?): UpdatePropertyDetailsStepId? =
+        fun getLicenceNumberUpdateStepId(licensingType: LicensingType?): UpdatePropertyDetailsStepId? =
             when (licensingType) {
                 LicensingType.SELECTIVE_LICENCE -> UpdatePropertyDetailsStepId.UpdateSelectiveLicence
                 LicensingType.HMO_MANDATORY_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence
@@ -75,6 +77,6 @@ class PropertyDetailsUpdateJourneyDataExtensions {
             )
 
         private fun JourneyData.getOriginalLicensingType(originalJourneyKey: String) =
-            JourneyDataHelper.getPageData(this, originalJourneyKey)?.getLicensingTypeIfPresent()
+            JourneyDataHelper.getPageData(this, originalJourneyKey)?.getLicensingTypeUpdateIfPresent()
     }
 }

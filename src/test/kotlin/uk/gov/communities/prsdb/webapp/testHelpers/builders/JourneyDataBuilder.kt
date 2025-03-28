@@ -355,6 +355,34 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withLicensingTypeUpdate(licensingType: LicensingType): JourneyDataBuilder {
+        journeyData[UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment] = mutableMapOf("licensingType" to licensingType.name)
+        return this
+    }
+
+    fun withLicenceNumberUpdate(
+        licenceNumber: String,
+        licensingType: LicensingType,
+    ): JourneyDataBuilder {
+        val licenseNumberUpdateStepIdUrlPathSegment =
+            when (licensingType) {
+                LicensingType.SELECTIVE_LICENCE -> UpdatePropertyDetailsStepId.UpdateSelectiveLicence.urlPathSegment
+                LicensingType.HMO_MANDATORY_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence.urlPathSegment
+                LicensingType.HMO_ADDITIONAL_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoAdditionalLicence.urlPathSegment
+                LicensingType.NO_LICENSING -> ""
+            }
+        journeyData[licenseNumberUpdateStepIdUrlPathSegment] = mapOf("licenceNumber" to licenceNumber)
+        return this
+    }
+
+    fun withLicenceUpdate(
+        licensingType: LicensingType,
+        licenceNumber: String,
+    ): JourneyDataBuilder =
+        this
+            .withLicensingTypeUpdate(licensingType)
+            .withLicenceNumberUpdate(licenceNumber, licensingType)
+
     fun withOriginalData(
         originalDataKey: String,
         originalData: JourneyData,
