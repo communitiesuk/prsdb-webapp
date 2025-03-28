@@ -8,7 +8,7 @@ import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationC
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.jwt.JwtDecoderFactory
-import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OSPlacesConfig
@@ -51,5 +51,5 @@ class PrsdbWebappApplicationTests {
     lateinit var identityService: OneLoginIdentityService
 
     @MockBean
-    lateinit var s3Client: S3Client
+    lateinit var s3: S3TransferManager
 }
