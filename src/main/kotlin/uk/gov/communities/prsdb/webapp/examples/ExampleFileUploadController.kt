@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.examples.MaximumLengthInputStream.Companion.withMaxLength
 import java.security.Principal
 
 @Controller
@@ -53,7 +54,9 @@ class ExampleFileUploadController(
         // this will need to be a useful name for LA users to download (and we should not trust the uploaded file name)
         val key = "${principal.name}/$freeSegment/${file.name}"
 
-        val uploadOutcome = fileUploader.uploadFile(key, file.inputStream)
+        val exampleMaxFileSizeInBytes = 5L * 1024L * 1024L
+
+        val uploadOutcome = fileUploader.uploadFile(key, file.inputStream.withMaxLength(exampleMaxFileSizeInBytes))
         model.addAttribute(
             "fileUploadResponse",
             mapOf(
