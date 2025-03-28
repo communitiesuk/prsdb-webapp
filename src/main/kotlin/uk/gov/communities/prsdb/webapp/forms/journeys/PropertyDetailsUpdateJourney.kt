@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Ownership
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import kotlin.reflect.full.memberProperties
 
 class PropertyDetailsUpdateJourney(
     validator: Validator,
@@ -46,14 +47,16 @@ class PropertyDetailsUpdateJourney(
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
 
         return mapOf(
-            UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment to mapOf("ownershipType" to propertyOwnership.ownershipType),
-            UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment to mapOf("occupied" to propertyOwnership.isOccupied),
+            UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment to
+                mapOf(OwnershipTypeFormModel::class.memberProperties.first().name to propertyOwnership.ownershipType),
+            UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment to
+                mapOf(OccupancyFormModel::class.memberProperties.first().name to propertyOwnership.isOccupied),
             UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment to
-                mapOf("numberOfHouseholds" to propertyOwnership.currentNumHouseholds),
+                mapOf(NumberOfHouseholdsFormModel::class.memberProperties.first().name to propertyOwnership.currentNumHouseholds),
             UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment to
                 mapOf(
-                    "numberOfPeople" to propertyOwnership.currentNumTenants,
-                    "numberOfHouseholds" to propertyOwnership.currentNumHouseholds,
+                    NumberOfPeopleFormModel::class.memberProperties.last().name to propertyOwnership.currentNumTenants,
+                    NumberOfPeopleFormModel::class.memberProperties.first().name to propertyOwnership.currentNumHouseholds,
                 ),
         )
     }

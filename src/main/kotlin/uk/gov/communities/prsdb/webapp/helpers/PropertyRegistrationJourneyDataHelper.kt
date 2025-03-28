@@ -7,6 +7,17 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoAdditionalLicenceFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoMandatoryLicenceFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectiveLicenceFormModel
+import kotlin.reflect.full.memberProperties
 
 class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
     companion object {
@@ -29,68 +40,79 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
             getFieldEnumValue<PropertyType>(
                 journeyData,
                 RegisterPropertyStepId.PropertyType.urlPathSegment,
-                "propertyType",
+                PropertyTypeFormModel::class.memberProperties.last().name,
             )
 
         fun getCustomPropertyType(journeyData: JourneyData): String? =
             getFieldStringValue(
                 journeyData,
                 RegisterPropertyStepId.PropertyType.urlPathSegment,
-                "customPropertyType",
+                PropertyTypeFormModel::class.memberProperties.first().name,
             )
 
         fun getOwnershipType(journeyData: JourneyData): OwnershipType? =
             getFieldEnumValue<OwnershipType>(
                 journeyData,
                 RegisterPropertyStepId.OwnershipType.urlPathSegment,
-                "ownershipType",
+                OwnershipTypeFormModel::class.memberProperties.first().name,
             )
 
         fun getIsOccupied(journeyData: JourneyData): Boolean? =
             getFieldBooleanValue(
                 journeyData,
                 RegisterPropertyStepId.Occupancy.urlPathSegment,
-                "occupied",
+                OccupancyFormModel::class.memberProperties.first().name,
             )
 
         fun getNumberOfHouseholds(journeyData: JourneyData): Int =
             getFieldIntegerValue(
                 journeyData,
                 RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment,
-                "numberOfHouseholds",
+                NumberOfHouseholdsFormModel::class.memberProperties.first().name,
             ) ?: 0
 
         fun getNumberOfTenants(journeyData: JourneyData): Int =
             getFieldIntegerValue(
                 journeyData,
                 RegisterPropertyStepId.NumberOfPeople.urlPathSegment,
-                "numberOfPeople",
+                NumberOfPeopleFormModel::class.memberProperties.last().name,
             ) ?: 0
 
         fun getLicensingType(journeyData: JourneyData): LicensingType? =
             getFieldEnumValue<LicensingType>(
                 journeyData,
                 RegisterPropertyStepId.LicensingType.urlPathSegment,
-                "licensingType",
+                LicensingTypeFormModel::class.memberProperties.first().name,
             )
 
-        fun getLicenseNumber(journeyData: JourneyData): String? {
-            val licenseNumberPathSegment =
-                when (getLicensingType(journeyData)!!) {
-                    LicensingType.SELECTIVE_LICENCE -> RegisterPropertyStepId.SelectiveLicence.urlPathSegment
-                    LicensingType.HMO_MANDATORY_LICENCE -> RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment
-                    LicensingType.HMO_ADDITIONAL_LICENCE -> RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment
-                    LicensingType.NO_LICENSING -> return ""
-                }
-
-            return getFieldStringValue(journeyData, licenseNumberPathSegment, "licenceNumber")
-        }
+        fun getLicenseNumber(journeyData: JourneyData): String? =
+            when (getLicensingType(journeyData)!!) {
+                LicensingType.SELECTIVE_LICENCE ->
+                    getFieldStringValue(
+                        journeyData,
+                        RegisterPropertyStepId.SelectiveLicence.urlPathSegment,
+                        SelectiveLicenceFormModel::class.memberProperties.first().name,
+                    )
+                LicensingType.HMO_MANDATORY_LICENCE ->
+                    getFieldStringValue(
+                        journeyData,
+                        RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment,
+                        HmoMandatoryLicenceFormModel::class.memberProperties.first().name,
+                    )
+                LicensingType.HMO_ADDITIONAL_LICENCE ->
+                    getFieldStringValue(
+                        journeyData,
+                        RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment,
+                        HmoAdditionalLicenceFormModel::class.memberProperties.first().name,
+                    )
+                LicensingType.NO_LICENSING -> ""
+            }
 
         private fun getSelectedAddress(journeyData: JourneyData): String? =
             getFieldStringValue(
                 journeyData,
                 RegisterPropertyStepId.SelectAddress.urlPathSegment,
-                "address",
+                SelectAddressFormModel::class.memberProperties.first().name,
             )
 
         fun isManualAddressChosen(journeyData: JourneyData) = getSelectedAddress(journeyData) == MANUAL_ADDRESS_CHOSEN
