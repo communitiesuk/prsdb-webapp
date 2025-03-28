@@ -15,7 +15,7 @@ class LocalFileUploader : FileUploader {
     override fun uploadFile(
         objectKey: String,
         inputStream: InputStream,
-    ): String {
+    ): Boolean {
         val cleanObjectKey =
             objectKey
                 .map { char -> if (char in forbiddenFilenameCharacters) "" else char }
@@ -28,6 +28,6 @@ class LocalFileUploader : FileUploader {
                 inputStream.copyTo(outputStream)
             }
         }
-        return destinationFile.absolutePath
+        return true
     }
 }

@@ -6,5 +6,5 @@ interface FileUploader {
     fun uploadFile(
         objectKey: String,
         inputStream: InputStream,
-    ): String
+    ): Boolean
 }

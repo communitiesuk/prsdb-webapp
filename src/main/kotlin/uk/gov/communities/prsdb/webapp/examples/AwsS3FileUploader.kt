@@ -15,7 +15,7 @@ class AwsS3FileUploader(
     override fun uploadFile(
         objectKey: String,
         inputStream: InputStream,
-    ): String {
+    ): Boolean {
         inputStream.use { input ->
             val requestBody = AsyncRequestBody.forBlockingInputStream(null)
             val upload =
@@ -30,7 +30,7 @@ class AwsS3FileUploader(
 
             val response = upload.completionFuture().join().response()
 
-            return response.toString()
+            return response.sdkHttpResponse().isSuccessful
         }
     }
 }

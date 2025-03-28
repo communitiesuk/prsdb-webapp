@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.examples
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.apache.commons.fileupload2.core.FileItemInput
 import org.apache.commons.fileupload2.jakarta.JakartaServletFileUpload
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
@@ -45,26 +46,18 @@ class ExampleFileUploadController(
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid upload token")
         }
 
-        if (!JakartaServletFileUpload.isMultipartContent(request)) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a multipart file upload")
-        }
+        val file =
+            getFirstFileItem(request) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a valid multipart file upload request")
 
-        val upload = JakartaServletFileUpload()
+        // Because this is an example endpoint, we can just keep the file name uploaded - for the compliance journey
+        // this will need to be a useful name for LA users to download (and we should not trust the uploaded file name)
+        val key = "${principal.name}/$freeSegment/${file.name}"
 
-        val itemIterator = upload.getItemIterator(request)
-
-        if (!itemIterator.hasNext()) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No files in upload")
-        }
-        val singleItem = itemIterator.next()
-
-        val key = "${principal.name}/$freeSegment/${singleItem.name}"
-
-        val uploadOutcome = fileUploader.uploadFile(key, singleItem.inputStream)
+        val uploadOutcome = fileUploader.uploadFile(key, file.inputStream)
         model.addAttribute(
             "fileUploadResponse",
             mapOf(
-                "uploadedName" to singleItem.name,
+                "uploadedName" to file.name,
                 "uploadReturnValue" to uploadOutcome,
                 "size" to request.contentLength,
                 "contentType" to request.contentType,
@@ -87,6 +80,32 @@ class ExampleFileUploadController(
         tokenCookie.secure = true
 
         return tokenCookie
+    }
+
+    private fun getFirstFileItem(request: HttpServletRequest): FileItemInput? {
+        if (!JakartaServletFileUpload.isMultipartContent(request)) {
+            return null
+        }
+        val upload = JakartaServletFileUpload()
+        val singleFileIterator = upload.getItemIterator(request)
+
+        if (!singleFileIterator.hasNext()) {
+            return null
+        }
+
+        // Currently we don't gracefully handle a request with multiple items - we take the first and ignore the rest
+        // If there's enough data in the subsequent requests this will cause the requests to not be read off the socket
+        // and the browser will interpret that as a lost connection. This is only ok because there is no way for the
+        // client to legitimately send multiple files to this endpoint - so we're happy with undefined behaviour as long
+        // as it is safe - which this is for us.
+        // To change this we just need to call next on the iterator for each item - which will read and discard the data.
+        val firstItem = singleFileIterator.next()
+
+        if (firstItem.isFormField) {
+            return null
+        }
+
+        return firstItem
     }
 
     companion object {
