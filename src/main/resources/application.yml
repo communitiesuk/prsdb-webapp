@@ -42,6 +42,10 @@ spring:
   thymeleaf:
     render-hidden-markers-before-checkboxes: true
 
+  servlet:
+    multipart:
+      enabled: false
+
 one-login:
   jwt:
     public.key: ${ONE_LOGIN_PUBLIC_KEY}

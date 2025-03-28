@@ -38,10 +38,6 @@ spring:
       ssl:
         enabled: false
 
-  servlet:
-    multipart:
-      enabled: false
-
 one-login:
   jwt:
     # We provide a default for the keys if the env vars are missing: this allows us to keep the keys in uncommitted
