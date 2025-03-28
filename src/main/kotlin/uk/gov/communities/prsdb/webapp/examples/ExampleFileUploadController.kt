@@ -93,7 +93,7 @@ class ExampleFileUploadController(
             return null
         }
 
-        // Currently we don't gracefully handle a request with multiple items - we take the first and ignore the rest
+        // Currently we don't gracefully handle a request with multiple items - we take the first file and ignore the rest
         // If there's enough data in the subsequent requests this will cause the requests to not be read off the socket
         // and the browser will interpret that as a lost connection. This is only ok because there is no way for the
         // client to legitimately send multiple files to this endpoint - so we're happy with undefined behaviour as long
