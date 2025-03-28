@@ -580,6 +580,7 @@ class PropertyOwnershipServiceTests {
         assertEquals(originalNumberOfHouseholds, propertyOwnership.currentNumHouseholds)
         assertEquals(originalNumberOfPeople, propertyOwnership.currentNumTenants)
         assertEquals(originalLicence, propertyOwnership.license)
+        verify(mockLicenseService, never()).updateLicence(any(), any(), any())
     }
 
     @Test
@@ -608,7 +609,7 @@ class PropertyOwnershipServiceTests {
             propertyOwnership,
         )
         whenever(
-            mockLicenseService.updateLicence(propertyOwnership.license!!, updateModel.licensingType, updateModel.licenceNumber),
+            mockLicenseService.updateLicence(propertyOwnership.license, updateModel.licensingType, updateModel.licenceNumber),
         ).thenReturn(updateLicence)
 
         // Act
@@ -642,6 +643,9 @@ class PropertyOwnershipServiceTests {
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
             propertyOwnership,
         )
+        whenever(
+            mockLicenseService.updateLicence(propertyOwnership.license, updateModel.licensingType, updateModel.licenceNumber),
+        ).thenReturn(null)
 
         // Act
         propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel)

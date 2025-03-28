@@ -20,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel.Companion.isLicenceUpdatable
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyViewModel
 
@@ -168,7 +167,7 @@ class PropertyOwnershipService(
 
         if (update.isLicenceUpdatable()) {
             val updatedLicence =
-                getUpdatedLicenceOrNull(
+                licenseService.updateLicence(
                     propertyOwnership.license,
                     update.licensingType,
                     update.licenceNumber,
@@ -176,20 +175,6 @@ class PropertyOwnershipService(
             propertyOwnership.license = updatedLicence
         }
     }
-
-    private fun getUpdatedLicenceOrNull(
-        license: License?,
-        updateLicenceType: LicensingType?,
-        updateLicenceNumber: String?,
-    ): License? =
-        if (updateLicenceType == LicensingType.NO_LICENSING) {
-            license?.let { licenseService.deleteLicence(license) }
-            null
-        } else if (license == null) {
-            licenseService.createLicense(updateLicenceType!!, updateLicenceNumber!!)
-        } else {
-            licenseService.updateLicence(license, updateLicenceType, updateLicenceNumber)
-        }
 
     private fun retrieveAllRegisteredPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
         propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(

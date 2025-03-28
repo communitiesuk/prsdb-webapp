@@ -10,7 +10,5 @@ data class PropertyOwnershipUpdateModel(
     val licensingType: LicensingType?,
     val licenceNumber: String?,
 ) {
-    companion object {
-        fun PropertyOwnershipUpdateModel.isLicenceUpdatable(): Boolean = this.licensingType != null || this.licenceNumber != null
-    }
+    fun isLicenceUpdatable(): Boolean = this.licensingType != null || this.licenceNumber != null
 }
