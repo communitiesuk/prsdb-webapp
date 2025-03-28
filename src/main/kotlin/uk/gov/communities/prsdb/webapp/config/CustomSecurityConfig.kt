@@ -55,7 +55,7 @@ class CustomSecurityConfig(
             .logout { logout ->
                 logout.logoutSuccessHandler(oidcLogoutSuccessHandler())
             }.csrf { requests ->
-                requests.disable()
+                requests.ignoringRequestMatchers("/local/**")
             }
 
         return http.build()

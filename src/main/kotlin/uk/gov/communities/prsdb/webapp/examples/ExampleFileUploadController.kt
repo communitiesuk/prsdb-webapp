@@ -99,7 +99,11 @@ class ExampleFileUploadController(
         // client to legitimately send multiple files to this endpoint - so we're happy with undefined behaviour as long
         // as it is safe - which this is for us.
         // To change this we just need to call next on the iterator for each item - which will read and discard the data.
-        val firstItem = singleFileIterator.next()
+        var firstItem = singleFileIterator.next()
+
+        while (firstItem.isFormField && singleFileIterator.hasNext()) {
+            firstItem = singleFileIterator.next()
+        }
 
         if (firstItem.isFormField) {
             return null
