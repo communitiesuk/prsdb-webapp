@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -21,6 +22,7 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -51,6 +53,9 @@ class PropertyOwnershipServiceTests {
 
     @Mock
     private lateinit var mockLocalAuthorityDataService: LocalAuthorityDataService
+
+    @Mock
+    private lateinit var mockLicenseService: LicenseService
 
     @InjectMocks
     private lateinit var propertyOwnershipService: PropertyOwnershipService
@@ -554,12 +559,14 @@ class PropertyOwnershipServiceTests {
                 ownershipType = OwnershipType.FREEHOLD,
                 currentNumHouseholds = 2,
                 currentNumTenants = 4,
+                license = License(LicensingType.SELECTIVE_LICENCE, "licenceNumber"),
             )
         val originalOwnershipType = propertyOwnership.ownershipType
         val originalNumberOfHouseholds = propertyOwnership.currentNumHouseholds
         val originalNumberOfPeople = propertyOwnership.currentNumTenants
+        val originalLicence = propertyOwnership.license!!
         val updateModel =
-            PropertyOwnershipUpdateModel(ownershipType = null, numberOfHouseholds = null, numberOfPeople = null)
+            PropertyOwnershipUpdateModel(null, null, null, null, null)
 
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
             propertyOwnership,
@@ -572,6 +579,8 @@ class PropertyOwnershipServiceTests {
         assertEquals(originalOwnershipType, propertyOwnership.ownershipType)
         assertEquals(originalNumberOfHouseholds, propertyOwnership.currentNumHouseholds)
         assertEquals(originalNumberOfPeople, propertyOwnership.currentNumTenants)
+        assertEquals(originalLicence, propertyOwnership.license)
+        verify(mockLicenseService, never()).updateLicence(any(), any(), any())
     }
 
     @Test
@@ -583,17 +592,25 @@ class PropertyOwnershipServiceTests {
                 ownershipType = OwnershipType.FREEHOLD,
                 currentNumHouseholds = 2,
                 currentNumTenants = 6,
+                license = License(LicensingType.SELECTIVE_LICENCE, "licenceNumberSelective"),
             )
+
+        val updateLicence = License(LicensingType.HMO_MANDATORY_LICENCE, "licenceNumberMandatory")
         val updateModel =
             PropertyOwnershipUpdateModel(
                 ownershipType = OwnershipType.LEASEHOLD,
                 numberOfHouseholds = 1,
                 numberOfPeople = 2,
+                licensingType = updateLicence.licenseType,
+                licenceNumber = updateLicence.licenseNumber,
             )
 
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
             propertyOwnership,
         )
+        whenever(
+            mockLicenseService.updateLicence(propertyOwnership.license, updateModel.licensingType, updateModel.licenceNumber),
+        ).thenReturn(updateLicence)
 
         // Act
         propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel)
@@ -602,6 +619,39 @@ class PropertyOwnershipServiceTests {
         assertEquals(updateModel.ownershipType, propertyOwnership.ownershipType)
         assertEquals(updateModel.numberOfHouseholds, propertyOwnership.currentNumHouseholds)
         assertEquals(updateModel.numberOfPeople, propertyOwnership.currentNumTenants)
+        assertEquals(updateModel.licensingType, propertyOwnership.license?.licenseType)
+        assertEquals(updateModel.licenceNumber, propertyOwnership.license?.licenseNumber)
+    }
+
+    @Test
+    fun `updatePropertyOwnership removes the licence when the licence service returns no licence`() {
+        // Arrange
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                license = License(LicensingType.SELECTIVE_LICENCE, "licenceNumberSelective"),
+            )
+
+        val updateModel =
+            PropertyOwnershipUpdateModel(
+                ownershipType = OwnershipType.LEASEHOLD,
+                numberOfHouseholds = 1,
+                numberOfPeople = 2,
+                licensingType = LicensingType.NO_LICENSING,
+                licenceNumber = null,
+            )
+
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+        whenever(
+            mockLicenseService.updateLicence(propertyOwnership.license, updateModel.licensingType, updateModel.licenceNumber),
+        ).thenReturn(null)
+
+        // Act
+        propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel)
+
+        // Assert
+        assertNull(propertyOwnership.license)
     }
 
     @Test

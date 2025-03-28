@@ -199,20 +199,19 @@ class JourneyDataBuilder(
     ): JourneyDataBuilder {
         journeyData["licensing-type"] = mapOf("licensingType" to licensingType.name)
         when (licensingType) {
-            LicensingType.SELECTIVE_LICENCE ->
-                journeyData["selective-licence"] =
-                    mapOf("licenceNumber" to licenseNumber)
-
-            LicensingType.HMO_MANDATORY_LICENCE ->
-                journeyData["hmo-mandatory-licence"] =
-                    mapOf("licenceNumber" to licenseNumber)
-
-            LicensingType.HMO_ADDITIONAL_LICENCE ->
-                journeyData["hmo-additional-licence"] =
-                    mapOf("licenceNumber" to licenseNumber)
-
+            LicensingType.SELECTIVE_LICENCE -> withLicenceNumber("selective-licence", licenseNumber)
+            LicensingType.HMO_MANDATORY_LICENCE -> withLicenceNumber("hmo-mandatory-licence", licenseNumber)
+            LicensingType.HMO_ADDITIONAL_LICENCE -> withLicenceNumber("hmo-additional-licence", licenseNumber)
             LicensingType.NO_LICENSING -> {}
         }
+        return this
+    }
+
+    fun withLicenceNumber(
+        urlPathSegment: String,
+        licenceNumber: String?,
+    ): JourneyDataBuilder {
+        journeyData[urlPathSegment] = mapOf("licenceNumber" to licenceNumber)
         return this
     }
 
@@ -353,6 +352,42 @@ class JourneyDataBuilder(
     fun withNumberOfPeopleUpdate(numberOfPeople: Int): JourneyDataBuilder {
         journeyData[UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment] =
             mutableMapOf("numberOfPeople" to numberOfPeople)
+        return this
+    }
+
+    fun withLicensingTypeUpdate(licensingType: LicensingType): JourneyDataBuilder {
+        journeyData[UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment] = mutableMapOf("licensingType" to licensingType.name)
+        return this
+    }
+
+    fun withLicenceNumberUpdate(
+        licenceNumber: String,
+        licensingType: LicensingType,
+    ): JourneyDataBuilder {
+        val licenseNumberUpdateStepIdUrlPathSegment =
+            when (licensingType) {
+                LicensingType.SELECTIVE_LICENCE -> UpdatePropertyDetailsStepId.UpdateSelectiveLicence.urlPathSegment
+                LicensingType.HMO_MANDATORY_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence.urlPathSegment
+                LicensingType.HMO_ADDITIONAL_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoAdditionalLicence.urlPathSegment
+                LicensingType.NO_LICENSING -> ""
+            }
+        journeyData[licenseNumberUpdateStepIdUrlPathSegment] = mapOf("licenceNumber" to licenceNumber)
+        return this
+    }
+
+    fun withLicenceUpdate(
+        licensingType: LicensingType,
+        licenceNumber: String,
+    ): JourneyDataBuilder =
+        this
+            .withLicensingTypeUpdate(licensingType)
+            .withLicenceNumberUpdate(licenceNumber, licensingType)
+
+    fun withOriginalData(
+        originalDataKey: String,
+        originalData: JourneyData,
+    ): JourneyDataBuilder {
+        journeyData[originalDataKey] = originalData
         return this
     }
 }

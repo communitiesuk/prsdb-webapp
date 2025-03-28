@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -36,5 +38,53 @@ class LicenseServiceTests {
         val licenseCaptor = captor<License>()
         verify(mockLicenseRepository).save(licenseCaptor.capture())
         assertTrue(ReflectionEquals(expectedLicense).matches(licenseCaptor.value))
+    }
+
+    @Test
+    fun `deleteLicence calls delete on the licenseRepository`() {
+        val licence = License(LicensingType.HMO_MANDATORY_LICENCE, "LN123456")
+
+        licenseService.deleteLicence(licence)
+
+        verify(mockLicenseRepository).delete(licence)
+    }
+
+    @Test
+    fun `updateLicence returns an updated licence`() {
+        val licence = License(LicensingType.HMO_MANDATORY_LICENCE, "LN123456")
+        val newLicence = License(LicensingType.SELECTIVE_LICENCE, "SL123456")
+
+        val updatedLicence = licenseService.updateLicence(licence, newLicence.licenseType, newLicence.licenseNumber)
+
+        assertEquals(updatedLicence?.licenseType, newLicence.licenseType)
+        assertEquals(updatedLicence?.licenseNumber, newLicence.licenseNumber)
+    }
+
+    @Test
+    fun `updateLicence calls createLicence and returns the created licence`() {
+        val licenseType = LicensingType.SELECTIVE_LICENCE
+        val licenceNumber = "SL123456"
+        val expectedLicense = License(licenseType, licenceNumber)
+
+        whenever(mockLicenseRepository.save(any(License::class.java))).thenReturn(expectedLicense)
+
+        val updatedLicence = licenseService.updateLicence(null, licenseType, licenceNumber)
+
+        verify(mockLicenseRepository).save(any(License::class.java))
+
+        assertEquals(updatedLicence?.licenseType, expectedLicense.licenseType)
+        assertEquals(updatedLicence?.licenseNumber, expectedLicense.licenseNumber)
+    }
+
+    @Test
+    fun `updateLicence calls deleteLicence and returns null`() {
+        val licence = License(LicensingType.HMO_MANDATORY_LICENCE, "LN123456")
+        val newLicenceType = LicensingType.NO_LICENSING
+
+        val updatedLicence = licenseService.updateLicence(licence, newLicenceType, null)
+
+        verify(mockLicenseRepository).delete(licence)
+
+        assertNull(updatedLicence)
     }
 }
