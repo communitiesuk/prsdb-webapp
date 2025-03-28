@@ -4,6 +4,5 @@ data class TaskListViewModel(
     val title: String,
     val pageHeading: String,
     val subtitles: List<String>,
-    val rootTaskId: String,
     val taskSections: List<TaskSectionViewModel>,
 )

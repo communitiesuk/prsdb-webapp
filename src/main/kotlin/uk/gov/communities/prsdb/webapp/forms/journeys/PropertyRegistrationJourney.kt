@@ -71,8 +71,8 @@ class PropertyRegistrationJourney(
 
     override val sections =
         listOf(
-            JourneySection(registerPropertyTasks(), "registerProperty.taskList.register.heading"),
-            JourneySection(checkAndSubmitPropertiesTasks(), "registerProperty.taskList.checkAndSubmit.heading"),
+            JourneySection(registerPropertyTasks(), "registerProperty.taskList.register.heading", "register-property"),
+            JourneySection(checkAndSubmitPropertiesTasks(), "registerProperty.taskList.checkAndSubmit.heading", "check-and-submit"),
         )
 
     override val taskListFactory =
@@ -80,7 +80,6 @@ class PropertyRegistrationJourney(
             "registerProperty.title",
             "registerProperty.taskList.heading",
             listOf("registerProperty.taskList.subtitle"),
-            "register-property-task",
         )
 
     private fun registerPropertyTasks(): List<JourneyTask<RegisterPropertyStepId>> =

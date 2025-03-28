@@ -32,12 +32,10 @@ abstract class JourneyWithTaskList<T : StepId>(
         titleKey: String,
         headingKey: String,
         subtitleKeys: List<String>,
-        rootId: String,
     ) = TaskListViewModelFactory(
         titleKey,
         headingKey,
         subtitleKeys,
-        rootId,
         sections,
     ) { task, journeyData -> getTaskStatus(task, journeyData) }
 
