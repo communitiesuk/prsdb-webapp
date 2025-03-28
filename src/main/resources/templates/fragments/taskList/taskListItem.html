@@ -7,6 +7,9 @@
            th:aria-describedby="${id}">
             task.name
         </a>
+        <div th:if="${task.hintKey != null}" th:id="${id} + '-hint'" class="govuk-task-list__hint" th:text="#{${task.hintKey}}">
+            task.hintKey
+        </div>
     </div>
     <div th:replace="~{fragments/taskList/taskListStatus :: taskListStatus(${task.status}, ${id})}"></div>
 </li>

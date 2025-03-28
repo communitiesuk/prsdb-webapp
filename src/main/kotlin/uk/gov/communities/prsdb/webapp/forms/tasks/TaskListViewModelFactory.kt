@@ -26,6 +26,7 @@ class TaskListViewModelFactory<T : StepId>(
                                 TaskListItemViewModel.fromTaskDetails(
                                     nameKey,
                                     getTaskStatus(task, journeyData),
+                                    task.hintKey,
                                     task.startingStepId,
                                 )
                             }
