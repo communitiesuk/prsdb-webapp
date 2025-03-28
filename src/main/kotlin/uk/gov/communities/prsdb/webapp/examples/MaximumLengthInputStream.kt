@@ -64,6 +64,6 @@ class MaximumLengthInputStream(
     override fun close() = innerInputStream.close()
 
     companion object {
-        fun InputStream.withMaxLength(maxLength: Long): InputStream = MaximumLengthInputStream(this, maxLength)
+        fun InputStream.withMaxLength(maxLength: Long): MaximumLengthInputStream = MaximumLengthInputStream(this, maxLength)
     }
 }
