@@ -1,5 +1,5 @@
 <th:block id="main-content" th:replace="~{fragments/layout :: layout('Example Form Page', ~{::#main-content/content()}, null)}">
-    <form th:action="@{''}" novalidate method="post" enctype="multipart/form-data">
+    <form th:action="@{'?' + ${_csrf.parameterName} + '=' + ${_csrf.token}}" novalidate method="post" enctype="multipart/form-data">
         <input type="file" name="uploaded-file">
         <input type="submit" value="Upload">
     </form>

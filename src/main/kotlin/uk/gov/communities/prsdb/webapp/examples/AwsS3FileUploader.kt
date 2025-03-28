@@ -2,33 +2,35 @@ package uk.gov.communities.prsdb.webapp.examples
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import software.amazon.awssdk.core.sync.RequestBody
-import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import software.amazon.awssdk.core.async.AsyncRequestBody
+import software.amazon.awssdk.transfer.s3.S3TransferManager
 import java.io.InputStream
 
 @Service
 class AwsS3FileUploader(
-    private val s3Client: S3Client,
+    private val transferManager: S3TransferManager,
     @Value("\${aws.s3.quarantineBucket}")
     private val bucketName: String,
 ) : FileUploader {
     override fun uploadFile(
         objectKey: String,
         inputStream: InputStream,
-        streamSize: Long,
-    ): String {
+    ): Boolean {
         inputStream.use { input ->
-            val objectRequest =
-                PutObjectRequest
-                    .builder()
-                    .bucket(bucketName)
-                    .key(objectKey)
-                    .build()
+            val requestBody = AsyncRequestBody.forBlockingInputStream(null)
+            val upload =
+                transferManager.upload { builder ->
+                    builder
+                        .requestBody(requestBody)
+                        .putObjectRequest { request -> request.bucket(bucketName).key(objectKey) }
+                        .build()
+                }
 
-            val response = s3Client.putObject(objectRequest, RequestBody.fromInputStream(input, streamSize))
+            requestBody.writeInputStream(input)
 
-            return response.toString()
+            val response = upload.completionFuture().join().response()
+
+            return response.sdkHttpResponse().isSuccessful
         }
     }
 }
