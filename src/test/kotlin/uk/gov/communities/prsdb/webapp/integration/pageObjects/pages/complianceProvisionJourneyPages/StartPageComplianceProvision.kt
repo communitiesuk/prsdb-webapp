@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.complicanceProvisionJourneyPages
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.complianceProvisionJourneyPages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.ProvideComplianceController
