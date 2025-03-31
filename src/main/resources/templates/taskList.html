@@ -13,7 +13,7 @@
                     </th:block>
                 </header>
                 <section th:each="section, iteratorStatus: ${taskListViewModel.taskSections}">
-                    <div th:replace="~{fragments/taskList/sectionTaskList :: sectionTaskList(${section}, ${iteratorStatus.count})}"></div>
+                    <div th:replace="~{fragments/taskList/sectionTaskList :: sectionTaskList(${section}, ${iteratorStatus.count}, ${taskListViewModel.areSectionsNumbered})}"></div>
                 </section>
             </th:block>
         </main>
