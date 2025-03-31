@@ -8,9 +8,12 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.server.ResponseStatusException
+import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_COMPLIANCE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.ProvideComplianceController.Companion.PROVIDE_COMPLIANCE_ROUTE
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.ComplianceProvisionJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -19,6 +22,7 @@ import java.security.Principal
 @RequestMapping(PROVIDE_COMPLIANCE_ROUTE)
 class ProvideComplianceController(
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val complianceProvisionJourneyFactory: ComplianceProvisionJourneyFactory,
 ) {
     @GetMapping
     fun index(
@@ -31,6 +35,18 @@ class ProvideComplianceController(
         // TODO PRSD:941: Add link to task list
         model.addAttribute("taskListUrl", "#")
         return "provideComplianceStartPage"
+    }
+
+    @GetMapping("/$TASK_LIST_PATH_SEGMENT")
+    fun getTaskList(
+        @PathVariable propertyOwnershipId: Long,
+        principal: Principal,
+    ): ModelAndView {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+
+        return complianceProvisionJourneyFactory
+            .create(propertyOwnershipId)
+            .getModelAndViewForTaskList()
     }
 
     private fun throwErrorIfUserIsNotAuthorized(
