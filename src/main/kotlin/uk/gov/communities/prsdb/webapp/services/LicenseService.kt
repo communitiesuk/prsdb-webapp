@@ -19,4 +19,8 @@ class LicenseService(
                 licenceNumber,
             ),
         )
+
+    fun deleteLicense(license: License?) {
+        if (license != null) licenseRepository.delete(license)
+    }
 }

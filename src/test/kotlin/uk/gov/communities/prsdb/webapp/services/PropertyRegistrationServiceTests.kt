@@ -300,7 +300,7 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `deregisterProperty deletes the property and property ownership`() {
+    fun `deregisterProperty deletes the property, license and property ownership`() {
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
         val propertyOwnershipId = propertyOwnership.id
         whenever(mockPropertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)).thenReturn(propertyOwnership)
@@ -309,6 +309,7 @@ class PropertyRegistrationServiceTests {
 
         verify(mockPropertyOwnershipService).deletePropertyOwnership(propertyOwnership)
         verify(mockPropertyService).deleteProperty(propertyOwnership.property)
+        verify(mockLicenceService).deleteLicense(propertyOwnership.license)
     }
 
     @Test

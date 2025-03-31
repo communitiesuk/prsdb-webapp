@@ -98,6 +98,7 @@ class PropertyRegistrationService(
         propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)?.let {
             propertyOwnershipService.deletePropertyOwnership(it)
             propertyService.deleteProperty(it.property)
+            licenseService.deleteLicense(it.license)
         }
     }
 

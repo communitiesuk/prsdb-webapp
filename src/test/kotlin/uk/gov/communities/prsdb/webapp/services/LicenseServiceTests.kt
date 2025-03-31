@@ -37,4 +37,13 @@ class LicenseServiceTests {
         verify(mockLicenseRepository).save(licenseCaptor.capture())
         assertTrue(ReflectionEquals(expectedLicense).matches(licenseCaptor.value))
     }
+
+    @Test
+    fun `deleteLicense deletes a license`() {
+        val licence = License()
+
+        licenseService.deleteLicense(licence)
+
+        verify(mockLicenseRepository).delete(licence)
+    }
 }
