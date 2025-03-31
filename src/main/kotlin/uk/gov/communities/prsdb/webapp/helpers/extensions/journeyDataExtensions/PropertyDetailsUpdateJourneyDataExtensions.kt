@@ -5,8 +5,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper.Companion.getFieldEnumValue
-import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper.Companion.getFieldStringValue
 
 class PropertyDetailsUpdateJourneyDataExtensions {
     companion object {
@@ -45,7 +43,7 @@ class PropertyDetailsUpdateJourneyDataExtensions {
             }
 
         fun JourneyData.getLicensingTypeUpdateIfPresent(): LicensingType? =
-            getFieldEnumValue<LicensingType>(
+            JourneyDataHelper.getFieldEnumValue<LicensingType>(
                 this,
                 UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment,
                 "licensingType",
@@ -57,7 +55,7 @@ class PropertyDetailsUpdateJourneyDataExtensions {
                 return null
             } else {
                 val licenseNumberUpdateStepId = getLicenceNumberUpdateStepId(licensingType)
-                return getFieldStringValue(this, licenseNumberUpdateStepId!!.urlPathSegment, "licenceNumber")
+                return JourneyDataHelper.getFieldStringValue(this, licenseNumberUpdateStepId!!.urlPathSegment, "licenceNumber")
             }
         }
 

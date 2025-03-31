@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.transaction.Transactional
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -16,6 +17,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.repository.LicenseRepository
+import kotlin.reflect.full.hasAnnotation
 
 @ExtendWith(MockitoExtension::class)
 class LicenseServiceTests {
@@ -50,7 +52,7 @@ class LicenseServiceTests {
     }
 
     @Test
-    fun `updateLicence returns an updated licence`() {
+    fun `updateLicence returns an updated licence when there is an existing licence and a new licence`() {
         val licence = License(LicensingType.HMO_MANDATORY_LICENCE, "LN123456")
         val newLicence = License(LicensingType.SELECTIVE_LICENCE, "SL123456")
 
@@ -61,7 +63,7 @@ class LicenseServiceTests {
     }
 
     @Test
-    fun `updateLicence calls createLicence and returns the created licence`() {
+    fun `updateLicence calls createLicence and returns the created licence when there is no existing licence and there is a new licence`() {
         val licenseType = LicensingType.SELECTIVE_LICENCE
         val licenceNumber = "SL123456"
         val expectedLicense = License(licenseType, licenceNumber)
@@ -77,7 +79,7 @@ class LicenseServiceTests {
     }
 
     @Test
-    fun `updateLicence calls deleteLicence and returns null`() {
+    fun `updateLicence calls deleteLicence and returns null when there is an existing licence and the new licenceType is NO_LICENSING`() {
         val licence = License(LicensingType.HMO_MANDATORY_LICENCE, "LN123456")
         val newLicenceType = LicensingType.NO_LICENSING
 
@@ -86,5 +88,10 @@ class LicenseServiceTests {
         verify(mockLicenseRepository).delete(licence)
 
         assertNull(updatedLicence)
+    }
+
+    @Test
+    fun `updateLicence is annotated with @Transactional`() {
+        assertTrue(licenseService::updateLicence.hasAnnotation<Transactional>())
     }
 }
