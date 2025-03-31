@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DEREGISTRATION_ENTITY_IDS
+import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @ExtendWith(MockitoExtension::class)
@@ -30,7 +31,8 @@ class PropertyDeregistrationServiceTests {
 
     @Test
     fun `deregisterProperty deletes the property, license and property ownership`() {
-        val propertyOwnership = MockLandlordData.createPropertyOwnership()
+        val licence = License()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(license = licence)
         val propertyOwnershipId = propertyOwnership.id
         whenever(mockPropertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)).thenReturn(propertyOwnership)
         // Act
@@ -38,7 +40,7 @@ class PropertyDeregistrationServiceTests {
 
         verify(mockPropertyOwnershipService).deletePropertyOwnership(propertyOwnership)
         verify(mockPropertyService).deleteProperty(propertyOwnership.property)
-        verify(mockLicenceService).deleteLicense(propertyOwnership.license)
+        verify(mockLicenceService).deleteLicense(licence)
     }
 
     @Test

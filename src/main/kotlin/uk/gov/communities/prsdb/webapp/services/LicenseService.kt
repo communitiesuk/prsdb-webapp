@@ -20,7 +20,11 @@ class LicenseService(
             ),
         )
 
-    fun deleteLicense(license: License?) {
-        if (license != null) licenseRepository.delete(license)
+    fun deleteLicense(license: License) {
+        licenseRepository.delete(license)
+    }
+
+    fun deleteLicenses(licenses: List<License>) {
+        licenseRepository.deleteAll(licenses)
     }
 }

@@ -21,20 +21,20 @@ class LandlordDeregistrationServiceTests {
     private lateinit var landlordDeregistrationService: LandlordDeregistrationService
 
     @Test
-    fun `deregisterLandlord deletes the user from the landlord table`() {
+    fun `deregisterLandlordAndTheirProperties deletes the user from the landlord table`() {
         val baseUserId = "one-login-user"
 
-        landlordDeregistrationService.deregisterLandlord(baseUserId)
+        landlordDeregistrationService.deregisterLandlordAndTheirProperties(baseUserId)
 
         verify(mockLandlordRepository).deleteByBaseUser_Id(baseUserId)
     }
 
     @Test
-    fun `deregisterLandlord deletes the user from the one-login table if they are not a different type of user`() {
+    fun `deregisterLandlordAndTheirProperties deletes the user from the one-login table if they are not a different type of user`() {
         // At time of writing, we only have landlord and local authority users, so this only checks the local authority user table
         val baseUserId = "one-login-user"
 
-        landlordDeregistrationService.deregisterLandlord(baseUserId)
+        landlordDeregistrationService.deregisterLandlordAndTheirProperties(baseUserId)
 
         verify(mockOneLoginUserRepository).deleteIfNotLocalAuthorityUser(baseUserId)
     }

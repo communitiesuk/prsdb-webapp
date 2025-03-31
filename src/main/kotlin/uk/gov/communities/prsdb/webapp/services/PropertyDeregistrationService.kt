@@ -1,8 +1,10 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DEREGISTRATION_ENTITY_IDS
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 
 @Service
 class PropertyDeregistrationService(
@@ -15,8 +17,18 @@ class PropertyDeregistrationService(
         propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)?.let {
             propertyOwnershipService.deletePropertyOwnership(it)
             propertyService.deleteProperty(it.property)
-            licenseService.deleteLicense(it.license)
+            if (it.license != null) licenseService.deleteLicense(it.license!!)
         }
+    }
+
+    @Transactional
+    fun deregisterProperties(propertyOwnerships: List<PropertyOwnership>) {
+        val properties = propertyOwnerships.map { it.property }
+        val licenses = propertyOwnerships.mapNotNull { it.license }
+
+        propertyOwnershipService.deletePropertyOwnerships(propertyOwnerships)
+        propertyService.deleteProperties(properties)
+        licenseService.deleteLicenses(licenses)
     }
 
     fun addDeregisteredPropertyAndOwnershipIdsToSession(

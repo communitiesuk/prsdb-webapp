@@ -95,12 +95,12 @@ class PropertyOwnershipService(
     ): Boolean = getPropertyOwnership(propertyOwnershipId).primaryLandlord.baseUser.id == baseUserId
 
     fun getRegisteredPropertiesForLandlordUser(baseUserId: String): List<RegisteredPropertyViewModel> =
-        retrieveAllRegisteredPropertiesForLandlord(baseUserId).map { propertyOwnership ->
+        retrieveAllActiveRegisteredPropertiesForLandlord(baseUserId).map { propertyOwnership ->
             RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
         }
 
     fun getRegisteredPropertiesForLandlord(landlordId: Long): List<RegisteredPropertyViewModel> =
-        retrieveAllRegisteredPropertiesForLandlord(landlordId).map { propertyOwnership ->
+        retrieveAllActiveRegisteredPropertiesForLandlord(landlordId).map { propertyOwnership ->
             RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership, isLaView = true)
         }
 
@@ -165,19 +165,26 @@ class PropertyOwnershipService(
         update.numberOfPeople?.let { propertyOwnership.currentNumTenants = it }
     }
 
-    private fun retrieveAllRegisteredPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
+    private fun retrieveAllActiveRegisteredPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
         propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
             baseUserId,
             RegistrationStatus.REGISTERED,
         )
 
-    private fun retrieveAllRegisteredPropertiesForLandlord(landlordId: Long): List<PropertyOwnership> =
+    private fun retrieveAllActiveRegisteredPropertiesForLandlord(landlordId: Long): List<PropertyOwnership> =
         propertyOwnershipRepository.findAllByPrimaryLandlord_IdAndIsActiveTrueAndProperty_Status(
             landlordId,
             RegistrationStatus.REGISTERED,
         )
 
+    fun retrieveAllPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
+        propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_Id(baseUserId)
+
     fun deletePropertyOwnership(propertyOwnership: PropertyOwnership) {
         propertyOwnershipRepository.delete(propertyOwnership)
+    }
+
+    fun deletePropertyOwnerships(propertyOwnerships: List<PropertyOwnership>) {
+        propertyOwnershipRepository.deleteAll(propertyOwnerships)
     }
 }

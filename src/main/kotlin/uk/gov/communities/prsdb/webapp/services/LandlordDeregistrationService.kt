@@ -9,19 +9,17 @@ import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepositor
 class LandlordDeregistrationService(
     private val landlordRepository: LandlordRepository,
     private val oneLoginUserRepository: OneLoginUserRepository,
+    private val propertyOwnershipService: PropertyOwnershipService,
+    private val propertyDeregistrationService: PropertyDeregistrationService,
 ) {
     @Transactional
-    fun deregisterLandlord(baseUserId: String) {
+    fun deregisterLandlordAndTheirProperties(baseUserId: String) {
+        val registeredProperties = propertyOwnershipService.retrieveAllPropertiesForLandlord(baseUserId)
+        if (registeredProperties.isNotEmpty()) {
+            propertyDeregistrationService.deregisterProperties(registeredProperties)
+        }
+
         landlordRepository.deleteByBaseUser_Id(baseUserId)
         oneLoginUserRepository.deleteIfNotLocalAuthorityUser(baseUserId)
-    }
-
-    @Transactional
-    fun deregisterLandlordsProperties(baseUserId: String) {
-        // retrieve all property ownerships
-
-        // delete all licenses
-        // delete all properties
-        // delete all property ownerships
     }
 }
