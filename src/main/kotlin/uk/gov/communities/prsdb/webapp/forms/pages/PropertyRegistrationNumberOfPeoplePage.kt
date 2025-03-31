@@ -4,6 +4,8 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import kotlin.reflect.KClass
 
 class PropertyRegistrationNumberOfPeoplePage(
@@ -23,7 +25,7 @@ class PropertyRegistrationNumberOfPeoplePage(
             return null
         }
         val newFormData = formData.toMutableMap()
-        newFormData["numberOfHouseholds"] = latestNumberOfHouseholds.toString()
+        newFormData[NumberOfPeopleFormModel::numberOfHouseholds.name] = latestNumberOfHouseholds.toString()
         return newFormData
     }
 }

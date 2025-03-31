@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.getLookedUpAddress
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
@@ -68,7 +69,7 @@ class SelectAddressPage(
         bindingResult: BindingResult,
         formData: PageData,
     ): Boolean {
-        val selectedAddress = formData["address"].toString()
+        val selectedAddress = formData[SelectAddressFormModel::address.name].toString()
         val journeyData = journeyDataService.getJourneyDataFromSession()
 
         return selectedAddress == MANUAL_ADDRESS_CHOSEN || journeyData.getLookedUpAddress(selectedAddress) != null

@@ -5,6 +5,14 @@ import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOfResidenceFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DateOfBirthFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NonEnglandOrWalesAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.VerifiedIdentityModel
 import java.time.LocalDate
 
 class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
@@ -15,14 +23,14 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             getFieldStringValue(
                 journeyData,
                 LandlordRegistrationStepId.Name.urlPathSegment,
-                "name",
+                NameFormModel::name.name,
             )
 
         fun getVerifiedName(journeyData: JourneyData) =
             getFieldStringValue(
                 journeyData,
                 LandlordRegistrationStepId.VerifyIdentity.urlPathSegment,
-                "name",
+                VerifiedIdentityModel::name.name,
             )
 
         fun getDOB(journeyData: JourneyData) = getVerifiedDOB(journeyData) ?: getManualDOB(journeyData)
@@ -31,7 +39,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             getFieldLocalDateValue(
                 journeyData,
                 LandlordRegistrationStepId.VerifyIdentity.urlPathSegment,
-                "birthDate",
+                VerifiedIdentityModel::birthDate.name,
             )
 
         private fun getManualDOB(journeyData: JourneyData): LocalDate? {
@@ -39,21 +47,21 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
                 getFieldIntegerValue(
                     journeyData,
                     LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
-                    "day",
+                    DateOfBirthFormModel::day.name,
                 ) ?: return null
 
             val month =
                 getFieldIntegerValue(
                     journeyData,
                     LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
-                    "month",
+                    DateOfBirthFormModel::month.name,
                 ) ?: return null
 
             val year =
                 getFieldIntegerValue(
                     journeyData,
                     LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
-                    "year",
+                    DateOfBirthFormModel::year.name,
                 ) ?: return null
 
             return LocalDate.of(year, month, day)
@@ -63,21 +71,21 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             getFieldStringValue(
                 journeyData,
                 LandlordRegistrationStepId.Email.urlPathSegment,
-                "emailAddress",
+                EmailFormModel::emailAddress.name,
             )
 
         fun getPhoneNumber(journeyData: JourneyData) =
             getFieldStringValue(
                 journeyData,
                 LandlordRegistrationStepId.PhoneNumber.urlPathSegment,
-                "phoneNumber",
+                PhoneNumberFormModel::phoneNumber.name,
             )
 
         fun getLivesInEnglandOrWales(journeyData: JourneyData) =
             getFieldBooleanValue(
                 journeyData,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
-                "livesInEnglandOrWales",
+                CountryOfResidenceFormModel::livesInEnglandOrWales.name,
             )
 
         fun getNonEnglandOrWalesCountryOfResidence(journeyData: JourneyData) =
@@ -87,7 +95,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
                 getFieldStringValue(
                     journeyData,
                     LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
-                    "countryOfResidence",
+                    CountryOfResidenceFormModel::countryOfResidence.name,
                 )
             }
 
@@ -119,7 +127,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             return getFieldStringValue(
                 journeyData,
                 selectAddressPathSegment,
-                "address",
+                SelectAddressFormModel::address.name,
             )
         }
 
@@ -141,7 +149,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             getFieldStringValue(
                 journeyData,
                 LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment,
-                "nonEnglandOrWalesAddress",
+                NonEnglandOrWalesAddressFormModel::nonEnglandOrWalesAddress.name,
             )
 
         fun isIdentityVerified(journeyData: JourneyData) =
