@@ -21,14 +21,14 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDer
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
 class PropertyDeregistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val propertyRegistrationService: PropertyRegistrationService,
+    private val propertyDeregistrationService: PropertyDeregistrationService,
     private val confirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmail>,
     private val propertyOwnershipId: Long,
 ) : Journey<DeregisterPropertyStepId>(
@@ -132,9 +132,9 @@ class PropertyDeregistrationJourney(
         val propertyRegistrationNumber = propertyOwnership.registrationNumber
         val propertyAddress = propertyOwnership.property.address.singleLineAddress
 
-        propertyRegistrationService.deregisterProperty(propertyOwnershipId)
+        propertyDeregistrationService.deregisterProperty(propertyOwnershipId)
 
-        propertyRegistrationService.addDeregisteredPropertyAndOwnershipIdsToSession(propertyOwnershipId, propertyOwnership.property.id)
+        propertyDeregistrationService.addDeregisteredPropertyAndOwnershipIdsToSession(propertyOwnershipId, propertyOwnership.property.id)
 
         confirmationEmailSender.sendEmail(
             primaryLandlordEmailAddress,
