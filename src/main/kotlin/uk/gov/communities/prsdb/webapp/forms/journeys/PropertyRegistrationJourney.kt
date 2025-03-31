@@ -332,74 +332,6 @@ class PropertyRegistrationJourney(
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.LicensingType, null) },
         )
 
-    private fun occupancyStep() =
-        Step(
-            id = RegisterPropertyStepId.Occupancy,
-            page =
-                Page(
-                    formModel = OccupancyFormModel::class,
-                    templateName = "forms/propertyOccupancyForm",
-                    content =
-                        mapOf(
-                            "title" to "registerProperty.title",
-                            "fieldSetHeading" to "forms.occupancy.fieldSetHeading",
-                            "radioOptions" to
-                                listOf(
-                                    RadiosButtonViewModel(
-                                        value = true,
-                                        labelMsgKey = "forms.radios.option.yes.label",
-                                        hintMsgKey = "forms.occupancy.radios.option.yes.hint",
-                                    ),
-                                    RadiosButtonViewModel(
-                                        value = false,
-                                        labelMsgKey = "forms.radios.option.no.label",
-                                        hintMsgKey = "forms.occupancy.radios.option.no.hint",
-                                    ),
-                                ),
-                        ),
-                    shouldDisplaySectionHeader = true,
-                ),
-            nextAction = { journeyData, _ -> occupancyNextAction(journeyData) },
-        )
-
-    private fun numberOfHouseholdsStep() =
-        Step(
-            id = RegisterPropertyStepId.NumberOfHouseholds,
-            page =
-                Page(
-                    formModel = NumberOfHouseholdsFormModel::class,
-                    templateName = "forms/numberOfHouseholdsForm",
-                    content =
-                        mapOf(
-                            "title" to "registerProperty.title",
-                            "fieldSetHeading" to "forms.numberOfHouseholds.fieldSetHeading",
-                            "label" to "forms.numberOfHouseholds.label",
-                        ),
-                    shouldDisplaySectionHeader = true,
-                ),
-            nextAction = { _, _ -> Pair(RegisterPropertyStepId.NumberOfPeople, null) },
-        )
-
-    private fun numberOfPeopleStep() =
-        Step(
-            id = RegisterPropertyStepId.NumberOfPeople,
-            page =
-                PropertyRegistrationNumberOfPeoplePage(
-                    formModel = NumberOfPeopleFormModel::class,
-                    templateName = "forms/numberOfPeopleForm",
-                    content =
-                        mapOf(
-                            "title" to "registerProperty.title",
-                            "fieldSetHeading" to "forms.numberOfPeople.fieldSetHeading",
-                            "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
-                            "label" to "forms.numberOfPeople.label",
-                        ),
-                    shouldDisplaySectionHeader = true,
-                    journeyDataService = journeyDataService,
-                ),
-            nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
-        )
-
     private fun licensingTypeStep() =
         Step(
             id = RegisterPropertyStepId.LicensingType,
@@ -505,6 +437,74 @@ class PropertyRegistrationJourney(
                     shouldDisplaySectionHeader = true,
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
+        )
+
+    private fun occupancyStep() =
+        Step(
+            id = RegisterPropertyStepId.Occupancy,
+            page =
+                Page(
+                    formModel = OccupancyFormModel::class,
+                    templateName = "forms/propertyOccupancyForm",
+                    content =
+                        mapOf(
+                            "title" to "registerProperty.title",
+                            "fieldSetHeading" to "forms.occupancy.fieldSetHeading",
+                            "radioOptions" to
+                                listOf(
+                                    RadiosButtonViewModel(
+                                        value = true,
+                                        labelMsgKey = "forms.radios.option.yes.label",
+                                        hintMsgKey = "forms.occupancy.radios.option.yes.hint",
+                                    ),
+                                    RadiosButtonViewModel(
+                                        value = false,
+                                        labelMsgKey = "forms.radios.option.no.label",
+                                        hintMsgKey = "forms.occupancy.radios.option.no.hint",
+                                    ),
+                                ),
+                        ),
+                    shouldDisplaySectionHeader = true,
+                ),
+            nextAction = { journeyData, _ -> occupancyNextAction(journeyData) },
+        )
+
+    private fun numberOfHouseholdsStep() =
+        Step(
+            id = RegisterPropertyStepId.NumberOfHouseholds,
+            page =
+                Page(
+                    formModel = NumberOfHouseholdsFormModel::class,
+                    templateName = "forms/numberOfHouseholdsForm",
+                    content =
+                        mapOf(
+                            "title" to "registerProperty.title",
+                            "fieldSetHeading" to "forms.numberOfHouseholds.fieldSetHeading",
+                            "label" to "forms.numberOfHouseholds.label",
+                        ),
+                    shouldDisplaySectionHeader = true,
+                ),
+            nextAction = { _, _ -> Pair(RegisterPropertyStepId.NumberOfPeople, null) },
+        )
+
+    private fun numberOfPeopleStep() =
+        Step(
+            id = RegisterPropertyStepId.NumberOfPeople,
+            page =
+                PropertyRegistrationNumberOfPeoplePage(
+                    formModel = NumberOfPeopleFormModel::class,
+                    templateName = "forms/numberOfPeopleForm",
+                    content =
+                        mapOf(
+                            "title" to "registerProperty.title",
+                            "fieldSetHeading" to "forms.numberOfPeople.fieldSetHeading",
+                            "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
+                            "label" to "forms.numberOfPeople.label",
+                        ),
+                    shouldDisplaySectionHeader = true,
+                    journeyDataService = journeyDataService,
+                ),
+            nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
         )
 
     private fun checkAnswersStep() =
