@@ -20,11 +20,11 @@ class HealthCheckControllerTests(
     }
 
     @Test
-    fun `HealthCheckController returns 200 when trailing slash is included`() {
+    fun `HealthCheckController returns 308 when trailing slash is included`() {
         mvc
             .get("/healthcheck/")
             .andExpect {
-                status { isOk() }
+                status { isPermanentRedirect() }
             }
     }
 }
