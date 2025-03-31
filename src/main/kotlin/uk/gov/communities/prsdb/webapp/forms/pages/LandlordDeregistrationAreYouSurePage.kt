@@ -1,8 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.springframework.http.HttpStatus
-import org.springframework.validation.BindingResult
-import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
@@ -41,17 +39,14 @@ class LandlordDeregistrationAreYouSurePage(
         }
     }
 
-    override fun bindDataToFormModel(
-        validator: Validator,
-        formData: PageData?,
-    ): BindingResult {
-        val newFormData = formData?.toMutableMap()
-        if (newFormData != null) {
-            val journeyData = journeyDataService.getJourneyDataFromSession()
-            val landlordHasRegisteredProperties = journeyData.getLandlordUserHasRegisteredProperties()
-            newFormData["userHasRegisteredProperties"] = landlordHasRegisteredProperties
+    override fun enrichFormData(formData: PageData?): PageData? {
+        if (formData == null) {
+            return null
         }
-
-        return super.bindDataToFormModel(validator, newFormData)
+        val newFormData = formData.toMutableMap()
+        val journeyData = journeyDataService.getJourneyDataFromSession()
+        val landlordHasRegisteredProperties = journeyData.getLandlordUserHasRegisteredProperties()
+        newFormData["userHasRegisteredProperties"] = landlordHasRegisteredProperties
+        return newFormData
     }
 }

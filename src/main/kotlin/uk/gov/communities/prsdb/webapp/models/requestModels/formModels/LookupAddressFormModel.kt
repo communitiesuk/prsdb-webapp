@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
@@ -26,4 +27,12 @@ class LookupAddressFormModel : FormModel {
         ],
     )
     var houseNameOrNumber: String? = null
+
+    companion object {
+        fun fromLandlord(landlord: Landlord): LookupAddressFormModel =
+            LookupAddressFormModel().apply {
+                postcode = landlord.address.getPostcodeSearchTerm()
+                houseNameOrNumber = landlord.address.getHouseNameOrNumber()
+            }
+    }
 }

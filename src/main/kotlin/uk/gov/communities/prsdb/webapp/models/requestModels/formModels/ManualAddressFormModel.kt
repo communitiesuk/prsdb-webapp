@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
@@ -40,4 +41,13 @@ class ManualAddressFormModel : FormModel {
         ],
     )
     var postcode: String? = null
+
+    companion object {
+        fun fromLandlord(landlord: Landlord): ManualAddressFormModel =
+            ManualAddressFormModel().apply {
+                addressLineOne = landlord.address.singleLineAddress
+                townOrCity = landlord.address.getTownOrCity()
+                postcode = landlord.address.getPostcodeSearchTerm()
+            }
+    }
 }

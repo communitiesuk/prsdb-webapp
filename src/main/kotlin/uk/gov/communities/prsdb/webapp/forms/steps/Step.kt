@@ -1,18 +1,19 @@
 package uk.gov.communities.prsdb.webapp.forms.steps
 
-import org.springframework.validation.Validator
+import org.springframework.validation.BindingResult
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.forms.pages.AbstractPage
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 
 class Step<T : StepId>(
     val id: T,
     val page: AbstractPage,
     val handleSubmitAndRedirect: ((journeyData: JourneyData, subPageNumber: Int?) -> String)? = null,
-    val isSatisfied: (validator: Validator, pageData: PageData) -> Boolean = { validator, pageData ->
+    val isSatisfied: (bindingResult: BindingResult, formData: PageData) -> Boolean = { bindingResult, pageData ->
         page.isSatisfied(
-            validator,
+            bindingResult,
             pageData,
         )
     },
@@ -28,14 +29,14 @@ class Step<T : StepId>(
 
     fun updatedJourneyData(
         journeyData: JourneyData,
-        pageData: PageData,
+        formModel: FormModel,
         subPageNumber: Int?,
     ): JourneyData =
         if (subPageNumber != null) {
-            val newStepData = updatedStepData(journeyData, subPageNumber, pageData)
+            val newStepData = updatedStepData(journeyData, subPageNumber, formModel.toPageData())
             journeyData + (name to newStepData)
         } else {
-            journeyData + (name to pageData)
+            journeyData + (name to formModel.toPageData())
         }
 
     private fun updatedStepData(

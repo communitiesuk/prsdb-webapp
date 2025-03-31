@@ -1,10 +1,14 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.whenever
+import org.springframework.validation.BindingResult
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.ReachableStepDetailsIterator
 import uk.gov.communities.prsdb.webapp.forms.TestStepId
+import uk.gov.communities.prsdb.webapp.forms.pages.AbstractPage
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 
 data class TestStepModel(
@@ -101,16 +105,21 @@ class TestIteratorBuilder {
         nextSegment: String? = null,
         isSatisfied: Boolean = true,
         customNextActionAddition: ((JourneyData) -> Unit)? = null,
-    ) = Step(
-        TestStepId(urlPathSegment),
-        mock(),
-        handleSubmitAndRedirect = null,
-        isSatisfied = { _, _ -> isSatisfied },
-        nextAction = { journeyData, _ ->
-            customNextActionAddition?.invoke(journeyData)
-            Pair(nextSegment?.let { TestStepId(it) }, null)
-        },
-    )
+    ): Step<TestStepId> {
+        val mockPage: AbstractPage = mock()
+        val mockBindingResult: BindingResult = mock()
+        whenever(mockPage.bindDataToFormModel(anyOrNull(), anyOrNull())).thenReturn(mockBindingResult)
+        return Step(
+            TestStepId(urlPathSegment),
+            mockPage,
+            handleSubmitAndRedirect = null,
+            isSatisfied = { bindingResult, formData -> isSatisfied },
+            nextAction = { journeyData, _ ->
+                customNextActionAddition?.invoke(journeyData)
+                Pair(nextSegment?.let { TestStepId(it) }, null)
+            },
+        )
+    }
 
     fun getDataForStep(urlPathSegment: String): Any? = journeyData[urlPathSegment]
 }

@@ -2,10 +2,15 @@ package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions
 
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.UpdateJourneyDataExtensions.Companion.getOriginalJourneyDataIfPresent
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoAdditionalLicenceFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoMandatoryLicenceFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectiveLicenceFormModel
 
 class PropertyDetailsUpdateJourneyDataExtensions {
     companion object {
@@ -65,6 +70,26 @@ class PropertyDetailsUpdateJourneyDataExtensions {
                 LicensingType.SELECTIVE_LICENCE -> UpdatePropertyDetailsStepId.UpdateSelectiveLicence
                 LicensingType.HMO_MANDATORY_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence
                 LicensingType.HMO_ADDITIONAL_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoAdditionalLicence
+                else -> null
+            }
+
+        fun getLicenceNumberStepIdAndFormModel(propertyOwnership: PropertyOwnership): Pair<UpdatePropertyDetailsStepId, FormModel>? =
+            when (propertyOwnership.license?.licenseType) {
+                LicensingType.SELECTIVE_LICENCE ->
+                    Pair(
+                        UpdatePropertyDetailsStepId.UpdateSelectiveLicence,
+                        SelectiveLicenceFormModel.fromPropertyOwnership(propertyOwnership),
+                    )
+                LicensingType.HMO_MANDATORY_LICENCE ->
+                    Pair(
+                        UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence,
+                        HmoMandatoryLicenceFormModel.fromPropertyOwnership(propertyOwnership),
+                    )
+                LicensingType.HMO_ADDITIONAL_LICENCE ->
+                    Pair(
+                        UpdatePropertyDetailsStepId.UpdateHmoAdditionalLicence,
+                        HmoAdditionalLicenceFormModel.fromPropertyOwnership(propertyOwnership),
+                    )
                 else -> null
             }
 

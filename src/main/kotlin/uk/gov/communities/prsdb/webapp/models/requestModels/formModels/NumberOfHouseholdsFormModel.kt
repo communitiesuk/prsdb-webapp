@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
@@ -21,4 +22,9 @@ class NumberOfHouseholdsFormModel : FormModel {
         ],
     )
     var numberOfHouseholds: String = ""
+
+    companion object {
+        fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): NumberOfHouseholdsFormModel =
+            NumberOfHouseholdsFormModel().apply { numberOfHouseholds = propertyOwnership.currentNumHouseholds.toString() }
+    }
 }

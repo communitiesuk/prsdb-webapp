@@ -11,7 +11,6 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpStatus
-import org.springframework.validation.BindingResult
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
@@ -96,24 +95,11 @@ class LandlordDeregistrationAreYouSurePageTests {
         whenever(mockValidator.supports(anyOrNull())).thenReturn(true)
 
         // Act
-        val modelAndView =
-            page.getModelAndView(
-                mockValidator,
-                formData,
-                DeregisterLandlordStepId.CheckForUserProperties.urlPathSegment,
-                journeyData,
-                null,
-            )
+        val bindingResult = page.bindDataToFormModel(mockValidator, formData)
 
         // Assert
-        val userHasRegisteredProperties =
-            (
-                (
-                    modelAndView
-                        .model[BindingResult.MODEL_KEY_PREFIX + "formModel"] as BindingResult
-                ).target as LandlordDeregistrationAreYouSureFormModel
-            ).userHasRegisteredProperties
-
+        val formModel = bindingResult.target as LandlordDeregistrationAreYouSureFormModel
+        val userHasRegisteredProperties = formModel.userHasRegisteredProperties
         assertNotNull(userHasRegisteredProperties)
         assertTrue(userHasRegisteredProperties)
     }

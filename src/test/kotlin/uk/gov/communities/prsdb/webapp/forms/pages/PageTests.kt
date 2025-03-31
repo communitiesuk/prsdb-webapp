@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
-import org.springframework.validation.BindingResult
 import org.springframework.validation.Validator
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
@@ -17,7 +16,6 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -53,9 +51,10 @@ class PageTests {
     fun `isSatisfied returns true when validation is satisfied`() {
         // Arrange
         val formData = mapOf("testProperty" to "testPropertyValue")
+        val bindingResult = testPage.bindDataToFormModel(validator, formData)
 
         // Act
-        val result = testPage.isSatisfied(validator, formData)
+        val result = testPage.isSatisfied(bindingResult, formData)
 
         // Assert
         assertTrue(result)
@@ -65,9 +64,10 @@ class PageTests {
     fun `isSatisfied returns false when validation is not satisfied`() {
         // Arrange
         val formData = mapOf("anotherProperty" to "testPropertyValue", "testProperty" to null)
+        val bindingResult = testPage.bindDataToFormModel(validator, formData)
 
         // Act
-        val result = testPage.isSatisfied(validator, formData)
+        val result = testPage.isSatisfied(bindingResult, formData)
 
         // Assert
         assertFalse(result)
@@ -81,11 +81,10 @@ class PageTests {
         val sectionHeader = SectionHeaderViewModel("testSectionHeader", 3, 5)
 
         // Act
-        val result = testPage.getModelAndView(validator, formData, previousUrl, null, sectionHeader)
+        val bindingResult = testPage.bindDataToFormModel(validator, formData)
+        val result = testPage.getModelAndView(bindingResult, previousUrl, null, sectionHeader)
 
         // Assert
-        assertIs<BindingResult>(result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"])
-        val bindingResult: BindingResult = result.model[BindingResult.MODEL_KEY_PREFIX + "formModel"] as BindingResult
         assertContains(result.model, "testKey")
         assertEquals("testValue", result.model["testKey"])
         assertContains(result.model, "backUrl")
@@ -111,8 +110,10 @@ class PageTests {
                 mapOf("testKey" to "testValue"),
                 shouldDisplaySectionHeader = false,
             )
+
         // Act
-        val result = testPageWithoutSectionHeader.getModelAndView(validator, formData, previousUrl, null, sectionHeader)
+        val bindingResult = testPage.bindDataToFormModel(validator, formData)
+        val result = testPageWithoutSectionHeader.getModelAndView(bindingResult, previousUrl, null, sectionHeader)
 
         assertNull(result.model["sectionHeaderInfo"])
     }
@@ -126,8 +127,9 @@ class PageTests {
         val sectionHeaderInfo = null
 
         // Act, Assert
+        val bindingResult = testPage.bindDataToFormModel(validator, formData)
         assertThrows<PrsdbWebException> {
-            testPage.getModelAndView(validator, formData, previousUrl, filteredJourneyData, sectionHeaderInfo)
+            testPage.getModelAndView(bindingResult, previousUrl, filteredJourneyData, sectionHeaderInfo)
         }
     }
 }

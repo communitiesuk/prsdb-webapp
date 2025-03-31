@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
-import org.springframework.validation.Validator
+import org.springframework.validation.BindingResult
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
@@ -65,7 +65,7 @@ class SelectAddressPage(
     }
 
     override fun isSatisfied(
-        validator: Validator,
+        bindingResult: BindingResult,
         formData: PageData,
     ): Boolean {
         val selectedAddress = formData["address"].toString()

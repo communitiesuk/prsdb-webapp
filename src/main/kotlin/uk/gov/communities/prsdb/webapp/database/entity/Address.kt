@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
 @Entity
@@ -68,4 +69,12 @@ class Address() : ModifiableAuditableEntity() {
         this.postcode = addressDataModel.postcode
         this.localAuthority = localAuthority
     }
+
+    fun getPostcodeSearchTerm(): String = postcode ?: singleLineAddress
+
+    fun getHouseNameOrNumber(): String = buildingName ?: buildingNumber ?: singleLineAddress
+
+    fun getSelectedAddress(): String = if (uprn == null) MANUAL_ADDRESS_CHOSEN else singleLineAddress
+
+    fun getTownOrCity(): String = townName ?: singleLineAddress
 }

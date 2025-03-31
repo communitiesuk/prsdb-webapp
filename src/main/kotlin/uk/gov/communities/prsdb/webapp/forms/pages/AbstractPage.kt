@@ -15,21 +15,19 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
 abstract class AbstractPage(
-    private val formModel: KClass<out FormModel>,
+    val formModel: KClass<out FormModel>,
     private val templateName: String,
     private val content: Map<String, Any>,
     val shouldDisplaySectionHeader: Boolean = false,
 ) {
     fun getModelAndView(
-        validator: Validator,
-        pageData: PageData?,
+        bindingResult: BindingResult,
         prevStepUrl: String?,
         filteredJourneyData: JourneyData?,
         sectionHeaderInfo: SectionHeaderViewModel?,
     ): ModelAndView {
         val modelAndView = ModelAndView(templateName)
 
-        val bindingResult = bindDataToFormModel(validator, pageData)
         modelAndView.addObject(BindingResult.MODEL_KEY_PREFIX + "formModel", bindingResult)
 
         if (prevStepUrl != null) {
@@ -64,21 +62,21 @@ abstract class AbstractPage(
     }
 
     open fun isSatisfied(
-        validator: Validator,
+        bindingResult: BindingResult,
         formData: PageData,
-    ): Boolean {
-        val bindingResult = bindDataToFormModel(validator, formData)
-        return !bindingResult.hasErrors()
-    }
+    ): Boolean = !bindingResult.hasErrors()
 
-    protected open fun bindDataToFormModel(
+    protected open fun enrichFormData(formData: PageData?): PageData? = formData
+
+    fun bindDataToFormModel(
         validator: Validator,
         formData: PageData?,
     ): BindingResult {
+        val enrichedData = enrichFormData(formData)
         val binder = WebDataBinder(formModel.createInstance())
         binder.validator = validator
-        binder.bind(MutablePropertyValues(formData))
-        if (formData != null) {
+        binder.bind(MutablePropertyValues(enrichedData))
+        if (enrichedData != null) {
             binder.validate()
         }
         return binder.bindingResult
