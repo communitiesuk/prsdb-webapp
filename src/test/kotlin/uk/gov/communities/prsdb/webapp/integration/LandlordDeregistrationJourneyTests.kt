@@ -64,6 +64,7 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
 
             val confirmationPage = assertPageIs(page, ConfirmationPageLandlordDeregistration::class)
             assertThat(confirmationPage.confirmationBanner).containsText("You have deleted your account from the database")
+            assertTrue(confirmationPage.page.content().contains("You have deleted your account from the database"))
 
             // Check they can no longer access the landlord dashboard
             val landlordDashboard = navigator.goToLandlordDashboard()
