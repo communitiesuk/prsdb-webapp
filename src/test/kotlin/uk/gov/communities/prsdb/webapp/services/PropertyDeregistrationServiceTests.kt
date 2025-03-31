@@ -44,6 +44,27 @@ class PropertyDeregistrationServiceTests {
     }
 
     @Test
+    fun `deregisterProperties deletes the property, license and property ownership for all properties`() {
+        val license = License()
+        val properties =
+            listOf(
+                MockLandlordData.createProperty(),
+                MockLandlordData.createProperty(),
+            )
+        val propertyOwnerships =
+            listOf(
+                MockLandlordData.createPropertyOwnership(license = license, property = properties[0]),
+                MockLandlordData.createPropertyOwnership(property = properties[1]),
+            )
+
+        propertyDeregistrationService.deregisterProperties(propertyOwnerships)
+
+        verify(mockPropertyOwnershipService).deletePropertyOwnerships(propertyOwnerships)
+        verify(mockPropertyService).deleteProperties(properties)
+        verify(mockLicenceService).deleteLicenses(listOf(license))
+    }
+
+    @Test
     fun `addDeregisteredPropertyAndOwnershipIdsToSession appends a new pair of entity ids if some are already stored in the session`() {
         // Arrange
         val propertyOwnershipId = 123.toLong()

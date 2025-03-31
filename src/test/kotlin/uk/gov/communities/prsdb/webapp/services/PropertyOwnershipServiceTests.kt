@@ -612,4 +612,32 @@ class PropertyOwnershipServiceTests {
 
         verify(mockPropertyOwnershipRepository).delete(propertyOwnership)
     }
+
+    @Test
+    fun `deletePropertyOwnerships deletes a list from the propertyOwnershipRepository`() {
+        val propertyOwnerships = listOf(MockLandlordData.createPropertyOwnership(), MockLandlordData.createPropertyOwnership())
+
+        propertyOwnershipService.deletePropertyOwnerships(propertyOwnerships)
+
+        verify(mockPropertyOwnershipRepository).deleteAll(propertyOwnerships)
+    }
+
+    @Test
+    fun `retrieveAllPropertiesForLandlord gets a list of property ownerships`() {
+        // Arrange
+        val expectedPropertyOwnerships =
+            listOf(
+                MockLandlordData.createPropertyOwnership(),
+                MockLandlordData.createPropertyOwnership(),
+            )
+        val baseUserId = "user-id"
+
+        whenever(mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_Id(baseUserId)).thenReturn(expectedPropertyOwnerships)
+
+        // Act
+        val propertyOwnerships = propertyOwnershipService.retrieveAllPropertiesForLandlord(baseUserId)
+
+        // Assert
+        assertEquals(expectedPropertyOwnerships, propertyOwnerships)
+    }
 }

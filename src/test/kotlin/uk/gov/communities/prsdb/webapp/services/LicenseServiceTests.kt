@@ -46,4 +46,13 @@ class LicenseServiceTests {
 
         verify(mockLicenseRepository).delete(licence)
     }
+
+    @Test
+    fun `deleteLicenses deletes a list from the licenseRepository`() {
+        val licenses = listOf(License(), License())
+
+        licenseService.deleteLicenses(licenses)
+
+        verify(mockLicenseRepository).deleteAll(licenses)
+    }
 }
