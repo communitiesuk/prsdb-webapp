@@ -5,7 +5,6 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -65,7 +64,6 @@ class PropertyRegistrationJourney(
         initialStepId = RegisterPropertyStepId.LookupAddress,
         validator = validator,
         journeyDataService = journeyDataService,
-        taskListUrlSegment = TASK_LIST_PATH_SEGMENT,
     ) {
     init {
         loadJourneyDataIfNotLoaded(principalName)
@@ -73,16 +71,15 @@ class PropertyRegistrationJourney(
 
     override val sections =
         listOf(
-            JourneySection(registerPropertyTasks(), "registerProperty.taskList.register.heading"),
-            JourneySection(checkAndSubmitPropertiesTasks(), "registerProperty.taskList.checkAndSubmit.heading"),
+            JourneySection(registerPropertyTasks(), "registerProperty.taskList.register.heading", "register-property"),
+            JourneySection(checkAndSubmitPropertiesTasks(), "registerProperty.taskList.checkAndSubmit.heading", "check-and-submit"),
         )
 
     override val taskListFactory =
         getTaskListViewModelFactory(
             "registerProperty.title",
             "registerProperty.taskList.heading",
-            "registerProperty.taskList.subtitle",
-            "register-property-task",
+            listOf("registerProperty.taskList.subtitle"),
         )
 
     private fun registerPropertyTasks(): List<JourneyTask<RegisterPropertyStepId>> =
