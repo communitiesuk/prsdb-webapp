@@ -32,8 +32,10 @@ class ProvideComplianceController(
     ): String {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
-        // TODO PRSD:941: Add link to task list
-        model.addAttribute("taskListUrl", "#")
+        model.addAttribute(
+            "taskListUrl",
+            "${getProvideCompliancePath(propertyOwnershipId)}/$TASK_LIST_PATH_SEGMENT",
+        )
         return "provideComplianceStartPage"
     }
 
