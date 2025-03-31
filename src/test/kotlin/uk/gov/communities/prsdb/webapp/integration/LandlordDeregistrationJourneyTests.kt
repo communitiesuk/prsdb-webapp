@@ -32,6 +32,10 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
                     .toString()
                     .contains("register-as-a-landlord"),
             )
+
+            // Check they can no longer access the landlord dashboard
+            val landlordDashboard = navigator.goToLandlordDashboard()
+            assertTrue(landlordDashboard.page.content().contains("You do not have permission to access this page"))
         }
 
         @Test
