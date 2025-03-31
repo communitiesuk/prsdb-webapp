@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.persistence.EntityExistsException
 import jakarta.persistence.EntityNotFoundException
+import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
@@ -53,6 +54,9 @@ class PropertyRegistrationServiceTests {
 
     @Mock
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
+
+    @Mock
+    private lateinit var mockSession: HttpSession
 
     @InjectMocks
     private lateinit var propertyRegistrationService: PropertyRegistrationService
