@@ -6,7 +6,6 @@ import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTRATION_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.LandlordDeregistrationAreYouSurePage
@@ -118,7 +117,8 @@ class LandlordDeregistrationJourney(
 
     private fun deregisterLandlordAndProperties(): String {
         // TODO: PRSD-891
-        return "/${REGISTER_LANDLORD_JOURNEY_URL}"
+
+        return CONFIRMATION_PATH_SEGMENT
     }
 
     private fun deregisterLandlord(): String {

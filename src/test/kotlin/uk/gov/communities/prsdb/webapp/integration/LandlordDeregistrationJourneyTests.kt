@@ -24,9 +24,15 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
             areYouSurePage.submitWantsToProceed()
 
             val reasonPage = assertPageIs(page, ReasonFormPageLandlordDeregistration::class)
-            // TODO PRSD-891 - continue the journey by submitting the reason page
+            reasonPage.form.submit()
 
-            // TODO PRSD-707 - redirect to confirmation page
+            val confirmationPage = assertPageIs(page, ConfirmationPageLandlordDeregistration::class)
+            assertThat(confirmationPage.confirmationBanner).containsText("You have deleted your account from the database")
+            assertTrue(
+                confirmationPage.page
+                    .content()
+                    .contains("You have deleted your landlord information and all your properties from the database"),
+            )
         }
 
         @Test

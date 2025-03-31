@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{deregisterLandlord.title}, ~{::main}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div id="page-contents"
+         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <div id="confirmation-banner"
+             th:replace="~{fragments/confirmationPageBanner :: confirmationPageBanner(#{deregisterLandlord.withProperties.confirmation.banner.heading}, null)}">
+        </div>
+        <h1 class="govuk-heading-l" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h1>
+        <p class="govuk-body" th:text="#{deregisterLandlord.withProperties.confirmation.paragraph.one}">
+            deregisterLandlord.withProperties.confirmation.paragraph.one
+        </p>
+        <p class="govuk-body" th:text="#{deregisterLandlord.withProperties.confirmation.paragraph.two}">
+            deregisterLandlord.withProperties.confirmation.paragraph.two
+        </p>
+        <p class="govuk-body" th:text="#{deregisterLandlord.withProperties.confirmation.paragraph.three}">
+            deregisterLandlord.withProperties.confirmation.paragraph.three
+        </p>
+    </div>
+</main>
+</html>

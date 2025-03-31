@@ -104,7 +104,6 @@ class DeregisterLandlordController(
                 .getLandlordUserHasRegisteredProperties()!!
 
         if (landlordHadRegisteredProperties) {
-            // TODO PRSD-707: create this template
             return "deregisterLandlordWithRegisteredPropertiesConfirmation"
         }
         return "deregisterLandlordWithNoPropertiesConfirmation"
