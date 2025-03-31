@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.test.context.ActiveProfiles
+import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
@@ -56,6 +57,9 @@ abstract class IntegrationTest {
 
     @SpyBean
     lateinit var clientRegistrationRepository: ClientRegistrationRepository
+
+    @MockBean
+    lateinit var s3: S3TransferManager
 
     /**
      * The mock One Login URLs are hard-coded with port 8080 in the local-no-auth profile config. However, our tests

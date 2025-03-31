@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmationPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ReasonPagePropertyDeregistration
 
 @Sql("/data-local.sql")
@@ -28,7 +29,15 @@ class PropertyDeregistrationJourneyTests : IntegrationTest() {
             )
         reasonPage.submitReason("No longer own this property")
 
-        // TOOD: : PRSD-698 - add the confirmation page
+        val confirmationPage =
+            assertPageIs(
+                page,
+                ConfirmationPagePropertyDeregistration::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+            )
+        assertThat(confirmationPage.confirmationBanner).containsText("You have deleted a property")
+
+        confirmationPage.goToDashboardButton.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
     }
 
@@ -63,10 +72,14 @@ class PropertyDeregistrationJourneyTests : IntegrationTest() {
     inner class ReasonStep {
         @Test
         fun `Reason page can be submitted without being filled in`(page: Page) {
-            val deregisterPropertyReasonPage = navigator.goToPropertyDeregistrationReasonPage(1.toLong())
+            val propertyOwnershipId = 1.toLong()
+            val deregisterPropertyReasonPage = navigator.goToPropertyDeregistrationReasonPage(propertyOwnershipId)
             deregisterPropertyReasonPage.form.submit()
-            // TOOD: PRSD-698 - change this to the confirmation page
-            assertPageIs(page, LandlordDashboardPage::class)
+            assertPageIs(
+                page,
+                ConfirmationPagePropertyDeregistration::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+            )
         }
 
         @Test

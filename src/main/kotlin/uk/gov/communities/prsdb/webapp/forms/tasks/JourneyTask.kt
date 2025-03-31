@@ -11,6 +11,7 @@ class JourneyTask<T : StepId>(
     val startingStepId: T,
     val steps: Set<Step<T>>,
     val nameKey: String? = null,
+    val hintKey: String? = null,
 ) {
     fun getTaskStatus(
         journeyData: JourneyData,
@@ -65,6 +66,7 @@ class JourneyTask<T : StepId>(
         fun <T : StepId> withOneStep(
             onlyStep: Step<T>,
             nameKey: String? = null,
-        ) = JourneyTask(onlyStep.id, setOf(onlyStep), nameKey)
+            hintKey: String? = null,
+        ) = JourneyTask(onlyStep.id, setOf(onlyStep), nameKey, hintKey)
     }
 }

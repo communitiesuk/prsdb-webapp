@@ -29,4 +29,11 @@ class RegisterLandlordControllerTests(
             status { isOk() }
         }
     }
+
+    @Test
+    fun `RegisterLandlordController returns 308 for authenticated user with trailing slash`() {
+        mvc.get("/register-as-a-landlord/").andExpect {
+            status { isPermanentRedirect() }
+        }
+    }
 }

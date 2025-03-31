@@ -4,9 +4,9 @@ import org.springframework.http.HttpStatus
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTRATION_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
-import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -72,7 +72,7 @@ class PropertyDeregistrationJourney(
                                 ),
                             BACK_URL_ATTR_NAME to PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId),
                         ),
-                ) { mapOf("singleLineAddress" to getPropertySingleLineAddress()) },
+                ) { mapOf("optionalFieldSetHeadingParam" to getPropertySingleLineAddress()) },
             // handleSubmitAndRedirect will execute. It does not have to redirect to the step specified in nextAction.
             handleSubmitAndRedirect = { newJourneyData, subPage -> areYouSureContinueToNextActionOrExitJourney(newJourneyData, subPage) },
             // This gets checked when determining whether the next step is reachable
@@ -134,6 +134,8 @@ class PropertyDeregistrationJourney(
 
         propertyRegistrationService.deregisterProperty(propertyOwnershipId)
 
+        propertyRegistrationService.addDeregisteredPropertyAndOwnershipIdsToSession(propertyOwnershipId, propertyOwnership.property.id)
+
         confirmationEmailSender.sendEmail(
             primaryLandlordEmailAddress,
             PropertyDeregistrationConfirmationEmail(
@@ -142,8 +144,7 @@ class PropertyDeregistrationJourney(
             ),
         )
 
-        // TODO: PRSD-698 - redirect to confirmation page
-        return LANDLORD_DASHBOARD_URL
+        return CONFIRMATION_PATH_SEGMENT
     }
 
     companion object {

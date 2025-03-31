@@ -4,7 +4,7 @@ plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
     kotlin("plugin.serialization") version "2.0.20"
-    id("org.springframework.boot") version "3.3.5"
+    id("org.springframework.boot") version "3.4.4"
     id("io.spring.dependency-management") version "1.1.6"
     kotlin("plugin.jpa") version "1.9.25"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
@@ -59,6 +59,9 @@ dependencies {
 
     // External service clients
     implementation("uk.gov.service.notify:notifications-java-client:5.2.1-RELEASE")
+    implementation("software.amazon.awssdk:s3:2.31.5")
+    implementation("software.amazon.awssdk.crt:aws-crt:0.36.3")
+    implementation("software.amazon.awssdk:s3-transfer-manager:2.22.0")
 
     // Development
     developmentOnly("org.springframework.boot:spring-boot-devtools")
@@ -67,7 +70,6 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testImplementation("net.sourceforge.htmlunit:htmlunit")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.springframework.security:spring-security-test")
@@ -87,6 +89,9 @@ dependencies {
 
     // CSV Data Loading
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv")
+
+    // Streaming upload without storing on local system
+    implementation("org.apache.commons:commons-fileupload2-jakarta:2.0.0-M1")
 }
 
 kotlin {

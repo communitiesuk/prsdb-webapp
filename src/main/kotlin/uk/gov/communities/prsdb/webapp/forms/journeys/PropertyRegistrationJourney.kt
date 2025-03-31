@@ -5,7 +5,6 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -14,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.AlreadyRegisteredPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationCheckAnswersPage
+import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationNumberOfPeoplePage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
@@ -64,7 +64,6 @@ class PropertyRegistrationJourney(
         initialStepId = RegisterPropertyStepId.LookupAddress,
         validator = validator,
         journeyDataService = journeyDataService,
-        taskListUrlSegment = TASK_LIST_PATH_SEGMENT,
     ) {
     init {
         loadJourneyDataIfNotLoaded(principalName)
@@ -72,16 +71,15 @@ class PropertyRegistrationJourney(
 
     override val sections =
         listOf(
-            JourneySection(registerPropertyTasks(), "registerProperty.taskList.register.heading"),
-            JourneySection(checkAndSubmitPropertiesTasks(), "registerProperty.taskList.checkAndSubmit.heading"),
+            JourneySection(registerPropertyTasks(), "registerProperty.taskList.register.heading", "register-property"),
+            JourneySection(checkAndSubmitPropertiesTasks(), "registerProperty.taskList.checkAndSubmit.heading", "check-and-submit"),
         )
 
     override val taskListFactory =
         getTaskListViewModelFactory(
             "registerProperty.title",
             "registerProperty.taskList.heading",
-            "registerProperty.taskList.subtitle",
-            "register-property-task",
+            listOf("registerProperty.taskList.subtitle"),
         )
 
     private fun registerPropertyTasks(): List<JourneyTask<RegisterPropertyStepId>> =
@@ -334,73 +332,6 @@ class PropertyRegistrationJourney(
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.LicensingType, null) },
         )
 
-    private fun occupancyStep() =
-        Step(
-            id = RegisterPropertyStepId.Occupancy,
-            page =
-                Page(
-                    formModel = OccupancyFormModel::class,
-                    templateName = "forms/propertyOccupancyForm",
-                    content =
-                        mapOf(
-                            "title" to "registerProperty.title",
-                            "fieldSetHeading" to "forms.occupancy.fieldSetHeading",
-                            "radioOptions" to
-                                listOf(
-                                    RadiosButtonViewModel(
-                                        value = true,
-                                        labelMsgKey = "forms.radios.option.yes.label",
-                                        hintMsgKey = "forms.occupancy.radios.option.yes.hint",
-                                    ),
-                                    RadiosButtonViewModel(
-                                        value = false,
-                                        labelMsgKey = "forms.radios.option.no.label",
-                                        hintMsgKey = "forms.occupancy.radios.option.no.hint",
-                                    ),
-                                ),
-                        ),
-                    shouldDisplaySectionHeader = true,
-                ),
-            nextAction = { journeyData, _ -> occupancyNextAction(journeyData) },
-        )
-
-    private fun numberOfHouseholdsStep() =
-        Step(
-            id = RegisterPropertyStepId.NumberOfHouseholds,
-            page =
-                Page(
-                    formModel = NumberOfHouseholdsFormModel::class,
-                    templateName = "forms/numberOfHouseholdsForm",
-                    content =
-                        mapOf(
-                            "title" to "registerProperty.title",
-                            "fieldSetHeading" to "forms.numberOfHouseholds.fieldSetHeading",
-                            "label" to "forms.numberOfHouseholds.label",
-                        ),
-                    shouldDisplaySectionHeader = true,
-                ),
-            nextAction = { _, _ -> Pair(RegisterPropertyStepId.NumberOfPeople, null) },
-        )
-
-    private fun numberOfPeopleStep() =
-        Step(
-            id = RegisterPropertyStepId.NumberOfPeople,
-            page =
-                Page(
-                    formModel = NumberOfPeopleFormModel::class,
-                    templateName = "forms/numberOfPeopleForm",
-                    content =
-                        mapOf(
-                            "title" to "registerProperty.title",
-                            "fieldSetHeading" to "forms.numberOfPeople.fieldSetHeading",
-                            "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
-                            "label" to "forms.numberOfPeople.label",
-                        ),
-                    shouldDisplaySectionHeader = true,
-                ),
-            nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
-        )
-
     private fun licensingTypeStep() =
         Step(
             id = RegisterPropertyStepId.LicensingType,
@@ -506,6 +437,74 @@ class PropertyRegistrationJourney(
                     shouldDisplaySectionHeader = true,
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.Occupancy, null) },
+        )
+
+    private fun occupancyStep() =
+        Step(
+            id = RegisterPropertyStepId.Occupancy,
+            page =
+                Page(
+                    formModel = OccupancyFormModel::class,
+                    templateName = "forms/propertyOccupancyForm",
+                    content =
+                        mapOf(
+                            "title" to "registerProperty.title",
+                            "fieldSetHeading" to "forms.occupancy.fieldSetHeading",
+                            "radioOptions" to
+                                listOf(
+                                    RadiosButtonViewModel(
+                                        value = true,
+                                        labelMsgKey = "forms.radios.option.yes.label",
+                                        hintMsgKey = "forms.occupancy.radios.option.yes.hint",
+                                    ),
+                                    RadiosButtonViewModel(
+                                        value = false,
+                                        labelMsgKey = "forms.radios.option.no.label",
+                                        hintMsgKey = "forms.occupancy.radios.option.no.hint",
+                                    ),
+                                ),
+                        ),
+                    shouldDisplaySectionHeader = true,
+                ),
+            nextAction = { journeyData, _ -> occupancyNextAction(journeyData) },
+        )
+
+    private fun numberOfHouseholdsStep() =
+        Step(
+            id = RegisterPropertyStepId.NumberOfHouseholds,
+            page =
+                Page(
+                    formModel = NumberOfHouseholdsFormModel::class,
+                    templateName = "forms/numberOfHouseholdsForm",
+                    content =
+                        mapOf(
+                            "title" to "registerProperty.title",
+                            "fieldSetHeading" to "forms.numberOfHouseholds.fieldSetHeading",
+                            "label" to "forms.numberOfHouseholds.label",
+                        ),
+                    shouldDisplaySectionHeader = true,
+                ),
+            nextAction = { _, _ -> Pair(RegisterPropertyStepId.NumberOfPeople, null) },
+        )
+
+    private fun numberOfPeopleStep() =
+        Step(
+            id = RegisterPropertyStepId.NumberOfPeople,
+            page =
+                PropertyRegistrationNumberOfPeoplePage(
+                    formModel = NumberOfPeopleFormModel::class,
+                    templateName = "forms/numberOfPeopleForm",
+                    content =
+                        mapOf(
+                            "title" to "registerProperty.title",
+                            "fieldSetHeading" to "forms.numberOfPeople.fieldSetHeading",
+                            "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
+                            "label" to "forms.numberOfPeople.label",
+                        ),
+                    shouldDisplaySectionHeader = true,
+                    journeyDataService = journeyDataService,
+                ),
+            nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
         )
 
     private fun checkAnswersStep() =

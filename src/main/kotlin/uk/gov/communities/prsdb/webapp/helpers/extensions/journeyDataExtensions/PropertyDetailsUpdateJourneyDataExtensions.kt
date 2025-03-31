@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions
 
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
@@ -41,11 +42,39 @@ class PropertyDetailsUpdateJourneyDataExtensions {
                 )
             }
 
+        fun JourneyData.getLicensingTypeUpdateIfPresent(): LicensingType? =
+            JourneyDataHelper.getFieldEnumValue<LicensingType>(
+                this,
+                UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment,
+                "licensingType",
+            )
+
+        fun JourneyData.getLicenceNumberUpdateIfPresent(originalJourneyKey: String): String? {
+            val licensingType = this.getLicensingTypeUpdateIfPresent() ?: this.getOriginalLicensingType(originalJourneyKey) ?: return null
+            if (licensingType == LicensingType.NO_LICENSING) {
+                return null
+            } else {
+                val licenseNumberUpdateStepId = getLicenceNumberUpdateStepId(licensingType)
+                return JourneyDataHelper.getFieldStringValue(this, licenseNumberUpdateStepId!!.urlPathSegment, "licenceNumber")
+            }
+        }
+
+        fun getLicenceNumberUpdateStepId(licensingType: LicensingType?): UpdatePropertyDetailsStepId? =
+            when (licensingType) {
+                LicensingType.SELECTIVE_LICENCE -> UpdatePropertyDetailsStepId.UpdateSelectiveLicence
+                LicensingType.HMO_MANDATORY_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence
+                LicensingType.HMO_ADDITIONAL_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoAdditionalLicence
+                else -> null
+            }
+
         private fun JourneyData.getIsOccupied() =
             JourneyDataHelper.getFieldBooleanValue(
                 this,
                 UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment,
                 "occupied",
             )
+
+        private fun JourneyData.getOriginalLicensingType(originalJourneyKey: String) =
+            JourneyDataHelper.getPageData(this, originalJourneyKey)?.getLicensingTypeUpdateIfPresent()
     }
 }
