@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTRATION_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
@@ -126,8 +127,7 @@ class LandlordDeregistrationJourney(
 
         refreshUserRoles()
 
-        // TODO: PRSD-705 - redirect to confirmation page
-        return "/${REGISTER_LANDLORD_JOURNEY_URL}"
+        return CONFIRMATION_PATH_SEGMENT
     }
 
     private fun refreshUserRoles() {
