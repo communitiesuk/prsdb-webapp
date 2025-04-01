@@ -32,5 +32,5 @@ class LandlordDeregistrationService(
             hadActiveProperties,
         )
 
-    fun getLandlordHadActivePropertiesFromSession(): Boolean = (session.getAttribute(LANDLORD_HAD_ACTIVE_PROPERTIES) == true)
+    fun getLandlordHadActivePropertiesFromSession(): Boolean = session.getAttribute(LANDLORD_HAD_ACTIVE_PROPERTIES) == true
 }
