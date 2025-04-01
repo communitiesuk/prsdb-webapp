@@ -3,6 +3,9 @@ package uk.gov.communities.prsdb.webapp.forms.steps
 enum class ProvideComplianceStepId(
     override val urlPathSegment: String,
 ) : StepId {
-    InitialPlaceholder("initial-placeholder"),
-    NonInitialPlaceholder("non-initial-placeholder"),
+    GasSafety("gas-safety"),
+    EICR("eicr"),
+    EPC("epc"),
+    CheckAndSubmit("check-and-submit"),
+    Declaration("declaration"),
 }

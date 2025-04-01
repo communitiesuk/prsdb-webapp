@@ -15,7 +15,7 @@ class ComplianceProvisionJourney(
     journeyDataService: JourneyDataService,
 ) : JourneyWithTaskList<ProvideComplianceStepId>(
         journeyType = JourneyType.COMPLIANCE_PROVISION,
-        initialStepId = ProvideComplianceStepId.InitialPlaceholder,
+        initialStepId = ProvideComplianceStepId.GasSafety,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
@@ -38,16 +38,17 @@ class ComplianceProvisionJourney(
             listOf(
                 // TODO PRSD-942: Implement gas safety certificate upload task
                 JourneyTask.withOneStep(
-                    placeholderStep(isInitialStep = true),
+                    placeholderStep(ProvideComplianceStepId.GasSafety, "TODO PRSD-942: Implement gas safety certificate upload task"),
                     "provideCompliance.taskList.upload.gasSafety",
                 ),
                 // TODO PRSD-954: Implement EICR upload task
                 JourneyTask.withOneStep(
-                    placeholderStep(),
+                    placeholderStep(ProvideComplianceStepId.EICR, "TODO PRSD-954: Implement EICR upload task"),
                     "provideCompliance.taskList.upload.eicr",
                 ),
+                // TODO PRSD-395: Implement EICR upload task
                 JourneyTask.withOneStep(
-                    placeholderStep(),
+                    placeholderStep(ProvideComplianceStepId.EPC, "TODO PRSD-395: Implement EPC task"),
                     "provideCompliance.taskList.upload.epc",
                     "provideCompliance.taskList.upload.epc.hint",
                 ),
@@ -57,14 +58,22 @@ class ComplianceProvisionJourney(
         get() =
             listOf(
                 // TODO PRSD-962: Implement check and submit task
-                JourneyTask.withOneStep(placeholderStep(), "provideCompliance.taskList.checkAndSubmit.check"),
+                JourneyTask.withOneStep(
+                    placeholderStep(ProvideComplianceStepId.CheckAndSubmit, "TODO PRSD-962: Implement check and submit task"),
+                    "provideCompliance.taskList.checkAndSubmit.check",
+                ),
                 // TODO PRSD-963: Implement declaration task
-                JourneyTask.withOneStep(placeholderStep(), "provideCompliance.taskList.checkAndSubmit.declare"),
+                JourneyTask.withOneStep(
+                    placeholderStep(ProvideComplianceStepId.Declaration, "TODO PRSD-963: Implement declaration task"),
+                    "provideCompliance.taskList.checkAndSubmit.declare",
+                ),
             )
 
-    private fun placeholderStep(isInitialStep: Boolean = false) =
-        Step(
-            id = if (isInitialStep) ProvideComplianceStepId.InitialPlaceholder else ProvideComplianceStepId.NonInitialPlaceholder,
-            page = Page(formModel = NoInputFormModel::class, templateName = "error/404", content = emptyMap()),
-        )
+    private fun placeholderStep(
+        stepId: ProvideComplianceStepId,
+        todoComment: String,
+    ) = Step(
+        id = stepId,
+        page = Page(formModel = NoInputFormModel::class, templateName = "todo", content = mapOf("todoComment" to todoComment)),
+    )
 }
