@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.servlet.http.HttpSession
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
@@ -9,6 +11,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_HAD_ACTIVE_PROPERTIES
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -26,6 +29,9 @@ class LandlordDeregistrationServiceTests {
 
     @Mock
     private lateinit var mockPropertyDeregistrationService: PropertyDeregistrationService
+
+    @Mock
+    private lateinit var mockHttpSession: HttpSession
 
     @InjectMocks
     private lateinit var landlordDeregistrationService: LandlordDeregistrationService
@@ -74,5 +80,19 @@ class LandlordDeregistrationServiceTests {
         landlordDeregistrationService.deregisterLandlordAndTheirProperties(baseUserId)
 
         verify(mockPropertyDeregistrationService, never()).deregisterProperties(any())
+    }
+
+    @Test
+    fun `addLandlordHadActivePropertiesToSession adds a boolean attribute to the session`() {
+        landlordDeregistrationService.addLandlordHadActivePropertiesToSession(true)
+
+        verify(mockHttpSession).setAttribute(LANDLORD_HAD_ACTIVE_PROPERTIES, true)
+    }
+
+    @Test
+    fun `getLandlordHadActivePropertiesFromSession gets a boolean from the session`() {
+        whenever(mockHttpSession.getAttribute(LANDLORD_HAD_ACTIVE_PROPERTIES)).thenReturn(true)
+
+        assertTrue(landlordDeregistrationService.getLandlordHadActivePropertiesFromSession())
     }
 }

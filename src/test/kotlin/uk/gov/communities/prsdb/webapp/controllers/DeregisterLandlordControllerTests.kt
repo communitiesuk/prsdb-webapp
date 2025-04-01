@@ -15,14 +15,12 @@ import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationCheckUserPropertiesFormModel.Companion.USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
-import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @WebMvcTest(DeregisterLandlordController::class)
@@ -39,10 +37,7 @@ class DeregisterLandlordControllerTests(
     private lateinit var landlordDeregistrationJourney: LandlordDeregistrationJourney
 
     @MockitoBean
-    private lateinit var journeyDataServiceFactory: JourneyDataServiceFactory
-
-    @MockitoBean
-    private lateinit var journeyDataService: JourneyDataService
+    private lateinit var landlordDeregistrationService: LandlordDeregistrationService
 
     @Test
     fun `checkForRegisteredProperties returns a redirect for an unauthenticated user`() {
@@ -92,16 +87,7 @@ class DeregisterLandlordControllerTests(
     @Test
     @WithMockUser
     fun `getConfirmation returns 200 if the current user is not in the landlord database`() {
-        val journeyData =
-            mutableMapOf(
-                DeregisterLandlordStepId.CheckForUserProperties.urlPathSegment to
-                    mutableMapOf(
-                        USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY to false,
-                    ),
-            ) as JourneyData
-        journeyDataService = mock()
-        whenever(journeyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
-        whenever(journeyDataServiceFactory.create(DEREGISTER_LANDLORD_JOURNEY_URL)).thenReturn(journeyDataService)
+        whenever(landlordDeregistrationService.getLandlordHadActivePropertiesFromSession()).thenReturn(false)
 
         mvc
             .get("/$DEREGISTER_LANDLORD_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")

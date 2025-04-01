@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTRATION_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.LandlordDeregistrationAreYouSurePage
@@ -119,14 +118,10 @@ class LandlordDeregistrationJourney(
 
     private fun deregisterLandlordAndProperties(userHadActiveProperties: Boolean): String {
         val baseUserId = SecurityContextHolder.getContext().authentication.name
+        landlordDeregistrationService.addLandlordHadActivePropertiesToSession(userHadActiveProperties)
         landlordDeregistrationService.deregisterLandlordAndTheirProperties(baseUserId)
-
         refreshUserRoles()
-
-        if (userHadActiveProperties) {
-            // TODO: PRSD-707 - redirect to confirmation page
-            return "/${REGISTER_LANDLORD_JOURNEY_URL}"
-        }
+        journeyDataService.clearJourneyDataFromSession()
 
         return CONFIRMATION_PATH_SEGMENT
     }
