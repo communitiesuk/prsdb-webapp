@@ -1,6 +1,6 @@
 <!--/*@thymesVar id="section" type="uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskSectionViewModel"*/-->
-<th:block th:fragment="sectionTaskList(section, sectionNumber)">
-    <h2 class="govuk-heading-m" th:text="|${sectionNumber}.  #{${section.headingKey}}|">sectionNumber. sectionHeading</h2>
+<th:block th:fragment="sectionTaskList(section, sectionNumber, numberSections)">
+    <h2 class="govuk-heading-m" th:text="${numberSections ? sectionNumber + '. ' : ''} + #{${section.headingKey}}">sectionNumber. sectionHeading</h2>
     <ul class="govuk-task-list">
         <th:block th:each="task, iteratorStatus: ${section.tasks}" th:with="taskListItemBaseId=${section.sectionId} + '-' + ${iteratorStatus.count}">
             <li th:replace="~{fragments/taskList/taskListItem :: taskListItem(${task}, ${taskListItemBaseId})}"></li>

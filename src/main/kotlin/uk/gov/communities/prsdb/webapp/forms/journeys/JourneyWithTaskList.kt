@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
-import org.springframework.ui.Model
 import org.springframework.validation.Validator
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
@@ -22,21 +22,23 @@ abstract class JourneyWithTaskList<T : StepId>(
 
     override val unreachableStepRedirect = taskListUrlSegment
 
-    fun populateModelAndGetTaskListViewName(model: Model): String {
+    fun getModelAndViewForTaskList(): ModelAndView {
         val journeyData = journeyDataService.getJourneyDataFromSession()
-        model.addAttribute("taskListViewModel", taskListFactory.getTaskListViewModel(journeyData))
-        return "taskList"
+        val model = mapOf("taskListViewModel" to taskListFactory.getTaskListViewModel(journeyData))
+        return ModelAndView("taskList", model)
     }
 
     protected fun getTaskListViewModelFactory(
         titleKey: String,
         headingKey: String,
         subtitleKeys: List<String>,
+        numberSections: Boolean = true,
     ) = TaskListViewModelFactory(
         titleKey,
         headingKey,
         subtitleKeys,
         sections,
+        numberSections,
     ) { task, journeyData -> getTaskStatus(task, journeyData) }
 
     private fun getTaskStatus(

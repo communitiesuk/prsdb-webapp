@@ -5,4 +5,5 @@ data class TaskListViewModel(
     val pageHeading: String,
     val subtitles: List<String>,
     val taskSections: List<TaskSectionViewModel>,
+    val numberSections: Boolean = true,
 )
