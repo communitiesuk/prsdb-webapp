@@ -16,6 +16,7 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.journeys.ComplianceProvisionJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.ComplianceProvisionJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.steps.ProvideComplianceStepId
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @WebMvcTest(ProvideComplianceController::class)
@@ -33,14 +34,20 @@ class ProvideComplianceControllerTests(
 
     private val validPropertyOwnershipId = 1L
     private val validProvideComplianceUrl = ProvideComplianceController.getProvideCompliancePath(validPropertyOwnershipId)
+    private val validProvideComplianceTaskListUrl = "$validProvideComplianceUrl/$TASK_LIST_PATH_SEGMENT"
+    private val validProvideComplianceJourneyStepUrl = "$validProvideComplianceUrl/${ProvideComplianceStepId.GasSafety.urlPathSegment}"
 
     private val invalidPropertyOwnershipId = 2L
     private val invalidProvideComplianceUrl = ProvideComplianceController.getProvideCompliancePath(invalidPropertyOwnershipId)
+    private val invalidProvideComplianceTaskListUrl = "$invalidProvideComplianceUrl/$TASK_LIST_PATH_SEGMENT"
+    private val invalidProvideComplianceJourneyStepUrl = "$invalidProvideComplianceUrl/${ProvideComplianceStepId.GasSafety.urlPathSegment}"
 
     @BeforeEach
     fun setUp() {
         whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(validPropertyOwnershipId), any())).thenReturn(true)
         whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(invalidPropertyOwnershipId), any())).thenReturn(false)
+
+        whenever(complianceProvisionJourneyFactory.create(validPropertyOwnershipId)).thenReturn(complianceProvisionJourney)
     }
 
     @Nested
@@ -79,14 +86,6 @@ class ProvideComplianceControllerTests(
 
     @Nested
     inner class GetTaskList {
-        private val validProvideComplianceTaskListUrl = "$validProvideComplianceUrl/$TASK_LIST_PATH_SEGMENT"
-        private val invalidProvideComplianceTaskListUrl = "$invalidProvideComplianceUrl/$TASK_LIST_PATH_SEGMENT"
-
-        @BeforeEach
-        fun setUp() {
-            whenever(complianceProvisionJourneyFactory.create(validPropertyOwnershipId)).thenReturn(complianceProvisionJourney)
-        }
-
         @Test
         fun `getTaskList returns a redirect for unauthenticated user`() {
             mvc.get(validProvideComplianceTaskListUrl).andExpect {
@@ -114,6 +113,40 @@ class ProvideComplianceControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `getTaskList returns 200 for a landlord user that does own the property`() {
             mvc.get(validProvideComplianceTaskListUrl).andExpect {
+                status { isOk() }
+            }
+        }
+    }
+
+    @Nested
+    inner class GetJourneyStep {
+        @Test
+        fun `getJourneyStep returns a redirect for unauthenticated user`() {
+            mvc.get(validProvideComplianceJourneyStepUrl).andExpect {
+                status { is3xxRedirection() }
+            }
+        }
+
+        @Test
+        @WithMockUser
+        fun `getJourneyStep returns 403 for an unauthorised user`() {
+            mvc.get(validProvideComplianceJourneyStepUrl).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getJourneyStep returns 404 for a landlord user that doesn't own the property`() {
+            mvc.get(invalidProvideComplianceJourneyStepUrl).andExpect {
+                status { isNotFound() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getJourneyStep returns 200 for a landlord user that does own the property`() {
+            mvc.get(validProvideComplianceJourneyStepUrl).andExpect {
                 status { isOk() }
             }
         }

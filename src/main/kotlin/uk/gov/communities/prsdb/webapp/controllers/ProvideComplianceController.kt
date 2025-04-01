@@ -7,6 +7,7 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
@@ -49,6 +50,20 @@ class ProvideComplianceController(
         return complianceProvisionJourneyFactory
             .create(propertyOwnershipId)
             .getModelAndViewForTaskList()
+    }
+
+    @GetMapping("/{stepName}")
+    fun getJourneyStep(
+        @PathVariable propertyOwnershipId: Long,
+        @PathVariable("stepName") stepName: String,
+        @RequestParam(value = "subpage", required = false) subpage: Int?,
+        principal: Principal,
+    ): ModelAndView {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+
+        return complianceProvisionJourneyFactory
+            .create(propertyOwnershipId)
+            .getModelAndViewForStep(stepName, subpage)
     }
 
     private fun throwErrorIfUserIsNotAuthorized(
