@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.steps
 
-enum class ProvideComplianceStepId(
+enum class PropertyComplianceStepId(
     override val urlPathSegment: String,
 ) : StepId {
     GasSafety("gas-safety"),

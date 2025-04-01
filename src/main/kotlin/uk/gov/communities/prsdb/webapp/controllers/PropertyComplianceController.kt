@@ -11,19 +11,19 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
-import uk.gov.communities.prsdb.webapp.constants.PROVIDE_COMPLIANCE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_COMPLIANCE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.ProvideComplianceController.Companion.PROVIDE_COMPLIANCE_ROUTE
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.ComplianceProvisionJourneyFactory
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.PROPERTY_COMPLIANCE_ROUTE
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
 @Controller
 @PreAuthorize("hasRole('LANDLORD')")
-@RequestMapping(PROVIDE_COMPLIANCE_ROUTE)
-class ProvideComplianceController(
+@RequestMapping(PROPERTY_COMPLIANCE_ROUTE)
+class PropertyComplianceController(
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val complianceProvisionJourneyFactory: ComplianceProvisionJourneyFactory,
+    private val propertyComplianceJourneyFactory: PropertyComplianceJourneyFactory,
 ) {
     @GetMapping
     fun index(
@@ -35,9 +35,9 @@ class ProvideComplianceController(
 
         model.addAttribute(
             "taskListUrl",
-            "${getProvideCompliancePath(propertyOwnershipId)}/$TASK_LIST_PATH_SEGMENT",
+            "${getPropertyCompliancePath(propertyOwnershipId)}/$TASK_LIST_PATH_SEGMENT",
         )
-        return "provideComplianceStartPage"
+        return "propertyComplianceStartPage"
     }
 
     @GetMapping("/$TASK_LIST_PATH_SEGMENT")
@@ -47,7 +47,7 @@ class ProvideComplianceController(
     ): ModelAndView {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
-        return complianceProvisionJourneyFactory
+        return propertyComplianceJourneyFactory
             .create(propertyOwnershipId)
             .getModelAndViewForTaskList()
     }
@@ -61,7 +61,7 @@ class ProvideComplianceController(
     ): ModelAndView {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
-        return complianceProvisionJourneyFactory
+        return propertyComplianceJourneyFactory
             .create(propertyOwnershipId)
             .getModelAndViewForStep(stepName, subpage)
     }
@@ -79,9 +79,9 @@ class ProvideComplianceController(
     }
 
     companion object {
-        const val PROVIDE_COMPLIANCE_ROUTE = "/$PROVIDE_COMPLIANCE_PATH_SEGMENT/{propertyOwnershipId}"
+        const val PROPERTY_COMPLIANCE_ROUTE = "/$PROPERTY_COMPLIANCE_PATH_SEGMENT/{propertyOwnershipId}"
 
-        fun getProvideCompliancePath(propertyOwnershipId: Long): String =
-            UriTemplate(PROVIDE_COMPLIANCE_ROUTE).expand(propertyOwnershipId).toASCIIString()
+        fun getPropertyCompliancePath(propertyOwnershipId: Long): String =
+            UriTemplate(PROPERTY_COMPLIANCE_ROUTE).expand(propertyOwnershipId).toASCIIString()
     }
 }

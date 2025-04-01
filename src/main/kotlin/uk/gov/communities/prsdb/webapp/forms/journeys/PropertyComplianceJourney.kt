@@ -3,33 +3,33 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
-import uk.gov.communities.prsdb.webapp.forms.steps.ProvideComplianceStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
-class ComplianceProvisionJourney(
+class PropertyComplianceJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
-) : JourneyWithTaskList<ProvideComplianceStepId>(
-        journeyType = JourneyType.COMPLIANCE_PROVISION,
-        initialStepId = ProvideComplianceStepId.GasSafety,
+) : JourneyWithTaskList<PropertyComplianceStepId>(
+        journeyType = JourneyType.PROPERTY_COMPLIANCE,
+        initialStepId = PropertyComplianceStepId.GasSafety,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
     override val sections =
         listOf(
-            JourneySection(uploadTasks, "provideCompliance.taskList.upload.heading", "upload-certificates"),
-            JourneySection(checkAndSubmitTasks, "provideCompliance.taskList.checkAndSubmit.heading", "check-and-submit"),
+            JourneySection(uploadTasks, "propertyCompliance.taskList.upload.heading", "upload-certificates"),
+            JourneySection(checkAndSubmitTasks, "propertyCompliance.taskList.checkAndSubmit.heading", "check-and-submit"),
         )
 
     override val taskListFactory =
         getTaskListViewModelFactory(
-            "provideCompliance.title",
-            "provideCompliance.taskList.heading",
-            listOf("provideCompliance.taskList.subtitle.one", "provideCompliance.taskList.subtitle.two"),
+            "propertyCompliance.title",
+            "propertyCompliance.taskList.heading",
+            listOf("propertyCompliance.taskList.subtitle.one", "propertyCompliance.taskList.subtitle.two"),
             numberSections = false,
         )
 
@@ -38,19 +38,19 @@ class ComplianceProvisionJourney(
             listOf(
                 // TODO PRSD-942: Implement gas safety certificate upload task
                 JourneyTask.withOneStep(
-                    placeholderStep(ProvideComplianceStepId.GasSafety, "TODO PRSD-942: Implement gas safety certificate upload task"),
-                    "provideCompliance.taskList.upload.gasSafety",
+                    placeholderStep(PropertyComplianceStepId.GasSafety, "TODO PRSD-942: Implement gas safety certificate upload task"),
+                    "propertyCompliance.taskList.upload.gasSafety",
                 ),
                 // TODO PRSD-954: Implement EICR upload task
                 JourneyTask.withOneStep(
-                    placeholderStep(ProvideComplianceStepId.EICR, "TODO PRSD-954: Implement EICR upload task"),
-                    "provideCompliance.taskList.upload.eicr",
+                    placeholderStep(PropertyComplianceStepId.EICR, "TODO PRSD-954: Implement EICR upload task"),
+                    "propertyCompliance.taskList.upload.eicr",
                 ),
                 // TODO PRSD-395: Implement EICR upload task
                 JourneyTask.withOneStep(
-                    placeholderStep(ProvideComplianceStepId.EPC, "TODO PRSD-395: Implement EPC task"),
-                    "provideCompliance.taskList.upload.epc",
-                    "provideCompliance.taskList.upload.epc.hint",
+                    placeholderStep(PropertyComplianceStepId.EPC, "TODO PRSD-395: Implement EPC task"),
+                    "propertyCompliance.taskList.upload.epc",
+                    "propertyCompliance.taskList.upload.epc.hint",
                 ),
             )
 
@@ -59,18 +59,18 @@ class ComplianceProvisionJourney(
             listOf(
                 // TODO PRSD-962: Implement check and submit task
                 JourneyTask.withOneStep(
-                    placeholderStep(ProvideComplianceStepId.CheckAndSubmit, "TODO PRSD-962: Implement check and submit task"),
-                    "provideCompliance.taskList.checkAndSubmit.check",
+                    placeholderStep(PropertyComplianceStepId.CheckAndSubmit, "TODO PRSD-962: Implement check and submit task"),
+                    "propertyCompliance.taskList.checkAndSubmit.check",
                 ),
                 // TODO PRSD-963: Implement declaration task
                 JourneyTask.withOneStep(
-                    placeholderStep(ProvideComplianceStepId.Declaration, "TODO PRSD-963: Implement declaration task"),
-                    "provideCompliance.taskList.checkAndSubmit.declare",
+                    placeholderStep(PropertyComplianceStepId.Declaration, "TODO PRSD-963: Implement declaration task"),
+                    "propertyCompliance.taskList.checkAndSubmit.declare",
                 ),
             )
 
     private fun placeholderStep(
-        stepId: ProvideComplianceStepId,
+        stepId: PropertyComplianceStepId,
         todoComment: String,
     ) = Step(
         id = stepId,
