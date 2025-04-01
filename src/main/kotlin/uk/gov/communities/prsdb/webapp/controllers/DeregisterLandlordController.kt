@@ -103,10 +103,11 @@ class DeregisterLandlordController(
                 .getJourneyDataFromSession()
                 .getLandlordUserHasRegisteredProperties()!!
 
-        if (landlordHadRegisteredProperties) {
-            return "deregisterLandlordWithRegisteredPropertiesConfirmation"
+        return if (landlordHadRegisteredProperties) {
+            "deregisterLandlordWithRegisteredPropertiesConfirmation"
+        } else {
+            "deregisterLandlordWithNoPropertiesConfirmation"
         }
-        return "deregisterLandlordWithNoPropertiesConfirmation"
     }
 
     companion object {
