@@ -102,7 +102,7 @@ class RegisterPropertyController(
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
         )
         model.addAttribute("isOccupied", propertyOwnership.isOccupied)
-        model.addAttribute("provideComplianceUrl", ProvideComplianceController.getProvideCompliancePath(propertyOwnership.id))
+        model.addAttribute("propertyComplianceUrl", PropertyComplianceController.getPropertyCompliancePath(propertyOwnership.id))
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
 
         return "registerPropertyConfirmation"
