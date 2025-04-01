@@ -97,7 +97,7 @@ class LandlordDeregistrationJourney(
                             "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> deregisterLandlordAndProperties(userHadRegisteredProperties = true) },
+            handleSubmitAndRedirect = { _, _ -> deregisterLandlordAndProperties(userHadActiveProperties = true) },
             saveAfterSubmit = false,
         )
 
@@ -109,7 +109,7 @@ class LandlordDeregistrationJourney(
             if (!journeyData.getLandlordUserHasRegisteredProperties()!!) {
                 // journeyData.getLandlordUserHasRegisteredProperties() only checked for active, registered properties.
                 // To delete the landlord, we must first delete all their properties including inactive ones.
-                return deregisterLandlordAndProperties(userHadRegisteredProperties = false)
+                return deregisterLandlordAndProperties(userHadActiveProperties = false)
             }
             val areYouSureStep = steps.single { it.id == DeregisterLandlordStepId.AreYouSure }
             return getRedirectForNextStep(areYouSureStep, journeyData, subPageNumber)
@@ -117,13 +117,13 @@ class LandlordDeregistrationJourney(
         return "/$LANDLORD_DETAILS_PATH_SEGMENT"
     }
 
-    private fun deregisterLandlordAndProperties(userHadRegisteredProperties: Boolean): String {
+    private fun deregisterLandlordAndProperties(userHadActiveProperties: Boolean): String {
         val baseUserId = SecurityContextHolder.getContext().authentication.name
         landlordDeregistrationService.deregisterLandlordAndTheirProperties(baseUserId)
 
         refreshUserRoles()
 
-        if (userHadRegisteredProperties) {
+        if (userHadActiveProperties) {
             // TODO: PRSD-707 - redirect to confirmation page
             return "/${REGISTER_LANDLORD_JOURNEY_URL}"
         }

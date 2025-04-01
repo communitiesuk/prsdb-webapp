@@ -13,6 +13,7 @@ class PropertyDeregistrationService(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val session: HttpSession,
 ) {
+    @Transactional
     fun deregisterProperty(propertyOwnershipId: Long) {
         propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)?.let {
             propertyOwnershipService.deletePropertyOwnership(it)
