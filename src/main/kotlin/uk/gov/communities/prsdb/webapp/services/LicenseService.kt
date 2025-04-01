@@ -21,8 +21,12 @@ class LicenseService(
             ),
         )
 
-    fun deleteLicence(license: License) {
+    fun deleteLicense(license: License) {
         licenseRepository.delete(license)
+    }
+
+    fun deleteLicenses(licenses: List<License>) {
+        licenseRepository.deleteAll(licenses)
     }
 
     @Transactional
@@ -32,7 +36,7 @@ class LicenseService(
         updateLicenceNumber: String?,
     ): License? =
         if (updateLicenceType == LicensingType.NO_LICENSING) {
-            license?.let { deleteLicence(license) }
+            license?.let { deleteLicense(license) }
             null
         } else if (license == null) {
             createLicense(updateLicenceType!!, updateLicenceNumber!!)

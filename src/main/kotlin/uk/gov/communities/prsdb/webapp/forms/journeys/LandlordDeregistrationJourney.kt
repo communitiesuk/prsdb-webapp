@@ -1,5 +1,4 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
-
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
@@ -98,7 +97,7 @@ class LandlordDeregistrationJourney(
                             "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> deregisterLandlordAndProperties() },
+            handleSubmitAndRedirect = { _, _ -> deregisterLandlordAndProperties(userHadActiveProperties = true) },
             saveAfterSubmit = false,
         )
 
@@ -108,7 +107,9 @@ class LandlordDeregistrationJourney(
     ): String {
         if (journeyData.getWantsToProceed()!!) {
             if (!journeyData.getLandlordUserHasRegisteredProperties()!!) {
-                return deregisterLandlord()
+                // journeyData.getLandlordUserHasRegisteredProperties() only checked for active, registered properties.
+                // To delete the landlord, we must first delete all their properties including inactive ones.
+                return deregisterLandlordAndProperties(userHadActiveProperties = false)
             }
             val areYouSureStep = steps.single { it.id == DeregisterLandlordStepId.AreYouSure }
             return getRedirectForNextStep(areYouSureStep, journeyData, subPageNumber)
@@ -116,16 +117,16 @@ class LandlordDeregistrationJourney(
         return "/$LANDLORD_DETAILS_PATH_SEGMENT"
     }
 
-    private fun deregisterLandlordAndProperties(): String {
-        // TODO: PRSD-891
-        return "/${REGISTER_LANDLORD_JOURNEY_URL}"
-    }
-
-    private fun deregisterLandlord(): String {
+    private fun deregisterLandlordAndProperties(userHadActiveProperties: Boolean): String {
         val baseUserId = SecurityContextHolder.getContext().authentication.name
-        landlordDeregistrationService.deregisterLandlord(baseUserId)
+        landlordDeregistrationService.deregisterLandlordAndTheirProperties(baseUserId)
 
         refreshUserRoles()
+
+        if (userHadActiveProperties) {
+            // TODO: PRSD-707 - redirect to confirmation page
+            return "/${REGISTER_LANDLORD_JOURNEY_URL}"
+        }
 
         return CONFIRMATION_PATH_SEGMENT
     }

@@ -24,9 +24,19 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
             areYouSurePage.submitWantsToProceed()
 
             val reasonPage = assertPageIs(page, ReasonFormPageLandlordDeregistration::class)
-            // TODO PRSD-891 - continue the journey by submitting the reason page
+            reasonPage.form.submit()
 
             // TODO PRSD-707 - redirect to confirmation page
+            assertTrue(
+                areYouSurePage.page
+                    .url()
+                    .toString()
+                    .contains("register-as-a-landlord"),
+            )
+
+            // Check they can no longer access the landlord dashboard
+            val landlordDashboard = navigator.goToLandlordDashboard()
+            assertTrue(landlordDashboard.page.content().contains("You do not have permission to access this page"))
         }
 
         @Test
