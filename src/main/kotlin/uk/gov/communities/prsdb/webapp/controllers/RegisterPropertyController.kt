@@ -56,13 +56,10 @@ class RegisterPropertyController(
             )
 
     @GetMapping("/$TASK_LIST_PATH_SEGMENT")
-    fun getTaskList(
-        model: Model,
-        principal: Principal,
-    ): String =
+    fun getTaskList(principal: Principal): ModelAndView =
         propertyRegistrationJourneyFactory
             .create(principal.name)
-            .populateModelAndGetTaskListViewName(model)
+            .getModelAndViewForTaskList()
 
     @PostMapping("/{stepName}")
     fun postJourneyData(

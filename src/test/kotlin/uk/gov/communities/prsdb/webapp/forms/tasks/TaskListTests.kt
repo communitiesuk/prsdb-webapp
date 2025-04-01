@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Nested
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
-import org.springframework.ui.ExtendedModelMap
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
@@ -166,10 +165,9 @@ class TaskListTests {
         fun `when a multi route task is completed along a one route, that task and subsequent filled in tasks show as completed`() {
             // Arrange
             val testJourney = getMultiPathJourneyWithMainlineCompleted(useMainline = true)
-            val model = ExtendedModelMap()
 
             // Act
-            testJourney.populateModelAndGetTaskListViewName(model)
+            val model = testJourney.getModelAndViewForTaskList().model
             val viewModel = model["taskListViewModel"] as TaskListViewModel
             val taskList = viewModel.taskSections.single().tasks
 
@@ -190,10 +188,9 @@ class TaskListTests {
         fun `when a multi route task that was previously completed is instead progressed along an alternate incomplete route, any subsequent tasks become unreachable`() {
             // Arrange
             val testJourney = getMultiPathJourneyWithMainlineCompleted(useMainline = false)
-            val model = ExtendedModelMap()
 
             // Act
-            testJourney.populateModelAndGetTaskListViewName(model)
+            val model = testJourney.getModelAndViewForTaskList().model
             val viewModel = model["taskListViewModel"] as TaskListViewModel
             val taskList = viewModel.taskSections.single().tasks
 
@@ -257,10 +254,9 @@ class TaskListTests {
                     twoStepTaskStatus = TaskStatus.NOT_YET_STARTED,
                     simpleTaskTwoCompleted = false,
                 )
-            val model = ExtendedModelMap()
 
             // Act
-            testJourney.populateModelAndGetTaskListViewName(model)
+            val model = testJourney.getModelAndViewForTaskList().model
             val viewModel = model["taskListViewModel"] as TaskListViewModel
             val taskList = viewModel.taskSections.single().tasks
 
@@ -280,10 +276,9 @@ class TaskListTests {
                     twoStepTaskStatus = TaskStatus.IN_PROGRESS,
                     simpleTaskTwoCompleted = false,
                 )
-            val model = ExtendedModelMap()
 
             // Act
-            testJourney.populateModelAndGetTaskListViewName(model)
+            val model = testJourney.getModelAndViewForTaskList().model
             val viewModel = model["taskListViewModel"] as TaskListViewModel
             val taskList = viewModel.taskSections.single().tasks
 
@@ -303,10 +298,9 @@ class TaskListTests {
                     twoStepTaskStatus = TaskStatus.COMPLETED,
                     simpleTaskTwoCompleted = true,
                 )
-            val model = ExtendedModelMap()
 
             // Act
-            testJourney.populateModelAndGetTaskListViewName(model)
+            val model = testJourney.getModelAndViewForTaskList().model
             val viewModel = model["taskListViewModel"] as TaskListViewModel
             val taskList = viewModel.taskSections.single().tasks
 
@@ -365,10 +359,9 @@ class TaskListTests {
         fun `untitled sections are not added to the view model, even if their tasks have titles`() {
             // Arrange
             val testJourney = getTestJourneyWithUntitledStages()
-            val model = ExtendedModelMap()
 
             // Act
-            testJourney.populateModelAndGetTaskListViewName(model)
+            val model = testJourney.getModelAndViewForTaskList().model
             val viewModel = model["taskListViewModel"] as TaskListViewModel
             val sections = viewModel.taskSections
 
@@ -383,10 +376,9 @@ class TaskListTests {
         fun `untitled tasks are not added to the view model`() {
             // Arrange
             val testJourney = getTestJourneyWithUntitledStages()
-            val model = ExtendedModelMap()
 
             // Act
-            testJourney.populateModelAndGetTaskListViewName(model)
+            val model = testJourney.getModelAndViewForTaskList().model
             val viewModel = model["taskListViewModel"] as TaskListViewModel
             val taskList = viewModel.taskSections.first().tasks
 
