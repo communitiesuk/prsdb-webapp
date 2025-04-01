@@ -122,8 +122,6 @@ class LandlordDeregistrationJourney(
 
         refreshUserRoles()
 
-        journeyDataService.clearJourneyDataFromSession()
-
         return CONFIRMATION_PATH_SEGMENT
     }
 
