@@ -33,6 +33,10 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
                     .content()
                     .contains("You have deleted your landlord information and all your properties from the database"),
             )
+
+            // Check they can no longer access the landlord dashboard
+            val landlordDashboard = navigator.goToLandlordDashboard()
+            assertTrue(landlordDashboard.page.content().contains("You do not have permission to access this page"))
         }
 
         @Test

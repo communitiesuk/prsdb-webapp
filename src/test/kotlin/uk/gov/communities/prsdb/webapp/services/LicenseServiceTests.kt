@@ -43,12 +43,21 @@ class LicenseServiceTests {
     }
 
     @Test
-    fun `deleteLicence calls delete on the licenseRepository`() {
-        val licence = License(LicensingType.HMO_MANDATORY_LICENCE, "LN123456")
+    fun `deleteLicense deletes a license`() {
+        val licence = License()
 
-        licenseService.deleteLicence(licence)
+        licenseService.deleteLicense(licence)
 
         verify(mockLicenseRepository).delete(licence)
+    }
+
+    @Test
+    fun `deleteLicenses deletes a list from the licenseRepository`() {
+        val licenses = listOf(License(), License())
+
+        licenseService.deleteLicenses(licenses)
+
+        verify(mockLicenseRepository).deleteAll(licenses)
     }
 
     @Test

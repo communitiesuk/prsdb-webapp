@@ -110,7 +110,7 @@ class DeregisterLandlordControllerTests(
 
     @Test
     @WithMockUser
-    fun `getConfirmation returns 200 if the current user is still in the landlord database`() {
+    fun `getConfirmation returns 500 if the current user is still in the landlord database`() {
         whenever(landlordService.retrieveLandlordByBaseUserId("user"))
             .thenReturn(MockLandlordData.createLandlord())
 

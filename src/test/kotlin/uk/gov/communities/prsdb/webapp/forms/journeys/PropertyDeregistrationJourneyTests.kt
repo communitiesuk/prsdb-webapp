@@ -14,8 +14,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -34,7 +34,7 @@ class PropertyDeregistrationJourneyTests {
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @MockBean
-    private lateinit var mockPropertyRegistrationService: PropertyRegistrationService
+    private lateinit var mockPropertyDeregistrationService: PropertyDeregistrationService
 
     @MockBean
     lateinit var mockConfirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmail>
@@ -47,7 +47,7 @@ class PropertyDeregistrationJourneyTests {
         mockJourneyDataServiceFactory = mock()
         mockJourneyDataService = mock()
         mockPropertyOwnershipService = mock()
-        mockPropertyRegistrationService = mock()
+        mockPropertyDeregistrationService = mock()
         mockConfirmationEmailSender = mock()
 
         whenever(mockJourneyDataServiceFactory.create(anyString())).thenReturn(mockJourneyDataService)
@@ -57,7 +57,7 @@ class PropertyDeregistrationJourneyTests {
                 alwaysTrueValidator,
                 mockJourneyDataServiceFactory,
                 mockPropertyOwnershipService,
-                mockPropertyRegistrationService,
+                mockPropertyDeregistrationService,
                 mockConfirmationEmailSender,
             )
     }
@@ -79,8 +79,8 @@ class PropertyDeregistrationJourneyTests {
             .completeStep(DeregisterPropertyStepId.Reason.urlPathSegment, mapOf("reason" to ""), null, mock())
 
         // Assert
-        verify(mockPropertyRegistrationService).deregisterProperty(propertyOwnershipId)
-        verify(mockPropertyRegistrationService)
+        verify(mockPropertyDeregistrationService).deregisterProperty(propertyOwnershipId)
+        verify(mockPropertyDeregistrationService)
             .addDeregisteredPropertyAndOwnershipIdsToSession(propertyOwnershipId, propertyOwnership.property.id)
     }
 

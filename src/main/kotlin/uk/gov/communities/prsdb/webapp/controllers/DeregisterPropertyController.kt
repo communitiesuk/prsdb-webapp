@@ -19,8 +19,8 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.C
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.PropertyService
 import java.security.Principal
 
@@ -31,7 +31,7 @@ class DeregisterPropertyController(
     private val propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyService: PropertyService,
-    private val propertyRegistrationService: PropertyRegistrationService,
+    private val propertyDeregistrationService: PropertyDeregistrationService,
 ) {
     @GetMapping("/{stepName}")
     fun getJourneyStep(
@@ -106,7 +106,7 @@ class DeregisterPropertyController(
     }
 
     private fun getPropertyIdIfPropertyWasDeregisteredThisSession(propertyOwnershipId: Long): Long {
-        val entityIdsDeregisteredThisSession = propertyRegistrationService.getDeregisteredPropertyAndOwnershipIdsFromSession()
+        val entityIdsDeregisteredThisSession = propertyDeregistrationService.getDeregisteredPropertyAndOwnershipIdsFromSession()
         if (entityIdsDeregisteredThisSession.isEmpty()) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
