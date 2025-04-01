@@ -118,11 +118,8 @@ class LandlordDeregistrationJourney(
 
     private fun deregisterLandlordAndProperties(userHadActiveProperties: Boolean): String {
         val baseUserId = SecurityContextHolder.getContext().authentication.name
-
         landlordDeregistrationService.addLandlordHadActivePropertiesToSession(userHadActiveProperties)
-
         landlordDeregistrationService.deregisterLandlordAndTheirProperties(baseUserId)
-
         refreshUserRoles()
         journeyDataService.clearJourneyDataFromSession()
 
