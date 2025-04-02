@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.LandlordDeregistrationJourneyDataExtensions.Companion.getWantsToProceed
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordNoPropertiesDeregistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordWithPropertiesDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -30,6 +31,7 @@ class LandlordDeregistrationJourney(
     private val landlordService: LandlordService,
     private val securityContextService: SecurityContextService,
     private val confirmationWithNoPropertiesEmailSender: EmailNotificationService<LandlordNoPropertiesDeregistrationConfirmationEmail>,
+    private val confirmationWithPropertiesEmailSender: EmailNotificationService<LandlordWithPropertiesDeregistrationConfirmationEmail>,
 ) : Journey<DeregisterLandlordStepId>(
         journeyType = JourneyType.LANDLORD_DEREGISTRATION,
         initialStepId = initialStepId,
@@ -129,6 +131,22 @@ class LandlordDeregistrationJourney(
         landlordDeregistrationService.deregisterLandlordAndTheirProperties(baseUserId)
         if (!userHadActiveProperties) {
             confirmationWithNoPropertiesEmailSender.sendEmail(landlordEmailAddress, LandlordNoPropertiesDeregistrationConfirmationEmail())
+        } else {
+            confirmationWithPropertiesEmailSender.sendEmail(
+                landlordEmailAddress,
+                LandlordWithPropertiesDeregistrationConfirmationEmail(
+                    "### Property 1 \n \n" +
+                        "Property registration number: \n \n" +
+                        "^ P-XXX-XXX \n \n" +
+                        "Address: 1 street name, city AB1 2CD \n \n" +
+                        "--- \n" +
+                        "### Property 2 \n \n" +
+                        "Property registration number: \n \n" +
+                        "^ P-YYY-YYY \n \n" +
+                        "Address: 2 fake way, madeupville EF3 4GH \n \n" +
+                        "--- \n",
+                ),
+            )
         }
 
         refreshUserRoles()

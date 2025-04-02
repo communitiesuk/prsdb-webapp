@@ -5,6 +5,7 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordNoPropertiesDeregistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordWithPropertiesDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -19,6 +20,7 @@ class LandlordDeregistrationJourneyFactory(
     private val landlordService: LandlordService,
     private val securityContextService: SecurityContextService,
     private val confirmationWithNoPropertiesEmailSender: EmailNotificationService<LandlordNoPropertiesDeregistrationConfirmationEmail>,
+    private val confirmationWithPropertiesEmailSender: EmailNotificationService<LandlordWithPropertiesDeregistrationConfirmationEmail>,
 ) {
     fun create() =
         LandlordDeregistrationJourney(
@@ -28,5 +30,6 @@ class LandlordDeregistrationJourneyFactory(
             landlordService,
             securityContextService,
             confirmationWithNoPropertiesEmailSender,
+            confirmationWithPropertiesEmailSender,
         )
 }
