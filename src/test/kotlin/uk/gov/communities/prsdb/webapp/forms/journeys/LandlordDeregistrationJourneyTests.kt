@@ -13,8 +13,12 @@ import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationCheckUserPropertiesFormModel.Companion.USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordNoPropertiesDeregistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordWithPropertiesDeregistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDetailsEmailSection
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDetailsEmailSectionList
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
@@ -47,6 +51,10 @@ class LandlordDeregistrationJourneyTests {
     private lateinit var mockConfirmationWithNoPropertiesEmailSender:
         EmailNotificationService<LandlordNoPropertiesDeregistrationConfirmationEmail>
 
+    @MockitoBean
+    private lateinit var mockConfirmationLandlordWithPropertiesEmailSender:
+        EmailNotificationService<LandlordWithPropertiesDeregistrationConfirmationEmail>
+
     @MockitoSpyBean
     private lateinit var landlordDeregistrationJourneyFactory: LandlordDeregistrationJourneyFactory
 
@@ -58,6 +66,7 @@ class LandlordDeregistrationJourneyTests {
         mockLandlordService = mock()
         mockSecurityContextService = mock()
         mockConfirmationWithNoPropertiesEmailSender = mock()
+        mockConfirmationLandlordWithPropertiesEmailSender = mock()
 
         landlordDeregistrationJourneyFactory =
             LandlordDeregistrationJourneyFactory(
@@ -67,6 +76,7 @@ class LandlordDeregistrationJourneyTests {
                 mockLandlordService,
                 mockSecurityContextService,
                 mockConfirmationWithNoPropertiesEmailSender,
+                mockConfirmationLandlordWithPropertiesEmailSender,
             )
     }
 
@@ -125,10 +135,64 @@ class LandlordDeregistrationJourneyTests {
                     ),
             ) as JourneyData
 
+        setupDeregistrationAsALandlord(baseUserId, journeyData)
+    }
+
+    private fun setupDeregistrationAsALandlord(
+        baseUserId: String,
+        journeyData: JourneyData,
+    ) {
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
         whenever(mockJourneyDataServiceFactory.create(DEREGISTER_LANDLORD_JOURNEY_URL)).thenReturn(mockJourneyDataService)
         whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(MockLandlordData.createLandlord())
 
         JourneyTestHelper.setMockUser(baseUserId)
+    }
+
+    @Test
+    fun `When a landlord with registered properties is deregistered a confirmation email is sent`() {
+        val baseUserId = "user-id"
+        val journeyData =
+            mutableMapOf(
+                DeregisterLandlordStepId.CheckForUserProperties.urlPathSegment to
+                    mutableMapOf(
+                        USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY to true,
+                    ),
+            ) as JourneyData
+
+        setupDeregistrationAsALandlord(baseUserId, journeyData)
+
+        val propertyOwnedByLandlord = MockLandlordData.createPropertyOwnership()
+
+        val landlordsProperties =
+            listOf(
+                propertyOwnedByLandlord,
+            )
+
+        val expectedPropertyEmailSectionList =
+            PropertyDetailsEmailSectionList(
+                listOf(
+                    PropertyDetailsEmailSection(
+                        1,
+                        RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnedByLandlord.registrationNumber).toString(),
+                        propertyOwnedByLandlord.property.address.singleLineAddress,
+                    ),
+                ),
+            )
+
+        whenever(mockLandlordDeregistrationService.deregisterLandlordAndTheirProperties(baseUserId))
+            .thenReturn(landlordsProperties)
+
+        // Act
+        landlordDeregistrationJourneyFactory
+            .create()
+            .completeStep(DeregisterLandlordStepId.Reason.urlPathSegment, mapOf("reason" to ""), null, mock())
+
+        // Assert
+        verify(mockConfirmationLandlordWithPropertiesEmailSender)
+            .sendEmail(
+                "example@email.com",
+                LandlordWithPropertiesDeregistrationConfirmationEmail(expectedPropertyEmailSectionList.toString()),
+            )
     }
 }
