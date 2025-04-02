@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import kotlin.reflect.KClass
 
 class PropertyRegistrationNumberOfPeoplePage(
