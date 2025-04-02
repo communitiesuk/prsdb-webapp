@@ -48,7 +48,7 @@ class PropertyComplianceController(
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
         return propertyComplianceJourneyFactory
-            .create(propertyOwnershipId)
+            .create(propertyOwnershipId, principal.name)
             .getModelAndViewForTaskList()
     }
 
@@ -62,7 +62,7 @@ class PropertyComplianceController(
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
         return propertyComplianceJourneyFactory
-            .create(propertyOwnershipId)
+            .create(propertyOwnershipId, principal.name)
             .getModelAndViewForStep(stepName, subpage)
     }
 

@@ -11,9 +11,12 @@ class PropertyComplianceJourneyFactory(
     private val validator: Validator,
     private val journeyDataServiceFactory: JourneyDataServiceFactory,
 ) {
-    fun create(propertyOwnershipId: Long) =
-        PropertyComplianceJourney(
-            validator,
-            journeyDataServiceFactory.create(PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId)),
-        )
+    fun create(
+        propertyOwnershipId: Long,
+        principalName: String,
+    ) = PropertyComplianceJourney(
+        validator,
+        journeyDataServiceFactory.create(PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId)),
+        principalName,
+    )
 }

@@ -48,7 +48,7 @@ class PropertyComplianceControllerTests(
         whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(validPropertyOwnershipId), any())).thenReturn(true)
         whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(invalidPropertyOwnershipId), any())).thenReturn(false)
 
-        whenever(propertyComplianceJourneyFactory.create(validPropertyOwnershipId)).thenReturn(propertyComplianceJourney)
+        whenever(propertyComplianceJourneyFactory.create(eq(validPropertyOwnershipId), any())).thenReturn(propertyComplianceJourney)
     }
 
     @Nested

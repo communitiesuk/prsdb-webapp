@@ -13,12 +13,17 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 class PropertyComplianceJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
+    principalName: String,
 ) : JourneyWithTaskList<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE,
         initialStepId = PropertyComplianceStepId.GasSafety,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
+    init {
+        loadJourneyDataIfNotLoaded(principalName)
+    }
+
     override val sections =
         listOf(
             JourneySection(uploadTasks, "propertyCompliance.taskList.upload.heading", "upload-certificates"),
