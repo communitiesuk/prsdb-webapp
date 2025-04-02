@@ -502,7 +502,10 @@ class PropertyRegistrationJourney(
                             "label" to "forms.numberOfPeople.label",
                         ),
                     shouldDisplaySectionHeader = true,
-                    journeyDataService = journeyDataService,
+                    latestNumberOfHouseholds =
+                        PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(
+                            journeyDataService.getJourneyDataFromSession(),
+                        ),
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
         )

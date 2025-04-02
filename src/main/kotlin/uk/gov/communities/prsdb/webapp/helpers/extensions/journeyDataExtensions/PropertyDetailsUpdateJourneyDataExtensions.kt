@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.UpdateJourneyDataExtensions.Companion.getOriginalJourneyDataIfPresent
 
 class PropertyDetailsUpdateJourneyDataExtensions {
     companion object {
@@ -73,6 +74,18 @@ class PropertyDetailsUpdateJourneyDataExtensions {
                 UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment,
                 "occupied",
             )
+
+        fun JourneyData.getLatestNumberOfHouseholds(originalJourneyDataKey: String?): Int {
+            val journeyDataValue = this.getNumberOfHouseholdsUpdateIfPresent()
+            val originalJourneyData = this.getOriginalJourneyDataIfPresent(originalJourneyDataKey)!!
+            val originalJourneyDataValue = originalJourneyData.getNumberOfHouseholdsUpdateIfPresent()
+
+            if (journeyDataValue == null) {
+                return originalJourneyDataValue ?: 0
+            } else {
+                return journeyDataValue
+            }
+        }
 
         private fun JourneyData.getOriginalLicensingType(originalJourneyKey: String) =
             JourneyDataHelper.getPageData(this, originalJourneyKey)?.getLicensingTypeUpdateIfPresent()
