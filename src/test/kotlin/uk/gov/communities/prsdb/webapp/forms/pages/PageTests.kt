@@ -54,7 +54,7 @@ class PageTests {
         val bindingResult = testPage.bindDataToFormModel(validator, formData)
 
         // Act
-        val result = testPage.isSatisfied(bindingResult, formData)
+        val result = testPage.isSatisfied(bindingResult)
 
         // Assert
         assertTrue(result)
@@ -67,7 +67,7 @@ class PageTests {
         val bindingResult = testPage.bindDataToFormModel(validator, formData)
 
         // Act
-        val result = testPage.isSatisfied(bindingResult, formData)
+        val result = testPage.isSatisfied(bindingResult)
 
         // Assert
         assertFalse(result)

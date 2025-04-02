@@ -88,6 +88,6 @@ class ReachableStepDetailsIterator<T : StepId>(
                 step.subPageNumber,
             )
         val bindingResult = step.step.page.bindDataToFormModel(validator, subPageData)
-        return subPageData != null && step.step.isSatisfied(bindingResult, subPageData)
+        return subPageData != null && step.step.isSatisfied(bindingResult)
     }
 }

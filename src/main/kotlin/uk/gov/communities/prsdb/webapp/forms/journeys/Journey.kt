@@ -84,7 +84,7 @@ abstract class Journey<T : StepId>(
 
         val bindingResult = currentStep.page.bindDataToFormModel(validator, formData)
 
-        if (!currentStep.isSatisfied(bindingResult, formData)) {
+        if (!currentStep.isSatisfied(bindingResult)) {
             return getModelAndViewForStep(
                 stepPathSegment,
                 subPageNumber,

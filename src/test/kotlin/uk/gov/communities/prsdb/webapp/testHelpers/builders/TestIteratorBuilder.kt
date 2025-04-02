@@ -113,7 +113,7 @@ class TestIteratorBuilder {
             TestStepId(urlPathSegment),
             mockPage,
             handleSubmitAndRedirect = null,
-            isSatisfied = { bindingResult, formData -> isSatisfied },
+            isSatisfied = { _ -> isSatisfied },
             nextAction = { journeyData, _ ->
                 customNextActionAddition?.invoke(journeyData)
                 Pair(nextSegment?.let { TestStepId(it) }, null)

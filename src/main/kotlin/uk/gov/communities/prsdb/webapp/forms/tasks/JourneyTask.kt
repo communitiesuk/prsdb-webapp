@@ -60,7 +60,7 @@ class JourneyTask<T : StepId>(
     ): Boolean {
         val pageData = JourneyDataHelper.getPageData(journeyData, step.name)
         val bindingResult = step.page.bindDataToFormModel(validator, pageData)
-        return pageData != null && step.isSatisfied(bindingResult, pageData)
+        return pageData != null && step.isSatisfied(bindingResult)
     }
 
     companion object {

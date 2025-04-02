@@ -61,10 +61,7 @@ abstract class AbstractPage(
         return modelAndView
     }
 
-    open fun isSatisfied(
-        bindingResult: BindingResult,
-        formData: PageData,
-    ): Boolean = !bindingResult.hasErrors()
+    open fun isSatisfied(bindingResult: BindingResult): Boolean = !bindingResult.hasErrors()
 
     protected open fun enrichFormData(formData: PageData?): PageData? = formData
 

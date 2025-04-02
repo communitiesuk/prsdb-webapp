@@ -11,12 +11,7 @@ class Step<T : StepId>(
     val id: T,
     val page: AbstractPage,
     val handleSubmitAndRedirect: ((journeyData: JourneyData, subPageNumber: Int?) -> String)? = null,
-    val isSatisfied: (bindingResult: BindingResult, formData: PageData) -> Boolean = { bindingResult, pageData ->
-        page.isSatisfied(
-            bindingResult,
-            pageData,
-        )
-    },
+    val isSatisfied: (bindingResult: BindingResult) -> Boolean = { bindingResult -> page.isSatisfied(bindingResult) },
     val nextAction: (journeyData: JourneyData, subPageNumber: Int?) -> Pair<T?, Int?> = { _, _ ->
         Pair(
             null,
