@@ -24,6 +24,8 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
             areYouSurePage.submitWantsToProceed()
 
             val reasonPage = assertPageIs(page, ReasonFormPageLandlordDeregistration::class)
+            assertThat(reasonPage.form.fieldsetHeading)
+                .containsText("Why are you deleting your account? (optional)")
             reasonPage.form.submit()
 
             val confirmationPage = assertPageIs(page, ConfirmationPageLandlordDeregistration::class)
