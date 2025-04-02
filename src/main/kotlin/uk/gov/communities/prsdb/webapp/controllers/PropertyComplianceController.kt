@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
@@ -14,6 +15,7 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_COMPLIANCE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.PROPERTY_COMPLIANCE_ROUTE
+import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -64,6 +66,22 @@ class PropertyComplianceController(
         return propertyComplianceJourneyFactory
             .create(propertyOwnershipId, principal.name)
             .getModelAndViewForStep(stepName, subpage)
+    }
+
+    @PreAuthorize("hasRole('LANDLORD')")
+    @PostMapping("/{stepName}")
+    fun postJourneyData(
+        @PathVariable propertyOwnershipId: Long,
+        @PathVariable("stepName") stepName: String,
+        @RequestParam(value = "subpage", required = false) subpage: Int?,
+        @RequestParam formData: PageData,
+        principal: Principal,
+    ): ModelAndView {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+
+        return propertyComplianceJourneyFactory
+            .create(propertyOwnershipId, principal.name)
+            .completeStep(stepName, formData, subpage, principal)
     }
 
     private fun throwErrorIfUserIsNotAuthorized(

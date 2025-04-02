@@ -26,7 +26,7 @@ class PropertyComplianceJourney(
     principalName: String,
 ) : JourneyWithTaskList<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE,
-        initialStepId = PropertyComplianceStepId.GasSafety,
+        initialStepId = initialStepId,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
@@ -151,4 +151,8 @@ class PropertyComplianceJourney(
         propertyOwnershipService
             .getPropertyOwnership(propertyOwnershipId)
             .property.address.singleLineAddress
+
+    companion object {
+        val initialStepId = PropertyComplianceStepId.GasSafety
+    }
 }
