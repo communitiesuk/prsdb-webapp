@@ -309,9 +309,7 @@ class PropertyDetailsUpdateJourney(
                             BACK_URL_ATTR_NAME to getNumberOfPeopleStepBackUrl(),
                         ),
                     latestNumberOfHouseholds =
-                        journeyDataService.getJourneyDataFromSession().getLatestNumberOfHouseholds(
-                            getOriginalJourneyDataKey(journeyDataService),
-                        ),
+                        journeyDataService.getJourneyDataFromSession().getLatestNumberOfHouseholds(originalDataKey),
                 ),
             nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateDetails, null) },
             saveAfterSubmit = false,

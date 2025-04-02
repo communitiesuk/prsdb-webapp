@@ -390,4 +390,12 @@ class JourneyDataBuilder(
         journeyData[originalDataKey] = originalData
         return this
     }
+    
+    fun withOriginalNumberOfHouseholdsData(
+        originalDataKey: String,
+        originalData: Int,
+    ): JourneyDataBuilder {
+        journeyData[originalDataKey] = mapOf(UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment to originalData)
+        return this
+    }
 }
