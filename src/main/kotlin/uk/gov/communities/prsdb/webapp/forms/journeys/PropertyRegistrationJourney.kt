@@ -331,6 +331,7 @@ class PropertyRegistrationJourney(
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.LicensingType, null) },
         )
+
     private fun licensingTypeStep() =
         Step(
             id = RegisterPropertyStepId.LicensingType,
@@ -501,7 +502,10 @@ class PropertyRegistrationJourney(
                             "label" to "forms.numberOfPeople.label",
                         ),
                     shouldDisplaySectionHeader = true,
-                    journeyDataService = journeyDataService,
+                    latestNumberOfHouseholds =
+                        PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(
+                            journeyDataService.getJourneyDataFromSession(),
+                        ),
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.CheckAnswers, null) },
         )

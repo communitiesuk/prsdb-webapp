@@ -79,6 +79,7 @@ class PropertyDetailsUpdateJourneyDataExtensions {
             val journeyDataValue = this.getNumberOfHouseholdsUpdateIfPresent()
             val originalJourneyData = this.getOriginalJourneyDataIfPresent(originalJourneyDataKey)!!
             val originalJourneyDataValue = originalJourneyData.getNumberOfHouseholdsUpdateIfPresent()
+
             if (journeyDataValue == null) {
                 return originalJourneyDataValue ?: 0
             } else {
