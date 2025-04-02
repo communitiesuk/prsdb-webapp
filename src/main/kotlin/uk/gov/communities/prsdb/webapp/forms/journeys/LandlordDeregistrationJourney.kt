@@ -15,16 +15,21 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.LandlordDeregistrationJourneyDataExtensions.Companion.getLandlordUserHasRegisteredProperties
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.LandlordDeregistrationJourneyDataExtensions.Companion.getWantsToProceed
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationReasonFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordNoPropertiesDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
+import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 
 class LandlordDeregistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     private val landlordDeregistrationService: LandlordDeregistrationService,
+    private val landlordService: LandlordService,
     private val securityContextService: SecurityContextService,
+    private val confirmationWithNoPropertiesEmailSender: EmailNotificationService<LandlordNoPropertiesDeregistrationConfirmationEmail>,
 ) : Journey<DeregisterLandlordStepId>(
         journeyType = JourneyType.LANDLORD_DEREGISTRATION,
         initialStepId = initialStepId,
@@ -118,8 +123,14 @@ class LandlordDeregistrationJourney(
 
     private fun deregisterLandlordAndProperties(userHadActiveProperties: Boolean): String {
         val baseUserId = SecurityContextHolder.getContext().authentication.name
+        val landlordEmailAddress = landlordService.retrieveLandlordByBaseUserId(baseUserId)!!.email
         landlordDeregistrationService.addLandlordHadActivePropertiesToSession(userHadActiveProperties)
+
         landlordDeregistrationService.deregisterLandlordAndTheirProperties(baseUserId)
+        if (!userHadActiveProperties) {
+            confirmationWithNoPropertiesEmailSender.sendEmail(landlordEmailAddress, LandlordNoPropertiesDeregistrationConfirmationEmail())
+        }
+
         refreshUserRoles()
         journeyDataService.clearJourneyDataFromSession()
 
