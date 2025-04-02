@@ -40,6 +40,10 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/PropertyDeregistrationConfirmation.md",
                 ),
+                EmailTemplateTestData(
+                    LandlordNoPropertiesDeregistrationConfirmationEmail(),
+                    "/emails/LandlordNoPropertiesDeregistrationConfirmation.md",
+                ),
             )
 
         private fun createLocalAuthority(
