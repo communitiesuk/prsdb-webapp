@@ -1,18 +1,28 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
+import uk.gov.communities.prsdb.webapp.forms.pages.PageWithContentProvider
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 class PropertyComplianceJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
+    private val propertyOwnershipService: PropertyOwnershipService,
+    private val propertyOwnershipId: Long,
     principalName: String,
 ) : JourneyWithTaskList<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE,
@@ -41,11 +51,7 @@ class PropertyComplianceJourney(
     private val uploadTasks
         get() =
             listOf(
-                // TODO PRSD-942: Implement gas safety certificate upload task
-                JourneyTask.withOneStep(
-                    placeholderStep(PropertyComplianceStepId.GasSafety, "TODO PRSD-942: Implement gas safety certificate upload task"),
-                    "propertyCompliance.taskList.upload.gasSafety",
-                ),
+                gasSafetyTask,
                 // TODO PRSD-954: Implement EICR upload task
                 JourneyTask.withOneStep(
                     placeholderStep(PropertyComplianceStepId.EICR, "TODO PRSD-954: Implement EICR upload task"),
@@ -74,6 +80,58 @@ class PropertyComplianceJourney(
                 ),
             )
 
+    private val gasSafetyTask
+        get() =
+            JourneyTask(
+                PropertyComplianceStepId.GasSafety,
+                setOf(
+                    gasSafetyStep,
+                    // TODO PRSD-943: Implement gas safety cert issue date step
+                    placeholderStep(
+                        PropertyComplianceStepId.GasSafetyIssueDate,
+                        "TODO PRSD-943: Implement gas safety cert issue date step",
+                    ),
+                    // TODO PRSD-949: Implement gas safety cert exemption step
+                    placeholderStep(
+                        PropertyComplianceStepId.GasSafetyExemption,
+                        "TODO PRSD-949: Implement gas safety cert exemption step",
+                    ),
+                ),
+                "propertyCompliance.taskList.upload.gasSafety",
+            )
+
+    private val gasSafetyStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.GasSafety,
+                page =
+                    PageWithContentProvider(
+                        formModel = GasSafetyFormModel::class,
+                        templateName = "forms/gasSafetyForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.gasSafety.fieldSetHeading",
+                                "fieldSetHint" to "forms.gasSafety.fieldSetHint",
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = true,
+                                            valueStr = "yes",
+                                            labelMsgKey = "forms.radios.option.yes.label",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = false,
+                                            valueStr = "no",
+                                            labelMsgKey = "forms.radios.option.no.label",
+                                        ),
+                                    ),
+                                BACK_URL_ATTR_NAME to TASK_LIST_PATH_SEGMENT,
+                            ),
+                    ) { mapOf("address" to getPropertyAddress()) },
+                nextAction = { journeyData, _ -> gasSafetyStepNextAction(journeyData) },
+            )
+
     private fun placeholderStep(
         stepId: PropertyComplianceStepId,
         todoComment: String,
@@ -81,4 +139,16 @@ class PropertyComplianceJourney(
         id = stepId,
         page = Page(formModel = NoInputFormModel::class, templateName = "todo", content = mapOf("todoComment" to todoComment)),
     )
+
+    private fun gasSafetyStepNextAction(journeyData: JourneyData) =
+        if (journeyData.getHasGasSafetyCert()!!) {
+            Pair(PropertyComplianceStepId.GasSafetyIssueDate, null)
+        } else {
+            Pair(PropertyComplianceStepId.GasSafetyExemption, null)
+        }
+
+    private fun getPropertyAddress() =
+        propertyOwnershipService
+            .getPropertyOwnership(propertyOwnershipId)
+            .property.address.singleLineAddress
 }
