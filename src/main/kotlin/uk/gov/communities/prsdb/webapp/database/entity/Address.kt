@@ -70,11 +70,5 @@ class Address() : ModifiableAuditableEntity() {
         this.localAuthority = localAuthority
     }
 
-    fun getPostcodeSearchTerm(): String = postcode ?: singleLineAddress
-
-    fun getHouseNameOrNumber(): String = buildingName ?: buildingNumber ?: singleLineAddress
-
     fun getSelectedAddress(): String = if (uprn == null) MANUAL_ADDRESS_CHOSEN else singleLineAddress
-
-    fun getTownOrCity(): String = townName ?: singleLineAddress
 }

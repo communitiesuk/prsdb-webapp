@@ -34,6 +34,9 @@ class NumberOfPeopleFormModel(
 
     companion object {
         fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): NumberOfPeopleFormModel =
-            NumberOfPeopleFormModel().apply { numberOfPeople = propertyOwnership.currentNumTenants.toString() }
+            NumberOfPeopleFormModel().apply {
+                numberOfPeople = propertyOwnership.currentNumTenants.toString()
+                numberOfHouseholds = propertyOwnership.currentNumHouseholds.toString()
+            }
     }
 }

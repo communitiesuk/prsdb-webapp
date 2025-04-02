@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -71,14 +72,34 @@ class PropertyDetailsUpdateJourney(
                 UpdatePropertyDetailsStepId.UpdateLicensingType toPageData LicensingTypeFormModel::fromPropertyOwnership,
             )
 
-        val licenceStepIdAndFormModel = PropertyDetailsUpdateJourneyDataExtensions.getLicenceNumberStepIdAndFormModel(propertyOwnership)
-        if (licenceStepIdAndFormModel != null) {
-            val (licenceNumberUpdateStepId, licenceFormModel) = licenceStepIdAndFormModel
+        val licenceNumberStepIdAndFormModel = getLicenceNumberStepIdAndFormModel(propertyOwnership)
+        if (licenceNumberStepIdAndFormModel != null) {
+            val (licenceNumberUpdateStepId, licenceFormModel) = licenceNumberStepIdAndFormModel
             originalPropertyData[licenceNumberUpdateStepId.urlPathSegment] = licenceFormModel.toPageData()
         }
 
         return originalPropertyData
     }
+
+    private fun getLicenceNumberStepIdAndFormModel(propertyOwnership: PropertyOwnership): Pair<UpdatePropertyDetailsStepId, FormModel>? =
+        when (propertyOwnership.license?.licenseType) {
+            LicensingType.SELECTIVE_LICENCE ->
+                Pair(
+                    UpdatePropertyDetailsStepId.UpdateSelectiveLicence,
+                    SelectiveLicenceFormModel.fromPropertyOwnership(propertyOwnership),
+                )
+            LicensingType.HMO_MANDATORY_LICENCE ->
+                Pair(
+                    UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence,
+                    HmoMandatoryLicenceFormModel.fromPropertyOwnership(propertyOwnership),
+                )
+            LicensingType.HMO_ADDITIONAL_LICENCE ->
+                Pair(
+                    UpdatePropertyDetailsStepId.UpdateHmoAdditionalLicence,
+                    HmoAdditionalLicenceFormModel.fromPropertyOwnership(propertyOwnership),
+                )
+            else -> null
+        }
 
     private val updateDetailsStep =
         Step(

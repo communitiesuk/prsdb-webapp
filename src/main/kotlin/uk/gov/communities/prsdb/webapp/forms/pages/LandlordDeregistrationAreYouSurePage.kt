@@ -46,7 +46,7 @@ class LandlordDeregistrationAreYouSurePage(
         val newFormData = formData.toMutableMap()
         val journeyData = journeyDataService.getJourneyDataFromSession()
         val landlordHasRegisteredProperties = journeyData.getLandlordUserHasRegisteredProperties()
-        newFormData["userHasRegisteredProperties"] = landlordHasRegisteredProperties
+        newFormData[LandlordDeregistrationAreYouSureFormModel::userHasRegisteredProperties.name] = landlordHasRegisteredProperties
         return newFormData
     }
 }

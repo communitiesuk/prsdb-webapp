@@ -6,7 +6,6 @@ import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DAT
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 
 open class JourneyDataExtensions {
     companion object {
@@ -28,13 +27,5 @@ open class JourneyDataExtensions {
 
         fun JourneyData.withUpdatedLookedUpAddresses(lookedUpAddresses: List<AddressDataModel>): JourneyData =
             this.withUpdatedLookedUpAddresses(Json.encodeToString(lookedUpAddresses))
-
-        @JvmStatic
-        protected fun JourneyData.getWantsToProceed(urlPathSegment: String): Boolean? =
-            JourneyDataHelper.getFieldBooleanValue(
-                this,
-                urlPathSegment,
-                PropertyDeregistrationAreYouSureFormModel::wantsToProceed.name,
-            )
     }
 }

@@ -46,8 +46,8 @@ class ManualAddressFormModel : FormModel {
         fun fromLandlord(landlord: Landlord): ManualAddressFormModel =
             ManualAddressFormModel().apply {
                 addressLineOne = landlord.address.singleLineAddress
-                townOrCity = landlord.address.getTownOrCity()
-                postcode = landlord.address.getPostcodeSearchTerm()
+                townOrCity = landlord.address.townName
+                postcode = landlord.address.postcode
             }
     }
 }

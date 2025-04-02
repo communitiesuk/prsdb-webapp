@@ -31,8 +31,11 @@ class LookupAddressFormModel : FormModel {
     companion object {
         fun fromLandlord(landlord: Landlord): LookupAddressFormModel =
             LookupAddressFormModel().apply {
-                postcode = landlord.address.getPostcodeSearchTerm()
-                houseNameOrNumber = landlord.address.getHouseNameOrNumber()
+                // We default to singleLineAddress not because that's useful data, but because we want this form to
+                // be considered valid, and thus its journey Step to be satisfied, in the case that a manual address was
+                // provided rather than address lookup terms.
+                postcode = landlord.address.postcode ?: landlord.address.singleLineAddress
+                houseNameOrNumber = landlord.address.buildingName ?: landlord.address.buildingNumber ?: landlord.address.singleLineAddress
             }
     }
 }
