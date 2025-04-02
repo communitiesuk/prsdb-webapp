@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.forms.ExcludeFromPageData
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DateValidator
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
@@ -177,6 +179,7 @@ class DateOfBirthFormModel(
     )
     var year: String = "",
 ) : FormModel {
+    @ExcludeFromPageData
     val dateValidator = DateValidator()
 
     fun notAllBlank(): Boolean = !(dateValidator.isAllBlank(day, month, year))
@@ -221,4 +224,13 @@ class DateOfBirthFormModel(
     }
 
     fun isValidDateOfBirth(): Boolean = isValidDate() && isValidDateForMinimumAge() && isValidDateForMaximumAge()
+
+    companion object {
+        fun fromLandlord(landlord: Landlord): DateOfBirthFormModel =
+            DateOfBirthFormModel().apply {
+                day = landlord.dateOfBirth?.dayOfMonth.toString()
+                month = landlord.dateOfBirth?.monthValue.toString()
+                year = landlord.dateOfBirth?.year.toString()
+            }
+    }
 }

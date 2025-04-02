@@ -6,10 +6,13 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationNumberOfPeoplePage
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getIsOccupiedUpdateIfPresent
@@ -21,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getOriginalIsOccupied
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getOwnershipTypeUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoAdditionalLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoMandatoryLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
@@ -34,6 +38,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import kotlin.reflect.KFunction
 
 class PropertyDetailsUpdateJourney(
     validator: Validator,
@@ -55,30 +60,46 @@ class PropertyDetailsUpdateJourney(
     override fun createOriginalJourneyData(): JourneyData {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
 
-        val licensingType = propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING
+        infix fun <T : FormModel> StepId.toPageData(fromPropOwnershipFunc: KFunction<T>): Pair<String, PageData> =
+            this.urlPathSegment to fromPropOwnershipFunc.call(propertyOwnership).toPageData()
 
         val originalPropertyData =
             mutableMapOf(
-                UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment to mapOf("ownershipType" to propertyOwnership.ownershipType),
-                UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment to mapOf("occupied" to propertyOwnership.isOccupied),
-                UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment to
-                    mapOf("numberOfHouseholds" to propertyOwnership.currentNumHouseholds),
-                UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment to
-                    mapOf(
-                        "numberOfPeople" to propertyOwnership.currentNumTenants,
-                        "numberOfHouseholds" to propertyOwnership.currentNumHouseholds,
-                    ),
-                UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment to mapOf("licensingType" to licensingType),
+                UpdatePropertyDetailsStepId.UpdateOwnershipType toPageData OwnershipTypeFormModel::fromPropertyOwnership,
+                UpdatePropertyDetailsStepId.UpdateOccupancy toPageData OccupancyFormModel::fromPropertyOwnership,
+                UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds toPageData NumberOfHouseholdsFormModel::fromPropertyOwnership,
+                UpdatePropertyDetailsStepId.UpdateNumberOfPeople toPageData NumberOfPeopleFormModel::fromPropertyOwnership,
+                UpdatePropertyDetailsStepId.UpdateLicensingType toPageData LicensingTypeFormModel::fromPropertyOwnership,
             )
 
-        val licenceNumberUpdateStepId = PropertyDetailsUpdateJourneyDataExtensions.getLicenceNumberUpdateStepId(licensingType)
-        licenceNumberUpdateStepId?.let {
-            originalPropertyData[it.urlPathSegment] =
-                mapOf("licenceNumber" to propertyOwnership.license?.licenseNumber!!)
+        val licenceNumberStepIdAndFormModel = getLicenceNumberStepIdAndFormModel(propertyOwnership)
+        if (licenceNumberStepIdAndFormModel != null) {
+            val (licenceNumberUpdateStepId, licenceFormModel) = licenceNumberStepIdAndFormModel
+            originalPropertyData[licenceNumberUpdateStepId.urlPathSegment] = licenceFormModel.toPageData()
         }
 
         return originalPropertyData
     }
+
+    private fun getLicenceNumberStepIdAndFormModel(propertyOwnership: PropertyOwnership): Pair<UpdatePropertyDetailsStepId, FormModel>? =
+        when (propertyOwnership.license?.licenseType) {
+            LicensingType.SELECTIVE_LICENCE ->
+                Pair(
+                    UpdatePropertyDetailsStepId.UpdateSelectiveLicence,
+                    SelectiveLicenceFormModel.fromPropertyOwnership(propertyOwnership),
+                )
+            LicensingType.HMO_MANDATORY_LICENCE ->
+                Pair(
+                    UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence,
+                    HmoMandatoryLicenceFormModel.fromPropertyOwnership(propertyOwnership),
+                )
+            LicensingType.HMO_ADDITIONAL_LICENCE ->
+                Pair(
+                    UpdatePropertyDetailsStepId.UpdateHmoAdditionalLicence,
+                    HmoAdditionalLicenceFormModel.fromPropertyOwnership(propertyOwnership),
+                )
+            else -> null
+        }
 
     private val updateDetailsStep =
         Step(

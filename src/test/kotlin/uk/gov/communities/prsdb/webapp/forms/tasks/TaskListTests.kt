@@ -6,11 +6,14 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.mockito.Mock
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.whenever
+import org.springframework.validation.BindingResult
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.forms.journeys.JourneyWithTaskList
+import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListViewModel
@@ -67,20 +70,27 @@ class TaskListTests {
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData.toMutableMap())
     }
 
+    fun getMockPage(): Page {
+        val mockPage = mock<Page>()
+        val mockBindingResult = mock<BindingResult>()
+        whenever(mockPage.bindDataToFormModel(anyOrNull(), anyOrNull())).thenReturn(mockBindingResult)
+        return mockPage
+    }
+
     fun getTwoStepTask(status: TaskStatus = TaskStatus.COMPLETED): JourneyTask<TestStepId> =
         JourneyTask(
             TestStepId.TwoStepTaskPartOne,
             setOf(
                 Step(
                     TestStepId.TwoStepTaskPartOne,
-                    mock(),
-                    isSatisfied = { _, _ -> status == TaskStatus.IN_PROGRESS || status == TaskStatus.COMPLETED },
+                    getMockPage(),
+                    isSatisfied = { _ -> status == TaskStatus.IN_PROGRESS || status == TaskStatus.COMPLETED },
                     nextAction = { _, _ -> Pair(TestStepId.TwoStepTaskPartTwo, null) },
                 ),
                 Step(
                     TestStepId.TwoStepTaskPartTwo,
-                    mock(),
-                    isSatisfied = { _, _ -> status == TaskStatus.COMPLETED },
+                    getMockPage(),
+                    isSatisfied = { _ -> status == TaskStatus.COMPLETED },
                     nextAction = { _, _ -> Pair(TestStepId.SimpleTaskTwo, null) },
                 ),
             ),
@@ -93,8 +103,8 @@ class TaskListTests {
             setOf(
                 Step(
                     TestStepId.MultiPathTaskStart,
-                    mock(),
-                    isSatisfied = { _, _ -> true },
+                    getMockPage(),
+                    isSatisfied = { _ -> true },
                     nextAction = { _, _ ->
                         Pair(
                             if (useMainline) TestStepId.MultiPathTaskMainline else TestStepId.MultiPathTaskAlternateRoutePartOne,
@@ -104,20 +114,20 @@ class TaskListTests {
                 ),
                 Step(
                     TestStepId.MultiPathTaskMainline,
-                    mock(),
-                    isSatisfied = { _, _ -> true },
+                    getMockPage(),
+                    isSatisfied = { _ -> true },
                     nextAction = { _, _ -> Pair(TestStepId.TwoStepTaskPartOne, null) },
                 ),
                 Step(
                     TestStepId.MultiPathTaskAlternateRoutePartOne,
-                    mock(),
-                    isSatisfied = { _, _ -> false },
+                    getMockPage(),
+                    isSatisfied = { _ -> false },
                     nextAction = { _, _ -> Pair(TestStepId.MultiPathTaskAlternateRoutePartTwo, null) },
                 ),
                 Step(
                     TestStepId.MultiPathTaskAlternateRoutePartTwo,
-                    mock(),
-                    isSatisfied = { _, _ -> false },
+                    getMockPage(),
+                    isSatisfied = { _ -> false },
                     nextAction = { _, _ -> Pair(TestStepId.TwoStepTaskPartOne, null) },
                 ),
             ),
@@ -137,8 +147,8 @@ class TaskListTests {
                             JourneyTask.withOneStep(
                                 Step(
                                     TestStepId.SimpleTaskOne,
-                                    mock(),
-                                    isSatisfied = { _, _ -> true },
+                                    getMockPage(),
+                                    isSatisfied = { _ -> true },
                                     nextAction = { _, _ -> Pair(TestStepId.MultiPathTaskStart, null) },
                                 ),
                                 "task 1",
@@ -148,8 +158,8 @@ class TaskListTests {
                             JourneyTask.withOneStep(
                                 Step(
                                     TestStepId.SimpleTaskTwo,
-                                    mock(),
-                                    isSatisfied = { _, _ -> false },
+                                    getMockPage(),
+                                    isSatisfied = { _ -> false },
                                 ),
                                 "task 4",
                             ),
@@ -223,8 +233,8 @@ class TaskListTests {
                         JourneyTask.withOneStep(
                             Step(
                                 TestStepId.SimpleTaskOne,
-                                mock(),
-                                isSatisfied = { _, _ -> simpleTaskOneCompleted },
+                                getMockPage(),
+                                isSatisfied = { _ -> simpleTaskOneCompleted },
                                 nextAction = { _, _ -> Pair(TestStepId.TwoStepTaskPartOne, null) },
                             ),
                             "task 1",
@@ -233,8 +243,8 @@ class TaskListTests {
                         JourneyTask.withOneStep(
                             Step(
                                 TestStepId.SimpleTaskTwo,
-                                mock(),
-                                isSatisfied = { _, _ -> simpleTaskTwoCompleted },
+                                getMockPage(),
+                                isSatisfied = { _ -> simpleTaskTwoCompleted },
                             ),
                             "task 3",
                         ),
@@ -325,8 +335,8 @@ class TaskListTests {
                             JourneyTask.withOneStep(
                                 Step(
                                     TestStepId.SimpleTaskOne,
-                                    mock(),
-                                    isSatisfied = { _, _ -> true },
+                                    getMockPage(),
+                                    isSatisfied = { _ -> true },
                                     nextAction = { _, _ -> Pair(TestStepId.TwoStepTaskPartOne, null) },
                                 ),
                                 "task 1",
@@ -339,8 +349,8 @@ class TaskListTests {
                             JourneyTask.withOneStep(
                                 Step(
                                     TestStepId.SimpleTaskTwo,
-                                    mock(),
-                                    isSatisfied = { _, _ -> true },
+                                    getMockPage(),
+                                    isSatisfied = { _ -> true },
                                 ),
                             ),
                         ),

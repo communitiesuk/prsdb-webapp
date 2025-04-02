@@ -27,13 +27,5 @@ open class JourneyDataExtensions {
 
         fun JourneyData.withUpdatedLookedUpAddresses(lookedUpAddresses: List<AddressDataModel>): JourneyData =
             this.withUpdatedLookedUpAddresses(Json.encodeToString(lookedUpAddresses))
-
-        @JvmStatic
-        protected fun JourneyData.getWantsToProceed(urlPathSegment: String): Boolean? =
-            JourneyDataHelper.getFieldBooleanValue(
-                this,
-                urlPathSegment,
-                "wantsToProceed",
-            )
     }
 }

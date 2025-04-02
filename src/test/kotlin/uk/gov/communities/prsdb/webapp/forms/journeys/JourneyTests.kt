@@ -17,6 +17,7 @@ import org.mockito.Mockito.mock
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
@@ -460,10 +461,10 @@ class JourneyTests {
                             ),
                         ),
                 )
-            val pageDataStepOne: PageData = mapOf("testProperty" to "testProperty")
-            val pageDataStepTwo: PageData = mapOf("testPropertyTwo" to "testProperty")
-            val pageDataStepThree: PageData = mapOf("testProperty" to "testProperty")
-            val pageDataStepFour: PageData = mapOf("testProperty" to "testProperty")
+            val pageDataStepOne: PageData = mapOf("testProperty" to "testProperty1")
+            val pageDataStepTwo: PageData = mapOf("testProperty" to "testProperty2")
+            val pageDataStepThree: PageData = mapOf("testProperty" to "testProperty3")
+            val pageDataStepFour: PageData = mapOf("testProperty" to "testProperty4")
             val journeyData: JourneyData =
                 mapOf(
                     TestStepId.StepOne.urlPathSegment to pageDataStepOne,
@@ -487,11 +488,10 @@ class JourneyTests {
 
             // Assert
             verify(spiedOnPage).getModelAndView(
-                validator,
-                pageDataStepFour,
-                TestStepId.StepThree.urlPathSegment,
-                filteredJourneyData,
-                null,
+                anyOrNull(),
+                eq(TestStepId.StepThree.urlPathSegment),
+                eq(filteredJourneyData),
+                eq(null),
             )
         }
     }

@@ -4,6 +4,7 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import kotlin.reflect.KClass
 
 class AlreadyRegisteredPage(
@@ -18,7 +19,11 @@ class AlreadyRegisteredPage(
     ) {
         modelAndView.addObject(
             "singleLineAddress",
-            JourneyDataHelper.getFieldStringValue(filteredJourneyData!!, selectedAddressPathSegment, "address"),
+            JourneyDataHelper.getFieldStringValue(
+                filteredJourneyData!!,
+                selectedAddressPathSegment,
+                SelectAddressFormModel::address.name,
+            ),
         )
     }
 }

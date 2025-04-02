@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import java.security.Principal
 import java.util.Optional
+import kotlin.reflect.cast
 
 abstract class Journey<T : StepId>(
     private val journeyType: JourneyType,
@@ -61,12 +62,12 @@ abstract class Journey<T : StepId>(
         val pageData =
             submittedPageData
                 ?: JourneyDataHelper.getPageData(journeyDataService.getJourneyDataFromSession(), requestedStep.name, subPageNumber)
+        val bindingResult = requestedStep.page.bindDataToFormModel(validator, pageData)
 
         val sectionHeaderInfo = getSectionHeaderInfo(requestedStep)
 
         return requestedStep.page.getModelAndView(
-            validator,
-            pageData,
+            bindingResult,
             prevStepUrl,
             prevStepDetails?.filteredJourneyData,
             sectionHeaderInfo,
@@ -75,20 +76,25 @@ abstract class Journey<T : StepId>(
 
     fun completeStep(
         stepPathSegment: String,
-        pageData: PageData,
+        formData: PageData,
         subPageNumber: Int?,
         principal: Principal,
     ): ModelAndView {
         val currentStep = getStep(stepPathSegment)
-        if (!currentStep.isSatisfied(validator, pageData)) {
+
+        val bindingResult = currentStep.page.bindDataToFormModel(validator, formData)
+
+        if (!currentStep.isSatisfied(bindingResult)) {
             return getModelAndViewForStep(
                 stepPathSegment,
                 subPageNumber,
-                pageData,
+                formData,
             )
         }
 
-        val newJourneyData = currentStep.updatedJourneyData(journeyDataService.getJourneyDataFromSession(), pageData, subPageNumber)
+        val formModel = currentStep.page.formModel.cast(bindingResult.target)
+
+        val newJourneyData = currentStep.updatedJourneyData(journeyDataService.getJourneyDataFromSession(), formModel, subPageNumber)
         journeyDataService.setJourneyDataInSession(newJourneyData)
 
         if (currentStep.saveAfterSubmit) {

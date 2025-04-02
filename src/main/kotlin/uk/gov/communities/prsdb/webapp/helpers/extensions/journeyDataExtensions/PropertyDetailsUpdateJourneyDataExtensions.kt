@@ -6,6 +6,11 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.UpdateJourneyDataExtensions.Companion.getOriginalJourneyDataIfPresent
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 
 class PropertyDetailsUpdateJourneyDataExtensions {
     companion object {
@@ -13,7 +18,7 @@ class PropertyDetailsUpdateJourneyDataExtensions {
             JourneyDataHelper.getFieldEnumValue<OwnershipType>(
                 this,
                 UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment,
-                "ownershipType",
+                OwnershipTypeFormModel::ownershipType.name,
             )
 
         fun JourneyData.getOriginalIsOccupied(originalJourneyKey: String) =
@@ -28,7 +33,7 @@ class PropertyDetailsUpdateJourneyDataExtensions {
                 JourneyDataHelper.getFieldIntegerValue(
                     this,
                     UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment,
-                    "numberOfHouseholds",
+                    NumberOfHouseholdsFormModel::numberOfHouseholds.name,
                 )
             }
 
@@ -39,7 +44,7 @@ class PropertyDetailsUpdateJourneyDataExtensions {
                 JourneyDataHelper.getFieldIntegerValue(
                     this,
                     UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment,
-                    "numberOfPeople",
+                    NumberOfPeopleFormModel::numberOfPeople.name,
                 )
             }
 
@@ -47,7 +52,7 @@ class PropertyDetailsUpdateJourneyDataExtensions {
             JourneyDataHelper.getFieldEnumValue<LicensingType>(
                 this,
                 UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment,
-                "licensingType",
+                LicensingTypeFormModel::licensingType.name,
             )
 
         fun JourneyData.getLicenceNumberUpdateIfPresent(originalJourneyKey: String): String? {
@@ -72,7 +77,7 @@ class PropertyDetailsUpdateJourneyDataExtensions {
             JourneyDataHelper.getFieldBooleanValue(
                 this,
                 UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment,
-                "occupied",
+                OccupancyFormModel::occupied.name,
             )
 
         fun JourneyData.getLatestNumberOfHouseholds(originalJourneyDataKey: String?): Int {
