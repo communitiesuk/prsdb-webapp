@@ -12,13 +12,13 @@ class PropertyDetailsEmailSectionTests {
     fun `PropertyDetailsEmailSection toString returns a template string with the details of a single property`() {
         val expectedMarkdown =
             """
-            ### Property 1 
+            ### Property 1
             
-            Property registration number: 
+            Property registration number:
             
-            ^P-WWW-XXX 
+            ^P-WWW-XXX
             
-            Address: 1 Imaginary Street, Fakeville, FA1 2KE 
+            Address: 1 Imaginary Street, Fakeville, FA1 2KE
             
             
             """.trimIndent()
@@ -37,22 +37,22 @@ class PropertyDetailsEmailSectionTests {
     fun `PropertyDetailsEmailSectionList toString returns a template string with details of all the properties`() {
         val expectedMarkdown =
             """
-            ### Property 1 
+            ### Property 1
             
-            Property registration number: 
+            Property registration number:
             
-            ^P-WWW-XXX 
+            ^P-WWW-XXX
             
-            Address: 1 Imaginary Street, Fakeville, FA1 2KE 
+            Address: 1 Imaginary Street, Fakeville, FA1 2KE
             
             --- 
-            ### Property 2 
+            ### Property 2
             
-            Property registration number: 
+            Property registration number:
             
-            ^P-YYY-ZZZ 
+            ^P-YYY-ZZZ
             
-            Address: 2 Mythical Place, Fakeville, FA3 4KE 
+            Address: 2 Mythical Place, Fakeville, FA3 4KE
             
             
             """.trimIndent()

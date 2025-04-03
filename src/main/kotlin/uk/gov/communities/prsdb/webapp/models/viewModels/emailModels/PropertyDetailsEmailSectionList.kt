@@ -31,8 +31,15 @@ data class PropertyDetailsEmailSection(
     val singleLineAddress: String,
 ) {
     override fun toString() =
-        "### Property ${this.propertyNumber} \n\n" +
-            "Property registration number: \n\n" +
-            "^${this.prn} \n\n" +
-            "Address: ${this.singleLineAddress} \n\n"
+        """ 
+        ### Property ${this.propertyNumber}
+        
+        Property registration number:
+        
+        ^${this.prn}
+        
+        Address: ${this.singleLineAddress}
+        
+        
+        """.trimIndent()
 }
