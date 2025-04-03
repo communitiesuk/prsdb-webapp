@@ -19,7 +19,7 @@ spring:
       defer-datasource-initialization: true
 
   flyway:
-    enabled: true
+    enabled: false
     locations: classpath:db/migrations
     validate-on-migrate: true
 

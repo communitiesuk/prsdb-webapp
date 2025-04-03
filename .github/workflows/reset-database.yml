@@ -31,8 +31,8 @@ jobs:
           echo "::error ::Invalid Target Environment: ${{ inputs.environment }}. This action can only target integration and test environments."
           exit 1
 
-  clean-database:
-    name: Clean Database
+  clean-and-migrate-database:
+    name: Clean and Migrate Database
     needs: validate-target-environment
     runs-on: ubuntu-latest
     steps:
@@ -82,13 +82,18 @@ jobs:
           FLYWAY_CLEAN_DISABLED: false
         run: ./gradlew flywayClean --no-daemon
 
+      - name: Run gradle flywayMigrate
+        env:
+          FLYWAY_URL: jdbc:postgresql://localhost:5432/prsdb
+        run: ./gradlew flywayMigrate
+
       - name: Terminate SSM port-forwarding session
         if: (success() || failure()) && steps.start-session.outputs.SSM_SESSION_ID != ''
         run: aws ssm terminate-session --session-id ${{ steps.start-session.outputs.SSM_SESSION_ID }}
 
   restart-ecs:
     name: Restart ECS
-    needs: clean-database
+    needs: clean-and-migrate-database
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials
