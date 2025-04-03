@@ -137,7 +137,7 @@ class LandlordDeregistrationJourney(
 
             confirmationWithPropertiesEmailSender.sendEmail(
                 landlordEmailAddress,
-                LandlordWithPropertiesDeregistrationConfirmationEmail(propertySectionList.toString()),
+                LandlordWithPropertiesDeregistrationConfirmationEmail(propertySectionList),
             )
         }
 

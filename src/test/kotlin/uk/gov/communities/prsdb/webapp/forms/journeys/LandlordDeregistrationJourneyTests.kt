@@ -192,7 +192,7 @@ class LandlordDeregistrationJourneyTests {
         verify(mockConfirmationLandlordWithPropertiesEmailSender)
             .sendEmail(
                 "example@email.com",
-                LandlordWithPropertiesDeregistrationConfirmationEmail(expectedPropertyEmailSectionList.toString()),
+                LandlordWithPropertiesDeregistrationConfirmationEmail(expectedPropertyEmailSectionList),
             )
     }
 }
