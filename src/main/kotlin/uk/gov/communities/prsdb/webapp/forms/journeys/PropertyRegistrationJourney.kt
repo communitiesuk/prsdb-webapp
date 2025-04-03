@@ -114,6 +114,7 @@ class PropertyRegistrationJourney(
             setOf(
                 lookupAddressStep(),
                 selectAddressStep(),
+                noAddressFoundStep(),
                 alreadyRegisteredStep(),
                 manualAddressStep(),
                 localAuthorityStep(),
@@ -212,6 +213,27 @@ class PropertyRegistrationJourney(
                         ),
                     selectedAddressPathSegment = RegisterPropertyStepId.SelectAddress.urlPathSegment,
                 ),
+        )
+
+    private fun noAddressFoundStep() =
+        Step(
+            id = RegisterPropertyStepId.NoAddressFound,
+            page =
+                Page(
+                    formModel = NoInputFormModel::class,
+                    templateName = "noAddressFoundPage",
+                    content =
+                        mapOf(
+                            "title" to "registerProperty.title",
+                            "postcode" to "HARDCODED POSTCODE",
+                            "houseNameOrNumber" to "HARDCODED HOUSE NUMBER",
+                            "searchAgainUrl" to
+                                "/$REGISTER_PROPERTY_JOURNEY_URL/" +
+                                RegisterPropertyStepId.LookupAddress.urlPathSegment,
+                        ),
+                    shouldDisplaySectionHeader = true,
+                ),
+            nextAction = { _, _ -> Pair(RegisterPropertyStepId.ManualAddress, null) },
         )
 
     private fun manualAddressStep() =
@@ -554,7 +576,9 @@ class PropertyRegistrationJourney(
         journeyData: JourneyData,
         propertyRegistrationService: PropertyRegistrationService,
     ): Pair<RegisterPropertyStepId, Int?> =
-        if (PropertyRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
+        if (journeyData.getLookedUpAddresses().isEmpty()) {
+            Pair(RegisterPropertyStepId.NoAddressFound, null)
+        } else if (PropertyRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
             Pair(RegisterPropertyStepId.ManualAddress, null)
         } else {
             val selectedAddress = PropertyRegistrationJourneyDataHelper.getAddress(journeyData, journeyData.getLookedUpAddresses())!!
