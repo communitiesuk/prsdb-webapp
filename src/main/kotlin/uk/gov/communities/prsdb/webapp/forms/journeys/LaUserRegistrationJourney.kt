@@ -36,8 +36,8 @@ class LaUserRegistrationJourney(
     init {
         val journeyData = journeyDataService.getJourneyDataFromSession()
         if (!isJourneyDataInitialized(journeyData)) {
-            val emailFormData = mapOf("emailAddress" to invitation.invitedEmail)
-            val newJourneyData = emailStep().updatedJourneyData(journeyData, emailFormData, subPageNumber = null)
+            val emailForm = EmailFormModel.fromLaInvitation(invitation)
+            val newJourneyData = emailStep().updatedJourneyData(journeyData, emailForm, subPageNumber = null)
             journeyDataService.setJourneyDataInSession(newJourneyData)
         }
     }

@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
@@ -21,4 +22,8 @@ class PhoneNumberFormModel : FormModel {
         ],
     )
     var phoneNumber: String? = null
+
+    companion object {
+        fun fromLandlord(landlord: Landlord): PhoneNumberFormModel = PhoneNumberFormModel().apply { phoneNumber = landlord.phoneNumber }
+    }
 }

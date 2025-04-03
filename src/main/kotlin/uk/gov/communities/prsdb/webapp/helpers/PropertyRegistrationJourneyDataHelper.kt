@@ -7,6 +7,16 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoAdditionalLicenceFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoMandatoryLicenceFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectiveLicenceFormModel
 
 class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
     companion object {
@@ -29,68 +39,71 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
             getFieldEnumValue<PropertyType>(
                 journeyData,
                 RegisterPropertyStepId.PropertyType.urlPathSegment,
-                "propertyType",
+                PropertyTypeFormModel::propertyType.name,
             )
 
         fun getCustomPropertyType(journeyData: JourneyData): String? =
             getFieldStringValue(
                 journeyData,
                 RegisterPropertyStepId.PropertyType.urlPathSegment,
-                "customPropertyType",
+                PropertyTypeFormModel::customPropertyType.name,
             )
 
         fun getOwnershipType(journeyData: JourneyData): OwnershipType? =
             getFieldEnumValue<OwnershipType>(
                 journeyData,
                 RegisterPropertyStepId.OwnershipType.urlPathSegment,
-                "ownershipType",
+                OwnershipTypeFormModel::ownershipType.name,
             )
 
         fun getIsOccupied(journeyData: JourneyData): Boolean? =
             getFieldBooleanValue(
                 journeyData,
                 RegisterPropertyStepId.Occupancy.urlPathSegment,
-                "occupied",
+                OccupancyFormModel::occupied.name,
             )
 
         fun getNumberOfHouseholds(journeyData: JourneyData): Int =
             getFieldIntegerValue(
                 journeyData,
                 RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment,
-                "numberOfHouseholds",
+                NumberOfHouseholdsFormModel::numberOfHouseholds.name,
             ) ?: 0
 
         fun getNumberOfTenants(journeyData: JourneyData): Int =
             getFieldIntegerValue(
                 journeyData,
                 RegisterPropertyStepId.NumberOfPeople.urlPathSegment,
-                "numberOfPeople",
+                NumberOfPeopleFormModel::numberOfPeople.name,
             ) ?: 0
 
         fun getLicensingType(journeyData: JourneyData): LicensingType? =
             getFieldEnumValue<LicensingType>(
                 journeyData,
                 RegisterPropertyStepId.LicensingType.urlPathSegment,
-                "licensingType",
+                LicensingTypeFormModel::licensingType.name,
             )
 
         fun getLicenseNumber(journeyData: JourneyData): String? {
-            val licenseNumberPathSegment =
+            val (stepId, fieldName) =
                 when (getLicensingType(journeyData)!!) {
-                    LicensingType.SELECTIVE_LICENCE -> RegisterPropertyStepId.SelectiveLicence.urlPathSegment
-                    LicensingType.HMO_MANDATORY_LICENCE -> RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment
-                    LicensingType.HMO_ADDITIONAL_LICENCE -> RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment
+                    LicensingType.SELECTIVE_LICENCE ->
+                        Pair(RegisterPropertyStepId.SelectiveLicence, SelectiveLicenceFormModel::licenceNumber.name)
+                    LicensingType.HMO_MANDATORY_LICENCE ->
+                        Pair(RegisterPropertyStepId.HmoMandatoryLicence, HmoMandatoryLicenceFormModel::licenceNumber.name)
+                    LicensingType.HMO_ADDITIONAL_LICENCE ->
+                        Pair(RegisterPropertyStepId.HmoAdditionalLicence, HmoAdditionalLicenceFormModel::licenceNumber.name)
                     LicensingType.NO_LICENSING -> return ""
                 }
 
-            return getFieldStringValue(journeyData, licenseNumberPathSegment, "licenceNumber")
+            return getFieldStringValue(journeyData, stepId.urlPathSegment, fieldName)
         }
 
         private fun getSelectedAddress(journeyData: JourneyData): String? =
             getFieldStringValue(
                 journeyData,
                 RegisterPropertyStepId.SelectAddress.urlPathSegment,
-                "address",
+                SelectAddressFormModel::address.name,
             )
 
         fun isManualAddressChosen(journeyData: JourneyData) = getSelectedAddress(journeyData) == MANUAL_ADDRESS_CHOSEN

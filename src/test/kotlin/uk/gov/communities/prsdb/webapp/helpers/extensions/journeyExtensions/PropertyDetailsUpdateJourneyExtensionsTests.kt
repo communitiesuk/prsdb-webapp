@@ -1,24 +1,25 @@
-package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions
+package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getIsOccupiedUpdateIfPresent
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getLicenceNumberUpdateIfPresent
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getLicensingTypeUpdateIfPresent
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfHouseholdsUpdateIfPresent
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfPeopleUpdateIfPresent
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getOriginalIsOccupied
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getOwnershipTypeUpdateIfPresent
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getIsOccupiedUpdateIfPresent
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getLatestNumberOfHouseholds
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getLicenceNumberUpdateIfPresent
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getLicensingTypeUpdateIfPresent
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getNumberOfHouseholdsUpdateIfPresent
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getNumberOfPeopleUpdateIfPresent
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getOriginalIsOccupied
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getOwnershipTypeUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class PropertyDetailsUpdateJourneyDataExtensionsTests {
+class PropertyDetailsUpdateJourneyExtensionsTests {
     private lateinit var journeyDataBuilder: JourneyDataBuilder
 
     @BeforeEach
@@ -168,6 +169,53 @@ class PropertyDetailsUpdateJourneyDataExtensionsTests {
         val numberOfPeopleUpdate = testJourneyData.getNumberOfPeopleUpdateIfPresent()
 
         assertNull(numberOfPeopleUpdate)
+    }
+
+    @Test
+    fun `getLatestNumberOfHouseholds returns number of households from originalJourneyData when it is not in journeyData`() {
+        val originalDataKey = "original-data-key"
+        val expectedNumberOfHouseholds = 2
+
+        val testJourneyData = journeyDataBuilder.withOriginalNumberOfHouseholdsData(originalDataKey, expectedNumberOfHouseholds).build()
+
+        val latestNumberOfHouseholds = testJourneyData.getLatestNumberOfHouseholds(originalDataKey)
+
+        assertEquals(expectedNumberOfHouseholds, latestNumberOfHouseholds)
+    }
+
+    @Test
+    fun `getLatestNumberOfHouseholds returns number of households from JourneyData if the corresponding page is there`() {
+        val originalDataKey = "original-data-key"
+        val originalNumberOfHouseholds = 2
+        val expectedNumberOfHouseholds = 3
+
+        val testJourneyData =
+            journeyDataBuilder
+                .withNumberOfHouseholdsUpdate(
+                    expectedNumberOfHouseholds,
+                ).withOriginalNumberOfHouseholdsData(originalDataKey, originalNumberOfHouseholds)
+                .build()
+
+        val latestNumberOfHouseholds = testJourneyData.getLatestNumberOfHouseholds(originalDataKey)
+
+        assertEquals(expectedNumberOfHouseholds, latestNumberOfHouseholds)
+    }
+
+    @Test
+    fun `getLatestNumberOfHouseholds returns 0 if journeyDate isOccupied is false`() {
+        val originalDataKey = "original-data-key"
+        val originalNumberOfHouseholds = 2
+        val expectedNumberOfHouseholds = 0
+
+        val testJourneyData =
+            journeyDataBuilder
+                .withIsOccupiedUpdate(false)
+                .withOriginalNumberOfHouseholdsData(originalDataKey, originalNumberOfHouseholds)
+                .build()
+
+        val latestNumberOfHouseholds = testJourneyData.getLatestNumberOfHouseholds(originalDataKey)
+
+        assertEquals(expectedNumberOfHouseholds, latestNumberOfHouseholds)
     }
 
     @Test

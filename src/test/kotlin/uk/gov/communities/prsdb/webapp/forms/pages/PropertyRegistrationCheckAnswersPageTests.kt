@@ -45,7 +45,8 @@ class PropertyRegistrationCheckAnswersPageTests {
     private fun getPropertyDetails(journeyData: JourneyData): List<SummaryListRowViewModel> {
         whenever(journeyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
-        val result = page.getModelAndView(validator, pageData, prevStepUrl, journeyData, null)
+        val bindingResult = page.bindDataToFormModel(validator, pageData)
+        val result = page.getModelAndView(bindingResult, prevStepUrl, journeyData, null)
 
         val propertyDetails = result.model["propertyDetails"] as List<*>
         return propertyDetails.filterIsInstance<SummaryListRowViewModel>()

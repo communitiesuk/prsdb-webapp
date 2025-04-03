@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
@@ -30,4 +31,12 @@ class NumberOfPeopleFormModel(
     var numberOfHouseholds: String = "",
 ) : FormModel {
     fun isNotLessThanNumberOfHouseholds(): Boolean = numberOfPeople.toInt() >= numberOfHouseholds.toInt()
+
+    companion object {
+        fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): NumberOfPeopleFormModel =
+            NumberOfPeopleFormModel().apply {
+                numberOfPeople = propertyOwnership.currentNumTenants.toString()
+                numberOfHouseholds = propertyOwnership.currentNumHouseholds.toString()
+            }
+    }
 }

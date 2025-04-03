@@ -6,24 +6,25 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
-import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
-import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.UpdateLandlordDetailsJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.getSerializedLookedUpAddresses
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getSerializedLookedUpAddresses
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DateOfBirthFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
@@ -33,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAdd
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import kotlin.reflect.KFunction
 
 class UpdateLandlordDetailsJourney(
     validator: Validator,
@@ -55,35 +57,23 @@ class UpdateLandlordDetailsJourney(
     override fun createOriginalJourneyData(): JourneyData {
         val landlord = landlordService.retrieveLandlordByBaseUserId(landlordBaseUserId)!!
 
+        infix fun <T : FormModel> StepId.toPageData(fromLandlordFunc: KFunction<T>): Pair<String, PageData> =
+            this.urlPathSegment to fromLandlordFunc.call(landlord).toPageData()
+
         val originalLandlordData =
             mutableMapOf(
                 IS_IDENTITY_VERIFIED_KEY to landlord.isVerified,
                 LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to Json.encodeToString(listOf(AddressDataModel.fromAddress(landlord.address))),
-                UpdateLandlordDetailsStepId.UpdateEmail.urlPathSegment to mapOf("emailAddress" to landlord.email),
-                UpdateLandlordDetailsStepId.UpdateName.urlPathSegment to mapOf("name" to landlord.name),
-                UpdateLandlordDetailsStepId.UpdatePhoneNumber.urlPathSegment to mapOf("phoneNumber" to landlord.phoneNumber),
-                UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment to
-                    mapOf(
-                        "postcode" to landlord.address.getPostcodeSearchTerm(),
-                        "houseNameOrNumber" to landlord.address.getHouseNameOrNumber(),
-                    ),
-                UpdateLandlordDetailsStepId.SelectEnglandAndWalesAddress.urlPathSegment to
-                    mapOf("address" to landlord.address.getSelectedAddress()),
-                UpdateLandlordDetailsStepId.UpdateDateOfBirth.urlPathSegment to
-                    mapOf(
-                        "day" to landlord.dateOfBirth?.dayOfMonth.toString(),
-                        "month" to landlord.dateOfBirth?.monthValue.toString(),
-                        "year" to landlord.dateOfBirth?.year.toString(),
-                    ),
+                UpdateLandlordDetailsStepId.UpdateEmail toPageData EmailFormModel::fromLandlord,
+                UpdateLandlordDetailsStepId.UpdateName toPageData NameFormModel::fromLandlord,
+                UpdateLandlordDetailsStepId.UpdatePhoneNumber toPageData PhoneNumberFormModel::fromLandlord,
+                UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress toPageData LookupAddressFormModel::fromLandlord,
+                UpdateLandlordDetailsStepId.SelectEnglandAndWalesAddress toPageData SelectAddressFormModel::fromLandlord,
+                UpdateLandlordDetailsStepId.UpdateDateOfBirth toPageData DateOfBirthFormModel::fromLandlord,
             )
 
         if (landlord.address.uprn == null) {
-            originalLandlordData[UpdateLandlordDetailsStepId.ManualEnglandAndWalesAddress.urlPathSegment] =
-                mapOf(
-                    "addressLineOne" to landlord.address.singleLineAddress,
-                    "townOrCity" to landlord.address.getTownOrCity(),
-                    "postcode" to landlord.address.getPostcodeSearchTerm(),
-                )
+            originalLandlordData += UpdateLandlordDetailsStepId.ManualEnglandAndWalesAddress toPageData ManualAddressFormModel::fromLandlord
         }
 
         return originalLandlordData
@@ -325,14 +315,6 @@ class UpdateLandlordDetailsJourney(
 
         return LandlordDetailsController.LANDLORD_DETAILS_ROUTE
     }
-
-    private fun Address.getHouseNameOrNumber(): String = buildingName ?: buildingNumber ?: singleLineAddress
-
-    private fun Address.getPostcodeSearchTerm(): String = postcode ?: singleLineAddress
-
-    private fun Address.getSelectedAddress(): String = if (uprn == null) MANUAL_ADDRESS_CHOSEN else singleLineAddress
-
-    private fun Address.getTownOrCity(): String = townName ?: singleLineAddress
 
     companion object {
         const val IS_IDENTITY_VERIFIED_KEY = "isIdentityVerified"
