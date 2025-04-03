@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions
+package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions
 
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
