@@ -1,18 +1,23 @@
-package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions
+package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions
 
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.UpdateJourneyDataExtensions.Companion.getOriginalJourneyDataIfPresent
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.UpdateJourneyDataExtensions.Companion.getOriginalJourneyDataIfPresent
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoAdditionalLicenceFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoMandatoryLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectiveLicenceFormModel
 
-class PropertyDetailsUpdateJourneyDataExtensions {
+class PropertyDetailsUpdateJourneyExtensions {
     companion object {
         fun JourneyData.getOwnershipTypeUpdateIfPresent() =
             JourneyDataHelper.getFieldEnumValue<OwnershipType>(
@@ -94,5 +99,25 @@ class PropertyDetailsUpdateJourneyDataExtensions {
 
         private fun JourneyData.getOriginalLicensingType(originalJourneyKey: String) =
             JourneyDataHelper.getPageData(this, originalJourneyKey)?.getLicensingTypeUpdateIfPresent()
+
+        fun PropertyOwnership.getLicenceNumberStepIdAndFormModel(): Pair<UpdatePropertyDetailsStepId, FormModel>? =
+            when (this.license?.licenseType) {
+                LicensingType.SELECTIVE_LICENCE ->
+                    Pair(
+                        UpdatePropertyDetailsStepId.UpdateSelectiveLicence,
+                        SelectiveLicenceFormModel.fromPropertyOwnership(this),
+                    )
+                LicensingType.HMO_MANDATORY_LICENCE ->
+                    Pair(
+                        UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence,
+                        HmoMandatoryLicenceFormModel.fromPropertyOwnership(this),
+                    )
+                LicensingType.HMO_ADDITIONAL_LICENCE ->
+                    Pair(
+                        UpdatePropertyDetailsStepId.UpdateHmoAdditionalLicence,
+                        HmoAdditionalLicenceFormModel.fromPropertyOwnership(this),
+                    )
+                else -> null
+            }
     }
 }

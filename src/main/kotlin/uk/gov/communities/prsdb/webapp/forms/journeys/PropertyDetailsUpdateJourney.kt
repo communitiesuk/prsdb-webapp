@@ -6,7 +6,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -14,15 +13,16 @@ import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationNumberOfP
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getIsOccupiedUpdateIfPresent
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getLatestNumberOfHouseholds
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getLicenceNumberUpdateIfPresent
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getLicensingTypeUpdateIfPresent
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfHouseholdsUpdateIfPresent
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfPeopleUpdateIfPresent
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getOriginalIsOccupied
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getOwnershipTypeUpdateIfPresent
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getIsOccupiedUpdateIfPresent
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getLatestNumberOfHouseholds
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getLicenceNumberStepIdAndFormModel
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getLicenceNumberUpdateIfPresent
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getLicensingTypeUpdateIfPresent
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getNumberOfHouseholdsUpdateIfPresent
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getNumberOfPeopleUpdateIfPresent
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getOriginalIsOccupied
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getOwnershipTypeUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoAdditionalLicenceFormModel
@@ -72,7 +72,7 @@ class PropertyDetailsUpdateJourney(
                 UpdatePropertyDetailsStepId.UpdateLicensingType toPageData LicensingTypeFormModel::fromPropertyOwnership,
             )
 
-        val licenceNumberStepIdAndFormModel = getLicenceNumberStepIdAndFormModel(propertyOwnership)
+        val licenceNumberStepIdAndFormModel = propertyOwnership.getLicenceNumberStepIdAndFormModel()
         if (licenceNumberStepIdAndFormModel != null) {
             val (licenceNumberUpdateStepId, licenceFormModel) = licenceNumberStepIdAndFormModel
             originalPropertyData[licenceNumberUpdateStepId.urlPathSegment] = licenceFormModel.toPageData()
@@ -80,26 +80,6 @@ class PropertyDetailsUpdateJourney(
 
         return originalPropertyData
     }
-
-    private fun getLicenceNumberStepIdAndFormModel(propertyOwnership: PropertyOwnership): Pair<UpdatePropertyDetailsStepId, FormModel>? =
-        when (propertyOwnership.license?.licenseType) {
-            LicensingType.SELECTIVE_LICENCE ->
-                Pair(
-                    UpdatePropertyDetailsStepId.UpdateSelectiveLicence,
-                    SelectiveLicenceFormModel.fromPropertyOwnership(propertyOwnership),
-                )
-            LicensingType.HMO_MANDATORY_LICENCE ->
-                Pair(
-                    UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence,
-                    HmoMandatoryLicenceFormModel.fromPropertyOwnership(propertyOwnership),
-                )
-            LicensingType.HMO_ADDITIONAL_LICENCE ->
-                Pair(
-                    UpdatePropertyDetailsStepId.UpdateHmoAdditionalLicence,
-                    HmoAdditionalLicenceFormModel.fromPropertyOwnership(propertyOwnership),
-                )
-            else -> null
-        }
 
     private val updateDetailsStep =
         Step(
@@ -420,7 +400,7 @@ class PropertyDetailsUpdateJourney(
         val licensingType = journeyData.getLicensingTypeUpdateIfPresent()!!
 
         val nextActionStepId =
-            PropertyDetailsUpdateJourneyDataExtensions.getLicenceNumberUpdateStepId(licensingType)
+            PropertyDetailsUpdateJourneyExtensions.getLicenceNumberUpdateStepId(licensingType)
                 ?: UpdatePropertyDetailsStepId.UpdateOccupancy
 
         return Pair(nextActionStepId, null)
@@ -430,7 +410,7 @@ class PropertyDetailsUpdateJourney(
         val licensingType = journeyData.getLicensingTypeUpdateIfPresent()!!
 
         val redirectStepId =
-            PropertyDetailsUpdateJourneyDataExtensions.getLicenceNumberUpdateStepId(licensingType)
+            PropertyDetailsUpdateJourneyExtensions.getLicenceNumberUpdateStepId(licensingType)
                 ?: UpdatePropertyDetailsStepId.UpdateDetails
 
         return redirectStepId.urlPathSegment
