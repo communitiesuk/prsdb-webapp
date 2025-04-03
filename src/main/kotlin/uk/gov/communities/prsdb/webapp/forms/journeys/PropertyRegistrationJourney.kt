@@ -4,12 +4,14 @@ import jakarta.persistence.EntityExistsException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.AlreadyRegisteredPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationCheckAnswersPage
@@ -192,6 +194,7 @@ class PropertyRegistrationJourney(
     private fun selectAddressStep() =
         Step(
             id = RegisterPropertyStepId.SelectAddress,
+            autocompleteAndRedirect = { subPage -> autocompleteSelectAddressWithManualAddressChosen(subPage) },
             page =
                 SelectAddressPage(
                     formModel = SelectAddressFormModel::class,
@@ -216,6 +219,22 @@ class PropertyRegistrationJourney(
                 )
             },
         )
+
+    private fun autocompleteSelectAddressWithManualAddressChosen(subPageNumber: Int?): String? {
+        if (journeyDataService.getJourneyDataFromSession().getLookedUpAddresses().isNotEmpty()) {
+            return null
+        }
+        val pageData =
+            mutableMapOf(
+                "address" to MANUAL_ADDRESS_CHOSEN,
+            ) as PageData
+
+        val currentStep = steps.single { it.id == RegisterPropertyStepId.SelectAddress }
+
+        savePageDataToJourneyDataIfValid(currentStep, pageData, subPageNumber)
+
+        return getRedirectForNextStep(currentStep, journeyDataService.getJourneyDataFromSession(), subPageNumber)
+    }
 
     private fun alreadyRegisteredStep() =
         Step(

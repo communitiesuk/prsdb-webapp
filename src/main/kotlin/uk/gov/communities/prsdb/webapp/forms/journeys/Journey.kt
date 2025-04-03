@@ -59,7 +59,9 @@ abstract class Journey<T : StepId>(
         }
 
         if (requestedStep.autocompleteAndRedirect != null) {
-            return ModelAndView("redirect:${requestedStep.autocompleteAndRedirect.invoke()}")
+            if (requestedStep.autocompleteAndRedirect.invoke(subPageNumber) != null) {
+                return ModelAndView("redirect:${requestedStep.autocompleteAndRedirect.invoke(subPageNumber)}")
+            }
         }
 
         val prevStepDetails = getPrevStep(requestedStep, subPageNumber)
@@ -87,9 +89,8 @@ abstract class Journey<T : StepId>(
     ): ModelAndView {
         val currentStep = getStep(stepPathSegment)
 
-        val bindingResult = currentStep.page.bindDataToFormModel(validator, formData)
-
-        if (!currentStep.isSatisfied(bindingResult)) {
+        val pageDataValidAndStoredInJourneyData = savePageDataToJourneyDataIfValid(currentStep, formData, subPageNumber)
+        if (!pageDataValidAndStoredInJourneyData) {
             return getModelAndViewForStep(
                 stepPathSegment,
                 subPageNumber,
@@ -97,10 +98,7 @@ abstract class Journey<T : StepId>(
             )
         }
 
-        val formModel = currentStep.page.formModel.cast(bindingResult.target)
-
-        val newJourneyData = currentStep.updatedJourneyData(journeyDataService.getJourneyDataFromSession(), formModel, subPageNumber)
-        journeyDataService.setJourneyDataInSession(newJourneyData)
+        val newJourneyData = journeyDataService.getJourneyDataFromSession()
 
         if (currentStep.saveAfterSubmit) {
             val journeyDataContextId = journeyDataService.getContextId()
@@ -113,6 +111,25 @@ abstract class Journey<T : StepId>(
 
         val redirectUrl = getRedirectForNextStep(currentStep, newJourneyData, subPageNumber)
         return ModelAndView("redirect:$redirectUrl")
+    }
+
+    protected fun savePageDataToJourneyDataIfValid(
+        currentStep: Step<T>,
+        formData: PageData,
+        subPageNumber: Int?,
+    ): Boolean {
+        val bindingResult = currentStep.page.bindDataToFormModel(validator, formData)
+
+        if (!currentStep.isSatisfied(bindingResult)) {
+            return false
+        }
+
+        val formModel = currentStep.page.formModel.cast(bindingResult.target)
+
+        val newJourneyData = currentStep.updatedJourneyData(journeyDataService.getJourneyDataFromSession(), formModel, subPageNumber)
+        journeyDataService.setJourneyDataInSession(newJourneyData)
+
+        return true
     }
 
     protected fun getRedirectForNextStep(
