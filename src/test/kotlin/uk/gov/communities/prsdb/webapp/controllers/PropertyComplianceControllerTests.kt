@@ -5,18 +5,21 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.Mock
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @WebMvcTest(PropertyComplianceController::class)
@@ -35,20 +38,21 @@ class PropertyComplianceControllerTests(
     private val validPropertyOwnershipId = 1L
     private val validPropertyComplianceUrl = PropertyComplianceController.getPropertyCompliancePath(validPropertyOwnershipId)
     private val validPropertyComplianceTaskListUrl = "$validPropertyComplianceUrl/$TASK_LIST_PATH_SEGMENT"
-    private val validPropertyComplianceJourneyStepUrl = "$validPropertyComplianceUrl/${PropertyComplianceStepId.GasSafety.urlPathSegment}"
+    private val validPropertyComplianceInitialStepUrl =
+        "$validPropertyComplianceUrl/${PropertyComplianceJourney.initialStepId.urlPathSegment}"
 
     private val invalidPropertyOwnershipId = 2L
     private val invalidPropertyComplianceUrl = PropertyComplianceController.getPropertyCompliancePath(invalidPropertyOwnershipId)
     private val invalidPropertyComplianceTaskListUrl = "$invalidPropertyComplianceUrl/$TASK_LIST_PATH_SEGMENT"
-    private val invalidPropertyComplianceJourneyStepUrl =
-        "$invalidPropertyComplianceUrl/${PropertyComplianceStepId.GasSafety.urlPathSegment}"
+    private val invalidPropertyComplianceInitialStepUrl =
+        "$invalidPropertyComplianceUrl/${PropertyComplianceJourney.initialStepId.urlPathSegment}"
 
     @BeforeEach
     fun setUp() {
         whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(validPropertyOwnershipId), any())).thenReturn(true)
         whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(invalidPropertyOwnershipId), any())).thenReturn(false)
 
-        whenever(propertyComplianceJourneyFactory.create(validPropertyOwnershipId)).thenReturn(propertyComplianceJourney)
+        whenever(propertyComplianceJourneyFactory.create(eq(validPropertyOwnershipId), any())).thenReturn(propertyComplianceJourney)
     }
 
     @Nested
@@ -123,7 +127,7 @@ class PropertyComplianceControllerTests(
     inner class GetJourneyStep {
         @Test
         fun `getJourneyStep returns a redirect for unauthenticated user`() {
-            mvc.get(validPropertyComplianceJourneyStepUrl).andExpect {
+            mvc.get(validPropertyComplianceInitialStepUrl).andExpect {
                 status { is3xxRedirection() }
             }
         }
@@ -131,7 +135,7 @@ class PropertyComplianceControllerTests(
         @Test
         @WithMockUser
         fun `getJourneyStep returns 403 for an unauthorised user`() {
-            mvc.get(validPropertyComplianceJourneyStepUrl).andExpect {
+            mvc.get(validPropertyComplianceInitialStepUrl).andExpect {
                 status { isForbidden() }
             }
         }
@@ -139,7 +143,7 @@ class PropertyComplianceControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `getJourneyStep returns 404 for a landlord user that doesn't own the property`() {
-            mvc.get(invalidPropertyComplianceJourneyStepUrl).andExpect {
+            mvc.get(invalidPropertyComplianceInitialStepUrl).andExpect {
                 status { isNotFound() }
             }
         }
@@ -147,9 +151,64 @@ class PropertyComplianceControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `getJourneyStep returns 200 for a landlord user that does own the property`() {
-            mvc.get(validPropertyComplianceJourneyStepUrl).andExpect {
+            mvc.get(validPropertyComplianceInitialStepUrl).andExpect {
                 status { isOk() }
             }
+        }
+    }
+
+    @Nested
+    inner class PostJourneyData {
+        @Test
+        fun `postJourneyData returns a redirect for unauthenticated user`() {
+            mvc
+                .post(validPropertyComplianceInitialStepUrl) {
+                    with(csrf())
+                }.andExpect {
+                    status { is3xxRedirection() }
+                }
+        }
+
+        @Test
+        @WithMockUser
+        fun `postJourneyData returns 403 for an unauthorised user`() {
+            mvc
+                .post(validPropertyComplianceInitialStepUrl) {
+                    with(csrf())
+                }.andExpect {
+                    status { isForbidden() }
+                }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `postJourneyData returns 404 for a landlord user that doesn't own the property`() {
+            mvc
+                .post(invalidPropertyComplianceInitialStepUrl) {
+                    with(csrf())
+                }.andExpect {
+                    status { isNotFound() }
+                }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `postJourneyData returns a redirect for a landlord user that does own the property`() {
+            whenever(
+                propertyComplianceJourney.completeStep(
+                    eq(PropertyComplianceJourney.initialStepId.urlPathSegment),
+                    anyOrNull(),
+                    eq(null),
+                    anyOrNull(),
+                ),
+            ).thenReturn(ModelAndView("redirect:"))
+
+            mvc
+                .post(validPropertyComplianceInitialStepUrl) {
+                    with(csrf())
+                }.andExpect {
+                    status { is3xxRedirection() }
+                }
         }
     }
 }
