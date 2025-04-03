@@ -48,7 +48,7 @@ class EmailTemplateModelsTests {
                     LandlordWithPropertiesDeregistrationConfirmationEmail(
                         PropertyDetailsEmailSectionList(
                             listOf(PropertyDetailsEmailSection(1, "P-WWW-XXX", "1 Fake Street, Mirageville")),
-                        ).toString(),
+                        ),
                     ),
                     "/emails/LandlordWithPropertiesDeregistrationConfirmation.md",
                 ),

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -56,7 +57,7 @@ class LandlordDeregistrationServiceTests {
     }
 
     @Test
-    fun `deregisterLandlordAndTheirProperties deletes landlord properties`() {
+    fun `deregisterLandlordAndTheirProperties deletes landlord properties and returns the deleted propertyOwnerships`() {
         // Arrange
         val landlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createOneLoginUser(id = "one-login-user"))
         val landlordProperties =
@@ -67,10 +68,11 @@ class LandlordDeregistrationServiceTests {
         whenever(mockPropertyOwnershipService.retrieveAllPropertiesForLandlord("one-login-user")).thenReturn(landlordProperties)
 
         // Act
-        landlordDeregistrationService.deregisterLandlordAndTheirProperties("one-login-user")
+        val deletedPropertyOwnerships = landlordDeregistrationService.deregisterLandlordAndTheirProperties("one-login-user")
 
         // Assert
         verify(mockPropertyDeregistrationService).deregisterProperties(landlordProperties)
+        assertEquals(landlordProperties, deletedPropertyOwnerships)
     }
 
     @Test

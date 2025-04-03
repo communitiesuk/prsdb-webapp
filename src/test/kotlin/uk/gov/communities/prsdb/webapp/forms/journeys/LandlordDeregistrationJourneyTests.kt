@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationCheckUserPropertiesFormModel.Companion.USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationCheckUserPropertiesFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordNoPropertiesDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordWithPropertiesDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDetailsEmailSection
@@ -84,7 +84,7 @@ class LandlordDeregistrationJourneyTests {
     fun `When the landlord is deregistered, user roles are refreshed`() {
         // Arrange
         val baseUserId = "user-id"
-        setupDeregistrationAsALandlordWithNoProperties(baseUserId)
+        setupDeregistrationAsALandlord(baseUserId, userHasProperties = false)
 
         // Act
         landlordDeregistrationJourneyFactory
@@ -99,7 +99,7 @@ class LandlordDeregistrationJourneyTests {
     @Test
     fun `When the landlord is deregistered, landlordHadActiveProperties is stored in the session and journey data is cleared`() {
         // Arrange
-        setupDeregistrationAsALandlordWithNoProperties(baseUserId = "user-id")
+        setupDeregistrationAsALandlord(baseUserId = "user-id", userHasProperties = false)
 
         // Act
         landlordDeregistrationJourneyFactory
@@ -114,7 +114,7 @@ class LandlordDeregistrationJourneyTests {
     @Test
     fun `When a landlord with no properties is deregistered a confirmation email is sent`() {
         // Arrange
-        setupDeregistrationAsALandlordWithNoProperties(baseUserId = "user-id")
+        setupDeregistrationAsALandlord(baseUserId = "user-id", userHasProperties = false)
 
         // Act
         landlordDeregistrationJourneyFactory
@@ -126,41 +126,11 @@ class LandlordDeregistrationJourneyTests {
             .sendEmail(eq("example@email.com"), any())
     }
 
-    private fun setupDeregistrationAsALandlordWithNoProperties(baseUserId: String) {
-        val journeyData =
-            mutableMapOf(
-                DeregisterLandlordStepId.CheckForUserProperties.urlPathSegment to
-                    mutableMapOf(
-                        USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY to false,
-                    ),
-            ) as JourneyData
-
-        setupDeregistrationAsALandlord(baseUserId, journeyData)
-    }
-
-    private fun setupDeregistrationAsALandlord(
-        baseUserId: String,
-        journeyData: JourneyData,
-    ) {
-        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
-        whenever(mockJourneyDataServiceFactory.create(DEREGISTER_LANDLORD_JOURNEY_URL)).thenReturn(mockJourneyDataService)
-        whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(MockLandlordData.createLandlord())
-
-        JourneyTestHelper.setMockUser(baseUserId)
-    }
-
     @Test
     fun `When a landlord with registered properties is deregistered a confirmation email is sent`() {
         val baseUserId = "user-id"
-        val journeyData =
-            mutableMapOf(
-                DeregisterLandlordStepId.CheckForUserProperties.urlPathSegment to
-                    mutableMapOf(
-                        USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY to true,
-                    ),
-            ) as JourneyData
 
-        setupDeregistrationAsALandlord(baseUserId, journeyData)
+        setupDeregistrationAsALandlord(baseUserId, userHasProperties = true)
 
         val propertyOwnedByLandlord = MockLandlordData.createPropertyOwnership()
 
@@ -194,5 +164,25 @@ class LandlordDeregistrationJourneyTests {
                 "example@email.com",
                 LandlordWithPropertiesDeregistrationConfirmationEmail(expectedPropertyEmailSectionList),
             )
+    }
+
+    private fun setupDeregistrationAsALandlord(
+        baseUserId: String,
+        userHasProperties: Boolean,
+    ) {
+        val journeyData =
+            mutableMapOf(
+                DeregisterLandlordStepId.CheckForUserProperties.urlPathSegment to
+                    mutableMapOf(
+                        LandlordDeregistrationCheckUserPropertiesFormModel::userHasRegisteredProperties.name to userHasProperties,
+                    ),
+            ) as JourneyData
+
+        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
+        whenever(mockJourneyDataServiceFactory.create(DEREGISTER_LANDLORD_JOURNEY_URL)).thenReturn(mockJourneyDataService)
+        whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId))
+            .thenReturn(MockLandlordData.createLandlord(email = "example@email.com"))
+
+        JourneyTestHelper.setMockUser(baseUserId)
     }
 }
