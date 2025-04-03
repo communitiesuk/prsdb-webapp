@@ -14,11 +14,9 @@ import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.LandlordDeregistrationJourneyDataExtensions.Companion.getLandlordUserHasRegisteredProperties
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.LandlordDeregistrationJourneyDataExtensions.Companion.getWantsToProceed
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordNoPropertiesDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordWithPropertiesDeregistrationConfirmationEmail
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDetailsEmailSection
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDetailsEmailSectionList
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -135,19 +133,7 @@ class LandlordDeregistrationJourney(
         if (!userHadActiveProperties) {
             confirmationWithNoPropertiesEmailSender.sendEmail(landlordEmailAddress, LandlordNoPropertiesDeregistrationConfirmationEmail())
         } else {
-            val propertySectionList =
-                PropertyDetailsEmailSectionList(
-                    deregisteredProperties
-                        .filter { it.isActive }
-                        .withIndex()
-                        .map {
-                            PropertyDetailsEmailSection(
-                                it.index + 1,
-                                RegistrationNumberDataModel.fromRegistrationNumber(it.value.registrationNumber).toString(),
-                                it.value.property.address.singleLineAddress,
-                            )
-                        },
-                )
+            val propertySectionList = PropertyDetailsEmailSectionList.fromPropertyOwnerships(deregisteredProperties)
 
             confirmationWithPropertiesEmailSender.sendEmail(
                 landlordEmailAddress,

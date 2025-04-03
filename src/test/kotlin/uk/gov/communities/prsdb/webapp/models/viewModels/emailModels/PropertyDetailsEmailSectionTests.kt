@@ -2,6 +2,10 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 class PropertyDetailsEmailSectionTests {
     @Test
@@ -52,5 +56,54 @@ class PropertyDetailsEmailSectionTests {
             ).toString()
 
         assertEquals(expectedMarkdown, actualMarkdown)
+    }
+
+    @Test
+    fun `fromPropertyOwnerships returns a PropertyDetailsEmailSectionList`() {
+        val registrationNumber1 = RegistrationNumber(RegistrationNumberType.PROPERTY, 1)
+        val registrationNumber2 = RegistrationNumber(RegistrationNumberType.PROPERTY, 2)
+        val propertyOwnerships =
+            listOf(
+                MockLandlordData.createPropertyOwnership(
+                    property =
+                        MockLandlordData.createProperty(
+                            address =
+                                MockLandlordData.createAddress(
+                                    singleLineAddress = "1 Imaginary Street, Fakeville, FA1 2KE",
+                                ),
+                        ),
+                    registrationNumber = registrationNumber1,
+                ),
+                MockLandlordData.createPropertyOwnership(
+                    property =
+                        MockLandlordData.createProperty(
+                            address =
+                                MockLandlordData.createAddress(
+                                    singleLineAddress = "2 Mythical Place, Fakeville, FA3 4KE",
+                                ),
+                        ),
+                    registrationNumber = registrationNumber2,
+                ),
+            )
+        val expectedPropertyDetailsEmailSectionList =
+            PropertyDetailsEmailSectionList(
+                propertyList =
+                    listOf(
+                        PropertyDetailsEmailSection(
+                            1,
+                            RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber1).toString(),
+                            "1 Imaginary Street, Fakeville, FA1 2KE",
+                        ),
+                        PropertyDetailsEmailSection(
+                            2,
+                            RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber2).toString(),
+                            "2 Mythical Place, Fakeville, FA3 4KE",
+                        ),
+                    ),
+            )
+
+        val propertyDetailsEmailSectionList = PropertyDetailsEmailSectionList.fromPropertyOwnerships(propertyOwnerships)
+
+        assertEquals(expectedPropertyDetailsEmailSectionList, propertyDetailsEmailSectionList)
     }
 }
