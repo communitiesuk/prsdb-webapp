@@ -57,6 +57,11 @@ abstract class Journey<T : StepId>(
         if (!isStepReachable(requestedStep, subPageNumber)) {
             return ModelAndView("redirect:$unreachableStepRedirect")
         }
+
+        if (requestedStep.autocompleteAndRedirect != null) {
+            return ModelAndView("redirect:${requestedStep.autocompleteAndRedirect.invoke()}")
+        }
+
         val prevStepDetails = getPrevStep(requestedStep, subPageNumber)
         val prevStepUrl = prevStepDetails?.let { getStepUrl(it.step.id, it.subPageNumber) }
         val pageData =

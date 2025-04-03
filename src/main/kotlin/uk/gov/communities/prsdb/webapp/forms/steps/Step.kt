@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 class Step<T : StepId>(
     val id: T,
     val page: AbstractPage,
+    val autocompleteAndRedirect: (() -> String)? = null,
     val handleSubmitAndRedirect: ((journeyData: JourneyData, subPageNumber: Int?) -> String)? = null,
     val isSatisfied: (bindingResult: BindingResult) -> Boolean = { bindingResult -> page.isSatisfied(bindingResult) },
     val nextAction: (journeyData: JourneyData, subPageNumber: Int?) -> Pair<T?, Int?> = { _, _ ->

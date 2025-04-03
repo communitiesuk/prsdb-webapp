@@ -20,8 +20,10 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
+import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoAdditionalLicenceFormModel
@@ -165,8 +167,27 @@ class PropertyRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
+            handleSubmitAndRedirect = { journeyData, subPage -> performLookupCacheResultsAndDirectToNextStep(journeyData, subPage) },
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.SelectAddress, null) },
         )
+
+    private fun performLookupCacheResultsAndDirectToNextStep(
+        journeyData: JourneyData,
+        subPageNumber: Int?,
+    ): String {
+        val (houseNameOrNumber, postcode) =
+            JourneyDataHelper.getLookupAddressHouseNameOrNumberAndPostcode(
+                journeyData,
+                RegisterPropertyStepId.LookupAddress.urlPathSegment,
+            )!!
+
+        val addressLookupResults = addressLookupService.search(houseNameOrNumber, postcode)
+        val updatedJourneyData = journeyData.withUpdatedLookedUpAddresses(addressLookupResults)
+        journeyDataService.setJourneyDataInSession(updatedJourneyData)
+
+        val currentStep = steps.single { it.id == RegisterPropertyStepId.LookupAddress }
+        return getRedirectForNextStep(currentStep, updatedJourneyData, subPageNumber)
+    }
 
     private fun selectAddressStep() =
         Step(
@@ -185,7 +206,6 @@ class PropertyRegistrationJourney(
                                 RegisterPropertyStepId.LookupAddress.urlPathSegment,
                         ),
                     lookupAddressPathSegment = RegisterPropertyStepId.LookupAddress.urlPathSegment,
-                    addressLookupService = addressLookupService,
                     journeyDataService = journeyDataService,
                     displaySectionHeader = true,
                 ),
