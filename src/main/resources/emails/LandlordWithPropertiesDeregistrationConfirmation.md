@@ -7,4 +7,4 @@ To access the database, you must register your details again.
 ((property list))
 
 ---
-This is an automated email - do not reply
+This is an automated email - do not reply.
