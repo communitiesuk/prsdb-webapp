@@ -182,13 +182,13 @@ class DateOfBirthFormModel : IDateFormModel {
 
     fun isValidDateForMinimumAge(): Boolean {
         if (isDayOrMonthOrYearInvalid()) return true
-        val age = DateValidator().getAgeFromDate(day, month, year)
+        val age = DateValidator.getAgeFromDate(day, month, year)
         return age >= 18
     }
 
     fun isValidDateForMaximumAge(): Boolean {
         if (isDayOrMonthOrYearInvalid()) return true
-        val age = DateValidator().getAgeFromDate(day, month, year)
+        val age = DateValidator.getAgeFromDate(day, month, year)
         return age <= 120
     }
 

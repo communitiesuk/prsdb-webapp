@@ -14,13 +14,11 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 
 class DateValidatorTest {
-    val dateValidator = DateValidator()
-
     @Nested
     inner class IsAllBlank {
         @Test
         fun `isAllBlank returns true if all date fields are blank`() {
-            Assertions.assertTrue(dateValidator.isAllBlank("", "", ""))
+            Assertions.assertTrue(DateValidator.isAllBlank("", "", ""))
         }
 
         @ParameterizedTest
@@ -38,7 +36,7 @@ class DateValidatorTest {
             month: String,
             year: String,
         ) {
-            Assertions.assertFalse(dateValidator.isAllBlank(day, month, year))
+            Assertions.assertFalse(DateValidator.isAllBlank(day, month, year))
         }
     }
 
@@ -46,7 +44,7 @@ class DateValidatorTest {
     inner class IsBothBlank {
         @Test
         fun `isBothBlank returns true if all date fields are blank`() {
-            Assertions.assertTrue(dateValidator.isBothBlank("", ""))
+            Assertions.assertTrue(DateValidator.isBothBlank("", ""))
         }
 
         @ParameterizedTest
@@ -59,7 +57,7 @@ class DateValidatorTest {
             firstValue: String,
             secondValue: String,
         ) {
-            Assertions.assertFalse(dateValidator.isBothBlank(firstValue, secondValue))
+            Assertions.assertFalse(DateValidator.isBothBlank(firstValue, secondValue))
         }
     }
 
@@ -75,7 +73,7 @@ class DateValidatorTest {
             month: String,
             year: String,
         ) {
-            Assertions.assertTrue(dateValidator.isValidDate(day, month, year))
+            Assertions.assertTrue(DateValidator.isValidDate(day, month, year))
         }
 
         @ParameterizedTest
@@ -89,7 +87,7 @@ class DateValidatorTest {
             month: String,
             year: String,
         ) {
-            Assertions.assertFalse(dateValidator.isValidDate(day, month, year))
+            Assertions.assertFalse(DateValidator.isValidDate(day, month, year))
         }
     }
 
@@ -110,7 +108,7 @@ class DateValidatorTest {
             month: String,
             year: String,
         ) {
-            Assertions.assertTrue(dateValidator.isDayOrMonthOrYearNotValid(day, month, year))
+            Assertions.assertTrue(DateValidator.isDayOrMonthOrYearNotValid(day, month, year))
         }
     }
 
@@ -145,7 +143,7 @@ class DateValidatorTest {
             year: String,
             expectedAge: Int,
         ) {
-            Assertions.assertEquals(dateValidator.getAgeFromDate(day, month, year), expectedAge)
+            Assertions.assertEquals(DateValidator.getAgeFromDate(day, month, year), expectedAge)
         }
     }
 }

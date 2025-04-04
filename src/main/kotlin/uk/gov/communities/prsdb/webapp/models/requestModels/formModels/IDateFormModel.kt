@@ -9,13 +9,13 @@ interface IDateFormModel : FormModel {
 
     var year: String
 
-    fun notAllBlank(): Boolean = !(DateValidator().isAllBlank(day, month, year))
+    fun notAllBlank(): Boolean = !(DateValidator.isAllBlank(day, month, year))
 
-    fun notDayAndMonthBlank(): Boolean = !(DateValidator().isBothBlank(day, month))
+    fun notDayAndMonthBlank(): Boolean = !(DateValidator.isBothBlank(day, month))
 
-    fun notDayAndYearBlank(): Boolean = !(DateValidator().isBothBlank(day, year))
+    fun notDayAndYearBlank(): Boolean = !(DateValidator.isBothBlank(day, year))
 
-    fun notMonthAndYearBlank(): Boolean = !(DateValidator().isBothBlank(month, year))
+    fun notMonthAndYearBlank(): Boolean = !(DateValidator.isBothBlank(month, year))
 
     fun notAllInvalid(): Boolean = isValidDay() || isValidMonth() || isValidYear()
 
@@ -25,16 +25,16 @@ interface IDateFormModel : FormModel {
 
     fun notMonthAndYearInvalid(): Boolean = isValidMonth() || isValidYear()
 
-    fun isValidDay(): Boolean = DateValidator().isAnyBlank(day, month, year) || DateValidator().isValidDay(day)
+    fun isValidDay(): Boolean = DateValidator.isAnyBlank(day, month, year) || DateValidator.isValidDay(day)
 
-    fun isValidMonth(): Boolean = DateValidator().isAnyBlank(day, month, year) || DateValidator().isValidMonth(month)
+    fun isValidMonth(): Boolean = DateValidator.isAnyBlank(day, month, year) || DateValidator.isValidMonth(month)
 
-    fun isValidYear(): Boolean = DateValidator().isAnyBlank(day, month, year) || DateValidator().isValidYear(year)
+    fun isValidYear(): Boolean = DateValidator.isAnyBlank(day, month, year) || DateValidator.isValidYear(year)
 
-    fun isDayOrMonthOrYearInvalid(): Boolean = DateValidator().isDayOrMonthOrYearNotValid(day, month, year)
+    fun isDayOrMonthOrYearInvalid(): Boolean = DateValidator.isDayOrMonthOrYearNotValid(day, month, year)
 
     fun isValidDate(): Boolean {
         if (isDayOrMonthOrYearInvalid()) return true
-        return DateValidator().isValidDate(day, month, year)
+        return DateValidator.isValidDate(day, month, year)
     }
 }
