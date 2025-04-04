@@ -75,7 +75,7 @@ class DateValidatorTests {
         }
 
         @ParameterizedTest(name = "{0}")
-        @FieldSource("uk.gov.communities.prsdb.webapp.validation.DateValidatorTest#provideNotAllBlankDateFieldSets")
+        @FieldSource("uk.gov.communities.prsdb.webapp.validation.DateValidatorTests#provideNotAllBlankDateFieldSets")
         fun `isAllBlank returns false if`(
             day: String,
             month: String,
@@ -88,7 +88,7 @@ class DateValidatorTests {
     @Nested
     inner class IsAnyBlank {
         @ParameterizedTest(name = "{0}")
-        @FieldSource("uk.gov.communities.prsdb.webapp.validation.DateValidatorTest#provideNotAllCompleteDateFieldSets")
+        @FieldSource("uk.gov.communities.prsdb.webapp.validation.DateValidatorTests#provideNotAllCompleteDateFieldSets")
         fun `isAnyBlank returns true if`(
             day: String,
             month: String,
@@ -111,7 +111,7 @@ class DateValidatorTests {
         }
 
         @ParameterizedTest
-        @FieldSource("uk.gov.communities.prsdb.webapp.validation.DateValidatorTest#provideNotBothBlankFieldSets")
+        @FieldSource("uk.gov.communities.prsdb.webapp.validation.DateValidatorTests#provideNotBothBlankFieldSets")
         fun `isBothBlank returns false if not all are blank`(
             firstValue: String,
             secondValue: String,
@@ -123,7 +123,7 @@ class DateValidatorTests {
     @Nested
     inner class IsAnyInvalid {
         @ParameterizedTest(name = "{0}")
-        @FieldSource("uk.gov.communities.prsdb.webapp.validation.DateValidatorTest#provideInvalidDateFieldSets")
+        @FieldSource("uk.gov.communities.prsdb.webapp.validation.DateValidatorTests#provideInvalidDateFieldSets")
         fun `isAnyInvalid returns true if`(
             day: String,
             month: String,
@@ -141,7 +141,7 @@ class DateValidatorTests {
     @Nested
     inner class IsValidDate {
         @ParameterizedTest(name = "{0}")
-        @FieldSource("uk.gov.communities.prsdb.webapp.validation.DateValidatorTest#provideRealDateFieldSets")
+        @FieldSource("uk.gov.communities.prsdb.webapp.validation.DateValidatorTests#provideRealDateFieldSets")
         fun `isValidDate returns true for`(
             day: String,
             month: String,
@@ -151,7 +151,7 @@ class DateValidatorTests {
         }
 
         @ParameterizedTest(name = "{0}")
-        @FieldSource("uk.gov.communities.prsdb.webapp.validation.DateValidatorTest#provideFakeDateFieldSets")
+        @FieldSource("uk.gov.communities.prsdb.webapp.validation.DateValidatorTests#provideFakeDateFieldSets")
         fun `isValidDate returns false for`(
             day: String,
             month: String,
