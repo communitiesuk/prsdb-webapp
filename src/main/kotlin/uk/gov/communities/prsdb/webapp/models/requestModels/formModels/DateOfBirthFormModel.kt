@@ -1,8 +1,8 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
-import uk.gov.communities.prsdb.webapp.validation.DateValidator
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
@@ -181,14 +181,14 @@ class DateOfBirthFormModel : IDateFormModel {
     override var year: String = ""
 
     fun isValidDateForMinimumAge(): Boolean {
-        if (isDayOrMonthOrYearInvalid()) return true
-        val age = DateValidator.getAgeFromDate(day, month, year)
+        val dateOfBirth = DateTimeHelper.parseDateOrNull(day, month, year) ?: return true
+        val age = DateTimeHelper().getAgeFromBirthDate(dateOfBirth)
         return age >= 18
     }
 
     fun isValidDateForMaximumAge(): Boolean {
-        if (isDayOrMonthOrYearInvalid()) return true
-        val age = DateValidator.getAgeFromDate(day, month, year)
+        val dateOfBirth = DateTimeHelper.parseDateOrNull(day, month, year) ?: return true
+        val age = DateTimeHelper().getAgeFromBirthDate(dateOfBirth)
         return age <= 120
     }
 

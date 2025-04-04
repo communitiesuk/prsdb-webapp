@@ -31,10 +31,8 @@ interface IDateFormModel : FormModel {
 
     fun isValidYear(): Boolean = DateValidator.isAnyBlank(day, month, year) || DateValidator.isValidYear(year)
 
-    fun isDayOrMonthOrYearInvalid(): Boolean = DateValidator.isDayOrMonthOrYearNotValid(day, month, year)
-
-    fun isValidDate(): Boolean {
-        if (isDayOrMonthOrYearInvalid()) return true
-        return DateValidator.isValidDate(day, month, year)
-    }
+    fun isValidDate(): Boolean =
+        DateValidator.isAnyBlank(day, month, year) ||
+            DateValidator.isAnyInvalid(day, month, year) ||
+            DateValidator.isValidDate(day, month, year)
 }
