@@ -1,9 +1,9 @@
-package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions
+package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
