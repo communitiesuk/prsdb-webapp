@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.helpers
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.yearsUntil
@@ -34,5 +35,7 @@ class DateTimeHelper(
             } catch (e: IllegalArgumentException) {
                 null
             }
+
+        fun LocalDate.isAfter(otherDate: LocalDate): Boolean = this.toJavaLocalDate().isAfter(otherDate.toJavaLocalDate())
     }
 }
