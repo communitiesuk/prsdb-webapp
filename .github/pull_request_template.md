@@ -1,6 +1,6 @@
 ## Ticket number
 
-Reference to the ticket this PR is for
+In the format of "PRSD-XXXX" so that github will auto-link to the jira ticket
 
 ## Goal of change
 
@@ -24,6 +24,7 @@ Delete any that are not applicable, and add explanation below for any that are a
 
 - [ ] Screenshots of any UI changes have been added
 - [ ] Unit tests for new logic (e.g. new service methods) have been added
+- [ ] Controller tests for any new endpoints, including testing the relevant permissions
 - [ ] Single page integration tests have been added for any unhappy-flow UI features, e.g. validation errors
 - [ ] New journey steps have been added to the appropriate journey integration test(s)
 - [ ] A new journey integration test has been added for any new journeys
