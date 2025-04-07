@@ -12,8 +12,10 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -86,10 +88,16 @@ class PropertyComplianceJourney(
                 PropertyComplianceStepId.GasSafety,
                 setOf(
                     gasSafetyStep,
-                    // TODO PRSD-943: Implement gas safety cert issue date step
+                    gasSafetyIssueDateStep,
+                    // TODO PRSD-944: Implement gas safety cert engineer number step
                     placeholderStep(
-                        PropertyComplianceStepId.GasSafetyIssueDate,
-                        "TODO PRSD-943: Implement gas safety cert issue date step",
+                        PropertyComplianceStepId.GasSafetyEngineerNum,
+                        "TODO PRSD-944: Implement gas safety cert engineer number step",
+                    ),
+                    // TODO PRSD-953: Implement gas safety cert outdated step
+                    placeholderStep(
+                        PropertyComplianceStepId.GasSafetyOutdated,
+                        "TODO PRSD-953: Implement gas safety cert outdated step",
                     ),
                     // TODO PRSD-949: Implement gas safety cert exemption step
                     placeholderStep(
@@ -132,6 +140,25 @@ class PropertyComplianceJourney(
                 nextAction = { journeyData, _ -> gasSafetyStepNextAction(journeyData) },
             )
 
+    private val gasSafetyIssueDateStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.GasSafetyIssueDate,
+                page =
+                    Page(
+                        formModel = TodayOrPastDateFormModel::class,
+                        templateName = "forms/dateForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.todayOrPastDate.gasSafetyCert.fieldSetHeading",
+                                "fieldSetHint" to "forms.todayOrPastDate.gasSafetyCert.fieldSetHint",
+                                "submitButtonText" to "forms.buttons.saveAndContinue",
+                            ),
+                    ),
+                nextAction = { journeyData, _ -> gasSafetyIssueDateStepNextAction(journeyData) },
+            )
+
     private fun placeholderStep(
         stepId: PropertyComplianceStepId,
         todoComment: String,
@@ -145,6 +172,13 @@ class PropertyComplianceJourney(
             Pair(PropertyComplianceStepId.GasSafetyIssueDate, null)
         } else {
             Pair(PropertyComplianceStepId.GasSafetyExemption, null)
+        }
+
+    private fun gasSafetyIssueDateStepNextAction(journeyData: JourneyData) =
+        if (journeyData.getIsGasSafetyCertOutdated()!!) {
+            Pair(PropertyComplianceStepId.GasSafetyOutdated, null)
+        } else {
+            Pair(PropertyComplianceStepId.GasSafetyEngineerNum, null)
         }
 
     private fun getPropertyAddress() =
