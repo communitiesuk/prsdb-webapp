@@ -20,6 +20,8 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.security.web.context.SecurityContextRepository
+import org.springframework.security.web.csrf.CsrfTokenRepository
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @Configuration
@@ -55,7 +57,7 @@ class CustomSecurityConfig(
             .logout { logout ->
                 logout.logoutSuccessHandler(oidcLogoutSuccessHandler())
             }.csrf { requests ->
-                requests.ignoringRequestMatchers("/local/**")
+                requests.ignoringRequestMatchers("/local/**").csrfTokenRepository(csrfTokenRepository())
             }
 
         return http.build()
@@ -80,6 +82,9 @@ class CustomSecurityConfig(
             DefaultOidcUser(mappedAuthorities, oidcUser.idToken, oidcUser.userInfo)
         }
     }
+
+    @Bean
+    fun csrfTokenRepository(): CsrfTokenRepository = HttpSessionCsrfTokenRepository()
 
     @Bean
     fun securityContextRepository(): SecurityContextRepository = HttpSessionSecurityContextRepository()
