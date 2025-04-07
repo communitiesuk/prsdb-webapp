@@ -138,7 +138,7 @@ class Navigator(
 
     fun goToLandlordRegistrationEmailFormPage(): EmailFormPageLandlordRegistration {
         val dateOfBirthFormPage = goToLandlordRegistrationDateOfBirthFormPage()
-        dateOfBirthFormPage.submitDateOfBirth("8", "6", "2000")
+        dateOfBirthFormPage.submitDate("8", "6", "2000")
         val emailFormPage = createValidPage(page, EmailFormPageLandlordRegistration::class)
         return emailFormPage
     }

@@ -179,7 +179,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
 
         val dateOfBirthPage = assertPageIs(page, DateOfBirthFormPageLandlordRegistration::class)
         assertThat(dateOfBirthPage.form.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
-        dateOfBirthPage.submitDateOfBirth("12", "11", "1990")
+        dateOfBirthPage.submitDate("12", "11", "1990")
 
         val emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
         emailPage.submitEmail("test@example.com")
@@ -231,7 +231,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         namePage.submitName("landlord name")
 
         val dateOfBirthPage = assertPageIs(page, DateOfBirthFormPageLandlordRegistration::class)
-        dateOfBirthPage.submitDateOfBirth("12", "11", "1990")
+        dateOfBirthPage.submitDate("12", "11", "1990")
 
         val emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
         emailPage.submitEmail("test@example.com")
@@ -313,7 +313,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             expectedErrorMessage: String,
         ) {
             val dateOfBirthPage = navigator.goToLandlordRegistrationDateOfBirthFormPage()
-            dateOfBirthPage.submitDateOfBirth(day, month, year)
+            dateOfBirthPage.submitDate(day, month, year)
             assertThat(dateOfBirthPage.form.getErrorMessage()).containsText(expectedErrorMessage)
         }
 
@@ -340,7 +340,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             expectedErrorMessage: String,
         ) {
             val dateOfBirthPage = navigator.goToLandlordRegistrationDateOfBirthFormPage()
-            dateOfBirthPage.submitDateOfBirth(day, month, year)
+            dateOfBirthPage.submitDate(day, month, year)
             assertThat(dateOfBirthPage.form.getErrorMessage()).containsText(expectedErrorMessage)
         }
 
@@ -354,7 +354,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             fun `Submitting a valid date of birth for the minimum age redirects to the next page`(page: Page) {
                 val date = currentDate.minus(DatePeriod(years = 18))
                 val dateOfBirthPage = navigator.goToLandlordRegistrationDateOfBirthFormPage()
-                dateOfBirthPage.submitDateOfBirth(date)
+                dateOfBirthPage.submitDate(date)
                 assertPageIs(page, EmailFormPageLandlordRegistration::class)
             }
 
@@ -362,7 +362,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             fun `Submitting a valid date of birth for the maximum age redirects to the next page`(page: Page) {
                 val date = currentDate.minus(DatePeriod(years = 121)).plus(DatePeriod(days = 1))
                 val dateOfBirthPage = navigator.goToLandlordRegistrationDateOfBirthFormPage()
-                dateOfBirthPage.submitDateOfBirth(date)
+                dateOfBirthPage.submitDate(date)
                 assertPageIs(page, EmailFormPageLandlordRegistration::class)
             }
 
@@ -370,7 +370,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             fun `Submitting any invalid date for the minimum age returns an error`() {
                 val date = currentDate.minus(DatePeriod(years = 18)).plus(DatePeriod(days = 1))
                 val dateOfBirthPage = navigator.goToLandlordRegistrationDateOfBirthFormPage()
-                dateOfBirthPage.submitDateOfBirth(date)
+                dateOfBirthPage.submitDate(date)
                 assertThat(dateOfBirthPage.form.getErrorMessage()).containsText(
                     "The minimum age to register as a landlord is 18",
                 )
@@ -380,7 +380,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             fun `Submitting any invalid date for the maximum age returns an error`() {
                 val date = currentDate.minus(DatePeriod(years = 121))
                 val dateOfBirthPage = navigator.goToLandlordRegistrationDateOfBirthFormPage()
-                dateOfBirthPage.submitDateOfBirth(date)
+                dateOfBirthPage.submitDate(date)
                 assertThat(dateOfBirthPage.form.getErrorMessage()).containsText("You must enter a valid date of birth")
             }
         }
