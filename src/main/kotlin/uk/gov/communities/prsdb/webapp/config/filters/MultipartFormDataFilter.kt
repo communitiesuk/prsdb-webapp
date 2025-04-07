@@ -39,9 +39,8 @@ class MultipartFormDataFilter : Filter {
                 if (csrfItem.isFormField && csrfItem.fieldName == csrfName) {
                     csrfItem.inputStream.use { input ->
                         val rawToken = input.reader().readText()
-                        println(rawToken)
                         request.setAttribute("multipartItemIterator", multipartItemIterator)
-                        chain.doFilter(request, response)
+                        chain.doFilter(CsrfProvidingRequestWrapper(request, rawToken), response)
                         return
                     }
                 }
@@ -51,4 +50,16 @@ class MultipartFormDataFilter : Filter {
             chain.doFilter(request, response)
         }
     }
+}
+
+class CsrfProvidingRequestWrapper(
+    private val request: HttpServletRequest,
+    private val csrf: String,
+) : HttpServletRequest by request {
+    override fun getParameter(p0: String?): String =
+        if (p0 == "_csrf") {
+            csrf
+        } else {
+            request.getParameter(p0)
+        }
 }
