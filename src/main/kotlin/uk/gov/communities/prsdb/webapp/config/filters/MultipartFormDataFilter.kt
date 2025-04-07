@@ -8,14 +8,9 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.apache.commons.fileupload2.core.FileItemInputIterator
 import org.apache.commons.fileupload2.jakarta.JakartaServletFileUpload
-import org.springframework.core.Ordered
-import org.springframework.core.annotation.Order
 import org.springframework.security.web.csrf.CsrfTokenRepository
-import org.springframework.stereotype.Component
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 
-@Component
-@Order(Ordered.HIGHEST_PRECEDENCE + 2)
 class MultipartFormDataFilter(
     private val tokenRepository: CsrfTokenRepository,
 ) : Filter {
