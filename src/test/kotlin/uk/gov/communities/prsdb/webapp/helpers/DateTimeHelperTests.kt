@@ -52,10 +52,22 @@ class DateTimeHelperTests {
         @JvmStatic
         private fun provideDateStringsAndDates() =
             arrayOf(
-                Arguments.of(Named.of("a valid date", "12"), "11", "1990", Named.of("the corresponding date", LocalDate(1990, 11, 12))),
-                Arguments.of(Named.of("a valid leap date", "29"), "02", "2004", Named.of("the corresponding date", LocalDate(2004, 2, 29))),
-                Arguments.of(Named.of("an invalid date", "31"), "11", "1990", null),
-                Arguments.of(Named.of("an invalid leap date", "29"), "02", "2005", null),
+                Arguments.of(
+                    Named.of("a valid date", Triple("12", "11", "1990")),
+                    Named.of("the corresponding date", LocalDate(1990, 11, 12)),
+                ),
+                Arguments.of(
+                    Named.of("a valid leap date", Triple("29", "02", "2004")),
+                    Named.of("the corresponding date", LocalDate(2004, 2, 29)),
+                ),
+                Arguments.of(
+                    Named.of("an invalid date", Triple("31", "11", "1990")),
+                    null,
+                ),
+                Arguments.of(
+                    Named.of("an invalid leap date", Triple("29", "02", "2005")),
+                    null,
+                ),
             )
     }
 
@@ -99,14 +111,13 @@ class DateTimeHelperTests {
         assertEquals(expectedDate, DateTimeHelper.getDateInUK(instant))
     }
 
-    @ParameterizedTest(name = "{3} for {0}")
+    @ParameterizedTest(name = "{1} for {0}")
     @MethodSource("provideDateStringsAndDates")
     fun `parseDateOrNull returns`(
-        day: String,
-        month: String,
-        year: String,
+        dayMonthYear: Triple<String, String, String>,
         expectedDateOrNull: LocalDate?,
     ) {
+        val (day, month, year) = dayMonthYear
         assertEquals(DateTimeHelper.parseDateOrNull(day, month, year), expectedDateOrNull)
     }
 }

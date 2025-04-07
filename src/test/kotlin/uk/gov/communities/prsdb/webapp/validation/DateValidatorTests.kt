@@ -1,10 +1,9 @@
 package uk.gov.communities.prsdb.webapp.validation
 
-import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.Arguments.argumentSet
 import org.junit.jupiter.params.provider.FieldSource
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -13,57 +12,57 @@ class DateValidatorTests {
     companion object {
         private val provideOneBlankDateFieldSets =
             arrayOf(
-                Arguments.of(Named.of("blank day", ""), "2", "2000"),
-                Arguments.of(Named.of("blank month", "1"), "", "2000"),
-                Arguments.of(Named.of("blank year", "1"), "2", ""),
+                argumentSet("blank day", "", "2", "2000"),
+                argumentSet("blank month", "1", "", "2000"),
+                argumentSet("blank year", "1", "2", ""),
             )
 
         private val providePartlyBlankDateFieldSets =
             provideOneBlankDateFieldSets +
                 arrayOf(
-                    Arguments.of(Named.of("blank day and month", ""), "", "2000"),
-                    Arguments.of(Named.of("blank day and year", ""), "2", ""),
-                    Arguments.of(Named.of("blank month and year", "1"), "", ""),
+                    argumentSet("blank day and month", "", "", "2000"),
+                    argumentSet("blank day and year", "", "2", ""),
+                    argumentSet("blank month and year", "1", "", ""),
                 )
 
         @JvmStatic
         private val provideNotAllBlankDateFieldSets =
-            providePartlyBlankDateFieldSets + Arguments.of(Named.of("complete day month and year", "1"), "2", "2000")
+            providePartlyBlankDateFieldSets + argumentSet("complete day month and year", "1", "2", "2000")
 
         @JvmStatic
         private val provideNotAllCompleteDateFieldSets =
-            providePartlyBlankDateFieldSets + Arguments.of(Named.of("blank day month and year", ""), "", "")
+            providePartlyBlankDateFieldSets + argumentSet("blank day month and year", "", "", "")
 
         @JvmStatic
         private val provideNotBothBlankFieldSets =
             arrayOf(
-                Arguments.of(Named.of("blank second value", "1"), ""),
-                Arguments.of(Named.of("blank first value", ""), "2"),
-                Arguments.of(Named.of("no blank values", "1"), "2"),
+                argumentSet("blank second value", "1", ""),
+                argumentSet("blank first value", "", "2"),
+                argumentSet("no blank values", "1", "2"),
             )
 
         @JvmStatic
         private val provideInvalidDateFieldSets =
             provideOneBlankDateFieldSets +
                 arrayOf(
-                    Arguments.of(Named.of("invalid day", "32"), "2", "2000"),
-                    Arguments.of(Named.of("invalid month", "1"), "13", "2000"),
-                    Arguments.of(Named.of("invalid year (too in the past)", "1"), "2", "1899"),
-                    Arguments.of(Named.of("invalid year (too in the future)", "1"), "2", "3000"),
+                    argumentSet("invalid day", "32", "2", "2000"),
+                    argumentSet("invalid month", "1", "13", "2000"),
+                    argumentSet("invalid year (too in the past)", "1", "2", "1899"),
+                    argumentSet("invalid year (too in the future)", "1", "2", "3000"),
                 )
 
         @JvmStatic
         private val provideRealDateFieldSets =
             arrayOf(
-                Arguments.of(Named.of("valid date", "12"), "11", "1990"),
-                Arguments.of(Named.of("valid leap date", "29"), "02", "2004"),
+                argumentSet("valid date", "12", "11", "1990"),
+                argumentSet("valid leap date", "29", "02", "2004"),
             )
 
         @JvmStatic
         private val provideFakeDateFieldSets =
             arrayOf(
-                Arguments.of(Named.of("invalid date", "31"), "11", "1990"),
-                Arguments.of(Named.of("invalid leap date", "29"), "02", "2005"),
+                argumentSet("invalid date", "31", "11", "1990"),
+                argumentSet("invalid leap date", "29", "02", "2005"),
             )
     }
 
@@ -74,7 +73,7 @@ class DateValidatorTests {
             assertTrue(DateValidator.isAllBlank("", "", ""))
         }
 
-        @ParameterizedTest(name = "{0}")
+        @ParameterizedTest(name = "{argumentSetName}")
         @FieldSource("uk.gov.communities.prsdb.webapp.validation.DateValidatorTests#provideNotAllBlankDateFieldSets")
         fun `isAllBlank returns false if`(
             day: String,
@@ -87,7 +86,7 @@ class DateValidatorTests {
 
     @Nested
     inner class IsAnyBlank {
-        @ParameterizedTest(name = "{0}")
+        @ParameterizedTest(name = "{argumentSetName}")
         @FieldSource("uk.gov.communities.prsdb.webapp.validation.DateValidatorTests#provideNotAllCompleteDateFieldSets")
         fun `isAnyBlank returns true if`(
             day: String,
@@ -122,7 +121,7 @@ class DateValidatorTests {
 
     @Nested
     inner class IsAnyInvalid {
-        @ParameterizedTest(name = "{0}")
+        @ParameterizedTest(name = "{argumentSetName}")
         @FieldSource("uk.gov.communities.prsdb.webapp.validation.DateValidatorTests#provideInvalidDateFieldSets")
         fun `isAnyInvalid returns true if`(
             day: String,
