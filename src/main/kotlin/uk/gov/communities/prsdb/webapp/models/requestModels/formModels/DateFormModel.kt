@@ -2,12 +2,12 @@ package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
 import uk.gov.communities.prsdb.webapp.validation.DateValidator
 
-interface IDateFormModel : FormModel {
-    var day: String
+abstract class DateFormModel : FormModel {
+    abstract var day: String
 
-    var month: String
+    abstract var month: String
 
-    var year: String
+    abstract var year: String
 
     fun notAllBlank(): Boolean = !(DateValidator.isAllBlank(day, month, year))
 

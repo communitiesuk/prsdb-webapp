@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class DateOfBirthFormModel : IDateFormModel {
+class DateOfBirthFormModel : DateFormModel() {
     @ValidatedBy(
         constraints = [
             // Check missing
