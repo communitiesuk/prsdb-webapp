@@ -59,6 +59,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyIssueDatePagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
@@ -389,6 +390,16 @@ class Navigator(
                 "/${PropertyComplianceStepId.GasSafety.urlPathSegment}",
         )
         return createValidPage(page, GasSafetyPagePropertyCompliance::class, mapOf("propertyOwnershipId" to propertyOwnershipId.toString()))
+    }
+
+    fun goToPropertyComplianceGasSafetyIssueDatePage(propertyOwnershipId: Long): GasSafetyIssueDatePagePropertyCompliance {
+        val gasSafetyPage = goToPropertyComplianceGasSafetyPage(propertyOwnershipId)
+        gasSafetyPage.submitHasGasSafetyCert()
+        return createValidPage(
+            page,
+            GasSafetyIssueDatePagePropertyCompliance::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
     }
 
     fun goToLandlordDetails(): LandlordDetailsPage {
