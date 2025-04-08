@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyIssueDatePagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyOutdatedPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
 import kotlin.test.assertContains
@@ -76,13 +77,14 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             // Gas Safety Cert Issue Date page
             val outdatedIssueDate = currentDate.minus(DatePeriod(years = 1))
             gasSafetyIssueDatePage.submitDate(outdatedIssueDate)
+            val gasSafetyOutdatedPage = assertPageIs(page, GasSafetyOutdatedPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-953: Continue journey tests
-            assertContains(
-                page.url(),
-                PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.GasSafetyOutdated.urlPathSegment}",
-            )
+            // Gas Safety Outdated page
+            assertThat(gasSafetyOutdatedPage.heading).containsText("Your gas safety certificate is out of date")
+            gasSafetyOutdatedPage.saveAndReturnToTaskListButton.clickAndWait()
+            assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+
+            // TODO PRSD-954: Continue journey test
         }
 
         @Test
