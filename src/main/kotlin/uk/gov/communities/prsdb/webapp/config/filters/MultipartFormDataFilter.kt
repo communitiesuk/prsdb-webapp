@@ -79,21 +79,21 @@ class MultipartFormDataFilter(
         val csrfToken = deferredCsrfToken.get()
         return csrfToken.parameterName
     }
-}
 
-class CsrfProvidingRequestWrapper(
-    private val request: HttpServletRequest,
-    private val csrfToken: ParameterCsrfTokenDetails,
-) : HttpServletRequest by request {
-    override fun getParameter(p0: String?): String =
-        if (p0 == csrfToken.parameterName) {
-            csrfToken.token
-        } else {
-            request.getParameter(p0)
-        }
-}
+    class CsrfProvidingRequestWrapper(
+        private val request: HttpServletRequest,
+        private val csrfToken: ParameterCsrfTokenDetails,
+    ) : HttpServletRequest by request {
+        override fun getParameter(p0: String?): String =
+            if (p0 == csrfToken.parameterName) {
+                csrfToken.token
+            } else {
+                request.getParameter(p0)
+            }
+    }
 
-class ParameterCsrfTokenDetails(
-    val parameterName: String,
-    val token: String,
-)
+    class ParameterCsrfTokenDetails(
+        val parameterName: String,
+        val token: String,
+    )
+}
