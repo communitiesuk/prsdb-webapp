@@ -32,7 +32,7 @@ class DateValidator {
 
         fun isValidMonth(month: String): Boolean = month.toIntOrNull() in 1..12
 
-        fun isValidYear(year: String): Boolean = year.toIntOrNull() in 1900..2099
+        fun isValidYear(year: String): Boolean = year.toIntOrNull()?.let { it > 1899 } ?: false
 
         fun isValidDate(
             day: String,

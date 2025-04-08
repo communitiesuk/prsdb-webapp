@@ -6,17 +6,17 @@ import kotlinx.datetime.number
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
 
-abstract class DateOfBirthFormPage(
+abstract class DateFormPage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
-    val form = DateOfBirthForm(page)
+    val form = DateForm(page)
 
-    fun submitDateOfBirth(date: LocalDate) {
-        submitDateOfBirth(date.dayOfMonth.toString(), date.month.number.toString(), date.year.toString())
+    fun submitDate(date: LocalDate) {
+        submitDate(date.dayOfMonth.toString(), date.month.number.toString(), date.year.toString())
     }
 
-    fun submitDateOfBirth(
+    fun submitDate(
         day: String,
         month: String,
         year: String,
@@ -27,7 +27,7 @@ abstract class DateOfBirthFormPage(
         form.submit()
     }
 
-    class DateOfBirthForm(
+    class DateForm(
         page: Page,
     ) : FormWithSectionHeader(page) {
         val dayInput = TextInput.textByFieldName(locator, "day")
