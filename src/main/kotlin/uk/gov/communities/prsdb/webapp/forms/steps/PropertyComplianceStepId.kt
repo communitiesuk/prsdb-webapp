@@ -6,6 +6,7 @@ enum class PropertyComplianceStepId(
     GasSafety("gas-safety-certificate"),
     GasSafetyIssueDate("gas-safety-certificate-issue-date"),
     GasSafetyEngineerNum("gas-safety-certificate-engineer-number"),
+    GasSafetyUpload("gas-safety-certificate-upload"),
     GasSafetyOutdated("gas-safety-certificate-outdated"),
     GasSafetyExemption("gas-safety-certificate-exemption"),
     EICR("eicr"),

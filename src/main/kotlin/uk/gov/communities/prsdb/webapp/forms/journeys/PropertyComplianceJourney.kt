@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
@@ -13,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
@@ -89,10 +91,11 @@ class PropertyComplianceJourney(
                 setOf(
                     gasSafetyStep,
                     gasSafetyIssueDateStep,
-                    // TODO PRSD-944: Implement gas safety cert engineer number step
+                    gasSafetyEngineerNumStep,
+                    // TODO PRSD-945: Implement gas safety cert upload step
                     placeholderStep(
-                        PropertyComplianceStepId.GasSafetyEngineerNum,
-                        "TODO PRSD-944: Implement gas safety cert engineer number step",
+                        PropertyComplianceStepId.GasSafetyUpload,
+                        "TODO PRSD-945: Implement gas safety cert upload step",
                     ),
                     // TODO PRSD-953: Implement gas safety cert outdated step
                     placeholderStep(
@@ -157,6 +160,25 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { journeyData, _ -> gasSafetyIssueDateStepNextAction(journeyData) },
+            )
+
+    private val gasSafetyEngineerNumStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.GasSafetyEngineerNum,
+                page =
+                    Page(
+                        formModel = GasSafeEngineerNumFormModel::class,
+                        templateName = "forms/gasSafeEngineerNumForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.gasSafeEngineerNum.fieldSetHeading",
+                                "fieldSetHint" to "forms.gasSafeEngineerNum.fieldSetHint",
+                                "gasSafeRegisterURL" to GAS_SAFE_REGISTER,
+                            ),
+                    ),
+                nextAction = { _, _ -> (PropertyComplianceStepId.GasSafetyUpload to null) },
             )
 
     private fun placeholderStep(
