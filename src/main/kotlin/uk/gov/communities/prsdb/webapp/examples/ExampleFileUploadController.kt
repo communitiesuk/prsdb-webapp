@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import java.security.Principal
 
 @Controller
@@ -36,7 +37,7 @@ class ExampleFileUploadController(
 
     @PostMapping
     fun uploadFile(
-        @RequestAttribute("multipartItemIterator") iterator: FileItemInputIterator,
+        @RequestAttribute(MultipartFormDataFilter.ITERATOR_ATTRIBUTE) iterator: FileItemInputIterator,
         @CookieValue(value = COOKIE_NAME) token: String,
         model: Model,
         @PathVariable("freeSegment") freeSegment: String,

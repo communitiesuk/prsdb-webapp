@@ -1,28 +1,18 @@
 package uk.gov.communities.prsdb.webapp.config.filters
 
-import jakarta.servlet.Filter
 import jakarta.servlet.FilterChain
-import jakarta.servlet.ServletRequest
-import jakarta.servlet.ServletResponse
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.apache.commons.fileupload2.core.FileItemInputIterator
 import org.apache.commons.fileupload2.jakarta.JakartaServletFileUpload
 import org.springframework.security.web.csrf.CsrfTokenRepository
+import org.springframework.web.filter.OncePerRequestFilter
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 
 class MultipartFormDataFilter(
     private val tokenRepository: CsrfTokenRepository,
-) : Filter {
-    override fun doFilter(
-        request: ServletRequest?,
-        response: ServletResponse?,
-        chain: FilterChain,
-    ) {
-        doFilter(request as HttpServletRequest, response as HttpServletResponse, chain)
-    }
-
-    private fun doFilter(
+) : OncePerRequestFilter() {
+    override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
         chain: FilterChain,
@@ -41,7 +31,7 @@ class MultipartFormDataFilter(
     ) {
         val upload = JakartaServletFileUpload()
         val multipartItemIterator = upload.getItemIterator(multipartRequest)
-        multipartRequest.setAttribute("multipartItemIterator", multipartItemIterator)
+        multipartRequest.setAttribute(ITERATOR_ATTRIBUTE, multipartItemIterator)
 
         val tokenDetails = getCsrfTokenDetails(multipartRequest, response, multipartItemIterator)
 
@@ -96,4 +86,8 @@ class MultipartFormDataFilter(
         val parameterName: String,
         val token: String,
     )
+
+    companion object {
+        const val ITERATOR_ATTRIBUTE = "multipartItemIterator"
+    }
 }
