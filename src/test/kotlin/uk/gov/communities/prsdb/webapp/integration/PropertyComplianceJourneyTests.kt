@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyIssueDatePagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
@@ -41,14 +42,18 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             gasSafetyPage.submitHasGasSafetyCert()
             val gasSafetyIssueDatePage = assertPageIs(page, GasSafetyIssueDatePagePropertyCompliance::class, urlArguments)
 
-            // Gas Safety Cert Issue Date page
+            // Gas Safety Cert. Issue Date page
             gasSafetyIssueDatePage.submitDate(currentDate)
+            val gasSafeEngineerNumPage = assertPageIs(page, GasSafeEngineerNumPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-944: Continue journey tests
+            // Gas Safe Engineer Num. page
+            gasSafeEngineerNumPage.submitEngineerNum("1234567")
+
+            // TODO PRSD-945: Continue journey tests
             assertContains(
                 page.url(),
                 PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.GasSafetyEngineerNum.urlPathSegment}",
+                    "/${PropertyComplianceStepId.GasSafetyUpload.urlPathSegment}",
             )
         }
 
@@ -127,6 +132,24 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             val gasSafetyIssueDatePage = navigator.goToPropertyComplianceGasSafetyIssueDatePage(PROPERTY_OWNERSHIP_ID)
             gasSafetyIssueDatePage.submitDate(day, month, year)
             assertThat(gasSafetyIssueDatePage.form.getErrorMessage()).containsText(expectedErrorMessage)
+        }
+    }
+
+    @Nested
+    inner class GasSafetyEngineerNumStepTests {
+        @Test
+        fun `Submitting with no value entered returns an error`() {
+            val gasSafeEngineerNumPage = navigator.goToPropertyComplianceGasSafetyEngineerNumPage(PROPERTY_OWNERSHIP_ID)
+            gasSafeEngineerNumPage.form.submit()
+            assertThat(gasSafeEngineerNumPage.form.getErrorMessage())
+                .containsText("You need to enter a Gas Safe engineer's registered number.")
+        }
+
+        @Test
+        fun `Submitting with an invalid value entered returns an error`() {
+            val gasSafeEngineerNumPage = navigator.goToPropertyComplianceGasSafetyEngineerNumPage(PROPERTY_OWNERSHIP_ID)
+            gasSafeEngineerNumPage.submitEngineerNum("ABCDEFG")
+            assertThat(gasSafeEngineerNumPage.form.getErrorMessage()).containsText("Enter a 7-digit number.")
         }
     }
 

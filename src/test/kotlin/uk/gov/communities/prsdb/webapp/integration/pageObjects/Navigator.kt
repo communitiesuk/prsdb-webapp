@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
@@ -59,6 +60,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyIssueDatePagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
@@ -398,6 +400,16 @@ class Navigator(
         return createValidPage(
             page,
             GasSafetyIssueDatePagePropertyCompliance::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
+    fun goToPropertyComplianceGasSafetyEngineerNumPage(propertyOwnershipId: Long): GasSafeEngineerNumPagePropertyCompliance {
+        val gasSafetyIssueDatePage = goToPropertyComplianceGasSafetyIssueDatePage(propertyOwnershipId)
+        gasSafetyIssueDatePage.submitDate(DateTimeHelper().getCurrentDateInUK())
+        return createValidPage(
+            page,
+            GasSafeEngineerNumPagePropertyCompliance::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }
