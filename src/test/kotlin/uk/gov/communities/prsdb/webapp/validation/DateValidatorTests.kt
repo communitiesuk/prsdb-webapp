@@ -47,8 +47,7 @@ class DateValidatorTests {
                 arrayOf(
                     argumentSet("invalid day", "32", "2", "2000"),
                     argumentSet("invalid month", "1", "13", "2000"),
-                    argumentSet("invalid year (too in the past)", "1", "2", "1899"),
-                    argumentSet("invalid year (too in the future)", "1", "2", "3000"),
+                    argumentSet("invalid year", "1", "2", "1899"),
                 )
 
         @JvmStatic

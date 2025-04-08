@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import java.time.LocalDate
@@ -408,6 +409,16 @@ class JourneyDataBuilder(
     fun withGasSafetyCertStatus(hasGasSafetyCert: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafety.urlPathSegment] =
             mapOf(GasSafetyFormModel::hasGasSafetyCert.name to hasGasSafetyCert)
+        return this
+    }
+
+    fun withGasSafetyIssueDate(issueDate: LocalDate): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.GasSafetyIssueDate.urlPathSegment] =
+            mapOf(
+                TodayOrPastDateFormModel::day.name to issueDate.dayOfMonth,
+                TodayOrPastDateFormModel::month.name to issueDate.monthValue,
+                TodayOrPastDateFormModel::year.name to issueDate.year,
+            )
         return this
     }
 }

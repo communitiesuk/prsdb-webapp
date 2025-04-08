@@ -307,7 +307,7 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
             .clickAndWait()
         val updateDateOfBirthPage = assertPageIs(page, DateOfBirthFormPageUpdateLandlordDetails::class)
 
-        updateDateOfBirthPage.submitDateOfBirth(newDateOfBirth)
+        updateDateOfBirthPage.submitDate(newDateOfBirth)
         return assertPageIs(page, LandlordUpdateDetailsPage::class)
     }
 
