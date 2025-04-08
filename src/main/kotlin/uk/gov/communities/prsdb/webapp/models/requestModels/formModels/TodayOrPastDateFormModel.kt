@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.isAfter
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
@@ -178,6 +177,6 @@ class TodayOrPastDateFormModel : DateFormModel() {
     fun isValidDateFromTodayOrPast(): Boolean {
         val date = DateTimeHelper.parseDateOrNull(day, month, year) ?: return true
         val today = DateTimeHelper().getCurrentDateInUK()
-        return !date.isAfter(today)
+        return date <= today
     }
 }

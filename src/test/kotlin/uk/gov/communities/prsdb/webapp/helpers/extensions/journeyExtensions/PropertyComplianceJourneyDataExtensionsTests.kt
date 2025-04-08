@@ -61,6 +61,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
         issueDate: LocalDate,
         expectedResult: Boolean,
     ) {
+        // currentDate is an arbitrary date
         val currentDate = LocalDate.of(2020, 1, 5).toKotlinLocalDate()
         mockConstruction(DateTimeHelper::class.java) { mock, _ -> whenever(mock.getCurrentDateInUK()).thenReturn(currentDate) }
             .use {
