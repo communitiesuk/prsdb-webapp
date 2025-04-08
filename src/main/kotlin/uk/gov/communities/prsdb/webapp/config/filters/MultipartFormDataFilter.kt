@@ -60,13 +60,15 @@ class MultipartFormDataFilter(
         val csrfParameterName = getCsrfParameterName(multipartRequest, response)
 
         val csrfItem = multipartItemIterator.next()
-        if (csrfItem.isFormField && csrfItem.fieldName == csrfParameterName) {
-            csrfItem.inputStream.use { input ->
-                val rawToken = input.reader().readText()
-                return ParameterCsrfTokenDetails(csrfParameterName, rawToken)
-            }
+
+        if (!csrfItem.isFormField || csrfItem.fieldName != csrfParameterName) {
+            throw PrsdbWebException("Must have CSRF as first item on forms")
         }
-        throw PrsdbWebException("Must have CSRF as first item on forms")
+
+        csrfItem.inputStream.use { input ->
+            val rawToken = input.reader().readText()
+            return ParameterCsrfTokenDetails(csrfParameterName, rawToken)
+        }
     }
 
     private fun getCsrfParameterName(
