@@ -41,7 +41,7 @@ class MultipartFormDataFilter(
     ) {
         val upload = JakartaServletFileUpload()
         val multipartItemIterator = upload.getItemIterator(multipartRequest)
-        multipartRequest.setAttribute("multipartItemIterator", multipartItemIterator)
+        multipartRequest.setAttribute(ITERATOR_ATTRIBUTE, multipartItemIterator)
 
         val tokenDetails = getCsrfTokenDetails(multipartRequest, response, multipartItemIterator)
 
@@ -96,4 +96,8 @@ class MultipartFormDataFilter(
         val parameterName: String,
         val token: String,
     )
+
+    companion object {
+        const val ITERATOR_ATTRIBUTE = "multipartItemIterator"
+    }
 }
