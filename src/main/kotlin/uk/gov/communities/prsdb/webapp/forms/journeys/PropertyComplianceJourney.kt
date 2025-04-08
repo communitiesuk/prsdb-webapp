@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
-import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -61,7 +60,7 @@ class PropertyComplianceJourney(
                     placeholderStep(PropertyComplianceStepId.EICR, "TODO PRSD-954: Implement EICR upload task"),
                     "propertyCompliance.taskList.upload.eicr",
                 ),
-                // TODO PRSD-395: Implement EICR upload task
+                // TODO PRSD-395: Implement EPC upload task
                 JourneyTask.withOneStep(
                     placeholderStep(PropertyComplianceStepId.EPC, "TODO PRSD-395: Implement EPC task"),
                     "propertyCompliance.taskList.upload.epc",
@@ -97,11 +96,7 @@ class PropertyComplianceJourney(
                         PropertyComplianceStepId.GasSafetyUpload,
                         "TODO PRSD-945: Implement gas safety cert upload step",
                     ),
-                    // TODO PRSD-953: Implement gas safety cert outdated step
-                    placeholderStep(
-                        PropertyComplianceStepId.GasSafetyOutdated,
-                        "TODO PRSD-953: Implement gas safety cert outdated step",
-                    ),
+                    gasSafetyOutdatedStep,
                     // TODO PRSD-949: Implement gas safety cert exemption step
                     placeholderStep(
                         PropertyComplianceStepId.GasSafetyExemption,
@@ -137,7 +132,7 @@ class PropertyComplianceJourney(
                                             labelMsgKey = "forms.radios.option.no.label",
                                         ),
                                     ),
-                                BACK_URL_ATTR_NAME to TASK_LIST_PATH_SEGMENT,
+                                BACK_URL_ATTR_NAME to taskListUrlSegment,
                             ),
                     ) { mapOf("address" to getPropertyAddress()) },
                 nextAction = { journeyData, _ -> gasSafetyStepNextAction(journeyData) },
@@ -179,6 +174,22 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { _, _ -> (PropertyComplianceStepId.GasSafetyUpload to null) },
+            )
+
+    private val gasSafetyOutdatedStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.GasSafetyOutdated,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/gasSafetyOutdatedForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "taskListUrl" to taskListUrlSegment,
+                            ),
+                    ),
             )
 
     private fun placeholderStep(
