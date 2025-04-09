@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionReasonPagePropertyCompliance
@@ -114,13 +115,16 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // Gas Safety Exemption Reason page
             gasSafetyExemptionReasonPage.submitExemptionReason(GasSafetyExemptionReason.NO_GAS_SUPPLY)
+            val gasSafetyExemptionConfirmationPage =
+                assertPageIs(page, GasSafetyExemptionConfirmationPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-951: Continue journey tests
-            assertContains(
-                page.url(),
-                PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.GasSafetyExemptionConfirmation.urlPathSegment}",
-            )
+            // Gas Safety Exemption Confirmation page
+            assertThat(gasSafetyExemptionConfirmationPage.heading)
+                .containsText("You’ve marked this property as not needing a gas safety certificate")
+            gasSafetyExemptionConfirmationPage.saveAndReturnToTaskListButton.clickAndWait()
+            assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+
+            // TODO PRSD-954: Continue journey test
         }
 
         @Test
