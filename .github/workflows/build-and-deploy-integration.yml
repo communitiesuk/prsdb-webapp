@@ -14,5 +14,5 @@ jobs:
       update-ecs-role: "arn:aws:iam::794038239680:role/github-actions-terraform-admin"
       ecr-repository: "integration-webapp"
       account-id: "794038239680"
-      branch: feat/PRSD-1028-run-migrations-in-the-deployment-pipeline
+      branch: "feat/PRSD-1028-run-migrations-in-the-deployment-pipeline"
     secrets: inherit
