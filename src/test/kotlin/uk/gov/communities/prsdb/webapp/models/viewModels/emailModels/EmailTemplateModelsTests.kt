@@ -40,6 +40,18 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/PropertyDeregistrationConfirmation.md",
                 ),
+                EmailTemplateTestData(
+                    LandlordNoPropertiesDeregistrationConfirmationEmail(),
+                    "/emails/LandlordNoPropertiesDeregistrationConfirmation.md",
+                ),
+                EmailTemplateTestData(
+                    LandlordWithPropertiesDeregistrationConfirmationEmail(
+                        PropertyDetailsEmailSectionList(
+                            listOf(PropertyDetailsEmailSection(1, "P-WWW-XXX", "1 Fake Street, Mirageville")),
+                        ),
+                    ),
+                    "/emails/LandlordWithPropertiesDeregistrationConfirmation.md",
+                ),
             )
 
         private fun createLocalAuthority(

@@ -1,14 +1,14 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
-import org.springframework.validation.Validator
+import org.springframework.validation.BindingResult
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.getLookedUpAddress
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddress
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
@@ -64,13 +64,12 @@ class SelectAddressPage(
         modelAndView.addObject("options", addressRadiosViewModel)
     }
 
-    override fun isSatisfied(
-        validator: Validator,
-        formData: PageData,
-    ): Boolean {
-        val selectedAddress = formData["address"].toString()
+    override fun isSatisfied(bindingResult: BindingResult): Boolean {
+        val selectAddressFormModel = bindingResult.target as SelectAddressFormModel
+        val selectedAddress = selectAddressFormModel.address
         val journeyData = journeyDataService.getJourneyDataFromSession()
 
-        return selectedAddress == MANUAL_ADDRESS_CHOSEN || journeyData.getLookedUpAddress(selectedAddress) != null
+        return selectedAddress == MANUAL_ADDRESS_CHOSEN ||
+            (selectedAddress != null && journeyData.getLookedUpAddress(selectedAddress) != null)
     }
 }

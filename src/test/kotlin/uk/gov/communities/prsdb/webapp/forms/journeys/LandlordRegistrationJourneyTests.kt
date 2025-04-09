@@ -19,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
-import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper.Companion.setMockUser
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -108,7 +107,7 @@ class LandlordRegistrationJourneyTests {
             // Act
             testJourney.completeStep(
                 stepPathSegment = LandlordRegistrationStepId.Declaration.urlPathSegment,
-                pageData = mapOf(),
+                formData = mapOf(),
                 subPageNumber = null,
                 principal = mock(),
             )

@@ -24,7 +24,7 @@
             </section>
 
             <div th:if="${isOccupied}" class="govuk-button-group">
-                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${provideComplianceUrl}}, #{registerProperty.confirmation.addCompliance})}">
+                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${propertyComplianceUrl}}, #{registerProperty.confirmation.addCompliance})}">
                     registerProperty.confirmation.addCompliance
                 </a>
                 <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${landlordDashboardUrl}}, #{common.confirmationPage.goToDashboard})}">

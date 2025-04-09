@@ -4,11 +4,10 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.getLatestNumberOfHouseholds
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.getLookedUpAddress
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.getSerializedLookedUpAddresses
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddress
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getSerializedLookedUpAddresses
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -119,67 +118,5 @@ class JourneyDataExtensionsTests {
         val updatedJourneyData = journeyData.withUpdatedLookedUpAddresses(addresses)
 
         assertEquals(expectedUpdatedJourneyData, updatedJourneyData)
-    }
-
-    @Test
-    fun `getLatestNumberOfHouseholds returns number of households from journeyData for registration journey`() {
-        val expectedNumberOfHouseholds = 1
-        val journeyData =
-            mapOf(
-                "number-of-households" to
-                    mapOf(
-                        "numberOfHouseholds" to expectedNumberOfHouseholds.toString(),
-                    ),
-            )
-
-        val latestNumberOfHouseholds = journeyData.getLatestNumberOfHouseholds("original-data-key")
-
-        assertEquals(expectedNumberOfHouseholds, latestNumberOfHouseholds)
-    }
-
-    @Test
-    fun `getLatestNumberOfHouseholds returns number of households from originalJourneyData for update journey`() {
-        val originalDataKey = "original-data-key"
-        val expectedNumberOfHouseholds = 2
-
-        val journeyData =
-            mapOf(
-                originalDataKey to
-                    mapOf(
-                        "number-of-households" to
-                            mapOf(
-                                "numberOfHouseholds" to expectedNumberOfHouseholds.toString(),
-                            ),
-                    ),
-            )
-
-        val latestNumberOfHouseholds = journeyData.getLatestNumberOfHouseholds(originalDataKey)
-
-        assertEquals(expectedNumberOfHouseholds, latestNumberOfHouseholds)
-    }
-
-    @Test
-    fun `getLatestNumberOfHouseholds returns number of households from JourneyData for update journey`() {
-        val originalDataKey = "original-data-key"
-        val expectedNumberOfHouseholds = 3
-
-        val journeyData =
-            mapOf(
-                "number-of-households" to
-                    mapOf(
-                        "numberOfHouseholds" to expectedNumberOfHouseholds.toString(),
-                    ),
-                originalDataKey to
-                    mapOf(
-                        "number-of-households" to
-                            mapOf(
-                                "numberOfHouseholds" to "2",
-                            ),
-                    ),
-            )
-
-        val latestNumberOfHouseholds = journeyData.getLatestNumberOfHouseholds(originalDataKey)
-
-        assertEquals(expectedNumberOfHouseholds, latestNumberOfHouseholds)
     }
 }

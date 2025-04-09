@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PageWithContentProvider
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDeregistrationJourneyDataExtensions.Companion.getWantsToProceed
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDeregistrationJourneyDataExtensions.Companion.getWantsToProceed
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationReasonFormModel
@@ -21,14 +21,14 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDer
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
 class PropertyDeregistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val propertyRegistrationService: PropertyRegistrationService,
+    private val propertyDeregistrationService: PropertyDeregistrationService,
     private val confirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmail>,
     private val propertyOwnershipId: Long,
 ) : Journey<DeregisterPropertyStepId>(
@@ -132,9 +132,9 @@ class PropertyDeregistrationJourney(
         val propertyRegistrationNumber = propertyOwnership.registrationNumber
         val propertyAddress = propertyOwnership.property.address.singleLineAddress
 
-        propertyRegistrationService.deregisterProperty(propertyOwnershipId)
+        propertyDeregistrationService.deregisterProperty(propertyOwnershipId)
 
-        propertyRegistrationService.addDeregisteredPropertyAndOwnershipIdsToSession(propertyOwnershipId, propertyOwnership.property.id)
+        propertyDeregistrationService.addDeregisteredPropertyAndOwnershipIdsToSession(propertyOwnershipId, propertyOwnership.property.id)
 
         confirmationEmailSender.sendEmail(
             primaryLandlordEmailAddress,
@@ -143,6 +143,8 @@ class PropertyDeregistrationJourney(
                 propertyAddress,
             ),
         )
+
+        journeyDataService.clearJourneyDataFromSession()
 
         return CONFIRMATION_PATH_SEGMENT
     }

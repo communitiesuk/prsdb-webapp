@@ -1,10 +1,9 @@
 package uk.gov.communities.prsdb.webapp.examples
 
 import jakarta.servlet.http.Cookie
-import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.apache.commons.fileupload2.core.FileItemInput
-import org.apache.commons.fileupload2.jakarta.JakartaServletFileUpload
+import org.apache.commons.fileupload2.core.FileItemInputIterator
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -12,8 +11,11 @@ import org.springframework.web.bind.annotation.CookieValue
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
+import uk.gov.communities.prsdb.webapp.examples.MaximumLengthInputStream.Companion.withMaxLength
 import java.security.Principal
 
 @Controller
@@ -36,7 +38,7 @@ class ExampleFileUploadController(
 
     @PostMapping
     fun uploadFile(
-        request: HttpServletRequest,
+        @RequestAttribute(MultipartFormDataFilter.ITERATOR_ATTRIBUTE) iterator: FileItemInputIterator,
         @CookieValue(value = COOKIE_NAME) token: String,
         model: Model,
         @PathVariable("freeSegment") freeSegment: String,
@@ -47,20 +49,21 @@ class ExampleFileUploadController(
         }
 
         val file =
-            getFirstFileItem(request) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a valid multipart file upload request")
+            getFirstFileItem(iterator) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a valid multipart file upload request")
 
         // Because this is an example endpoint, we can just keep the file name uploaded - for the compliance journey
         // this will need to be a useful name for LA users to download (and we should not trust the uploaded file name)
         val key = "${principal.name}/$freeSegment/${file.name}"
 
-        val uploadOutcome = fileUploader.uploadFile(key, file.inputStream)
+        val exampleMaxFileSizeInBytes = 5L * 1024L * 1024L
+
+        val uploadOutcome = fileUploader.uploadFile(key, file.inputStream.withMaxLength(exampleMaxFileSizeInBytes))
         model.addAttribute(
             "fileUploadResponse",
             mapOf(
                 "uploadedName" to file.name,
                 "uploadReturnValue" to uploadOutcome,
-                "size" to request.contentLength,
-                "contentType" to request.contentType,
+                "contentType" to file.contentType,
                 "cookie-value" to token,
             ),
         )
@@ -82,13 +85,7 @@ class ExampleFileUploadController(
         return tokenCookie
     }
 
-    private fun getFirstFileItem(request: HttpServletRequest): FileItemInput? {
-        if (!JakartaServletFileUpload.isMultipartContent(request)) {
-            return null
-        }
-        val upload = JakartaServletFileUpload()
-        val singleFileIterator = upload.getItemIterator(request)
-
+    private fun getFirstFileItem(singleFileIterator: FileItemInputIterator): FileItemInput? {
         if (!singleFileIterator.hasNext()) {
             return null
         }

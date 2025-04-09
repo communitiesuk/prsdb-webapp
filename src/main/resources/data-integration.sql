@@ -34,7 +34,7 @@ VALUES (1,'2024-10-15 00:00:00+00',2001001001,1),
        (6,'2025-02-20 11:50:45.723696+00',105757165800,1),
        (7,'2025-02-24 09:29:52.993571+00',116726635893,1),
        (8,'2025-02-24 10:01:14.5196+00',61597584540,1),
-       (9,'2025-02-24 10:01:14.5196+00',61597584540,0);
+       (9,'2025-02-24 10:01:14.5196+00',54697323416,0);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -55,12 +55,12 @@ VALUES(1,1,1,'2024-10-15 00:00:00+00','Team-PRSDB+landlord@softwire.com',null,tr
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
-INSERT INTO property (id, status, is_active, property_build_type, address_id)
-VALUES (1, 1, true, 1, 1);
+INSERT INTO property (id, status, is_active, property_build_type, address_id, created_date, last_modified_date)
+VALUES (1, 1, true, 1, 1, '2024-10-15 00:00:00+00', null);
 
 SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
 
-INSERT INTO property_ownership (id, is_active, occupancy_type, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, property_id)
-VALUES (1, true, 0, 1, 1, 2, 9, 1, 1);
+INSERT INTO property_ownership (id, is_active, occupancy_type, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, property_id, created_date, last_modified_date)
+VALUES (1, true, 0, 1, 1, 2, 9, 1, 1, '2024-10-15 00:00:00+00', null);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));

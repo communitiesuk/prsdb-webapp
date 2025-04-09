@@ -1,0 +1,52 @@
+<!--/*@thymesVar id="taskListUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{propertyCompliance.title}, ~{::main}, false)}">
+    <main class="govuk-main-wrapper" id="main-content">
+        <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
+            <header>
+                <h1 class="govuk-heading-l" th:text="#{propertyCompliance.heading}">propertyCompliance.heading</h1>
+                <p class="govuk-body" th:text="#{propertyCompliance.intro}">propertyCompliance.intro</p>
+            </header>
+            <section>
+                <h2 class="govuk-heading-s" th:text="#{propertyCompliance.whenToUpload.heading}">
+                    propertyCompliance.whenToUpload.heading
+                </h2>
+                <p class="govuk-body" th:text="#{propertyCompliance.whenToUpload.paragraph.one}">
+                    propertyCompliance.whenToUpload.paragraph.one
+                </p>
+                <p class="govuk-body" th:text="#{propertyCompliance.whenToUpload.paragraph.two}">
+                    propertyCompliance.whenToUpload.paragraph.two
+                </p>
+                <p class="govuk-body" th:text="#{propertyCompliance.whenToUpload.paragraph.three}">
+                    propertyCompliance.whenToUpload.paragraph.three
+                </p>
+            </section>
+            <section>
+                <h2 class="govuk-heading-s" th:text="#{propertyCompliance.whatToUpload.heading}">
+                    propertyCompliance.whatToUpload.heading
+                </h2>
+                <p class="govuk-body" th:text="#{propertyCompliance.whatToUpload.bullet.heading}">
+                    propertyCompliance.whatToUpload.bullet.heading
+                </p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{propertyCompliance.whatToUpload.bullet.one}">
+                        propertyCompliance.whatToUpload.bullet.one
+                    </li>
+                    <li th:text="#{propertyCompliance.whatToUpload.bullet.two}">
+                        propertyCompliance.whatToUpload.bullet.two
+                    </li>
+                    <li th:text="#{propertyCompliance.whatToUpload.bullet.three}">
+                        propertyCompliance.whatToUpload.bullet.three
+                    </li>
+                </ul>
+                <p class="govuk-body" th:text="#{propertyCompliance.whatToUpload.paragraph.one}">
+                    propertyCompliance.whatToUpload.paragraph.one
+                </p>
+                <p class="govuk-body" th:text="#{propertyCompliance.whatToUpload.paragraph.two}">
+                    propertyCompliance.whatToUpload.paragraph.two
+                </p>
+                <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${taskListUrl}, #{startButtonText})}"></button>
+            </section>
+        </div>
+    </main>
+</html>

@@ -49,5 +49,9 @@ class PropertyService(
         propertyRepository.delete(property)
     }
 
+    fun deleteProperties(properties: List<Property>) {
+        propertyRepository.deleteAll(properties)
+    }
+
     fun retrievePropertyById(propertyId: Long): Property? = propertyRepository.findByIdOrNull(propertyId)
 }

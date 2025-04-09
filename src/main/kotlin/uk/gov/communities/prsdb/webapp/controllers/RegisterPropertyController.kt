@@ -56,13 +56,10 @@ class RegisterPropertyController(
             )
 
     @GetMapping("/$TASK_LIST_PATH_SEGMENT")
-    fun getTaskList(
-        model: Model,
-        principal: Principal,
-    ): String =
+    fun getTaskList(principal: Principal): ModelAndView =
         propertyRegistrationJourneyFactory
             .create(principal.name)
-            .populateModelAndGetTaskListViewName(model)
+            .getModelAndViewForTaskList()
 
     @PostMapping("/{stepName}")
     fun postJourneyData(
@@ -105,7 +102,7 @@ class RegisterPropertyController(
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
         )
         model.addAttribute("isOccupied", propertyOwnership.isOccupied)
-        model.addAttribute("provideComplianceUrl", ProvideComplianceController.getProvideCompliancePath(propertyOwnership.id))
+        model.addAttribute("propertyComplianceUrl", PropertyComplianceController.getPropertyCompliancePath(propertyOwnership.id))
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
 
         return "registerPropertyConfirmation"

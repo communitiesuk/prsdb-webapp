@@ -117,4 +117,13 @@ class PropertyServiceTests {
     fun `retrievePropertyById returns null if no matching property is in the database`() {
         assertNull(propertyService.retrievePropertyById(1))
     }
+
+    @Test
+    fun `deleteProperties deletes a list from the propertyRepository`() {
+        val properties = listOf(MockLandlordData.createProperty(), MockLandlordData.createProperty())
+
+        propertyService.deleteProperties(properties)
+
+        verify(mockPropertyRepository).deleteAll(properties)
+    }
 }

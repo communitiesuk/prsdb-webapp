@@ -5,6 +5,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toKotlinInstant
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.yearsUntil
 import java.time.Clock
 
 class DateTimeHelper(
@@ -15,10 +16,23 @@ class DateTimeHelper(
         return getDateInUK(now)
     }
 
+    fun getAgeFromBirthDate(birthDate: LocalDate): Int = birthDate.yearsUntil(getCurrentDateInUK())
+
     companion object {
         fun getDateInUK(instant: Instant): LocalDate {
             val dateTimeInUK = instant.toLocalDateTime(TimeZone.of("Europe/London"))
-            return LocalDate(dateTimeInUK.year, dateTimeInUK.month.value, dateTimeInUK.dayOfMonth)
+            return dateTimeInUK.date
         }
+
+        fun parseDateOrNull(
+            day: String,
+            month: String,
+            year: String,
+        ): LocalDate? =
+            try {
+                LocalDate.parse("$year-${month.padStart(2, '0')}-${day.padStart(2, '0')}")
+            } catch (e: IllegalArgumentException) {
+                null
+            }
     }
 }

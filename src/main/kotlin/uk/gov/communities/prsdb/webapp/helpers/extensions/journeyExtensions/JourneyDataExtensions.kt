@@ -1,14 +1,14 @@
-package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions
+package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions
 
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.PropertyDetailsUpdateJourneyDataExtensions.Companion.getNumberOfHouseholdsUpdateIfPresent
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyDataExtensions.UpdateJourneyDataExtensions.Companion.getOriginalJourneyDataIfPresent
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DateFormModel
 
 open class JourneyDataExtensions {
     companion object {
@@ -31,22 +31,12 @@ open class JourneyDataExtensions {
         fun JourneyData.withUpdatedLookedUpAddresses(lookedUpAddresses: List<AddressDataModel>): JourneyData =
             this.withUpdatedLookedUpAddresses(Json.encodeToString(lookedUpAddresses))
 
-        fun JourneyData.getLatestNumberOfHouseholds(originalJourneyDataKey: String?): Int {
-            val journeyDataValue = this.getNumberOfHouseholdsUpdateIfPresent()
-            val originalJourneyData = this.getOriginalJourneyDataIfPresent(originalJourneyDataKey)
-            val originalJourneyDataValue = originalJourneyData?.let { PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(it) }
-            if (originalJourneyDataValue != null && journeyDataValue == null) {
-                return originalJourneyDataValue
-            }
-            return journeyDataValue ?: 0
-        }
-
         @JvmStatic
-        protected fun JourneyData.getWantsToProceed(urlPathSegment: String): Boolean? =
-            JourneyDataHelper.getFieldBooleanValue(
-                this,
-                urlPathSegment,
-                "wantsToProceed",
-            )
+        protected fun JourneyData.getFieldSetLocalDateValue(urlPathSegment: String): LocalDate? {
+            val day = JourneyDataHelper.getFieldStringValue(this, urlPathSegment, DateFormModel::day.name) ?: return null
+            val month = JourneyDataHelper.getFieldStringValue(this, urlPathSegment, DateFormModel::month.name) ?: return null
+            val year = JourneyDataHelper.getFieldStringValue(this, urlPathSegment, DateFormModel::year.name) ?: return null
+            return DateTimeHelper.parseDateOrNull(day, month, year)
+        }
     }
 }
