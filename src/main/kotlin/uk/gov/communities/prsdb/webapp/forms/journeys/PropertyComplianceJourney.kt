@@ -124,7 +124,7 @@ class PropertyComplianceJourney(
                 page =
                     PageWithContentProvider(
                         formModel = GasSafetyFormModel::class,
-                        templateName = "forms/gasSafetyForm",
+                        templateName = "forms/certificateForm",
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",

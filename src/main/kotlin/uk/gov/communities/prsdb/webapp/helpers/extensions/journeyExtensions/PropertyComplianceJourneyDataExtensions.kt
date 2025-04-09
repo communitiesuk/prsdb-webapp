@@ -16,7 +16,7 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
             JourneyDataHelper.getFieldBooleanValue(
                 this,
                 PropertyComplianceStepId.GasSafety.urlPathSegment,
-                GasSafetyFormModel::hasGasSafetyCert.name,
+                GasSafetyFormModel::hasCert.name,
             )
 
         fun JourneyData.getIsGasSafetyCertOutdated(): Boolean? {
