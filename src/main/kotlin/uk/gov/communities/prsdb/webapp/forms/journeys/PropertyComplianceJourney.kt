@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
@@ -18,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionOtherReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
@@ -100,11 +102,7 @@ class PropertyComplianceJourney(
                     gasSafetyOutdatedStep,
                     gasSafetyExemptionStep,
                     gasSafetyExemptionReasonStep,
-                    // TODO PRSD-994: Implement gas safety cert exemption other reason step
-                    placeholderStep(
-                        PropertyComplianceStepId.GasSafetyExemptionOtherReason,
-                        "TODO PRSD-994: Implement gas safety cert exemption other reason step",
-                    ),
+                    gasSafetyExemptionOtherReasonStep,
                     // TODO PRSD-951: Implement gas safety cert exemption confirmation step
                     placeholderStep(
                         PropertyComplianceStepId.GasSafetyExemptionConfirmation,
@@ -276,6 +274,25 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { journeyData, _ -> gasSafetyExemptionReasonStepNextAction(journeyData) },
+            )
+
+    private val gasSafetyExemptionOtherReasonStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.GasSafetyExemptionOtherReason,
+                page =
+                    Page(
+                        formModel = GasSafetyExemptionOtherReasonFormModel::class,
+                        templateName = "forms/exemptionOtherReasonForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.gasSafetyExemptionOtherReason.fieldSetHeading",
+                                "fieldSetHint" to "forms.gasSafetyExemptionOtherReason.fieldSetHint",
+                                "limit" to GAS_SAFETY_EXEMPTION_OTHER_REASON_MAX_LENGTH,
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyExemptionConfirmation, null) },
             )
 
     private fun placeholderStep(
