@@ -103,11 +103,7 @@ class PropertyComplianceJourney(
                     gasSafetyExemptionStep,
                     gasSafetyExemptionReasonStep,
                     gasSafetyExemptionOtherReasonStep,
-                    // TODO PRSD-951: Implement gas safety cert exemption confirmation step
-                    placeholderStep(
-                        PropertyComplianceStepId.GasSafetyExemptionConfirmation,
-                        "TODO PRSD-951: Implement gas safety cert exemption confirmation step",
-                    ),
+                    gasSafetyExemptionConfirmationStep,
                     // TODO PRSD-952: Implement gas safety cert exemption missing step
                     placeholderStep(
                         PropertyComplianceStepId.GasSafetyExemptionMissing,
@@ -293,6 +289,23 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyExemptionConfirmation, null) },
+            )
+
+    private val gasSafetyExemptionConfirmationStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.GasSafetyExemptionConfirmation,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/gasSafetyExemptionConfirmationForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                            ),
+                    ),
+                handleSubmitAndRedirect = { _, _ -> taskListUrlSegment },
+                nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
             )
 
     private fun placeholderStep(
