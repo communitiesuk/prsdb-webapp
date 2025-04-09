@@ -4,12 +4,14 @@ import jakarta.persistence.EntityExistsException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.AlreadyRegisteredPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationCheckAnswersPage
@@ -20,8 +22,10 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
+import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoAdditionalLicenceFormModel
@@ -114,6 +118,7 @@ class PropertyRegistrationJourney(
             setOf(
                 lookupAddressStep(),
                 selectAddressStep(),
+                noAddressFoundStep(),
                 alreadyRegisteredStep(),
                 manualAddressStep(),
                 localAuthorityStep(),
@@ -164,12 +169,32 @@ class PropertyRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
+            handleSubmitAndRedirect = { journeyData, subPage -> performLookupCacheResultsAndDirectToNextStep(journeyData, subPage) },
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.SelectAddress, null) },
         )
+
+    private fun performLookupCacheResultsAndDirectToNextStep(
+        journeyData: JourneyData,
+        subPageNumber: Int?,
+    ): String {
+        val (houseNameOrNumber, postcode) =
+            JourneyDataHelper.getLookupAddressHouseNameOrNumberAndPostcode(
+                journeyData,
+                RegisterPropertyStepId.LookupAddress.urlPathSegment,
+            )!!
+
+        val addressLookupResults = addressLookupService.search(houseNameOrNumber, postcode)
+        val updatedJourneyData = journeyData.withUpdatedLookedUpAddresses(addressLookupResults)
+        journeyDataService.setJourneyDataInSession(updatedJourneyData)
+
+        val currentStep = steps.single { it.id == RegisterPropertyStepId.LookupAddress }
+        return getRedirectForNextStep(currentStep, updatedJourneyData, subPageNumber)
+    }
 
     private fun selectAddressStep() =
         Step(
             id = RegisterPropertyStepId.SelectAddress,
+            autocompleteAndRedirect = { subPage -> autocompleteSelectAddressWithManualAddressChosen(subPage) },
             page =
                 SelectAddressPage(
                     formModel = SelectAddressFormModel::class,
@@ -184,7 +209,6 @@ class PropertyRegistrationJourney(
                                 RegisterPropertyStepId.LookupAddress.urlPathSegment,
                         ),
                     lookupAddressPathSegment = RegisterPropertyStepId.LookupAddress.urlPathSegment,
-                    addressLookupService = addressLookupService,
                     journeyDataService = journeyDataService,
                     displaySectionHeader = true,
                 ),
@@ -195,6 +219,22 @@ class PropertyRegistrationJourney(
                 )
             },
         )
+
+    private fun autocompleteSelectAddressWithManualAddressChosen(subPageNumber: Int?): String? {
+        if (journeyDataService.getJourneyDataFromSession().getLookedUpAddresses().isNotEmpty()) {
+            return null
+        }
+        val pageData =
+            mutableMapOf(
+                "address" to MANUAL_ADDRESS_CHOSEN,
+            ) as PageData
+
+        val currentStep = steps.single { it.id == RegisterPropertyStepId.SelectAddress }
+
+        savePageDataToJourneyDataIfValid(currentStep, pageData, subPageNumber)
+
+        return getRedirectForNextStep(currentStep, journeyDataService.getJourneyDataFromSession(), subPageNumber)
+    }
 
     private fun alreadyRegisteredStep() =
         Step(
@@ -212,6 +252,27 @@ class PropertyRegistrationJourney(
                         ),
                     selectedAddressPathSegment = RegisterPropertyStepId.SelectAddress.urlPathSegment,
                 ),
+        )
+
+    private fun noAddressFoundStep() =
+        Step(
+            id = RegisterPropertyStepId.NoAddressFound,
+            page =
+                Page(
+                    formModel = NoInputFormModel::class,
+                    templateName = "noAddressFoundPage",
+                    content =
+                        mapOf(
+                            "title" to "registerProperty.title",
+                            "postcode" to "HARDCODED POSTCODE",
+                            "houseNameOrNumber" to "HARDCODED HOUSE NUMBER",
+                            "searchAgainUrl" to
+                                "/$REGISTER_PROPERTY_JOURNEY_URL/" +
+                                RegisterPropertyStepId.LookupAddress.urlPathSegment,
+                        ),
+                    shouldDisplaySectionHeader = true,
+                ),
+            nextAction = { _, _ -> Pair(RegisterPropertyStepId.ManualAddress, null) },
         )
 
     private fun manualAddressStep() =
@@ -554,7 +615,9 @@ class PropertyRegistrationJourney(
         journeyData: JourneyData,
         propertyRegistrationService: PropertyRegistrationService,
     ): Pair<RegisterPropertyStepId, Int?> =
-        if (PropertyRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
+        if (journeyData.getLookedUpAddresses().isEmpty()) {
+            Pair(RegisterPropertyStepId.NoAddressFound, null)
+        } else if (PropertyRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
             Pair(RegisterPropertyStepId.ManualAddress, null)
         } else {
             val selectedAddress = PropertyRegistrationJourneyDataHelper.getAddress(journeyData, journeyData.getLookedUpAddresses())!!
