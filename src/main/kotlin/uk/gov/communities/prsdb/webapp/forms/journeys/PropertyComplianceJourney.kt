@@ -55,11 +55,7 @@ class PropertyComplianceJourney(
         get() =
             listOf(
                 gasSafetyTask,
-                // TODO PRSD-954: Implement EICR upload task
-                JourneyTask.withOneStep(
-                    placeholderStep(PropertyComplianceStepId.EICR, "TODO PRSD-954: Implement EICR upload task"),
-                    "propertyCompliance.taskList.upload.eicr",
-                ),
+                eicrTask,
                 // TODO PRSD-395: Implement EPC upload task
                 JourneyTask.withOneStep(
                     placeholderStep(PropertyComplianceStepId.EPC, "TODO PRSD-395: Implement EPC task"),
@@ -104,6 +100,14 @@ class PropertyComplianceJourney(
                     ),
                 ),
                 "propertyCompliance.taskList.upload.gasSafety",
+            )
+
+    // TODO PRSD-954: Implement EICR upload task
+    private val eicrTask
+        get() =
+            JourneyTask.withOneStep(
+                placeholderStep(PropertyComplianceStepId.EICR, "TODO PRSD-954: Implement EICR upload task"),
+                "propertyCompliance.taskList.upload.eicr",
             )
 
     private val gasSafetyStep
@@ -173,7 +177,7 @@ class PropertyComplianceJourney(
                                 "gasSafeRegisterURL" to GAS_SAFE_REGISTER,
                             ),
                     ),
-                nextAction = { _, _ -> (PropertyComplianceStepId.GasSafetyUpload to null) },
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyUpload, null) },
             )
 
     private val gasSafetyOutdatedStep
@@ -187,9 +191,10 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
-                                "taskListUrl" to taskListUrlSegment,
                             ),
                     ),
+                handleSubmitAndRedirect = { _, _ -> taskListUrlSegment },
+                nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
             )
 
     private fun placeholderStep(
