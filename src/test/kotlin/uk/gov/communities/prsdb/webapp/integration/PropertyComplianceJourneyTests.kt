@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionMissingPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionReasonPagePropertyCompliance
@@ -145,13 +146,14 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // Gas Safety Exemption page
             gasSafetyExemptionPage.submitHasNoGasSafetyCertExemption()
+            val gasSafetyExemptionMissingPage = assertPageIs(page, GasSafetyExemptionMissingPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-952: Continue journey tests
-            assertContains(
-                page.url(),
-                PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.GasSafetyExemptionMissing.urlPathSegment}",
-            )
+            // Gas Safety Exemption Missing page
+            assertThat(gasSafetyExemptionMissingPage.heading).containsText("You must get a valid gas safety certificate for this property")
+            gasSafetyExemptionMissingPage.saveAndReturnToTaskListButton.clickAndWait()
+            assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+
+            // TODO PRSD-954: Continue journey test
         }
     }
 
