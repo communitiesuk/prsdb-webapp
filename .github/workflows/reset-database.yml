@@ -35,6 +35,8 @@ jobs:
     name: Clean and Migrate Database
     needs: validate-target-environment
     runs-on: ubuntu-latest
+    env:
+      FLYWAY_URL: jdbc:postgresql://localhost:5432/prsdb
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -78,13 +80,10 @@ jobs:
 
       - name: Run gradle flywayClean
         env:
-          FLYWAY_URL: jdbc:postgresql://localhost:5432/prsdb
           FLYWAY_CLEAN_DISABLED: false
         run: ./gradlew flywayClean --no-daemon
 
       - name: Run gradle flywayMigrate
-        env:
-          FLYWAY_URL: jdbc:postgresql://localhost:5432/prsdb
         run: ./gradlew flywayMigrate
 
       - name: Terminate SSM port-forwarding session
