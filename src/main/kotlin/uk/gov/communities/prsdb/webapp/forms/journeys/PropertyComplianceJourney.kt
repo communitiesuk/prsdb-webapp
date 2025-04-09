@@ -177,7 +177,7 @@ class PropertyComplianceJourney(
                                 "gasSafeRegisterURL" to GAS_SAFE_REGISTER,
                             ),
                     ),
-                nextAction = { _, _ -> (PropertyComplianceStepId.GasSafetyUpload to null) },
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyUpload, null) },
             )
 
     private val gasSafetyOutdatedStep
@@ -194,7 +194,7 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 handleSubmitAndRedirect = { _, _ -> taskListUrlSegment },
-                nextAction = { _, _ -> (eicrTask.startingStepId to null) },
+                nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
             )
 
     private fun placeholderStep(
