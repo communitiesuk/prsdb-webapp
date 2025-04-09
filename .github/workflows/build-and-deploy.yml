@@ -125,7 +125,7 @@ jobs:
       contents: read
     env:
       AWS_REGION: eu-west-2
-      IAM_ROLE: arn:aws:iam::${{ inputs.aws-account-id }}:role/github-actions-terraform-admin
+      IAM_ROLE: arn:aws:iam::${{ inputs.account-id }}:role/github-actions-terraform-admin
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
