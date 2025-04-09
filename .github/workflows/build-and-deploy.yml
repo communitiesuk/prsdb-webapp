@@ -129,8 +129,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.branch }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -170,7 +168,7 @@ jobs:
       - name: Run gradle flywayMigrate
         env:
           FLYWAY_URL: jdbc:postgresql://localhost:5432/prsdb
-        run: ./gradlew flywayMigrate
+        run: ./gradlew flywayMigrate --no-daemon
 
       - name: Terminate SSM port-forwarding session
         if: (success() || failure()) && steps.start-session.outputs.SSM_SESSION_ID != ''
