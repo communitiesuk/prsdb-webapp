@@ -283,7 +283,7 @@ class PropertyComplianceJourney(
                 page =
                     Page(
                         formModel = GasSafetyExemptionOtherReasonFormModel::class,
-                        templateName = "forms/exemptionOtherReasonForm ",
+                        templateName = "forms/exemptionOtherReasonForm",
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
