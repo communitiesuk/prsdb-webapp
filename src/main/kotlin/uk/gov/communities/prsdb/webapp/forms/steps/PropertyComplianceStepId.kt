@@ -10,6 +10,8 @@ enum class PropertyComplianceStepId(
     GasSafetyOutdated("gas-safety-certificate-outdated"),
     GasSafetyExemption("gas-safety-certificate-exemption"),
     GasSafetyExemptionReason("gas-safety-certificate-exemption-reason"),
+    GasSafetyExemptionOtherReason("gas-safety-certificate-exemption-other-reason"),
+    GasSafetyExemptionConfirmation("gas-safety-certificate-exemption-confirmation"),
     GasSafetyExemptionMissing("gas-safety-certificate-exemption-missing"),
     EICR("eicr"),
     EPC("epc"),

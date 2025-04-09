@@ -2,7 +2,9 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
+import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -14,8 +16,11 @@ import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCertExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionOtherReasonFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
@@ -96,16 +101,10 @@ class PropertyComplianceJourney(
                     ),
                     gasSafetyOutdatedStep,
                     gasSafetyExemptionStep,
-                    // TODO PRSD-950: Implement gas safety cert exemption reason step
-                    placeholderStep(
-                        PropertyComplianceStepId.GasSafetyExemptionReason,
-                        "TODO PRSD-950: Implement gas safety cert exemption reason step",
-                    ),
-                    // TODO PRSD-952: Implement gas safety cert exemption missing step
-                    placeholderStep(
-                        PropertyComplianceStepId.GasSafetyExemptionMissing,
-                        "TODO PRSD-952: Implement gas safety cert exemption missing step",
-                    ),
+                    gasSafetyExemptionReasonStep,
+                    gasSafetyExemptionOtherReasonStep,
+                    gasSafetyExemptionConfirmationStep,
+                    gasSafetyExemptionMissingStep,
                 ),
                 "propertyCompliance.taskList.upload.gasSafety",
             )
@@ -235,6 +234,93 @@ class PropertyComplianceJourney(
                 nextAction = { journeyData, _ -> gasSafetyExemptionStepNextAction(journeyData) },
             )
 
+    private val gasSafetyExemptionReasonStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.GasSafetyExemptionReason,
+                page =
+                    Page(
+                        formModel = GasSafetyExemptionReasonFormModel::class,
+                        templateName = "forms/exemptionReasonForm.html",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.gasSafetyExemptionReason.fieldSetHeading",
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = GasSafetyExemptionReason.NO_GAS_SUPPLY,
+                                            labelMsgKey = "forms.gasSafetyExemptionReason.radios.noGas.label",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = GasSafetyExemptionReason.LONG_LEASE,
+                                            labelMsgKey = "forms.gasSafetyExemptionReason.radios.longLease.label",
+                                            hintMsgKey = "forms.gasSafetyExemptionReason.radios.longLease.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = GasSafetyExemptionReason.OTHER,
+                                            labelMsgKey = "forms.gasSafetyExemptionReason.radios.other.label",
+                                            hintMsgKey = "forms.gasSafetyExemptionReason.radios.other.hint",
+                                        ),
+                                    ),
+                            ),
+                    ),
+                nextAction = { journeyData, _ -> gasSafetyExemptionReasonStepNextAction(journeyData) },
+            )
+
+    private val gasSafetyExemptionOtherReasonStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.GasSafetyExemptionOtherReason,
+                page =
+                    Page(
+                        formModel = GasSafetyExemptionOtherReasonFormModel::class,
+                        templateName = "forms/exemptionOtherReasonForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.gasSafetyExemptionOtherReason.fieldSetHeading",
+                                "fieldSetHint" to "forms.gasSafetyExemptionOtherReason.fieldSetHint",
+                                "limit" to GAS_SAFETY_EXEMPTION_OTHER_REASON_MAX_LENGTH,
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyExemptionConfirmation, null) },
+            )
+
+    private val gasSafetyExemptionConfirmationStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.GasSafetyExemptionConfirmation,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/gasSafetyExemptionConfirmationForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                            ),
+                    ),
+                handleSubmitAndRedirect = { _, _ -> taskListUrlSegment },
+                nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
+            )
+
+    private val gasSafetyExemptionMissingStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.GasSafetyExemptionMissing,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/gasSafetyExemptionMissingForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                            ),
+                    ),
+                handleSubmitAndRedirect = { _, _ -> taskListUrlSegment },
+                nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
+            )
+
     private fun placeholderStep(
         stepId: PropertyComplianceStepId,
         todoComment: String,
@@ -262,6 +348,13 @@ class PropertyComplianceJourney(
             Pair(PropertyComplianceStepId.GasSafetyExemptionReason, null)
         } else {
             Pair(PropertyComplianceStepId.GasSafetyExemptionMissing, null)
+        }
+
+    private fun gasSafetyExemptionReasonStepNextAction(journeyData: JourneyData) =
+        if (journeyData.getIsGasSafetyExemptionReasonOther()!!) {
+            Pair(PropertyComplianceStepId.GasSafetyExemptionOtherReason, null)
+        } else {
+            Pair(PropertyComplianceStepId.GasSafetyExemptionConfirmation, null)
         }
 
     private fun getPropertyAddress() =
