@@ -9,6 +9,8 @@ enum class PropertyComplianceStepId(
     GasSafetyUpload("gas-safety-certificate-upload"),
     GasSafetyOutdated("gas-safety-certificate-outdated"),
     GasSafetyExemption("gas-safety-certificate-exemption"),
+    GasSafetyExemptionReason("gas-safety-certificate-exemption-reason"),
+    GasSafetyExemptionMissing("gas-safety-certificate-exemption-missing"),
     EICR("eicr"),
     EPC("epc"),
     CheckAndSubmit("check-and-submit"),

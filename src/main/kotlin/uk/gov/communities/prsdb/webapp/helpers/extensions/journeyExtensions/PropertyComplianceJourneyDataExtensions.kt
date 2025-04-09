@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 
 class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
@@ -23,5 +24,12 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
             val today = DateTimeHelper().getCurrentDateInUK()
             return issueDate.yearsUntil(today) >= 1
         }
+
+        fun JourneyData.getHasGasSafetyCertExemption() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.GasSafetyExemption.urlPathSegment,
+                GasSafetyExemptionFormModel::hasExemption.name,
+            )
     }
 }

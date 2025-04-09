@@ -12,6 +12,7 @@ import org.mockito.Mockito.mockConstruction
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCertExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import java.time.LocalDate
@@ -80,5 +81,24 @@ class PropertyComplianceJourneyDataExtensionsTests {
         val retrievedIsGasSafetyCertOutdated = testJourneyData.getIsGasSafetyCertOutdated()
 
         assertNull(retrievedIsGasSafetyCertOutdated)
+    }
+
+    @Test
+    fun `getHasGasSafetyCertExemption returns a boolean if the corresponding page is in journeyData`() {
+        val hasGasSafetyCertExemption = true
+        val testJourneyData = journeyDataBuilder.withGasSafetyCertExemptionStatus(hasGasSafetyCertExemption).build()
+
+        val retrievedHasGasSafetyCertExemption = testJourneyData.getHasGasSafetyCertExemption()
+
+        assertEquals(hasGasSafetyCertExemption, retrievedHasGasSafetyCertExemption)
+    }
+
+    @Test
+    fun `getHasGasSafetyCertExemption returns null if the corresponding page is not in journeyData`() {
+        val testJourneyData = journeyDataBuilder.build()
+
+        val retrievedHasGasSafetyCertExemption = testJourneyData.getHasGasSafetyCertExemption()
+
+        assertNull(retrievedHasGasSafetyCertExemption)
     }
 }
