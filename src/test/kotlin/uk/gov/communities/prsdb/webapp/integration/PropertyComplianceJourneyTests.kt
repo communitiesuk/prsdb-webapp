@@ -12,12 +12,14 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.test.context.jdbc.Sql
+import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyIssueDatePagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyOutdatedPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyPagePropertyCompliance
@@ -106,12 +108,16 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // Gas Safety Exemption page
             gasSafetyExemptionPage.submitHasGasSafetyCertExemption()
+            val gasSafetyExemptionReasonPage = assertPageIs(page, GasSafetyExemptionReasonPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-950: Continue journey tests
+            // Gas Safety Exemption Reason page
+            gasSafetyExemptionReasonPage.submitExemptionReason(GasSafetyExemptionReason.NO_GAS_SUPPLY)
+
+            // TODO PRSD-951: Continue journey tests
             assertContains(
                 page.url(),
                 PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.GasSafetyExemptionReason.urlPathSegment}",
+                    "/${PropertyComplianceStepId.GasSafetyExemptionConfirmation.urlPathSegment}",
             )
         }
 
@@ -195,6 +201,30 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             gasSafetyExemptionPage.form.submit()
             assertThat(gasSafetyExemptionPage.form.getErrorMessage())
                 .containsText("Select whether you have a gas safety certificate exemption")
+        }
+    }
+
+    @Nested
+    inner class GasSafetyExemptionReasonStepTests {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val gasSafetyExemptionReasonPage = navigator.goToPropertyComplianceGasSafetyExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
+            gasSafetyExemptionReasonPage.form.submit()
+            assertThat(gasSafetyExemptionReasonPage.form.getErrorMessage())
+                .containsText("Select why this property is exempt from gas safety")
+        }
+
+        @Test
+        fun `Submitting with 'other' selected redirects to the gas safety exemption other reason page`(page: Page) {
+            val gasSafetyExemptionReasonPage = navigator.goToPropertyComplianceGasSafetyExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
+            gasSafetyExemptionReasonPage.submitExemptionReason(GasSafetyExemptionReason.OTHER)
+
+            // TODO PRSD-994: Replace with gas safety exemption other reason page assertion
+            assertContains(
+                page.url(),
+                PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
+                    "/${PropertyComplianceStepId.GasSafetyExemptionOtherReason.urlPathSegment}",
+            )
         }
     }
 
