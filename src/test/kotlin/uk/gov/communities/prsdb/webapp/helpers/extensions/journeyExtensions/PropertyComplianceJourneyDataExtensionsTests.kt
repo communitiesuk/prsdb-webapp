@@ -10,10 +10,12 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.mockConstruction
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCertExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import java.time.LocalDate
 import kotlin.test.assertEquals
@@ -27,6 +29,13 @@ class PropertyComplianceJourneyDataExtensionsTests {
                 Arguments.of(Named.of("over a year old", LocalDate.of(2019, 1, 4)), true),
                 Arguments.of(Named.of("a year old", LocalDate.of(2019, 1, 5)), true),
                 Arguments.of(Named.of("less than a year old", LocalDate.of(2019, 1, 6)), false),
+            )
+
+        @JvmStatic
+        private fun provideGasExemptionReasons() =
+            arrayOf(
+                Arguments.of(Named.of("other", GasSafetyExemptionReason.OTHER), true),
+                Arguments.of(Named.of("not other", GasSafetyExemptionReason.NO_GAS_SUPPLY), false),
             )
     }
 
@@ -100,5 +109,27 @@ class PropertyComplianceJourneyDataExtensionsTests {
         val retrievedHasGasSafetyCertExemption = testJourneyData.getHasGasSafetyCertExemption()
 
         assertNull(retrievedHasGasSafetyCertExemption)
+    }
+
+    @ParameterizedTest(name = "{1} when the reason is {0}")
+    @MethodSource("provideGasExemptionReasons")
+    fun `getIsGasSafetyExemptionReasonOther returns`(
+        reason: GasSafetyExemptionReason,
+        expectedResult: Boolean,
+    ) {
+        val testJourneyData = journeyDataBuilder.withGasSafetyCertExemptionReason(reason).build()
+
+        val retrievedIsGasSafetyCertExemptionReasonOther = testJourneyData.getIsGasSafetyExemptionReasonOther()!!
+
+        assertEquals(expectedResult, retrievedIsGasSafetyCertExemptionReasonOther)
+    }
+
+    @Test
+    fun `getIsGasSafetyExemptionReasonOther returns null if the corresponding page is not in journeyData`() {
+        val testJourneyData = journeyDataBuilder.build()
+
+        val retrievedIsGasSafetyCertExemptionReasonOther = testJourneyData.getIsGasSafetyExemptionReasonOther()
+
+        assertNull(retrievedIsGasSafetyCertExemptionReasonOther)
     }
 }
