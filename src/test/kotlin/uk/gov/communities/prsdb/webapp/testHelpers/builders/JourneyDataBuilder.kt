@@ -411,7 +411,7 @@ class JourneyDataBuilder(
 
     fun withGasSafetyCertStatus(hasGasSafetyCert: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafety.urlPathSegment] =
-            mapOf(GasSafetyFormModel::hasGasSafetyCert.name to hasGasSafetyCert)
+            mapOf(GasSafetyFormModel::hasCert.name to hasGasSafetyCert)
         return this
     }
 
