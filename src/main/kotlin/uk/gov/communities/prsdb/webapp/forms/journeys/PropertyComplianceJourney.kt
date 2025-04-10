@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_EXEMPTION_OTHER_REAS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PageWithContentProvider
@@ -56,6 +57,7 @@ class PropertyComplianceJourney(
             "propertyCompliance.taskList.heading",
             listOf("propertyCompliance.taskList.subtitle.one", "propertyCompliance.taskList.subtitle.two"),
             numberSections = false,
+            backUrl = LANDLORD_DASHBOARD_URL,
         )
 
     private val uploadTasks

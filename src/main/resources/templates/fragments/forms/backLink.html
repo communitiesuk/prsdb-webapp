@@ -1,2 +1,3 @@
-<a th:fragment="backLink(backUrl)" th:href="@{${backUrl}}" class="govuk-back-link"
-   th:text="#{forms.buttons.back}">forms.buttons.back</a>
+<a th:fragment="backLink(backUrl)" th:unless="${backUrl == null}" th:href="@{${backUrl}}" class="govuk-back-link" th:text="#{forms.buttons.back}">
+    forms.buttons.back
+</a>
