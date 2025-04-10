@@ -15,12 +15,13 @@ import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
+import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.examples.MaximumLengthInputStream.Companion.withMaxLength
 import java.security.Principal
 
 @Controller
 // This free segment allows the example controller to simulate multiple journeys in parallel
-@RequestMapping("example/file-upload/{freeSegment}")
+@RequestMapping("example/$FILE_UPLOAD_URL_SUBSTRING/{freeSegment}")
 class ExampleFileUploadController(
     private val fileUploader: FileUploader,
     private val tokenService: FileUploadTokenService,
@@ -79,7 +80,7 @@ class ExampleFileUploadController(
         // that the token is being used correctly by storing some additional information with the token in the session.
         val tokenCookie = Cookie(COOKIE_NAME, token)
         tokenCookie.isHttpOnly = true
-        tokenCookie.path = "/example/file-upload/$segment"
+        tokenCookie.path = "/example/$FILE_UPLOAD_URL_SUBSTRING/$segment"
         tokenCookie.secure = true
 
         return tokenCookie
