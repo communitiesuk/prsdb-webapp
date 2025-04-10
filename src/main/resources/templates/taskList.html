@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html>
     <body th:replace="~{fragments/layout :: layout(#{${taskListViewModel.title}}, ~{::body/content()}, false)}">
+        <a th:replace="~{fragments/forms/backLink :: backLink(${taskListViewModel.backUrl})}"></a>
         <main class="govuk-main-wrapper" id="main-content">
             <th:block id="page-contents" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
                 <header id="header">
