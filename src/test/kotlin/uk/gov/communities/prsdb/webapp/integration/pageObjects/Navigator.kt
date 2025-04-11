@@ -90,12 +90,14 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.VerifiedIdentityModel
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
+import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import java.time.LocalDate
 
 class Navigator(
     private val page: Page,
     private val port: Int,
     private val identityService: OneLoginIdentityService,
+    private val userRolesService: UserRolesService,
 ) {
     fun goToManageLaUsers(authorityId: Int): ManageLaUsersPage {
         navigate("/local-authority/$authorityId/manage-users")
@@ -123,10 +125,18 @@ class Navigator(
                 VerifiedIdentityModel.NAME_KEY to "Arthur Dent",
                 VerifiedIdentityModel.BIRTH_DATE_KEY to LocalDate.of(2000, 6, 8),
             )
+        whenever(userRolesService.getHasLandlordUserRole(any())).thenReturn(false)
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentityMap)
 
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.VerifyIdentity.urlPathSegment}")
         return createValidPage(page, ConfirmIdentityFormPageLandlordRegistration::class)
+    }
+
+    fun redirectToLandlordDashboardPage(): LandlordDashboardPage {
+        whenever(userRolesService.getHasLandlordUserRole(any())).thenReturn(true)
+
+        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.VerifyIdentity.urlPathSegment}")
+        return createValidPage(page, LandlordDashboardPage::class)
     }
 
     fun goToLandlordRegistrationNameFormPage(): NameFormPageLandlordRegistration {

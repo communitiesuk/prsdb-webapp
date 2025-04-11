@@ -9,13 +9,13 @@ import org.junit.jupiter.api.BeforeEach
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Import
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.config.OSPlacesConfig
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.Navigator
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
+import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import uk.gov.service.notify.NotificationClient
 
 @Import(TestcontainersConfiguration::class)
@@ -37,29 +38,32 @@ abstract class IntegrationTest {
     @LocalServerPort
     val port: Int = 0
 
-    @MockBean
+    @MockitoBean
     lateinit var notifyConfig: NotifyConfig
 
-    @MockBean
+    @MockitoBean
     lateinit var notificationClient: NotificationClient
 
-    @MockBean
+    @MockitoBean
     lateinit var osPlacesConfig: OSPlacesConfig
 
-    @MockBean
+    @MockitoBean
     lateinit var osPlacesClient: OSPlacesClient
 
-    @MockBean
+    @MockitoBean
     lateinit var identityService: OneLoginIdentityService
 
-    @MockBean
+    @MockitoBean
     lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
-    @SpyBean
+    @MockitoSpyBean
     lateinit var clientRegistrationRepository: ClientRegistrationRepository
 
-    @MockBean
+    @MockitoBean
     lateinit var s3: S3TransferManager
+
+    @MockitoBean
+    lateinit var userRolesService: UserRolesService
 
     /**
      * The mock One Login URLs are hard-coded with port 8080 in the local-no-auth profile config. However, our tests
@@ -100,7 +104,7 @@ abstract class IntegrationTest {
 
     @BeforeEach
     fun setUp(page: Page) {
-        navigator = Navigator(page, port, identityService)
+        navigator = Navigator(page, port, identityService, userRolesService)
     }
 
     @AfterEach

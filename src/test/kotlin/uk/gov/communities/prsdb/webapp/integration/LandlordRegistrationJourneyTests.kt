@@ -280,6 +280,15 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     }
 
     @Nested
+    inner class LandlordRegistrationStepVerifyIdentity {
+        @Test
+        fun `Navigating here as a registered landlord redirects to the landlord dashboard page`() {
+            val dashboardPage = navigator.redirectToLandlordDashboardPage()
+            assertThat(dashboardPage.bannerSubHeading).containsText("Arthur Dent")
+        }
+    }
+
+    @Nested
     inner class LandlordRegistrationStepName {
         @Test
         fun `Submitting an empty name returns an error`() {
