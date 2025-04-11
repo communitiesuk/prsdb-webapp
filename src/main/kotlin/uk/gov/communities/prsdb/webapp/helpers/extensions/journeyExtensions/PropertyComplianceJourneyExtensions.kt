@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
@@ -47,5 +48,12 @@ class PropertyComplianceJourneyExtensions : JourneyDataExtensions() {
             propertyOwnershipId: Long,
             originalFileName: String,
         ) = "property_${propertyOwnershipId}_gas_safety_certificate.${FilenameUtils.getExtension(originalFileName)}"
+
+        fun JourneyData.getHasEICR() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.EICR.urlPathSegment,
+                EicrFormModel::hasCert.name,
+            )
     }
 }
