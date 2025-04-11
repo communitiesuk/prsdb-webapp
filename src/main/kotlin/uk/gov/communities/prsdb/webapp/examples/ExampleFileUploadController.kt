@@ -1,9 +1,11 @@
 package uk.gov.communities.prsdb.webapp.examples
 
 import jakarta.servlet.http.Cookie
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.apache.commons.fileupload2.core.FileItemInput
 import org.apache.commons.fileupload2.core.FileItemInputIterator
+import org.apache.commons.io.FilenameUtils
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -17,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.examples.MaximumLengthInputStream.Companion.withMaxLength
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import java.security.Principal
 
 @Controller
@@ -39,6 +42,7 @@ class ExampleFileUploadController(
 
     @PostMapping
     fun uploadFile(
+        streamlessRequest: HttpServletRequest,
         @RequestAttribute(MultipartFormDataFilter.ITERATOR_ATTRIBUTE) iterator: FileItemInputIterator,
         @CookieValue(value = COOKIE_NAME) token: String,
         model: Model,
@@ -56,15 +60,34 @@ class ExampleFileUploadController(
         // this will need to be a useful name for LA users to download (and we should not trust the uploaded file name)
         val key = "${principal.name}/$freeSegment/${file.name}"
 
-        val exampleMaxFileSizeInBytes = 5L * 1024L * 1024L
+        val mimetype = file.contentType
+        val extension = FilenameUtils.getExtension(file.name)
+        val reportedLength = streamlessRequest.contentLengthLong
 
-        val uploadOutcome = fileUploader.uploadFile(key, file.inputStream.withMaxLength(exampleMaxFileSizeInBytes))
+        val exampleMaxFileSizeInBytes = 5L * 1024L * 1024L
+        val exampleAllowedExtensions = listOf("pdf", "png", "mp4")
+        val exampleMimetypes = listOf("application/pdf", "image/png", "video/mp4")
+
+        if (reportedLength > exampleMaxFileSizeInBytes ||
+            !exampleAllowedExtensions.contains(extension) ||
+            !exampleMimetypes.contains(mimetype)
+        ) {
+            throw PrsdbWebException(
+                "Invalid file uploaded. File must be under 5Mb and a 'pdf', 'png' or 'mp4'. " +
+                    "File size was around: ${reportedLength}b; mimetype was $mimetype; extension was $extension",
+            )
+        }
+
+        val uploadOutcome = fileUploader.uploadFile(key, file.inputStream.withMaxLength(reportedLength))
         model.addAttribute(
             "fileUploadResponse",
             mapOf(
                 "uploadedName" to file.name,
                 "uploadReturnValue" to uploadOutcome,
-                "contentType" to file.contentType,
+                "file contentType" to mimetype,
+                "extension" to extension,
+                "request size" to reportedLength,
+                "request contentType" to streamlessRequest.contentType,
                 "cookie-value" to token,
             ),
         )
