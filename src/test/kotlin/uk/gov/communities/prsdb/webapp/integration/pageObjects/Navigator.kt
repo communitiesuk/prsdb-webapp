@@ -412,7 +412,7 @@ class Navigator(
 
     fun goToPropertyComplianceGasSafetyIssueDatePage(propertyOwnershipId: Long): GasSafetyIssueDatePagePropertyCompliance {
         val gasSafetyPage = goToPropertyComplianceGasSafetyPage(propertyOwnershipId)
-        gasSafetyPage.submitHasGasSafetyCert()
+        gasSafetyPage.submitHasCert()
         return createValidPage(
             page,
             GasSafetyIssueDatePagePropertyCompliance::class,
@@ -442,7 +442,7 @@ class Navigator(
 
     fun goToPropertyComplianceGasSafetyExemptionPage(propertyOwnershipId: Long): GasSafetyExemptionPagePropertyCompliance {
         val gasSafetyPage = goToPropertyComplianceGasSafetyPage(propertyOwnershipId)
-        gasSafetyPage.submitHasNoGasSafetyCert()
+        gasSafetyPage.submitHasNoCert()
         return createValidPage(
             page,
             GasSafetyExemptionPagePropertyCompliance::class,

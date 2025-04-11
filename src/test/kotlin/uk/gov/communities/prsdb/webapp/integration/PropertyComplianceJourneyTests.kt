@@ -58,7 +58,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             val gasSafetyPage = assertPageIs(page, GasSafetyPagePropertyCompliance::class, urlArguments)
 
             // Gas Safety page
-            gasSafetyPage.submitHasGasSafetyCert()
+            gasSafetyPage.submitHasCert()
             val gasSafetyIssueDatePage = assertPageIs(page, GasSafetyIssueDatePagePropertyCompliance::class, urlArguments)
 
             // Gas Safety Cert. Issue Date page
@@ -100,7 +100,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             val gasSafetyPage = assertPageIs(page, GasSafetyPagePropertyCompliance::class, urlArguments)
 
             // Gas Safety page
-            gasSafetyPage.submitHasGasSafetyCert()
+            gasSafetyPage.submitHasCert()
             val gasSafetyIssueDatePage = assertPageIs(page, GasSafetyIssueDatePagePropertyCompliance::class, urlArguments)
 
             // Gas Safety Cert Issue Date page
@@ -129,7 +129,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             val gasSafetyPage = assertPageIs(page, GasSafetyPagePropertyCompliance::class, urlArguments)
 
             // Gas Safety page
-            gasSafetyPage.submitHasNoGasSafetyCert()
+            gasSafetyPage.submitHasNoCert()
             val gasSafetyExemptionPage = assertPageIs(page, GasSafetyExemptionPagePropertyCompliance::class, urlArguments)
 
             // Gas Safety Exemption page
@@ -163,7 +163,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             val gasSafetyPage = assertPageIs(page, GasSafetyPagePropertyCompliance::class, urlArguments)
 
             // Gas Safety page
-            gasSafetyPage.submitHasNoGasSafetyCert()
+            gasSafetyPage.submitHasNoCert()
             val gasSafetyExemptionPage = assertPageIs(page, GasSafetyExemptionPagePropertyCompliance::class, urlArguments)
 
             // Gas Safety Exemption page
