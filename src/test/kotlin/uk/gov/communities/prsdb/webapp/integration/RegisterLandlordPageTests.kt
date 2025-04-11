@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.VerifiedI
 import java.net.URI
 import java.time.LocalDate
 
-@Sql("/data-local.sql")
+@Sql("/data-mockuser-not-landlord.sql")
 class RegisterLandlordPageTests : IntegrationTest() {
     @Test
     fun `registerAsALandlord page renders`(page: Page) {
@@ -41,5 +41,20 @@ class RegisterLandlordPageTests : IntegrationTest() {
         page.navigate("http://localhost:$port/register-as-a-landlord")
         page.getByRole(AriaRole.BUTTON, Page.GetByRoleOptions().setName("Start Now")).click()
         assertEquals("/register-as-a-landlord/confirm-identity", URI(page.url()).path)
+    }
+
+    @Test
+    @Sql("/data-local.sql")
+    fun `the 'Start Now' button directs a registered landlord to the landlord dashboard page page`(page: Page) {
+        val verifiedIdentityMap =
+            mutableMapOf<String, Any?>(
+                VerifiedIdentityModel.NAME_KEY to "name",
+                VerifiedIdentityModel.BIRTH_DATE_KEY to LocalDate.now(),
+            )
+        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentityMap)
+
+        page.navigate("http://localhost:$port/register-as-a-landlord")
+        page.getByRole(AriaRole.BUTTON, Page.GetByRoleOptions().setName("Start Now")).click()
+        assertEquals("/landlord/dashboard", URI(page.url()).path)
     }
 }

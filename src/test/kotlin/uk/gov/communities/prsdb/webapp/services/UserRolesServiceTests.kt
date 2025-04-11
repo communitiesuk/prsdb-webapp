@@ -5,6 +5,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -36,7 +39,7 @@ class UserRolesServiceTests {
 
         // Assert
         Assertions.assertEquals(1, roles.size)
-        Assertions.assertEquals("ROLE_LANDLORD", roles[0])
+        Assertions.assertEquals(ROLE_LANDLORD, roles[0])
     }
 
     @Test
@@ -53,8 +56,8 @@ class UserRolesServiceTests {
 
         // Assert
         Assertions.assertEquals(2, roles.size)
-        Assertions.assertEquals("ROLE_LA_ADMIN", roles[0])
-        Assertions.assertEquals("ROLE_LA_USER", roles[1])
+        Assertions.assertEquals(ROLE_LA_ADMIN, roles[0])
+        Assertions.assertEquals(ROLE_LA_USER, roles[1])
     }
 
     @Test
@@ -71,6 +74,65 @@ class UserRolesServiceTests {
 
         // Assert
         Assertions.assertEquals(1, roles.size)
-        Assertions.assertEquals("ROLE_LA_USER", roles[0])
+        Assertions.assertEquals(ROLE_LA_USER, roles[0])
+    }
+
+    @Test
+    fun `getHasLandlordUserRole returns true for a landlord user`() {
+        // Arrange
+        val baseUser = MockOneLoginUserData.createOneLoginUser()
+        val user = MockLandlordData.createLandlord(baseUser)
+        whenever(landlordRepository.findByBaseUser_Id(baseUser.id))
+            .thenReturn(user)
+
+        // Act
+        val hasLandlordUserRole = userRolesService.getHasLandlordUserRole(baseUser.id)
+
+        // Assert
+        Assertions.assertTrue(hasLandlordUserRole)
+    }
+
+    @Test
+    fun `getHasLandlordUserRole returns false for a local authority manager`() {
+        // Arrange
+        val baseUser = MockOneLoginUserData.createOneLoginUser()
+        val user = MockLocalAuthorityData.createLocalAuthorityUser(baseUser, isManager = true)
+
+        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+            .thenReturn(user)
+
+        // Act
+        val hasLandlordUserRole = userRolesService.getHasLandlordUserRole(baseUser.id)
+
+        // Assert
+        Assertions.assertFalse(hasLandlordUserRole)
+    }
+
+    @Test
+    fun `getHasLandlordUserRole returns false for a standard local authority user`() {
+        // Arrange
+        val baseUser = MockOneLoginUserData.createOneLoginUser()
+        val user = MockLocalAuthorityData.createLocalAuthorityUser(baseUser, isManager = false)
+
+        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+            .thenReturn(user)
+
+        // Act
+        val hasLandlordUserRole = userRolesService.getHasLandlordUserRole(baseUser.id)
+
+        // Assert
+        Assertions.assertFalse(hasLandlordUserRole)
+    }
+
+    @Test
+    fun `getHasLandlordUserRole returns false for a user without roles`() {
+        // Arrange
+        val baseUser = MockOneLoginUserData.createOneLoginUser()
+
+        // Act
+        val hasLandlordUserRole = userRolesService.getHasLandlordUserRole(baseUser.id)
+
+        // Assert
+        Assertions.assertFalse(hasLandlordUserRole)
     }
 }

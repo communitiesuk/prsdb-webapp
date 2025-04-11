@@ -129,6 +129,11 @@ class Navigator(
         return createValidPage(page, ConfirmIdentityFormPageLandlordRegistration::class)
     }
 
+    fun redirectFromLandlordRegistrationVerifyIdentityToLandlordDashboardPage(): LandlordDashboardPage {
+        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.VerifyIdentity.urlPathSegment}")
+        return createValidPage(page, LandlordDashboardPage::class)
+    }
+
     fun goToLandlordRegistrationNameFormPage(): NameFormPageLandlordRegistration {
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
 
