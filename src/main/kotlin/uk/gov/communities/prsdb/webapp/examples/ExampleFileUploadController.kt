@@ -1,12 +1,16 @@
 package uk.gov.communities.prsdb.webapp.examples
 
 import jakarta.servlet.http.Cookie
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.apache.commons.fileupload2.core.FileItemInput
 import org.apache.commons.fileupload2.core.FileItemInputIterator
+import org.apache.commons.io.FilenameUtils
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
+import org.springframework.validation.BindingResult
+import org.springframework.validation.MapBindingResult
 import org.springframework.web.bind.annotation.CookieValue
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -14,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.server.ResponseStatusException
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.examples.MaximumLengthInputStream.Companion.withMaxLength
@@ -30,7 +35,10 @@ class ExampleFileUploadController(
     fun getFileUploadForm(
         response: HttpServletResponse,
         @PathVariable("freeSegment") freeSegment: String,
+        model: Model,
     ): String {
+        addFlashValidationToModel(model)
+
         val token = tokenService.issueTokenFor(freeSegment)
         val tokenCookie = createFileUploadTokenCookie(token, freeSegment)
         response.addCookie(tokenCookie)
@@ -39,11 +47,13 @@ class ExampleFileUploadController(
 
     @PostMapping
     fun uploadFile(
+        streamlessRequest: HttpServletRequest,
         @RequestAttribute(MultipartFormDataFilter.ITERATOR_ATTRIBUTE) iterator: FileItemInputIterator,
         @CookieValue(value = COOKIE_NAME) token: String,
         model: Model,
         @PathVariable("freeSegment") freeSegment: String,
         principal: Principal,
+        redirectAttrs: RedirectAttributes,
     ): String {
         if (!tokenService.checkTokenIsFor(token, freeSegment)) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid upload token")
@@ -56,19 +66,64 @@ class ExampleFileUploadController(
         // this will need to be a useful name for LA users to download (and we should not trust the uploaded file name)
         val key = "${principal.name}/$freeSegment/${file.name}"
 
-        val exampleMaxFileSizeInBytes = 5L * 1024L * 1024L
+        val errorMessageKeys = validateFileUploadRequest(file, streamlessRequest)
+        if (errorMessageKeys.isNotEmpty()) {
+            redirectAttrs.addFlashAttribute("errorMessageKeys", errorMessageKeys)
 
-        val uploadOutcome = fileUploader.uploadFile(key, file.inputStream.withMaxLength(exampleMaxFileSizeInBytes))
+            // This swallows the rest of the file, which may cause a problem for very large files - e.g. 100s of TB
+            iterator.hasNext()
+            return "redirect:$freeSegment"
+        }
+
+        // This manually adds the formModel and binding result to the model - in this case that is all it does as
+        // this code is only reached if validation passed
+        addFlashValidationToModel(model)
+
+        val uploadOutcome = fileUploader.uploadFile(key, file.inputStream.withMaxLength(streamlessRequest.contentLengthLong))
         model.addAttribute(
             "fileUploadResponse",
             mapOf(
                 "uploadedName" to file.name,
                 "uploadReturnValue" to uploadOutcome,
-                "contentType" to file.contentType,
+                "request contentType" to streamlessRequest.contentType,
                 "cookie-value" to token,
             ),
         )
         return "example/fileUpload"
+    }
+
+    private fun validateFileUploadRequest(
+        file: FileItemInput,
+        streamlessRequest: HttpServletRequest,
+    ): List<String> {
+        val errors = mutableListOf<String>()
+
+        val exampleMaxFileSizeInBytes = 5L * 1024L * 1024L
+        val exampleAllowedExtensions = listOf("pdf", "png", "mp4")
+        val exampleMimetypes = listOf("application/pdf", "image/png", "video/mp4")
+
+        if (exampleMaxFileSizeInBytes < streamlessRequest.contentLengthLong) {
+            errors.add("file.error.tooBig")
+        }
+        if (!exampleAllowedExtensions.contains(FilenameUtils.getExtension(file.name))) {
+            errors.add("file.error.badExtension")
+        }
+        if (!exampleMimetypes.contains(file.contentType)) {
+            errors.add("file.error.badMimeType")
+        }
+
+        return errors
+    }
+
+    private fun addFlashValidationToModel(model: Model) {
+        val bindingResult = MapBindingResult(mapOf("uploaded-file" to null), "formModel")
+        model.addAttribute(BindingResult.MODEL_KEY_PREFIX + "formModel", bindingResult)
+        val errors = model.getAttribute("errorMessageKeys") as? List<*>
+        errors?.forEach {
+            if (it is String) {
+                bindingResult.rejectValue("uploaded-file", "", it)
+            }
+        }
     }
 
     private fun createFileUploadTokenCookie(
