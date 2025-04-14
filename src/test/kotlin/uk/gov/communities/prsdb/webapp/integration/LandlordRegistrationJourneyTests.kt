@@ -284,7 +284,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     inner class LandlordRegistrationStepVerifyIdentity {
         @Test
         fun `Navigating here as a registered landlord redirects to the landlord dashboard page`() {
-            val dashboardPage = navigator.redirectFromLandlordRegistrationVerifyIdentityToLandlordDashboardPage()
+            val dashboardPage = navigator.goToLandlordRegistrationVerifyIdentityAsRegisteredLandlord()
             assertThat(dashboardPage.bannerHeading).containsText("Alexander Smith")
         }
     }

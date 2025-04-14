@@ -48,8 +48,9 @@ class RegisterLandlordControllerTests(
         mvc
             .get("/register-as-a-landlord/verify-identity") {
                 with(oidcLogin())
-            }.andExpect {
+            }.andExpectAll {
                 status { is3xxRedirection() }
+                redirectedUrl("/landlord/dashboard")
             }
     }
 }
