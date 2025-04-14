@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistra
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
+import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import java.security.Principal
 
 @Controller
@@ -27,6 +28,7 @@ class RegisterLandlordController(
     private val landlordRegistrationJourneyFactory: LandlordRegistrationJourneyFactory,
     private val identityService: OneLoginIdentityService,
     private val landlordService: LandlordService,
+    private val userRolesService: UserRolesService,
 ) {
     @GetMapping
     fun index(model: Model): CharSequence {
@@ -46,6 +48,10 @@ class RegisterLandlordController(
         principal: Principal,
         @AuthenticationPrincipal oidcUser: OidcUser,
     ): ModelAndView {
+        if (userRolesService.getHasLandlordUserRole(principal.name)) {
+            return ModelAndView("redirect:${LANDLORD_DASHBOARD_URL}")
+        }
+
         val identity = identityService.getVerifiedIdentityData(oidcUser) ?: mapOf()
 
         return landlordRegistrationJourneyFactory

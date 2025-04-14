@@ -61,6 +61,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.StartPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionPagePropertyCompliance
@@ -117,6 +118,11 @@ class Navigator(
         return createValidPage(page, SearchPropertyRegisterPage::class)
     }
 
+    fun goToLandlordRegistrationStartPage(): StartPageLandlordRegistration {
+        navigate("/register-as-a-landlord")
+        return createValidPage(page, StartPageLandlordRegistration::class)
+    }
+
     fun goToLandlordRegistrationConfirmIdentityFormPage(): ConfirmIdentityFormPageLandlordRegistration {
         val verifiedIdentityMap =
             mutableMapOf<String, Any?>(
@@ -127,6 +133,11 @@ class Navigator(
 
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.VerifyIdentity.urlPathSegment}")
         return createValidPage(page, ConfirmIdentityFormPageLandlordRegistration::class)
+    }
+
+    fun goToLandlordRegistrationVerifyIdentityAsRegisteredLandlord(): LandlordDashboardPage {
+        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.VerifyIdentity.urlPathSegment}")
+        return createValidPage(page, LandlordDashboardPage::class)
     }
 
     fun goToLandlordRegistrationNameFormPage(): NameFormPageLandlordRegistration {
