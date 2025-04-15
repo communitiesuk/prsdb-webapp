@@ -5,7 +5,9 @@ import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -92,4 +94,9 @@ class PropertyRegistrationService(
     fun setLastPrnRegisteredThisSession(prn: Long) = session.setAttribute(PROPERTY_REGISTRATION_NUMBER, prn)
 
     fun getLastPrnRegisteredThisSession() = session.getAttribute(PROPERTY_REGISTRATION_NUMBER)?.toString()?.toLong()
+
+    fun deleteExistingPropertyRegistrationJourneyDataFromSession() {
+        session.removeAttribute(CONTEXT_ID)
+        session.removeAttribute(REGISTER_PROPERTY_JOURNEY_URL)
+    }
 }

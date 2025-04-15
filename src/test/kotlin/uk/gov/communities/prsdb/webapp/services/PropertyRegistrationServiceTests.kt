@@ -15,8 +15,11 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -295,5 +298,12 @@ class PropertyRegistrationServiceTests {
             )
 
         assertEquals(expectedPropertyOwnership.registrationNumber, propertyRegistrationNumber)
+    }
+
+    @Test
+    fun `deleteExistingPropertyRegistrationJourneyDataFromSession removes propertyRegistration journeyData and contextId from session`() {
+        propertyRegistrationService.deleteExistingPropertyRegistrationJourneyDataFromSession()
+        verify(mockSession, times(1)).removeAttribute(CONTEXT_ID)
+        verify(mockSession, times(1)).removeAttribute(REGISTER_PROPERTY_JOURNEY_URL)
     }
 }

@@ -34,11 +34,17 @@ class RegisterPropertyController(
     fun index(model: Model): String {
         model.addAttribute(
             "registerPropertyInitialStep",
-            "/$REGISTER_PROPERTY_JOURNEY_URL/$TASK_LIST_PATH_SEGMENT",
+            "/$REGISTER_PROPERTY_JOURNEY_URL/$START_PAGE_PATH_SEGMENT",
         )
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
         return "registerPropertyStartPage"
+    }
+
+    @GetMapping("/${RegisterLandlordController.START_PAGE_PATH_SEGMENT}")
+    fun getStart(): String {
+        propertyRegistrationService.deleteExistingPropertyRegistrationJourneyDataFromSession()
+        return "redirect:$TASK_LIST_PATH_SEGMENT"
     }
 
     @GetMapping("/{stepName}")
@@ -106,5 +112,9 @@ class RegisterPropertyController(
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
 
         return "registerPropertyConfirmation"
+    }
+
+    companion object {
+        const val START_PAGE_PATH_SEGMENT = "start"
     }
 }
