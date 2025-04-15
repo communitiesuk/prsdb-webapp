@@ -18,6 +18,7 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
@@ -140,14 +141,14 @@ class RegisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getStart redirects to task-list after calling delete journey data method from propertyRegistrationService`() {
+    fun `getStart redirects to task-list after calling clear journey data method from propertyRegistrationService`() {
         mvc
-            .get("/register-property/start")
+            .get("/$REGISTER_PROPERTY_JOURNEY_URL/$START_PAGE_PATH_SEGMENT")
             .andExpect {
                 status { is3xxRedirection() }
                 redirectedUrl(TASK_LIST_PATH_SEGMENT)
             }
 
-        verify(propertyRegistrationService, times(1)).deleteExistingPropertyRegistrationJourneyDataFromSession()
+        verify(propertyRegistrationService, times(1)).clearPropertyRegistrationJourneyDataFromSession()
     }
 }

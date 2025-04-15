@@ -95,7 +95,7 @@ class PropertyRegistrationService(
 
     fun getLastPrnRegisteredThisSession() = session.getAttribute(PROPERTY_REGISTRATION_NUMBER)?.toString()?.toLong()
 
-    fun deleteExistingPropertyRegistrationJourneyDataFromSession() {
+    fun clearPropertyRegistrationJourneyDataFromSession() {
         session.removeAttribute(CONTEXT_ID)
         session.removeAttribute(REGISTER_PROPERTY_JOURNEY_URL)
     }

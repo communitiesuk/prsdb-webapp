@@ -301,8 +301,8 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `deleteExistingPropertyRegistrationJourneyDataFromSession removes propertyRegistration journeyData and contextId from session`() {
-        propertyRegistrationService.deleteExistingPropertyRegistrationJourneyDataFromSession()
+    fun `clearPropertyRegistrationJourneyDataFromSession removes propertyRegistration journeyData and contextId from session`() {
+        propertyRegistrationService.clearPropertyRegistrationJourneyDataFromSession()
         verify(mockSession, times(1)).removeAttribute(CONTEXT_ID)
         verify(mockSession, times(1)).removeAttribute(REGISTER_PROPERTY_JOURNEY_URL)
     }
