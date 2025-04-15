@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mock
 import org.mockito.kotlin.any
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -149,6 +148,6 @@ class RegisterPropertyControllerTests(
                 redirectedUrl(TASK_LIST_PATH_SEGMENT)
             }
 
-        verify(propertyRegistrationService, times(1)).clearPropertyRegistrationJourneyDataFromSession()
+        verify(propertyRegistrationService).clearPropertyRegistrationJourneyDataFromSession()
     }
 }

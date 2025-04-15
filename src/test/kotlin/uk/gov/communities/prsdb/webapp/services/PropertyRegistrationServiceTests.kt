@@ -15,7 +15,6 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID
@@ -303,7 +302,7 @@ class PropertyRegistrationServiceTests {
     @Test
     fun `clearPropertyRegistrationJourneyDataFromSession removes propertyRegistration journeyData and contextId from session`() {
         propertyRegistrationService.clearPropertyRegistrationJourneyDataFromSession()
-        verify(mockSession, times(1)).removeAttribute(CONTEXT_ID)
-        verify(mockSession, times(1)).removeAttribute(REGISTER_PROPERTY_JOURNEY_URL)
+        verify(mockSession).removeAttribute(CONTEXT_ID)
+        verify(mockSession).removeAttribute(REGISTER_PROPERTY_JOURNEY_URL)
     }
 }
