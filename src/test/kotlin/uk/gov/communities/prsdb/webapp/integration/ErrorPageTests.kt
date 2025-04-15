@@ -13,4 +13,10 @@ class ErrorPageTests : IntegrationTest() {
         page.navigate("http://localhost:$port/error")
         assertThat(page.getByRole(AriaRole.HEADING)).containsText("Sorry, there is a problem with the service")
     }
+
+    @Test
+    fun `file too large page renders when file too large controller path called`(page: Page) {
+        page.navigate("http://localhost:$port/file-too-large")
+        assertThat(page.getByRole(AriaRole.HEADING)).containsText("The file you selected was too large")
+    }
 }
