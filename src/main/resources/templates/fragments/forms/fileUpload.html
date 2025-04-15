@@ -1,0 +1,6 @@
+<th:block id="file-upload" th:fragment="fileUpload(label, fieldName, hint)" th:replace="~{fragments/forms/inputGroup :: inputGroup(${label}, ${fieldName}, ~{::#file-upload/content()}, ${hint})}">
+    <div class="govuk-drop-zone" data-module="govuk-file-upload">
+        <input class="govuk-file-upload" th:classappend='${#fields.hasErrors(fieldName) ? "govuk-file-upload--error" : ""}' type="file" th:field="*{__${fieldName}__}"
+               th:attrappend="aria-describedby=${#fields.hasErrors(fieldName)} ? ${fieldName +'-error'}">
+    </div>
+</th:block>
