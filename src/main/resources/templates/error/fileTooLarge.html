@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{error.fileTooLarge.title(#{serviceName})}, ~{::main}, false)}">
+<main class="govuk-main-wrapper govuk-main-wrapper--l" id="main-content" role="main">
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            <h1 class="govuk-heading-l" th:text="#{error.fileTooLarge.header}">error.notFound.header</h1>
+            <p class="govuk-body" th:text="#{error.fileTooLarge.body.one}">error.notFound.body.one</p>
+            <p class="govuk-body" th:text="#{error.fileTooLarge.body.two}">error.notFound.body.two</p>
+            <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink('/', #{error.fileTooLarge.cta})}">error.notFound.cta</button>
+        </div>
+    </div>
+</main>
+</html>
