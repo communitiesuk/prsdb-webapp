@@ -10,11 +10,12 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 
 @Controller
+@RequestMapping("error")
 class CustomErrorController : ErrorController {
-    @GetMapping("/file-too-large")
+    @GetMapping("file-too-large")
     fun fileTooLargeErrorPage() = "error/fileTooLarge"
 
-    @RequestMapping("/error")
+    @RequestMapping
     fun handleError(
         request: HttpServletRequest,
         model: Model,

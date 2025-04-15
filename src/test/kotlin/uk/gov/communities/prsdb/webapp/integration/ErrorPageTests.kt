@@ -19,7 +19,7 @@ class ErrorPageTests : IntegrationTest() {
 
     @Test
     fun `file too large page renders when file too large controller path called`(page: Page) {
-        navigator.navigate("/file-too-large")
+        navigator.navigate("/error/file-too-large")
         val errorPage = createValidPage(page, ErrorPage::class)
         BaseComponent.assertThat(errorPage.heading).containsText("The file you selected was too large")
     }
