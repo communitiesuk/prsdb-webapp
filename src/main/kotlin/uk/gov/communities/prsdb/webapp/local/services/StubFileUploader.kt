@@ -1,15 +1,16 @@
-package uk.gov.communities.prsdb.webapp.examples
+package uk.gov.communities.prsdb.webapp.local.services
 
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.services.FileUploader
 import java.io.File
 import java.io.InputStream
 
 @Service
 @Primary
 @Profile("local")
-class LocalFileUploader : FileUploader {
+class StubFileUploader : FileUploader {
     private val forbiddenFilenameCharacters = listOf(':', '<', '>', '"', '?', '*', '&', '/', '\\', ',')
 
     override fun uploadFile(
