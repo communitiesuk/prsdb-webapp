@@ -66,10 +66,9 @@ Use Spring's built-in scheduled task functionality to run scheduled tasks in a l
 ### An ephemeral copy of the WebApp container (without a webserver running) triggered by Eventbridge Scheduler
 
 Use Eventbridge Scheduler to trigger a copy of the WebApp to spin up and perform the scheduled job, before shutting
-itself down
-when the job has been completed
+itself down when the job has been completed
 
-* Neutral, because scheduling is more complex to setup but there are example that can be followed
+* Neutral, because scheduling is more complex to setup but there are examples that can be followed
 * Good, because we can easily reuse existing code to access the database, send emails etc
 * Neutral, because while the container would only exist while it is needed, we would be deploying a lot more code than
   is actually used in each task, so it would still be a bit wasteful in terms of resources
@@ -81,7 +80,7 @@ when the job has been completed
 Use Eventbridge Scheduler to trigger a standalone ECS task that performs the scheduled job, before shutting itself down
 when the job has been completed
 
-* Neutral, because scheduling is more complex to setup but there are example that can be followed
+* Neutral, because scheduling is more complex to setup but there are examples that can be followed
 * Bad, because we would need to either duplicate common code from our main WebApp or split it out into a separate
   package
 * Good, because we would only be deploying the code required to complete the task
@@ -92,7 +91,7 @@ when the job has been completed
 
 Use Eventbridge Scheduler to trigger specific lambda functions for each of the scheduled jobs.
 
-* Neutral, because scheduling is more complex to setup but there are example that can be followed
+* Neutral, because scheduling is more complex to setup but there are examples that can be followed
 * Bad, because we would need to either duplicate common code from our main WebApp or split it out into (multiple)
   separate
   packages
