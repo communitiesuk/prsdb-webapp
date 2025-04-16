@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.examples
+package uk.gov.communities.prsdb.webapp.services
 
 import java.io.InputStream
 

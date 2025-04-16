@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.examples
+package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
