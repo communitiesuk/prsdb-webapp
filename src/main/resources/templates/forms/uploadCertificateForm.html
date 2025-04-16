@@ -6,11 +6,9 @@
 <!--/*@thymesVar id="fieldSetHint" type="java.lang.String"*/-->
 <!--/*@thymesVar id="label" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:with="enctype='multipart/form-data'">
-    <th:block id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage('title', ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-        <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'certificate', 'fieldSetHeading', 'fieldSetHint')}">
-            <div th:replace="~{fragments/forms/fileUpload :: fileUpload('label', 'certificate', null)}"></div>
-        </th:block>
-        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(title='title', formModel=${formModel}, formContent=~{::#form-content/content()}, backUrl=${backUrl}, sectionHeaderInfo=${sectionHeaderInfo}, enctype='multipart/form-data')}">
+    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'certificate', 'fieldSetHeading', 'fieldSetHint')}">
+        <div th:replace="~{fragments/forms/fileUpload :: fileUpload('label', 'certificate', null)}"></div>
     </th:block>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
 </html>

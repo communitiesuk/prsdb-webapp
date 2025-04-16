@@ -1,5 +1,4 @@
-<!--/*@thymesVar id="enctype" type="java.lang.String"*/-->
-<th:block th:fragment="questionPage(title, formModel, formContent, backUrl, sectionHeaderInfo)">
+<th:block th:fragment="questionPage(title, formModel, formContent, backUrl, sectionHeaderInfo)" th:with="enctype=${enctype ?: 'application/x-www-form-urlencoded'}">
     <th:block id="main-content"
               th:replace="~{fragments/layout :: layout(${title}, ~{::#main-content/content()}, ${#fields.hasErrors('${formModel.*}')})}">
         <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back
@@ -7,7 +6,7 @@
         <main class="govuk-main-wrapper">
             <div id="page-content"
                  th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
-                <form th:action="@{''}" method="post" novalidate th:object="${formModel}" th:attrappend="enctype=${enctype != null} ? ${enctype}">
+                <form th:action="@{''}" method="post" novalidate th:object="${formModel}" th:attrappend="enctype=${enctype}">
                     <div th:replace="~{fragments/forms/errorSummary :: errorSummary()}">Error Summary</div>
                     <p th:replace="~{fragments/sectionHeader :: sectionHeader(${sectionHeaderInfo})}" ></p>
                     <th:block th:replace="${formContent}"></th:block>
