@@ -22,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.helpers.MaximumLengthInputStream.Companion.withMaxLength
+import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.getFirstFileField
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import java.security.Principal
 
@@ -60,8 +61,15 @@ class ExampleFileUploadController(
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid upload token")
         }
 
+        // Currently we don't gracefully handle a request with multiple items - we take the first file and ignore the rest
+        // If there's enough data in the subsequent requests this will cause the requests to not be read off the socket
+        // and the browser will interpret that as a lost connection. This is only ok because there is no way for the
+        // client to legitimately send multiple files to this endpoint - so we're happy with undefined behaviour as long
+        // as it is safe - which this is for us.
+        // To change this we just need to call next on the iterator for each item - which will read and discard the data.
         val file =
-            getFirstFileItem(iterator) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a valid multipart file upload request")
+            iterator.getFirstFileField()
+                ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a valid multipart file upload request")
 
         // Because this is an example endpoint, we can just keep the file name uploaded - for the compliance journey
         // this will need to be a useful name for LA users to download (and we should not trust the uploaded file name)
@@ -140,30 +148,6 @@ class ExampleFileUploadController(
         tokenCookie.secure = true
 
         return tokenCookie
-    }
-
-    private fun getFirstFileItem(singleFileIterator: FileItemInputIterator): FileItemInput? {
-        if (!singleFileIterator.hasNext()) {
-            return null
-        }
-
-        // Currently we don't gracefully handle a request with multiple items - we take the first file and ignore the rest
-        // If there's enough data in the subsequent requests this will cause the requests to not be read off the socket
-        // and the browser will interpret that as a lost connection. This is only ok because there is no way for the
-        // client to legitimately send multiple files to this endpoint - so we're happy with undefined behaviour as long
-        // as it is safe - which this is for us.
-        // To change this we just need to call next on the iterator for each item - which will read and discard the data.
-        var firstItem = singleFileIterator.next()
-
-        while (firstItem.isFormField && singleFileIterator.hasNext()) {
-            firstItem = singleFileIterator.next()
-        }
-
-        if (firstItem.isFormField) {
-            return null
-        }
-
-        return firstItem
     }
 
     companion object {
