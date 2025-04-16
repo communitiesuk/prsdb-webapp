@@ -280,6 +280,16 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
     }
 
     @Nested
+    @Sql("/data-local.sql")
+    inner class LandlordRegistrationStepVerifyIdentity {
+        @Test
+        fun `Navigating here as a registered landlord redirects to the landlord dashboard page`() {
+            val dashboardPage = navigator.goToLandlordRegistrationVerifyIdentityAsRegisteredLandlord()
+            assertThat(dashboardPage.bannerHeading).containsText("Alexander Smith")
+        }
+    }
+
+    @Nested
     inner class LandlordRegistrationStepName {
         @Test
         fun `Submitting an empty name returns an error`() {

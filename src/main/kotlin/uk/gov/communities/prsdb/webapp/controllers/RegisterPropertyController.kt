@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -34,11 +35,17 @@ class RegisterPropertyController(
     fun index(model: Model): String {
         model.addAttribute(
             "registerPropertyInitialStep",
-            "/$REGISTER_PROPERTY_JOURNEY_URL/$TASK_LIST_PATH_SEGMENT",
+            "/$REGISTER_PROPERTY_JOURNEY_URL/$START_PAGE_PATH_SEGMENT",
         )
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
         return "registerPropertyStartPage"
+    }
+
+    @GetMapping("/$START_PAGE_PATH_SEGMENT")
+    fun getStart(): String {
+        propertyRegistrationService.clearPropertyRegistrationJourneyDataFromSession()
+        return "redirect:$TASK_LIST_PATH_SEGMENT"
     }
 
     @GetMapping("/{stepName}")
