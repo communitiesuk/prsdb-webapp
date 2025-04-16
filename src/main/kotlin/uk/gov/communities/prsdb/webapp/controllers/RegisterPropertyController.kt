@@ -13,14 +13,17 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import java.security.Principal
 
 @PreAuthorize("hasRole('LANDLORD')")
@@ -30,6 +33,7 @@ class RegisterPropertyController(
     private val propertyRegistrationJourneyFactory: PropertyRegistrationJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyRegistrationService: PropertyRegistrationService,
+    private val journeyDataServiceFactory: JourneyDataServiceFactory,
 ) {
     @GetMapping
     fun index(model: Model): String {
@@ -44,7 +48,19 @@ class RegisterPropertyController(
 
     @GetMapping("/$START_PAGE_PATH_SEGMENT")
     fun getStart(): String {
-        propertyRegistrationService.clearPropertyRegistrationJourneyDataFromSession()
+        journeyDataServiceFactory.create(REGISTER_PROPERTY_JOURNEY_URL).removeJourneyDataAndContextIdFromSession()
+        return "redirect:$TASK_LIST_PATH_SEGMENT"
+    }
+
+    @GetMapping("/$RESUME_PAGE_PATH_SEGMENT")
+    fun getResume(
+        principal: Principal,
+        @RequestParam(value = "contextId", required = true) contextId: String,
+    ): String {
+        journeyDataServiceFactory
+            .create(
+                REGISTER_PROPERTY_JOURNEY_URL,
+            ).loadJourneyDataIntoSession(contextId.toLong(), principal.name, JourneyType.PROPERTY_REGISTRATION)
         return "redirect:$TASK_LIST_PATH_SEGMENT"
     }
 

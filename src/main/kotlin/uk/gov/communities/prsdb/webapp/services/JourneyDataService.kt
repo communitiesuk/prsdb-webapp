@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.HttpSession
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
@@ -26,6 +28,11 @@ class JourneyDataService(
 
     fun clearJourneyDataFromSession() {
         session.setAttribute(journeyDataKey, null)
+    }
+
+    fun removeJourneyDataAndContextIdFromSession() {
+        session.removeAttribute(CONTEXT_ID)
+        session.removeAttribute(journeyDataKey)
     }
 
     fun getContextId(): Long? = session.getAttribute(CONTEXT_ID) as? Long
@@ -67,15 +74,37 @@ class JourneyDataService(
         return savedFormContext.id
     }
 
+    fun loadJourneyDataFromFormContextIntoSession(formContext: FormContext) {
+        val loadedJourneyData =
+            objectToStringKeyedMap(objectMapper.readValue(formContext.context, Any::class.java)) ?: mapOf()
+        setJourneyDataInSession(loadedJourneyData)
+        setContextId(formContext.id)
+    }
+
     fun loadJourneyDataIntoSession(contextId: Long) {
         val formContext =
             formContextRepository
                 .findById(contextId)
                 .orElseThrow { IllegalStateException("FormContext with ID $contextId not found") }!!
-        val loadedJourneyData =
-            objectToStringKeyedMap(objectMapper.readValue(formContext.context, Any::class.java)) ?: mapOf()
-        setJourneyDataInSession(loadedJourneyData)
-        setContextId(contextId)
+        loadJourneyDataFromFormContextIntoSession(formContext)
+    }
+
+    fun loadJourneyDataIntoSession(
+        contextId: Long,
+        baseUserId: String,
+        journeyType: JourneyType,
+    ) {
+        val formContext =
+            formContextRepository.findByIdAndUser_IdAndJourneyType(contextId, baseUserId, journeyType)
+
+        if (formContext == null) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Form context with ID: $contextId and journey type: ${journeyType.name} not found for base user: $baseUserId",
+            )
+        } else {
+            loadJourneyDataFromFormContextIntoSession(formContext)
+        }
     }
 
     fun deleteJourneyData() {

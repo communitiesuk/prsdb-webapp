@@ -251,4 +251,11 @@ class JourneyDataServiceTests {
             }
         }
     }
+
+    @Test
+    fun `removeJourneyDataAndContextIdFromSession removes journeyData and contextId from session`() {
+        journeyDataService.removeJourneyDataAndContextIdFromSession()
+        verify(mockHttpSession).removeAttribute(CONTEXT_ID)
+        verify(mockHttpSession).removeAttribute(journeyDataKey)
+    }
 }
