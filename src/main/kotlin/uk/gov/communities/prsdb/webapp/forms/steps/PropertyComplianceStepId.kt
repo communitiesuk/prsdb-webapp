@@ -1,12 +1,14 @@
 package uk.gov.communities.prsdb.webapp.forms.steps
 
+import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
+
 enum class PropertyComplianceStepId(
     override val urlPathSegment: String,
 ) : StepId {
     GasSafety("gas-safety-certificate"),
     GasSafetyIssueDate("gas-safety-certificate-issue-date"),
     GasSafetyEngineerNum("gas-safety-certificate-engineer-number"),
-    GasSafetyUpload("gas-safety-certificate-upload"),
+    GasSafetyUpload("gas-safety-certificate-$FILE_UPLOAD_URL_SUBSTRING"),
     GasSafetyOutdated("gas-safety-certificate-outdated"),
     GasSafetyExemption("gas-safety-certificate-exemption"),
     GasSafetyExemptionReason("gas-safety-certificate-exemption-reason"),
