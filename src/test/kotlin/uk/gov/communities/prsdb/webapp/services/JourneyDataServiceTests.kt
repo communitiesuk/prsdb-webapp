@@ -15,6 +15,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
@@ -231,7 +232,7 @@ class JourneyDataServiceTests {
             val formContextCaptor = captor<JourneyData>()
             verify(mockHttpSession).setAttribute(eq(journeyDataKey), formContextCaptor.capture())
             val contextIdCaptor = captor<Long>()
-            verify(mockHttpSession).setAttribute(eq("contextId"), contextIdCaptor.capture())
+            verify(mockHttpSession).setAttribute(eq(CONTEXT_ID), contextIdCaptor.capture())
 
             // Assert
             assertEquals(journeyData, formContextCaptor.value)

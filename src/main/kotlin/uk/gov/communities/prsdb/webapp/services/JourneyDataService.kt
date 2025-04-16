@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.HttpSession
+import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
@@ -27,7 +28,7 @@ class JourneyDataService(
         session.setAttribute(journeyDataKey, null)
     }
 
-    fun getContextId(): Long? = session.getAttribute("contextId") as? Long
+    fun getContextId(): Long? = session.getAttribute(CONTEXT_ID) as? Long
 
     fun getContextId(
         principalName: String,
@@ -35,7 +36,7 @@ class JourneyDataService(
     ): Long? = formContextRepository.findByUser_IdAndJourneyType(principalName, journeyType)?.id
 
     fun setContextId(contextId: Long) {
-        session.setAttribute("contextId", contextId)
+        session.setAttribute(CONTEXT_ID, contextId)
     }
 
     fun saveJourneyData(
@@ -81,7 +82,7 @@ class JourneyDataService(
         val contextId = getContextId() ?: return
         formContextRepository.deleteById(contextId)
 
-        session.removeAttribute("contextId")
+        session.removeAttribute(CONTEXT_ID)
         clearJourneyDataFromSession()
     }
 }
