@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.examples
 
-import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.apache.commons.fileupload2.core.FileItemInput
@@ -23,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.helpers.MaximumLengthInputStream.Companion.withMaxLength
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.getFirstFileField
+import uk.gov.communities.prsdb.webapp.services.CookieService
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import java.security.Principal
 
@@ -31,19 +31,19 @@ import java.security.Principal
 @RequestMapping("example/$FILE_UPLOAD_URL_SUBSTRING/{freeSegment}")
 class ExampleFileUploadController(
     private val fileUploader: FileUploader,
-    private val tokenService: FileUploadTokenService,
+    private val cookieService: CookieService,
 ) {
     @GetMapping
     fun getFileUploadForm(
         response: HttpServletResponse,
+        request: HttpServletRequest,
         @PathVariable("freeSegment") freeSegment: String,
         model: Model,
     ): String {
         addFlashValidationToModel(model)
 
-        val token = tokenService.issueTokenFor(freeSegment)
-        val tokenCookie = createFileUploadTokenCookie(token, freeSegment)
-        response.addCookie(tokenCookie)
+        val cookie = cookieService.createCookieForValue(COOKIE_NAME, request.requestURI)
+        response.addCookie(cookie)
         return "forms/uploadCertificateForm"
     }
 
@@ -57,8 +57,10 @@ class ExampleFileUploadController(
         principal: Principal,
         redirectAttrs: RedirectAttributes,
     ): String {
-        if (!tokenService.checkTokenIsFor(token, freeSegment)) {
+        if (!cookieService.isTokenForCookieValue(token, streamlessRequest.requestURI)) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid upload token")
+        } else {
+            cookieService.useToken(token)
         }
 
         // Currently we don't gracefully handle a request with multiple items - we take the first file and ignore the rest
@@ -133,21 +135,6 @@ class ExampleFileUploadController(
                 bindingResult.rejectValue("certificate", "", it)
             }
         }
-    }
-
-    private fun createFileUploadTokenCookie(
-        token: String,
-        segment: String,
-    ): Cookie {
-        // This cookie needs to be used in a way such that parallel journeys in the same session can be supported
-        // for example it could use the path attribute can be used to differentiate between them alongside validating
-        // that the token is being used correctly by storing some additional information with the token in the session.
-        val tokenCookie = Cookie(COOKIE_NAME, token)
-        tokenCookie.isHttpOnly = true
-        tokenCookie.path = "/example/$FILE_UPLOAD_URL_SUBSTRING/$segment"
-        tokenCookie.secure = true
-
-        return tokenCookie
     }
 
     companion object {

@@ -13,3 +13,5 @@ const val PROPERTY_DEREGISTRATION_ENTITY_IDS = "propertyDeregistrationEntityIds"
 const val LANDLORD_HAD_ACTIVE_PROPERTIES = "landlordHadActiveProperties"
 
 const val CONTEXT_ID = "contextId"
+
+const val COOKIE_TOKENS = "cookieTokens"
