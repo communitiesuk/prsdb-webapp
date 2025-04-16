@@ -42,7 +42,7 @@ class ExampleFileUploadController(
         val token = tokenService.issueTokenFor(freeSegment)
         val tokenCookie = createFileUploadTokenCookie(token, freeSegment)
         response.addCookie(tokenCookie)
-        return "example/fileUpload"
+        return "forms/uploadCertificateForm"
     }
 
     @PostMapping
@@ -89,7 +89,7 @@ class ExampleFileUploadController(
                 "cookie-value" to token,
             ),
         )
-        return "example/fileUpload"
+        return "forms/uploadCertificateForm"
     }
 
     private fun validateFileUploadRequest(
@@ -116,12 +116,12 @@ class ExampleFileUploadController(
     }
 
     private fun addFlashValidationToModel(model: Model) {
-        val bindingResult = MapBindingResult(mapOf("uploaded-file" to null), "formModel")
+        val bindingResult = MapBindingResult(mapOf("certificate" to null), "formModel")
         model.addAttribute(BindingResult.MODEL_KEY_PREFIX + "formModel", bindingResult)
         val errors = model.getAttribute("errorMessageKeys") as? List<*>
         errors?.forEach {
             if (it is String) {
-                bindingResult.rejectValue("uploaded-file", "", it)
+                bindingResult.rejectValue("certificate", "", it)
             }
         }
     }
