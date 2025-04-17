@@ -6,6 +6,7 @@ enum class RegisterPropertyStepId(
     PlaceholderPage("placeholder"),
     LookupAddress("lookup-address"),
     SelectAddress("select-address"),
+    NoAddressFound("no-address-found"),
     ManualAddress("manual-address"),
     AlreadyRegistered("already-registered"),
     LocalAuthority("local-authority"),
