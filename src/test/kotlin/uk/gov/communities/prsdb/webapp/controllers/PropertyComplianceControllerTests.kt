@@ -10,17 +10,21 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import org.springframework.validation.Validator
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
+import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.TokenCookieService
 
 @WebMvcTest(PropertyComplianceController::class)
 class PropertyComplianceControllerTests(
@@ -30,7 +34,16 @@ class PropertyComplianceControllerTests(
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
     @MockitoBean
+    private lateinit var tokenCookieService: TokenCookieService
+
+    @MockitoBean
+    private lateinit var fileUploader: FileUploader
+
+    @MockitoBean
     private lateinit var propertyComplianceJourneyFactory: PropertyComplianceJourneyFactory
+
+    @MockitoBean
+    private lateinit var validator: Validator
 
     @Mock
     private lateinit var propertyComplianceJourney: PropertyComplianceJourney
@@ -174,6 +187,7 @@ class PropertyComplianceControllerTests(
         fun `postJourneyData returns 403 for an unauthorised user`() {
             mvc
                 .post(validPropertyComplianceInitialStepUrl) {
+                    contentType = MediaType.APPLICATION_FORM_URLENCODED
                     with(csrf())
                 }.andExpect {
                     status { isForbidden() }
@@ -185,6 +199,7 @@ class PropertyComplianceControllerTests(
         fun `postJourneyData returns 404 for a landlord user that doesn't own the property`() {
             mvc
                 .post(invalidPropertyComplianceInitialStepUrl) {
+                    contentType = MediaType.APPLICATION_FORM_URLENCODED
                     with(csrf())
                 }.andExpect {
                     status { isNotFound() }
@@ -205,6 +220,7 @@ class PropertyComplianceControllerTests(
 
             mvc
                 .post(validPropertyComplianceInitialStepUrl) {
+                    contentType = MediaType.APPLICATION_FORM_URLENCODED
                     with(csrf())
                 }.andExpect {
                     status { is3xxRedirection() }
