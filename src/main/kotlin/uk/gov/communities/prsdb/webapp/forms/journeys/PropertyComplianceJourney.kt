@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -96,10 +97,11 @@ class PropertyComplianceJourney(
                     gasSafetyStep,
                     gasSafetyIssueDateStep,
                     gasSafetyEngineerNumStep,
-                    // TODO PRSD-945: Implement gas safety cert upload step
+                    gasSafetyUploadStep,
+                    // TODO PRSD-1098: Implement gas safety cert upload confirmation step
                     placeholderStep(
-                        PropertyComplianceStepId.GasSafetyUpload,
-                        "TODO PRSD-945: Implement gas safety cert upload step",
+                        PropertyComplianceStepId.GasSafetyUploadConfirmation,
+                        "TODO PRSD-1098: Implement gas safety cert upload confirmation step",
                     ),
                     gasSafetyOutdatedStep,
                     gasSafetyExemptionStep,
@@ -187,6 +189,24 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyUpload, null) },
+            )
+
+    private val gasSafetyUploadStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.GasSafetyUpload,
+                page =
+                    PageWithContentProvider(
+                        formModel = UploadCertificateFormModel::class,
+                        templateName = "forms/uploadCertificateForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.uploadCertificate.gasSafety.fieldSetHeading",
+                                "fieldSetHint" to "forms.uploadCertificate.fieldSetHint",
+                            ),
+                    ) { mapOf("fieldSetSubheading" to getPropertyAddress()) },
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyUploadConfirmation, null) },
             )
 
     private val gasSafetyOutdatedStep
