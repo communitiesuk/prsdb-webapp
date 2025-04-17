@@ -1,10 +1,12 @@
 package uk.gov.communities.prsdb.webapp.helpers.extensions
 
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.discardRemainingFields
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.getFirstFileField
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFileItemInput
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFileItemInputIterator
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 
 class FileItemInputIteratorExtensionsTests {
@@ -59,5 +61,21 @@ class FileItemInputIteratorExtensionsTests {
         val firstFileField = iterator.getFirstFileField()!!
 
         assertEquals(firstFileField.fieldName, "fileField1")
+    }
+
+    @Test
+    fun `discardRemainingFields iterates through any remaining items`() {
+        val iterator =
+            MockFileItemInputIterator(
+                listOf(
+                    MockFileItemInput("formField1", isFormField = true),
+                    MockFileItemInput("fileField1", isFormField = false),
+                    MockFileItemInput("fileField2", isFormField = false),
+                ),
+            )
+
+        iterator.discardRemainingFields()
+
+        assertFalse(iterator.hasNext())
     }
 }
