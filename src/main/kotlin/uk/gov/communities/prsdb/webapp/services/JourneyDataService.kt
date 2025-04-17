@@ -74,37 +74,32 @@ class JourneyDataService(
         return savedFormContext.id
     }
 
-    fun loadJourneyDataFromFormContextIntoSession(formContext: FormContext) {
+    fun loadJourneyDataIntoSession(formContext: FormContext) {
         val loadedJourneyData =
             objectToStringKeyedMap(objectMapper.readValue(formContext.context, Any::class.java)) ?: mapOf()
         setJourneyDataInSession(loadedJourneyData)
         setContextId(formContext.id)
     }
 
-    fun loadJourneyDataIntoSession(contextId: Long) {
+    fun loadJourneyDataFromFormContext(contextId: Long) {
         val formContext =
             formContextRepository
                 .findById(contextId)
                 .orElseThrow { IllegalStateException("FormContext with ID $contextId not found") }!!
-        loadJourneyDataFromFormContextIntoSession(formContext)
+        loadJourneyDataIntoSession(formContext)
     }
 
-    fun loadJourneyDataIntoSession(
+    fun loadJourneyDataFromFormContext(
         contextId: Long,
         baseUserId: String,
         journeyType: JourneyType,
     ) {
         val formContext =
-            formContextRepository.findByIdAndUser_IdAndJourneyType(contextId, baseUserId, journeyType)
-
-        if (formContext == null) {
-            throw ResponseStatusException(
+            formContextRepository.findByIdAndUser_IdAndJourneyType(contextId, baseUserId, journeyType) ?: throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Form context with ID: $contextId and journey type: ${journeyType.name} not found for base user: $baseUserId",
             )
-        } else {
-            loadJourneyDataFromFormContextIntoSession(formContext)
-        }
+        loadJourneyDataIntoSession(formContext)
     }
 
     fun deleteJourneyData() {

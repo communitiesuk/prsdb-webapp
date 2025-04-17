@@ -15,6 +15,8 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
@@ -205,7 +207,7 @@ class JourneyDataServiceTests {
     @Nested
     inner class LoadJourneyDataIntoSessionTests {
         @Test
-        fun `stores the new journey data in the session`() {
+        fun `saves journey data to session`() {
             // Function Args
             val journeyType = JourneyType.LANDLORD_REGISTRATION
 
@@ -223,32 +225,87 @@ class JourneyDataServiceTests {
             val oneLoginUser = OneLoginUser()
 
             // FormContext
-            val contextId: Long = 123
             val formContext = FormContext(journeyType, serializedJourneyData, oneLoginUser)
-            whenever(mockFormContextRepository.findById(contextId)).thenReturn(Optional.ofNullable(formContext))
 
             // Act
-            journeyDataService.loadJourneyDataIntoSession(contextId)
+            journeyDataService.loadJourneyDataIntoSession(formContext)
             val formContextCaptor = captor<JourneyData>()
             verify(mockHttpSession).setAttribute(eq(journeyDataKey), formContextCaptor.capture())
             val contextIdCaptor = captor<Long>()
             verify(mockHttpSession).setAttribute(eq(CONTEXT_ID), contextIdCaptor.capture())
 
             // Assert
-            assertEquals(journeyData, formContextCaptor.value)
-            assertEquals(contextId, contextIdCaptor.value)
+            assertEquals(formContext.id, contextIdCaptor.value)
+        }
+    }
+
+    @Nested
+    inner class LoadJourneyDataFromFormContextWithOnlyContextIdTests {
+        @Test
+        fun `calls loadJourneyDataIntoSession when form context exists`() {
+            // Arrange
+            val spiedOnJourneyDataService = spy(journeyDataService)
+            val formContext = FormContext(JourneyType.PROPERTY_REGISTRATION, "{\"testPage\":\"noData\"}", OneLoginUser())
+            whenever(mockFormContextRepository.findById(formContext.id)).thenReturn(Optional.ofNullable(formContext))
+
+            // Act
+            spiedOnJourneyDataService.loadJourneyDataFromFormContext(formContext.id)
+
+            // Assert
+            verify(mockFormContextRepository).findById(formContext.id)
+            verify(spiedOnJourneyDataService).loadJourneyDataIntoSession(formContext)
         }
 
         @Test
         fun `throws an illegal state exception if form context is missing`() {
             // Arrange
-            val contextId: Long = 123
-            whenever(mockFormContextRepository.findById(contextId)).thenReturn(Optional.ofNullable(null))
+            val formContextId: Long = 123
+            whenever(mockFormContextRepository.findById(formContextId)).thenReturn(Optional.ofNullable(null))
 
             // Act and Assert
             assertThrows<IllegalStateException> {
-                journeyDataService.loadJourneyDataIntoSession(contextId)
+                journeyDataService.loadJourneyDataFromFormContext(formContextId)
             }
+        }
+    }
+
+    @Nested
+    inner class LoadJourneyDataFromFormContextWithContextIdAndUserIdAndJourneyTypeTests {
+        @Test
+        fun `calls loadJourneyDataIntoSession when form context exists`() {
+            // Arrange
+            val spiedOnJourneyDataService = spy(journeyDataService)
+            val formContext = FormContext(JourneyType.PROPERTY_REGISTRATION, "{\"testPage\":\"noData\"}", OneLoginUser())
+
+            whenever(
+                mockFormContextRepository.findByIdAndUser_IdAndJourneyType(formContext.id, formContext.user.id, formContext.journeyType),
+            ).thenReturn(formContext)
+
+            // Act
+            spiedOnJourneyDataService.loadJourneyDataFromFormContext(formContext.id, formContext.user.id, formContext.journeyType)
+
+            // Assert
+            verify(mockFormContextRepository).findByIdAndUser_IdAndJourneyType(formContext.id, formContext.user.id, formContext.journeyType)
+            verify(spiedOnJourneyDataService).loadJourneyDataIntoSession(formContext)
+        }
+
+        @Test
+        fun `throws an response status exception NOT_FOUND if form context is missing`() {
+            // Arrange
+            val formContextId: Long = 123
+            val baseUserId = "user"
+            val journeyType = JourneyType.PROPERTY_REGISTRATION
+
+            whenever(
+                mockFormContextRepository.findByIdAndUser_IdAndJourneyType(formContextId, baseUserId, journeyType),
+            ).thenReturn(null)
+
+            // Act and Assert
+            val exception =
+                assertThrows<ResponseStatusException> {
+                    journeyDataService.loadJourneyDataFromFormContext(formContextId, baseUserId, journeyType)
+                }
+            assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
         }
     }
 
