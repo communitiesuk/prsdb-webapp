@@ -76,13 +76,6 @@ class JourneyDataServiceTests {
 
             verify(mockHttpSession).setAttribute(journeyDataKey, journeyData)
         }
-
-        @Test
-        fun `clearJourneyDataFromSession clears the journey data from session`() {
-            journeyDataService.clearJourneyDataFromSession()
-
-            verify(mockHttpSession).setAttribute(journeyDataKey, null)
-        }
     }
 
     @Nested

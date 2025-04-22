@@ -26,10 +26,6 @@ class JourneyDataService(
         session.setAttribute(journeyDataKey, journeyData)
     }
 
-    fun clearJourneyDataFromSession() {
-        session.setAttribute(journeyDataKey, null)
-    }
-
     fun removeJourneyDataAndContextIdFromSession() {
         session.removeAttribute(CONTEXT_ID)
         session.removeAttribute(journeyDataKey)
@@ -103,10 +99,9 @@ class JourneyDataService(
     }
 
     fun deleteJourneyData() {
-        val contextId = getContextId() ?: return
-        formContextRepository.deleteById(contextId)
+        val contextId = getContextId()
+        contextId?.let { formContextRepository.deleteById(it) }
 
-        session.removeAttribute(CONTEXT_ID)
-        clearJourneyDataFromSession()
+        removeJourneyDataAndContextIdFromSession()
     }
 }

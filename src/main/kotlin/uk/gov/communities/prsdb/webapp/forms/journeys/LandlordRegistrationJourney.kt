@@ -523,7 +523,7 @@ class LandlordRegistrationJourney(
             ),
         )
 
-        journeyDataService.clearJourneyDataFromSession()
+        journeyDataService.removeJourneyDataAndContextIdFromSession()
 
         refreshUserRoles()
 
