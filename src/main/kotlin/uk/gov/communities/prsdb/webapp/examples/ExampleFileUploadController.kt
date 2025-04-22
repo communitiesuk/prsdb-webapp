@@ -22,8 +22,8 @@ import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.helpers.MaximumLengthInputStream.Companion.withMaxLength
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.getFirstFileField
-import uk.gov.communities.prsdb.webapp.services.CookieService
 import uk.gov.communities.prsdb.webapp.services.FileUploader
+import uk.gov.communities.prsdb.webapp.services.TokenCookieService
 import java.security.Principal
 
 @Controller
@@ -31,7 +31,7 @@ import java.security.Principal
 @RequestMapping("example/$FILE_UPLOAD_URL_SUBSTRING/{freeSegment}")
 class ExampleFileUploadController(
     private val fileUploader: FileUploader,
-    private val cookieService: CookieService,
+    private val tokenCookieService: TokenCookieService,
 ) {
     @GetMapping
     fun getFileUploadForm(
@@ -42,7 +42,7 @@ class ExampleFileUploadController(
     ): String {
         addFlashValidationToModel(model)
 
-        val cookie = cookieService.createCookieForValue(COOKIE_NAME, request.requestURI)
+        val cookie = tokenCookieService.createCookieForValue(COOKIE_NAME, request.requestURI)
         response.addCookie(cookie)
         return "forms/uploadCertificateForm"
     }
@@ -57,10 +57,10 @@ class ExampleFileUploadController(
         principal: Principal,
         redirectAttrs: RedirectAttributes,
     ): String {
-        if (!cookieService.isTokenForCookieValue(token, streamlessRequest.requestURI)) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid upload token")
+        if (tokenCookieService.isTokenForCookieValue(token, streamlessRequest.requestURI)) {
+            tokenCookieService.useToken(token)
         } else {
-            cookieService.useToken(token)
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid upload token")
         }
 
         // Currently we don't gracefully handle a request with multiple items - we take the first file and ignore the rest

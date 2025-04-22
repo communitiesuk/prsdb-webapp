@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.COOKIE_TOKENS
 import java.util.UUID
 
 @Service
-class CookieService(
+class TokenCookieService(
     private val session: HttpSession,
 ) {
     fun createCookieForValue(

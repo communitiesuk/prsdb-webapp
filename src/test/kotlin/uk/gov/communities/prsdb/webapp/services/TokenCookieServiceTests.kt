@@ -14,12 +14,12 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @ExtendWith(MockitoExtension::class)
-class CookieServiceTests {
+class TokenCookieServiceTests {
     @Mock
     private lateinit var mockHttpSession: HttpSession
 
     @InjectMocks
-    private lateinit var cookieService: CookieService
+    private lateinit var tokenCookieService: TokenCookieService
 
     @Test
     fun `createCookieForValue creates a cookie with an issued token for the given inputs`() {
@@ -27,7 +27,7 @@ class CookieServiceTests {
         val cookiePath = "/path"
         val cookieValue = "value"
 
-        val createdCookie = cookieService.createCookieForValue(cookieName, cookiePath, cookieValue)
+        val createdCookie = tokenCookieService.createCookieForValue(cookieName, cookiePath, cookieValue)
 
         verify(mockHttpSession).setAttribute(COOKIE_TOKENS, mapOf(createdCookie.value to cookieValue))
         assertEquals(cookieName, createdCookie.name)
@@ -40,14 +40,14 @@ class CookieServiceTests {
     fun `isTokenForCookieValue returns false if there are no tokens in session`() {
         whenever(mockHttpSession.getAttribute(COOKIE_TOKENS)).thenReturn(emptyMap<String, Any>())
 
-        assertFalse(cookieService.isTokenForCookieValue("anyToken", "anyCookieValue"))
+        assertFalse(tokenCookieService.isTokenForCookieValue("anyToken", "anyCookieValue"))
     }
 
     @Test
     fun `isTokenForCookieValue returns false if the token isn't in session`() {
         whenever(mockHttpSession.getAttribute(COOKIE_TOKENS)).thenReturn(mapOf("otherToken" to "cookieValue"))
 
-        assertFalse(cookieService.isTokenForCookieValue("token", "cookieValue"))
+        assertFalse(tokenCookieService.isTokenForCookieValue("token", "cookieValue"))
     }
 
     @Test
@@ -55,7 +55,7 @@ class CookieServiceTests {
         val token = "token"
         whenever(mockHttpSession.getAttribute(COOKIE_TOKENS)).thenReturn(mapOf(token to "otherCookieValue"))
 
-        assertFalse(cookieService.isTokenForCookieValue(token, "cookieValue"))
+        assertFalse(tokenCookieService.isTokenForCookieValue(token, "cookieValue"))
     }
 
     @Test
@@ -64,7 +64,7 @@ class CookieServiceTests {
         val cookieValue = "value"
         whenever(mockHttpSession.getAttribute(COOKIE_TOKENS)).thenReturn(mapOf(token to cookieValue))
 
-        assertTrue(cookieService.isTokenForCookieValue(token, cookieValue))
+        assertTrue(tokenCookieService.isTokenForCookieValue(token, cookieValue))
     }
 
     @Test
@@ -72,7 +72,7 @@ class CookieServiceTests {
         val token = "token"
         whenever(mockHttpSession.getAttribute(COOKIE_TOKENS)).thenReturn(mapOf(token to "cookieValue", "otherToken" to "cookieValue"))
 
-        cookieService.useToken(token)
+        tokenCookieService.useToken(token)
 
         verify(mockHttpSession).setAttribute(COOKIE_TOKENS, mapOf("otherToken" to "cookieValue"))
     }
