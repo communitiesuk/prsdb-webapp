@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.examples
+package uk.gov.communities.prsdb.webapp.helpers
 
 import org.apache.tomcat.util.http.fileupload.util.LimitedInputStream
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
