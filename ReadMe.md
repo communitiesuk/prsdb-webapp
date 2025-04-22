@@ -71,11 +71,14 @@ Static assets should be added to the `src/main/resources/assets` folder. These w
 the `src/main/resources/static/assets` folder at build time. Assets should not be added to the `static/assets` folder
 directly as this is excluded from source control.
 
-Custom css can now be added using [sass](https://sass-lang.com/) which is compiled to css by rollup when the project is run.
-New styles can be added to new or existing files in `src/main/resources/css` - if you make a new file, make sure it is added 
+Custom css can now be added using [sass](https://sass-lang.com/) which is compiled to css by rollup when the project is
+run.
+New styles can be added to new or existing files in `src/main/resources/css` - if you make a new file, make sure it is
+added
 to `custom.scss` (this is what will get compiled). This lets directly use the govuk colours / spacing mixins.
-So far we just included minimal govuk scss as this is all we need - see 
-[here](https://frontend.design-system.service.gov.uk/import-css/#import-specific-parts-using-sass) for adding more if required.
+So far we just included minimal govuk scss as this is all we need - see
+[here](https://frontend.design-system.service.gov.uk/import-css/#import-specific-parts-using-sass) for adding more if
+required.
 
 ### Database migrations
 
@@ -148,3 +151,32 @@ logging in.
   (it should look like `urn:fdc:gov.uk:2022:string-of-characters`)
 
 If anyone knows a better way to do this please add it here!
+
+## Releasing to Test
+
+At least once a sprint we aim to release changes into the Test environment. This process happens automatically when
+changes are merged to the `test` branch. Merges into `test` should be made as normal (not squash) merges to ensure a
+common git history between `main` and `test`.
+
+The normal process is simply to raise a PR merging `main` into `test`. In most cases this will be all that is required
+as all features on integration will have been QA'd, demoed, and be ready for review.
+
+In the rare case that there are changes on `main` that we do not want to release to `test`:
+
+- Identify the last commit on `main` before the code that you do not want to release was added
+- Create a new branch off of that commit, e.g. `release/main-to-test-11` for the 11th release to `test`
+- Identify any later commits that you _do_ want to release to `test` and cherry-pick them onto the new branch
+- Merge the new branch into `test`
+- Merge `test` back into `main` **using a normal merge - not a squash commit** - you will need to ask an admin on the
+  repo to temporarily allow normal merges into `main` to do this
+
+#### Hotfixes
+
+It should be very rare that a hotfix will need to be made directly to `test` (vs. being made on `main` and then
+releasing to `test` in the normal way). However, if this is needed:
+
+- Create a new branch from `test` e.g. `hotfix/prsd-<ticket number>-<description>`
+- Make the changes on the hotfix branch
+- Merge the hotfix branch into `test`
+- Merge `test` back into `main` **using a normal merge - not a squash commit** - you will need to ask an admin on the
+  repo to temporarily allow normal merges into `main` to do this
