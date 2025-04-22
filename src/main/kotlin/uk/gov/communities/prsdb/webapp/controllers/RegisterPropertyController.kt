@@ -60,7 +60,7 @@ class RegisterPropertyController(
         journeyDataServiceFactory
             .create(
                 REGISTER_PROPERTY_JOURNEY_URL,
-            ).loadJourneyDataFromFormContext(contextId.toLong(), principal.name, JourneyType.PROPERTY_REGISTRATION)
+            ).loadJourneyDataIntoSession(contextId.toLong(), principal.name, JourneyType.PROPERTY_REGISTRATION)
         return "redirect:$TASK_LIST_PATH_SEGMENT"
     }
 

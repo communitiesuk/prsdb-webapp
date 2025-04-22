@@ -81,7 +81,7 @@ class JourneyDataService(
         setContextId(formContext.id)
     }
 
-    fun loadJourneyDataFromFormContext(contextId: Long) {
+    fun loadJourneyDataIntoSession(contextId: Long) {
         val formContext =
             formContextRepository
                 .findById(contextId)
@@ -89,7 +89,7 @@ class JourneyDataService(
         loadJourneyDataIntoSession(formContext)
     }
 
-    fun loadJourneyDataFromFormContext(
+    fun loadJourneyDataIntoSession(
         contextId: Long,
         baseUserId: String,
         journeyType: JourneyType,

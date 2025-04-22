@@ -43,7 +43,7 @@ abstract class Journey<T : StepId>(
                 context to an overload of journeyDataService.loadJourneyDataIntoSession().*/
             val contextId = journeyDataService.getContextId(principalName, journeyType)
             if (contextId != null) {
-                journeyDataService.loadJourneyDataFromFormContext(contextId)
+                journeyDataService.loadJourneyDataIntoSession(contextId)
             }
         }
     }

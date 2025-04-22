@@ -876,7 +876,7 @@ class JourneyTests {
             TestJourneyFactory(journeyType, mockJourneyDataService).create(principalName)
 
             // Assert
-            verify(mockJourneyDataService, never()).loadJourneyDataFromFormContext(any())
+            verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any())
         }
 
         @Test
@@ -892,7 +892,7 @@ class JourneyTests {
 
             // Assert
             val captor = argumentCaptor<Long>()
-            verify(mockJourneyDataService).loadJourneyDataFromFormContext(captor.capture())
+            verify(mockJourneyDataService).loadJourneyDataIntoSession(captor.capture())
             assertEquals(contextId, captor.allValues.single())
         }
 
@@ -906,7 +906,7 @@ class JourneyTests {
             TestJourneyFactory(JourneyType.PROPERTY_REGISTRATION, mockJourneyDataService).create(principalName)
 
             // Assert
-            verify(mockJourneyDataService, never()).loadJourneyDataFromFormContext(any())
+            verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any())
         }
     }
 }

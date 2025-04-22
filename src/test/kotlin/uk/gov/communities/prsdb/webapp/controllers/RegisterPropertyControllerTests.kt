@@ -173,6 +173,6 @@ class RegisterPropertyControllerTests(
                 status { is3xxRedirection() }
                 redirectedUrl(TASK_LIST_PATH_SEGMENT)
             }
-        verify(journeyDataService).loadJourneyDataFromFormContext(contextId.toLong(), "user", JourneyType.PROPERTY_REGISTRATION)
+        verify(journeyDataService).loadJourneyDataIntoSession(contextId.toLong(), "user", JourneyType.PROPERTY_REGISTRATION)
     }
 }
