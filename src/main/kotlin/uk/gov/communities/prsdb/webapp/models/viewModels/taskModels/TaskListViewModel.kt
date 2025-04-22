@@ -6,4 +6,5 @@ data class TaskListViewModel(
     val subtitles: List<String>,
     val taskSections: List<TaskSectionViewModel>,
     val numberSections: Boolean = true,
+    val backUrl: String? = null,
 )

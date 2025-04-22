@@ -34,6 +34,5 @@ class PropertyRegistrationJourneyFactory(
             landlordService,
             absoluteUrlProvider,
             confirmationEmailSender,
-            principalName,
         )
 }

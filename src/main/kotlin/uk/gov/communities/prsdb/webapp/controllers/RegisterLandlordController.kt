@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -19,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistra
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
+import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import java.security.Principal
 
 @Controller
@@ -27,6 +29,7 @@ class RegisterLandlordController(
     private val landlordRegistrationJourneyFactory: LandlordRegistrationJourneyFactory,
     private val identityService: OneLoginIdentityService,
     private val landlordService: LandlordService,
+    private val userRolesService: UserRolesService,
 ) {
     @GetMapping
     fun index(model: Model): CharSequence {
@@ -46,6 +49,10 @@ class RegisterLandlordController(
         principal: Principal,
         @AuthenticationPrincipal oidcUser: OidcUser,
     ): ModelAndView {
+        if (userRolesService.getHasLandlordUserRole(principal.name)) {
+            return ModelAndView("redirect:${LANDLORD_DASHBOARD_URL}")
+        }
+
         val identity = identityService.getVerifiedIdentityData(oidcUser) ?: mapOf()
 
         return landlordRegistrationJourneyFactory
@@ -104,7 +111,6 @@ class RegisterLandlordController(
     }
 
     companion object {
-        const val START_PAGE_PATH_SEGMENT = "start"
         const val IDENTITY_VERIFICATION_PATH_SEGMENT = "verify-identity"
     }
 }

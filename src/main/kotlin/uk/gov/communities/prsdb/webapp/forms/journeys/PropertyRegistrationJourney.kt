@@ -58,17 +58,12 @@ class PropertyRegistrationJourney(
     private val landlordService: LandlordService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
-    principalName: String,
 ) : JourneyWithTaskList<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
         initialStepId = RegisterPropertyStepId.LookupAddress,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
-    init {
-        loadJourneyDataIfNotLoaded(principalName)
-    }
-
     override val sections =
         listOf(
             JourneySection(registerPropertyTasks(), "registerProperty.taskList.register.heading", "register-property"),

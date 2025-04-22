@@ -98,7 +98,6 @@ class PropertyRegistrationJourneyTests {
                     landlordService = landlordService,
                     confirmationEmailSender = confirmationEmailSender,
                     absoluteUrlProvider = urlProvider,
-                    principalName = principalName,
                 )
             JourneyTestHelper.setMockUser(principalName)
         }

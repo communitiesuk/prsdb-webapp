@@ -22,6 +22,9 @@ on:
         description: "Id of the AWS account containing the target environment"
         required: true
         type: string
+      branch:
+        required: true
+        type: string
     secrets:
       ONE_LOGIN_PRIVATE_KEY:
         required: true
@@ -113,9 +116,67 @@ jobs:
       account_id: ${{ inputs.account-id }}
       image_name: ${{ needs.build-and-deploy.outputs.image_name }}
 
+  migrate-database:
+    name: Run Database Migration
+    needs: update-task-definition
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      AWS_REGION: eu-west-2
+      IAM_ROLE: arn:aws:iam::${{ inputs.account-id }}:role/github-actions-terraform-admin
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.IAM_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Start SSM port-forwarding Session
+        id: start-session
+        run: |
+          BASTION_ID=$(aws ec2 describe-instances --output text --filters "Name=tag:Name,Values=${{ inputs.environment }}-bastion-1" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[].InstanceId | [0]")
+
+          DB_URL=$(aws ssm get-parameter --output text --name "${{ inputs.environment }}-prsdb-database-url" --query "Parameter.Value")
+
+          DB_ENDPOINT="${DB_URL%:*}"
+
+          aws ssm start-session --region $AWS_REGION --target $BASTION_ID --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters host=$DB_ENDPOINT,portNumber="5432",localPortNumber="5432" > ssm_output.txt 2>&1 &
+          sleep 10 # Wait for command to output the session Id
+          cat ssm_output.txt
+
+          SESSION_ID=$(grep -oP 'SessionId: \K[a-zA-Z0-9-]+' ssm_output.txt | head -1)
+          if [ -z "$SESSION_ID" ]; then
+              echo "Session Id not found in the output."
+              exit 1
+          fi
+          echo "SSM_SESSION_ID=$SESSION_ID" >> $GITHUB_OUTPUT
+
+      - name: Set DB username in ENV
+        run: echo "FLYWAY_USER=$(aws ssm get-parameter --output text --name "${{ inputs.environment }}-prsdb-database-username" --query "Parameter.Value")" >> $GITHUB_ENV
+
+      - name: Set DB password in ENV
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2.0.8
+        with:
+          secret-ids: |
+            FLYWAY_PASSWORD, tf-${{ inputs.environment }}-prsdb-database-password
+
+      - name: Run gradle flywayMigrate
+        env:
+          FLYWAY_URL: jdbc:postgresql://localhost:5432/prsdb
+        run: ./gradlew flywayMigrate --no-daemon
+
+      - name: Terminate SSM port-forwarding session
+        if: (success() || failure()) && steps.start-session.outputs.SSM_SESSION_ID != ''
+        run: aws ssm terminate-session --session-id ${{ steps.start-session.outputs.SSM_SESSION_ID }}
+
   update-ecs-service:
     name: Update ECS service
-    needs: update-task-definition
+    needs: migrate-database
     runs-on: ubuntu-latest
     permissions:
       id-token: write
