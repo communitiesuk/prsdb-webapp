@@ -206,8 +206,8 @@ class JourneyDataServiceTests {
 
     @Nested
     inner class LoadJourneyDataIntoSessionTests {
-        var journeyData: JourneyData
-        var formContext: FormContext
+        lateinit var journeyData: JourneyData
+        lateinit var formContext: FormContext
 
         @BeforeEach
         fun setUp() {
