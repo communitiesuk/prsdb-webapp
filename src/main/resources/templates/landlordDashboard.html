@@ -15,6 +15,11 @@
                         landlord.dashboard.registerProperty.button
                     </a>
                 </div>
+                <div class="govuk-grid-column-one-third prsd-dashboard__stretched-button-container">
+                    <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${viewIncompletePropertiesUrl}, #{landlord.dashboard.viewIncompleteProperties.button})}">
+                        landlord.dashboard.viewIncompleteProperties.button
+                    </a>
+                </div>
             </div>
         </section>
         <section class="prsd-dashboard__section">

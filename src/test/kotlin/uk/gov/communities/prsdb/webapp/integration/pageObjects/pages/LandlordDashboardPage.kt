@@ -13,6 +13,7 @@ class LandlordDashboardPage(
     val bannerHeading = Heading(page.locator("div.prsd-dashboard-panel h1.govuk-heading-xl"))
     val bannerSubHeading = Heading(page.locator("div.prsd-dashboard-panel div.govuk-body-l"))
     val registerPropertyButton = Button.byText(page, "Register a property")
+    val viewIncompletePropertiesButton = Button.byText(page, "View incomplete properties")
     val viewPropertyRecordsButton = Button.byText(page, "View your property records")
     val viewLandlordRecordButton = Button.byText(page, "View your landlord record")
 

@@ -28,6 +28,14 @@ class LandlordDashboardTests : IntegrationTest() {
     }
 
     @Test
+    fun `the view incomplete properties button links to the incomplete properties page`(page: Page) {
+        val dashboard = navigator.goToLandlordDashboard()
+        dashboard.viewIncompletePropertiesButton.clickAndWait()
+        // TODO PRSD-1078 change the assert to check the page is the incomplete properties page
+        assertTrue(page.url().contains("/landlord/incomplete-properties"))
+    }
+
+    @Test
     fun `the view property records button links to property records tab on the landlord details page`(page: Page) {
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.viewPropertyRecordsButton.clickAndWait()
