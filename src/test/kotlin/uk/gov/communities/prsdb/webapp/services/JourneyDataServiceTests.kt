@@ -235,6 +235,7 @@ class JourneyDataServiceTests {
             verify(mockHttpSession).setAttribute(eq(CONTEXT_ID), contextIdCaptor.capture())
 
             // Assert
+            assertEquals(journeyData, formContextCaptor.value)
             assertEquals(formContext.id, contextIdCaptor.value)
         }
     }
