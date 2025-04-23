@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_HAD_ACTIVE_PROPERTIES
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 
@@ -16,7 +17,7 @@ class LandlordDeregistrationService(
     private val session: HttpSession,
 ) {
     @Transactional
-    fun deregisterLandlordAndTheirProperties(baseUserId: String) {
+    fun deregisterLandlordAndTheirProperties(baseUserId: String): List<PropertyOwnership> {
         val registeredProperties = propertyOwnershipService.retrieveAllPropertiesForLandlord(baseUserId)
         if (registeredProperties.isNotEmpty()) {
             propertyDeregistrationService.deregisterProperties(registeredProperties)
@@ -24,6 +25,8 @@ class LandlordDeregistrationService(
 
         landlordRepository.deleteByBaseUser_Id(baseUserId)
         oneLoginUserRepository.deleteIfNotLocalAuthorityUser(baseUserId)
+
+        return registeredProperties
     }
 
     fun addLandlordHadActivePropertiesToSession(hadActiveProperties: Boolean) =

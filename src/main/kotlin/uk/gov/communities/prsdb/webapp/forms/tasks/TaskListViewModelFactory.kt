@@ -13,6 +13,7 @@ class TaskListViewModelFactory<T : StepId>(
     private val subtitleKeys: List<String>,
     private val sections: List<JourneySection<T>>,
     private val numberSections: Boolean = true,
+    private val backUrl: String? = null,
     val getTaskStatus: (task: JourneyTask<T>, journeyData: JourneyData) -> TaskStatus,
 ) {
     fun getTaskListViewModel(journeyData: JourneyData): TaskListViewModel {
@@ -38,6 +39,6 @@ class TaskListViewModelFactory<T : StepId>(
                 }
             }
 
-        return TaskListViewModel(titleKey, headingKey, subtitleKeys, sectionViewModels, numberSections)
+        return TaskListViewModel(titleKey, headingKey, subtitleKeys, sectionViewModels, numberSections, backUrl)
     }
 }

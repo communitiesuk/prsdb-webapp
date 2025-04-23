@@ -1,71 +1,45 @@
 package uk.gov.communities.prsdb.webapp.validation
 
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.yearsUntil
 import org.hibernate.validator.internal.constraintvalidators.bv.NotBlankValidator
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 
 class DateValidator {
-    fun isAllBlank(
-        day: String,
-        month: String,
-        year: String,
-    ): Boolean = isBlank(day) && isBlank(month) && isBlank(year)
+    companion object {
+        fun isAllBlank(
+            day: String,
+            month: String,
+            year: String,
+        ): Boolean = isBlank(day) && isBlank(month) && isBlank(year)
 
-    fun isBothBlank(
-        firstValue: String,
-        secondValue: String,
-    ): Boolean = isBlank(firstValue) && isBlank(secondValue)
+        fun isAnyBlank(
+            day: String,
+            month: String,
+            year: String,
+        ): Boolean = isBlank(day) || isBlank(month) || isBlank(year)
 
-    fun isAnyBlank(
-        day: String,
-        month: String,
-        year: String,
-    ): Boolean = isBlank(day) || isBlank(month) || isBlank(year)
+        fun isBothBlank(
+            firstValue: String,
+            secondValue: String,
+        ): Boolean = isBlank(firstValue) && isBlank(secondValue)
 
-    fun isValidDay(day: String): Boolean = day.toIntOrNull() in 1..31
+        fun isAnyInvalid(
+            day: String,
+            month: String,
+            year: String,
+        ): Boolean = !isValidDay(day) || !isValidMonth(month) || !isValidYear(year)
 
-    fun isValidMonth(month: String): Boolean = month.toIntOrNull() in 1..12
+        fun isValidDay(day: String): Boolean = day.toIntOrNull() in 1..31
 
-    fun isValidYear(year: String): Boolean = year.toIntOrNull() in 1900..2099
+        fun isValidMonth(month: String): Boolean = month.toIntOrNull() in 1..12
 
-    fun isValidDate(
-        day: String,
-        month: String,
-        year: String,
-    ): Boolean {
-        try {
-            LocalDate.parse(getFullDateString(day, month, year))
-            return true
-        } catch (e: IllegalArgumentException) {
-            return false
-        }
+        fun isValidYear(year: String): Boolean = year.toIntOrNull()?.let { it > 1899 } ?: false
+
+        fun isValidDate(
+            day: String,
+            month: String,
+            year: String,
+        ) = DateTimeHelper.parseDateOrNull(day, month, year) != null
+
+        private fun isBlank(value: String): Boolean = !NotBlankValidator().isValid(value as CharSequence?, null)
     }
-
-    fun getAgeFromDate(
-        day: String,
-        month: String,
-        year: String,
-    ): Int {
-        // Creating an instance of DateTimeHelper in this method allows us to use spring to properly mock time in our tests
-        val dateTimeHelper = DateTimeHelper()
-        val dateOfBirth = LocalDate.parse(getFullDateString(day, month, year))
-        return dateOfBirth.yearsUntil(dateTimeHelper.getCurrentDateInUK())
-    }
-
-    private fun isNotBlank(value: Any): Boolean = NotBlankValidator().isValid(value as CharSequence?, null)
-
-    fun isBlank(value: String): Boolean = !isNotBlank(value)
-
-    private fun getFullDateString(
-        day: String,
-        month: String,
-        year: String,
-    ): String = "$year-${month.padStart(2, '0')}-${day.padStart(2, '0')}"
-
-    fun isDayOrMonthOrYearNotValid(
-        day: String,
-        month: String,
-        year: String,
-    ): Boolean = isBlank(day) || isBlank(month) || isBlank(year) || !isValidDay(day) || !isValidMonth(month) || !isValidYear(year)
 }

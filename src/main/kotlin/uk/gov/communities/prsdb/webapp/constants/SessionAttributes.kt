@@ -11,3 +11,7 @@ const val LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY = "looked-up-addresses"
 const val PROPERTY_DEREGISTRATION_ENTITY_IDS = "propertyDeregistrationEntityIds"
 
 const val LANDLORD_HAD_ACTIVE_PROPERTIES = "landlordHadActiveProperties"
+
+const val CONTEXT_ID = "contextId"
+
+const val COOKIE_TOKENS = "cookieTokens"

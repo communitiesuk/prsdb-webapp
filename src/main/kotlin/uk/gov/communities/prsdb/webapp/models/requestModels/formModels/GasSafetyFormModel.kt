@@ -15,5 +15,5 @@ class GasSafetyFormModel : FormModel {
             ),
         ],
     )
-    var hasGasSafetyCert: Boolean? = null
+    var hasCert: Boolean? = null
 }

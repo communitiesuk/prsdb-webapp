@@ -71,11 +71,14 @@ Static assets should be added to the `src/main/resources/assets` folder. These w
 the `src/main/resources/static/assets` folder at build time. Assets should not be added to the `static/assets` folder
 directly as this is excluded from source control.
 
-Custom css can now be added using [sass](https://sass-lang.com/) which is compiled to css by rollup when the project is run.
-New styles can be added to new or existing files in `src/main/resources/css` - if you make a new file, make sure it is added 
+Custom css can now be added using [sass](https://sass-lang.com/) which is compiled to css by rollup when the project is
+run.
+New styles can be added to new or existing files in `src/main/resources/css` - if you make a new file, make sure it is
+added
 to `custom.scss` (this is what will get compiled). This lets directly use the govuk colours / spacing mixins.
-So far we just included minimal govuk scss as this is all we need - see 
-[here](https://frontend.design-system.service.gov.uk/import-css/#import-specific-parts-using-sass) for adding more if required.
+So far we just included minimal govuk scss as this is all we need - see
+[here](https://frontend.design-system.service.gov.uk/import-css/#import-specific-parts-using-sass) for adding more if
+required.
 
 ### Database migrations
 
@@ -148,3 +151,74 @@ logging in.
   (it should look like `urn:fdc:gov.uk:2022:string-of-characters`)
 
 If anyone knows a better way to do this please add it here!
+
+### Connecting to AWS
+
+When the service runs in AWS it has the profile of the ECS service it is running on.
+This allows it to connect to e.g. S3, the database and other AWS services.
+To connect to the deployed database while running locally you need to set up a port forwarding session using SSM due to
+networking rules.
+To connect to S3 you need to provide your local service with a profile with which to connect.
+You can do that using `aws-vault`, as follows.
+To set up `aws-vault` follow the instructions in the `prsdb-infra` repository.
+
+#### Setting up `aws-vault` as a profile server
+
+Run
+```shell
+aws-vault exec <profile> --server
+```
+
+This starts a session with aws-vault acting as a credential server.
+You can add `-- bash` or `-- powershell` to enter the server using your shell of choice.
+
+Then run
+```shell
+env | grep AWS_CONTAINER
+```
+
+This will return two lines giving you the `AWS_CONTAINER_CREDENTIALS_FULL_URI` and the
+`AWS_CONTAINER_AUTHORIZATION_TOKEN` for your server.
+Copy both of these lines into your `.env` file and add the line
+```
+AWS_REGION=eu-west-2
+```
+
+Then run the service as usual, it will pick up the profile provided by the `aws-vault exec` command.
+
+When you have finished running the service, run `exit` in the server terminal to close the server.
+
+#### Connecting to AWS S3 locally
+
+By default, when the service is run locally, it uses the `LocalFileUploader` instead of the `AwsS3FileUploader`.
+You can manually switch by manipulating the profiles and attributes on those classes.
+Currently, there isn't a profile which connects to AWS with an otherwise local build.
+
+## Releasing to Test
+
+At least once a sprint we aim to release changes into the Test environment. This process happens automatically when
+changes are merged to the `test` branch. Merges into `test` should be made as normal (not squash) merges to ensure a
+common git history between `main` and `test`.
+
+The normal process is simply to raise a PR merging `main` into `test`. In most cases this will be all that is required
+as all features on integration will have been QA'd, demoed, and be ready for review.
+
+In the rare case that there are changes on `main` that we do not want to release to `test`:
+
+- Identify the last commit on `main` before the code that you do not want to release was added
+- Create a new branch off of that commit, e.g. `release/main-to-test-11` for the 11th release to `test`
+- Identify any later commits that you _do_ want to release to `test` and cherry-pick them onto the new branch
+- Merge the new branch into `test`
+- Merge `test` back into `main` **using a normal merge - not a squash commit** - you will need to ask an admin on the
+  repo to temporarily allow normal merges into `main` to do this
+
+#### Hotfixes
+
+It should be very rare that a hotfix will need to be made directly to `test` (vs. being made on `main` and then
+releasing to `test` in the normal way). However, if this is needed:
+
+- Create a new branch from `test` e.g. `hotfix/prsd-<ticket number>-<description>`
+- Make the changes on the hotfix branch
+- Merge the hotfix branch into `test`
+- Merge `test` back into `main` **using a normal merge - not a squash commit** - you will need to ask an admin on the
+  repo to temporarily allow normal merges into `main` to do this
