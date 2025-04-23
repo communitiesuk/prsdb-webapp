@@ -103,7 +103,7 @@ abstract class Journey<T : StepId>(
         }
 
         if (currentStep.handleSubmitAndRedirect != null) {
-            return ModelAndView("redirect:${currentStep.handleSubmitAndRedirect.invoke(newJourneyData, subPageNumber)}")
+            return ModelAndView("redirect:${currentStep.handleSubmitAndRedirect!!.invoke(newJourneyData, subPageNumber)}")
         }
 
         val redirectUrl = getRedirectForNextStep(currentStep, newJourneyData, subPageNumber)

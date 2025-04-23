@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationCheckAnsw
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationNumberOfPeoplePage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
+import uk.gov.communities.prsdb.webapp.forms.steps.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
@@ -141,7 +142,7 @@ class PropertyRegistrationJourney(
         )
 
     private fun lookupAddressStep() =
-        Step(
+        LookupAddressStep(
             id = RegisterPropertyStepId.LookupAddress,
             page =
                 Page(
@@ -160,7 +161,10 @@ class PropertyRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
-            nextAction = { _, _ -> Pair(RegisterPropertyStepId.SelectAddress, null) },
+            nextStepIfAddressesFound = RegisterPropertyStepId.SelectAddress,
+            nextStepIfNoAddressesFound = RegisterPropertyStepId.NoAddressFound,
+            addressLookupService = addressLookupService,
+            journeyDataService = journeyDataService,
         )
 
     private fun selectAddressStep() =

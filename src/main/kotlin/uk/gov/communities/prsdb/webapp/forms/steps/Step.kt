@@ -7,19 +7,38 @@ import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.forms.pages.AbstractPage
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 
-class Step<T : StepId>(
+open class Step<T : StepId>(
     val id: T,
     val page: AbstractPage,
-    val handleSubmitAndRedirect: ((journeyData: JourneyData, subPageNumber: Int?) -> String)? = null,
     val isSatisfied: (bindingResult: BindingResult) -> Boolean = { bindingResult -> page.isSatisfied(bindingResult) },
-    val nextAction: (journeyData: JourneyData, subPageNumber: Int?) -> Pair<T?, Int?> = { _, _ ->
+    val saveAfterSubmit: Boolean = true,
+) {
+    constructor(
+        id: T,
+        page: AbstractPage,
+        handleSubmitAndRedirect: ((journeyData: JourneyData, subPageNumber: Int?) -> String)? = null,
+        isSatisfied: (bindingResult: BindingResult) -> Boolean = { bindingResult -> page.isSatisfied(bindingResult) },
+        nextAction: (journeyData: JourneyData, subPageNumber: Int?) -> Pair<T?, Int?> = { _, _ ->
+            Pair(
+                null,
+                null,
+            )
+        },
+        saveAfterSubmit: Boolean = true,
+    ) : this(id, page, isSatisfied, saveAfterSubmit) {
+        this.handleSubmitAndRedirect = handleSubmitAndRedirect
+        this.nextAction = nextAction
+    }
+
+    open var handleSubmitAndRedirect: ((journeyData: JourneyData, subPageNumber: Int?) -> String)? = null
+
+    open var nextAction: (journeyData: JourneyData, subPageNumber: Int?) -> Pair<T?, Int?> = { _, _ ->
         Pair(
             null,
             null,
         )
-    },
-    val saveAfterSubmit: Boolean = true,
-) {
+    }
+
     val name: String = id.urlPathSegment
 
     fun updatedJourneyData(
