@@ -30,7 +30,7 @@ class UploadCertificateFormModel : FormModel {
             ConstraintDescriptor(
                 messageKey = "forms.uploadCertificate.error.unsuccessfulUpload",
                 validatorType = DelegatedPropertyConstraintValidator::class,
-                targetMethod = "isUploadNotUnsuccessful",
+                targetMethod = "isUploadSuccessfulOrInvalid",
             ),
         ],
     )
@@ -42,7 +42,7 @@ class UploadCertificateFormModel : FormModel {
 
     var contentLength: Long = 0
 
-    var isUploadSuccessful: Boolean? = null
+    var isUploadSuccessfulOrNull: Boolean? = null
 
     fun isNameNotBlank() = name.isNotBlank()
 
@@ -50,7 +50,7 @@ class UploadCertificateFormModel : FormModel {
 
     fun isContentLengthValid() = !isNameNotBlank() || !isFileTypeValid() || contentLength <= maxContentLength
 
-    fun isUploadNotUnsuccessful() = isUploadSuccessful != false
+    fun isUploadSuccessfulOrInvalid() = isUploadSuccessfulOrNull != false
 
     companion object {
         private val validExtensions = listOf("pdf", "png", "jpeg", "jpg")
@@ -60,12 +60,12 @@ class UploadCertificateFormModel : FormModel {
         fun fromFileItemInput(
             fileItemInput: FileItemInput,
             fileLength: Long,
-            isUploadSuccessful: Boolean? = null,
+            isUploadSuccessfulOrNull: Boolean? = null,
         ) = UploadCertificateFormModel().apply {
             this.name = fileItemInput.name
             this.contentType = fileItemInput.contentType
             this.contentLength = fileLength
-            this.isUploadSuccessful = isUploadSuccessful
+            this.isUploadSuccessfulOrNull = isUploadSuccessfulOrNull
         }
     }
 }

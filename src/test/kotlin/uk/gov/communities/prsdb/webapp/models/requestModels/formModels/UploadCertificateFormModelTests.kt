@@ -19,7 +19,7 @@ class UploadCertificateFormModelTests {
                 this.name = fileName
                 this.contentType = contentType
                 this.contentLength = contentLength
-                this.isUploadSuccessful = isUploadSuccessful
+                this.isUploadSuccessfulOrNull = isUploadSuccessful
             }
 
         val returnedModel = UploadCertificateFormModel.fromFileItemInput(fileItemInput, contentLength, isUploadSuccessful)

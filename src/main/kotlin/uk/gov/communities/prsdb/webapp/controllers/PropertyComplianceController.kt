@@ -136,11 +136,16 @@ class PropertyComplianceController(
             fileInputIterator.getFirstFileField()
                 ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a valid multipart file upload request")
 
-        val isUploadSuccessful = uploadFileIfValid(file, request.contentLengthLong, propertyOwnershipId)
+        val isUploadSuccessfulOrNull =
+            if (isFileValid(file, request.contentLengthLong)) {
+                uploadFile(file, request.contentLengthLong, propertyOwnershipId)
+            } else {
+                null
+            }
 
         fileInputIterator.discardRemainingFields()
 
-        if (isUploadSuccessful != true) {
+        if (isUploadSuccessfulOrNull != true) {
             val cookie = tokenCookieService.createCookieForValue(FILE_UPLOAD_COOKIE_NAME, request.requestURI)
             response.addCookie(cookie)
         }
@@ -149,7 +154,7 @@ class PropertyComplianceController(
             .create(propertyOwnershipId, principal.name)
             .completeStep(
                 stepName,
-                UploadCertificateFormModel.fromFileItemInput(file, request.contentLengthLong, isUploadSuccessful).toPageData(),
+                UploadCertificateFormModel.fromFileItemInput(file, request.contentLengthLong, isUploadSuccessfulOrNull).toPageData(),
                 subpage,
                 principal,
             )
@@ -167,21 +172,23 @@ class PropertyComplianceController(
         }
     }
 
-    private fun uploadFileIfValid(
+    private fun isFileValid(
+        file: FileItemInput,
+        fileLength: Long,
+    ): Boolean {
+        val fileFormModel = UploadCertificateFormModel.fromFileItemInput(file, fileLength)
+        return !validator.validateObject(fileFormModel).hasErrors()
+    }
+
+    private fun uploadFile(
         file: FileItemInput,
         fileLength: Long,
         propertyOwnershipId: Long,
-    ): Boolean? {
-        val fileFormModel = UploadCertificateFormModel.fromFileItemInput(file, fileLength)
-        return if (!validator.validateObject(fileFormModel).hasErrors()) {
-            fileUploader.uploadFile(
-                PropertyComplianceJourneyExtensions.getGasSafetyCertFilename(propertyOwnershipId, file.name),
-                file.inputStream.withMaxLength(fileLength),
-            )
-        } else {
-            null
-        }
-    }
+    ): Boolean =
+        fileUploader.uploadFile(
+            PropertyComplianceJourneyExtensions.getGasSafetyCertFilename(propertyOwnershipId, file.name),
+            file.inputStream.withMaxLength(fileLength),
+        )
 
     companion object {
         const val PROPERTY_COMPLIANCE_ROUTE = "/$PROPERTY_COMPLIANCE_PATH_SEGMENT/{propertyOwnershipId}"
