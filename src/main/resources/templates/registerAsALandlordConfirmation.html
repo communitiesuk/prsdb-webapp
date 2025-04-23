@@ -4,7 +4,7 @@
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <div id="confirmation-banner"
-             th:replace="~{fragments/confirmationPageBanner :: confirmationPageBanner(#{registerAsALandlord.confirmation.banner.heading}, ~{::#confirmation-banner/content()})}">
+             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{registerAsALandlord.confirmation.banner.heading}, ~{::#confirmation-banner/content()})}">
             <span th:remove="tag"
                   th:text="#{registerAsALandlord.confirmation.banner.body.beforeRegistrationNumber}">
                 registerAsALandlord.confirmation.banner.body.beforeRegistrationNumber

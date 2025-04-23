@@ -3,7 +3,7 @@
 <main class="govuk-main-wrapper">
     <div id="page-content">
         <div id="dashboard-banner"
-             th:replace="~{fragments/dashboardBanner :: dashboardBanner(${landlordName}, ~{::#dashboard-banner/content()})}">
+             th:replace="~{fragments/banners/dashboardBanner :: dashboardBanner(${landlordName}, ~{::#dashboard-banner/content()})}">
             <strong th:text="#{landlord.dashboard.banner.subheading}">landlord.dashboard.banner.subheading</strong>
             <span th:text="${lrn}">LRN</span>
         </div>

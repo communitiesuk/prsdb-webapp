@@ -4,7 +4,7 @@
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <div id="confirmation-banner"
-             th:replace="~{fragments/confirmationPageBanner :: confirmationPageBanner(null, ~{::#confirmation-banner/content()})}">
+             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(null, ~{::#confirmation-banner/content()})}">
             <strong>
                 <span th:text="#{cancelLAUserInvitationSuccess.banner.body(${deletedEmail}, ${localAuthority.name})}"
                       th:remove="tag">cancelLAUserInvitationSuccess.banner.body</span>
