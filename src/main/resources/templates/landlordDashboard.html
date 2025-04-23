@@ -2,6 +2,12 @@
 <html th:replace="~{fragments/layout :: layout(#{dashboard.title}, ~{::main}, false)}">
 <main class="govuk-main-wrapper">
     <div id="page-content">
+        <div id="notification-banner"
+             th:replace="${incompleteProperties != null} ? ~{fragments/banners/notificationBanner :: notificationBanner(#{landlord.dashboard.notification.banner.title},
+             #{landlord.dashboard.notification.banner.subheadingBeforeNumber} + ' ' + ${incompleteProperties} + ' ' + #{landlord.dashboard.notification.banner.subheadingAfterNumber} + ' ',
+             ${viewIncompletePropertiesUrl}, #{landlord.dashboard.notification.banner.linkText})} : ~{}">
+            Incomplete properties notification banner
+        </div>
         <div id="dashboard-banner"
              th:replace="~{fragments/banners/dashboardBanner :: dashboardBanner(${landlordName}, ~{::#dashboard-banner/content()})}">
             <strong th:text="#{landlord.dashboard.banner.subheading}">landlord.dashboard.banner.subheading</strong>

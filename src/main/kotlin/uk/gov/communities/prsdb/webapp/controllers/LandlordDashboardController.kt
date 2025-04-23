@@ -40,7 +40,7 @@ class LandlordDashboardController(
 
         val incompleteProperties = propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(principal.name)
 
-        model.addAttribute("numberOfIncompleteProperties", incompleteProperties)
+        model.addAttribute("incompleteProperties", incompleteProperties)
 
         model.addAttribute("landlordName", landlord.name)
         model.addAttribute("lrn", RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber))
