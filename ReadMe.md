@@ -200,8 +200,16 @@ At least once a sprint we aim to release changes into the Test environment. This
 changes are merged to the `test` branch. Merges into `test` should be made as normal (not squash) merges to ensure a
 common git history between `main` and `test`.
 
-The normal process is simply to raise a PR merging `main` into `test`. In most cases this will be all that is required
-as all features on integration will have been QA'd, demoed, and be ready for review.
+### Release infra before webapp
+Before releasing the webapp, go to the [prsd-infra](https://github.com/communitiesuk/prsdb-infra) repo and release main to test (follow the same PR process below)
+
+### PR process
+
+The normal process is simply to raise a PR merging `main` into `test`, name the PR "Release main to test #n" for the nth release to `test`.
+For the PR description add a list of all the commits that will be included and their ticket numbers.
+In most cases this will be all that is required as all features on integration will have been QA'd, demoed, and be ready for review.
+
+Note: you will probably see the message "This branch is out-of-date with the base branch" on your PR this does not need to be resolved and can be ignored. 
 
 In the rare case that there are changes on `main` that we do not want to release to `test`:
 
