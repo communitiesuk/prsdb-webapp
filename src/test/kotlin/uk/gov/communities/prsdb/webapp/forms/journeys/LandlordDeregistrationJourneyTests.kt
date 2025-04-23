@@ -108,7 +108,7 @@ class LandlordDeregistrationJourneyTests {
 
         // Assert
         verify(mockLandlordDeregistrationService).addLandlordHadActivePropertiesToSession(false)
-        verify(mockJourneyDataService).clearJourneyDataFromSession()
+        verify(mockJourneyDataService).removeJourneyDataAndContextIdFromSession()
     }
 
     @Test

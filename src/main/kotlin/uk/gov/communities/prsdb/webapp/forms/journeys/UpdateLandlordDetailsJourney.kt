@@ -311,7 +311,7 @@ class UpdateLandlordDetailsJourney(
             landlordUpdate,
         )
 
-        journeyDataService.clearJourneyDataFromSession()
+        journeyDataService.removeJourneyDataAndContextIdFromSession()
 
         return LandlordDetailsController.LANDLORD_DETAILS_ROUTE
     }
