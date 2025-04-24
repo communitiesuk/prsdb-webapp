@@ -587,9 +587,7 @@ class PropertyRegistrationJourney(
         journeyData: JourneyData,
         propertyRegistrationService: PropertyRegistrationService,
     ): Pair<RegisterPropertyStepId, Int?> =
-        if (journeyData.getLookedUpAddresses().isEmpty()) {
-            Pair(RegisterPropertyStepId.NoAddressFound, null)
-        } else if (PropertyRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
+        if (PropertyRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
             Pair(RegisterPropertyStepId.ManualAddress, null)
         } else {
             val selectedAddress = PropertyRegistrationJourneyDataHelper.getAddress(journeyData, journeyData.getLookedUpAddresses())!!

@@ -4,7 +4,6 @@ import org.springframework.validation.BindingResult
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.AbstractPage
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.StepUrlBuilder
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
@@ -19,7 +18,12 @@ class LookupAddressStep<T : StepId>(
     private val nextStepIfNoAddressesFound: T,
     private val addressLookupService: AddressLookupService,
     private val journeyDataService: JourneyDataService,
-) : Step<T>(id, page, isSatisfied, saveAfterSubmit) {
+) : Step<T>(
+        id = id,
+        page = page,
+        isSatisfied = isSatisfied,
+        saveAfterSubmit = saveAfterSubmit,
+    ) {
     override var nextAction: (JourneyData, Int?) -> Pair<T?, Int?> =
         { _: JourneyData, subPageNumber: Int? -> Pair(getNextStep(), subPageNumber) }
 
@@ -46,7 +50,7 @@ class LookupAddressStep<T : StepId>(
 
         val nextStepId = getNextStep()
 
-        return StepUrlBuilder.getStepUrl(nextStepId, subPageNumber)
+        return Step.generateUrl(nextStepId, subPageNumber)
     }
 
     private fun getNextStep(): T {
