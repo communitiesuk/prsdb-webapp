@@ -4,6 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.Response
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
@@ -79,6 +80,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NoAddressFoundFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfHouseholdsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
@@ -301,6 +303,17 @@ class Navigator(
         val taskListPage = goToPropertyRegistrationTaskList()
         taskListPage.clickRegisterTaskWithName("Add the property address")
         return createValidPage(page, LookupAddressFormPagePropertyRegistration::class)
+    }
+
+    fun goToPropertyRegistrationNoAddressFoundPage(
+        osPlacesClient: OSPlacesClient,
+        houseNameOrNumber: String,
+        postcode: String,
+    ): NoAddressFoundFormPagePropertyRegistration {
+        val addressLookupPage = goToPropertyRegistrationLookupAddressPage()
+        whenever(osPlacesClient.search(houseNameOrNumber, postcode)).thenReturn("{}")
+        addressLookupPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNameOrNumber)
+        return createValidPage(page, NoAddressFoundFormPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationSelectAddressPage(): SelectAddressFormPagePropertyRegistration {

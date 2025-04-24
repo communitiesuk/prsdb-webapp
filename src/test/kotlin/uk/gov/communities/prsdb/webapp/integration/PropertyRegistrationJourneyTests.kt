@@ -10,8 +10,8 @@ import org.mockito.ArgumentCaptor.captor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -32,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NoAddressFoundFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfHouseholdsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
@@ -51,7 +52,7 @@ import kotlin.test.assertTrue
 class PropertyRegistrationJourneyTests : IntegrationTest() {
     private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
 
-    @SpyBean
+    @MockitoSpyBean
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
 
     @MockitoBean
@@ -347,6 +348,39 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             lookupAddressPage.form.submit()
             assertThat(lookupAddressPage.form.getErrorMessage("postcode")).containsText("Enter a postcode")
             assertThat(lookupAddressPage.form.getErrorMessage("houseNameOrNumber")).containsText("Enter a house name or number")
+        }
+
+        @Test
+        fun `User is directed to the No Address Found step if no addresses are returned`(page: Page) {
+            val houseNumber = "15"
+            val postcode = "AB1 2CD"
+            whenever(osPlacesClient.search(houseNumber, postcode)).thenReturn("{}")
+
+            val lookupAddressPage = navigator.goToPropertyRegistrationLookupAddressPage()
+            lookupAddressPage.form.houseNameOrNumberInput.fill(houseNumber)
+            lookupAddressPage.form.postcodeInput.fill(postcode)
+            lookupAddressPage.form.submit()
+
+            val noAddressFoundPage = assertPageIs(page, NoAddressFoundFormPagePropertyRegistration::class)
+            assertThat(noAddressFoundPage.heading).containsText(houseNumber)
+            assertThat(noAddressFoundPage.heading).containsText(postcode)
+        }
+    }
+
+    @Nested
+    inner class NoAddressFoundStep {
+        @Test
+        fun `Clicking Search Again navigates to the Lookup Address step`(page: Page) {
+            val noAddressFoundPage = navigator.goToPropertyRegistrationNoAddressFoundPage(osPlacesClient, "15", "AB1 2CD")
+            noAddressFoundPage.searchAgain.clickAndWait()
+            assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Submitting navigates to the Manual Address step`(page: Page) {
+            val noAddressFoundPage = navigator.goToPropertyRegistrationNoAddressFoundPage(osPlacesClient, "15", "AB1 2CD")
+            noAddressFoundPage.form.submit()
+            assertPageIs(page, ManualAddressFormPagePropertyRegistration::class)
         }
     }
 
