@@ -147,7 +147,7 @@ class LaUserRegistrationJourney(
         invitationService.deleteInvitation(invitation)
         invitationService.clearTokenFromSession()
 
-        journeyDataService.clearJourneyDataFromSession()
+        journeyDataService.removeJourneyDataAndContextIdFromSession()
 
         refreshUserRoles()
 

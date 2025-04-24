@@ -8,8 +8,8 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -17,37 +17,49 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 
 @WebMvcTest(RegisterPropertyController::class)
 class RegisterPropertyControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
-    @MockBean
+    @MockitoBean
     private lateinit var propertyRegistrationJourneyFactory: PropertyRegistrationJourneyFactory
 
     @Mock
     private lateinit var propertyRegistrationJourney: PropertyRegistrationJourney
 
-    @MockBean
+    @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
-    @MockBean
+    @MockitoBean
     private lateinit var propertyRegistrationService: PropertyRegistrationService
+
+    @MockitoBean
+    private lateinit var journeyDataServiceFactory: JourneyDataServiceFactory
+
+    @Mock
+    private lateinit var journeyDataService: JourneyDataService
 
     @BeforeEach
     fun setupMocks() {
         whenever(propertyRegistrationJourneyFactory.create(any())).thenReturn(propertyRegistrationJourney)
         whenever(propertyRegistrationJourney.initialStepId).thenReturn(RegisterPropertyStepId.PlaceholderPage)
+        whenever(journeyDataServiceFactory.create(any())).thenReturn(journeyDataService)
+        whenever(journeyDataService.journeyDataKey).thenReturn(REGISTER_PROPERTY_JOURNEY_URL)
     }
 
     @Test
@@ -148,6 +160,19 @@ class RegisterPropertyControllerTests(
                 redirectedUrl(TASK_LIST_PATH_SEGMENT)
             }
 
-        verify(propertyRegistrationService).clearPropertyRegistrationJourneyDataFromSession()
+        verify(journeyDataService).removeJourneyDataAndContextIdFromSession()
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    fun `getResume redirects to task-list after calling load journey data method from propertyRegistrationService`() {
+        val contextId = "1"
+        mvc
+            .get("/$REGISTER_PROPERTY_JOURNEY_URL/$RESUME_PAGE_PATH_SEGMENT?contextId=$contextId")
+            .andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl(TASK_LIST_PATH_SEGMENT)
+            }
+        verify(journeyDataService).loadJourneyDataIntoSession(contextId.toLong(), "user", JourneyType.PROPERTY_REGISTRATION)
     }
 }

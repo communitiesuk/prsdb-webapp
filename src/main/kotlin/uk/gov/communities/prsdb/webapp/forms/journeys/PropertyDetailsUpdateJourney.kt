@@ -387,7 +387,7 @@ class PropertyDetailsUpdateJourney(
 
         propertyOwnershipService.updatePropertyOwnership(propertyOwnershipId, propertyUpdate)
 
-        journeyDataService.clearJourneyDataFromSession()
+        journeyDataService.removeJourneyDataAndContextIdFromSession()
 
         return UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment
     }
