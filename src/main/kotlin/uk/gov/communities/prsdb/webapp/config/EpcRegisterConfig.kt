@@ -5,13 +5,11 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.web.client.RestClient
 
 @Configuration
 class EpcRegisterConfig(
     private val authorizedClientManager: OAuth2AuthorizedClientManager,
-    private val repo: ClientRegistrationRepository,
 ) {
     @Value("\${epc.base-url}")
     lateinit var baseUrl: String
