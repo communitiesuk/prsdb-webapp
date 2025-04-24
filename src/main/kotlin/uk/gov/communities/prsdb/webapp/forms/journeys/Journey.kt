@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.StepUrlBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import java.security.Principal
@@ -57,7 +56,7 @@ abstract class Journey<T : StepId>(
             return ModelAndView("redirect:$unreachableStepRedirect")
         }
         val prevStepDetails = getPrevStep(requestedStep, subPageNumber)
-        val prevStepUrl = prevStepDetails?.let { StepUrlBuilder.getStepUrl(it.step.id, it.subPageNumber) }
+        val prevStepUrl = prevStepDetails?.let { Step.generateUrl(it.step.id, it.subPageNumber) }
         val pageData =
             submittedPageData
                 ?: JourneyDataHelper.getPageData(journeyDataService.getJourneyDataFromSession(), requestedStep.name, subPageNumber)
@@ -118,7 +117,7 @@ abstract class Journey<T : StepId>(
         if (newStepId == null) {
             throw IllegalStateException("Cannot compute next step from step ${currentStep.id.urlPathSegment}")
         }
-        return StepUrlBuilder.getStepUrl(newStepId, newSubPageNumber)
+        return Step.generateUrl(newStepId, newSubPageNumber)
     }
 
     override fun iterator(): Iterator<StepDetails<T>> =
