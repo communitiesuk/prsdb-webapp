@@ -1,15 +1,14 @@
 package uk.gov.communities.prsdb.webapp.forms.steps
 
 import org.springframework.validation.BindingResult
-import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.AbstractPage
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.StepUrlBuilder
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import java.util.Optional
 
 class LookupAddressStep<T : StepId>(
     id: T,
@@ -47,7 +46,7 @@ class LookupAddressStep<T : StepId>(
 
         val nextStepId = getNextStep()
 
-        return getStepUrl(nextStepId, subPageNumber)
+        return StepUrlBuilder.getStepUrl(nextStepId, subPageNumber)
     }
 
     private fun getNextStep(): T {
@@ -58,16 +57,4 @@ class LookupAddressStep<T : StepId>(
             nextStepIfAddressesFound
         }
     }
-
-    // Copied from Journey - might want to move to a helper
-    private fun getStepUrl(
-        stepId: T,
-        subPageNumber: Int?,
-    ): String =
-        UriComponentsBuilder
-            .newInstance()
-            .path(stepId.urlPathSegment)
-            .queryParamIfPresent("subpage", Optional.ofNullable(subPageNumber))
-            .build(true)
-            .toUriString()
 }
