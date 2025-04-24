@@ -18,7 +18,12 @@ class LookupAddressStep<T : StepId>(
     private val nextStepIfNoAddressesFound: T,
     private val addressLookupService: AddressLookupService,
     private val journeyDataService: JourneyDataService,
-) : Step<T>(id, page, isSatisfied, saveAfterSubmit) {
+) : Step<T>(
+        id = id,
+        page = page,
+        isSatisfied = isSatisfied,
+        saveAfterSubmit = saveAfterSubmit,
+    ) {
     override var nextAction: (JourneyData, Int?) -> Pair<T?, Int?> =
         { _: JourneyData, subPageNumber: Int? -> Pair(getNextStep(), subPageNumber) }
 
