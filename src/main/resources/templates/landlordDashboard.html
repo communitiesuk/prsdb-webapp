@@ -4,7 +4,7 @@
     <div id="page-content">
         <div id="notification-banner"
              th:replace="${incompleteProperties != null} ? ~{fragments/banners/notificationBanner :: notificationBanner(#{landlord.dashboard.notification.banner.title},
-             #{landlord.dashboard.notification.banner.subheadingBeforeNumber} + ' ' + ${incompleteProperties} + ' ' + #{landlord.dashboard.notification.banner.subheadingAfterNumber} + ' ',
+             #{landlord.dashboard.notification.banner.subheadingBeforeNumber} + ' ' + ${incompleteProperties} + ' ' + (${incompleteProperties != 1} ? #{landlord.dashboard.notification.banner.subheadingAfterNumber} : #{landlord.dashboard.notification.banner.subheadingAfterNumberIsOne}) + ' ',
              ${viewIncompletePropertiesUrl}, #{landlord.dashboard.notification.banner.linkText})} : ~{}">
             Incomplete properties notification banner
         </div>
