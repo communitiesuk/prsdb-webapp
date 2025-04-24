@@ -12,5 +12,7 @@ class FileItemInputIteratorExtensions {
             }
             return null
         }
+
+        fun FileItemInputIterator.discardRemainingFields() = forEachRemaining {}
     }
 }

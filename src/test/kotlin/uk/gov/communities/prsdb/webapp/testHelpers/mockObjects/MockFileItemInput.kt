@@ -6,22 +6,24 @@ import org.apache.commons.fileupload2.core.FileItemInputIterator
 import java.io.InputStream
 
 class MockFileItemInput(
-    private val fieldName: String,
-    private val isFormField: Boolean,
+    private val fieldName: String = "fieldName",
+    private val isFormField: Boolean = false,
+    private val name: String = "fileName",
+    private val contentType: String = "fileType",
 ) : FileItemInput {
     override fun getFieldName(): String = fieldName
 
     override fun isFormField(): Boolean = isFormField
 
+    override fun getName(): String = name
+
+    override fun getContentType(): String = contentType
+
     override fun getHeaders(): FileItemHeaders? = null
 
     override fun setHeaders(p0: FileItemHeaders?): FileItemInput? = null
 
-    override fun getContentType(): String? = null
-
     override fun getInputStream(): InputStream? = null
-
-    override fun getName(): String? = null
 }
 
 class MockFileItemInputIterator(
