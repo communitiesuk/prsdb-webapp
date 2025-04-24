@@ -34,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualContactAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NoAddressFoundFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NonEnglandOrWalesAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
@@ -485,6 +486,39 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             assertThat(lookupAddressPage.form.getErrorMessage("postcode")).containsText("Enter a postcode")
             assertThat(lookupAddressPage.form.getErrorMessage("houseNameOrNumber")).containsText("Enter a house name or number")
         }
+
+        @Test
+        fun `Navigates to the No Address Found step if no addresses are returned`(page: Page) {
+            val houseNumber = "15"
+            val postcode = "AB1 2CD"
+            whenever(osPlacesClient.search(houseNumber, postcode)).thenReturn("{}")
+
+            val lookupAddressPage = navigator.goToLandlordRegistrationLookupAddressPage()
+            lookupAddressPage.form.houseNameOrNumberInput.fill(houseNumber)
+            lookupAddressPage.form.postcodeInput.fill(postcode)
+            lookupAddressPage.form.submit()
+
+            val noAddressFoundPage = assertPageIs(page, NoAddressFoundFormPageLandlordRegistration::class)
+            assertThat(noAddressFoundPage.heading).containsText(houseNumber)
+            assertThat(noAddressFoundPage.heading).containsText(postcode)
+        }
+    }
+
+    @Nested
+    inner class LandlordRegistrationStepNoAddressFound {
+        @Test
+        fun `Clicking Search Again navigates to the Lookup Address step`(page: Page) {
+            val noAddressFoundPage = navigator.goToLandlordRegistrationNoAddressFoundPage(osPlacesClient, "15", "AB1 2CD")
+            noAddressFoundPage.searchAgain.clickAndWait()
+            assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
+        }
+
+        @Test
+        fun `Submitting navigates to the Manual Address step`(page: Page) {
+            val noAddressFoundPage = navigator.goToLandlordRegistrationNoAddressFoundPage(osPlacesClient, "15", "AB1 2CD")
+            noAddressFoundPage.form.submit()
+            assertPageIs(page, ManualAddressFormPageLandlordRegistration::class)
+        }
     }
 
     @Nested
@@ -542,6 +576,39 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             lookupContactAddressPage.form.submit()
             assertThat(lookupContactAddressPage.form.getErrorMessage("postcode")).containsText("Enter a postcode")
             assertThat(lookupContactAddressPage.form.getErrorMessage("houseNameOrNumber")).containsText("Enter a house name or number")
+        }
+
+        @Test
+        fun `Navigates to the No Address Found step if no addresses are returned`(page: Page) {
+            val houseNumber = "15"
+            val postcode = "AB1 2CD"
+            whenever(osPlacesClient.search(houseNumber, postcode)).thenReturn("{}")
+
+            val lookupAddressPage = navigator.goToLandlordRegistrationLookupAddressPage()
+            lookupAddressPage.form.houseNameOrNumberInput.fill(houseNumber)
+            lookupAddressPage.form.postcodeInput.fill(postcode)
+            lookupAddressPage.form.submit()
+
+            val noAddressFoundPage = assertPageIs(page, NoAddressFoundFormPageLandlordRegistration::class)
+            assertThat(noAddressFoundPage.heading).containsText(houseNumber)
+            assertThat(noAddressFoundPage.heading).containsText(postcode)
+        }
+    }
+
+    @Nested
+    inner class LandlordRegistrationStepNoContactAddressFound {
+        @Test
+        fun `Clicking Search Again navigates to the Lookup Address step`(page: Page) {
+            val noAddressFoundPage = navigator.goToLandlordRegistrationNoContactAddressFoundPage(osPlacesClient, "15", "AB1 2CD")
+            noAddressFoundPage.searchAgain.clickAndWait()
+            assertPageIs(page, LookupContactAddressFormPageLandlordRegistration::class)
+        }
+
+        @Test
+        fun `Submitting navigates to the Manual Address step`(page: Page) {
+            val noAddressFoundPage = navigator.goToLandlordRegistrationNoContactAddressFoundPage(osPlacesClient, "15", "AB1 2CD")
+            noAddressFoundPage.form.submit()
+            assertPageIs(page, ManualContactAddressFormPageLandlordRegistration::class)
         }
     }
 

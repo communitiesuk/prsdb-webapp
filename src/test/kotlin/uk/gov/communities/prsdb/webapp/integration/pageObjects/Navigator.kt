@@ -58,6 +58,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NoAddressFoundFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NoContactAddressFoundFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NonEnglandOrWalesAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
@@ -182,6 +184,17 @@ class Navigator(
         return createValidPage(page, LookupAddressFormPageLandlordRegistration::class)
     }
 
+    fun goToLandlordRegistrationNoAddressFoundPage(
+        osPlacesClient: OSPlacesClient,
+        houseNameOrNumber: String,
+        postcode: String,
+    ): NoAddressFoundFormPageLandlordRegistration {
+        val addressLookupPage = goToLandlordRegistrationLookupAddressPage()
+        whenever(osPlacesClient.search(houseNameOrNumber, postcode)).thenReturn("{}")
+        addressLookupPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNameOrNumber)
+        return createValidPage(page, NoAddressFoundFormPageLandlordRegistration::class)
+    }
+
     fun goToLandlordRegistrationSelectAddressPage(): SelectAddressFormPageLandlordRegistration {
         val lookupAddressPage = goToLandlordRegistrationLookupAddressPage()
         lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG", "1")
@@ -204,6 +217,17 @@ class Navigator(
         val nonEnglandOrWalesAddressPage = goToLandlordRegistrationNonEnglandOrWalesAddressPage()
         nonEnglandOrWalesAddressPage.submitAddress("test address")
         return createValidPage(page, LookupContactAddressFormPageLandlordRegistration::class)
+    }
+
+    fun goToLandlordRegistrationNoContactAddressFoundPage(
+        osPlacesClient: OSPlacesClient,
+        houseNameOrNumber: String,
+        postcode: String,
+    ): NoContactAddressFoundFormPageLandlordRegistration {
+        val addressLookupPage = goToLandlordRegistrationLookupContactAddressPage()
+        whenever(osPlacesClient.search(houseNameOrNumber, postcode)).thenReturn("{}")
+        addressLookupPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNameOrNumber)
+        return createValidPage(page, NoContactAddressFoundFormPageLandlordRegistration::class)
     }
 
     fun goToLandlordRegistrationSelectContactAddressPage(): SelectContactAddressFormPageLandlordRegistration {

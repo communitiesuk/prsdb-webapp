@@ -351,7 +351,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         }
 
         @Test
-        fun `User is directed to the No Address Found step if no addresses are returned`(page: Page) {
+        fun `Navigates to the No Address Found step if no addresses are returned`(page: Page) {
             val houseNumber = "15"
             val postcode = "AB1 2CD"
             whenever(osPlacesClient.search(houseNumber, postcode)).thenReturn("{}")
