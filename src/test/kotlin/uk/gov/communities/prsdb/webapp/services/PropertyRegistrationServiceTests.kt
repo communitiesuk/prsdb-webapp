@@ -5,6 +5,7 @@ import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -17,6 +18,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -26,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
+import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyRepository
@@ -42,6 +45,9 @@ class PropertyRegistrationServiceTests {
 
     @Mock
     private lateinit var mockLandlordRepository: LandlordRepository
+
+    @Mock
+    private lateinit var mockFormContextRepository: FormContextRepository
 
     @Mock
     private lateinit var mockRegisteredAddressCache: RegisteredAddressCache
@@ -295,5 +301,30 @@ class PropertyRegistrationServiceTests {
             )
 
         assertEquals(expectedPropertyOwnership.registrationNumber, propertyRegistrationNumber)
+    }
+
+    @Test
+    fun `getNumberOfIncompletePropertyRegistrationsForLandlord returns number of incomplete properties`() {
+        val principalName = "principalName"
+        val expectedIncompleteProperties = 3
+        whenever(
+            mockFormContextRepository.countFormContextsByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION),
+        ).thenReturn(expectedIncompleteProperties)
+
+        val incompleteProperties = propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(principalName)
+
+        assertEquals(expectedIncompleteProperties, incompleteProperties)
+    }
+
+    @Test
+    fun `getNumberOfIncompletePropertyRegistrationsForLandlord returns null if there are no incomplete properties`() {
+        val principalName = "principalName"
+        whenever(
+            mockFormContextRepository.countFormContextsByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION),
+        ).thenReturn(0)
+
+        val incompleteProperties = propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(principalName)
+
+        assertNull(incompleteProperties)
     }
 }
