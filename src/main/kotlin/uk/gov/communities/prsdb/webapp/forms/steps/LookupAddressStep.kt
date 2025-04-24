@@ -22,11 +22,11 @@ class LookupAddressStep<T : StepId>(
         id = id,
         page = page,
         isSatisfied = isSatisfied,
+        nextAction = { journeyData: JourneyData, subPageNumber: Int? ->
+            Pair(getNextStep(journeyData, nextStepIfAddressesFound, nextStepIfNoAddressesFound), subPageNumber)
+        },
         saveAfterSubmit = saveAfterSubmit,
     ) {
-    override var nextAction: (JourneyData, Int?) -> Pair<T?, Int?> =
-        { _: JourneyData, subPageNumber: Int? -> Pair(getNextStep(), subPageNumber) }
-
     override var handleSubmitAndRedirect: ((JourneyData, Int?) -> String)? = { journeyData: JourneyData, subPageNumber: Int? ->
         performAddressLookupCacheResultsAndGetRedirect(
             journeyData,
@@ -48,17 +48,21 @@ class LookupAddressStep<T : StepId>(
         val updatedJourneyData = journeyData.withUpdatedLookedUpAddresses(addressLookupResults)
         journeyDataService.setJourneyDataInSession(updatedJourneyData)
 
-        val nextStepId = getNextStep()
+        val nextStepId = getNextStep(journeyData, nextStepIfAddressesFound, nextStepIfNoAddressesFound)
 
         return Step.generateUrl(nextStepId, subPageNumber)
     }
 
-    private fun getNextStep(): T {
-        val journeyData = journeyDataService.getJourneyDataFromSession()
-        return if (journeyData.getLookedUpAddresses().isEmpty()) {
-            nextStepIfNoAddressesFound
-        } else {
-            nextStepIfAddressesFound
-        }
+    companion object {
+        fun <T : StepId> getNextStep(
+            journeyData: JourneyData,
+            nextStepIfAddressesFound: T,
+            nextStepIfNoAddressesFound: T,
+        ): T =
+            if (journeyData.getLookedUpAddresses().isEmpty()) {
+                nextStepIfNoAddressesFound
+            } else {
+                nextStepIfAddressesFound
+            }
     }
 }
