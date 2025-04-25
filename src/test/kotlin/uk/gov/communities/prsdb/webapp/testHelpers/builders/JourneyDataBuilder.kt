@@ -442,4 +442,14 @@ class JourneyDataBuilder(
         journeyData[PropertyComplianceStepId.EICR.urlPathSegment] = mapOf(EicrFormModel::hasCert.name to hasEICR)
         return this
     }
+
+    fun withEicrIssueDate(issueDate: LocalDate): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EicrIssueDate.urlPathSegment] =
+            mapOf(
+                TodayOrPastDateFormModel::day.name to issueDate.dayOfMonth,
+                TodayOrPastDateFormModel::month.name to issueDate.monthValue,
+                TodayOrPastDateFormModel::year.name to issueDate.year,
+            )
+        return this
+    }
 }
