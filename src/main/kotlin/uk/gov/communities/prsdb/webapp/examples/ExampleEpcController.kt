@@ -24,7 +24,7 @@ class ExampleEpcController(
 
     @GetMapping("rrn/{rrn}")
     @ResponseBody
-    fun getEpcByUprn(
+    fun getEpcByRrn(
         @PathVariable rrn: String,
     ): String = client.getByRrn(rrn)
 }
