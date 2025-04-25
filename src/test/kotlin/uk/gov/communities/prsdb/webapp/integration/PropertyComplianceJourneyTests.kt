@@ -167,7 +167,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             val gasSafetyExemptionPage = assertPageIs(page, GasSafetyExemptionPagePropertyCompliance::class, urlArguments)
 
             // Gas Safety Exemption page
-            gasSafetyExemptionPage.submitHasGasSafetyCertExemption()
+            gasSafetyExemptionPage.submitHasExemption()
             val gasSafetyExemptionReasonPage = assertPageIs(page, GasSafetyExemptionReasonPagePropertyCompliance::class, urlArguments)
 
             // Gas Safety Exemption Reason page
@@ -213,7 +213,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             val gasSafetyExemptionPage = assertPageIs(page, GasSafetyExemptionPagePropertyCompliance::class, urlArguments)
 
             // Gas Safety Exemption page
-            gasSafetyExemptionPage.submitHasNoGasSafetyCertExemption()
+            gasSafetyExemptionPage.submitHasNoExemption()
             val gasSafetyExemptionMissingPage = assertPageIs(page, GasSafetyExemptionMissingPagePropertyCompliance::class, urlArguments)
 
             // Gas Safety Exemption Missing page

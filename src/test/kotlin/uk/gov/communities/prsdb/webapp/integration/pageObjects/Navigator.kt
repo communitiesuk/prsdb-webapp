@@ -455,7 +455,7 @@ class Navigator(
 
     fun goToPropertyComplianceGasSafetyExemptionReasonPage(propertyOwnershipId: Long): GasSafetyExemptionReasonPagePropertyCompliance {
         val gasSafetyExemptionPage = goToPropertyComplianceGasSafetyExemptionPage(propertyOwnershipId)
-        gasSafetyExemptionPage.submitHasGasSafetyCertExemption()
+        gasSafetyExemptionPage.submitHasExemption()
         return createValidPage(
             page,
             GasSafetyExemptionReasonPagePropertyCompliance::class,
@@ -477,7 +477,7 @@ class Navigator(
 
     fun goToPropertyComplianceEicrPage(propertyOwnershipId: Long): EicrPagePropertyCompliance {
         val gasSafetyExemptionPage = goToPropertyComplianceGasSafetyExemptionPage(propertyOwnershipId)
-        gasSafetyExemptionPage.submitHasNoGasSafetyCertExemption()
+        gasSafetyExemptionPage.submitHasNoExemption()
         val gasSafetyExemptionMissingPage =
             createValidPage(
                 page,
