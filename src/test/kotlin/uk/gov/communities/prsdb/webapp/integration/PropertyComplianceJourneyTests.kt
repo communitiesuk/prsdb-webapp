@@ -32,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyIssueDatePagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyOutdatedPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyUploadConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyUploadPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.services.FileUploader
@@ -76,13 +77,14 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
                 ),
             ).thenReturn(true)
             gasSafetyUploadPage.uploadCertificate("validFile.png")
+            val gasSafetyUploadConfirmationPage = assertPageIs(page, GasSafetyUploadConfirmationPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-1098: Continue journey tests
-            assertContains(
-                page.url(),
-                PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.GasSafetyUploadConfirmation.urlPathSegment}",
-            )
+            // Gas Safety Cert. Upload Confirmation page
+            assertThat(gasSafetyUploadConfirmationPage.heading).containsText("Your file is being scanned")
+            gasSafetyUploadConfirmationPage.saveAndContinueButton.clickAndWait()
+            assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+
+            // TODO PRSD-954: Continue journey test
         }
 
         @Test
