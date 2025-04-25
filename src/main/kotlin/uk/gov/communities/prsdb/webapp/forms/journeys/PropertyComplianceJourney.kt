@@ -15,11 +15,13 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasEICR
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasEicrExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasGasSafetyCertExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsGasSafetyExemptionReasonOther
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
@@ -121,7 +123,9 @@ class PropertyComplianceJourney(
                     eicrIssueDateStep,
                     placeholderStep(PropertyComplianceStepId.EicrUpload, "TODO PRSD-956: Implement EICR upload step"),
                     placeholderStep(PropertyComplianceStepId.EicrOutdated, "TODO PRSD-961: Implement EICR outdated step"),
-                    placeholderStep(PropertyComplianceStepId.EicrExemption, "TODO PRSD-957: Implement EICR exemption step"),
+                    eicrExemptionStep,
+                    placeholderStep(PropertyComplianceStepId.EicrExemptionReason, "TODO PRSD-958: Implement EICR exemption reason step"),
+                    placeholderStep(PropertyComplianceStepId.EicrExemptionMissing, "TODO PRSD-960: Implement EICR exemption missing step"),
                 ),
                 "propertyCompliance.taskList.upload.eicr",
             )
@@ -416,6 +420,36 @@ class PropertyComplianceJourney(
                 nextAction = { journeyData, _ -> eicrIssueDateStepNextAction(journeyData) },
             )
 
+    private val eicrExemptionStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EicrExemption,
+                page =
+                    Page(
+                        formModel = EicrExemptionFormModel::class,
+                        templateName = "forms/exemptionForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.eicrExemption.fieldSetHeading",
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = true,
+                                            valueStr = "yes",
+                                            labelMsgKey = "forms.radios.option.yes.label",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = false,
+                                            valueStr = "no",
+                                            labelMsgKey = "forms.radios.option.no.label",
+                                        ),
+                                    ),
+                            ),
+                    ),
+                nextAction = { journeyData, _ -> eicrExemptionStepNextAction(journeyData) },
+            )
+
     private fun placeholderStep(
         stepId: PropertyComplianceStepId,
         todoComment: String,
@@ -464,6 +498,13 @@ class PropertyComplianceJourney(
             Pair(PropertyComplianceStepId.EicrOutdated, null)
         } else {
             Pair(PropertyComplianceStepId.EicrUpload, null)
+        }
+
+    private fun eicrExemptionStepNextAction(journeyData: JourneyData) =
+        if (journeyData.getHasEicrExemption()!!) {
+            Pair(PropertyComplianceStepId.EicrExemptionReason, null)
+        } else {
+            Pair(PropertyComplianceStepId.EicrExemptionMissing, null)
         }
 
     private fun getPropertyAddress() =

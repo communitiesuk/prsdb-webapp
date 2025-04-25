@@ -21,6 +21,8 @@ enum class PropertyComplianceStepId(
     EicrUpload("eicr-$FILE_UPLOAD_URL_SUBSTRING"),
     EicrOutdated("eicr-outdated"),
     EicrExemption("eicr-exemption"),
+    EicrExemptionReason("eicr-exemption-reason"),
+    EicrExemptionMissing("eicr-exemption-missing"),
     EPC("epc"),
     CheckAndSubmit("check-and-submit"),
     Declaration("declaration"),
