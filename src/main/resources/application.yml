@@ -57,6 +57,9 @@ os-places:
   api-key: ${OS_PLACES_API_KEY}
   base-url: https://api.os.uk/search/places/v1
 
+epc:
+  base-url: ${EPC_REGISTER_BASE_URL}
+
 server:
   error:
     path: /error
@@ -80,6 +83,13 @@ spring:
             client-authentication-method: private_key_jwt
             authorization-grant-type: authorization_code
             scope: openid
+          epc-register:
+            client-id: ${EPC_REGISTER_CLIENT_ID}
+            client-secret: ${EPC_REGISTER_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope:
         provider:
           one-login:
             issuer-uri: ${ONE_LOGIN_ISSUER_URL}
+          epc-register:
+            token-uri: ${EPC_REGISTER_TOKEN_URI}
