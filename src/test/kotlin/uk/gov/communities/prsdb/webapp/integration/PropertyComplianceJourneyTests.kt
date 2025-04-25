@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrIssueDatePagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
@@ -91,12 +92,16 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // EICR page
             eicrPage.submitHasCert()
+            val eicrIssueDatePage = assertPageIs(page, EicrIssueDatePagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-955: Continue test
+            // EICR Issue Date page
+            eicrIssueDatePage.submitDate(currentDate)
+
+            // TODO PRSD-956: Continue test
             assertContains(
                 page.url(),
                 PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.EicrIssueDate.urlPathSegment}",
+                    "/${PropertyComplianceStepId.EicrUpload.urlPathSegment}",
             )
         }
 
@@ -132,12 +137,16 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // EICR page
             eicrPage.submitHasCert()
+            val eicrIssueDatePage = assertPageIs(page, EicrIssueDatePagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-955: Continue test
+            // EICR Issue Date page
+            eicrIssueDatePage.submitDate(currentDate.minus(DatePeriod(years = 5)))
+
+            // TODO PRSD-961: Continue test
             assertContains(
                 page.url(),
                 PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.EicrIssueDate.urlPathSegment}",
+                    "/${PropertyComplianceStepId.EicrOutdated.urlPathSegment}",
             )
         }
 
@@ -378,6 +387,22 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             val eicrPage = navigator.goToPropertyComplianceEicrPage(PROPERTY_OWNERSHIP_ID)
             eicrPage.form.submit()
             assertThat(eicrPage.form.getErrorMessage()).containsText("Select whether you have an EICR for this property")
+        }
+    }
+
+    @Nested
+    inner class EicrIssueDateStepTests {
+        @ParameterizedTest(name = "{0}")
+        @MethodSource("uk.gov.communities.prsdb.webapp.integration.PropertyComplianceJourneyTests#provideInvalidDateStrings")
+        fun `Submitting returns a corresponding error when`(
+            dayMonthYear: Triple<String, String, String>,
+            expectedErrorMessage: String,
+        ) {
+            val (day, month, year) = dayMonthYear
+
+            val eicrIssueDatePage = navigator.goToPropertyComplianceEicrIssueDatePage(PROPERTY_OWNERSHIP_ID)
+            eicrIssueDatePage.submitDate(day, month, year)
+            assertThat(eicrIssueDatePage.form.getErrorMessage()).containsText(expectedErrorMessage)
         }
     }
 
