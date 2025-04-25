@@ -1,8 +1,10 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
 import kotlinx.datetime.toKotlinInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.yearsUntil
@@ -34,5 +36,12 @@ class DateTimeHelper(
             } catch (e: IllegalArgumentException) {
                 null
             }
+
+        fun get28DaysFromDate(date: LocalDate): LocalDate = date.plus(28, DateTimeUnit.DAY)
+
+        fun isDateInPast(date: LocalDate): Boolean {
+            val currentDate = DateTimeHelper().getCurrentDateInUK()
+            return date < currentDate
+        }
     }
 }
