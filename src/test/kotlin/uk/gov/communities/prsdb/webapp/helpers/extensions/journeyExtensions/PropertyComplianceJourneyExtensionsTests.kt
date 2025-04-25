@@ -13,6 +13,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasEICR
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasEicrExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasGasSafetyCertExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsEicrOutdated
@@ -199,5 +200,24 @@ class PropertyComplianceJourneyExtensionsTests {
         val retrievedIsEicrOutdated = testJourneyData.getIsEicrOutdated()
 
         assertNull(retrievedIsEicrOutdated)
+    }
+
+    @Test
+    fun `getHasEicrExemption returns a boolean if the corresponding page is in journeyData`() {
+        val hasEicrExemption = true
+        val testJourneyData = journeyDataBuilder.withEicrExemptionStatus(hasEicrExemption).build()
+
+        val retrievedHasEicrExemption = testJourneyData.getHasEicrExemption()
+
+        assertEquals(hasEicrExemption, retrievedHasEicrExemption)
+    }
+
+    @Test
+    fun `getHasEicrExemption returns null if the corresponding page is not in journeyData`() {
+        val testJourneyData = journeyDataBuilder.build()
+
+        val retrievedHasEicrExemption = testJourneyData.getHasEicrExemption()
+
+        assertNull(retrievedHasEicrExemption)
     }
 }

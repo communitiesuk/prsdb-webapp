@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
@@ -63,5 +64,12 @@ class PropertyComplianceJourneyExtensions : JourneyDataExtensions() {
             val today = DateTimeHelper().getCurrentDateInUK()
             return issueDate.yearsUntil(today) >= 5
         }
+
+        fun JourneyData.getHasEicrExemption() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.EicrExemption.urlPathSegment,
+                EicrExemptionFormModel::hasExemption.name,
+            )
     }
 }

@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
@@ -450,6 +451,12 @@ class JourneyDataBuilder(
                 TodayOrPastDateFormModel::month.name to issueDate.monthValue,
                 TodayOrPastDateFormModel::year.name to issueDate.year,
             )
+        return this
+    }
+
+    fun withEicrExemptionStatus(hasEicrExemption: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EicrExemption.urlPathSegment] =
+            mapOf(EicrExemptionFormModel::hasExemption.name to hasEicrExemption)
         return this
     }
 }
