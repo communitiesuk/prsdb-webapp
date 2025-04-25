@@ -58,11 +58,19 @@ class LandlordDashboardTests : IntegrationTest() {
     }
 
     @Test
+    @Sql("/data-mockuser-landlord-with-one-incomplete-property.sql")
+    fun `the dashboard loads with a notification banner and correct message when the landlord has one incomplete property`(page: Page) {
+        val dashboard = navigator.goToLandlordDashboard()
+        assertThat(dashboard.notificationBanner.title).containsText("Important")
+        assertThat(dashboard.notificationBanner.subheading).containsText("You have 1 incomplete property: View incomplete properties")
+    }
+
+    @Test
     @Sql("/data-mockuser-landlord-with-incomplete-properties.sql")
     fun `the dashboard loads with a notification banner when the landlord has incomplete properties`(page: Page) {
         val dashboard = navigator.goToLandlordDashboard()
         assertThat(dashboard.notificationBanner.title).containsText("Important")
-        assertThat(dashboard.notificationBanner.subheading).containsText("You have 1 incomplete properties: View incomplete properties")
+        assertThat(dashboard.notificationBanner.subheading).containsText("You have 2 incomplete properties: View incomplete properties")
     }
 
     @Test
