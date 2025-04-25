@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionMissingPagePropertyCompliance
@@ -46,12 +47,12 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
     @Nested
     inner class JourneyTests {
         @Test
-        fun `User can navigate whole journey if pages are filled in correctly (in-date gas safety cert)`(page: Page) {
+        fun `User can navigate whole journey if pages are filled in correctly (in-date certs)`(page: Page) {
             // Start page
             val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
             assertThat(startPage.heading).containsText("Compliance certificates")
             startPage.startButton.clickAndWait()
-            val taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+            var taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
 
             // Task List page
             taskListPage.clickUploadTaskWithName("Upload the gas safety certificate")
@@ -82,18 +83,30 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             // Gas Safety Cert. Upload Confirmation page
             assertThat(gasSafetyUploadConfirmationPage.heading).containsText("Your file is being scanned")
             gasSafetyUploadConfirmationPage.saveAndContinueButton.clickAndWait()
-            assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+            taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-954: Continue journey test
+            // Task List page
+            taskListPage.clickUploadTaskWithName("Upload the Electrical Installation Condition Report (EICR)")
+            val eicrPage = assertPageIs(page, EicrPagePropertyCompliance::class, urlArguments)
+
+            // EICR page
+            eicrPage.submitHasCert()
+
+            // TODO PRSD-955: Continue test
+            assertContains(
+                page.url(),
+                PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
+                    "/${PropertyComplianceStepId.EicrIssueDate.urlPathSegment}",
+            )
         }
 
         @Test
-        fun `User can navigate whole journey if pages are filled in correctly (outdated gas safety cert)`(page: Page) {
+        fun `User can navigate whole journey if pages are filled in correctly (outdated certs)`(page: Page) {
             // Start page
             val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
             assertThat(startPage.heading).containsText("Compliance certificates")
             startPage.startButton.clickAndWait()
-            val taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+            var taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
 
             // Task List page
             taskListPage.clickUploadTaskWithName("Upload the gas safety certificate")
@@ -111,18 +124,30 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             // Gas Safety Outdated page
             assertThat(gasSafetyOutdatedPage.heading).containsText("Your gas safety certificate is out of date")
             gasSafetyOutdatedPage.saveAndReturnToTaskListButton.clickAndWait()
-            assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+            taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-954: Continue journey test
+            // Task List page
+            taskListPage.clickUploadTaskWithName("Upload the Electrical Installation Condition Report (EICR)")
+            val eicrPage = assertPageIs(page, EicrPagePropertyCompliance::class, urlArguments)
+
+            // EICR page
+            eicrPage.submitHasCert()
+
+            // TODO PRSD-955: Continue test
+            assertContains(
+                page.url(),
+                PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
+                    "/${PropertyComplianceStepId.EicrIssueDate.urlPathSegment}",
+            )
         }
 
         @Test
-        fun `User can navigate whole journey if pages are filled in correctly (no gas safety cert, exemption)`(page: Page) {
+        fun `User can navigate whole journey if pages are filled in correctly (no certs, exemptions)`(page: Page) {
             // Start page
             val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
             assertThat(startPage.heading).containsText("Compliance certificates")
             startPage.startButton.clickAndWait()
-            val taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+            var taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
 
             // Task List page
             taskListPage.clickUploadTaskWithName("Upload the gas safety certificate")
@@ -145,18 +170,30 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             assertThat(gasSafetyExemptionConfirmationPage.heading)
                 .containsText("You’ve marked this property as not needing a gas safety certificate")
             gasSafetyExemptionConfirmationPage.saveAndReturnToTaskListButton.clickAndWait()
-            assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+            taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-954: Continue journey test
+            // Task List page
+            taskListPage.clickUploadTaskWithName("Upload the Electrical Installation Condition Report (EICR)")
+            val eicrPage = assertPageIs(page, EicrPagePropertyCompliance::class, urlArguments)
+
+            // EICR page
+            eicrPage.submitHasNoCert()
+
+            // TODO PRSD-957: Continue test
+            assertContains(
+                page.url(),
+                PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
+                    "/${PropertyComplianceStepId.EicrExemption.urlPathSegment}",
+            )
         }
 
         @Test
-        fun `User can navigate whole journey if pages are filled in correctly (no gas safety cert, no exemption)`(page: Page) {
+        fun `User can navigate whole journey if pages are filled in correctly (no certs, no exemptions)`(page: Page) {
             // Start page
             val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
             assertThat(startPage.heading).containsText("Compliance certificates")
             startPage.startButton.clickAndWait()
-            val taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+            var taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
 
             // Task List page
             taskListPage.clickUploadTaskWithName("Upload the gas safety certificate")
@@ -173,9 +210,21 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             // Gas Safety Exemption Missing page
             assertThat(gasSafetyExemptionMissingPage.heading).containsText("You must get a valid gas safety certificate for this property")
             gasSafetyExemptionMissingPage.saveAndReturnToTaskListButton.clickAndWait()
-            assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+            taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-954: Continue journey test
+            // Task List page
+            taskListPage.clickUploadTaskWithName("Upload the Electrical Installation Condition Report (EICR)")
+            val eicrPage = assertPageIs(page, EicrPagePropertyCompliance::class, urlArguments)
+
+            // EICR page
+            eicrPage.submitHasNoCert()
+
+            // TODO PRSD-957: Continue test
+            assertContains(
+                page.url(),
+                PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
+                    "/${PropertyComplianceStepId.EicrExemption.urlPathSegment}",
+            )
         }
     }
 
@@ -319,6 +368,16 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
                 PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
                     "/${PropertyComplianceStepId.GasSafetyExemptionConfirmation.urlPathSegment}",
             )
+        }
+    }
+
+    @Nested
+    inner class EicrStepTests {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val eicrPage = navigator.goToPropertyComplianceEicrPage(PROPERTY_OWNERSHIP_ID)
+            eicrPage.form.submit()
+            assertThat(eicrPage.form.getErrorMessage()).containsText("Select whether you have an EICR for this property")
         }
     }
 
