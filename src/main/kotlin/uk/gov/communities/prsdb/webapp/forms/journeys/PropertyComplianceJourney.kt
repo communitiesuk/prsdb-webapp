@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasGasSafetyCertExemption
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsGasSafetyExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
@@ -117,7 +118,9 @@ class PropertyComplianceJourney(
                 PropertyComplianceStepId.EICR,
                 setOf(
                     eicrStep,
-                    placeholderStep(PropertyComplianceStepId.EicrIssueDate, "TODO PRSD-955: Implement EICR issue date step"),
+                    eicrIssueDateStep,
+                    placeholderStep(PropertyComplianceStepId.EicrUpload, "TODO PRSD-956: Implement EICR upload step"),
+                    placeholderStep(PropertyComplianceStepId.EicrOutdated, "TODO PRSD-961: Implement EICR outdated step"),
                     placeholderStep(PropertyComplianceStepId.EicrExemption, "TODO PRSD-957: Implement EICR exemption step"),
                 ),
                 "propertyCompliance.taskList.upload.eicr",
@@ -394,6 +397,25 @@ class PropertyComplianceJourney(
                 nextAction = { journeyData, _ -> eicrStepNextAction(journeyData) },
             )
 
+    private val eicrIssueDateStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EicrIssueDate,
+                page =
+                    Page(
+                        formModel = TodayOrPastDateFormModel::class,
+                        templateName = "forms/dateForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.todayOrPastDate.eicr.fieldSetHeading",
+                                "fieldSetHint" to "forms.todayOrPastDate.eicr.fieldSetHint",
+                                "submitButtonText" to "forms.buttons.saveAndContinue",
+                            ),
+                    ),
+                nextAction = { journeyData, _ -> eicrIssueDateStepNextAction(journeyData) },
+            )
+
     private fun placeholderStep(
         stepId: PropertyComplianceStepId,
         todoComment: String,
@@ -435,6 +457,13 @@ class PropertyComplianceJourney(
             Pair(PropertyComplianceStepId.EicrIssueDate, null)
         } else {
             Pair(PropertyComplianceStepId.EicrExemption, null)
+        }
+
+    private fun eicrIssueDateStepNextAction(journeyData: JourneyData) =
+        if (journeyData.getIsEicrOutdated()!!) {
+            Pair(PropertyComplianceStepId.EicrOutdated, null)
+        } else {
+            Pair(PropertyComplianceStepId.EicrUpload, null)
         }
 
     private fun getPropertyAddress() =
