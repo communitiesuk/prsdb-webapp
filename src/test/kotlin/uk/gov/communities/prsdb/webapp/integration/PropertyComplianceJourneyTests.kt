@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrIssueDatePagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
@@ -187,12 +188,16 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // EICR page
             eicrPage.submitHasNoCert()
+            val eicrExemptionPage = assertPageIs(page, EicrExemptionPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-957: Continue test
+            // EICR Exemption page
+            eicrExemptionPage.submitHasExemption()
+
+            // TODO PRSD-958: Continue test
             assertContains(
                 page.url(),
                 PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.EicrExemption.urlPathSegment}",
+                    "/${PropertyComplianceStepId.EicrExemptionReason.urlPathSegment}",
             )
         }
 
@@ -227,12 +232,16 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // EICR page
             eicrPage.submitHasNoCert()
+            val eicrExemptionPage = assertPageIs(page, EicrExemptionPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-957: Continue test
+            // EICR Exemption page
+            eicrExemptionPage.submitHasNoExemption()
+
+            // TODO PRSD-960: Continue test
             assertContains(
                 page.url(),
                 PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.EicrExemption.urlPathSegment}",
+                    "/${PropertyComplianceStepId.EicrExemptionMissing.urlPathSegment}",
             )
         }
     }
@@ -403,6 +412,17 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             val eicrIssueDatePage = navigator.goToPropertyComplianceEicrIssueDatePage(PROPERTY_OWNERSHIP_ID)
             eicrIssueDatePage.submitDate(day, month, year)
             assertThat(eicrIssueDatePage.form.getErrorMessage()).containsText(expectedErrorMessage)
+        }
+    }
+
+    @Nested
+    inner class EicrExemptionStepTests {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val eicrExemptionPage = navigator.goToPropertyComplianceEicrExemptionPage(PROPERTY_OWNERSHIP_ID)
+            eicrExemptionPage.form.submit()
+            assertThat(eicrExemptionPage.form.getErrorMessage())
+                .containsText("Select whether this property has an EICR exemption")
         }
     }
 
