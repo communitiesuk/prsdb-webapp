@@ -244,7 +244,6 @@ class UpdateLandlordDetailsJourney(
                                 UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
                         ),
                     lookupAddressPathSegment = UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
-                    addressLookupService = addressLookupService,
                     journeyDataService = journeyDataService,
                     displaySectionHeader = false,
                 ),
