@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsGasSafetyExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionOtherReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
@@ -134,10 +135,7 @@ class PropertyComplianceJourney(
                     ),
                     eicrExemptionStep,
                     eicrExemptionReasonStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.EicrExemptionOtherReason,
-                        "TODO PRSD-995: Implement EICR exemption other reason step",
-                    ),
+                    eicrExemptionOtherReasonStep,
                     placeholderStep(
                         PropertyComplianceStepId.EicrExemptionConfirmation,
                         "TODO PRSD-959: Implement EICR exemption confirmation step",
@@ -506,6 +504,25 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { journeyData, _ -> eicrExemptionReasonStepNextAction(journeyData) },
+            )
+
+    private val eicrExemptionOtherReasonStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EicrExemptionOtherReason,
+                page =
+                    Page(
+                        formModel = EicrExemptionOtherReasonFormModel::class,
+                        templateName = "forms/exemptionOtherReasonForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.eicrExemptionOtherReason.fieldSetHeading",
+                                "fieldSetHint" to "forms.eicrExemptionOtherReason.fieldSetHint",
+                                "limit" to EXEMPTION_OTHER_REASON_MAX_LENGTH,
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrExemptionConfirmation, null) },
             )
 
     private fun placeholderStep(
