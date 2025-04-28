@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationCheckAnsw
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationNumberOfPeoplePage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
+import uk.gov.communities.prsdb.webapp.forms.steps.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
@@ -109,6 +110,7 @@ class PropertyRegistrationJourney(
             setOf(
                 lookupAddressStep(),
                 selectAddressStep(),
+                noAddressFoundStep(),
                 alreadyRegisteredStep(),
                 manualAddressStep(),
                 localAuthorityStep(),
@@ -140,7 +142,7 @@ class PropertyRegistrationJourney(
         )
 
     private fun lookupAddressStep() =
-        Step(
+        LookupAddressStep(
             id = RegisterPropertyStepId.LookupAddress,
             page =
                 Page(
@@ -159,7 +161,10 @@ class PropertyRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
-            nextAction = { _, _ -> Pair(RegisterPropertyStepId.SelectAddress, null) },
+            nextStepIfAddressesFound = RegisterPropertyStepId.SelectAddress,
+            nextStepIfNoAddressesFound = RegisterPropertyStepId.NoAddressFound,
+            addressLookupService = addressLookupService,
+            journeyDataService = journeyDataService,
         )
 
     private fun selectAddressStep() =
@@ -207,6 +212,27 @@ class PropertyRegistrationJourney(
                         ),
                     selectedAddressPathSegment = RegisterPropertyStepId.SelectAddress.urlPathSegment,
                 ),
+        )
+
+    private fun noAddressFoundStep() =
+        Step(
+            id = RegisterPropertyStepId.NoAddressFound,
+            page =
+                Page(
+                    formModel = NoInputFormModel::class,
+                    templateName = "noAddressFoundPage",
+                    content =
+                        mapOf(
+                            "title" to "registerProperty.title",
+                            "postcode" to "HARDCODED POSTCODE",
+                            "houseNameOrNumber" to "HARDCODED HOUSE NUMBER",
+                            "searchAgainUrl" to
+                                "/$REGISTER_PROPERTY_JOURNEY_URL/" +
+                                RegisterPropertyStepId.LookupAddress.urlPathSegment,
+                        ),
+                    shouldDisplaySectionHeader = true,
+                ),
+            nextAction = { _, _ -> Pair(RegisterPropertyStepId.ManualAddress, null) },
         )
 
     private fun manualAddressStep() =
