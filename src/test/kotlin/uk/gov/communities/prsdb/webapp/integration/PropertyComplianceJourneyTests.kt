@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrIssueDatePagePropertyCompliance
@@ -446,12 +447,38 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
         fun `Submitting with 'other' selected redirects to the EICR exemption other reason page`(page: Page) {
             val eicrExemptionReasonPage = navigator.goToPropertyComplianceEicrExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
             eicrExemptionReasonPage.submitExemptionReason(EicrExemptionReason.OTHER)
+            assertPageIs(page, EicrExemptionOtherReasonPagePropertyCompliance::class, urlArguments)
+        }
+    }
 
-            // TODO PRSD-995: Replace with EICR other exemption page
+    @Nested
+    inner class EicrExemptionOtherReasonStepTests {
+        @Test
+        fun `Submitting with no reason returns an error`(page: Page) {
+            val eicrExemptionOtherReasonPage = navigator.goToPropertyComplianceEicrExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
+            eicrExemptionOtherReasonPage.form.submit()
+            assertThat(eicrExemptionOtherReasonPage.form.getErrorMessage())
+                .containsText("Explain why your property is exempt from needing an EICR")
+        }
+
+        @Test
+        fun `Submitting with a too long reason returns an error`(page: Page) {
+            val eicrExemptionOtherReasonPage = navigator.goToPropertyComplianceEicrExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
+            eicrExemptionOtherReasonPage.submitReason("too long reason".repeat(EXEMPTION_OTHER_REASON_MAX_LENGTH))
+            assertThat(eicrExemptionOtherReasonPage.form.getErrorMessage("otherReason"))
+                .containsText("Explanation must be 200 characters or fewer")
+        }
+
+        @Test
+        fun `Submitting with a valid reason redirects to the gas safety exemption confirmation page`(page: Page) {
+            val eicrExemptionOtherReasonPage = navigator.goToPropertyComplianceEicrExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
+            eicrExemptionOtherReasonPage.submitReason("valid reason")
+
+            // TODO PRSD-959: Replace with gas exemption confirmation page
             assertContains(
                 page.url(),
                 PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.EicrExemptionOtherReason.urlPathSegment}",
+                    "/${PropertyComplianceStepId.EicrExemptionConfirmation.urlPathSegment}",
             )
         }
     }
