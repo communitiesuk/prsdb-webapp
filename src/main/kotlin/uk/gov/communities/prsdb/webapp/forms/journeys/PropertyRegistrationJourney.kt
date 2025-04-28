@@ -110,8 +110,8 @@ class PropertyRegistrationJourney(
             RegisterPropertyStepId.LookupAddress,
             setOf(
                 lookupAddressStep(),
-                selectAddressStep(),
                 noAddressFoundStep(),
+                selectAddressStep(),
                 alreadyRegisteredStep(),
                 manualAddressStep(),
                 localAuthorityStep(),
@@ -216,15 +216,12 @@ class PropertyRegistrationJourney(
         )
 
     private fun noAddressFoundStep(): Step<RegisterPropertyStepId> {
-        val lookupAddressHouseNameOrNumberAndPostcode =
+        val (houseNameOrNumber, postcode) =
             JourneyDataHelper
                 .getLookupAddressHouseNameOrNumberAndPostcode(
                     journeyDataService.getJourneyDataFromSession(),
                     RegisterPropertyStepId.LookupAddress.urlPathSegment,
-                )
-
-        val houseNameOrNumber = lookupAddressHouseNameOrNumberAndPostcode?.first ?: ""
-        val postcode = lookupAddressHouseNameOrNumberAndPostcode?.second ?: ""
+                ) ?: Pair("", "")
 
         return Step(
             id = RegisterPropertyStepId.NoAddressFound,

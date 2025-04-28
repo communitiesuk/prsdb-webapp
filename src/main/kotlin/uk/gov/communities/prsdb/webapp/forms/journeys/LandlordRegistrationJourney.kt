@@ -314,15 +314,12 @@ class LandlordRegistrationJourney(
         lookupAddressStepId: LandlordRegistrationStepId,
         manualAddressStepId: LandlordRegistrationStepId,
     ): Step<LandlordRegistrationStepId> {
-        val lookupAddressHouseNameOrNumberAndPostcode =
+        val (houseNameOrNumber, postcode) =
             JourneyDataHelper
                 .getLookupAddressHouseNameOrNumberAndPostcode(
                     journeyDataService.getJourneyDataFromSession(),
                     lookupAddressStepId.urlPathSegment,
-                )
-
-        val houseNameOrNumber = lookupAddressHouseNameOrNumberAndPostcode?.first ?: ""
-        val postcode = lookupAddressHouseNameOrNumberAndPostcode?.second ?: ""
+                ) ?: Pair("", "")
 
         return Step(
             id = noAddressFoundStepId,
