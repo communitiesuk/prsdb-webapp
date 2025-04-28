@@ -341,7 +341,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     }
 
     @Nested
-    inner class LookupAddressStep {
+    inner class LookupAddressStepAndNoAddressFound {
         @Test
         fun `Submitting with empty data fields returns an error`(page: Page) {
             val lookupAddressPage = navigator.goToPropertyRegistrationLookupAddressPage()
@@ -351,35 +351,27 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         }
 
         @Test
-        fun `Navigates to the No Address Found step if no addresses are returned`(page: Page) {
+        fun `If no addresses are returned, user can search again or enter address manually via the No Address Found step`(page: Page) {
+            // Lookup address finds no results
             val houseNumber = "15"
             val postcode = "AB1 2CD"
             whenever(osPlacesClient.search(houseNumber, postcode)).thenReturn("{}")
-
             val lookupAddressPage = navigator.goToPropertyRegistrationLookupAddressPage()
-            lookupAddressPage.form.houseNameOrNumberInput.fill(houseNumber)
-            lookupAddressPage.form.postcodeInput.fill(postcode)
-            lookupAddressPage.form.submit()
+            lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
 
+            // redirect to noAddressFoundPage
             val noAddressFoundPage = assertPageIs(page, NoAddressFoundFormPagePropertyRegistration::class)
             assertThat(noAddressFoundPage.heading).containsText(houseNumber)
             assertThat(noAddressFoundPage.heading).containsText(postcode)
-        }
-    }
 
-    @Nested
-    inner class NoAddressFoundStep {
-        @Test
-        fun `Clicking Search Again navigates to the Lookup Address step`(page: Page) {
-            val noAddressFoundPage = navigator.goToPropertyRegistrationNoAddressFoundPage(osPlacesClient, "15", "AB1 2CD")
+            // Search Again
             noAddressFoundPage.searchAgain.clickAndWait()
-            assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
-        }
+            val lookupAddressPageAgain = assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
+            lookupAddressPageAgain.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
 
-        @Test
-        fun `Submitting navigates to the Manual Address step`(page: Page) {
-            val noAddressFoundPage = navigator.goToPropertyRegistrationNoAddressFoundPage(osPlacesClient, "15", "AB1 2CD")
-            noAddressFoundPage.form.submit()
+            // Submit no address found page
+            val noAddressFoundPageAgain = assertPageIs(page, NoAddressFoundFormPagePropertyRegistration::class)
+            noAddressFoundPageAgain.form.submit()
             assertPageIs(page, ManualAddressFormPagePropertyRegistration::class)
         }
     }

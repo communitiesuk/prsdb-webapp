@@ -36,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordUpdateDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalAuthorityView
@@ -58,8 +59,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NoAddressFoundFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NoContactAddressFoundFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NonEnglandOrWalesAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
@@ -184,17 +183,6 @@ class Navigator(
         return createValidPage(page, LookupAddressFormPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationNoAddressFoundPage(
-        osPlacesClient: OSPlacesClient,
-        houseNameOrNumber: String,
-        postcode: String,
-    ): NoAddressFoundFormPageLandlordRegistration {
-        val addressLookupPage = goToLandlordRegistrationLookupAddressPage()
-        whenever(osPlacesClient.search(houseNameOrNumber, postcode)).thenReturn("{}")
-        addressLookupPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNameOrNumber)
-        return createValidPage(page, NoAddressFoundFormPageLandlordRegistration::class)
-    }
-
     fun goToLandlordRegistrationSelectAddressPage(): SelectAddressFormPageLandlordRegistration {
         val lookupAddressPage = goToLandlordRegistrationLookupAddressPage()
         lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG", "1")
@@ -217,17 +205,6 @@ class Navigator(
         val nonEnglandOrWalesAddressPage = goToLandlordRegistrationNonEnglandOrWalesAddressPage()
         nonEnglandOrWalesAddressPage.submitAddress("test address")
         return createValidPage(page, LookupContactAddressFormPageLandlordRegistration::class)
-    }
-
-    fun goToLandlordRegistrationNoContactAddressFoundPage(
-        osPlacesClient: OSPlacesClient,
-        houseNameOrNumber: String,
-        postcode: String,
-    ): NoContactAddressFoundFormPageLandlordRegistration {
-        val addressLookupPage = goToLandlordRegistrationLookupContactAddressPage()
-        whenever(osPlacesClient.search(houseNameOrNumber, postcode)).thenReturn("{}")
-        addressLookupPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNameOrNumber)
-        return createValidPage(page, NoContactAddressFoundFormPageLandlordRegistration::class)
     }
 
     fun goToLandlordRegistrationSelectContactAddressPage(): SelectContactAddressFormPageLandlordRegistration {
@@ -529,6 +506,13 @@ class Navigator(
     fun goToUpdateLandlordDetailsPage(): LandlordUpdateDetailsPage {
         navigate("${LandlordDetailsController.UPDATE_ROUTE}/$DETAILS_PATH_SEGMENT")
         return createValidPage(page, LandlordUpdateDetailsPage::class)
+    }
+
+    fun goToUpdateLandlordDetailsLookupAddressPage(): LookupAddressFormPageUpdateLandlordDetails {
+        val detailsPage = goToUpdateLandlordDetailsPage()
+        detailsPage.personalDetailsSummaryList.addressRow.actions.actionLink
+            .clickAndWait()
+        return createValidPage(page, LookupAddressFormPageUpdateLandlordDetails::class)
     }
 
     fun goToPropertyDetailsUpdatePage(propertyOwnershipId: Long): PropertyDetailsUpdatePage {
