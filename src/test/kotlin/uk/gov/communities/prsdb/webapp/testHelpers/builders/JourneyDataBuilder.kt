@@ -5,6 +5,7 @@ import kotlinx.serialization.json.Json
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -17,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
@@ -457,6 +459,12 @@ class JourneyDataBuilder(
     fun withEicrExemptionStatus(hasEicrExemption: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EicrExemption.urlPathSegment] =
             mapOf(EicrExemptionFormModel::hasExemption.name to hasEicrExemption)
+        return this
+    }
+
+    fun withEicrExemptionReason(eicrExemptionReason: EicrExemptionReason): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EicrExemptionReason.urlPathSegment] =
+            mapOf(EicrExemptionReasonFormModel::exemptionReason.name to eicrExemptionReason)
         return this
     }
 }
