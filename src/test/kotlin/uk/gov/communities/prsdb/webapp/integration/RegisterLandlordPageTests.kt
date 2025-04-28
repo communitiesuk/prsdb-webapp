@@ -52,6 +52,6 @@ class RegisterLandlordPageTests : IntegrationTest() {
         val startPage = navigator.goToLandlordRegistrationStartPage()
         startPage.startButton.clickAndWait()
         val dashboardPage = assertPageIs(page, LandlordDashboardPage::class)
-        BaseComponent.assertThat(dashboardPage.bannerHeading).containsText("Alexander Smith")
+        BaseComponent.assertThat(dashboardPage.dashboardBannerHeading).containsText("Alexander Smith")
     }
 }
