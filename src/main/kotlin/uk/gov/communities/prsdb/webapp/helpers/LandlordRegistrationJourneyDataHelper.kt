@@ -4,6 +4,7 @@ import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOfResidenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DateOfBirthFormModel
@@ -105,7 +106,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
         ): AddressDataModel? {
             val livesInEnglandOrWales = getLivesInEnglandOrWales(journeyData) ?: return null
 
-            return if (isManualAddressChosen(journeyData, !livesInEnglandOrWales)) {
+            return if (isManualAddressChosen(journeyData, !livesInEnglandOrWales, lookedUpAddresses)) {
                 getManualAddress(journeyData, !livesInEnglandOrWales)
             } else {
                 val selectedAddress = getSelectedAddress(journeyData, !livesInEnglandOrWales) ?: return null
@@ -159,7 +160,11 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
         fun isManualAddressChosen(
             journeyData: JourneyData,
             isContactAddress: Boolean = false,
-        ) = getSelectedAddress(journeyData, isContactAddress) == MANUAL_ADDRESS_CHOSEN
+            lookedUpAddresses: List<AddressDataModel>? = null,
+        ): Boolean {
+            val lookedUpAddressList = lookedUpAddresses ?: journeyData.getLookedUpAddresses()
+            return lookedUpAddressList.isEmpty() || getSelectedAddress(journeyData, isContactAddress) == MANUAL_ADDRESS_CHOSEN
+        }
 
         fun getCountryOfResidence(journeyData: JourneyData): String =
             getNonEnglandOrWalesCountryOfResidence(journeyData) ?: ENGLAND_OR_WALES

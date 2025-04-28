@@ -69,11 +69,30 @@ class UpdateLandlordDetailsJourneyDataHelperTests {
     }
 
     @Test
-    fun `getAddressIfPresent returns a manual address if the manual address in in journey data`() {
+    fun `getAddressIfPresent returns a manual address if manual address was selected and the manual address in in journey data`() {
         val lineOne = "first line"
         val locality = "a place"
         val postcode = "EG1 9ZY"
-        val testJourneyData = journeyDataBuilder.withManualAddress(lineOne, locality, postcode).build()
+        val testJourneyData = journeyDataBuilder.withManualAddressSelected().withManualAddress(lineOne, locality, postcode).build()
+
+        val addressUpdate = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(testJourneyData)
+
+        assertEquals(
+            AddressDataModel(
+                AddressDataModel.manualAddressDataToSingleLineAddress(lineOne, locality, postcode),
+                townName = locality,
+                postcode = postcode,
+            ),
+            addressUpdate,
+        )
+    }
+
+    @Test
+    fun `getAddressIfPresent returns a manual address if lookup returned no addresses and the manual address in in journey data`() {
+        val lineOne = "first line"
+        val locality = "a place"
+        val postcode = "EG1 9ZY"
+        val testJourneyData = journeyDataBuilder.withEmptyLookedUpAddresses().withManualAddress(lineOne, locality, postcode).build()
 
         val addressUpdate = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(testJourneyData)
 

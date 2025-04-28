@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoAdditionalLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoMandatoryLicenceFormModel
@@ -24,7 +25,7 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
             journeyData: JourneyData,
             lookedUpAddresses: List<AddressDataModel>,
         ): AddressDataModel? =
-            if (isManualAddressChosen(journeyData)) {
+            if (isManualAddressChosen(journeyData, lookedUpAddresses)) {
                 getManualAddress(
                     journeyData,
                     RegisterPropertyStepId.ManualAddress.urlPathSegment,
@@ -106,6 +107,12 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
                 SelectAddressFormModel::address.name,
             )
 
-        fun isManualAddressChosen(journeyData: JourneyData) = getSelectedAddress(journeyData) == MANUAL_ADDRESS_CHOSEN
+        fun isManualAddressChosen(
+            journeyData: JourneyData,
+            lookedUpAddresses: List<AddressDataModel>? = null,
+        ): Boolean {
+            val lookedUpAddressList = lookedUpAddresses ?: journeyData.getLookedUpAddresses()
+            return lookedUpAddressList.isEmpty() || getSelectedAddress(journeyData) == MANUAL_ADDRESS_CHOSEN
+        }
     }
 }
