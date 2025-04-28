@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_EXEMPTION_OTHER_REASON_MAX_LENGTH
+import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.LengthConstraintValidator
@@ -18,7 +18,7 @@ class GasSafetyExemptionOtherReasonFormModel : FormModel {
             ConstraintDescriptor(
                 messageKey = "forms.gasSafetyExemptionOtherReason.error.tooLong",
                 validatorType = LengthConstraintValidator::class,
-                validatorArgs = arrayOf("0", GAS_SAFETY_EXEMPTION_OTHER_REASON_MAX_LENGTH.toString()),
+                validatorArgs = arrayOf("0", EXEMPTION_OTHER_REASON_MAX_LENGTH.toString()),
             ),
         ],
     )

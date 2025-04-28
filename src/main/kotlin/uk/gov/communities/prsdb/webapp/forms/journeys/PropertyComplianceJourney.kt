@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_EXEMPTION_OTHER_REASON_MAX_LENGTH
+import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -349,7 +349,7 @@ class PropertyComplianceJourney(
                                 "title" to "propertyCompliance.title",
                                 "fieldSetHeading" to "forms.gasSafetyExemptionOtherReason.fieldSetHeading",
                                 "fieldSetHint" to "forms.gasSafetyExemptionOtherReason.fieldSetHint",
-                                "limit" to GAS_SAFETY_EXEMPTION_OTHER_REASON_MAX_LENGTH,
+                                "limit" to EXEMPTION_OTHER_REASON_MAX_LENGTH,
                             ),
                     ),
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyExemptionConfirmation, null) },
