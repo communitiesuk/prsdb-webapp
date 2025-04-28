@@ -59,6 +59,8 @@ class PropertyComplianceControllerTests(
     @Mock
     private lateinit var propertyComplianceJourney: PropertyComplianceJourney
 
+    private val propertyComplianceJourneyRedirectUrl = "any-url"
+
     private val validPropertyOwnershipId = 1L
     private val validPropertyComplianceUrl = PropertyComplianceController.getPropertyCompliancePath(validPropertyOwnershipId)
     private val validPropertyComplianceInitialStepUrl =
@@ -215,7 +217,7 @@ class PropertyComplianceControllerTests(
                     eq(null),
                     anyOrNull(),
                 ),
-            ).thenReturn(ModelAndView("redirect:"))
+            ).thenReturn(ModelAndView("redirect:$propertyComplianceJourneyRedirectUrl"))
         }
 
         @Test
@@ -262,6 +264,7 @@ class PropertyComplianceControllerTests(
                     with(csrf())
                 }.andExpect {
                     status { is3xxRedirection() }
+                    redirectedUrl(propertyComplianceJourneyRedirectUrl)
                 }
         }
     }
@@ -294,7 +297,7 @@ class PropertyComplianceControllerTests(
                     eq(null),
                     anyOrNull(),
                 ),
-            ).thenReturn(ModelAndView("redirect:"))
+            ).thenReturn(ModelAndView("redirect:$propertyComplianceJourneyRedirectUrl"))
         }
 
         @Test
@@ -378,6 +381,7 @@ class PropertyComplianceControllerTests(
                     cookie(validFileUploadCookie)
                 }.andExpect {
                     status { is3xxRedirection() }
+                    redirectedUrl(propertyComplianceJourneyRedirectUrl)
                     cookie { value(FILE_UPLOAD_COOKIE_NAME, validFileUploadCookie.value) }
                 }
 
@@ -400,6 +404,7 @@ class PropertyComplianceControllerTests(
                     cookie(validFileUploadCookie)
                 }.andExpect {
                     status { is3xxRedirection() }
+                    redirectedUrl(propertyComplianceJourneyRedirectUrl)
                     cookie { value(FILE_UPLOAD_COOKIE_NAME, validFileUploadCookie.value) }
                 }
 
@@ -422,6 +427,7 @@ class PropertyComplianceControllerTests(
                     cookie(validFileUploadCookie)
                 }.andExpect {
                     status { is3xxRedirection() }
+                    redirectedUrl(propertyComplianceJourneyRedirectUrl)
                 }
 
             verify(tokenCookieService).useToken(validFileUploadCookie.value)
