@@ -22,43 +22,56 @@ class LookupAddressStep<T : StepId>(
         id = id,
         page = page,
         isSatisfied = isSatisfied,
+        nextAction = { journeyData: JourneyData, subPageNumber: Int? ->
+            Pair(getNextStep(journeyData, nextStepIfAddressesFound, nextStepIfNoAddressesFound), subPageNumber)
+        },
         saveAfterSubmit = saveAfterSubmit,
-    ) {
-    override var nextAction: (JourneyData, Int?) -> Pair<T?, Int?> =
-        { _: JourneyData, subPageNumber: Int? -> Pair(getNextStep(), subPageNumber) }
-
-    override var handleSubmitAndRedirect: ((JourneyData, Int?) -> String)? = { journeyData: JourneyData, subPageNumber: Int? ->
-        performAddressLookupCacheResultsAndGetRedirect(
-            journeyData,
-            subPageNumber,
-        )
-    }
-
-    private fun performAddressLookupCacheResultsAndGetRedirect(
-        journeyData: JourneyData,
-        subPageNumber: Int?,
-    ): String {
-        val (houseNameOrNumber, postcode) =
-            JourneyDataHelper.getLookupAddressHouseNameOrNumberAndPostcode(
+        handleSubmitAndRedirect = { journeyData: JourneyData, subPageNumber: Int? ->
+            performAddressLookupCacheResultsAndGetRedirect(
                 journeyData,
-                id.urlPathSegment,
-            )!!
-        val addressLookupResults = addressLookupService.search(houseNameOrNumber, postcode)
+                subPageNumber,
+                id,
+                nextStepIfAddressesFound,
+                nextStepIfNoAddressesFound,
+                journeyDataService,
+                addressLookupService,
+            )
+        },
+    ) {
+    companion object {
+        fun <T : StepId> getNextStep(
+            journeyData: JourneyData,
+            nextStepIfAddressesFound: T,
+            nextStepIfNoAddressesFound: T,
+        ): T =
+            if (journeyData.getLookedUpAddresses().isEmpty()) {
+                nextStepIfNoAddressesFound
+            } else {
+                nextStepIfAddressesFound
+            }
 
-        val updatedJourneyData = journeyData.withUpdatedLookedUpAddresses(addressLookupResults)
-        journeyDataService.setJourneyDataInSession(updatedJourneyData)
+        fun <T : StepId> performAddressLookupCacheResultsAndGetRedirect(
+            journeyData: JourneyData,
+            subPageNumber: Int?,
+            id: T,
+            nextStepIfAddressesFound: T,
+            nextStepIfNoAddressesFound: T,
+            journeyDataService: JourneyDataService,
+            addressLookupService: AddressLookupService,
+        ): String {
+            val (houseNameOrNumber, postcode) =
+                JourneyDataHelper.getLookupAddressHouseNameOrNumberAndPostcode(
+                    journeyData,
+                    id.urlPathSegment,
+                )!!
+            val addressLookupResults = addressLookupService.search(houseNameOrNumber, postcode)
 
-        val nextStepId = getNextStep()
+            val updatedJourneyData = journeyData.withUpdatedLookedUpAddresses(addressLookupResults)
+            journeyDataService.setJourneyDataInSession(updatedJourneyData)
 
-        return Step.generateUrl(nextStepId, subPageNumber)
-    }
+            val nextStepId = getNextStep(updatedJourneyData, nextStepIfAddressesFound, nextStepIfNoAddressesFound)
 
-    private fun getNextStep(): T {
-        val journeyData = journeyDataService.getJourneyDataFromSession()
-        return if (journeyData.getLookedUpAddresses().isEmpty()) {
-            nextStepIfNoAddressesFound
-        } else {
-            nextStepIfAddressesFound
+            return Step.generateUrl(nextStepId, subPageNumber)
         }
     }
 }

@@ -6,10 +6,12 @@ import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
+import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyRepository
@@ -20,6 +22,7 @@ class PropertyRegistrationService(
     private val propertyRepository: PropertyRepository,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val landlordRepository: LandlordRepository,
+    private val formContextRepository: FormContextRepository,
     private val registeredAddressCache: RegisteredAddressCache,
     private val propertyService: PropertyService,
     private val licenseService: LicenseService,
@@ -92,4 +95,17 @@ class PropertyRegistrationService(
     fun setLastPrnRegisteredThisSession(prn: Long) = session.setAttribute(PROPERTY_REGISTRATION_NUMBER, prn)
 
     fun getLastPrnRegisteredThisSession() = session.getAttribute(PROPERTY_REGISTRATION_NUMBER)?.toString()?.toLong()
+
+    fun getNumberOfIncompletePropertyRegistrationsForLandlord(principalName: String): Int? {
+        val incompleteProperties =
+            formContextRepository.countFormContextsByUser_IdAndJourneyType(
+                principalName,
+                JourneyType.PROPERTY_REGISTRATION,
+            )
+
+        if (incompleteProperties > 0) {
+            return incompleteProperties
+        }
+        return null
+    }
 }

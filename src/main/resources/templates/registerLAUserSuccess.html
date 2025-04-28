@@ -4,7 +4,7 @@
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <div id="confirmation-banner"
-             th:replace="~{fragments/confirmationPageBanner :: confirmationPageBanner(#{registerLaUser.success.banner.title(${localAuthority})}, ~{::#confirmation-banner/content()})}">
+             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{registerLaUser.success.banner.title(${localAuthority})}, ~{::#confirmation-banner/content()})}">
         </div>
         <h2 class="govuk-heading-m" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h2>
         <p class="govuk-body" th:text="#{registerLaUser.success.whatHappensNext.paragraph.one}">

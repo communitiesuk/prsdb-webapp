@@ -119,7 +119,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         confirmationPage.goToDashboardButton.clickAndWait()
         val dashboard = assertPageIs(page, LandlordDashboardPage::class)
 
-        assertThat(dashboard.bannerSubHeading).containsText("Landlord registration number")
+        assertThat(dashboard.dashboardBannerSubHeading).containsText("Landlord registration number")
     }
 
     @Test
@@ -286,7 +286,7 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Navigating here as a registered landlord redirects to the landlord dashboard page`() {
             val dashboardPage = navigator.goToLandlordRegistrationVerifyIdentityAsRegisteredLandlord()
-            assertThat(dashboardPage.bannerHeading).containsText("Alexander Smith")
+            assertThat(dashboardPage.dashboardBannerHeading).containsText("Alexander Smith")
         }
     }
 

@@ -49,6 +49,9 @@ one-login:
 notify:
   api-key: ${EMAILNOTIFICATIONS_APIKEY}
 
+epc:
+  base-url: https://api.epb-staging.digital.communities.gov.uk
+
 server:
   error:
     path: /error
@@ -75,6 +78,11 @@ spring:
             authorization-grant-type: authorization_code
             scope: openid
             redirect-uri: http://localhost:8080/login/oauth2/code/one-login
+          epc-register:
+            client-id: cb34efcd-4e22-439f-a15e-fcb8abdf73a2
+            client-secret: ${EPC_REGISTER_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope:
         provider:
           one-login:
             authorization-uri: http://localhost:8080/local/one-login/authorize
@@ -82,6 +90,9 @@ spring:
             jwk-set-uri: http://localhost:8080/local/one-login/.well-known/jwks.json
             user-info-uri: http://localhost:8080/local/one-login/userinfo
             userNameAttribute: "sub"
+          epc-register:
+            token-uri: https://api.epb-staging.digital.communities.gov.uk/auth/oauth/token
+
 one-login.did.uri: http://localhost:8080/local/one-login/.well-known/did.json
 
 ---

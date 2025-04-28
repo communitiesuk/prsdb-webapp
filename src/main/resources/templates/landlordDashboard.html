@@ -2,8 +2,14 @@
 <html th:replace="~{fragments/layout :: layout(#{dashboard.title}, ~{::main}, false)}">
 <main class="govuk-main-wrapper">
     <div id="page-content">
+        <div id="notification-banner"
+             th:replace="${incompleteProperties != null} ? ~{fragments/banners/notificationBanner :: notificationBanner(#{landlord.dashboard.notification.banner.title},
+             #{landlord.dashboard.notification.banner.subheadingBeforeNumber} + ' ' + ${incompleteProperties} + ' ' + (${incompleteProperties != 1} ? #{landlord.dashboard.notification.banner.subheadingAfterNumber} : #{landlord.dashboard.notification.banner.subheadingAfterNumberIsOne}) + ' ',
+             ${viewIncompletePropertiesUrl}, #{landlord.dashboard.notification.banner.linkText})} : ~{}">
+            Incomplete properties notification banner
+        </div>
         <div id="dashboard-banner"
-             th:replace="~{fragments/dashboardBanner :: dashboardBanner(${landlordName}, ~{::#dashboard-banner/content()})}">
+             th:replace="~{fragments/banners/dashboardBanner :: dashboardBanner(${landlordName}, ~{::#dashboard-banner/content()})}">
             <strong th:text="#{landlord.dashboard.banner.subheading}">landlord.dashboard.banner.subheading</strong>
             <span th:text="${lrn}">LRN</span>
         </div>
@@ -13,6 +19,11 @@
                 <div class="govuk-grid-column-one-third prsd-dashboard__stretched-button-container">
                     <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${registerPropertyUrl}, #{landlord.dashboard.registerProperty.button})}">
                         landlord.dashboard.registerProperty.button
+                    </a>
+                </div>
+                <div class="govuk-grid-column-one-third prsd-dashboard__stretched-button-container">
+                    <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${viewIncompletePropertiesUrl}, #{landlord.dashboard.viewIncompleteProperties.button})}">
+                        landlord.dashboard.viewIncompleteProperties.button
                     </a>
                 </div>
             </div>
