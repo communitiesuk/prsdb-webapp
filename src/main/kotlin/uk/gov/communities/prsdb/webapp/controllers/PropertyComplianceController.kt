@@ -138,7 +138,8 @@ class PropertyComplianceController(
 
         val isUploadSuccessfulOrNull =
             if (isFileValid(file, request.contentLengthLong)) {
-                uploadFile(file, request.contentLengthLong, propertyOwnershipId)
+                val uploadFileName = PropertyComplianceJourneyExtensions.getCertFilename(propertyOwnershipId, stepName, file.name)
+                uploadFile(uploadFileName, file, request.contentLengthLong)
             } else {
                 null
             }
@@ -181,14 +182,10 @@ class PropertyComplianceController(
     }
 
     private fun uploadFile(
+        uploadFileName: String,
         file: FileItemInput,
         fileLength: Long,
-        propertyOwnershipId: Long,
-    ): Boolean =
-        fileUploader.uploadFile(
-            PropertyComplianceJourneyExtensions.getGasSafetyCertFilename(propertyOwnershipId, file.name),
-            file.inputStream.withMaxLength(fileLength),
-        )
+    ): Boolean = fileUploader.uploadFile(uploadFileName, file.inputStream.withMaxLength(fileLength))
 
     companion object {
         const val PROPERTY_COMPLIANCE_ROUTE = "/$PROPERTY_COMPLIANCE_PATH_SEGMENT/{propertyOwnershipId}"

@@ -4,6 +4,7 @@ import kotlinx.datetime.toKotlinLocalDate
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -12,6 +13,7 @@ import org.mockito.Mockito.mockConstruction
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasEicrExemption
@@ -30,6 +32,9 @@ class PropertyComplianceJourneyExtensionsTests {
     companion object {
         // currentDate is an arbitrary date
         private val currentDate = LocalDate.of(2020, 1, 5).toKotlinLocalDate()
+
+        private const val PROPERTY_OWNERSHIP_ID = 1L
+        private const val ORIGINAL_FILE_EXT = "png"
 
         @JvmStatic
         private fun provideGasSafetyCertIssueDates() =
@@ -59,6 +64,19 @@ class PropertyComplianceJourneyExtensionsTests {
             arrayOf(
                 Arguments.of(Named.of("other", EicrExemptionReason.OTHER), true),
                 Arguments.of(Named.of("not other", EicrExemptionReason.LIVE_IN_LANDLORD), false),
+            )
+
+        @JvmStatic
+        private fun provideFileUploadStepNames() =
+            arrayOf(
+                Arguments.of(
+                    Named.of(PropertyComplianceStepId.GasSafetyUpload.name, PropertyComplianceStepId.GasSafetyUpload.urlPathSegment),
+                    "property_${PROPERTY_OWNERSHIP_ID}_gas_safety_certificate.$ORIGINAL_FILE_EXT",
+                ),
+                Arguments.of(
+                    Named.of(PropertyComplianceStepId.EicrUpload.name, PropertyComplianceStepId.EicrUpload.urlPathSegment),
+                    "property_${PROPERTY_OWNERSHIP_ID}_eicr.$ORIGINAL_FILE_EXT",
+                ),
             )
     }
 
@@ -155,19 +173,6 @@ class PropertyComplianceJourneyExtensionsTests {
     }
 
     @Test
-    fun `getGasSafetyCertFilename returns the corresponding file name`() {
-        val expectedFileName = "property_1_gas_safety_certificate.png"
-
-        val returnedFileName =
-            PropertyComplianceJourneyExtensions.getGasSafetyCertFilename(
-                propertyOwnershipId = 1,
-                originalFileName = "file.png",
-            )
-
-        assertEquals(expectedFileName, returnedFileName)
-    }
-
-    @Test
     fun `getHasEICR returns a boolean if the corresponding page is in journeyData`() {
         val hasEICR = true
         val testJourneyData = journeyDataBuilder.withEicrStatus(hasEICR).build()
@@ -250,5 +255,29 @@ class PropertyComplianceJourneyExtensionsTests {
         val retrievedIsEicrExemptionReasonOther = testJourneyData.getIsEicrExemptionReasonOther()
 
         assertNull(retrievedIsEicrExemptionReasonOther)
+    }
+
+    @ParameterizedTest(name = "for the {0} step")
+    @MethodSource("provideFileUploadStepNames")
+    fun `getCertFilename returns the corresponding file name`(
+        stepName: String,
+        expectedFileName: String,
+    ) {
+        val originalFileName = "any-name.$ORIGINAL_FILE_EXT"
+
+        assertEquals(
+            expectedFileName,
+            PropertyComplianceJourneyExtensions.getCertFilename(PROPERTY_OWNERSHIP_ID, stepName, originalFileName),
+        )
+    }
+
+    @Test
+    fun `getCertFilename throws an IllegalStateException for invalid file upload step names`() {
+        val invalidStepName = "invalid-step"
+        val originalFileName = "any-name.$ORIGINAL_FILE_EXT"
+
+        assertThrows<IllegalStateException> {
+            PropertyComplianceJourneyExtensions.getCertFilename(PROPERTY_OWNERSHIP_ID, invalidStepName, originalFileName)
+        }
     }
 }

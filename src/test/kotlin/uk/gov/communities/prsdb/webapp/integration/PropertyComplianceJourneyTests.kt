@@ -77,7 +77,13 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             // Gas Safety Cert. Upload page
             whenever(
                 fileUploader.uploadFile(
-                    eq(PropertyComplianceJourneyExtensions.getGasSafetyCertFilename(PROPERTY_OWNERSHIP_ID, "validFile.png")),
+                    eq(
+                        PropertyComplianceJourneyExtensions.getCertFilename(
+                            PROPERTY_OWNERSHIP_ID,
+                            PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
+                            "validFile.png",
+                        ),
+                    ),
                     any(),
                 ),
             ).thenReturn(true)
@@ -323,7 +329,13 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
         fun `Submitting a valid file returns an error if the upload attempt is unsuccessful`() {
             whenever(
                 fileUploader.uploadFile(
-                    eq(PropertyComplianceJourneyExtensions.getGasSafetyCertFilename(PROPERTY_OWNERSHIP_ID, "validFile.png")),
+                    eq(
+                        PropertyComplianceJourneyExtensions.getCertFilename(
+                            PROPERTY_OWNERSHIP_ID,
+                            PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
+                            "validFile.png",
+                        ),
+                    ),
                     any(),
                 ),
             ).thenReturn(false)
