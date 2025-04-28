@@ -18,6 +18,8 @@ enum class PropertyComplianceStepId(
     GasSafetyExemptionMissing("gas-safety-certificate-exemption-missing"),
     EICR("eicr"),
     EicrIssueDate("eicr-issue-date"),
+    EicrUpload("eicr-$FILE_UPLOAD_URL_SUBSTRING"),
+    EicrOutdated("eicr-outdated"),
     EicrExemption("eicr-exemption"),
     EPC("epc"),
     CheckAndSubmit("check-and-submit"),

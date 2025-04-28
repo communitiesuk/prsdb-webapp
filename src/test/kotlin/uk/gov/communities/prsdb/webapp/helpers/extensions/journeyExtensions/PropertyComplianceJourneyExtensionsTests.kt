@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasGasSafetyCertExemption
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsGasSafetyExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
@@ -24,6 +25,9 @@ import kotlin.test.assertNull
 
 class PropertyComplianceJourneyExtensionsTests {
     companion object {
+        // currentDate is an arbitrary date
+        private val currentDate = LocalDate.of(2020, 1, 5).toKotlinLocalDate()
+
         @JvmStatic
         private fun provideGasSafetyCertIssueDates() =
             arrayOf(
@@ -37,6 +41,14 @@ class PropertyComplianceJourneyExtensionsTests {
             arrayOf(
                 Arguments.of(Named.of("other", GasSafetyExemptionReason.OTHER), true),
                 Arguments.of(Named.of("not other", GasSafetyExemptionReason.NO_GAS_SUPPLY), false),
+            )
+
+        @JvmStatic
+        private fun provideEicrIssueDates() =
+            arrayOf(
+                Arguments.of(Named.of("over 5 years old", LocalDate.of(2015, 1, 4)), true),
+                Arguments.of(Named.of("5 years old", LocalDate.of(2015, 1, 5)), true),
+                Arguments.of(Named.of("less than 5 years old", LocalDate.of(2015, 1, 6)), false),
             )
     }
 
@@ -72,8 +84,6 @@ class PropertyComplianceJourneyExtensionsTests {
         issueDate: LocalDate,
         expectedResult: Boolean,
     ) {
-        // currentDate is an arbitrary date
-        val currentDate = LocalDate.of(2020, 1, 5).toKotlinLocalDate()
         mockConstruction(DateTimeHelper::class.java) { mock, _ -> whenever(mock.getCurrentDateInUK()).thenReturn(currentDate) }
             .use {
                 val testJourneyData = journeyDataBuilder.withGasSafetyIssueDate(issueDate).build()
@@ -164,5 +174,30 @@ class PropertyComplianceJourneyExtensionsTests {
         val retrievedHasEICR = testJourneyData.getHasEICR()
 
         assertNull(retrievedHasEICR)
+    }
+
+    @ParameterizedTest(name = "{1} when the EICR is {0}")
+    @MethodSource("provideEicrIssueDates")
+    fun `getIsEicrOutdated returns`(
+        issueDate: LocalDate,
+        expectedResult: Boolean,
+    ) {
+        mockConstruction(DateTimeHelper::class.java) { mock, _ -> whenever(mock.getCurrentDateInUK()).thenReturn(currentDate) }
+            .use {
+                val testJourneyData = journeyDataBuilder.withEicrIssueDate(issueDate).build()
+
+                val retrievedIsEicrOutdated = testJourneyData.getIsEicrOutdated()
+
+                assertEquals(expectedResult, retrievedIsEicrOutdated)
+            }
+    }
+
+    @Test
+    fun `getIsEicrOutdated returns null if the corresponding page is not in journeyData`() {
+        val testJourneyData = journeyDataBuilder.build()
+
+        val retrievedIsEicrOutdated = testJourneyData.getIsEicrOutdated()
+
+        assertNull(retrievedIsEicrOutdated)
     }
 }

@@ -55,5 +55,13 @@ class PropertyComplianceJourneyExtensions : JourneyDataExtensions() {
                 PropertyComplianceStepId.EICR.urlPathSegment,
                 EicrFormModel::hasCert.name,
             )
+
+        fun JourneyData.getIsEicrOutdated(): Boolean? {
+            val issueDate =
+                this.getFieldSetLocalDateValue(PropertyComplianceStepId.EicrIssueDate.urlPathSegment)
+                    ?: return null
+            val today = DateTimeHelper().getCurrentDateInUK()
+            return issueDate.yearsUntil(today) >= 5
+        }
     }
 }
