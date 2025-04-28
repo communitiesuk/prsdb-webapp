@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
@@ -108,4 +109,7 @@ class PropertyRegistrationService(
         }
         return null
     }
+
+    fun getIncompletePropertiesForLandlord(principalName: String): List<FormContext>? =
+        formContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION)
 }

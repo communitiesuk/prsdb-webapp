@@ -15,8 +15,11 @@ import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_BASE_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompletePropertiesViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LANDLORD')")
@@ -25,6 +28,8 @@ import java.security.Principal
 class LandlordDashboardController(
     private val landlordService: LandlordService,
     private val propertyRegistrationService: PropertyRegistrationService,
+    private val journeyDataServiceFactory: JourneyDataServiceFactory,
+    private val localAuthorityService: LocalAuthorityService,
 ) {
     @GetMapping
     fun index(): CharSequence = "redirect:$LANDLORD_DASHBOARD_URL"
@@ -61,6 +66,29 @@ class LandlordDashboardController(
         model.addAttribute("keepingPropertyCompliantUrl", "#")
 
         return "landlordDashboard"
+    }
+
+    @GetMapping("/$INCOMPLETE_PROPERTIES_PATH_SEGMENT")
+    fun landlordIncompleteProperties(
+        model: Model,
+        principal: Principal,
+    ): String {
+        val incompleteProperties = propertyRegistrationService.getIncompletePropertiesForLandlord(principal.name)
+
+        val incompletePropertiesViewModel =
+            incompleteProperties?.let {
+                IncompletePropertiesViewModel(
+                    incompleteProperties,
+                    journeyDataServiceFactory.create(REGISTER_PROPERTY_JOURNEY_URL),
+                    localAuthorityService,
+                )
+            }
+
+        model.addAttribute("incompleteProperties", incompletePropertiesViewModel?.incompleteProperties)
+        model.addAttribute("registerPropertyUrl", "/$REGISTER_PROPERTY_JOURNEY_URL")
+        model.addAttribute("viewRegisteredPropertiesUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT#$REGISTERED_PROPERTIES_PATH_SEGMENT")
+
+        return "incompletePropertiesView"
     }
 
     companion object {

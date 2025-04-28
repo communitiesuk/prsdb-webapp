@@ -12,26 +12,24 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.addCard
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
-import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import java.time.Instant
 
 class IncompletePropertiesViewModel(
     private val formContexts: List<FormContext>,
-    journeyDataServiceFactory: JourneyDataServiceFactory,
+    private val journeyDataService: JourneyDataService,
     private val localAuthorityService: LocalAuthorityService,
 ) {
-    val journeyDataService = journeyDataServiceFactory.create(REGISTER_PROPERTY_JOURNEY_URL)
+    val incompleteProperties: List<SummaryCardViewModel>? = getListOfIncompleteProperties()
 
-    val incompleteProperties: List<SummaryCardViewModel> = getIncompleteProperties()
-
-    private fun getIncompleteProperties(): List<SummaryCardViewModel> {
+    private fun getListOfIncompleteProperties(): List<SummaryCardViewModel>? {
         val incompleteProperties = mutableListOf<SummaryCardViewModel>()
 
-        formContexts.forEach { formContext ->
+        formContexts.forEachIndexed { index, formContext ->
             val completeByDate = getCompleteByDate(formContext.createdDate)
             if (DateTimeHelper.isDateInPast(completeByDate)) {
-                return@forEach
+                return@forEachIndexed
             }
 
             val address = getAddressData(formContext)
@@ -39,6 +37,7 @@ class IncompletePropertiesViewModel(
             incompleteProperties
                 .apply {
                     addCard(
+                        cardNumber = (index + 1).toString(),
                         title = "landlord.incompleteProperties.summaryCardTitlePrefix",
                         summaryList = getSummaryList(address, completeByDate),
                         actions = getActions(formContext.id),
@@ -46,7 +45,9 @@ class IncompletePropertiesViewModel(
                 }.toList()
         }
 
-        return incompleteProperties
+        return incompleteProperties.ifEmpty {
+            null
+        }
     }
 
     // TODO PRSD-1127 make AddressDataModel param not nullable

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{landlord.incompleteProperties.title}, ~{::main}, false)}">
+<main class="govuk-main-wrapper">
+    <div id="page-content">
+        <h1 class="govuk-heading-l" th:text="#{landlord.incompleteProperties.heading}">landlord.incompleteProperties.heading</h1>
+
+        <div th:if="${incompleteProperties != null}">
+            <p class="govuk-body-l" th:text="#{landlord.incompleteProperties.text}">landlord.incompleteProperties.text</p>
+            <th:block th:each="property: ${incompleteProperties}">
+                <div th:replace="~{fragments/summaryCard :: summaryCard(${property.title}, ${property.cardNumber}, ${property.actions}, ${property.summaryList})}" ></div>
+            </th:block>
+        </div>
+        <div th:if="${incompleteProperties == null}">
+            <p class="govuk-body-l govuk-hint" th:text="#{landlord.incompleteProperties.none.hintText}">landlord.incompleteProperties.none.hintText</p>
+            <div>
+                <span class="govuk-body" th:text="#{landlord.incompleteProperties.none.text.beforeLinks}">
+                    landlord.incompleteProperties.none.text.beforeLinks
+                </span>
+                <a class="govuk-link" th:text="#{landlord.incompleteProperties.none.viewRegisteredProperties.linkText}" th:href="${viewRegisteredPropertiesUrl}">
+                    landlord.incompleteProperties.none.viewRegisteredProperties.linkText
+                </a>
+                <span class="govuk-body" th:text="#{landlord.incompleteProperties.none.text.betweenLinks}">
+                    landlord.incompleteProperties.none.text.betweenLinks
+                </span>
+                <a class="govuk-link" th:text="#{landlord.incompleteProperties.none.registerANewProperty.linkText}" th:href="${registerPropertyUrl}">
+                    landlord.incompleteProperties.none.registerANewProperty.linkText
+                </a>
+                <span class="govuk-body" th:text="#{landlord.incompleteProperties.none.text.afterLinks}">
+                    landlord.incompleteProperties.none.text.afterLinks
+                </span>
+            </div>
+        </div>
+    </div>
+</main>
+</html>

@@ -6,10 +6,11 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 
 fun MutableList<SummaryCardViewModel>.addCard(
     title: String,
+    cardNumber: String? = null,
     summaryList: List<SummaryListRowViewModel>,
     actions: List<SummaryCardActionViewModel>? = null,
 ) {
-    add(SummaryCardViewModel(title, summaryList, actions))
+    add(SummaryCardViewModel(title, cardNumber, summaryList, actions))
 }
 
 fun MutableList<SummaryCardActionViewModel>.addAction(
