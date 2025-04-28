@@ -11,12 +11,17 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.whenever
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
@@ -27,11 +32,16 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyIssueDatePagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyOutdatedPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyUploadPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.services.FileUploader
 import kotlin.test.assertContains
 
 @Sql("/data-local.sql")
 class PropertyComplianceJourneyTests : IntegrationTest() {
+    @MockitoBean
+    private lateinit var fileUploader: FileUploader
+
     @Nested
     inner class JourneyTests {
         @Test
@@ -56,12 +66,22 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // Gas Safe Engineer Num. page
             gasSafeEngineerNumPage.submitEngineerNum("1234567")
+            val gasSafetyUploadPage = assertPageIs(page, GasSafetyUploadPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-945: Continue journey tests
+            // Gas Safety Cert. Upload page
+            whenever(
+                fileUploader.uploadFile(
+                    eq(PropertyComplianceJourneyExtensions.getGasSafetyCertFilename(PROPERTY_OWNERSHIP_ID, "validFile.png")),
+                    any(),
+                ),
+            ).thenReturn(true)
+            gasSafetyUploadPage.uploadCertificate("validFile.png")
+
+            // TODO PRSD-1098: Continue journey tests
             assertContains(
                 page.url(),
                 PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.GasSafetyUpload.urlPathSegment}",
+                    "/${PropertyComplianceStepId.GasSafetyUploadConfirmation.urlPathSegment}",
             )
         }
 
@@ -198,6 +218,44 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             val gasSafeEngineerNumPage = navigator.goToPropertyComplianceGasSafetyEngineerNumPage(PROPERTY_OWNERSHIP_ID)
             gasSafeEngineerNumPage.submitEngineerNum("ABCDEFG")
             assertThat(gasSafeEngineerNumPage.form.getErrorMessage()).containsText("Enter a 7-digit number.")
+        }
+    }
+
+    @Nested
+    inner class GasSafetyUploadStepTests {
+        @Test
+        fun `Submitting with no file staged returns an error`() {
+            val gasSafetyUploadPage = navigator.goToPropertyComplianceGasSafetyUploadPage(PROPERTY_OWNERSHIP_ID)
+            gasSafetyUploadPage.form.submit()
+            assertThat(gasSafetyUploadPage.form.getErrorMessage()).containsText("Select a file")
+        }
+
+        @Test
+        fun `Submitting with an invalid file (wrong type) staged returns an error`() {
+            val gasSafetyUploadPage = navigator.goToPropertyComplianceGasSafetyUploadPage(PROPERTY_OWNERSHIP_ID)
+            gasSafetyUploadPage.uploadCertificate("invalidFileType.bmp")
+            assertThat(gasSafetyUploadPage.form.getErrorMessage()).containsText("The selected file must be a PDF, PNG or JPG")
+        }
+
+        @Test
+        fun `Submitting with an invalid file (too big) staged returns an error`() {
+            val gasSafetyUploadPage = navigator.goToPropertyComplianceGasSafetyUploadPage(PROPERTY_OWNERSHIP_ID)
+            gasSafetyUploadPage.uploadCertificate("invalidFileSize.jpg")
+            assertThat(gasSafetyUploadPage.form.getErrorMessage()).containsText("The selected file must be smaller than 15MB")
+        }
+
+        @Test
+        fun `Submitting a valid file returns an error if the upload attempt is unsuccessful`() {
+            whenever(
+                fileUploader.uploadFile(
+                    eq(PropertyComplianceJourneyExtensions.getGasSafetyCertFilename(PROPERTY_OWNERSHIP_ID, "validFile.png")),
+                    any(),
+                ),
+            ).thenReturn(false)
+
+            val gasSafetyUploadPage = navigator.goToPropertyComplianceGasSafetyUploadPage(PROPERTY_OWNERSHIP_ID)
+            gasSafetyUploadPage.uploadCertificate("validFile.png")
+            assertThat(gasSafetyUploadPage.form.getErrorMessage()).containsText("The selected file could not be uploaded - try again")
         }
     }
 

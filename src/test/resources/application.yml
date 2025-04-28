@@ -4,6 +4,9 @@ spring:
   mvc:
     format:
       date: "d MMMM yyyy"
+  servlet:
+    multipart:
+      enabled: false
 
 notify:
   api-key: ${EMAILNOTIFICATIONS_APIKEY}
