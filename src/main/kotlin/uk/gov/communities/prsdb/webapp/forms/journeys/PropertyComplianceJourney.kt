@@ -98,11 +98,7 @@ class PropertyComplianceJourney(
                     gasSafetyIssueDateStep,
                     gasSafetyEngineerNumStep,
                     gasSafetyUploadStep,
-                    // TODO PRSD-1098: Implement gas safety cert upload confirmation step
-                    placeholderStep(
-                        PropertyComplianceStepId.GasSafetyUploadConfirmation,
-                        "TODO PRSD-1098: Implement gas safety cert upload confirmation step",
-                    ),
+                    gasSafetyUploadConfirmationStep,
                     gasSafetyOutdatedStep,
                     gasSafetyExemptionStep,
                     gasSafetyExemptionReasonStep,
@@ -207,6 +203,23 @@ class PropertyComplianceJourney(
                             ),
                     ) { mapOf("fieldSetSubheading" to getPropertyAddress()) },
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyUploadConfirmation, null) },
+            )
+
+    private val gasSafetyUploadConfirmationStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.GasSafetyUploadConfirmation,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/uploadCertificateConfirmationForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                            ),
+                    ),
+                handleSubmitAndRedirect = { _, _ -> taskListUrlSegment },
+                nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
             )
 
     private val gasSafetyOutdatedStep
