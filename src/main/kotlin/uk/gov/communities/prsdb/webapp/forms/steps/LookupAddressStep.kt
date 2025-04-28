@@ -69,7 +69,7 @@ class LookupAddressStep<T : StepId>(
             val updatedJourneyData = journeyData.withUpdatedLookedUpAddresses(addressLookupResults)
             journeyDataService.setJourneyDataInSession(updatedJourneyData)
 
-            val nextStepId = getNextStep(journeyData, nextStepIfAddressesFound, nextStepIfNoAddressesFound)
+            val nextStepId = getNextStep(updatedJourneyData, nextStepIfAddressesFound, nextStepIfNoAddressesFound)
 
             return Step.generateUrl(nextStepId, subPageNumber)
         }
