@@ -124,9 +124,10 @@ class PropertyComplianceJourney(
                 setOf(
                     eicrStep,
                     eicrIssueDateStep,
+                    eicrUploadStep,
                     placeholderStep(
-                        PropertyComplianceStepId.EicrUpload,
-                        "TODO PRSD-956: Implement EICR upload step",
+                        PropertyComplianceStepId.EicrUploadConfirmation,
+                        "TODO PRSD-1128: Implement EICR upload confirmation step",
                     ),
                     placeholderStep(
                         PropertyComplianceStepId.EicrOutdated,
@@ -438,6 +439,24 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { journeyData, _ -> eicrIssueDateStepNextAction(journeyData) },
+            )
+
+    private val eicrUploadStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EicrUpload,
+                page =
+                    PageWithContentProvider(
+                        formModel = UploadCertificateFormModel::class,
+                        templateName = "forms/uploadCertificateForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.uploadCertificate.eicr.fieldSetHeading",
+                                "fieldSetHint" to "forms.uploadCertificate.fieldSetHint",
+                            ),
+                    ) { mapOf("fieldSetSubheading" to getPropertyAddress()) },
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrUploadConfirmation, null) },
             )
 
     private val eicrExemptionStep

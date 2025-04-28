@@ -19,6 +19,7 @@ enum class PropertyComplianceStepId(
     EICR("eicr"),
     EicrIssueDate("eicr-issue-date"),
     EicrUpload("eicr-$FILE_UPLOAD_URL_SUBSTRING"),
+    EicrUploadConfirmation("eicr-upload-confirmation"),
     EicrOutdated("eicr-outdated"),
     EicrExemption("eicr-exemption"),
     EicrExemptionReason("eicr-exemption-reason"),
