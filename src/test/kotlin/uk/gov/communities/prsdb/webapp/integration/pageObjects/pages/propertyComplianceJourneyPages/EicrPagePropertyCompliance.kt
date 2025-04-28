@@ -5,11 +5,11 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.CertificateFormPage
 
-class GasSafetyPagePropertyCompliance(
+class EicrPagePropertyCompliance(
     page: Page,
     urlArguments: Map<String, String>,
 ) : CertificateFormPage(
         page,
         PropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.GasSafety.urlPathSegment}",
+            "/${PropertyComplianceStepId.EICR.urlPathSegment}",
     )

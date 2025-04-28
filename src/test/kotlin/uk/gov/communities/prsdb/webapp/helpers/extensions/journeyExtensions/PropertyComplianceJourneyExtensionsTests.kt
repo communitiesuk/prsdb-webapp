@@ -12,6 +12,7 @@ import org.mockito.Mockito.mockConstruction
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasGasSafetyCertExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsGasSafetyCertOutdated
@@ -144,5 +145,24 @@ class PropertyComplianceJourneyExtensionsTests {
             )
 
         assertEquals(expectedFileName, returnedFileName)
+    }
+
+    @Test
+    fun `getHasEICR returns a boolean if the corresponding page is in journeyData`() {
+        val hasEICR = true
+        val testJourneyData = journeyDataBuilder.withEicrStatus(hasEICR).build()
+
+        val retrievedHasEICR = testJourneyData.getHasEICR()
+
+        assertEquals(hasEICR, retrievedHasEICR)
+    }
+
+    @Test
+    fun `getHasEICR returns null if the corresponding page is not in journeyData`() {
+        val testJourneyData = journeyDataBuilder.build()
+
+        val retrievedHasEICR = testJourneyData.getHasEICR()
+
+        assertNull(retrievedHasEICR)
     }
 }

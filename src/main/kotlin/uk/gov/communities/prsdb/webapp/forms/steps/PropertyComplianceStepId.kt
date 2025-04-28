@@ -17,6 +17,8 @@ enum class PropertyComplianceStepId(
     GasSafetyExemptionConfirmation("gas-safety-certificate-exemption-confirmation"),
     GasSafetyExemptionMissing("gas-safety-certificate-exemption-missing"),
     EICR("eicr"),
+    EicrIssueDate("eicr-issue-date"),
+    EicrExemption("eicr-exemption"),
     EPC("epc"),
     CheckAndSubmit("check-and-submit"),
     Declaration("declaration"),
