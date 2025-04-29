@@ -4,22 +4,26 @@ import org.junit.jupiter.api.BeforeEach
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class LookupAddressStepTests {
     @Mock
-    val mockAddressLookupService: AddressLookupService = mock()
+    private lateinit var mockAddressLookupService: AddressLookupService
 
     @Mock
-    val mockJourneyDataService: JourneyDataService = mock()
+    private lateinit var mockJourneyDataService: JourneyDataService
 
     @Mock
-    val mockPage: Page = mock()
+    private lateinit var mockPage: Page
+
+    private lateinit var journeyDataBuilder: JourneyDataBuilder
+
+    private lateinit var lookupAddressStep: LookupAddressStep<LookupStepTestIds>
 
     enum class LookupStepTestIds(
         override val urlPathSegment: String,
@@ -29,10 +33,12 @@ class LookupAddressStepTests {
         SelectAddress("select-address"),
     }
 
-    private lateinit var lookupAddressStep: LookupAddressStep<LookupStepTestIds>
-
     @BeforeEach
     fun setup() {
+        mockAddressLookupService = mock()
+        mockJourneyDataService = mock()
+        mockPage = mock()
+
         lookupAddressStep =
             LookupAddressStep(
                 id = LookupStepTestIds.LookupAddress,
@@ -42,11 +48,16 @@ class LookupAddressStepTests {
                 addressLookupService = mockAddressLookupService,
                 journeyDataService = mockJourneyDataService,
             )
+
+        journeyDataBuilder = JourneyDataBuilder(mock())
     }
 
     @Test
     fun `getNextStep returns nextStepIfAddressesFound if the cached lookedUpAddress list is not empty`() {
-        val journeyData = mapOf(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to "[{\"singleLineAddress\":\"1 Street Address, City, AB1 2CD\"}]")
+        val journeyData =
+            journeyDataBuilder
+                .withLookedUpAddresses()
+                .build()
 
         val nextStep = lookupAddressStep.nextAction(journeyData, null)
 
@@ -55,7 +66,10 @@ class LookupAddressStepTests {
 
     @Test
     fun `getNextStep returns nextStepIfNoAddressesFound if the cached lookedUpAddress list is empty`() {
-        val journeyData = mapOf(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to "[]")
+        val journeyData =
+            journeyDataBuilder
+                .withEmptyLookedUpAddresses()
+                .build()
 
         val nextStep = lookupAddressStep.nextAction(journeyData, null)
 
@@ -70,16 +84,15 @@ class LookupAddressStepTests {
         val postcode = "AB1 2CD"
 
         val originalJourneyData =
-            mutableMapOf(
-                LookupStepTestIds.LookupAddress.urlPathSegment to
-                    mapOf(
-                        "houseNameOrNumber" to houseNumber,
-                        "postcode" to postcode,
-                    ),
-            )
+            journeyDataBuilder
+                .withLookupAddress(houseNumber, postcode)
+                .build()
 
         val expectedUpdatedJourneyData =
-            originalJourneyData + (LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to "[]")
+            journeyDataBuilder
+                .withLookupAddress(houseNumber, postcode)
+                .withEmptyLookedUpAddresses()
+                .build()
 
         // Act
         val redirectedUrl = lookupAddressStep.handleSubmitAndRedirect?.let { it(originalJourneyData, null) }
