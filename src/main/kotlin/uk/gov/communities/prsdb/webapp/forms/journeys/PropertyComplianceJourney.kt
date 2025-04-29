@@ -225,7 +225,7 @@ class PropertyComplianceJourney(
             Step(
                 id = PropertyComplianceStepId.GasSafetyUpload,
                 page =
-                    PageWithContentProvider(
+                    Page(
                         formModel = UploadCertificateFormModel::class,
                         templateName = "forms/uploadCertificateForm",
                         content =
@@ -234,7 +234,7 @@ class PropertyComplianceJourney(
                                 "fieldSetHeading" to "forms.uploadCertificate.gasSafety.fieldSetHeading",
                                 "fieldSetHint" to "forms.uploadCertificate.fieldSetHint",
                             ),
-                    ) { mapOf("fieldSetSubheading" to getPropertyAddress()) },
+                    ),
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyUploadConfirmation, null) },
             )
 
@@ -445,7 +445,7 @@ class PropertyComplianceJourney(
             Step(
                 id = PropertyComplianceStepId.EicrUpload,
                 page =
-                    PageWithContentProvider(
+                    Page(
                         formModel = UploadCertificateFormModel::class,
                         templateName = "forms/uploadCertificateForm",
                         content =
@@ -454,7 +454,7 @@ class PropertyComplianceJourney(
                                 "fieldSetHeading" to "forms.uploadCertificate.eicr.fieldSetHeading",
                                 "fieldSetHint" to "forms.uploadCertificate.fieldSetHint",
                             ),
-                    ) { mapOf("fieldSetSubheading" to getPropertyAddress()) },
+                    ),
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrUploadConfirmation, null) },
             )
 
