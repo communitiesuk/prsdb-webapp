@@ -160,11 +160,8 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
         fun isManualAddressChosen(
             journeyData: JourneyData,
             isContactAddress: Boolean = false,
-            lookedUpAddresses: List<AddressDataModel>? = null,
-        ): Boolean {
-            val lookedUpAddressList = lookedUpAddresses ?: journeyData.getLookedUpAddresses()
-            return lookedUpAddressList.isEmpty() || getSelectedAddress(journeyData, isContactAddress) == MANUAL_ADDRESS_CHOSEN
-        }
+            lookedUpAddresses: List<AddressDataModel> = journeyData.getLookedUpAddresses(),
+        ): Boolean = lookedUpAddresses.isEmpty() || getSelectedAddress(journeyData, isContactAddress) == MANUAL_ADDRESS_CHOSEN
 
         fun getCountryOfResidence(journeyData: JourneyData): String =
             getNonEnglandOrWalesCountryOfResidence(journeyData) ?: ENGLAND_OR_WALES

@@ -341,7 +341,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     }
 
     @Nested
-    inner class LookupAddressStepAndNoAddressFound {
+    inner class LookupAddressAndNoAddressFoundSteps {
         @Test
         fun `Submitting with empty data fields returns an error`(page: Page) {
             val lookupAddressPage = navigator.goToPropertyRegistrationLookupAddressPage()

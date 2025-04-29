@@ -258,17 +258,8 @@ class UpdateLandlordDetailsJourney(
             Pair(UpdateLandlordDetailsStepId.UpdateDetails, null)
         }
 
-    private val noAddressFoundStep = getNoAddressFoundStep()
-
-    private fun getNoAddressFoundStep(): Step<UpdateLandlordDetailsStepId> {
-        val (houseNameOrNumber, postcode) =
-            JourneyDataHelper
-                .getLookupAddressHouseNameOrNumberAndPostcode(
-                    journeyDataService.getJourneyDataFromSession(),
-                    UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
-                ) ?: Pair("", "")
-
-        return Step(
+    private val noAddressFoundStep =
+        Step(
             id = UpdateLandlordDetailsStepId.NoAddressFound,
             page =
                 Page(
@@ -277,8 +268,8 @@ class UpdateLandlordDetailsJourney(
                     content =
                         mapOf(
                             "title" to "landlordDetails.update.title",
-                            "postcode" to postcode,
-                            "houseNameOrNumber" to houseNameOrNumber,
+                            "postcode" to getHouseNameOrNumberAndPostcode().second,
+                            "houseNameOrNumber" to getHouseNameOrNumberAndPostcode().first,
                             "searchAgainUrl" to
                                 "${LandlordDetailsController.UPDATE_ROUTE}/" +
                                 UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
@@ -286,7 +277,13 @@ class UpdateLandlordDetailsJourney(
                 ),
             nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.ManualEnglandAndWalesAddress, null) },
         )
-    }
+
+    private fun getHouseNameOrNumberAndPostcode() =
+        JourneyDataHelper
+            .getLookupAddressHouseNameOrNumberAndPostcode(
+                journeyDataService.getJourneyDataFromSession(),
+                UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
+            )!!
 
     private val manualAddressStep =
         Step(

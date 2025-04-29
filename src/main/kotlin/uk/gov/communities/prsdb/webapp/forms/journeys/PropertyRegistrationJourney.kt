@@ -214,15 +214,8 @@ class PropertyRegistrationJourney(
                 ),
         )
 
-    private fun noAddressFoundStep(): Step<RegisterPropertyStepId> {
-        val (houseNameOrNumber, postcode) =
-            JourneyDataHelper
-                .getLookupAddressHouseNameOrNumberAndPostcode(
-                    journeyDataService.getJourneyDataFromSession(),
-                    RegisterPropertyStepId.LookupAddress.urlPathSegment,
-                ) ?: Pair("", "")
-
-        return Step(
+    private fun noAddressFoundStep() =
+        Step(
             id = RegisterPropertyStepId.NoAddressFound,
             page =
                 Page(
@@ -231,8 +224,8 @@ class PropertyRegistrationJourney(
                     content =
                         mapOf(
                             "title" to "registerProperty.title",
-                            "postcode" to postcode,
-                            "houseNameOrNumber" to houseNameOrNumber,
+                            "postcode" to getHouseNameOrNumberAndPostcode().second,
+                            "houseNameOrNumber" to getHouseNameOrNumberAndPostcode().first,
                             "searchAgainUrl" to
                                 "/$REGISTER_PROPERTY_JOURNEY_URL/" +
                                 RegisterPropertyStepId.LookupAddress.urlPathSegment,
@@ -241,7 +234,13 @@ class PropertyRegistrationJourney(
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.ManualAddress, null) },
         )
-    }
+
+    private fun getHouseNameOrNumberAndPostcode() =
+        JourneyDataHelper
+            .getLookupAddressHouseNameOrNumberAndPostcode(
+                journeyDataService.getJourneyDataFromSession(),
+                RegisterPropertyStepId.LookupAddress.urlPathSegment,
+            )!!
 
     private fun manualAddressStep() =
         Step(

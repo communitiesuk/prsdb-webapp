@@ -109,10 +109,7 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
 
         fun isManualAddressChosen(
             journeyData: JourneyData,
-            lookedUpAddresses: List<AddressDataModel>? = null,
-        ): Boolean {
-            val lookedUpAddressList = lookedUpAddresses ?: journeyData.getLookedUpAddresses()
-            return lookedUpAddressList.isEmpty() || getSelectedAddress(journeyData) == MANUAL_ADDRESS_CHOSEN
-        }
+            lookedUpAddresses: List<AddressDataModel> = journeyData.getLookedUpAddresses(),
+        ): Boolean = lookedUpAddresses.isEmpty() || getSelectedAddress(journeyData) == MANUAL_ADDRESS_CHOSEN
     }
 }
