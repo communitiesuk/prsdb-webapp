@@ -283,7 +283,7 @@ class UpdateLandlordDetailsJourney(
             .getLookupAddressHouseNameOrNumberAndPostcode(
                 journeyDataService.getJourneyDataFromSession(),
                 UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
-            )!!
+            ) ?: Pair("", "")
 
     private val manualAddressStep =
         Step(

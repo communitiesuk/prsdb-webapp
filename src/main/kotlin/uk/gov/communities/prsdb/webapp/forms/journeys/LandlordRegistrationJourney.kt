@@ -326,7 +326,7 @@ class LandlordRegistrationJourney(
             .getLookupAddressHouseNameOrNumberAndPostcode(
                 journeyDataService.getJourneyDataFromSession(),
                 lookupAddressStepId.urlPathSegment,
-            )!!
+            ) ?: Pair("", "")
 
     private fun selectAddressStep() =
         Step(

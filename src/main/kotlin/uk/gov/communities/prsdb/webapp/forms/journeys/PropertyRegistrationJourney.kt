@@ -240,7 +240,7 @@ class PropertyRegistrationJourney(
             .getLookupAddressHouseNameOrNumberAndPostcode(
                 journeyDataService.getJourneyDataFromSession(),
                 RegisterPropertyStepId.LookupAddress.urlPathSegment,
-            )!!
+            ) ?: Pair("", "")
 
     private fun manualAddressStep() =
         Step(
