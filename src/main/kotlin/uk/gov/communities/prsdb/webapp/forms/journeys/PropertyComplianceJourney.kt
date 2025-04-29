@@ -75,12 +75,7 @@ class PropertyComplianceJourney(
             listOf(
                 gasSafetyTask,
                 eicrTask,
-                // TODO PRSD-395: Implement EPC upload task
-                JourneyTask.withOneStep(
-                    placeholderStep(PropertyComplianceStepId.EPC, "TODO PRSD-395: Implement EPC task"),
-                    "propertyCompliance.taskList.upload.epc",
-                    "propertyCompliance.taskList.upload.epc.hint",
-                ),
+                epcTask,
             )
 
     private val checkAndSubmitTasks
@@ -137,16 +132,22 @@ class PropertyComplianceJourney(
                     eicrExemptionStep,
                     eicrExemptionReasonStep,
                     eicrExemptionOtherReasonStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.EicrExemptionConfirmation,
-                        "TODO PRSD-959: Implement EICR exemption confirmation step",
-                    ),
+                    eicrExemptionConfirmationStep,
                     placeholderStep(
                         PropertyComplianceStepId.EicrExemptionMissing,
                         "TODO PRSD-960: Implement EICR exemption missing step",
                     ),
                 ),
                 "propertyCompliance.taskList.upload.eicr",
+            )
+
+    // TODO PRSD-395: Implement EPC upload task
+    private val epcTask
+        get() =
+            JourneyTask.withOneStep(
+                placeholderStep(PropertyComplianceStepId.EPC, "TODO PRSD-395: Implement EPC task"),
+                "propertyCompliance.taskList.upload.epc",
+                "propertyCompliance.taskList.upload.epc.hint",
             )
 
     private val gasSafetyStep
@@ -542,6 +543,23 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrExemptionConfirmation, null) },
+            )
+
+    private val eicrExemptionConfirmationStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EicrExemptionConfirmation,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/eicrExemptionConfirmationForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                            ),
+                    ),
+                handleSubmitAndRedirect = { _, _ -> taskListUrlSegment },
+                nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
             )
 
     private fun placeholderStep(

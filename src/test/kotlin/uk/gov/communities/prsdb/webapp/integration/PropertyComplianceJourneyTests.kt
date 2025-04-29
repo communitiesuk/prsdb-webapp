@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionReasonPagePropertyCompliance
@@ -222,13 +223,15 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // EICR Exemption Reason page
             eicrExemptionReasonPage.submitExemptionReason(EicrExemptionReason.LIVE_IN_LANDLORD)
+            val eicrExemptionConfirmationPage =
+                assertPageIs(page, EicrExemptionConfirmationPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-959: Continue test
-            assertContains(
-                page.url(),
-                PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.EicrExemptionConfirmation.urlPathSegment}",
-            )
+            // Gas Safety Exemption Confirmation page
+            assertThat(eicrExemptionConfirmationPage.heading).containsText("You’ve marked this property as exempt from needing an EICR")
+            eicrExemptionConfirmationPage.saveAndReturnToTaskListButton.clickAndWait()
+
+            // TODO PRSD-395: Continue test (EPC task)
+            assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
         }
 
         @Test
@@ -546,13 +549,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
         fun `Submitting with a valid reason redirects to the gas safety exemption confirmation page`(page: Page) {
             val eicrExemptionOtherReasonPage = navigator.goToPropertyComplianceEicrExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
             eicrExemptionOtherReasonPage.submitReason("valid reason")
-
-            // TODO PRSD-959: Replace with gas exemption confirmation page
-            assertContains(
-                page.url(),
-                PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.EicrExemptionConfirmation.urlPathSegment}",
-            )
+            assertPageIs(page, EicrExemptionConfirmationPagePropertyCompliance::class, urlArguments)
         }
     }
 
