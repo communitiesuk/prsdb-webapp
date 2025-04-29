@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrIssueDatePagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrOutdatedPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrUploadConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrUploadPagePropertyCompliance
@@ -171,13 +172,14 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // EICR Issue Date page
             eicrIssueDatePage.submitDate(currentDate.minus(DatePeriod(years = 5)))
+            val eicrOutdatedPage = assertPageIs(page, EicrOutdatedPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-961: Continue test
-            assertContains(
-                page.url(),
-                PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.EicrOutdated.urlPathSegment}",
-            )
+            // EICR Outdated page
+            assertThat(eicrOutdatedPage.heading).containsText("This property’s EICR is out of date")
+            eicrOutdatedPage.returnToTaskListButton.clickAndWait()
+
+            // TODO PRSD-395: Continue test (EPC task)
+            assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
         }
 
         @Test
