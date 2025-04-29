@@ -149,7 +149,10 @@ class LandlordRegistrationJourneyDataHelperTests {
 
     @Test
     fun `isManualAddressChosen returns true if passed an empty list of lookedUpAddresses`() {
-        val journeyData = journeyDataBuilder.build()
+        val journeyData =
+            journeyDataBuilder
+                .withLookedUpAddresses()
+                .build()
         val lookedUpAddresses = listOf<AddressDataModel>()
 
         assertTrue(LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData, lookedUpAddresses = lookedUpAddresses))

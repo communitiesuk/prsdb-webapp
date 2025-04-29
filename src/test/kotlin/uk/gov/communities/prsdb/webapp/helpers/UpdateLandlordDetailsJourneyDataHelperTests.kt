@@ -73,7 +73,12 @@ class UpdateLandlordDetailsJourneyDataHelperTests {
         val lineOne = "first line"
         val locality = "a place"
         val postcode = "EG1 9ZY"
-        val testJourneyData = journeyDataBuilder.withManualAddressSelected().withManualAddress(lineOne, locality, postcode).build()
+        val testJourneyData =
+            journeyDataBuilder
+                .withLookedUpAddresses()
+                .withManualAddressSelected()
+                .withManualAddress(lineOne, locality, postcode)
+                .build()
 
         val addressUpdate = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(testJourneyData)
 
