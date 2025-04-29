@@ -15,14 +15,14 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasEICR
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasEicrExemption
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasGasSafetyCert
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasGasSafetyCertExemption
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsEicrExemptionReasonOther
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsEicrOutdated
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsGasSafetyCertOutdated
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsGasSafetyExemptionReasonOther
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCertExemption
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrExemptionReasonOther
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionOtherReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
@@ -125,9 +125,10 @@ class PropertyComplianceJourney(
                 setOf(
                     eicrStep,
                     eicrIssueDateStep,
+                    eicrUploadStep,
                     placeholderStep(
-                        PropertyComplianceStepId.EicrUpload,
-                        "TODO PRSD-956: Implement EICR upload step",
+                        PropertyComplianceStepId.EicrUploadConfirmation,
+                        "TODO PRSD-1128: Implement EICR upload confirmation step",
                     ),
                     placeholderStep(
                         PropertyComplianceStepId.EicrOutdated,
@@ -436,6 +437,24 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { journeyData, _ -> eicrIssueDateStepNextAction(journeyData) },
+            )
+
+    private val eicrUploadStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EicrUpload,
+                page =
+                    PageWithContentProvider(
+                        formModel = UploadCertificateFormModel::class,
+                        templateName = "forms/uploadCertificateForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.uploadCertificate.eicr.fieldSetHeading",
+                                "fieldSetHint" to "forms.uploadCertificate.fieldSetHint",
+                            ),
+                    ) { mapOf("fieldSetSubheading" to getPropertyAddress()) },
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrUploadConfirmation, null) },
             )
 
     private val eicrExemptionStep

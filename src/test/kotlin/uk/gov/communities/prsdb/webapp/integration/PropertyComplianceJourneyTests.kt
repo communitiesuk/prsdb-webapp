@@ -22,13 +22,14 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions
+import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrIssueDatePagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrUploadPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionMissingPagePropertyCompliance
@@ -78,7 +79,13 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             // Gas Safety Cert. Upload page
             whenever(
                 fileUploader.uploadFile(
-                    eq(PropertyComplianceJourneyExtensions.getGasSafetyCertFilename(PROPERTY_OWNERSHIP_ID, "validFile.png")),
+                    eq(
+                        PropertyComplianceJourneyHelper.getCertFilename(
+                            PROPERTY_OWNERSHIP_ID,
+                            PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
+                            "validFile.png",
+                        ),
+                    ),
                     any(),
                 ),
             ).thenReturn(true)
@@ -100,12 +107,28 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // EICR Issue Date page
             eicrIssueDatePage.submitDate(currentDate)
+            val eicrUploadPage = assertPageIs(page, EicrUploadPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-956: Continue test
+            // EICR Upload page
+            whenever(
+                fileUploader.uploadFile(
+                    eq(
+                        PropertyComplianceJourneyHelper.getCertFilename(
+                            PROPERTY_OWNERSHIP_ID,
+                            PropertyComplianceStepId.EicrUpload.urlPathSegment,
+                            "validFile.png",
+                        ),
+                    ),
+                    any(),
+                ),
+            ).thenReturn(true)
+            eicrUploadPage.uploadCertificate("validFile.png")
+
+            // TODO PRSD-1128: Continue test
             assertContains(
                 page.url(),
                 PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.EicrUpload.urlPathSegment}",
+                    "/${PropertyComplianceStepId.EicrUploadConfirmation.urlPathSegment}",
             )
         }
 
@@ -324,7 +347,13 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
         fun `Submitting a valid file returns an error if the upload attempt is unsuccessful`() {
             whenever(
                 fileUploader.uploadFile(
-                    eq(PropertyComplianceJourneyExtensions.getGasSafetyCertFilename(PROPERTY_OWNERSHIP_ID, "validFile.png")),
+                    eq(
+                        PropertyComplianceJourneyHelper.getCertFilename(
+                            PROPERTY_OWNERSHIP_ID,
+                            PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
+                            "validFile.png",
+                        ),
+                    ),
                     any(),
                 ),
             ).thenReturn(false)
@@ -419,6 +448,50 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             val eicrIssueDatePage = navigator.goToPropertyComplianceEicrIssueDatePage(PROPERTY_OWNERSHIP_ID)
             eicrIssueDatePage.submitDate(day, month, year)
             assertThat(eicrIssueDatePage.form.getErrorMessage()).containsText(expectedErrorMessage)
+        }
+    }
+
+    @Nested
+    inner class EicrUploadStepTests {
+        @Test
+        fun `Submitting with no file staged returns an error`() {
+            val eicrUploadPage = navigator.goToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
+            eicrUploadPage.form.submit()
+            assertThat(eicrUploadPage.form.getErrorMessage()).containsText("Select a file")
+        }
+
+        @Test
+        fun `Submitting with an invalid file (wrong type) staged returns an error`() {
+            val eicrUploadPage = navigator.goToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
+            eicrUploadPage.uploadCertificate("invalidFileType.bmp")
+            assertThat(eicrUploadPage.form.getErrorMessage()).containsText("The selected file must be a PDF, PNG or JPG")
+        }
+
+        @Test
+        fun `Submitting with an invalid file (too big) staged returns an error`() {
+            val eicrUploadPage = navigator.goToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
+            eicrUploadPage.uploadCertificate("invalidFileSize.jpg")
+            assertThat(eicrUploadPage.form.getErrorMessage()).containsText("The selected file must be smaller than 15MB")
+        }
+
+        @Test
+        fun `Submitting a valid file returns an error if the upload attempt is unsuccessful`() {
+            whenever(
+                fileUploader.uploadFile(
+                    eq(
+                        PropertyComplianceJourneyHelper.getCertFilename(
+                            PROPERTY_OWNERSHIP_ID,
+                            PropertyComplianceStepId.EicrUpload.urlPathSegment,
+                            "validFile.png",
+                        ),
+                    ),
+                    any(),
+                ),
+            ).thenReturn(false)
+
+            val eicrUploadPage = navigator.goToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
+            eicrUploadPage.uploadCertificate("validFile.png")
+            assertThat(eicrUploadPage.form.getErrorMessage()).containsText("The selected file could not be uploaded - try again")
         }
     }
 

@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 
-class PropertyComplianceJourneyExtensions : JourneyDataExtensions() {
+class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
     companion object {
         fun JourneyData.getHasGasSafetyCert() =
             JourneyDataHelper.getFieldBooleanValue(
@@ -47,11 +47,6 @@ class PropertyComplianceJourneyExtensions : JourneyDataExtensions() {
                     GasSafetyExemptionReasonFormModel::exemptionReason.name,
                 )?.let { it == GasSafetyExemptionReason.OTHER }
 
-        fun getGasSafetyCertFilename(
-            propertyOwnershipId: Long,
-            originalFileName: String,
-        ) = "property_${propertyOwnershipId}_gas_safety_certificate.${FilenameUtils.getExtension(originalFileName)}"
-
         fun JourneyData.getHasEICR() =
             JourneyDataHelper.getFieldBooleanValue(
                 this,
@@ -81,5 +76,19 @@ class PropertyComplianceJourneyExtensions : JourneyDataExtensions() {
                     PropertyComplianceStepId.EicrExemptionReason.urlPathSegment,
                     EicrExemptionReasonFormModel::exemptionReason.name,
                 )?.let { it == EicrExemptionReason.OTHER }
+
+        fun getCertFilename(
+            propertyOwnershipId: Long,
+            stepName: String,
+            originalFileName: String,
+        ): String {
+            val certificateType =
+                when (stepName) {
+                    PropertyComplianceStepId.GasSafetyUpload.urlPathSegment -> "gas_safety_certificate"
+                    PropertyComplianceStepId.EicrUpload.urlPathSegment -> "eicr"
+                    else -> throw IllegalStateException("Invalid file upload step name: $stepName")
+                }
+            return "property_${propertyOwnershipId}_$certificateType.${FilenameUtils.getExtension(originalFileName)}"
+        }
     }
 }

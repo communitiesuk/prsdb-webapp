@@ -13,20 +13,20 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasEICR
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasEicrExemption
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasGasSafetyCert
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasGasSafetyCertExemption
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsEicrExemptionReasonOther
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsEicrOutdated
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsGasSafetyCertOutdated
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsGasSafetyExemptionReasonOther
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCertExemption
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrExemptionReasonOther
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-class PropertyComplianceJourneyExtensionsTests {
+class PropertyComplianceJourneyDataExtensionsTests {
     companion object {
         // currentDate is an arbitrary date
         private val currentDate = LocalDate.of(2020, 1, 5).toKotlinLocalDate()
@@ -152,19 +152,6 @@ class PropertyComplianceJourneyExtensionsTests {
         val retrievedIsGasSafetyCertExemptionReasonOther = testJourneyData.getIsGasSafetyExemptionReasonOther()
 
         assertNull(retrievedIsGasSafetyCertExemptionReasonOther)
-    }
-
-    @Test
-    fun `getGasSafetyCertFilename returns the corresponding file name`() {
-        val expectedFileName = "property_1_gas_safety_certificate.png"
-
-        val returnedFileName =
-            PropertyComplianceJourneyExtensions.getGasSafetyCertFilename(
-                propertyOwnershipId = 1,
-                originalFileName = "file.png",
-            )
-
-        assertEquals(expectedFileName, returnedFileName)
     }
 
     @Test
