@@ -16,6 +16,8 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
@@ -450,6 +452,27 @@ class JourneyDataBuilder(
     fun withGasSafetyCertExemptionReason(gasSafetyCertExemptionReason: GasSafetyExemptionReason): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafetyExemptionReason.urlPathSegment] =
             mapOf(GasSafetyExemptionReasonFormModel::exemptionReason.name to gasSafetyCertExemptionReason)
+        return this
+    }
+
+    fun withEicrStatus(hasEICR: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EICR.urlPathSegment] = mapOf(EicrFormModel::hasCert.name to hasEICR)
+        return this
+    }
+
+    fun withEicrIssueDate(issueDate: LocalDate): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EicrIssueDate.urlPathSegment] =
+            mapOf(
+                TodayOrPastDateFormModel::day.name to issueDate.dayOfMonth,
+                TodayOrPastDateFormModel::month.name to issueDate.monthValue,
+                TodayOrPastDateFormModel::year.name to issueDate.year,
+            )
+        return this
+    }
+
+    fun withEicrExemptionStatus(hasEicrExemption: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EicrExemption.urlPathSegment] =
+            mapOf(EicrExemptionFormModel::hasExemption.name to hasEicrExemption)
         return this
     }
 }

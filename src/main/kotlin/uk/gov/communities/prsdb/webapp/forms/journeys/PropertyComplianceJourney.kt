@@ -14,10 +14,15 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasEICR
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasEicrExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasGasSafetyCertExemption
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsGasSafetyExemptionReasonOther
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionOtherReasonFormModel
@@ -98,11 +103,7 @@ class PropertyComplianceJourney(
                     gasSafetyIssueDateStep,
                     gasSafetyEngineerNumStep,
                     gasSafetyUploadStep,
-                    // TODO PRSD-1098: Implement gas safety cert upload confirmation step
-                    placeholderStep(
-                        PropertyComplianceStepId.GasSafetyUploadConfirmation,
-                        "TODO PRSD-1098: Implement gas safety cert upload confirmation step",
-                    ),
+                    gasSafetyUploadConfirmationStep,
                     gasSafetyOutdatedStep,
                     gasSafetyExemptionStep,
                     gasSafetyExemptionReasonStep,
@@ -113,11 +114,19 @@ class PropertyComplianceJourney(
                 "propertyCompliance.taskList.upload.gasSafety",
             )
 
-    // TODO PRSD-954: Implement EICR upload task
     private val eicrTask
         get() =
-            JourneyTask.withOneStep(
-                placeholderStep(PropertyComplianceStepId.EICR, "TODO PRSD-954: Implement EICR upload task"),
+            JourneyTask(
+                PropertyComplianceStepId.EICR,
+                setOf(
+                    eicrStep,
+                    eicrIssueDateStep,
+                    placeholderStep(PropertyComplianceStepId.EicrUpload, "TODO PRSD-956: Implement EICR upload step"),
+                    placeholderStep(PropertyComplianceStepId.EicrOutdated, "TODO PRSD-961: Implement EICR outdated step"),
+                    eicrExemptionStep,
+                    placeholderStep(PropertyComplianceStepId.EicrExemptionReason, "TODO PRSD-958: Implement EICR exemption reason step"),
+                    placeholderStep(PropertyComplianceStepId.EicrExemptionMissing, "TODO PRSD-960: Implement EICR exemption missing step"),
+                ),
                 "propertyCompliance.taskList.upload.eicr",
             )
 
@@ -207,6 +216,23 @@ class PropertyComplianceJourney(
                             ),
                     ) { mapOf("fieldSetSubheading" to getPropertyAddress()) },
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyUploadConfirmation, null) },
+            )
+
+    private val gasSafetyUploadConfirmationStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.GasSafetyUploadConfirmation,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/uploadCertificateConfirmationForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                            ),
+                    ),
+                handleSubmitAndRedirect = { _, _ -> taskListUrlSegment },
+                nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
             )
 
     private val gasSafetyOutdatedStep
@@ -343,6 +369,87 @@ class PropertyComplianceJourney(
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
             )
 
+    private val eicrStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EICR,
+                page =
+                    PageWithContentProvider(
+                        formModel = EicrFormModel::class,
+                        templateName = "forms/certificateForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.eicr.fieldSetHeading",
+                                "fieldSetHint" to "forms.eicr.fieldSetHint",
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = true,
+                                            valueStr = "yes",
+                                            labelMsgKey = "forms.radios.option.yes.label",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = false,
+                                            valueStr = "no",
+                                            labelMsgKey = "forms.radios.option.no.label",
+                                        ),
+                                    ),
+                                BACK_URL_ATTR_NAME to taskListUrlSegment,
+                            ),
+                    ) { mapOf("address" to getPropertyAddress()) },
+                nextAction = { journeyData, _ -> eicrStepNextAction(journeyData) },
+            )
+
+    private val eicrIssueDateStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EicrIssueDate,
+                page =
+                    Page(
+                        formModel = TodayOrPastDateFormModel::class,
+                        templateName = "forms/dateForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.todayOrPastDate.eicr.fieldSetHeading",
+                                "fieldSetHint" to "forms.todayOrPastDate.eicr.fieldSetHint",
+                                "submitButtonText" to "forms.buttons.saveAndContinue",
+                            ),
+                    ),
+                nextAction = { journeyData, _ -> eicrIssueDateStepNextAction(journeyData) },
+            )
+
+    private val eicrExemptionStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EicrExemption,
+                page =
+                    Page(
+                        formModel = EicrExemptionFormModel::class,
+                        templateName = "forms/exemptionForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.eicrExemption.fieldSetHeading",
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = true,
+                                            valueStr = "yes",
+                                            labelMsgKey = "forms.radios.option.yes.label",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = false,
+                                            valueStr = "no",
+                                            labelMsgKey = "forms.radios.option.no.label",
+                                        ),
+                                    ),
+                            ),
+                    ),
+                nextAction = { journeyData, _ -> eicrExemptionStepNextAction(journeyData) },
+            )
+
     private fun placeholderStep(
         stepId: PropertyComplianceStepId,
         todoComment: String,
@@ -377,6 +484,27 @@ class PropertyComplianceJourney(
             Pair(PropertyComplianceStepId.GasSafetyExemptionOtherReason, null)
         } else {
             Pair(PropertyComplianceStepId.GasSafetyExemptionConfirmation, null)
+        }
+
+    private fun eicrStepNextAction(journeyData: JourneyData) =
+        if (journeyData.getHasEICR()!!) {
+            Pair(PropertyComplianceStepId.EicrIssueDate, null)
+        } else {
+            Pair(PropertyComplianceStepId.EicrExemption, null)
+        }
+
+    private fun eicrIssueDateStepNextAction(journeyData: JourneyData) =
+        if (journeyData.getIsEicrOutdated()!!) {
+            Pair(PropertyComplianceStepId.EicrOutdated, null)
+        } else {
+            Pair(PropertyComplianceStepId.EicrUpload, null)
+        }
+
+    private fun eicrExemptionStepNextAction(journeyData: JourneyData) =
+        if (journeyData.getHasEicrExemption()!!) {
+            Pair(PropertyComplianceStepId.EicrExemptionReason, null)
+        } else {
+            Pair(PropertyComplianceStepId.EicrExemptionMissing, null)
         }
 
     private fun getPropertyAddress() =
