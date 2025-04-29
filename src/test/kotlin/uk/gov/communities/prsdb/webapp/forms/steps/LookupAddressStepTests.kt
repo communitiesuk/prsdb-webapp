@@ -1,9 +1,11 @@
 package uk.gov.communities.prsdb.webapp.forms.steps
 
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import org.mockito.junit.jupiter.MockitoExtension
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -11,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@ExtendWith(MockitoExtension::class)
 class LookupAddressStepTests {
     @Mock
     private lateinit var mockAddressLookupService: AddressLookupService
@@ -35,10 +38,6 @@ class LookupAddressStepTests {
 
     @BeforeEach
     fun setup() {
-        mockAddressLookupService = mock()
-        mockJourneyDataService = mock()
-        mockPage = mock()
-
         lookupAddressStep =
             LookupAddressStep(
                 id = LookupStepTestIds.LookupAddress,
