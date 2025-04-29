@@ -28,9 +28,9 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.helpers.MaximumLengthInputStream.Companion.withMaxLength
+import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.discardRemainingFields
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.getFirstFileField
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -138,7 +138,8 @@ class PropertyComplianceController(
 
         val isUploadSuccessfulOrNull =
             if (isFileValid(file, request.contentLengthLong)) {
-                uploadFile(file, request.contentLengthLong, propertyOwnershipId)
+                val uploadFileName = PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, stepName, file.name)
+                uploadFile(uploadFileName, file, request.contentLengthLong)
             } else {
                 null
             }
@@ -181,14 +182,10 @@ class PropertyComplianceController(
     }
 
     private fun uploadFile(
+        uploadFileName: String,
         file: FileItemInput,
         fileLength: Long,
-        propertyOwnershipId: Long,
-    ): Boolean =
-        fileUploader.uploadFile(
-            PropertyComplianceJourneyExtensions.getGasSafetyCertFilename(propertyOwnershipId, file.name),
-            file.inputStream.withMaxLength(fileLength),
-        )
+    ): Boolean = fileUploader.uploadFile(uploadFileName, file.inputStream.withMaxLength(fileLength))
 
     companion object {
         const val PROPERTY_COMPLIANCE_ROUTE = "/$PROPERTY_COMPLIANCE_PATH_SEGMENT/{propertyOwnershipId}"

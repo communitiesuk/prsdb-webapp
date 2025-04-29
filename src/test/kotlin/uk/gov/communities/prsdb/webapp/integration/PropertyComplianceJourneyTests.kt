@@ -16,16 +16,21 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.jdbc.Sql
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_EXEMPTION_OTHER_REASON_MAX_LENGTH
+import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
+import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions
+import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionConfirmationPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrIssueDatePagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrUploadPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionMissingPagePropertyCompliance
@@ -75,7 +80,13 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             // Gas Safety Cert. Upload page
             whenever(
                 fileUploader.uploadFile(
-                    eq(PropertyComplianceJourneyExtensions.getGasSafetyCertFilename(PROPERTY_OWNERSHIP_ID, "validFile.png")),
+                    eq(
+                        PropertyComplianceJourneyHelper.getCertFilename(
+                            PROPERTY_OWNERSHIP_ID,
+                            PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
+                            "validFile.png",
+                        ),
+                    ),
                     any(),
                 ),
             ).thenReturn(true)
@@ -97,12 +108,28 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // EICR Issue Date page
             eicrIssueDatePage.submitDate(currentDate)
+            val eicrUploadPage = assertPageIs(page, EicrUploadPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-956: Continue test
+            // EICR Upload page
+            whenever(
+                fileUploader.uploadFile(
+                    eq(
+                        PropertyComplianceJourneyHelper.getCertFilename(
+                            PROPERTY_OWNERSHIP_ID,
+                            PropertyComplianceStepId.EicrUpload.urlPathSegment,
+                            "validFile.png",
+                        ),
+                    ),
+                    any(),
+                ),
+            ).thenReturn(true)
+            eicrUploadPage.uploadCertificate("validFile.png")
+
+            // TODO PRSD-1128: Continue test
             assertContains(
                 page.url(),
                 PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.EicrUpload.urlPathSegment}",
+                    "/${PropertyComplianceStepId.EicrUploadConfirmation.urlPathSegment}",
             )
         }
 
@@ -192,13 +219,19 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // EICR Exemption page
             eicrExemptionPage.submitHasExemption()
+            val eicrExemptionReasonPage = assertPageIs(page, EicrExemptionReasonPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-958: Continue test
-            assertContains(
-                page.url(),
-                PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.EicrExemptionReason.urlPathSegment}",
-            )
+            // EICR Exemption Reason page
+            eicrExemptionReasonPage.submitExemptionReason(EicrExemptionReason.LIVE_IN_LANDLORD)
+            val eicrExemptionConfirmationPage =
+                assertPageIs(page, EicrExemptionConfirmationPagePropertyCompliance::class, urlArguments)
+
+            // Gas Safety Exemption Confirmation page
+            assertThat(eicrExemptionConfirmationPage.heading).containsText("You’ve marked this property as exempt from needing an EICR")
+            eicrExemptionConfirmationPage.saveAndReturnToTaskListButton.clickAndWait()
+
+            // TODO PRSD-395: Continue test (EPC task)
+            assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
         }
 
         @Test
@@ -317,7 +350,13 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
         fun `Submitting a valid file returns an error if the upload attempt is unsuccessful`() {
             whenever(
                 fileUploader.uploadFile(
-                    eq(PropertyComplianceJourneyExtensions.getGasSafetyCertFilename(PROPERTY_OWNERSHIP_ID, "validFile.png")),
+                    eq(
+                        PropertyComplianceJourneyHelper.getCertFilename(
+                            PROPERTY_OWNERSHIP_ID,
+                            PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
+                            "validFile.png",
+                        ),
+                    ),
                     any(),
                 ),
             ).thenReturn(false)
@@ -370,7 +409,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
         @Test
         fun `Submitting with a too long reason returns an error`(page: Page) {
             val gasSafetyExemptionOtherReasonPage = navigator.goToPropertyComplianceGasSafetyExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
-            gasSafetyExemptionOtherReasonPage.submitReason("too long reason".repeat(GAS_SAFETY_EXEMPTION_OTHER_REASON_MAX_LENGTH))
+            gasSafetyExemptionOtherReasonPage.submitReason("too long reason".repeat(EXEMPTION_OTHER_REASON_MAX_LENGTH))
             assertThat(gasSafetyExemptionOtherReasonPage.form.getErrorMessage("otherReason"))
                 .containsText("Explanation must be 200 characters or fewer")
         }
@@ -416,6 +455,50 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
     }
 
     @Nested
+    inner class EicrUploadStepTests {
+        @Test
+        fun `Submitting with no file staged returns an error`() {
+            val eicrUploadPage = navigator.goToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
+            eicrUploadPage.form.submit()
+            assertThat(eicrUploadPage.form.getErrorMessage()).containsText("Select a file")
+        }
+
+        @Test
+        fun `Submitting with an invalid file (wrong type) staged returns an error`() {
+            val eicrUploadPage = navigator.goToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
+            eicrUploadPage.uploadCertificate("invalidFileType.bmp")
+            assertThat(eicrUploadPage.form.getErrorMessage()).containsText("The selected file must be a PDF, PNG or JPG")
+        }
+
+        @Test
+        fun `Submitting with an invalid file (too big) staged returns an error`() {
+            val eicrUploadPage = navigator.goToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
+            eicrUploadPage.uploadCertificate("invalidFileSize.jpg")
+            assertThat(eicrUploadPage.form.getErrorMessage()).containsText("The selected file must be smaller than 15MB")
+        }
+
+        @Test
+        fun `Submitting a valid file returns an error if the upload attempt is unsuccessful`() {
+            whenever(
+                fileUploader.uploadFile(
+                    eq(
+                        PropertyComplianceJourneyHelper.getCertFilename(
+                            PROPERTY_OWNERSHIP_ID,
+                            PropertyComplianceStepId.EicrUpload.urlPathSegment,
+                            "validFile.png",
+                        ),
+                    ),
+                    any(),
+                ),
+            ).thenReturn(false)
+
+            val eicrUploadPage = navigator.goToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
+            eicrUploadPage.uploadCertificate("validFile.png")
+            assertThat(eicrUploadPage.form.getErrorMessage()).containsText("The selected file could not be uploaded - try again")
+        }
+    }
+
+    @Nested
     inner class EicrExemptionStepTests {
         @Test
         fun `Submitting with no option selected returns an error`() {
@@ -423,6 +506,50 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             eicrExemptionPage.form.submit()
             assertThat(eicrExemptionPage.form.getErrorMessage())
                 .containsText("Select whether this property has an EICR exemption")
+        }
+    }
+
+    @Nested
+    inner class EicrExemptionReasonStepTests {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val eicrExemptionReasonPage = navigator.goToPropertyComplianceEicrExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
+            eicrExemptionReasonPage.form.submit()
+            assertThat(eicrExemptionReasonPage.form.getErrorMessage())
+                .containsText("Select why this property has an EICR exemption")
+        }
+
+        @Test
+        fun `Submitting with 'other' selected redirects to the EICR exemption other reason page`(page: Page) {
+            val eicrExemptionReasonPage = navigator.goToPropertyComplianceEicrExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
+            eicrExemptionReasonPage.submitExemptionReason(EicrExemptionReason.OTHER)
+            assertPageIs(page, EicrExemptionOtherReasonPagePropertyCompliance::class, urlArguments)
+        }
+    }
+
+    @Nested
+    inner class EicrExemptionOtherReasonStepTests {
+        @Test
+        fun `Submitting with no reason returns an error`(page: Page) {
+            val eicrExemptionOtherReasonPage = navigator.goToPropertyComplianceEicrExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
+            eicrExemptionOtherReasonPage.form.submit()
+            assertThat(eicrExemptionOtherReasonPage.form.getErrorMessage())
+                .containsText("Explain why your property is exempt from needing an EICR")
+        }
+
+        @Test
+        fun `Submitting with a too long reason returns an error`(page: Page) {
+            val eicrExemptionOtherReasonPage = navigator.goToPropertyComplianceEicrExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
+            eicrExemptionOtherReasonPage.submitReason("too long reason".repeat(EXEMPTION_OTHER_REASON_MAX_LENGTH))
+            assertThat(eicrExemptionOtherReasonPage.form.getErrorMessage("otherReason"))
+                .containsText("Explanation must be 200 characters or fewer")
+        }
+
+        @Test
+        fun `Submitting with a valid reason redirects to the gas safety exemption confirmation page`(page: Page) {
+            val eicrExemptionOtherReasonPage = navigator.goToPropertyComplianceEicrExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
+            eicrExemptionOtherReasonPage.submitReason("valid reason")
+            assertPageIs(page, EicrExemptionConfirmationPagePropertyCompliance::class, urlArguments)
         }
     }
 

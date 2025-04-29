@@ -1,16 +1,15 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.ExemptionReasonFormPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.UploadCertificateFormPage
 
-class GasSafetyExemptionReasonPagePropertyCompliance(
+class EicrUploadPagePropertyCompliance(
     page: Page,
     urlArguments: Map<String, String>,
-) : ExemptionReasonFormPage<GasSafetyExemptionReason>(
+) : UploadCertificateFormPage(
         page,
         PropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.GasSafetyExemptionReason.urlPathSegment}",
+            "/${PropertyComplianceStepId.EicrUpload.urlPathSegment}",
     )
