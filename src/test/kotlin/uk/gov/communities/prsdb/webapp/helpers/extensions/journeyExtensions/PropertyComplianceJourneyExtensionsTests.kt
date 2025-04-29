@@ -10,12 +10,14 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.mockConstruction
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasEicrExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasGasSafetyCertExemption
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsEicrExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsGasSafetyExemptionReasonOther
@@ -50,6 +52,13 @@ class PropertyComplianceJourneyExtensionsTests {
                 Arguments.of(Named.of("over 5 years old", LocalDate.of(2015, 1, 4)), true),
                 Arguments.of(Named.of("5 years old", LocalDate.of(2015, 1, 5)), true),
                 Arguments.of(Named.of("less than 5 years old", LocalDate.of(2015, 1, 6)), false),
+            )
+
+        @JvmStatic
+        private fun provideEicrExemptionReasons() =
+            arrayOf(
+                Arguments.of(Named.of("other", EicrExemptionReason.OTHER), true),
+                Arguments.of(Named.of("not other", EicrExemptionReason.LIVE_IN_LANDLORD), false),
             )
     }
 
@@ -219,5 +228,27 @@ class PropertyComplianceJourneyExtensionsTests {
         val retrievedHasEicrExemption = testJourneyData.getHasEicrExemption()
 
         assertNull(retrievedHasEicrExemption)
+    }
+
+    @ParameterizedTest(name = "{1} when the reason is {0}")
+    @MethodSource("provideEicrExemptionReasons")
+    fun `getIsEicrExemptionReasonOther returns`(
+        reason: EicrExemptionReason,
+        expectedResult: Boolean,
+    ) {
+        val testJourneyData = journeyDataBuilder.withEicrExemptionReason(reason).build()
+
+        val retrievedIsEicrExemptionReasonOther = testJourneyData.getIsEicrExemptionReasonOther()!!
+
+        assertEquals(expectedResult, retrievedIsEicrExemptionReasonOther)
+    }
+
+    @Test
+    fun `getIsEicrExemptionReasonOther returns null if the corresponding page is not in journeyData`() {
+        val testJourneyData = journeyDataBuilder.build()
+
+        val retrievedIsEicrExemptionReasonOther = testJourneyData.getIsEicrExemptionReasonOther()
+
+        assertNull(retrievedIsEicrExemptionReasonOther)
     }
 }

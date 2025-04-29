@@ -17,6 +17,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_EXEMPTION_OTHER_REASON_MAX_LENGTH
+import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
@@ -24,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrIssueDatePagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
@@ -192,12 +194,16 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // EICR Exemption page
             eicrExemptionPage.submitHasExemption()
+            val eicrExemptionReasonPage = assertPageIs(page, EicrExemptionReasonPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-958: Continue test
+            // EICR Exemption Reason page
+            eicrExemptionReasonPage.submitExemptionReason(EicrExemptionReason.LIVE_IN_LANDLORD)
+
+            // TODO PRSD-959: Continue test
             assertContains(
                 page.url(),
                 PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.EicrExemptionReason.urlPathSegment}",
+                    "/${PropertyComplianceStepId.EicrExemptionConfirmation.urlPathSegment}",
             )
         }
 
@@ -423,6 +429,30 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             eicrExemptionPage.form.submit()
             assertThat(eicrExemptionPage.form.getErrorMessage())
                 .containsText("Select whether this property has an EICR exemption")
+        }
+    }
+
+    @Nested
+    inner class EicrExemptionReasonStepTests {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val eicrExemptionReasonPage = navigator.goToPropertyComplianceEicrExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
+            eicrExemptionReasonPage.form.submit()
+            assertThat(eicrExemptionReasonPage.form.getErrorMessage())
+                .containsText("Select why this property has an EICR exemption")
+        }
+
+        @Test
+        fun `Submitting with 'other' selected redirects to the EICR exemption other reason page`(page: Page) {
+            val eicrExemptionReasonPage = navigator.goToPropertyComplianceEicrExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
+            eicrExemptionReasonPage.submitExemptionReason(EicrExemptionReason.OTHER)
+
+            // TODO PRSD-995: Replace with EICR other exemption page
+            assertContains(
+                page.url(),
+                PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
+                    "/${PropertyComplianceStepId.EicrExemptionOtherReason.urlPathSegment}",
+            )
         }
     }
 

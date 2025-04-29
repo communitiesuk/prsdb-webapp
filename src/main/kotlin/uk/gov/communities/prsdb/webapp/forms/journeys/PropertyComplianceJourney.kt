@@ -4,6 +4,7 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
+import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
@@ -18,10 +19,12 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasEicrExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getHasGasSafetyCertExemption
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsEicrExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions.Companion.getIsGasSafetyExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
@@ -121,11 +124,28 @@ class PropertyComplianceJourney(
                 setOf(
                     eicrStep,
                     eicrIssueDateStep,
-                    placeholderStep(PropertyComplianceStepId.EicrUpload, "TODO PRSD-956: Implement EICR upload step"),
-                    placeholderStep(PropertyComplianceStepId.EicrOutdated, "TODO PRSD-961: Implement EICR outdated step"),
+                    placeholderStep(
+                        PropertyComplianceStepId.EicrUpload,
+                        "TODO PRSD-956: Implement EICR upload step",
+                    ),
+                    placeholderStep(
+                        PropertyComplianceStepId.EicrOutdated,
+                        "TODO PRSD-961: Implement EICR outdated step",
+                    ),
                     eicrExemptionStep,
-                    placeholderStep(PropertyComplianceStepId.EicrExemptionReason, "TODO PRSD-958: Implement EICR exemption reason step"),
-                    placeholderStep(PropertyComplianceStepId.EicrExemptionMissing, "TODO PRSD-960: Implement EICR exemption missing step"),
+                    eicrExemptionReasonStep,
+                    placeholderStep(
+                        PropertyComplianceStepId.EicrExemptionOtherReason,
+                        "TODO PRSD-995: Implement EICR exemption other reason step",
+                    ),
+                    placeholderStep(
+                        PropertyComplianceStepId.EicrExemptionConfirmation,
+                        "TODO PRSD-959: Implement EICR exemption confirmation step",
+                    ),
+                    placeholderStep(
+                        PropertyComplianceStepId.EicrExemptionMissing,
+                        "TODO PRSD-960: Implement EICR exemption missing step",
+                    ),
                 ),
                 "propertyCompliance.taskList.upload.eicr",
             )
@@ -450,6 +470,44 @@ class PropertyComplianceJourney(
                 nextAction = { journeyData, _ -> eicrExemptionStepNextAction(journeyData) },
             )
 
+    private val eicrExemptionReasonStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EicrExemptionReason,
+                page =
+                    Page(
+                        formModel = EicrExemptionReasonFormModel::class,
+                        templateName = "forms/exemptionReasonForm.html",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.eicrExemptionReason.fieldSetHeading",
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = GasSafetyExemptionReason.LONG_LEASE,
+                                            labelMsgKey = "forms.eicrExemptionReason.radios.longLease.label",
+                                            hintMsgKey = "forms.eicrExemptionReason.radios.longLease.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = EicrExemptionReason.STUDENT_ACCOMMODATION,
+                                            labelMsgKey = "forms.eicrExemptionReason.radios.studentAccommodation.label",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = EicrExemptionReason.LIVE_IN_LANDLORD,
+                                            labelMsgKey = "forms.eicrExemptionReason.radios.liveInLandlord.label",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = GasSafetyExemptionReason.OTHER,
+                                            labelMsgKey = "forms.eicrExemptionReason.radios.other.label",
+                                            hintMsgKey = "forms.eicrExemptionReason.radios.other.hint",
+                                        ),
+                                    ),
+                            ),
+                    ),
+                nextAction = { journeyData, _ -> eicrExemptionReasonStepNextAction(journeyData) },
+            )
+
     private fun placeholderStep(
         stepId: PropertyComplianceStepId,
         todoComment: String,
@@ -505,6 +563,13 @@ class PropertyComplianceJourney(
             Pair(PropertyComplianceStepId.EicrExemptionReason, null)
         } else {
             Pair(PropertyComplianceStepId.EicrExemptionMissing, null)
+        }
+
+    private fun eicrExemptionReasonStepNextAction(journeyData: JourneyData) =
+        if (journeyData.getIsEicrExemptionReasonOther()!!) {
+            Pair(PropertyComplianceStepId.EicrExemptionOtherReason, null)
+        } else {
+            Pair(PropertyComplianceStepId.EicrExemptionConfirmation, null)
         }
 
     private fun getPropertyAddress() =

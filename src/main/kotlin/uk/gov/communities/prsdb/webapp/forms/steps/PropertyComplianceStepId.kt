@@ -22,6 +22,8 @@ enum class PropertyComplianceStepId(
     EicrOutdated("eicr-outdated"),
     EicrExemption("eicr-exemption"),
     EicrExemptionReason("eicr-exemption-reason"),
+    EicrExemptionOtherReason("eicr-exemption-other-reason"),
+    EicrExemptionConfirmation("eicr-exemption-confirmation"),
     EicrExemptionMissing("eicr-exemption-missing"),
     EPC("epc"),
     CheckAndSubmit("check-and-submit"),
