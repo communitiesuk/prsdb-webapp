@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 
-class PropertyComplianceJourneyExtensions : JourneyDataExtensions() {
+class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
     companion object {
         fun JourneyData.getHasGasSafetyCert() =
             JourneyDataHelper.getFieldBooleanValue(

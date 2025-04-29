@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyExtensions
+import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionReasonPagePropertyCompliance
@@ -79,7 +79,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             whenever(
                 fileUploader.uploadFile(
                     eq(
-                        PropertyComplianceJourneyExtensions.getCertFilename(
+                        PropertyComplianceJourneyHelper.getCertFilename(
                             PROPERTY_OWNERSHIP_ID,
                             PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
                             "validFile.png",
@@ -112,7 +112,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             whenever(
                 fileUploader.uploadFile(
                     eq(
-                        PropertyComplianceJourneyExtensions.getCertFilename(
+                        PropertyComplianceJourneyHelper.getCertFilename(
                             PROPERTY_OWNERSHIP_ID,
                             PropertyComplianceStepId.EicrUpload.urlPathSegment,
                             "validFile.png",
@@ -347,7 +347,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             whenever(
                 fileUploader.uploadFile(
                     eq(
-                        PropertyComplianceJourneyExtensions.getCertFilename(
+                        PropertyComplianceJourneyHelper.getCertFilename(
                             PROPERTY_OWNERSHIP_ID,
                             PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
                             "validFile.png",
@@ -478,7 +478,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             whenever(
                 fileUploader.uploadFile(
                     eq(
-                        PropertyComplianceJourneyExtensions.getCertFilename(
+                        PropertyComplianceJourneyHelper.getCertFilename(
                             PROPERTY_OWNERSHIP_ID,
                             PropertyComplianceStepId.EicrUpload.urlPathSegment,
                             "validFile.png",
