@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionConfirmationPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionMissingPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionReasonPagePropertyCompliance
@@ -271,13 +272,14 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // EICR Exemption page
             eicrExemptionPage.submitHasNoExemption()
+            val eicrExemptionMissingPage = assertPageIs(page, EicrExemptionMissingPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-960: Continue test
-            assertContains(
-                page.url(),
-                PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.EicrExemptionMissing.urlPathSegment}",
-            )
+            // EICR Exemption Missing page
+            assertThat(eicrExemptionMissingPage.heading).containsText("You must get a valid EICR for this property")
+            eicrExemptionMissingPage.returnToTaskListButton.clickAndWait()
+
+            // TODO PRSD-395: Continue test (EPC task)
+            assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
         }
     }
 
