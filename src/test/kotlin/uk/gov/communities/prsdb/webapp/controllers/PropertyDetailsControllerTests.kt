@@ -12,11 +12,11 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
@@ -34,10 +34,10 @@ import kotlin.test.Test
 class PropertyDetailsControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
-    @MockBean
+    @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
-    @MockBean
+    @MockitoBean
     private lateinit var propertyDetailsUpdateJourneyFactory: PropertyDetailsUpdateJourneyFactory
 
     @Mock

@@ -8,11 +8,11 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
@@ -51,43 +51,43 @@ import kotlin.test.Test
 class LandlordDashboardUrlTests(
     context: WebApplicationContext,
 ) : ControllerTest(context) {
-    @SpyBean
+    @MockitoSpyBean
     private lateinit var landlordRegistrationJourneyFactory: LandlordRegistrationJourneyFactory
 
-    @SpyBean
+    @MockitoSpyBean
     private lateinit var propertyRegistrationJourneyFactory: PropertyRegistrationJourneyFactory
 
-    @SpyBean
+    @MockitoSpyBean
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
-    @MockBean
+    @MockitoBean
     private lateinit var anyEmailNotificationService: EmailNotificationService<EmailTemplateModel>
 
-    @MockBean
+    @MockitoBean
     private lateinit var mockLandlordService: LandlordService
 
-    @MockBean
+    @MockitoBean
     private lateinit var mockIdentityService: OneLoginIdentityService
 
-    @MockBean
+    @MockitoBean
     private lateinit var mockJourneyDataServiceFactory: JourneyDataServiceFactory
 
     @Mock
     private lateinit var mockJourneyDataService: JourneyDataService
 
-    @MockBean
+    @MockitoBean
     private lateinit var mockAddressLookupService: AddressLookupService
 
-    @MockBean
+    @MockitoBean
     private lateinit var mockLocalAuthorityService: LocalAuthorityService
 
-    @MockBean
+    @MockitoBean
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
-    @MockBean
+    @MockitoBean
     private lateinit var mockPropertyRegistrationService: PropertyRegistrationService
 
-    @MockBean
+    @MockitoBean
     private lateinit var resetter: SecurityContextService
 
     @BeforeEach
