@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
+import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -109,8 +110,8 @@ class PropertyRegistrationJourney(
             RegisterPropertyStepId.LookupAddress,
             setOf(
                 lookupAddressStep(),
-                selectAddressStep(),
                 noAddressFoundStep(),
+                selectAddressStep(),
                 alreadyRegisteredStep(),
                 manualAddressStep(),
                 localAuthorityStep(),
@@ -184,7 +185,6 @@ class PropertyRegistrationJourney(
                                 RegisterPropertyStepId.LookupAddress.urlPathSegment,
                         ),
                     lookupAddressPathSegment = RegisterPropertyStepId.LookupAddress.urlPathSegment,
-                    addressLookupService = addressLookupService,
                     journeyDataService = journeyDataService,
                     displaySectionHeader = true,
                 ),
@@ -224,8 +224,8 @@ class PropertyRegistrationJourney(
                     content =
                         mapOf(
                             "title" to "registerProperty.title",
-                            "postcode" to "HARDCODED POSTCODE",
-                            "houseNameOrNumber" to "HARDCODED HOUSE NUMBER",
+                            "postcode" to getHouseNameOrNumberAndPostcode().second,
+                            "houseNameOrNumber" to getHouseNameOrNumberAndPostcode().first,
                             "searchAgainUrl" to
                                 "/$REGISTER_PROPERTY_JOURNEY_URL/" +
                                 RegisterPropertyStepId.LookupAddress.urlPathSegment,
@@ -234,6 +234,13 @@ class PropertyRegistrationJourney(
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.ManualAddress, null) },
         )
+
+    private fun getHouseNameOrNumberAndPostcode() =
+        JourneyDataHelper
+            .getLookupAddressHouseNameOrNumberAndPostcode(
+                journeyDataService.getJourneyDataFromSession(),
+                RegisterPropertyStepId.LookupAddress.urlPathSegment,
+            ) ?: Pair("", "")
 
     private fun manualAddressStep() =
         Step(

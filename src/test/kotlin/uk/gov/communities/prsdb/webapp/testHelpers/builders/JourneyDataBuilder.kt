@@ -123,6 +123,22 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withEmptyLookedUpAddresses(): JourneyDataBuilder {
+        journeyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY] = "[]"
+        return this
+    }
+
+    fun withLookedUpAddresses(): JourneyDataBuilder {
+        journeyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY] = "[{\"singleLineAddress\":\"1 Street Address, City, AB1 2CD\"}]"
+        return this
+    }
+
+    fun withManualAddressSelected(isContactAddress: Boolean = false): JourneyDataBuilder {
+        val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
+        journeyData[selectAddressKey] = mapOf("address" to MANUAL_ADDRESS_CHOSEN)
+        return this
+    }
+
     fun withSelectedAddress(
         singleLineAddress: String,
         uprn: Long? = null,

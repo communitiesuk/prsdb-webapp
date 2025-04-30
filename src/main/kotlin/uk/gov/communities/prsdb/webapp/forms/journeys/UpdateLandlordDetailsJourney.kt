@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
+import uk.gov.communities.prsdb.webapp.forms.steps.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
@@ -199,7 +200,7 @@ class UpdateLandlordDetailsJourney(
         )
 
     private val lookupAddressStep =
-        Step(
+        LookupAddressStep(
             id = UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress,
             page =
                 Page(
@@ -219,7 +220,10 @@ class UpdateLandlordDetailsJourney(
                         ),
                     shouldDisplaySectionHeader = false,
                 ),
-            nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.SelectEnglandAndWalesAddress, null) },
+            nextStepIfAddressesFound = UpdateLandlordDetailsStepId.SelectEnglandAndWalesAddress,
+            nextStepIfNoAddressesFound = UpdateLandlordDetailsStepId.NoAddressFound,
+            addressLookupService = addressLookupService,
+            journeyDataService = journeyDataService,
             saveAfterSubmit = false,
         )
 
@@ -240,7 +244,6 @@ class UpdateLandlordDetailsJourney(
                                 UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
                         ),
                     lookupAddressPathSegment = UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
-                    addressLookupService = addressLookupService,
                     journeyDataService = journeyDataService,
                     displaySectionHeader = false,
                 ),
@@ -254,6 +257,33 @@ class UpdateLandlordDetailsJourney(
         } else {
             Pair(UpdateLandlordDetailsStepId.UpdateDetails, null)
         }
+
+    private val noAddressFoundStep =
+        Step(
+            id = UpdateLandlordDetailsStepId.NoAddressFound,
+            page =
+                Page(
+                    formModel = NoInputFormModel::class,
+                    templateName = "noAddressFoundPage",
+                    content =
+                        mapOf(
+                            "title" to "landlordDetails.update.title",
+                            "postcode" to getHouseNameOrNumberAndPostcode().second,
+                            "houseNameOrNumber" to getHouseNameOrNumberAndPostcode().first,
+                            "searchAgainUrl" to
+                                "${LandlordDetailsController.UPDATE_ROUTE}/" +
+                                UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
+                        ),
+                ),
+            nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.ManualEnglandAndWalesAddress, null) },
+        )
+
+    private fun getHouseNameOrNumberAndPostcode() =
+        JourneyDataHelper
+            .getLookupAddressHouseNameOrNumberAndPostcode(
+                journeyDataService.getJourneyDataFromSession(),
+                UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
+            ) ?: Pair("", "")
 
     private val manualAddressStep =
         Step(
@@ -290,6 +320,7 @@ class UpdateLandlordDetailsJourney(
                 dateOfBirthStep,
                 phoneNumberStep,
                 lookupAddressStep,
+                noAddressFoundStep,
                 selectAddressStep,
                 manualAddressStep,
                 updateDetailsStep,

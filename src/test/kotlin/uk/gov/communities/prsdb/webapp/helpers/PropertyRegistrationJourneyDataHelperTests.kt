@@ -205,4 +205,54 @@ class PropertyRegistrationJourneyDataHelperTests {
 
         assertEquals(expectedLicenseNumber, licenseNumber)
     }
+
+    @Test
+    fun `isManualAddressChosen returns true if manual address is chosen on the Select Address step`() {
+        val journeyData =
+            journeyDataBuilder
+                .withLookedUpAddresses()
+                .withManualAddressSelected()
+                .build()
+
+        assertTrue(PropertyRegistrationJourneyDataHelper.isManualAddressChosen(journeyData))
+    }
+
+    @Test
+    fun `isManualAddressChosen returns true if passed an empty list of lookedUpAddresses`() {
+        val journeyData =
+            journeyDataBuilder
+                .withLookedUpAddresses()
+                .build()
+        val lookedUpAddresses = listOf<AddressDataModel>()
+
+        assertTrue(PropertyRegistrationJourneyDataHelper.isManualAddressChosen(journeyData, lookedUpAddresses))
+    }
+
+    @Test
+    fun `isManualAddressChosen returns false if passed a populated list of lookedUpAddresses and manual address was not selected`() {
+        val journeyData =
+            journeyDataBuilder
+                .withSelectedAddress("1 Street Address")
+                .build()
+        val lookedUpAddresses =
+            listOf(
+                AddressDataModel("1 Street Address"),
+            )
+
+        assertFalse(PropertyRegistrationJourneyDataHelper.isManualAddressChosen(journeyData, lookedUpAddresses))
+    }
+
+    @Test
+    fun `isManualAddressChosen returns true if JourneyData's lookedUpAddresses is an empty list`() {
+        val journeyData = journeyDataBuilder.withEmptyLookedUpAddresses().build()
+
+        assertTrue(PropertyRegistrationJourneyDataHelper.isManualAddressChosen(journeyData))
+    }
+
+    @Test
+    fun `isManualAddressChosen returns false if JourneyData's lookedUpAddresses is a populated list and manual address was not selected`() {
+        val journeyData = journeyDataBuilder.withSelectedAddress("1 Street Address").build()
+
+        assertFalse(PropertyRegistrationJourneyDataHelper.isManualAddressChosen(journeyData))
+    }
 }

@@ -116,22 +116,23 @@ class LandlordRegistrationCheckAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress"
             },
             LandlordRegistrationJourneyDataHelper.getAddress(journeyData, lookedUpAddresses)!!.singleLineAddress,
-            getContactAddressChangeURLPathSegment(journeyData, livesInEnglandOrWales),
+            getContactAddressChangeURLPathSegment(journeyData, livesInEnglandOrWales, lookedUpAddresses),
         )
 
     private fun getContactAddressChangeURLPathSegment(
         journeyData: JourneyData,
         livesInEnglandOrWales: Boolean,
+        lookedUpAddresses: List<AddressDataModel>,
     ): String =
         if (livesInEnglandOrWales) {
-            if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
+            if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData, lookedUpAddresses = lookedUpAddresses)) {
                 LandlordRegistrationStepId.ManualAddress.urlPathSegment
             } else {
                 LandlordRegistrationStepId.LookupAddress.urlPathSegment
             }
         } else {
             val isContactAddress = true
-            if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData, isContactAddress)
+            if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData, isContactAddress, lookedUpAddresses)
             ) {
                 LandlordRegistrationStepId.ManualContactAddress.urlPathSegment
             } else {

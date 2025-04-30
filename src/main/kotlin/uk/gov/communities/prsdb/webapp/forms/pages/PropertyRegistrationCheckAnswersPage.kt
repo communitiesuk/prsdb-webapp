@@ -44,7 +44,7 @@ class PropertyRegistrationCheckAnswersPage(
 
         modelAndView.addObject("propertyDetails", propertyDetails)
         modelAndView.addObject("propertyName", propertyName)
-        modelAndView.addObject("showUprnDetail", !DataHelper.isManualAddressChosen(journeyData))
+        modelAndView.addObject("showUprnDetail", !DataHelper.isManualAddressChosen(journeyData, lookedUpAddresses))
     }
 
     private fun getPropertyName(
@@ -67,7 +67,7 @@ class PropertyRegistrationCheckAnswersPage(
         lookedUpAddresses: List<AddressDataModel>,
     ): List<SummaryListRowViewModel> {
         val address = DataHelper.getAddress(journeyData, lookedUpAddresses)!!
-        return if (DataHelper.isManualAddressChosen(journeyData)) {
+        return if (DataHelper.isManualAddressChosen(journeyData, lookedUpAddresses)) {
             getManualAddressDetails(address)
         } else {
             getSelectedAddressDetails(address)
