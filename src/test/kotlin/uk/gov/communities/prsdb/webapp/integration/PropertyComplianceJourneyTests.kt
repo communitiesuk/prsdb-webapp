@@ -424,13 +424,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
         fun `Submitting with a valid reason redirects to the gas safety exemption confirmation page`(page: Page) {
             val gasSafetyExemptionOtherReasonPage = navigator.goToPropertyComplianceGasSafetyExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
             gasSafetyExemptionOtherReasonPage.submitReason("valid reason")
-
-            // TODO PRSD-951: Replace with gas exemption confirmation page
-            assertContains(
-                page.url(),
-                PropertyComplianceController.getPropertyCompliancePath(PROPERTY_OWNERSHIP_ID) +
-                    "/${PropertyComplianceStepId.GasSafetyExemptionConfirmation.urlPathSegment}",
-            )
+            assertPageIs(page, GasSafetyExemptionConfirmationPagePropertyCompliance::class, urlArguments)
         }
     }
 
