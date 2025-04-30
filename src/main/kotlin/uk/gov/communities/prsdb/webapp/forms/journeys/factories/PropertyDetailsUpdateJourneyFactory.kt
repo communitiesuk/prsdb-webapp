@@ -23,33 +23,14 @@ class PropertyDetailsUpdateJourneyFactory(
         journeyDataServiceFactory.create(getJourneyDataKey(propertyOwnershipId, stepName)),
         propertyOwnershipService,
         propertyOwnershipId,
+        stepName,
     )
 
     fun getJourneyDataKey(
         propertyOwnershipId: Long,
         stepName: String,
-    ) = when (stepName) {
-        UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment ->
-            PropertyDetailsController.getUpdatePropertyDetailsPath(
-                propertyOwnershipId,
-            ) + "-OWNERSHIP"
-        UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment,
-        UpdatePropertyDetailsStepId.UpdateSelectiveLicence.urlPathSegment,
-        UpdatePropertyDetailsStepId.UpdateHmoAdditionalLicence.urlPathSegment,
-        UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence.urlPathSegment,
-        UpdatePropertyDetailsStepId.CheckYourLicensing.urlPathSegment,
-        ->
-            PropertyDetailsController.getUpdatePropertyDetailsPath(
-                propertyOwnershipId,
-            ) + "-LICENSING"
-        UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment,
-        UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment,
-        UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment,
-        UpdatePropertyDetailsStepId.CheckYourOccupancy.urlPathSegment,
-        ->
-            PropertyDetailsController.getUpdatePropertyDetailsPath(
-                propertyOwnershipId,
-            ) + "-OCCUPANCY"
-        else -> throw PrsdbWebException("Invalid step name $stepName")
+    ): String {
+        val step = UpdatePropertyDetailsStepId.fromPathSegment(stepName) ?: throw PrsdbWebException("Invalid step name: $stepName")
+        return PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) + step.groupIdentifier.identifierString
     }
 }

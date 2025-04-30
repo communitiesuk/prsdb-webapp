@@ -1,19 +1,23 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.validation.Validator
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.ReachableStepDetailsIterator
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import java.security.Principal
 
 abstract class UpdateJourney<T : StepId>(
     journeyType: JourneyType,
     initialStepId: T,
     validator: Validator,
     journeyDataService: JourneyDataService,
+    private val stepName: String,
 ) : Journey<T>(journeyType, initialStepId, validator, journeyDataService) {
     companion object {
         fun getOriginalJourneyDataKey(journeyDataService: JourneyDataService) = "ORIGINAL_${journeyDataService.journeyDataKey}"
@@ -32,6 +36,14 @@ abstract class UpdateJourney<T : StepId>(
             journeyDataService.setJourneyDataInSession(newJourneyData)
         }
     }
+
+    fun getModelAndViewForStep(submittedPageData: PageData? = null): ModelAndView =
+        getModelAndViewForStep(stepName, null, submittedPageData)
+
+    fun completeStep(
+        formData: PageData,
+        principal: Principal,
+    ): ModelAndView = completeStep(stepName, formData, null, principal)
 
     override fun iterator(): Iterator<StepDetails<T>> {
         val journeyData = journeyDataService.getJourneyDataFromSession()

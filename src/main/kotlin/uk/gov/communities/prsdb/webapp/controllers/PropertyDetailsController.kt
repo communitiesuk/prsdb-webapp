@@ -71,7 +71,7 @@ class PropertyDetailsController(
         if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
             propertyDetailsUpdateJourneyFactory
                 .create(propertyOwnershipId, stepName)
-                .getModelAndViewForStep(stepName, subPageNumber = null)
+                .getModelAndViewForStep()
         } else {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
@@ -91,12 +91,7 @@ class PropertyDetailsController(
         if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
             propertyDetailsUpdateJourneyFactory
                 .create(propertyOwnershipId, stepName)
-                .completeStep(
-                    stepName,
-                    formData,
-                    subPageNumber = null,
-                    principal,
-                )
+                .completeStep(formData, principal)
         } else {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
