@@ -10,9 +10,12 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 
 @WebMvcTest(LandlordDashboardController::class)
@@ -24,6 +27,12 @@ class LandlordDashboardControllerTests(
 
     @MockitoBean
     private lateinit var propertyRegistrationService: PropertyRegistrationService
+
+    @MockitoBean
+    private lateinit var journeyDataServiceFactory: JourneyDataServiceFactory
+
+    @MockitoBean
+    private lateinit var localAuthorityService: LocalAuthorityService
 
     @Test
     fun `index returns a redirect for unauthenticated user`() {
@@ -80,6 +89,36 @@ class LandlordDashboardControllerTests(
         whenever(landlordService.retrieveLandlordByBaseUserId(anyString())).thenReturn(landlord)
         mvc
             .get(LANDLORD_DASHBOARD_URL)
+            .andExpect {
+                status { isOk() }
+            }
+    }
+
+    @Test
+    fun `landlordIncompleteProperties returns a redirect for unauthenticated user`() {
+        mvc
+            .get(INCOMPLETE_PROPERTIES_URL)
+            .andExpect {
+                status { is3xxRedirection() }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun `landlordIncompleteProperties returns 403 for unauthorized user`() {
+        mvc
+            .get(INCOMPLETE_PROPERTIES_URL)
+            .andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], username = "user")
+    fun `landlordIncompleteProperties returns 200 for authorised landlord user`() {
+        whenever(propertyRegistrationService.getIncompletePropertiesForLandlord("user")).thenReturn(null)
+        mvc
+            .get(INCOMPLETE_PROPERTIES_URL)
             .andExpect {
                 status { isOk() }
             }

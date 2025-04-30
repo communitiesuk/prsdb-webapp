@@ -12,14 +12,14 @@
         </div>
         <div th:if="${incompleteProperties == null}">
             <p class="govuk-body-l govuk-hint" th:text="#{landlord.incompleteProperties.none.hintText}">landlord.incompleteProperties.none.hintText</p>
-            <div>
-                <span class="govuk-body" th:text="#{landlord.incompleteProperties.none.text.beforeLinks}">
+            <div class="govuk-body">
+                <span class="govuk-body" th:text="#{landlord.incompleteProperties.none.text.beforeLinks} + ' '">
                     landlord.incompleteProperties.none.text.beforeLinks
                 </span>
-                <a class="govuk-link" th:text="#{landlord.incompleteProperties.none.viewRegisteredProperties.linkText}" th:href="${viewRegisteredPropertiesUrl}">
+                <a class="govuk-link" th:text="#{landlord.incompleteProperties.none.viewRegisteredProperties.linkText} + ' '" th:href="${viewRegisteredPropertiesUrl}">
                     landlord.incompleteProperties.none.viewRegisteredProperties.linkText
                 </a>
-                <span class="govuk-body" th:text="#{landlord.incompleteProperties.none.text.betweenLinks}">
+                <span class="govuk-body" th:text="#{landlord.incompleteProperties.none.text.betweenLinks} + ' '">
                     landlord.incompleteProperties.none.text.betweenLinks
                 </span>
                 <a class="govuk-link" th:text="#{landlord.incompleteProperties.none.registerANewProperty.linkText}" th:href="${registerPropertyUrl}">

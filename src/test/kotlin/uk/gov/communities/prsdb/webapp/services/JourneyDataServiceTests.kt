@@ -316,4 +316,18 @@ class JourneyDataServiceTests {
         verify(mockHttpSession).removeAttribute(CONTEXT_ID)
         verify(mockHttpSession).removeAttribute(journeyDataKey)
     }
+
+    @Test
+    fun `getFormContextAsJourneyData returns form context as journey data`() {
+        val journeyData =
+            mapOf(
+                "testPage" to mapOf("testKey" to "testValue"),
+            )
+        val serializedJourneyData = ObjectMapper().writeValueAsString(journeyData)
+        val formContext = FormContext(JourneyType.PROPERTY_REGISTRATION, serializedJourneyData, OneLoginUser())
+
+        val result = journeyDataService.getFormContextAsJourneyData(formContext)
+
+        assertEquals(journeyData, result)
+    }
 }

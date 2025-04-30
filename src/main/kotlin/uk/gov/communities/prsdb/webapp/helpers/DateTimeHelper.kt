@@ -39,9 +39,9 @@ class DateTimeHelper(
 
         fun get28DaysFromDate(date: LocalDate): LocalDate = date.plus(28, DateTimeUnit.DAY)
 
-        fun isDateInPast(date: LocalDate): Boolean {
-            val currentDate = DateTimeHelper().getCurrentDateInUK()
-            return date < currentDate
-        }
+        fun isDateInPast(
+            date: LocalDate,
+            currentDate: LocalDate = DateTimeHelper().getCurrentDateInUK(),
+        ): Boolean = date < currentDate
     }
 }

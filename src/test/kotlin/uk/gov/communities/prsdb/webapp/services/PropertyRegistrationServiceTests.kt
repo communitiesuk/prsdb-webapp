@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
+import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.Property
@@ -33,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOneLoginUser
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 
 @ExtendWith(MockitoExtension::class)
@@ -326,5 +328,24 @@ class PropertyRegistrationServiceTests {
         val incompleteProperties = propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(principalName)
 
         assertNull(incompleteProperties)
+    }
+
+    @Test
+    fun `getIncompletePropertiesForLandlord returns list of incomplete properties from FormContextRepo`() {
+        val principalName = "principalName"
+        val user = createOneLoginUser(principalName)
+        val expectedIncompletePropertyFormContexts =
+            mutableListOf(
+                FormContext(JourneyType.PROPERTY_REGISTRATION, "", user),
+                FormContext(JourneyType.PROPERTY_REGISTRATION, "", user),
+            )
+        whenever(
+            mockFormContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION),
+        ).thenReturn(expectedIncompletePropertyFormContexts)
+
+        val incompleteProperties = propertyRegistrationService.getIncompletePropertiesForLandlord(principalName)
+
+        verify(mockFormContextRepository).findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION)
+        assertEquals(expectedIncompletePropertyFormContexts, incompleteProperties)
     }
 }

@@ -26,9 +26,11 @@ class IncompletePropertiesViewModel(
     private fun getListOfIncompleteProperties(): List<SummaryCardViewModel>? {
         val incompleteProperties = mutableListOf<SummaryCardViewModel>()
 
+        val currentDate = DateTimeHelper().getCurrentDateInUK()
+
         formContexts.forEachIndexed { index, formContext ->
             val completeByDate = getCompleteByDate(formContext.createdDate)
-            if (DateTimeHelper.isDateInPast(completeByDate)) {
+            if (DateTimeHelper.isDateInPast(completeByDate, currentDate)) {
                 return@forEachIndexed
             }
 
