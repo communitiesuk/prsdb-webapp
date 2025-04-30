@@ -405,7 +405,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
     @Nested
     inner class GasSafetyExemptionOtherReasonStepTests {
         @Test
-        fun `Submitting with no reason returns an error`(page: Page) {
+        fun `Submitting with no reason returns an error`() {
             val gasSafetyExemptionOtherReasonPage = navigator.goToPropertyComplianceGasSafetyExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
             gasSafetyExemptionOtherReasonPage.form.submit()
             assertThat(gasSafetyExemptionOtherReasonPage.form.getErrorMessage())
@@ -413,7 +413,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
         }
 
         @Test
-        fun `Submitting with a too long reason returns an error`(page: Page) {
+        fun `Submitting with a too long reason returns an error`() {
             val gasSafetyExemptionOtherReasonPage = navigator.goToPropertyComplianceGasSafetyExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
             gasSafetyExemptionOtherReasonPage.submitReason("too long reason".repeat(EXEMPTION_OTHER_REASON_MAX_LENGTH))
             assertThat(gasSafetyExemptionOtherReasonPage.form.getErrorMessage("otherReason"))
@@ -530,7 +530,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
     @Nested
     inner class EicrExemptionOtherReasonStepTests {
         @Test
-        fun `Submitting with no reason returns an error`(page: Page) {
+        fun `Submitting with no reason returns an error`() {
             val eicrExemptionOtherReasonPage = navigator.goToPropertyComplianceEicrExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
             eicrExemptionOtherReasonPage.form.submit()
             assertThat(eicrExemptionOtherReasonPage.form.getErrorMessage())
@@ -538,7 +538,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
         }
 
         @Test
-        fun `Submitting with a too long reason returns an error`(page: Page) {
+        fun `Submitting with a too long reason returns an error`() {
             val eicrExemptionOtherReasonPage = navigator.goToPropertyComplianceEicrExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
             eicrExemptionOtherReasonPage.submitReason("too long reason".repeat(EXEMPTION_OTHER_REASON_MAX_LENGTH))
             assertThat(eicrExemptionOtherReasonPage.form.getErrorMessage("otherReason"))
