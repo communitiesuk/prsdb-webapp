@@ -18,4 +18,11 @@ class SystemOperator(
     @JoinColumn(name = "subject_identifier", nullable = false, foreignKey = ForeignKey(name = "FK_SYSTEM_OPERATOR_1L_USER"))
     lateinit var baseUser: OneLoginUser
         private set
+
+    constructor(
+        id: Long,
+        baseUser: OneLoginUser,
+    ) : this(id) {
+        this.baseUser = baseUser
+    }
 }
