@@ -301,3 +301,10 @@ VALUES (1, true, 0, 1, 1, 2, 6, 1, 1, '01/15/25', '02/02/25', null),
        (32, true, 0, 1, 0, 0, 64, 1, 32, '05/02/25', '01/15/25', 8);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
+
+INSERT INTO system_operator (id, created_date, last_modified_date, subject_identifier)
+VALUES (1,'2025-02-19 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:UVWXY'),
+       (2,'2025-02-26 17:02:19.625996+00',null,'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI'),
+       (3,'2025-03-06 15:32:59.529898+00',null,'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s');
+
+SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) FROM system_operator));
