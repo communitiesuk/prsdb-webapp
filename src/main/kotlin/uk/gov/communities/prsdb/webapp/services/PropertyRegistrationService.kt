@@ -107,15 +107,25 @@ class PropertyRegistrationService(
 
     fun getNumberOfIncompletePropertyRegistrationsForLandlord(principalName: String): Int? {
         val incompleteProperties =
-            formContextRepository.countFormContextsByUser_IdAndJourneyType(
-                principalName,
-                JourneyType.PROPERTY_REGISTRATION,
-            )
+            formContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION) ?: return null
 
-        if (incompleteProperties > 0) {
-            return incompleteProperties
+        val filteredIncompleteProperties = filterIncompleteProperties(incompleteProperties) ?: return null
+
+        return filteredIncompleteProperties.size
+    }
+
+    private fun filterIncompleteProperties(incompleteProperties: List<FormContext>): List<FormContext>? {
+        val filteredIncompleteProperties = mutableListOf<FormContext>()
+
+        val currentDate = DateTimeHelper().getCurrentDateInUK()
+
+        incompleteProperties.forEach { property ->
+            val completeByDate = getCompleteByDate(property.createdDate)
+            if (!DateTimeHelper.isDateInPast(completeByDate, currentDate)) {
+                filteredIncompleteProperties.add(property)
+            }
         }
-        return null
+        return filteredIncompleteProperties.ifEmpty { null }
     }
 
     fun getIncompletePropertiesForLandlord(principalName: String): List<IncompletePropertiesDataModel> {
