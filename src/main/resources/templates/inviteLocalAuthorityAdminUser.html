@@ -2,16 +2,12 @@
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="fieldSetHint" type="java.lang.String"*/-->
-<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="selectOptions" type="java.lang.Object"*/-->
-<!--/*@thymesVar id="selectLabel" type="java.lang.Object"*/-->
-<!--/*@thymesVar id="findLocalAuthorityUrl" type="java.lang.String"*/-->
-<!--/*@thymesVar id="sectionHeaderInfo" type="java.lang.Object"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, null, null)}">
 <th:block id="form-content">
     <fieldset id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'localAuthorityId', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'laAdminInvitation', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
         <select th:replace="~{fragments/forms/select :: select(#{forms.inviteLaAdminUser.selectLabel},'localAuthorityId',null, ${selectOptions})}"></select>
         <input th:replace="~{fragments/forms/emailInput :: emailInput(#{addLAUser.form.primaryEmailLabel}, 'email', null)}">
         <input th:replace="~{fragments/forms/emailInput :: emailInput(#{addLAUser.form.confirmEmailLabel}, 'confirmEmail', null)}">

@@ -1,9 +1,14 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import jakarta.validation.Valid
+import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
+import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.InviteLocalAuthorityAdminFormModel
@@ -34,4 +39,22 @@ class InviteLocalAuthorityAdminController(
 
         return "inviteLocalAuthorityAdminUser"
     }
+
+    @PostMapping("/invite-la-admin", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
+    fun sendInvitation(
+        model: Model,
+        @Valid
+        @ModelAttribute
+        formModel: InviteLocalAuthorityAdminFormModel,
+        bindingResult: BindingResult,
+    ): String {
+        if (bindingResult.hasErrors()) {
+            return "inviteLocalAuthorityAdminUser"
+        }
+
+        return "redirect:/$SYSTEM_OPERATOR_PATH_SEGMENT/invite-la-admin/success"
+    }
+
+    @GetMapping("/invite-la-admin/success")
+    fun confirmation(): String = "inviteLocalAuthorityAdminSuccess"
 }
