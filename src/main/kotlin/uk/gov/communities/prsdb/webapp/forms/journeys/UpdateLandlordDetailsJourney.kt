@@ -48,8 +48,6 @@ class UpdateLandlordDetailsJourney(
         initialStepId = UpdateLandlordDetailsStepId.UpdateEmail,
         validator = validator,
         journeyDataService = journeyDataService,
-        updateStepId = UpdateLandlordDetailsStepId.UpdateDetails,
-        updateEntityId = landlordBaseUserId,
     ) {
     init {
         initializeJourneyDataIfNotInitialized()

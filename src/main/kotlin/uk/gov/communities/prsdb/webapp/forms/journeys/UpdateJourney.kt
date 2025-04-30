@@ -14,8 +14,6 @@ abstract class UpdateJourney<T : StepId>(
     initialStepId: T,
     validator: Validator,
     journeyDataService: JourneyDataService,
-    private val updateStepId: T,
-    protected val updateEntityId: String,
 ) : Journey<T>(journeyType, initialStepId, validator, journeyDataService) {
     companion object {
         fun getOriginalJourneyDataKey(journeyDataService: JourneyDataService) = "ORIGINAL_${journeyDataService.journeyDataKey}"
