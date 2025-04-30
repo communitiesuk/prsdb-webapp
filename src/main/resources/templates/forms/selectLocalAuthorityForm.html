@@ -4,6 +4,7 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="selectOptions" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="selectLabel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="findLocalAuthorityUrl" type=""*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
@@ -11,7 +12,7 @@
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'localAuthorityId', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
         <p class="govuk-body">
             <span th:text="#{forms.selectLocalAuthority.paragraph.one.beforeLink}">forms.selectLocalAuthority.paragraph.one.beforeLink</span>
-            <a class="govuk-link" target="_blank" th:href="#{forms.selectLocalAuthority.paragraph.one.linkUrl}"
+            <a class="govuk-link" target="_blank" th:href="${findLocalAuthorityUrl}"
                th:text="#{forms.selectLocalAuthority.paragraph.one.linkText}">forms.selectLocalAuthority.paragraph.one.linkText</a>
         </p>
         <select th:replace="~{fragments/forms/select :: select(#{${selectLabel}},'localAuthorityId',null, ${selectOptions})}"></select>
