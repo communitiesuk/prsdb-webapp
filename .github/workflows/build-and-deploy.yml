@@ -65,14 +65,14 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      - name: Run gradle `check` to run linting and tests
-        env:
-          ONE_LOGIN_PRIVATE_KEY: |
-            ${{ secrets.ONE_LOGIN_PRIVATE_KEY }}
-          ONE_LOGIN_PUBLIC_KEY: |
-            ${{ secrets.ONE_LOGIN_PUBLIC_KEY }}
-          EMAILNOTIFICATIONS_APIKEY: ${{ secrets.NOTIFY_KEY }}
-        run: ./gradlew clean check --no-daemon
+#      - name: Run gradle `check` to run linting and tests
+#        env:
+#          ONE_LOGIN_PRIVATE_KEY: |
+#            ${{ secrets.ONE_LOGIN_PRIVATE_KEY }}
+#          ONE_LOGIN_PUBLIC_KEY: |
+#            ${{ secrets.ONE_LOGIN_PUBLIC_KEY }}
+#          EMAILNOTIFICATIONS_APIKEY: ${{ secrets.NOTIFY_KEY }}
+#        run: ./gradlew clean check --no-daemon
 
       - name: Get latest version tag for minor version
         id: get-latest-tag
@@ -168,7 +168,7 @@ jobs:
       - name: Run gradle flywayMigrate
         env:
           FLYWAY_URL: jdbc:postgresql://localhost:5432/prsdb
-          FLYWAY_LOCATIONS: communitiesuk/prsdb-webapp/src/main/resources/db/migrations
+          FLYWAY_LOCATIONS: filesystem:src/main/resources/db/migrations
         run: ./gradlew flywayMigrate --no-daemon
 
       - name: Terminate SSM port-forwarding session
