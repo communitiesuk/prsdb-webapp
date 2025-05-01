@@ -168,7 +168,7 @@ jobs:
       - name: Run gradle flywayMigrate
         env:
           FLYWAY_URL: jdbc:postgresql://localhost:5432/prsdb
-          FLYWAY_LOCATIONS: classpath:db/migrations
+          FLYWAY_LOCATIONS: communitiesuk/prsdb-webapp/src/main/resources/db.migrations
         run: ./gradlew flywayMigrate --no-daemon
 
       - name: Terminate SSM port-forwarding session
