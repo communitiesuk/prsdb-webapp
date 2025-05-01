@@ -48,7 +48,7 @@ class UpdateLandlordDetailsJourney(
         initialStepId = UpdateLandlordDetailsStepId.UpdateEmail,
         validator = validator,
         journeyDataService = journeyDataService,
-        // TODO PRSD-XXX Use the actual step name
+        // TODO PRSD-1101 Use the actual step name
         "",
     ) {
     init {

@@ -8,6 +8,8 @@ import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHe
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
+// TODO PRSD-1108 - the functions here have been copy and pasted from the property registration journey. Logic should be
+// customised or commonised.
 class CheckLicensingPage :
     AbstractPage(
         NoInputFormModel::class,
