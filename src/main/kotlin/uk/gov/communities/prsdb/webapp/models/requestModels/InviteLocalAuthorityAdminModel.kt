@@ -13,11 +13,11 @@ class InviteLocalAuthorityAdminModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.email.error.missing",
+                messageKey = "addLAUser.error.missingEmail",
                 validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(
-                messageKey = "forms.email.error.invalidFormat",
+                messageKey = "addLAUser.error.notAnEmail",
                 validatorType = EmailConstraintValidator::class,
             ),
         ],

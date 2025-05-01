@@ -33,6 +33,6 @@ class InviteLaUsersTests : IntegrationTest() {
     fun `inviting a new LA user shows validation errors if the email addresses don't match`() {
         val invitePage = navigator.goToInviteNewLaUser(1)
         invitePage.submitMismatchedEmails("test@example.com", "different@example.com")
-        assertThat(invitePage.form.getErrorMessage()).containsText("Both email address should match")
+        assertThat(invitePage.form.getErrorMessage()).containsText("Both email addresses should match")
     }
 }
