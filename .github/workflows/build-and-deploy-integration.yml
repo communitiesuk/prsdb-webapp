@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - fix/prsd-none-fix-database-migrations-in-pipeline
 
 jobs:
   build-and-deploy-integration:
@@ -13,5 +14,5 @@ jobs:
       update-ecs-role: "arn:aws:iam::794038239680:role/github-actions-terraform-admin"
       ecr-repository: "integration-webapp"
       account-id: "794038239680"
-      branch: "main"
+      branch: "fix/prsd-none-fix-database-migrations-in-pipeline"
     secrets: inherit
