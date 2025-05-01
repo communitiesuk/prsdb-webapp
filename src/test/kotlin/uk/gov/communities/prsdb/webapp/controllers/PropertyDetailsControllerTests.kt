@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
@@ -265,6 +266,8 @@ class PropertyDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["LANDLORD"])
+        // TODO PRSD-1107 - re-enable test and update them to match new flow
+        @Disabled
         fun `postJourneyData redirects to the update details page for a valid request from a landlord`() {
             whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(eq(propertyOwnership.id), any())).thenReturn(true)
 

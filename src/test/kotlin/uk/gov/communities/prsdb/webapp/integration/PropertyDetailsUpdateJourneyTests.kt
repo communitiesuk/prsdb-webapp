@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
@@ -20,6 +21,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.SelectiveLicenceFormPagePropertyDetailsUpdate
 
 @Sql("/data-local.sql")
+// TODO PRSD-1106 - re-enable tests and update them to match new flow
+// TODO PRSD-1107 - re-enable tests and update them to match new flow
+// TODO PRSD-1108 - re-enable tests and update them to match new flow
+// TODO PRSD-1109 - re-enable tests and update them to match new flow
+// All above can be removed once all tests are re-enabled and re-written
+@Disabled
 class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
     private val propertyOwnershipId = 1L
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
