@@ -70,9 +70,9 @@ class PropertyDetailsUpdateJourney(
                 UpdatePropertyDetailsStepId.UpdateOccupancy toPageData OccupancyFormModel::fromPropertyOwnership,
                 UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds toPageData NumberOfHouseholdsFormModel::fromPropertyOwnership,
                 UpdatePropertyDetailsStepId.UpdateNumberOfPeople toPageData NumberOfPeopleFormModel::fromPropertyOwnership,
+                UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers.urlPathSegment to mapOf<String, Any>() as PageData,
                 UpdatePropertyDetailsStepId.UpdateLicensingType toPageData LicensingTypeFormModel::fromPropertyOwnership,
                 UpdatePropertyDetailsStepId.CheckYourLicensingAnswers.urlPathSegment to mapOf<String, Any>() as PageData,
-                UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers.urlPathSegment to mapOf<String, Any>() as PageData,
             )
 
         val licenceNumberStepIdAndFormModel = propertyOwnership.getLicenceNumberStepIdAndFormModel()
@@ -392,7 +392,10 @@ class PropertyDetailsUpdateJourney(
 
         journeyDataService.removeJourneyDataAndContextIdFromSession()
 
-        return ".."
+        // The path for the update journey is "{propertyDetailsPath}/update/{pathSegment}". As there is no trailing slash, any relative path is
+        // relative to ".../update/". Therefore, the relative path to the "{propertyDetailsPath}" is just the parent of the current path.
+        val relativePathToPropertyDetails = ".."
+        return relativePathToPropertyDetails
     }
 
     private fun wasPropertyOriginallyOccupied() = journeyDataService.getJourneyDataFromSession().getOriginalIsOccupied(originalDataKey)!!

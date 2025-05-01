@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -16,7 +16,6 @@ class CheckOccupancyPage :
             "submitButtonText" to "forms.buttons.confirm",
             "summaryName" to "registerLaUser.checkAnswers.summaryName",
         ),
-        shouldDisplaySectionHeader = false,
     ) {
     override fun enrichModel(
         modelAndView: ModelAndView,
@@ -37,7 +36,7 @@ class CheckOccupancyPage :
                 SummaryListRowViewModel(
                     "forms.checkPropertyAnswers.propertyDetails.occupied",
                     false,
-                    RegisterPropertyStepId.Occupancy.urlPathSegment,
+                    UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment,
                 ),
             )
         }
@@ -48,17 +47,17 @@ class CheckOccupancyPage :
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.occupied",
                 true,
-                RegisterPropertyStepId.Occupancy.urlPathSegment,
+                UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment,
             ),
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.households",
                 PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(journeyData),
-                RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment,
+                UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment,
             ),
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.people",
                 PropertyRegistrationJourneyDataHelper.getNumberOfTenants(journeyData),
-                RegisterPropertyStepId.NumberOfPeople.urlPathSegment,
+                UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment,
             ),
         )
 }

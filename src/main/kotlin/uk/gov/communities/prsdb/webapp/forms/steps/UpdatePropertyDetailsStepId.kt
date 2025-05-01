@@ -8,12 +8,12 @@ enum class UpdatePropertyDetailsStepId(
     UpdateOccupancy("occupancy", UpdateGroupIdentifier.Occupancy),
     UpdateNumberOfHouseholds("number-of-households", UpdateGroupIdentifier.Occupancy),
     UpdateNumberOfPeople("number-of-people", UpdateGroupIdentifier.Occupancy),
-    CheckYourOccupancyAnswers("check-occupancy", UpdateGroupIdentifier.Occupancy),
+    CheckYourOccupancyAnswers("check-occupancy-answers", UpdateGroupIdentifier.Occupancy),
     UpdateLicensingType("licensing-type", UpdateGroupIdentifier.Licensing),
     UpdateSelectiveLicence("selective-licence", UpdateGroupIdentifier.Licensing),
     UpdateHmoMandatoryLicence("hmo-mandatory-licence", UpdateGroupIdentifier.Licensing),
     UpdateHmoAdditionalLicence("hmo-additional-licence", UpdateGroupIdentifier.Licensing),
-    CheckYourLicensingAnswers("check-licensing", UpdateGroupIdentifier.Licensing),
+    CheckYourLicensingAnswers("check-licensing-answers", UpdateGroupIdentifier.Licensing),
     ;
 
     companion object {

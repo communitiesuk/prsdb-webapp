@@ -26,11 +26,14 @@ class PropertyDetailsUpdateJourneyFactory(
         stepName,
     )
 
-    fun getJourneyDataKey(
+    private fun getJourneyDataKey(
         propertyOwnershipId: Long,
         stepName: String,
     ): String {
-        val step = UpdatePropertyDetailsStepId.fromPathSegment(stepName) ?: throw PrsdbWebException("Invalid step name: $stepName")
+        val step = UpdatePropertyDetailsStepId.fromPathSegment(stepName) ?: throwInvalidStepNameException(stepName)
         return PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) + step.groupIdentifier.identifierString
     }
+
+    private fun throwInvalidStepNameException(stepName: String): Nothing =
+        throw PrsdbWebException("Invalid PropertyDetailsUpdateJourney step name: $stepName")
 }

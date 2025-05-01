@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -17,7 +17,6 @@ class CheckLicensingPage :
             "submitButtonText" to "forms.buttons.confirm",
             "summaryName" to "registerLaUser.checkAnswers.summaryName",
         ),
-        shouldDisplaySectionHeader = false,
     ) {
     override fun enrichModel(
         modelAndView: ModelAndView,
@@ -33,7 +32,7 @@ class CheckLicensingPage :
                 SummaryListRowViewModel(
                     "forms.checkPropertyAnswers.propertyDetails.licensing",
                     licensingSummaryValue,
-                    RegisterPropertyStepId.LicensingType.urlPathSegment,
+                    UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment,
                 ),
             )
 
