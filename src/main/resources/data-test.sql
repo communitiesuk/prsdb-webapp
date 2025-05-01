@@ -13,7 +13,8 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao','2024-
        ('urn:fdc:gov.uk:2022:ea8XwChQkjezm4MgGJIzI_HRm7l8IPPTIMT705UQXjI','2025-02-27 13:56:15.745135+00'),
        ('urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA','2025-02-27 13:58:02.81462+00'),
        ('urn:fdc:gov.uk:2022:sgO5-g7fThIp2MhXMcvFo5N6ObnstGFVNSYFkghMd24','2025-03-06 08:22:41.002251+00'),
-       ('urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM','2025-03-06 10:33:22.395944+00');
+       ('urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM','2025-03-06 10:33:22.395944+00'),
+       ('urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0', '2025-05-01 10:33:22.395944+00');
 
 SELECT setval(pg_get_serial_sequence('local_authority', 'id'), (SELECT MAX(id) FROM local_authority));
 
@@ -132,6 +133,7 @@ VALUES (1,'2025-02-19 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:_RNZomOzEjxF
        (15,'2025-04-03 13:38:10.243392+00',null,'urn:fdc:gov.uk:2022:aDESlOYLkXmBVUJXUGd5PAGx55uR068Fe16lRN7VzyY'),
        (16,'2025-04-09 14:23:39.070368+00',null,'urn:fdc:gov.uk:2022:EeoMrsw0n0qpf_djwIRYUQ7vXLm1z1v62psIb53RiVE'),
        (17,'2025-04-17 09:49:19.826514+00',null,'urn:fdc:gov.uk:2022:L7hY9vy-Lo9uLDUUqYGK7o0ruguFKG2V17iOKIGpspY'),
-       (18,'2025-04-22 10:55:55.704192+00',null,'urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI');
+       (18,'2025-04-22 10:55:55.704192+00',null,'urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI'),
+       (19,'2025-05-01 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0');
 
 SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) FROM system_operator));
