@@ -34,7 +34,8 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', '09/13/24'),
        ('urn:fdc:gov.uk:2022:W', '01/15/25'),
        ('urn:fdc:gov.uk:2022:X', '01/15/25'),
        ('urn:fdc:gov.uk:2022:Y', '01/15/25'),
-       ('urn:fdc:gov.uk:2022:Z', '01/15/25');
+       ('urn:fdc:gov.uk:2022:Z', '01/15/25'),
+       ('urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0', '05/01/25');
 
 INSERT INTO local_authority_user (subject_identifier, is_manager, local_authority_id, created_date, last_modified_date,
                                   name, email)
@@ -301,3 +302,9 @@ VALUES (1, true, 0, 1, 1, 2, 6, 1, 1, '01/15/25', '02/02/25', null),
        (32, true, 0, 1, 0, 0, 64, 1, 32, '05/02/25', '01/15/25', 8);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
+
+INSERT INTO system_operator (id, created_date, last_modified_date, subject_identifier)
+VALUES (1,'2025-02-19 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:UVWXY'),
+       (2,'2025-05-01 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0');
+
+SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) FROM system_operator));

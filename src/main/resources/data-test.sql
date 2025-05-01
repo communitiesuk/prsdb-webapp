@@ -13,7 +13,8 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao','2024-
        ('urn:fdc:gov.uk:2022:ea8XwChQkjezm4MgGJIzI_HRm7l8IPPTIMT705UQXjI','2025-02-27 13:56:15.745135+00'),
        ('urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA','2025-02-27 13:58:02.81462+00'),
        ('urn:fdc:gov.uk:2022:sgO5-g7fThIp2MhXMcvFo5N6ObnstGFVNSYFkghMd24','2025-03-06 08:22:41.002251+00'),
-       ('urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM','2025-03-06 10:33:22.395944+00');
+       ('urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM','2025-03-06 10:33:22.395944+00'),
+       ('urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0', '2025-05-01 10:33:22.395944+00');
 
 SELECT setval(pg_get_serial_sequence('local_authority', 'id'), (SELECT MAX(id) FROM local_authority));
 
@@ -112,3 +113,27 @@ INSERT INTO property_ownership (id, is_active, occupancy_type, ownership_type, c
 VALUES (1, true, 0, 1, 1, 2, 13, 1, 1, '2024-10-15 00:00:00+00', null);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
+
+
+INSERT INTO system_operator (id, created_date, last_modified_date, subject_identifier)
+VALUES (1,'2025-02-19 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk'),
+       (2,'2025-02-26 17:02:19.625996+00',null,'urn:fdc:gov.uk:2022:DySqeEXIC4G2xauOirtTDcezwCPLZgQPUQZmQ-aIIMk'),
+       (3,'2025-02-27 14:13:11.876928+00',null,'urn:fdc:gov.uk:2022:e4eN4Mujv2NMVut4mIPzRlwpyBL3sBE304GgGlxgd-Q'),
+       (4,'2025-03-06 15:32:59.529898+00',null,'urn:fdc:gov.uk:2022:A9B5GpzhlOrNoGQM65oUESHL5i3O9fp0wjizEFVcCrU'),
+       (5,'2025-03-11 11:28:52.837278+00',null,'urn:fdc:gov.uk:2022:RR3fauA1ZgHYuLjW9824VtLzegGG9NXfdHJrtg2hIAE'),
+       (6,'2025-03-12 17:12:19.833105+00',null,'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI'),
+       (7,'2025-03-17 10:13:36.388805+00',null,'urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU'),
+       (8,'2025-03-18 10:13:36.388805+00',null,'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s'),
+       (9,'2025-04-01 10:47:41.04984+00',null,'urn:fdc:gov.uk:2022:Fv4k6DizfhFmrw4d17Virjsy3A-XCm_WxR2knMUQ394'),
+       (10,'2025-04-01 10:53:06.710827+00',null,'urn:fdc:gov.uk:2022:cF64cXNtN55uqmwjwSXv5SIT6jI0bpJ12gO1L3c0uAA'),
+       (11,'2025-04-01 11:15:40.136113+00',null,'urn:fdc:gov.uk:2022:DXI5RSmCmbPQQhBAPCbw1nkL-Dauufg6VOWdR9TuYlk'),
+       (12,'2025-04-02 12:52:16.995889+00',null,'urn:fdc:gov.uk:2022:vgKfvjYRO1LnJkmBr7CkEV62g9WoDeD-sZZNt9GCiVU'),
+       (13,'2025-04-02 13:01:55.29454+00',null,'urn:fdc:gov.uk:2022:pciqch9dYbtBx2rAhxvaCIEu00cQv3NFeIk5f4BesLo'),
+       (14,'2025-04-03 13:22:09.925662+00',null,'urn:fdc:gov.uk:2022:TSEDw_HXmsLDuNj2bLV5fOLuAvooeSYlupbEykMhWj8'),
+       (15,'2025-04-03 13:38:10.243392+00',null,'urn:fdc:gov.uk:2022:aDESlOYLkXmBVUJXUGd5PAGx55uR068Fe16lRN7VzyY'),
+       (16,'2025-04-09 14:23:39.070368+00',null,'urn:fdc:gov.uk:2022:EeoMrsw0n0qpf_djwIRYUQ7vXLm1z1v62psIb53RiVE'),
+       (17,'2025-04-17 09:49:19.826514+00',null,'urn:fdc:gov.uk:2022:L7hY9vy-Lo9uLDUUqYGK7o0ruguFKG2V17iOKIGpspY'),
+       (18,'2025-04-22 10:55:55.704192+00',null,'urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI'),
+       (19,'2025-05-01 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0');
+
+SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) FROM system_operator));
