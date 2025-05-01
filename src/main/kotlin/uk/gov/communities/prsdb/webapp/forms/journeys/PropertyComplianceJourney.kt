@@ -129,10 +129,7 @@ class PropertyComplianceJourney(
                     eicrExemptionReasonStep,
                     eicrExemptionOtherReasonStep,
                     eicrExemptionConfirmationStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.EicrExemptionMissing,
-                        "TODO PRSD-960: Implement EICR exemption missing step",
-                    ),
+                    eicrExemptionMissingStep,
                 ),
                 "propertyCompliance.taskList.upload.eicr",
             )
@@ -588,6 +585,25 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                            ),
+                    ),
+                handleSubmitAndRedirect = { _, _ -> taskListUrlSegment },
+                nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
+            )
+
+    private val eicrExemptionMissingStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EicrExemptionMissing,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/eicrExemptionMissingForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "rcpElectricalInfoUrl" to RCP_ELECTRICAL_INFO_URL,
+                                "rcpElectricalRegisterUrl" to RCP_ELECTRICAL_REGISTER_URL,
                             ),
                     ),
                 handleSubmitAndRedirect = { _, _ -> taskListUrlSegment },

@@ -1,0 +1,38 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="rcpElectricalInfoUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="rcpElectricalRegisterUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+    <header>
+        <h1 class="govuk-heading-l" th:text="#{forms.eicrExemptionMissing.heading}">forms.eicrExemptionMissing.heading</h1>
+    </header>
+    <section>
+        <p class="govuk-body">
+            <span th:remove="tag" th:text="#{forms.eicrExemptionMissing.paragraph.one.beforeLink}">forms.eicrExemptionMissing.paragraph.one.beforeLink</span>
+            <a class="govuk-link" th:text="#{forms.eicrExemptionMissing.paragraph.one.link}" th:href="${rcpElectricalInfoUrl}" rel="noreferrer noopener" target="_blank">
+                forms.eicrExemptionMissing.paragraph.one.link
+            </a><span th:remove="tag" th:text="#{forms.eicrExemptionMissing.paragraph.one.afterLink}">
+                    forms.eicrExemptionMissing.paragraph.one.afterLink
+            </span>
+        </p>
+        <p class="govuk-body">
+            <span th:remove="tag" th:text="#{forms.eicrExemptionMissing.paragraph.two.beforeLink}">forms.eicrExemptionMissing.paragraph.two.beforeLink</span>
+            <a class="govuk-link" th:text="#{forms.eicrExemptionMissing.paragraph.two.link}" th:href="${rcpElectricalRegisterUrl}" rel="noreferrer noopener" target="_blank">
+                forms.eicrExemptionMissing.paragraph.two.link
+            </a><span th:remove="tag" th:text="#{forms.eicrExemptionMissing.paragraph.two.afterLink}">
+                    forms.eicrExemptionMissing.paragraph.two.afterLink
+            </span>
+        </p>
+        <p class="govuk-body" th:text="#{forms.eicrExemptionMissing.paragraph.three}">forms.eicrExemptionMissing.paragraph.three</p>
+        <p class="govuk-body" th:text="#{forms.eicrExemptionMissing.paragraph.four}">forms.eicrExemptionMissing.paragraph.four</p>
+    </section>
+    <section>
+        <h2 class="govuk-heading-s" th:text="#{forms.eicrExemptionMissing.subsection.heading}">forms.eicrExemptionMissing.subsection.heading</h2>
+        <p class="govuk-body" th:text="#{forms.eicrExemptionMissing.subsection.paragraph.one}">forms.eicrExemptionMissing.subsection.paragraph.one</p>
+        <p class="govuk-body" th:text="#{forms.eicrExemptionMissing.subsection.paragraph.two}">forms.eicrExemptionMissing.subsection.paragraph.two</p>
+    </section>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.returnToTaskList})}"></button>
+</html>
