@@ -4,6 +4,8 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
+import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
+import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
@@ -121,22 +123,13 @@ class PropertyComplianceJourney(
                     eicrStep,
                     eicrIssueDateStep,
                     eicrUploadStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.EicrUploadConfirmation,
-                        "TODO PRSD-1128: Implement EICR upload confirmation step",
-                    ),
-                    placeholderStep(
-                        PropertyComplianceStepId.EicrOutdated,
-                        "TODO PRSD-961: Implement EICR outdated step",
-                    ),
+                    eicrUploadConfirmationStep,
+                    eicrOutdatedStep,
                     eicrExemptionStep,
                     eicrExemptionReasonStep,
                     eicrExemptionOtherReasonStep,
                     eicrExemptionConfirmationStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.EicrExemptionMissing,
-                        "TODO PRSD-960: Implement EICR exemption missing step",
-                    ),
+                    eicrExemptionMissingStep,
                 ),
                 "propertyCompliance.taskList.upload.eicr",
             )
@@ -225,7 +218,7 @@ class PropertyComplianceJourney(
             Step(
                 id = PropertyComplianceStepId.GasSafetyUpload,
                 page =
-                    PageWithContentProvider(
+                    Page(
                         formModel = UploadCertificateFormModel::class,
                         templateName = "forms/uploadCertificateForm",
                         content =
@@ -234,7 +227,7 @@ class PropertyComplianceJourney(
                                 "fieldSetHeading" to "forms.uploadCertificate.gasSafety.fieldSetHeading",
                                 "fieldSetHint" to "forms.uploadCertificate.fieldSetHint",
                             ),
-                    ) { mapOf("fieldSetSubheading" to getPropertyAddress()) },
+                    ),
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyUploadConfirmation, null) },
             )
 
@@ -445,7 +438,7 @@ class PropertyComplianceJourney(
             Step(
                 id = PropertyComplianceStepId.EicrUpload,
                 page =
-                    PageWithContentProvider(
+                    Page(
                         formModel = UploadCertificateFormModel::class,
                         templateName = "forms/uploadCertificateForm",
                         content =
@@ -454,8 +447,44 @@ class PropertyComplianceJourney(
                                 "fieldSetHeading" to "forms.uploadCertificate.eicr.fieldSetHeading",
                                 "fieldSetHint" to "forms.uploadCertificate.fieldSetHint",
                             ),
-                    ) { mapOf("fieldSetSubheading" to getPropertyAddress()) },
+                    ),
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrUploadConfirmation, null) },
+            )
+
+    private val eicrUploadConfirmationStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EicrUploadConfirmation,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/uploadCertificateConfirmationForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                            ),
+                    ),
+                handleSubmitAndRedirect = { _, _ -> taskListUrlSegment },
+                nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
+            )
+
+    private val eicrOutdatedStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EicrOutdated,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/eicrOutdatedForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "rcpElectricalInfoUrl" to RCP_ELECTRICAL_INFO_URL,
+                                "rcpElectricalRegisterUrl" to RCP_ELECTRICAL_REGISTER_URL,
+                            ),
+                    ),
+                handleSubmitAndRedirect = { _, _ -> taskListUrlSegment },
+                nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
             )
 
     private val eicrExemptionStep
@@ -556,6 +585,25 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                            ),
+                    ),
+                handleSubmitAndRedirect = { _, _ -> taskListUrlSegment },
+                nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
+            )
+
+    private val eicrExemptionMissingStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EicrExemptionMissing,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/eicrExemptionMissingForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "rcpElectricalInfoUrl" to RCP_ELECTRICAL_INFO_URL,
+                                "rcpElectricalRegisterUrl" to RCP_ELECTRICAL_REGISTER_URL,
                             ),
                     ),
                 handleSubmitAndRedirect = { _, _ -> taskListUrlSegment },

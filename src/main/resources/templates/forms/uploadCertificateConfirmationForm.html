@@ -8,9 +8,11 @@
         <h1 class="govuk-heading-l" th:text="#{forms.uploadCertificateConfirmation.heading}">forms.uploadCertificateConfirmation.heading</h1>
     </header>
     <section>
-        <p class="govuk-body" th:text="#{forms.uploadCertificateConfirmation.paragraph.one}">forms.uploadCertificateConfirmation.paragraph.one</p>
-        <p class="govuk-body" th:utext="#{forms.uploadCertificateConfirmation.paragraph.two}">forms.uploadCertificateConfirmation.paragraph.two</p>
-        <p class="govuk-body" th:text="#{forms.uploadCertificateConfirmation.paragraph.three}">forms.uploadCertificateConfirmation.paragraph.three</p>
+        <p class="govuk-body" th:text="#{forms.uploadCertificateConfirmation.paragraph}">forms.uploadCertificateConfirmation.paragraph</p>
+    </section>
+    <section>
+        <h2 class="govuk-heading-s" th:text="#{forms.uploadCertificateConfirmation.subsection.heading}">forms.uploadCertificateConfirmation.subsection.heading</h2>
+        <p class="govuk-body" th:text="#{forms.uploadCertificateConfirmation.subsection.paragraph}">forms.uploadCertificateConfirmation.subsection.paragraph</p>
     </section>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
 </html>

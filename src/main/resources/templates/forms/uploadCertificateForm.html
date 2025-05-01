@@ -3,11 +3,10 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
-<!--/*@thymesVar id="fieldSetSubheading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="fieldSetHint" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(title=#{${title}}, formModel=${formModel}, formContent=~{::#form-content/content()}, backUrl=${backUrl}, sectionHeaderInfo=${sectionHeaderInfo}, enctype='multipart/form-data')}">
-    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(content=~{::#fieldset-content/content()}, fieldName='certificate', fieldSetHeading=#{${fieldSetHeading}}, fieldSetSubheading=${fieldSetSubheading}, fieldSetHint=#{${fieldSetHint}})}">
+    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'certificate', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
         <div th:replace="~{fragments/forms/fileUpload :: fileUpload(#{forms.uploadCertificate.label}, 'certificate', null)}"></div>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
