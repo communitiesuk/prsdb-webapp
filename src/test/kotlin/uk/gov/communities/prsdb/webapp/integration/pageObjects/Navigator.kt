@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
@@ -642,6 +643,11 @@ class Navigator(
     fun goToLandlordDashboard(): LandlordDashboardPage {
         navigate(LANDLORD_DASHBOARD_URL)
         return createValidPage(page, LandlordDashboardPage::class)
+    }
+
+    fun goToInviteLaAdmin(): InviteLaAdminPage {
+        navigate("/system-operator/invite-la-admin")
+        return createValidPage(page, InviteLaAdminPage::class)
     }
 
     fun navigate(path: String): Response? = page.navigate("http://localhost:$port$path")
