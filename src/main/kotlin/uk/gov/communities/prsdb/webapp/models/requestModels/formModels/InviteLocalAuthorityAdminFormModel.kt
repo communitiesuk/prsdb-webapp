@@ -37,7 +37,7 @@ class InviteLocalAuthorityAdminFormModel : FormModel {
             ),
         ],
     )
-    val confirmEmail: String = ""
+    var confirmEmail: String = ""
 
     @ValidatedBy(
         constraints = [
