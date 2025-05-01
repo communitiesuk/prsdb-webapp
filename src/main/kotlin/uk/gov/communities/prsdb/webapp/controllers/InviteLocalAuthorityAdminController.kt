@@ -23,19 +23,8 @@ class InviteLocalAuthorityAdminController(
 ) {
     @GetMapping("/invite-la-admin")
     fun inviteLocalAuthorityAdmin(model: Model): String {
-        val localAuthoritiesSelectOptions =
-            localAuthorityService.retrieveAllLocalAuthorities().map {
-                SelectViewModel(
-                    value = it.id,
-                    label = it.name,
-                )
-            }
-
-        model.addAttribute("title", "forms.inviteLaAdminUser.title")
-        model.addAttribute("formModel", InviteLocalAuthorityAdminFormModel())
-        model.addAttribute("fieldSetHeading", "forms.inviteLaAdminUser.fieldSetHeading")
-        model.addAttribute("fieldSetHint", "forms.inviteLaAdminUser.fieldSetHint")
-        model.addAttribute("selectOptions", localAuthoritiesSelectOptions)
+        addSelectOptionsToModel(model)
+        model.addAttribute("inviteLocalAuthorityAdminFormModel", InviteLocalAuthorityAdminFormModel())
 
         return "inviteLocalAuthorityAdminUser"
     }
@@ -45,14 +34,26 @@ class InviteLocalAuthorityAdminController(
         model: Model,
         @Valid
         @ModelAttribute
-        formModel: InviteLocalAuthorityAdminFormModel,
+        inviteLocalAuthorityAdminFormModel: InviteLocalAuthorityAdminFormModel,
         bindingResult: BindingResult,
     ): String {
         if (bindingResult.hasErrors()) {
+            addSelectOptionsToModel(model)
             return "inviteLocalAuthorityAdminUser"
         }
 
         return "redirect:/$SYSTEM_OPERATOR_PATH_SEGMENT/invite-la-admin/success"
+    }
+
+    private fun addSelectOptionsToModel(model: Model) {
+        val localAuthoritiesSelectOptions =
+            localAuthorityService.retrieveAllLocalAuthorities().map {
+                SelectViewModel(
+                    value = it.id,
+                    label = it.name,
+                )
+            }
+        model.addAttribute("selectOptions", localAuthoritiesSelectOptions)
     }
 
     @GetMapping("/invite-la-admin/success")
