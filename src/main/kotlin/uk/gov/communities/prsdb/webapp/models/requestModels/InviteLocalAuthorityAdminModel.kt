@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
+package uk.gov.communities.prsdb.webapp.models.requestModels
 
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.validation.NotNullConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class InviteLocalAuthorityAdminFormModel : FormModel {
+class InviteLocalAuthorityAdminModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.InviteLocalAuthorityAdminFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.InviteLocalAuthorityAdminModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 
@@ -24,7 +24,7 @@ class InviteLocalAuthorityAdminController(
     @GetMapping("/invite-la-admin")
     fun inviteLocalAuthorityAdmin(model: Model): String {
         addSelectOptionsToModel(model)
-        model.addAttribute("inviteLocalAuthorityAdminFormModel", InviteLocalAuthorityAdminFormModel())
+        model.addAttribute("inviteLocalAuthorityAdminModel", InviteLocalAuthorityAdminModel())
 
         return "inviteLocalAuthorityAdminUser"
     }
@@ -34,7 +34,7 @@ class InviteLocalAuthorityAdminController(
         model: Model,
         @Valid
         @ModelAttribute
-        inviteLocalAuthorityAdminFormModel: InviteLocalAuthorityAdminFormModel,
+        inviteLocalAuthorityAdminModel: InviteLocalAuthorityAdminModel,
         bindingResult: BindingResult,
     ): String {
         if (bindingResult.hasErrors()) {
