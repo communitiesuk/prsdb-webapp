@@ -5,7 +5,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
@@ -13,6 +12,7 @@ import org.springframework.http.MediaType
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
@@ -42,16 +42,16 @@ import kotlin.test.Test
 class ManageLocalAuthorityUsersControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
-    @MockBean
+    @MockitoBean
     lateinit var emailNotificationService: EmailNotificationService<EmailTemplateModel>
 
-    @MockBean
+    @MockitoBean
     lateinit var localAuthorityInvitationService: LocalAuthorityInvitationService
 
-    @MockBean
+    @MockitoBean
     lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
-    @MockBean
+    @MockitoBean
     private lateinit var localAuthorityDataService: LocalAuthorityDataService
 
     @Test

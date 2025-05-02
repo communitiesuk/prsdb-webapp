@@ -7,8 +7,8 @@ import org.mockito.Mockito.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -25,13 +25,13 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorit
 class RegisterLAUserControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
-    @MockBean
+    @MockitoBean
     lateinit var laUserRegistrationJourneyFactory: LaUserRegistrationJourneyFactory
 
-    @MockBean
+    @MockitoBean
     lateinit var invitationService: LocalAuthorityInvitationService
 
-    @MockBean
+    @MockitoBean
     lateinit var localAuthorityDataService: LocalAuthorityDataService
 
     private val validToken = "token123"
