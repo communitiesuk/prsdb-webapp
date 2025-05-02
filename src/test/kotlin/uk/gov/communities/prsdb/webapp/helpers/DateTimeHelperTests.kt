@@ -1,18 +1,23 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
+import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toLocalDateTime
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Named
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.Clock
 import java.time.ZoneId
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class DateTimeHelperTests {
@@ -68,14 +73,6 @@ class DateTimeHelperTests {
                     Named.of("an invalid leap date", Triple("29", "02", "2005")),
                     null,
                 ),
-            )
-
-        @JvmStatic
-        private fun provideDatesForIsDateInPast() =
-            listOf(
-                Arguments.of(Named.of("date is before current date", LocalDate(2024, 3, 7)), Named.of("true", true)),
-                Arguments.of(Named.of("date is same as current date", LocalDate(2024, 3, 8)), Named.of("false", false)),
-                Arguments.of(Named.of("date is after current date", LocalDate(2024, 3, 9)), Named.of("false", false)),
             )
 
         @JvmStatic
@@ -148,16 +145,31 @@ class DateTimeHelperTests {
         assertEquals(expectedDate, result)
     }
 
-    @ParameterizedTest(name = "{1} when {0}")
-    @MethodSource("provideDatesForIsDateInPast")
-    fun `isDateInPast returns`(
-        date: LocalDate,
-        expectedResult: Boolean,
-    ) {
-        val currentDate = LocalDate(2024, 3, 8)
+    @Nested
+    inner class IsDateInPast {
+        private val currentDate = LocalDate(2024, 3, 8)
 
-        val result = DateTimeHelper.isDateInPast(date, currentDate)
+        @Test
+        fun `returns true for a date in the past`() {
+            val date = currentDate.minus(DatePeriod(days = 1))
 
-        assertEquals(expectedResult, result)
+            val result = DateTimeHelper.isDateInPast(date)
+
+            assertTrue(result)
+        }
+
+        @Test
+        fun `returns false when the date is the same as current date`() {
+            val result = DateTimeHelper.isDateInPast(currentDate)
+
+            assertTrue(result)
+        }
+
+        @Test
+        fun `returns false when for a date in the future`() {
+            val result = DateTimeHelper.isDateInPast(currentDate)
+
+            assertTrue(result)
+        }
     }
 }

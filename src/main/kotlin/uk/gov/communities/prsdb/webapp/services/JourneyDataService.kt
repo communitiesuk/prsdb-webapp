@@ -70,13 +70,8 @@ class JourneyDataService(
         return savedFormContext.id
     }
 
-    fun getFormContextAsJourneyData(formContext: FormContext): JourneyData? =
-        objectToStringKeyedMap(objectMapper.readValue(formContext.context, Any::class.java))
-
     fun loadJourneyDataIntoSession(formContext: FormContext) {
-        val loadedJourneyData =
-            getFormContextAsJourneyData(formContext) ?: mapOf()
-        setJourneyDataInSession(loadedJourneyData)
+        setJourneyDataInSession(formContext.toJourneyData())
         setContextId(formContext.id)
     }
 

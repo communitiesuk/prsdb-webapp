@@ -4,13 +4,13 @@
     <div id="page-content">
         <h1 class="govuk-heading-l" th:text="#{landlord.incompleteProperties.heading}">landlord.incompleteProperties.heading</h1>
 
-        <div th:if="${incompleteProperties != null}">
+        <div th:unless="${#lists.isEmpty(incompleteProperties)}">
             <p class="govuk-body-l" th:text="#{landlord.incompleteProperties.text}">landlord.incompleteProperties.text</p>
             <th:block th:each="property: ${incompleteProperties}">
                 <div th:replace="~{fragments/summaryCard :: summaryCard(${property.title}, ${property.cardNumber}, ${property.actions}, ${property.summaryList})}" ></div>
             </th:block>
         </div>
-        <div th:if="${incompleteProperties == null}">
+        <div th:if="${#lists.isEmpty(incompleteProperties)}">
             <p class="govuk-body-l govuk-hint" th:text="#{landlord.incompleteProperties.none.hintText}">landlord.incompleteProperties.none.hintText</p>
             <div class="govuk-body">
                 <span class="govuk-body" th:text="#{landlord.incompleteProperties.none.text.beforeLinks} + ' '">

@@ -73,18 +73,12 @@ class LandlordController(
         model: Model,
         principal: Principal,
     ): String {
-        val incompleteProperties = propertyRegistrationService.getIncompletePropertiesForLandlord(principal.name)
+        val incompleteProperties =
+            propertyRegistrationService.getIncompletePropertiesForLandlord(principal.name)
 
-        val incompletePropertiesViewModel =
-            incompleteProperties?.let {
-                IncompletePropertiesViewModel(
-                    incompleteProperties,
-                    journeyDataServiceFactory.create(REGISTER_PROPERTY_JOURNEY_URL),
-                    localAuthorityService,
-                )
-            }
+        val incompletePropertiesViewModel = IncompletePropertiesViewModel(incompleteProperties)
 
-        model.addAttribute("incompleteProperties", incompletePropertiesViewModel?.incompleteProperties)
+        model.addAttribute("incompleteProperties", incompletePropertiesViewModel.incompleteProperties)
         model.addAttribute("registerPropertyUrl", "/$REGISTER_PROPERTY_JOURNEY_URL")
         model.addAttribute("viewRegisteredPropertiesUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT#$REGISTERED_PROPERTIES_PATH_SEGMENT")
 

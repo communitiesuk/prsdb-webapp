@@ -1,81 +1,42 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.toKotlinInstant
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.database.entity.FormContext
-import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addAction
-import uk.gov.communities.prsdb.webapp.helpers.extensions.addCard
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
-import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
-import java.time.Instant
+import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesDataModel
 
 class IncompletePropertiesViewModel(
-    private val formContexts: List<FormContext>,
-    private val journeyDataService: JourneyDataService,
-    private val localAuthorityService: LocalAuthorityService,
+    private val incompletePropertiesData: List<IncompletePropertiesDataModel>,
 ) {
-    val incompleteProperties: List<SummaryCardViewModel>? = getListOfIncompleteProperties()
+    val incompleteProperties: List<SummaryCardViewModel> = getListOfIncompleteProperties()
 
-    private fun getListOfIncompleteProperties(): List<SummaryCardViewModel>? {
-        val incompleteProperties = mutableListOf<SummaryCardViewModel>()
+    private fun getListOfIncompleteProperties(): List<SummaryCardViewModel> =
+        incompletePropertiesData.mapIndexed { index, property ->
 
-        val currentDate = DateTimeHelper().getCurrentDateInUK()
-
-        formContexts.forEachIndexed { index, formContext ->
-            val completeByDate = getCompleteByDate(formContext.createdDate)
-            if (DateTimeHelper.isDateInPast(completeByDate, currentDate)) {
-                return@forEachIndexed
-            }
-
-            val address = getAddressData(formContext)
-
-            incompleteProperties
-                .apply {
-                    addCard(
-                        cardNumber = (index + 1).toString(),
-                        title = "landlord.incompleteProperties.summaryCardTitlePrefix",
-                        summaryList = getSummaryList(address, completeByDate),
-                        actions = getActions(formContext.id),
-                    )
-                }.toList()
+            SummaryCardViewModel(
+                cardNumber = (index + 1).toString(),
+                title = "landlord.incompleteProperties.summaryCardTitlePrefix",
+                summaryList = getSummaryList(property.singleLineAddress, property.localAuthorityName, property.completeByDate),
+                actions = getActions(property.contextId),
+            )
         }
 
-        return incompleteProperties.ifEmpty {
-            null
-        }
-    }
-
-    // TODO PRSD-1127 make AddressDataModel param not nullable
     private fun getSummaryList(
-        address: AddressDataModel?,
+        singleLineAddress: String,
+        localAuthorityName: String,
         completeByDate: LocalDate,
     ): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
                 addRow(
                     "landlord.incompleteProperties.summaryRow.propertyAddress",
-                    // TODO PRSD-1127 remove if statement and "Not yet completed" option as address should always exists now
-                    if (address?.singleLineAddress != null) {
-                        address.singleLineAddress
-                    } else {
-                        "Not yet completed"
-                    },
+                    singleLineAddress,
                 )
                 addRow(
                     "landlord.incompleteProperties.summaryRow.localAuthority",
-                    // TODO PRSD-1127 remove if statement and "Not yet completed" option as address should always exists now
-                    if (address?.localAuthorityId != null) {
-                        localAuthorityService.retrieveLocalAuthorityById(address.localAuthorityId).name
-                    } else {
-                        "Not yet completed"
-                    },
+                    localAuthorityName,
                 )
                 addRow(
                     "landlord.incompleteProperties.summaryRow.completeBy",
@@ -88,7 +49,7 @@ class IncompletePropertiesViewModel(
             .apply {
                 addAction(
                     "landlord.incompleteProperties.action.continue",
-                    "/$REGISTER_PROPERTY_JOURNEY_URL/$RESUME_PAGE_PATH_SEGMENT?contextId=$contextId",
+                    RegisterPropertyController.getResumePropertyRegistrationPath(contextId),
                 )
                 addAction(
                     "landlord.incompleteProperties.action.delete",
@@ -96,16 +57,4 @@ class IncompletePropertiesViewModel(
                     "/$REGISTER_PROPERTY_JOURNEY_URL/delete-incomplete-property?contextId=$contextId",
                 )
             }.toList()
-
-    private fun getCompleteByDate(createdDate: Instant): LocalDate {
-        val createdDateInUk = DateTimeHelper.getDateInUK(createdDate.toKotlinInstant())
-        return DateTimeHelper.get28DaysFromDate(createdDateInUk)
-    }
-
-    private fun getAddressData(formContext: FormContext): AddressDataModel? {
-        val formContextJourneyData = journeyDataService.getFormContextAsJourneyData(formContext)!!
-        val lookedUpAddresses = formContextJourneyData.getLookedUpAddresses()
-        // TODO PRSD-1127 new ticket number set this to return a not nullable AddressDataModel
-        return PropertyRegistrationJourneyDataHelper.getAddress(formContextJourneyData, lookedUpAddresses)
-    }
 }

@@ -1,19 +1,13 @@
 <div th:fragment="summaryCard(title, cardNumber, actions, summaryList)" class="govuk-summary-card">
     <div class="govuk-summary-card__title-wrapper">
-        <h2 th:if="${cardNumber == null}" class="govuk-summary-card__title" th:text="#{${title}}">
+        <h2 th:if="" class="govuk-summary-card__title" th:text="${cardNumber != null} ? #{${title}} + ' ' + ${cardNumber} : #{${title}}">
             Title of the summary card
         </h2>
-        <h2 th:if="${cardNumber != null}" class="govuk-summary-card__title" th:text="#{${title}} + ' ' + ${cardNumber}">
-            Title of the summary card
-        </h2>
-        <ul th:if="${actions != null}" class="govuk-summary-card__actions">
-            <th:block th:each="action: ${actions}">
-                <li class="govuk-summary-card__action">
-                    <a class="govuk-link" th:href="@{${action.url}}" th:text="#{${action.text}}">Link text</a>
-                </li>
-            </th:block>
+        <ul th:unless="${actions == null or #lists.isEmpty(actions)}" class="govuk-summary-card__actions" th:each="action: ${actions}">
+            <li class="govuk-summary-card__action">
+                <a class="govuk-link" th:href="@{${action.url}}" th:text="#{${action.text}}">Link text</a>
+            </li>
         </ul>
-
     </div>
     <div class="govuk-summary-card__content">
         <dl th:replace="~{fragments/summaryList :: summaryList(${summaryList})}"></dl>

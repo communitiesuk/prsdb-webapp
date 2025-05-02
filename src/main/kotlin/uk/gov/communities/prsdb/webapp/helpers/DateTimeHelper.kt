@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
-import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -37,11 +37,8 @@ class DateTimeHelper(
                 null
             }
 
-        fun get28DaysFromDate(date: LocalDate): LocalDate = date.plus(28, DateTimeUnit.DAY)
+        fun get28DaysFromDate(date: LocalDate): LocalDate = date.plus(DatePeriod(days = 28))
 
-        fun isDateInPast(
-            date: LocalDate,
-            currentDate: LocalDate = DateTimeHelper().getCurrentDateInUK(),
-        ): Boolean = date < currentDate
+        fun isDateInPast(date: LocalDate): Boolean = date < DateTimeHelper().getCurrentDateInUK()
     }
 }

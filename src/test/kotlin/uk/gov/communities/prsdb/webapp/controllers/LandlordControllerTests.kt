@@ -116,7 +116,11 @@ class LandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `landlordIncompleteProperties returns 200 for authorised landlord user`() {
-        whenever(propertyRegistrationService.getIncompletePropertiesForLandlord("user")).thenReturn(null)
+        whenever(
+            propertyRegistrationService.getIncompletePropertiesForLandlord(
+                "user",
+            ),
+        ).thenReturn(emptyList())
         mvc
             .get(INCOMPLETE_PROPERTIES_URL)
             .andExpect {
