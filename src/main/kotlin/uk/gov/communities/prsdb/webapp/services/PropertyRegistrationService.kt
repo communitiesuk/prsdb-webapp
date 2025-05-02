@@ -119,11 +119,9 @@ class PropertyRegistrationService(
     private fun filterIncompleteProperties(incompleteProperties: List<FormContext>): List<FormContext>? {
         val filteredIncompleteProperties = mutableListOf<FormContext>()
 
-        val currentDate = DateTimeHelper().getCurrentDateInUK()
-
         incompleteProperties.forEach { property ->
-            val completeByDate = getCompleteByDate(property.createdDate)
-            if (!DateTimeHelper.isDateInPast(completeByDate, currentDate)) {
+            val completeByDate = getIncompletePropertyCompleteByDate(property.createdDate)
+            if (!DateTimeHelper.isDateInPast(completeByDate)) {
                 filteredIncompleteProperties.add(property)
             }
         }
@@ -185,9 +183,9 @@ class PropertyRegistrationService(
                     "Form context with ID: $contextId and journey type: " +
                         "${JourneyType.PROPERTY_REGISTRATION.name} not found for base user: $principalName",
                 )
-        val completeByDate = getCompleteByDate(formContext.createdDate)
+        val completeByDate = getIncompletePropertyCompleteByDate(formContext.createdDate)
 
-        if (DateTimeHelper.isDateInPast(completeByDate, DateTimeHelper().getCurrentDateInUK())) {
+        if (DateTimeHelper.isDateInPast(completeByDate)) {
             throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "Completed date for orm context with ID: $contextId is in the past",
