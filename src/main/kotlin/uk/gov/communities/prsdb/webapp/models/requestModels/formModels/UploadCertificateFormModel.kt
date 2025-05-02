@@ -30,15 +30,24 @@ abstract class UploadCertificateFormModel : FormModel {
         private val maxContentLength = 15 * 10.0.pow(6) // 15MB
 
         fun fromFileItemInput(
-            uploadCertificateFormModel: KClass<out UploadCertificateFormModel>,
+            desiredClass: KClass<out UploadCertificateFormModel>,
             fileItemInput: FileItemInput,
             fileLength: Long,
             isUploadSuccessfulOrNull: Boolean? = null,
-        ) = uploadCertificateFormModel.constructors.first().call().apply {
-            this.name = fileItemInput.name
-            this.contentType = fileItemInput.contentType
-            this.contentLength = fileLength
-            this.isUploadSuccessfulOrNull = isUploadSuccessfulOrNull
+        ): UploadCertificateFormModel {
+            val uploadCertificateFormModel =
+                when (desiredClass) {
+                    GasSafetyUploadCertificateFormModel::class -> GasSafetyUploadCertificateFormModel()
+                    EicrUploadCertificateFormModel::class -> EicrUploadCertificateFormModel()
+                    else -> throw IllegalStateException("Unsupported desired class: ${desiredClass.simpleName}")
+                }
+
+            return uploadCertificateFormModel.apply {
+                this.name = fileItemInput.name
+                this.contentType = fileItemInput.contentType
+                this.contentLength = fileLength
+                this.isUploadSuccessfulOrNull = isUploadSuccessfulOrNull
+            }
         }
     }
 }
