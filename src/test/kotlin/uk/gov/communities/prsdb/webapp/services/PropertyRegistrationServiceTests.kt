@@ -4,12 +4,18 @@ import jakarta.persistence.EntityExistsException
 import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
 import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
-import kotlinx.datetime.plus
-import kotlinx.datetime.toJavaLocalDate
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toJavaInstant
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -22,6 +28,8 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -41,7 +49,6 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createFormContext
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOneLoginUser
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
-import java.time.Instant
 
 @ExtendWith(MockitoExtension::class)
 class PropertyRegistrationServiceTests {
@@ -314,41 +321,150 @@ class PropertyRegistrationServiceTests {
         assertEquals(expectedPropertyOwnership.registrationNumber, propertyRegistrationNumber)
     }
 
-    @Test
-    fun `getNumberOfIncompletePropertyRegistrationsForLandlord returns number of valid incomplete properties`() {
-        val currentDate = DateTimeHelper().getCurrentDateInUK()
-        val createdTodayDate = currentDate.toJavaLocalDate()
-        val createdYesterdayDate = currentDate.minus(1, DateTimeUnit.DAY).toJavaLocalDate()
-        val pastCompletionCreatedDate = currentDate.minus(29, DateTimeUnit.DAY).toJavaLocalDate()
+    @Nested
+    inner class IncompleteProperties {
+        private lateinit var currentDate: LocalDate
+        private lateinit var currentInstant: Instant
 
-        val principalName = "principalName"
-        val incompleteProperties =
-            listOf(
-                createFormContext(createdDate = Instant.from(createdTodayDate)),
-                createFormContext(createdDate = Instant.from(createdYesterdayDate)),
-                createFormContext(createdDate = Instant.from(pastCompletionCreatedDate)),
-            )
+        @BeforeEach
+        fun setup() {
+            currentDate = DateTimeHelper().getCurrentDateInUK()
+            currentInstant =
+                LocalDateTime(
+                    currentDate.year,
+                    currentDate.monthNumber,
+                    currentDate.dayOfMonth,
+                    11,
+                    30,
+                ).toInstant(TimeZone.of("Europe/London"))
+        }
 
-        val expectedIncompletePropertiesNumber = 2
+        @Test
+        fun `getNumberOfIncompletePropertyRegistrationsForLandlord returns number of valid incomplete properties`() {
+            val createdTodayDate = currentInstant.toJavaInstant()
+            val createdYesterdayDate = currentInstant.minus(1, DateTimeUnit.DAY, TimeZone.of("Europe/London")).toJavaInstant()
+            val outOfDateCreatedDate = currentInstant.minus(29, DateTimeUnit.DAY, TimeZone.of("Europe/London")).toJavaInstant()
 
-        whenever(
-            mockFormContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION),
-        ).thenReturn(incompleteProperties)
+            val principalName = "principalName"
+            val incompleteProperties =
+                listOf(
+                    createFormContext(createdDate = createdTodayDate),
+                    createFormContext(createdDate = createdYesterdayDate),
+                    createFormContext(createdDate = outOfDateCreatedDate),
+                )
 
-        val incompletePropertiesNumber = propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(principalName)
+            val expectedIncompletePropertiesNumber = 2
 
-        assertEquals(expectedIncompletePropertiesNumber, incompletePropertiesNumber)
-    }
+            whenever(
+                mockFormContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION),
+            ).thenReturn(incompleteProperties)
 
-    @Test
-    fun `getNumberOfIncompletePropertyRegistrationsForLandlord returns null if there are no incomplete properties`() {
-        val principalName = "principalName"
-        whenever(
-            mockFormContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION),
-        ).thenReturn(null)
+            val incompletePropertiesNumber =
+                propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(
+                    principalName,
+                )
 
-        val incompleteProperties = propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(principalName)
+            assertEquals(expectedIncompletePropertiesNumber, incompletePropertiesNumber)
+        }
 
-        assertNull(incompleteProperties)
+        @Test
+        fun `getNumberOfIncompletePropertyRegistrationsForLandlord returns null if there are no incomplete properties`() {
+            val principalName = "principalName"
+            whenever(
+                mockFormContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION),
+            ).thenReturn(null)
+
+            val incompleteProperties = propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(principalName)
+
+            assertNull(incompleteProperties)
+        }
+
+        @Test
+        fun `getIncompletePropertiesForLandlord returns list of incomplete properties from FormContextRepo`() {
+            val principalName = "principalName"
+            val user = createOneLoginUser(principalName)
+            val expectedIncompletePropertyFormContexts =
+                mutableListOf(
+                    FormContext(JourneyType.PROPERTY_REGISTRATION, "", user),
+                    FormContext(JourneyType.PROPERTY_REGISTRATION, "", user),
+                )
+            whenever(
+                mockFormContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION),
+            ).thenReturn(expectedIncompletePropertyFormContexts)
+
+            val incompleteProperties = propertyRegistrationService.getIncompletePropertiesForLandlord(principalName)
+
+            verify(mockFormContextRepository).findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION)
+            assertEquals(expectedIncompletePropertyFormContexts, incompleteProperties)
+        }
+
+        @Test
+        fun `getIncompletePropertyForLandlord returns the form context for a valid incomplete property`() {
+            val createdTodayDate = currentInstant.toJavaInstant()
+
+            val expectedFormContext = createFormContext(createdDate = createdTodayDate)
+            val principalName = "user"
+
+            whenever(
+                mockFormContextRepository.findByIdAndUser_IdAndJourneyType(
+                    expectedFormContext.id,
+                    principalName,
+                    JourneyType.PROPERTY_REGISTRATION,
+                ),
+            ).thenReturn(expectedFormContext)
+
+            val formContext =
+                propertyRegistrationService.getIncompletePropertyForLandlord(expectedFormContext.id, principalName)
+
+            assertEquals(expectedFormContext, formContext)
+        }
+
+        @Test
+        fun `getIncompletePropertyForLandlord returns NOT_FOUND error for an invalid incomplete property`() {
+            val formContextId: Long = 123
+            val principalName = "user"
+
+            val expectedErrorMessage =
+                "404 NOT_FOUND \"Form context with ID: $formContextId and journey type: " +
+                    "${JourneyType.PROPERTY_REGISTRATION.name} not found for base user: $principalName\""
+
+            whenever(
+                mockFormContextRepository.findByIdAndUser_IdAndJourneyType(formContextId, principalName, JourneyType.PROPERTY_REGISTRATION),
+            ).thenReturn(null)
+
+            // Act and Assert
+            val exception =
+                assertThrows<ResponseStatusException> {
+                    propertyRegistrationService.getIncompletePropertyForLandlord(formContextId, principalName)
+                }
+            kotlin.test.assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+            kotlin.test.assertEquals(expectedErrorMessage, exception.message)
+        }
+
+        @Test
+        fun `getIncompletePropertyForLandlord returns BAD_REQUEST error for an out of date incomplete property`() {
+            val outOfDateCreatedDate = currentInstant.minus(29, DateTimeUnit.DAY, TimeZone.of("Europe/London")).toJavaInstant()
+
+            val principalName = "user"
+            val formContext = createFormContext(createdDate = outOfDateCreatedDate)
+
+            val expectedErrorMessage = "400 BAD_REQUEST \"Completed date for orm context with ID: ${formContext.id} is in the past\""
+
+            whenever(
+                mockFormContextRepository.findByIdAndUser_IdAndJourneyType(
+                    formContext.id,
+                    principalName,
+                    JourneyType.PROPERTY_REGISTRATION,
+                ),
+            ).thenReturn(formContext)
+
+            // Act and Assert
+            val exception =
+                assertThrows<ResponseStatusException> {
+                    propertyRegistrationService.getIncompletePropertyForLandlord(formContext.id, principalName)
+                }
+            kotlin.test.assertEquals(HttpStatus.BAD_REQUEST, exception.statusCode)
+            kotlin.test.assertEquals(expectedErrorMessage, exception.message)
+        }
     }
 }
