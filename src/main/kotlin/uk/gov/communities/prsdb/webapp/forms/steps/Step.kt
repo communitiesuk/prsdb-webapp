@@ -55,11 +55,13 @@ open class Step<T : StepId>(
         fun generateUrl(
             stepId: StepId,
             subPageNumber: Int?,
+            changingAnswersFor: StepId? = null,
         ): String =
             UriComponentsBuilder
                 .newInstance()
                 .path(stepId.urlPathSegment)
                 .queryParamIfPresent("subpage", Optional.ofNullable(subPageNumber))
+                .queryParamIfPresent("changingAnswer", Optional.ofNullable(changingAnswersFor))
                 .build(true)
                 .toUriString()
     }
