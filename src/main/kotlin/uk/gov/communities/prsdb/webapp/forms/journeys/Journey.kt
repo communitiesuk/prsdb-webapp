@@ -31,6 +31,7 @@ abstract class Journey<T : StepId>(
         get() = sections.flatMap { section -> section.tasks }.flatMap { task -> task.steps }.toSet()
 
     protected open val unreachableStepRedirect = initialStepId.urlPathSegment
+    protected open val checkYourAnswersStepId: T? = null
 
     fun loadJourneyDataIfNotLoaded(principalName: String) {
         val data = journeyDataService.getJourneyDataFromSession()
@@ -50,13 +51,14 @@ abstract class Journey<T : StepId>(
         stepPathSegment: String,
         subPageNumber: Int?,
         submittedPageData: PageData? = null,
+        changingAnswersForStep: String? = null,
     ): ModelAndView {
         val requestedStep = getStep(stepPathSegment)
         if (!isStepReachable(requestedStep, subPageNumber)) {
             return ModelAndView("redirect:$unreachableStepRedirect")
         }
         val prevStepDetails = getPrevStep(requestedStep, subPageNumber)
-        val prevStepUrl = prevStepDetails?.let { Step.generateUrl(it.step.id, it.subPageNumber) }
+        val prevStepUrl = buildPreviousStepUrl(prevStepDetails, changingAnswersForStep?.let { getStep(it) }?.id)
         val pageData =
             submittedPageData
                 ?: JourneyDataHelper.getPageData(journeyDataService.getJourneyDataFromSession(), requestedStep.name, subPageNumber)
@@ -77,6 +79,7 @@ abstract class Journey<T : StepId>(
         formData: PageData,
         subPageNumber: Int?,
         principal: Principal,
+        changingAnswersFor: String? = null,
     ): ModelAndView {
         val currentStep = getStep(stepPathSegment)
 
@@ -104,20 +107,46 @@ abstract class Journey<T : StepId>(
             return ModelAndView("redirect:${currentStep.handleSubmitAndRedirect.invoke(newJourneyData, subPageNumber)}")
         }
 
-        val redirectUrl = getRedirectForNextStep(currentStep, newJourneyData, subPageNumber)
+        val redirectUrl = getRedirectForNextStep(currentStep, newJourneyData, subPageNumber, changingAnswersFor?.let { getStep(it) }?.id)
         return ModelAndView("redirect:$redirectUrl")
     }
+
+    protected open fun isStepAllowedForChangingAnswersTo(
+        destinationStep: T?,
+        changingAnswersFor: T?,
+    ): Boolean = destinationStep == changingAnswersFor
+
+    private fun buildPreviousStepUrl(
+        prevStepDetails: StepDetails<T>?,
+        changingAnswersFor: T?,
+    ): String? =
+        if (changingAnswersFor == null || isStepAllowedForChangingAnswersTo(prevStepDetails?.step?.id, changingAnswersFor)) {
+            prevStepDetails?.let { Step.generateUrl(it.step.id, it.subPageNumber, changingAnswersFor) }
+        } else {
+            checkYourAnswersStepId?.let { Step.generateUrl(it, null, null) }
+        }
 
     protected fun getRedirectForNextStep(
         currentStep: Step<T>,
         newJourneyData: JourneyData,
         subPageNumber: Int?,
+        changingAnswersFor: T? = null,
     ): String {
         val (newStepId: T?, newSubPageNumber: Int?) = currentStep.nextAction(newJourneyData, subPageNumber)
-        if (newStepId == null) {
-            throw IllegalStateException("Cannot compute next step from step ${currentStep.id.urlPathSegment}")
+
+        return if (changingAnswersFor == null || isStepAllowedForChangingAnswersTo(newStepId, changingAnswersFor)) {
+            if (newStepId == null) {
+                throw IllegalStateException("Cannot compute next step from step ${currentStep.id.urlPathSegment}")
+            }
+            Step.generateUrl(newStepId, newSubPageNumber, changingAnswersFor)
+        } else {
+            // Assigning to localCheckYourAnswersStep allows the null check here to smart cast from T? to T
+            val localCheckYourAnswersStep = checkYourAnswersStepId
+            if (localCheckYourAnswersStep == null) {
+                throw IllegalStateException("No check your answers step defined for journey ${journeyType.name}")
+            }
+            Step.generateUrl(localCheckYourAnswersStep, null, null)
         }
-        return Step.generateUrl(newStepId, newSubPageNumber)
     }
 
     override fun iterator(): Iterator<StepDetails<T>> =

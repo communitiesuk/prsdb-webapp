@@ -66,6 +66,7 @@ class PropertyRegistrationJourney(
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
+    override val checkYourAnswersStepId = RegisterPropertyStepId.CheckAnswers
     override val sections =
         listOf(
             JourneySection(registerPropertyTasks(), "registerProperty.taskList.register.heading", "register-property"),
@@ -78,6 +79,42 @@ class PropertyRegistrationJourney(
             "registerProperty.taskList.heading",
             listOf("registerProperty.taskList.subtitle"),
         )
+
+    override fun isStepAllowedForChangingAnswersTo(
+        destinationStep: RegisterPropertyStepId?,
+        changingAnswersFor: RegisterPropertyStepId?,
+    ): Boolean =
+        when (changingAnswersFor) {
+            RegisterPropertyStepId.LookupAddress, RegisterPropertyStepId.ManualAddress ->
+                listOf(
+                    RegisterPropertyStepId.LookupAddress,
+                    RegisterPropertyStepId.SelectAddress,
+                    RegisterPropertyStepId.ManualAddress,
+                    RegisterPropertyStepId.NoAddressFound,
+                    RegisterPropertyStepId.LocalAuthority,
+                    RegisterPropertyStepId.AlreadyRegistered,
+                ).contains(destinationStep)
+
+            RegisterPropertyStepId.Occupancy ->
+                listOf(
+                    RegisterPropertyStepId.Occupancy,
+                    RegisterPropertyStepId.NumberOfPeople,
+                    RegisterPropertyStepId.NumberOfHouseholds,
+                ).contains(destinationStep)
+
+            RegisterPropertyStepId.LicensingType ->
+                listOf(
+                    RegisterPropertyStepId.LicensingType,
+                    RegisterPropertyStepId.SelectiveLicence,
+                    RegisterPropertyStepId.HmoMandatoryLicence,
+                    RegisterPropertyStepId.HmoAdditionalLicence,
+                ).contains(destinationStep)
+            else ->
+                super.isStepAllowedForChangingAnswersTo(
+                    destinationStep,
+                    changingAnswersFor,
+                )
+        }
 
     private fun registerPropertyTasks(): List<JourneyTask<RegisterPropertyStepId>> =
         listOf(
