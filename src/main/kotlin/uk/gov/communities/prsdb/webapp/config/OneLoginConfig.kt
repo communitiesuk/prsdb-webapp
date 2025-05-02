@@ -63,7 +63,7 @@ class OneLoginConfig {
     @Bean
     fun oneloginAuthorizationCodeTokenResponseClient() =
         RestClientAuthorizationCodeTokenResponseClient().apply {
-            setParametersConverter(NimbusJwtClientAuthenticationParametersConverter(::oneloginJWKResolver))
+            addParametersConverter(NimbusJwtClientAuthenticationParametersConverter(::oneloginJWKResolver))
         }
 
     @Bean
