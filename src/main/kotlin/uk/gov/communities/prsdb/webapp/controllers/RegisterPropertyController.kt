@@ -73,6 +73,7 @@ class RegisterPropertyController(
     fun getJourneyStep(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
+        @RequestParam(value = "changingAnswerFor", required = false) changingAnswerFor: String? = null,
         model: Model,
         principal: Principal,
     ): ModelAndView =
@@ -81,6 +82,7 @@ class RegisterPropertyController(
             .getModelAndViewForStep(
                 stepName,
                 subpage,
+                changingAnswersForStep = changingAnswerFor,
             )
 
     @GetMapping("/$TASK_LIST_PATH_SEGMENT")
@@ -93,6 +95,7 @@ class RegisterPropertyController(
     fun postJourneyData(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
+        @RequestParam(value = "changingAnswerFor", required = false) changingAnswerFor: String? = null,
         @RequestParam formData: PageData,
         model: Model,
         principal: Principal,
@@ -104,6 +107,7 @@ class RegisterPropertyController(
                 formData,
                 subpage,
                 principal,
+                changingAnswerFor,
             )
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")

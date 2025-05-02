@@ -9,7 +9,8 @@
            th:text="${#messages.msgOrNull(value)} ?: ${{value}}">row.convertedFieldValue</p>
     </dd>
     <dd class="govuk-summary-list__actions">
-        <a th:if="${changeUrl} != null" class="govuk-link" th:href="@{${changeUrl}}" th:text="#{forms.links.change}">
+        <!-- TODO provide this change url with parameter more appropriately - this will act surprisingly if the summary row is used outside a CYA page-->
+        <a th:if="${changeUrl} != null" class="govuk-link" th:href="@{${changeUrl} + '?changingAnswerFor=' + ${changeUrl}}" th:text="#{forms.links.change}">
             <span class="govuk-visually-hidden" th:text="#{${heading}}">fieldHeading</span>
         </a>
     </dd>
