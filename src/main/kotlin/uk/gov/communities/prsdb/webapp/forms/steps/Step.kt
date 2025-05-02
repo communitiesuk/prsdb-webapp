@@ -61,7 +61,7 @@ open class Step<T : StepId>(
                 .newInstance()
                 .path(stepId.urlPathSegment)
                 .queryParamIfPresent("subpage", Optional.ofNullable(subPageNumber))
-                .queryParamIfPresent("changingAnswer", Optional.ofNullable(changingAnswersFor))
+                .queryParamIfPresent("changingAnswerFor", Optional.ofNullable(changingAnswersFor?.urlPathSegment))
                 .build(true)
                 .toUriString()
     }
