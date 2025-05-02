@@ -48,8 +48,8 @@ class UpdateLandlordDetailsJourney(
         initialStepId = UpdateLandlordDetailsStepId.UpdateEmail,
         validator = validator,
         journeyDataService = journeyDataService,
-        updateStepId = UpdateLandlordDetailsStepId.UpdateDetails,
-        updateEntityId = landlordBaseUserId,
+        // TODO PRSD-1101 Use the actual step name
+        "",
     ) {
     init {
         initializeJourneyDataIfNotInitialized()

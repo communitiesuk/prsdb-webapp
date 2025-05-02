@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
@@ -33,10 +33,10 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
     @Autowired
     lateinit var invitationService: LocalAuthorityInvitationService
 
-    @SpyBean
+    @MockitoSpyBean
     lateinit var laUserRepository: LocalAuthorityUserRepository
 
-    @SpyBean
+    @MockitoSpyBean
     lateinit var invitationRepository: LocalAuthorityInvitationRepository
 
     lateinit var invitation: LocalAuthorityInvitation

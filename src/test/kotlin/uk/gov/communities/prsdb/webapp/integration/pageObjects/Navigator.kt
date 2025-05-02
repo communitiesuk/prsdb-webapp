@@ -591,7 +591,7 @@ class Navigator(
     fun goToPropertyDetailsUpdatePage(propertyOwnershipId: Long): PropertyDetailsUpdatePage {
         navigate(
             PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) +
-                "/${UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment}",
+                "/${DETAILS_PATH_SEGMENT}",
         )
         return createValidPage(page, PropertyDetailsUpdatePage::class, mapOf("propertyOwnershipId" to propertyOwnershipId.toString()))
     }

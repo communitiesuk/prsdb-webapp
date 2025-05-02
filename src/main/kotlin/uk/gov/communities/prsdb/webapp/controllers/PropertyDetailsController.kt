@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
@@ -21,7 +22,6 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
@@ -51,13 +51,13 @@ class PropertyDetailsController(
         model: Model,
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
-    ): ModelAndView {
+    ): String {
         addPropertyDetailsToModelIfAuthorizedUser(model, principal, propertyOwnershipId, withPropertyChangeLinks = true)
         // TODO: PRSD-355 Remove this way of showing submit button
         model.addAttribute("shouldShowSubmitButton", true)
-        return propertyDetailsUpdateJourneyFactory
-            .create(propertyOwnershipId)
-            .getModelAndViewForStep(UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment, subPageNumber = null)
+        model.addAttribute(BACK_URL_ATTR_NAME, PROPERTY_DETAILS_ROUTE)
+
+        return "propertyDetailsView"
     }
 
     @PreAuthorize("hasRole('LANDLORD')")
@@ -70,8 +70,8 @@ class PropertyDetailsController(
     ): ModelAndView =
         if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
             propertyDetailsUpdateJourneyFactory
-                .create(propertyOwnershipId)
-                .getModelAndViewForStep(stepName, subPageNumber = null)
+                .create(propertyOwnershipId, stepName)
+                .getModelAndViewForStep()
         } else {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
@@ -90,13 +90,8 @@ class PropertyDetailsController(
     ): ModelAndView =
         if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
             propertyDetailsUpdateJourneyFactory
-                .create(propertyOwnershipId)
-                .completeStep(
-                    stepName,
-                    formData,
-                    subPageNumber = null,
-                    principal,
-                )
+                .create(propertyOwnershipId, stepName)
+                .completeStep(formData, principal)
         } else {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,

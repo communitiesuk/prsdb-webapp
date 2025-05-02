@@ -7,10 +7,10 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
@@ -37,22 +37,22 @@ import kotlin.test.Test
 class InvitationUrlTests(
     context: WebApplicationContext,
 ) : ControllerTest(context) {
-    @MockBean
+    @MockitoBean
     lateinit var anyEmailNotificationService: EmailNotificationService<EmailTemplateModel>
 
-    @MockBean
+    @MockitoBean
     lateinit var localAuthorityInvitationService: LocalAuthorityInvitationService
 
-    @MockBean
+    @MockitoBean
     lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
-    @MockBean
+    @MockitoBean
     private lateinit var localAuthorityDataService: LocalAuthorityDataService
 
-    @MockBean
+    @MockitoBean
     private lateinit var journeyDataService: JourneyDataService
 
-    @MockBean
+    @MockitoBean
     private lateinit var laUserRegistrationJourneyFactory: LaUserRegistrationJourneyFactory
 
     @Mock

@@ -84,6 +84,8 @@ jobs:
         run: ./gradlew flywayClean --no-daemon
 
       - name: Run gradle flywayMigrate
+        env:
+          FLYWAY_LOCATIONS: filesystem:src/main/resources/db/migrations
         run: ./gradlew flywayMigrate --no-daemon
 
       - name: Terminate SSM port-forwarding session
