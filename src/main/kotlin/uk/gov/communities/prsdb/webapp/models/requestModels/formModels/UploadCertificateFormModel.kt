@@ -2,39 +2,11 @@ package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
 import org.apache.commons.fileupload2.core.FileItemInput
 import org.apache.commons.io.FilenameUtils
-import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
-import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
-import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
-import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 import kotlin.math.pow
+import kotlin.reflect.KClass
 
-@IsValidPrioritised
-class UploadCertificateFormModel : FormModel {
-    @ValidatedBy(
-        constraints = [
-            ConstraintDescriptor(
-                messageKey = "forms.uploadCertificate.error.missing",
-                validatorType = DelegatedPropertyConstraintValidator::class,
-                targetMethod = "isNameNotBlank",
-            ),
-            ConstraintDescriptor(
-                messageKey = "forms.uploadCertificate.error.wrongType",
-                validatorType = DelegatedPropertyConstraintValidator::class,
-                targetMethod = "isFileTypeValid",
-            ),
-            ConstraintDescriptor(
-                messageKey = "forms.uploadCertificate.error.tooBig",
-                validatorType = DelegatedPropertyConstraintValidator::class,
-                targetMethod = "isContentLengthValid",
-            ),
-            ConstraintDescriptor(
-                messageKey = "forms.uploadCertificate.error.unsuccessfulUpload",
-                validatorType = DelegatedPropertyConstraintValidator::class,
-                targetMethod = "isUploadSuccessfulOrInvalid",
-            ),
-        ],
-    )
-    val certificate = null
+abstract class UploadCertificateFormModel : FormModel {
+    abstract val certificate: Nothing?
 
     var name: String = ""
 
@@ -58,10 +30,11 @@ class UploadCertificateFormModel : FormModel {
         private val maxContentLength = 15 * 10.0.pow(6) // 15MB
 
         fun fromFileItemInput(
+            uploadCertificateFormModel: KClass<out UploadCertificateFormModel>,
             fileItemInput: FileItemInput,
             fileLength: Long,
             isUploadSuccessfulOrNull: Boolean? = null,
-        ) = UploadCertificateFormModel().apply {
+        ) = uploadCertificateFormModel.constructors.first().call().apply {
             this.name = fileItemInput.name
             this.contentType = fileItemInput.contentType
             this.contentLength = fileLength

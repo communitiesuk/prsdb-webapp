@@ -29,14 +29,15 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemp
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionOtherReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionOtherReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -219,7 +220,7 @@ class PropertyComplianceJourney(
                 id = PropertyComplianceStepId.GasSafetyUpload,
                 page =
                     Page(
-                        formModel = UploadCertificateFormModel::class,
+                        formModel = GasSafetyUploadCertificateFormModel::class,
                         templateName = "forms/uploadCertificateForm",
                         content =
                             mapOf(
@@ -439,7 +440,7 @@ class PropertyComplianceJourney(
                 id = PropertyComplianceStepId.EicrUpload,
                 page =
                     Page(
-                        formModel = UploadCertificateFormModel::class,
+                        formModel = EicrUploadCertificateFormModel::class,
                         templateName = "forms/uploadCertificateForm",
                         content =
                             mapOf(

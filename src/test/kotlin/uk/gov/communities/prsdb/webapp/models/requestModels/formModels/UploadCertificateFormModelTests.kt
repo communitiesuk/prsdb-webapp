@@ -15,14 +15,20 @@ class UploadCertificateFormModelTests {
         val fileItemInput = MockFileItemInput(name = fileName, contentType = contentType)
 
         val expectedModel =
-            UploadCertificateFormModel().apply {
+            GasSafetyUploadCertificateFormModel().apply {
                 this.name = fileName
                 this.contentType = contentType
                 this.contentLength = contentLength
                 this.isUploadSuccessfulOrNull = isUploadSuccessful
             }
 
-        val returnedModel = UploadCertificateFormModel.fromFileItemInput(fileItemInput, contentLength, isUploadSuccessful)
+        val returnedModel =
+            UploadCertificateFormModel.fromFileItemInput(
+                GasSafetyUploadCertificateFormModel::class,
+                fileItemInput,
+                contentLength,
+                isUploadSuccessful,
+            )
 
         assertTrue(ReflectionEquals(returnedModel).matches(expectedModel))
     }
