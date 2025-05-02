@@ -39,7 +39,28 @@ class PropertyDetailsController(
         model: Model,
         principal: Principal,
     ): String {
-        addPropertyDetailsToModelIfAuthorizedUser(model, principal, propertyOwnershipId)
+        val propertyOwnership =
+            propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, principal.name)
+
+        val propertyDetails =
+            PropertyDetailsViewModel(
+                propertyOwnership = propertyOwnership,
+                withChangeLinks = true,
+                hideNullUprn = true,
+                landlordDetailsUrl = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
+            )
+
+        val landlordViewModel =
+            PropertyDetailsLandlordViewModel(
+                landlord = propertyOwnership.primaryLandlord,
+                landlordDetailsUrl = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
+            )
+
+        model.addAttribute("propertyDetails", propertyDetails)
+        model.addAttribute("landlordDetails", landlordViewModel.landlordsDetails)
+        model.addAttribute("deleteRecordLink", DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
+        model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
+
         return "propertyDetailsView"
     }
 
@@ -116,35 +137,6 @@ class PropertyDetailsController(
         model.addAttribute("backUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
 
         return "propertyDetailsView"
-    }
-
-    private fun addPropertyDetailsToModelIfAuthorizedUser(
-        model: Model,
-        principal: Principal,
-        propertyOwnershipId: Long,
-        withPropertyChangeLinks: Boolean = false,
-    ) {
-        val propertyOwnership =
-            propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, principal.name)
-
-        val propertyDetails =
-            PropertyDetailsViewModel(
-                propertyOwnership = propertyOwnership,
-                withChangeLinks = withPropertyChangeLinks,
-                hideNullUprn = true,
-                landlordDetailsUrl = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
-            )
-
-        val landlordViewModel =
-            PropertyDetailsLandlordViewModel(
-                landlord = propertyOwnership.primaryLandlord,
-                landlordDetailsUrl = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
-            )
-
-        model.addAttribute("propertyDetails", propertyDetails)
-        model.addAttribute("landlordDetails", landlordViewModel.landlordsDetails)
-        model.addAttribute("deleteRecordLink", DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
-        model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
     }
 
     companion object {
