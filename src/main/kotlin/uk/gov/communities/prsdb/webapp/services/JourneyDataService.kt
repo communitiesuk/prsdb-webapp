@@ -71,9 +71,7 @@ class JourneyDataService(
     }
 
     fun loadJourneyDataIntoSession(formContext: FormContext) {
-        val loadedJourneyData =
-            objectToStringKeyedMap(objectMapper.readValue(formContext.context, Any::class.java)) ?: mapOf()
-        setJourneyDataInSession(loadedJourneyData)
+        setJourneyDataInSession(formContext.toJourneyData())
         setContextId(formContext.id)
     }
 

@@ -22,4 +22,9 @@ interface FormContextRepository : JpaRepository<FormContext, Long?> {
         principalName: String,
         journeyType: JourneyType,
     ): Int
+
+    fun findAllByUser_IdAndJourneyType(
+        principalName: String,
+        journeyType: JourneyType,
+    ): List<FormContext>
 }

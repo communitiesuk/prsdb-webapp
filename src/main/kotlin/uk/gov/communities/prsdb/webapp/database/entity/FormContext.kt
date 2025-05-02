@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.ForeignKey
@@ -9,6 +10,8 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 
 @Entity
 class FormContext() : ModifiableAuditableEntity() {
@@ -37,4 +40,6 @@ class FormContext() : ModifiableAuditableEntity() {
         this.context = context
         this.user = user
     }
+
+    fun toJourneyData(): JourneyData = objectToStringKeyedMap(ObjectMapper().readValue(context, Any::class.java)) ?: emptyMap()
 }

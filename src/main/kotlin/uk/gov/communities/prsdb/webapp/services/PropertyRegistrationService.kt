@@ -4,18 +4,26 @@ import jakarta.persistence.EntityExistsException
 import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.toKotlinInstant
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyRepository
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesDataModel
+import java.time.Instant
 
 @Service
 class PropertyRegistrationService(
@@ -26,6 +34,7 @@ class PropertyRegistrationService(
     private val registeredAddressCache: RegisteredAddressCache,
     private val propertyService: PropertyService,
     private val licenseService: LicenseService,
+    private val localAuthorityService: LocalAuthorityService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val session: HttpSession,
 ) {
@@ -107,5 +116,49 @@ class PropertyRegistrationService(
             return incompleteProperties
         }
         return null
+    }
+
+    fun getIncompletePropertiesForLandlord(principalName: String): List<IncompletePropertiesDataModel> {
+        val formContexts = formContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION)
+
+        val incompleteProperties = mutableListOf<IncompletePropertiesDataModel>()
+
+        formContexts.forEach { formContext ->
+            val completeByDate = getIncompletePropertyCompleteByDate(formContext.createdDate)
+
+            if (!DateTimeHelper().isDateInPast(completeByDate)) {
+                incompleteProperties.add(getIncompletePropertiesDataModels(formContext, completeByDate))
+            }
+        }
+        return incompleteProperties
+    }
+
+    private fun getIncompletePropertiesDataModels(
+        formContext: FormContext,
+        completeByDate: LocalDate,
+    ): IncompletePropertiesDataModel {
+        val address = getAddressData(formContext)
+
+        // TODO PRSD-1127 remove the "Not yet completed" options as address and local authority should no longer be nullable
+        val localAuthorityName = address?.localAuthorityId?.let { localAuthorityService.retrieveLocalAuthorityById(it).name }
+
+        return IncompletePropertiesDataModel(
+            contextId = formContext.id,
+            completeByDate = completeByDate,
+            singleLineAddress = address?.singleLineAddress ?: "Not yet completed",
+            localAuthorityName = localAuthorityName ?: "Not yet completed",
+        )
+    }
+
+    private fun getIncompletePropertyCompleteByDate(createdDate: Instant): LocalDate {
+        val createdDateInUk = DateTimeHelper.getDateInUK(createdDate.toKotlinInstant())
+        return DateTimeHelper.get28DaysFromDate(createdDateInUk)
+    }
+
+    private fun getAddressData(formContext: FormContext): AddressDataModel? {
+        val formContextJourneyData = formContext.toJourneyData()
+        val lookedUpAddresses = formContextJourneyData.getLookedUpAddresses()
+        // TODO PRSD-1127 set this to return a not nullable AddressDataModel
+        return PropertyRegistrationJourneyDataHelper.getAddress(formContextJourneyData, lookedUpAddresses)
     }
 }
