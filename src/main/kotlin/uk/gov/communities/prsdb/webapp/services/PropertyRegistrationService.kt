@@ -126,7 +126,7 @@ class PropertyRegistrationService(
         formContexts.forEach { formContext ->
             val completeByDate = getIncompletePropertyCompleteByDate(formContext.createdDate)
 
-            if (!DateTimeHelper.isDateInPast(completeByDate)) {
+            if (!DateTimeHelper().isDateInPast(completeByDate)) {
                 incompleteProperties.add(getIncompletePropertiesDataModels(formContext, completeByDate))
             }
         }

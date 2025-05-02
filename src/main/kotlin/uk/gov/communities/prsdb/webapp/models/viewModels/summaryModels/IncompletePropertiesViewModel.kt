@@ -10,9 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesDat
 class IncompletePropertiesViewModel(
     private val incompletePropertiesData: List<IncompletePropertiesDataModel>,
 ) {
-    val incompleteProperties: List<SummaryCardViewModel> = getListOfIncompleteProperties()
-
-    private fun getListOfIncompleteProperties(): List<SummaryCardViewModel> =
+    val incompleteProperties: List<SummaryCardViewModel> =
         incompletePropertiesData.mapIndexed { index, property ->
 
             SummaryCardViewModel(

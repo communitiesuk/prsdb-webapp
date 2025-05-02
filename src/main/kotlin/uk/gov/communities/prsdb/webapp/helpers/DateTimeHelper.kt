@@ -20,6 +20,8 @@ class DateTimeHelper(
 
     fun getAgeFromBirthDate(birthDate: LocalDate): Int = birthDate.yearsUntil(getCurrentDateInUK())
 
+    fun isDateInPast(date: LocalDate): Boolean = date < getCurrentDateInUK()
+
     companion object {
         fun getDateInUK(instant: Instant): LocalDate {
             val dateTimeInUK = instant.toLocalDateTime(TimeZone.of("Europe/London"))
@@ -38,7 +40,5 @@ class DateTimeHelper(
             }
 
         fun get28DaysFromDate(date: LocalDate): LocalDate = date.plus(DatePeriod(days = 28))
-
-        fun isDateInPast(date: LocalDate): Boolean = date < DateTimeHelper().getCurrentDateInUK()
     }
 }
