@@ -99,8 +99,14 @@ class PropertyRegistrationJourney(
             RegisterPropertyStepId.Occupancy ->
                 listOf(
                     RegisterPropertyStepId.Occupancy,
-                    RegisterPropertyStepId.NumberOfPeople,
                     RegisterPropertyStepId.NumberOfHouseholds,
+                    RegisterPropertyStepId.NumberOfPeople,
+                ).contains(destinationStep)
+
+            RegisterPropertyStepId.NumberOfHouseholds ->
+                listOf(
+                    RegisterPropertyStepId.NumberOfHouseholds,
+                    RegisterPropertyStepId.NumberOfPeople,
                 ).contains(destinationStep)
 
             RegisterPropertyStepId.LicensingType ->
