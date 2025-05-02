@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
-import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
-import uk.gov.communities.prsdb.webapp.constants.DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
@@ -41,21 +39,27 @@ class PropertyDetailsController(
         model: Model,
         principal: Principal,
     ): String {
-        addPropertyDetailsToModelIfAuthorizedUser(model, principal, propertyOwnershipId)
-        return "propertyDetailsView"
-    }
+        val propertyOwnership =
+            propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, principal.name)
 
-    @PreAuthorize("hasRole('LANDLORD')")
-    @GetMapping("$UPDATE_PROPERTY_DETAILS_ROUTE/$DETAILS_PATH_SEGMENT")
-    fun getUpdatePropertyDetails(
-        model: Model,
-        principal: Principal,
-        @PathVariable propertyOwnershipId: Long,
-    ): String {
-        addPropertyDetailsToModelIfAuthorizedUser(model, principal, propertyOwnershipId, withPropertyChangeLinks = true)
-        // TODO: PRSD-355 Remove this way of showing submit button
-        model.addAttribute("shouldShowSubmitButton", true)
-        model.addAttribute(BACK_URL_ATTR_NAME, PROPERTY_DETAILS_ROUTE)
+        val propertyDetails =
+            PropertyDetailsViewModel(
+                propertyOwnership = propertyOwnership,
+                withChangeLinks = true,
+                hideNullUprn = true,
+                landlordDetailsUrl = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
+            )
+
+        val landlordViewModel =
+            PropertyDetailsLandlordViewModel(
+                landlord = propertyOwnership.primaryLandlord,
+                landlordDetailsUrl = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
+            )
+
+        model.addAttribute("propertyDetails", propertyDetails)
+        model.addAttribute("landlordDetails", landlordViewModel.landlordsDetails)
+        model.addAttribute("deleteRecordLink", DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
+        model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
         return "propertyDetailsView"
     }
@@ -133,35 +137,6 @@ class PropertyDetailsController(
         model.addAttribute("backUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
 
         return "propertyDetailsView"
-    }
-
-    private fun addPropertyDetailsToModelIfAuthorizedUser(
-        model: Model,
-        principal: Principal,
-        propertyOwnershipId: Long,
-        withPropertyChangeLinks: Boolean = false,
-    ) {
-        val propertyOwnership =
-            propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, principal.name)
-
-        val propertyDetails =
-            PropertyDetailsViewModel(
-                propertyOwnership = propertyOwnership,
-                withChangeLinks = withPropertyChangeLinks,
-                hideNullUprn = true,
-                landlordDetailsUrl = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
-            )
-
-        val landlordViewModel =
-            PropertyDetailsLandlordViewModel(
-                landlord = propertyOwnership.primaryLandlord,
-                landlordDetailsUrl = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
-            )
-
-        model.addAttribute("propertyDetails", propertyDetails)
-        model.addAttribute("landlordDetails", landlordViewModel.landlordsDetails)
-        model.addAttribute("deleteRecordLink", DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
-        model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
     }
 
     companion object {

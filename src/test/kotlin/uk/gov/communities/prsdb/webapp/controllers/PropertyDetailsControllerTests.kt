@@ -1,10 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
-import org.mockito.ArgumentMatchers.anyLong
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
@@ -12,7 +9,6 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
@@ -20,9 +16,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
-import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.constants.DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDetailsUpdateJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
@@ -152,56 +146,20 @@ class PropertyDetailsControllerTests(
     inner class PropertyDetailsUpdateStepTests {
         private val propertyOwnership = createPropertyOwnership()
 
-        private val updatePropertyDetailsPath =
-            PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnership.id) +
-                "/${DETAILS_PATH_SEGMENT}"
-
         private val updatePropertyOwnershipTypePath =
             PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnership.id) +
                 "/${UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment}"
 
+        private val propertyDetailsPath = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id)
+
         @BeforeEach
         fun setUp() {
-            whenever(propertyDetailsUpdateJourneyFactory.create(anyLong(), anyString())).thenReturn(propertyDetailsUpdateJourney)
-        }
-
-        @Test
-        fun `getUpdatePropertyDetails returns a redirect for an unauthenticated user`() {
-            mvc.get(updatePropertyDetailsPath).andExpect {
-                status { is3xxRedirection() }
-            }
-        }
-
-        @Test
-        @WithMockUser
-        fun `getUpdatePropertyDetails returns 403 for an unauthorized user`() {
-            mvc.get(updatePropertyDetailsPath).andExpect {
-                status { status { isForbidden() } }
-            }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `getUpdatePropertyDetails returns 200 for a valid request from a landlord`() {
             whenever(
-                propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()),
-            ).thenReturn(propertyOwnership)
-
-            mvc.get(updatePropertyDetailsPath).andExpect {
-                status { status { isOk() } }
-            }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `getUpdatePropertyDetails returns 404 for an invalid request from a landlord`() {
-            whenever(
-                propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()),
-            ).thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
-
-            mvc.get(updatePropertyDetailsPath).andExpect {
-                status { status { isNotFound() } }
-            }
+                propertyDetailsUpdateJourneyFactory.create(
+                    propertyOwnership.id,
+                    UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment,
+                ),
+            ).thenReturn(propertyDetailsUpdateJourney)
         }
 
         @Test
@@ -266,19 +224,12 @@ class PropertyDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["LANDLORD"])
-        // TODO PRSD-1107 - re-enable test and update them to match new flow
-        @Disabled
-        fun `postJourneyData redirects to the update details page for a valid request from a landlord`() {
+        fun `postJourneyData redirects to the details page for a valid request from a landlord`() {
             whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(eq(propertyOwnership.id), any())).thenReturn(true)
 
             whenever(
-                propertyDetailsUpdateJourney.completeStep(
-                    eq(UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment),
-                    argThat { pageData -> pageData["ownershipType"] == "FREEHOLD" },
-                    eq(null),
-                    any(),
-                ),
-            ).thenReturn(ModelAndView("redirect:$updatePropertyDetailsPath"))
+                propertyDetailsUpdateJourney.completeStep(argThat { pageData -> pageData["ownershipType"] == "FREEHOLD" }, any()),
+            ).thenReturn(ModelAndView("redirect:$propertyDetailsPath"))
 
             mvc
                 .post(updatePropertyOwnershipTypePath) {
@@ -288,7 +239,7 @@ class PropertyDetailsControllerTests(
                 }.andExpect {
                     status {
                         is3xxRedirection()
-                        redirectedUrl(updatePropertyDetailsPath)
+                        redirectedUrl(propertyDetailsPath)
                     }
                 }
         }

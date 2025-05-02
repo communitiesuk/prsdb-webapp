@@ -68,7 +68,8 @@ class PropertyDetailsViewModel(
                     "propertyDetails.propertyRecord.ownershipType",
                     MessageKeyConverter.convert(propertyOwnership.ownershipType),
                     UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment,
-                    withChangeLinks,
+                    // TODO PRSD-1107: Set to withChangeLinks when ticket has been implemented
+                    withChangeLinks = false,
                 )
                 addRow(
                     "propertyDetails.propertyRecord.licensingType",
@@ -80,26 +81,30 @@ class PropertyDetailsViewModel(
                         }
                     } ?: MessageKeyConverter.convert(LicensingType.NO_LICENSING),
                     UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment,
-                    withChangeLinks,
+                    // TODO PRSD-1108: Set to withChangeLinks when ticket has been implemented
+                    withChangeLinks = false,
                 )
                 addRow(
                     "propertyDetails.propertyRecord.occupied",
                     isTenantedKey,
                     UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment,
-                    withChangeLinks,
+                    // TODO PRSD-1109: Set to withChangeLinks when ticket has been implemented
+                    withChangeLinks = false,
                 )
                 if (propertyOwnership.isOccupied) {
                     addRow(
                         "propertyDetails.propertyRecord.numberOfHouseholds",
                         propertyOwnership.currentNumHouseholds,
                         UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment,
-                        withChangeLinks,
+                        // TODO PRSD-1109: Set to withChangeLinks when ticket has been implemented
+                        withChangeLinks = false,
                     )
                     addRow(
                         "propertyDetails.propertyRecord.numberOfPeople",
                         propertyOwnership.currentNumTenants,
                         UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment,
-                        withChangeLinks,
+                        // TODO PRSD-1109: Set to withChangeLinks when ticket has been implemented
+                        withChangeLinks = false,
                     )
                 }
             }.toList()
