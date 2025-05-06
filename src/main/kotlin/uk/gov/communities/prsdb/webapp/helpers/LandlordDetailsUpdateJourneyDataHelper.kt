@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.helpers
 
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.journeys.UpdateLandlordDetailsJourney
+import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDetailsUpdateJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddress
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
@@ -14,10 +14,10 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumb
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import java.time.LocalDate
 
-class UpdateLandlordDetailsJourneyDataHelper : JourneyDataHelper() {
+class LandlordDetailsUpdateJourneyDataHelper : JourneyDataHelper() {
     companion object {
         fun getIsIdentityVerified(journeyData: JourneyData): Boolean =
-            getStringValueByKey(journeyData, UpdateLandlordDetailsJourney.IS_IDENTITY_VERIFIED_KEY).toBoolean()
+            getStringValueByKey(journeyData, LandlordDetailsUpdateJourney.IS_IDENTITY_VERIFIED_KEY).toBoolean()
 
         fun getEmailUpdateIfPresent(journeyData: JourneyData) =
             getFieldStringValue(

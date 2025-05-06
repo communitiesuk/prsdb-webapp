@@ -17,8 +17,8 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.LandlordDetailsUpdateJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.UpdateLandlordDetailsJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getSerializedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -37,7 +37,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import kotlin.reflect.KFunction
 
-class UpdateLandlordDetailsJourney(
+class LandlordDetailsUpdateJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     addressLookupService: AddressLookupService,
@@ -124,7 +124,7 @@ class UpdateLandlordDetailsJourney(
                 ),
             handleSubmitAndRedirect = { _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
             nextAction = { journeyData, _ ->
-                if (UpdateLandlordDetailsJourneyDataHelper.getIsIdentityVerified(journeyData)) {
+                if (LandlordDetailsUpdateJourneyDataHelper.getIsIdentityVerified(journeyData)) {
                     Pair(UpdateLandlordDetailsStepId.UpdatePhoneNumber, null)
                 } else {
                     Pair(UpdateLandlordDetailsStepId.UpdateName, null)
@@ -330,11 +330,11 @@ class UpdateLandlordDetailsJourney(
     private fun updateLandlordWithChangesAndRedirect(journeyData: JourneyData): String {
         val landlordUpdate =
             LandlordUpdateModel(
-                email = UpdateLandlordDetailsJourneyDataHelper.getEmailUpdateIfPresent(journeyData),
-                name = UpdateLandlordDetailsJourneyDataHelper.getNameUpdateIfPresent(journeyData),
-                phoneNumber = UpdateLandlordDetailsJourneyDataHelper.getPhoneNumberIfPresent(journeyData),
-                address = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(journeyData),
-                dateOfBirth = UpdateLandlordDetailsJourneyDataHelper.getDateOfBirthIfPresent(journeyData),
+                email = LandlordDetailsUpdateJourneyDataHelper.getEmailUpdateIfPresent(journeyData),
+                name = LandlordDetailsUpdateJourneyDataHelper.getNameUpdateIfPresent(journeyData),
+                phoneNumber = LandlordDetailsUpdateJourneyDataHelper.getPhoneNumberIfPresent(journeyData),
+                address = LandlordDetailsUpdateJourneyDataHelper.getAddressIfPresent(journeyData),
+                dateOfBirth = LandlordDetailsUpdateJourneyDataHelper.getDateOfBirthIfPresent(journeyData),
             )
 
         landlordService.updateLandlordForBaseUserId(
