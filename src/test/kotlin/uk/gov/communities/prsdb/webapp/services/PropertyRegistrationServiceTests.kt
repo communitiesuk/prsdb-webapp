@@ -13,6 +13,7 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toJavaInstant
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -23,6 +24,7 @@ import org.junit.jupiter.params.provider.CsvSource
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
@@ -47,6 +49,8 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
+import kotlin.test.assertTrue
 
 @ExtendWith(MockitoExtension::class)
 class PropertyRegistrationServiceTests {
@@ -75,7 +79,7 @@ class PropertyRegistrationServiceTests {
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @Mock
-    private lateinit var localAuthorityService: LocalAuthorityService
+    private lateinit var mockLocalAuthorityService: LocalAuthorityService
 
     @Mock
     private lateinit var mockSession: HttpSession
@@ -445,6 +449,69 @@ class PropertyRegistrationServiceTests {
                 }
             kotlin.test.assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
             kotlin.test.assertEquals(expectedErrorMessage, exception.message)
+        }
+
+        @Test
+        fun `getIncompletePropertiesForLandlord returns a list of valid incomplete properties`() {
+            val createdTodayDate = currentInstant.toJavaInstant()
+            val createdYesterdayDate = currentInstant.minus(1, DateTimeUnit.DAY, TimeZone.of("Europe/London")).toJavaInstant()
+            val outOfDateCreatedDate = currentInstant.minus(29, DateTimeUnit.DAY, TimeZone.of("Europe/London")).toJavaInstant()
+
+            val principalName = "principalName"
+            val incompleteProperties =
+                listOf(
+                    createFormContext(createdDate = createdTodayDate),
+                    createFormContext(createdDate = createdYesterdayDate),
+                    createFormContext(createdDate = outOfDateCreatedDate),
+                )
+
+            val expectedIncompleteProperties =
+                listOf(
+                    createFormContext(createdDate = createdTodayDate),
+                    createFormContext(createdDate = createdYesterdayDate),
+                )
+
+            whenever(
+                mockFormContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION),
+            ).thenReturn(incompleteProperties)
+
+            val localAuthority = createLocalAuthority()
+            whenever(mockLocalAuthorityService.retrieveLocalAuthorityById(any())).thenReturn(localAuthority)
+
+            val incompletePropertiesList =
+                propertyRegistrationService.getIncompletePropertiesForLandlord(
+                    principalName,
+                )
+
+            assertEquals(expectedIncompleteProperties, incompletePropertiesList)
+        }
+
+        @Test
+        fun `getIncompletePropertiesForLandlord returns an emptyList if there are no valid incomplete properties`() {
+            val principalName = "principalName"
+            val outOfDateCreatedDate = currentInstant.minus(29, DateTimeUnit.DAY, TimeZone.of("Europe/London")).toJavaInstant()
+
+            val formContext = createFormContext(createdDate = outOfDateCreatedDate)
+
+            whenever(
+                mockFormContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION),
+            ).thenReturn(listOf(formContext))
+
+            val incompleteProperties = propertyRegistrationService.getIncompletePropertiesForLandlord(principalName)
+
+            assertTrue(incompleteProperties.isEmpty())
+        }
+
+        @Test
+        fun `getIncompletePropertiesForLandlord returns an emptyList if there are no incomplete properties`() {
+            val principalName = "principalName"
+            whenever(
+                mockFormContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION),
+            ).thenReturn(emptyList())
+
+            val incompleteProperties = propertyRegistrationService.getIncompletePropertiesForLandlord(principalName)
+
+            assertTrue(incompleteProperties.isEmpty())
         }
     }
 }
