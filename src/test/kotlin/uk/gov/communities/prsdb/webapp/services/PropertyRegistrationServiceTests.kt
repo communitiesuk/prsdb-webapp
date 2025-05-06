@@ -368,13 +368,14 @@ class PropertyRegistrationServiceTests {
         @Test
         fun `getNumberOfIncompletePropertyRegistrationsForLandlord returns 0 if there are no incomplete properties`() {
             val principalName = "principalName"
+            val expectedNumberOfIncompleteProperties = 0
             whenever(
                 mockFormContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION),
             ).thenReturn(emptyList())
 
             val incompleteProperties = propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(principalName)
 
-            assertEquals(0, incompleteProperties)
+            assertEquals(expectedNumberOfIncompleteProperties, incompleteProperties)
         }
 
         @Test
