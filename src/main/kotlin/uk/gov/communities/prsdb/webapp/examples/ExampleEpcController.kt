@@ -19,7 +19,7 @@ class ExampleEpcController(
     @GetMapping("uprn/{uprn}")
     @ResponseBody
     fun getEpcByUprn(
-        @PathVariable uprn: Int,
+        @PathVariable uprn: Long,
     ): String = client.getByUprn(uprn)
 
     @GetMapping("rrn/{rrn}")

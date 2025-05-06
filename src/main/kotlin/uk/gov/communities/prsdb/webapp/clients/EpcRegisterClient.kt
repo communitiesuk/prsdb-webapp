@@ -14,7 +14,7 @@ import java.net.URLEncoder
 class EpcRegisterClient(
     @Qualifier("epc-client") private val client: RestClient,
 ) {
-    fun getByUprn(uprn: Int): String {
+    fun getByUprn(uprn: Long): String {
         val uprnString = uprn.toString().padStart(12, '0')
         val query = URLEncoder.encode(uprnString, "UTF-8")
         return searchFor("uprn", "UPRN-$query")!!

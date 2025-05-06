@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -30,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
@@ -633,6 +635,11 @@ class Navigator(
     fun goToLandlordDashboard(): LandlordDashboardPage {
         navigate(LANDLORD_DASHBOARD_URL)
         return createValidPage(page, LandlordDashboardPage::class)
+    }
+
+    fun goToInviteLaAdmin(): InviteLaAdminPage {
+        navigate("/$SYSTEM_OPERATOR_PATH_SEGMENT/invite-la-admin")
+        return createValidPage(page, InviteLaAdminPage::class)
     }
 
     fun navigate(path: String): Response? = page.navigate("http://localhost:$port$path")

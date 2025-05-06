@@ -36,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
 import java.security.Principal
+import kotlin.reflect.KClass
 
 @Controller
 @PreAuthorize("hasRole('LANDLORD')")
@@ -136,8 +137,10 @@ class PropertyComplianceController(
             fileInputIterator.getFirstFileField()
                 ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a valid multipart file upload request")
 
+        val formModelClass = PropertyComplianceJourneyHelper.getUploadCertificateFormModelClass(stepName)
+
         val isUploadSuccessfulOrNull =
-            if (isFileValid(file, request.contentLengthLong)) {
+            if (isFileValid(formModelClass, file, request.contentLengthLong)) {
                 val uploadFileName = PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, stepName, file.name)
                 uploadFile(uploadFileName, file, request.contentLengthLong)
             } else {
@@ -151,11 +154,20 @@ class PropertyComplianceController(
             response.addCookie(cookie)
         }
 
+        val formData =
+            UploadCertificateFormModel
+                .fromFileItemInput(
+                    formModelClass,
+                    file,
+                    request.contentLengthLong,
+                    isUploadSuccessfulOrNull,
+                ).toPageData()
+
         return propertyComplianceJourneyFactory
             .create(propertyOwnershipId, principal.name)
             .completeStep(
                 stepName,
-                UploadCertificateFormModel.fromFileItemInput(file, request.contentLengthLong, isUploadSuccessfulOrNull).toPageData(),
+                formData,
                 subpage,
                 principal,
             )
@@ -174,10 +186,11 @@ class PropertyComplianceController(
     }
 
     private fun isFileValid(
+        formModelClass: KClass<out UploadCertificateFormModel>,
         file: FileItemInput,
         fileLength: Long,
     ): Boolean {
-        val fileFormModel = UploadCertificateFormModel.fromFileItemInput(file, fileLength)
+        val fileFormModel = UploadCertificateFormModel.fromFileItemInput(formModelClass, file, fileLength)
         return !validator.validateObject(fileFormModel).hasErrors()
     }
 

@@ -25,17 +25,18 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
     private val propertyOwnershipId = 1L
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
 
-    // TODO PRSD-1107 - re-enable tests and update them to match new flow
-    @Disabled
     @Nested
     inner class OwnershipTypeUpdates {
         @Test
         fun `A property can have its ownership type updated`(page: Page) {
             // Details page
             var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+            propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickActionLinkAndWait()
+            val updateOwnershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
-            val newOwnershipType = OwnershipType.LEASEHOLD
-            propertyDetailsPage = updateOwnershipTypeAndReturn(propertyDetailsPage, newOwnershipType)
+            // Update Ownership Type page
+            updateOwnershipTypePage.submitOwnershipType(OwnershipType.LEASEHOLD)
+            propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
             // Check changes have occurred
             assertThat(propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.value).containsText("Leasehold")
@@ -248,19 +249,6 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
         }
 
         // TODO PRSD-1109 - add test for updating just number of people
-    }
-
-    private fun updateOwnershipTypeAndReturn(
-        detailsPage: PropertyDetailsPageLandlordView,
-        newOwnershipType: OwnershipType,
-    ): PropertyDetailsPageLandlordView {
-        val page = detailsPage.page
-        detailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickActionLinkAndWait()
-
-        val updateOwnershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
-        updateOwnershipTypePage.submitOwnershipType(newOwnershipType)
-
-        return assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
     private fun updateLicensingTypeToNoneAndReturn(detailsPage: PropertyDetailsPageLandlordView): PropertyDetailsPageLandlordView {

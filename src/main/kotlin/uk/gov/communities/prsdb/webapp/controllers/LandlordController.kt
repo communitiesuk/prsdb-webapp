@@ -78,6 +78,8 @@ class LandlordController(
         model.addAttribute("registerPropertyUrl", "/$REGISTER_PROPERTY_JOURNEY_URL")
         model.addAttribute("viewRegisteredPropertiesUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT#$REGISTERED_PROPERTIES_PATH_SEGMENT")
 
+        model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
+
         return "incompletePropertiesView"
     }
 

@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions
 
 import kotlinx.datetime.yearsUntil
-import org.apache.commons.io.FilenameUtils
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
@@ -76,19 +75,5 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                     PropertyComplianceStepId.EicrExemptionReason.urlPathSegment,
                     EicrExemptionReasonFormModel::exemptionReason.name,
                 )?.let { it == EicrExemptionReason.OTHER }
-
-        fun getCertFilename(
-            propertyOwnershipId: Long,
-            stepName: String,
-            originalFileName: String,
-        ): String {
-            val certificateType =
-                when (stepName) {
-                    PropertyComplianceStepId.GasSafetyUpload.urlPathSegment -> "gas_safety_certificate"
-                    PropertyComplianceStepId.EicrUpload.urlPathSegment -> "eicr"
-                    else -> throw IllegalStateException("Invalid file upload step name: $stepName")
-                }
-            return "property_${propertyOwnershipId}_$certificateType.${FilenameUtils.getExtension(originalFileName)}"
-        }
     }
 }

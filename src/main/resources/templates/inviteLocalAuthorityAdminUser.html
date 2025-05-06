@@ -1,0 +1,20 @@
+<!--/*@thymesVar id="inviteLocalAuthorityAdminModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="selectOptions" type="java.lang.Object"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{forms.inviteLaAdminUser.title}, ~{::main}, ${#fields.hasErrors('${inviteLocalAuthorityAdminModel.*}')})}">
+    <main class="govuk-main-wrapper" id="main-content">
+        <div id="page-content"
+             th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
+            <form th:action="@{''}" method="post" novalidate th:object="${inviteLocalAuthorityAdminModel}">
+                <div th:replace="~{fragments/forms/errorSummary :: errorSummary()}">Error Summary</div>
+                <fieldset id="fieldset-content"
+                          th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'laAdminInvitation', #{forms.inviteLaAdminUser.fieldSetHeading}, #{forms.inviteLaAdminUser.fieldSetHint})}">
+                    <select th:replace="~{fragments/forms/select :: select(#{forms.inviteLaAdminUser.selectLabel},'localAuthorityId',null, ${selectOptions})}"></select>
+                    <input th:replace="~{fragments/forms/emailInput :: emailInput(#{addLAUser.form.primaryEmailLabel}, 'email', null)}">
+                    <input th:replace="~{fragments/forms/emailInput :: emailInput(#{addLAUser.form.confirmEmailLabel}, 'confirmEmail', null)}">
+                </fieldset>
+                <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.submit})}"></button>
+            </form>
+        </div>
+    </main>
+</html>

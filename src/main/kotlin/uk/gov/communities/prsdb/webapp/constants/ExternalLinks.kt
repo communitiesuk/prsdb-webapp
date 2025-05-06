@@ -9,3 +9,5 @@ const val GAS_SAFE_REGISTER = "https://www.gassaferegister.co.uk/find-an-enginee
 const val RCP_ELECTRICAL_INFO_URL = "https://www.electricalsafetyroundtable.co.uk/safety-guidance/competent-registered-electrician.aspx"
 
 const val RCP_ELECTRICAL_REGISTER_URL = "https://electricalcompetentperson.co.uk"
+
+const val FIND_LOCAL_AUTHORITY_URL = "https://www.gov.uk/find-local-council"
