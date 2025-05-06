@@ -67,10 +67,10 @@ class LandlordDetailsUpdateJourney(
                 LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to Json.encodeToString(listOf(AddressDataModel.fromAddress(landlord.address))),
                 UpdateLandlordDetailsStepId.UpdateEmail toPageData EmailFormModel::fromLandlord,
                 UpdateLandlordDetailsStepId.UpdateName toPageData NameFormModel::fromLandlord,
+                UpdateLandlordDetailsStepId.UpdateDateOfBirth toPageData DateOfBirthFormModel::fromLandlord,
                 UpdateLandlordDetailsStepId.UpdatePhoneNumber toPageData PhoneNumberFormModel::fromLandlord,
                 UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress toPageData LookupAddressFormModel::fromLandlord,
                 UpdateLandlordDetailsStepId.SelectEnglandAndWalesAddress toPageData SelectAddressFormModel::fromLandlord,
-                UpdateLandlordDetailsStepId.UpdateDateOfBirth toPageData DateOfBirthFormModel::fromLandlord,
             )
 
         if (landlord.address.uprn == null) {
@@ -91,20 +91,6 @@ class LandlordDetailsUpdateJourney(
         }
     }
 
-    private val updateDetailsStep =
-        Step(
-            id = UpdateLandlordDetailsStepId.UpdateDetails,
-            page =
-                Page(
-                    NoInputFormModel::class,
-                    "landlordDetailsView",
-                    mapOf(
-                        BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
-                    ),
-                ),
-            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
-        )
-
     private val emailStep =
         Step(
             id = UpdateLandlordDetailsStepId.UpdateEmail,
@@ -119,17 +105,11 @@ class LandlordDetailsUpdateJourney(
                             "fieldSetHint" to "forms.email.fieldSetHint",
                             "label" to "forms.email.label",
                             "submitButtonText" to "forms.buttons.continue",
-                            BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
+                            BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
-            nextAction = { journeyData, _ ->
-                if (LandlordDetailsUpdateJourneyDataHelper.getIsIdentityVerified(journeyData)) {
-                    Pair(UpdateLandlordDetailsStepId.UpdatePhoneNumber, null)
-                } else {
-                    Pair(UpdateLandlordDetailsStepId.UpdateName, null)
-                }
-            },
+            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
+            nextAction = { journeyData, _ -> emailNextAction(journeyData) },
             saveAfterSubmit = false,
         )
 
@@ -147,10 +127,10 @@ class LandlordDetailsUpdateJourney(
                             "fieldSetHint" to "forms.name.fieldSetHint",
                             "label" to "forms.name.label",
                             "submitButtonText" to "forms.buttons.continue",
-                            BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
+                            BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
+            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
             nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.UpdateDateOfBirth, null) },
             saveAfterSubmit = false,
         )
@@ -168,10 +148,10 @@ class LandlordDetailsUpdateJourney(
                             "fieldSetHeading" to "forms.update.dateOfBirth.fieldSetHeading",
                             "fieldSetHint" to "forms.dateOfBirth.fieldSetHint",
                             "submitButtonText" to "forms.buttons.continue",
-                            BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
+                            BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
+            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
             nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.UpdatePhoneNumber, null) },
             saveAfterSubmit = false,
         )
@@ -191,10 +171,10 @@ class LandlordDetailsUpdateJourney(
                             "label" to "forms.phoneNumber.label",
                             "submitButtonText" to "forms.buttons.continue",
                             "hint" to "forms.phoneNumber.hint",
-                            BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
+                            BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
+            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
             nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress, null) },
             saveAfterSubmit = false,
         )
@@ -216,7 +196,7 @@ class LandlordDetailsUpdateJourney(
                             "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
                             "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
                             "submitButtonText" to "forms.buttons.continue",
-                            BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
+                            BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                     shouldDisplaySectionHeader = false,
                 ),
@@ -247,16 +227,10 @@ class LandlordDetailsUpdateJourney(
                     journeyDataService = journeyDataService,
                     displaySectionHeader = false,
                 ),
+            handleSubmitAndRedirect = { journeyData, _ -> selectAddressHandleSubmitAndRedirect(journeyData) },
             nextAction = { journeyData, _ -> selectAddressNextAction(journeyData) },
             saveAfterSubmit = false,
         )
-
-    private fun selectAddressNextAction(journeyData: JourneyData): Pair<UpdateLandlordDetailsStepId, Int?> =
-        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
-            Pair(UpdateLandlordDetailsStepId.ManualEnglandAndWalesAddress, null)
-        } else {
-            Pair(UpdateLandlordDetailsStepId.UpdateDetails, null)
-        }
 
     private val noAddressFoundStep =
         Step(
@@ -277,13 +251,6 @@ class LandlordDetailsUpdateJourney(
                 ),
             nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.ManualEnglandAndWalesAddress, null) },
         )
-
-    private fun getHouseNameOrNumberAndPostcode() =
-        JourneyDataHelper
-            .getLookupAddressHouseNameOrNumberAndPostcode(
-                journeyDataService.getJourneyDataFromSession(),
-                UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
-            ) ?: Pair("", "")
 
     private val manualAddressStep =
         Step(
@@ -306,7 +273,7 @@ class LandlordDetailsUpdateJourney(
                         ),
                     shouldDisplaySectionHeader = false,
                 ),
-            nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.UpdateDetails, null) },
+            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
             saveAfterSubmit = false,
         )
 
@@ -323,9 +290,29 @@ class LandlordDetailsUpdateJourney(
                 noAddressFoundStep,
                 selectAddressStep,
                 manualAddressStep,
-                updateDetailsStep,
             ),
         )
+
+    private fun emailNextAction(journeyData: JourneyData) =
+        if (LandlordDetailsUpdateJourneyDataHelper.getIsIdentityVerified(journeyData)) {
+            Pair(UpdateLandlordDetailsStepId.UpdatePhoneNumber, null)
+        } else {
+            Pair(UpdateLandlordDetailsStepId.UpdateName, null)
+        }
+
+    private fun selectAddressNextAction(journeyData: JourneyData): Pair<UpdateLandlordDetailsStepId?, Int?> =
+        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
+            Pair(UpdateLandlordDetailsStepId.ManualEnglandAndWalesAddress, null)
+        } else {
+            Pair(null, null)
+        }
+
+    private fun selectAddressHandleSubmitAndRedirect(journeyData: JourneyData): String =
+        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
+            UpdateLandlordDetailsStepId.ManualEnglandAndWalesAddress.urlPathSegment
+        } else {
+            updateLandlordWithChangesAndRedirect(journeyData)
+        }
 
     private fun updateLandlordWithChangesAndRedirect(journeyData: JourneyData): String {
         val landlordUpdate =
@@ -346,6 +333,13 @@ class LandlordDetailsUpdateJourney(
 
         return LandlordDetailsController.LANDLORD_DETAILS_ROUTE
     }
+
+    private fun getHouseNameOrNumberAndPostcode() =
+        JourneyDataHelper
+            .getLookupAddressHouseNameOrNumberAndPostcode(
+                journeyDataService.getJourneyDataFromSession(),
+                UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
+            ) ?: Pair("", "")
 
     companion object {
         const val IS_IDENTITY_VERIFIED_KEY = "isIdentityVerified"

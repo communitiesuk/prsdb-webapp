@@ -20,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDetailsUpdateJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -45,7 +44,7 @@ class LandlordDetailsController(
         model.addAttribute("shouldShowSubmitButton", true)
         return landlordDetailsUpdateJourneyFactory
             .create(principal.name)
-            .getModelAndViewForStep(UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment, subPageNumber = null)
+            .getModelAndViewForStep(DETAILS_PATH_SEGMENT, subPageNumber = null)
     }
 
     @PreAuthorize("hasRole('LANDLORD')")
