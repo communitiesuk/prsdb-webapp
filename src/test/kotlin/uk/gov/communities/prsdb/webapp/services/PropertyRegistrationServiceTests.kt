@@ -428,7 +428,7 @@ class PropertyRegistrationServiceTests {
             val principalName = "user"
             val formContext = MockLandlordData.createFormContext(createdDate = outOfDateCreatedDate)
 
-            val expectedErrorMessage = "400 NOT_FOUND \"Complete by date for form context with ID: ${formContext.id} is in the past\""
+            val expectedErrorMessage = "404 NOT_FOUND \"Complete by date for form context with ID: ${formContext.id} is in the past\""
 
             whenever(
                 mockFormContextRepository.findByIdAndUser_IdAndJourneyType(
@@ -443,7 +443,7 @@ class PropertyRegistrationServiceTests {
                 assertThrows<ResponseStatusException> {
                     propertyRegistrationService.getIncompletePropertyFormContextForLandlordIfNotExpired(formContext.id, principalName)
                 }
-            kotlin.test.assertEquals(HttpStatus.BAD_REQUEST, exception.statusCode)
+            kotlin.test.assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
             kotlin.test.assertEquals(expectedErrorMessage, exception.message)
         }
     }
