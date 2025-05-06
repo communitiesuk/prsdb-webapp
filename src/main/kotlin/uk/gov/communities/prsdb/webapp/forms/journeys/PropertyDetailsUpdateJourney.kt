@@ -112,7 +112,7 @@ class PropertyDetailsUpdateJourney(
                             BACK_URL_ATTR_NAME to RELATIVE_PROPERTY_DETAILS_PATH,
                         ),
                 ),
-            handleSubmitAndRedirect = { journeyData, _ -> updatePropertyAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { journeyData, _, _ -> updatePropertyAndRedirect(journeyData) },
             nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateLicensingType, null) },
             saveAfterSubmit = false,
         )
@@ -155,7 +155,7 @@ class PropertyDetailsUpdateJourney(
                             BACK_URL_ATTR_NAME to RELATIVE_PROPERTY_DETAILS_PATH,
                         ),
                 ),
-            handleSubmitAndRedirect = { journeyData, _ -> licensingTypeHandleSubmitAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { journeyData, _, _ -> licensingTypeHandleSubmitAndRedirect(journeyData) },
             nextAction = { journeyData, _ -> licensingTypeNextAction(journeyData) },
             saveAfterSubmit = false,
         )
@@ -234,7 +234,7 @@ class PropertyDetailsUpdateJourney(
             id = UpdatePropertyDetailsStepId.CheckYourLicensingAnswers,
             page = CheckLicensingPage(),
             nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateOccupancy, null) },
-            handleSubmitAndRedirect = { journeyData, _ -> updatePropertyAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { journeyData, _, _ -> updatePropertyAndRedirect(journeyData) },
         )
 
     private val occupancyStep =
@@ -315,7 +315,7 @@ class PropertyDetailsUpdateJourney(
         Step(
             id = UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers,
             page = CheckOccupancyPage(),
-            handleSubmitAndRedirect = { journeyData, _ -> updatePropertyAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { journeyData, _, _ -> updatePropertyAndRedirect(journeyData) },
             saveAfterSubmit = false,
         )
 

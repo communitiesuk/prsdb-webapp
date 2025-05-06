@@ -109,7 +109,7 @@ class LandlordDetailsUpdateJourney(
                             BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
-            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { journeyData, _, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
             nextAction = { journeyData, _ -> emailNextAction(journeyData) },
             saveAfterSubmit = false,
         )
@@ -132,7 +132,7 @@ class LandlordDetailsUpdateJourney(
                             BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
-            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { journeyData, _, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
             nextAction = { _, _ -> Pair(LandlordDetailsUpdateStepId.UpdateDateOfBirth, null) },
             saveAfterSubmit = false,
         )
@@ -154,7 +154,7 @@ class LandlordDetailsUpdateJourney(
                             BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
-            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { journeyData, _, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
             nextAction = { _, _ -> Pair(LandlordDetailsUpdateStepId.UpdatePhoneNumber, null) },
             saveAfterSubmit = false,
         )
@@ -178,7 +178,7 @@ class LandlordDetailsUpdateJourney(
                             BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
-            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { journeyData, _, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
             nextAction = { _, _ -> Pair(LandlordDetailsUpdateStepId.LookupEnglandAndWalesAddress, null) },
             saveAfterSubmit = false,
         )
@@ -231,7 +231,7 @@ class LandlordDetailsUpdateJourney(
                     journeyDataService = journeyDataService,
                     displaySectionHeader = false,
                 ),
-            handleSubmitAndRedirect = { journeyData, _ -> selectAddressHandleSubmitAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { journeyData, _, _ -> selectAddressHandleSubmitAndRedirect(journeyData) },
             nextAction = { journeyData, _ -> selectAddressNextAction(journeyData) },
             saveAfterSubmit = false,
         )
@@ -277,7 +277,7 @@ class LandlordDetailsUpdateJourney(
                         ),
                     shouldDisplaySectionHeader = false,
                 ),
-            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { journeyData, _, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
             saveAfterSubmit = false,
         )
 

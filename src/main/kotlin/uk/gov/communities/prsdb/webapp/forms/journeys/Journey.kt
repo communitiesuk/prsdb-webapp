@@ -103,11 +103,14 @@ abstract class Journey<T : StepId>(
             journeyDataService.saveJourneyData(journeyDataContextId, newJourneyData, journeyType, principal)
         }
 
+        val changingAnswersForId = changingAnswersFor?.let { getStep(it).id }
         if (currentStep.handleSubmitAndRedirect != null) {
-            return ModelAndView("redirect:${currentStep.handleSubmitAndRedirect.invoke(newJourneyData, subPageNumber)}")
+            return ModelAndView(
+                "redirect:${currentStep.handleSubmitAndRedirect.invoke(newJourneyData, subPageNumber, changingAnswersForId)}",
+            )
         }
 
-        val redirectUrl = getRedirectForNextStep(currentStep, newJourneyData, subPageNumber, changingAnswersFor?.let { getStep(it) }?.id)
+        val redirectUrl = getRedirectForNextStep(currentStep, newJourneyData, subPageNumber, changingAnswersForId)
         return ModelAndView("redirect:$redirectUrl")
     }
 
