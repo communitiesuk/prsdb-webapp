@@ -3,12 +3,14 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.persistence.EntityExistsException
 import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
+import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toJavaInstant
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -47,6 +49,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
@@ -453,22 +456,42 @@ class PropertyRegistrationServiceTests {
 
         @Test
         fun `getIncompletePropertiesForLandlord returns a list of valid incomplete properties`() {
+            val address = "2, Example Road, EG"
+            val context =
+                "{\"lookup-address\":{\"houseNameOrNumber\":\"73\",\"postcode\":\"WC2R 1LA\"}," +
+                    "\"looked-up-addresses\":\"[{\\\"singleLineAddress\\\":\\\"2, Example Road, EG\\\"," +
+                    "\\\"localAuthorityId\\\":241,\\\"uprn\\\":2123456,\\\"buildingNumber\\\":\\\"2\\\"," +
+                    "\\\"postcode\\\":\\\"EG\\\"}]\",\"select-address\":{\"address\":\"$address\"}}"
+
             val createdTodayDate = currentInstant.toJavaInstant()
+            val formContextCreatedToday = MockLandlordData.createFormContext(createdDate = createdTodayDate, context = context)
+
             val createdYesterdayDate = currentInstant.minus(1, DateTimeUnit.DAY, TimeZone.of("Europe/London")).toJavaInstant()
+            val formContextCreatedYesterday = MockLandlordData.createFormContext(createdDate = createdYesterdayDate, context = context)
+
             val outOfDateCreatedDate = currentInstant.minus(29, DateTimeUnit.DAY, TimeZone.of("Europe/London")).toJavaInstant()
+            val formContextCreated29DaysAgo = MockLandlordData.createFormContext(createdDate = outOfDateCreatedDate)
 
             val principalName = "principalName"
-            val incompleteProperties =
-                listOf(
-                    createFormContext(createdDate = createdTodayDate),
-                    createFormContext(createdDate = createdYesterdayDate),
-                    createFormContext(createdDate = outOfDateCreatedDate),
-                )
+            val incompleteProperties = listOf(formContextCreatedToday, formContextCreatedYesterday, formContextCreated29DaysAgo)
 
-            val expectedIncompleteProperties =
+            val createdTodayCompleteByDate = currentDate.plus(DatePeriod(days = 28))
+            val createdYesterdayCompleteByDate = currentDate.plus(DatePeriod(days = 27))
+
+            val expectedIncompletePropertiesList =
                 listOf(
-                    createFormContext(createdDate = createdTodayDate),
-                    createFormContext(createdDate = createdYesterdayDate),
+                    IncompletePropertiesDataModel(
+                        formContextCreatedToday.id,
+                        createdTodayCompleteByDate,
+                        address,
+                        "name",
+                    ),
+                    IncompletePropertiesDataModel(
+                        formContextCreatedToday.id,
+                        createdYesterdayCompleteByDate,
+                        address,
+                        "name",
+                    ),
                 )
 
             whenever(
@@ -483,7 +506,7 @@ class PropertyRegistrationServiceTests {
                     principalName,
                 )
 
-            assertEquals(expectedIncompleteProperties, incompletePropertiesList)
+            assertEquals(expectedIncompletePropertiesList, incompletePropertiesList)
         }
 
         @Test
@@ -491,7 +514,7 @@ class PropertyRegistrationServiceTests {
             val principalName = "principalName"
             val outOfDateCreatedDate = currentInstant.minus(29, DateTimeUnit.DAY, TimeZone.of("Europe/London")).toJavaInstant()
 
-            val formContext = createFormContext(createdDate = outOfDateCreatedDate)
+            val formContext = MockLandlordData.createFormContext(createdDate = outOfDateCreatedDate)
 
             whenever(
                 mockFormContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION),
