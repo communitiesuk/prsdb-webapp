@@ -1,18 +1,20 @@
 <!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
-<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="radioOptions" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="showWarning" type="java.lang.Boolean"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
-<th:block id="form-content">
-    <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'ownershipType', #{${fieldSetHeading}}, null)}">
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'ownershipType', #{${fieldSetHeading}}, null)}">
         <th:block th:replace="~{fragments/forms/radios :: radios(null,'ownershipType',null, ${radioOptions})}"></th:block>
     </th:block>
-    <details id="details-content" th:replace="~{fragments/details :: details(#{'forms.ownershipType.details.summary.text'},~{::#details-content/content()})}">
-        <div class="govuk-details__text" th:text="#{'forms.ownershipType.details.text'}">detailsText</div>
+    <details id="details-content" th:replace="~{fragments/details :: details(#{forms.ownershipType.details.summary.text},~{::#details-content/content()})}">
+        <div class="govuk-details__text" th:text="#{forms.ownershipType.details.text}">detailsText</div>
     </details>
+    <th:block th:if="${showWarning}">
+        <div th:replace="~{fragments/warningText :: warningText(#{forms.update.warning})}">forms.update.warning</div>
+    </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
-</th:block>
 </html>
