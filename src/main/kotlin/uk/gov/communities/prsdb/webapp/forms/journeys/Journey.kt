@@ -58,7 +58,7 @@ abstract class Journey<T : StepId>(
             return ModelAndView("redirect:$unreachableStepRedirect")
         }
         val prevStepDetails = getPrevStep(requestedStep, subPageNumber)
-        val prevStepUrl = buildPreviousStepUrl(prevStepDetails, changingAnswersForStep?.let { getStep(it) }?.id)
+        val prevStepUrl = buildPreviousStepUrl(prevStepDetails, requestedStep.id, changingAnswersForStep?.let { getStep(it) }?.id)
         val pageData =
             submittedPageData
                 ?: JourneyDataHelper.getPageData(journeyDataService.getJourneyDataFromSession(), requestedStep.name, subPageNumber)
@@ -111,16 +111,20 @@ abstract class Journey<T : StepId>(
         return ModelAndView("redirect:$redirectUrl")
     }
 
-    protected open fun isStepAllowedForChangingAnswersTo(
+    protected open fun isDestinationInSameGroupAsStep(
         destinationStep: T?,
-        changingAnswersFor: T?,
-    ): Boolean = destinationStep == changingAnswersFor
+        groupStep: T?,
+    ): Boolean = destinationStep != null && destinationStep == groupStep
 
     private fun buildPreviousStepUrl(
         prevStepDetails: StepDetails<T>?,
+        currentStepId: T?,
         changingAnswersFor: T?,
     ): String? =
-        if (changingAnswersFor == null || isStepAllowedForChangingAnswersTo(prevStepDetails?.step?.id, changingAnswersFor)) {
+        if (changingAnswersFor == null ||
+            isDestinationInSameGroupAsStep(prevStepDetails?.step?.id, changingAnswersFor) &&
+            currentStepId != changingAnswersFor
+        ) {
             prevStepDetails?.let { Step.generateUrl(it.step.id, it.subPageNumber, changingAnswersFor) }
         } else {
             checkYourAnswersStepId?.let { Step.generateUrl(it, null, null) }
@@ -134,7 +138,7 @@ abstract class Journey<T : StepId>(
     ): String {
         val (newStepId: T?, newSubPageNumber: Int?) = currentStep.nextAction(newJourneyData, subPageNumber)
 
-        return if (changingAnswersFor == null || isStepAllowedForChangingAnswersTo(newStepId, changingAnswersFor)) {
+        return if (changingAnswersFor == null || isDestinationInSameGroupAsStep(newStepId, changingAnswersFor)) {
             if (newStepId == null) {
                 throw IllegalStateException("Cannot compute next step from step ${currentStep.id.urlPathSegment}")
             }
