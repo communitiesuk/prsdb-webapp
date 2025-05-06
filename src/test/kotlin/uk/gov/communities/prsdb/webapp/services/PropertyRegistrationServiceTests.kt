@@ -13,7 +13,6 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toJavaInstant
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -367,15 +366,15 @@ class PropertyRegistrationServiceTests {
         }
 
         @Test
-        fun `getNumberOfIncompletePropertyRegistrationsForLandlord returns null if there are no incomplete properties`() {
+        fun `getNumberOfIncompletePropertyRegistrationsForLandlord returns 0 if there are no incomplete properties`() {
             val principalName = "principalName"
             whenever(
                 mockFormContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION),
-            ).thenReturn(null)
+            ).thenReturn(emptyList())
 
             val incompleteProperties = propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(principalName)
 
-            assertNull(incompleteProperties)
+            assertEquals(0, incompleteProperties)
         }
 
         @Test
