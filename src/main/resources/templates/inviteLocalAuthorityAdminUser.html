@@ -5,7 +5,7 @@
     <main class="govuk-main-wrapper" id="main-content">
         <div id="page-content"
              th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
-            <form th:action="@{''}" method="post" novalidate th:object="${inviteLocalAuthorityAdminModel}" th:attrappend="enctype='application/x-www-form-urlencoded'">
+            <form th:action="@{''}" method="post" novalidate th:object="${inviteLocalAuthorityAdminModel}">
                 <div th:replace="~{fragments/forms/errorSummary :: errorSummary()}">Error Summary</div>
                 <fieldset id="fieldset-content"
                           th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'laAdminInvitation', #{forms.inviteLaAdminUser.fieldSetHeading}, #{forms.inviteLaAdminUser.fieldSetHint})}">

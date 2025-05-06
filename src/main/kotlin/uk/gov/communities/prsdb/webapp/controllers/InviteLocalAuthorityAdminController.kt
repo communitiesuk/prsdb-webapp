@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.INVITE_LA_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.models.requestModels.InviteLocalAuthorityAdminModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.SelectViewModel
@@ -21,7 +23,7 @@ import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 class InviteLocalAuthorityAdminController(
     private val localAuthorityService: LocalAuthorityService,
 ) {
-    @GetMapping("/invite-la-admin")
+    @GetMapping("/$INVITE_LA_ADMIN_PATH_SEGMENT")
     fun inviteLocalAuthorityAdmin(model: Model): String {
         addSelectOptionsToModel(model)
         model.addAttribute("inviteLocalAuthorityAdminModel", InviteLocalAuthorityAdminModel())
@@ -29,7 +31,7 @@ class InviteLocalAuthorityAdminController(
         return "inviteLocalAuthorityAdminUser"
     }
 
-    @PostMapping("/invite-la-admin", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
+    @PostMapping("/$INVITE_LA_ADMIN_PATH_SEGMENT", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
     fun sendInvitation(
         model: Model,
         @Valid
@@ -42,7 +44,8 @@ class InviteLocalAuthorityAdminController(
             return "inviteLocalAuthorityAdminUser"
         }
 
-        return "redirect:/$SYSTEM_OPERATOR_PATH_SEGMENT/invite-la-admin/success"
+        // TODO: PRSD-1096 send invitation email
+        return "redirect:/$SYSTEM_OPERATOR_PATH_SEGMENT/$INVITE_LA_ADMIN_PATH_SEGMENT/$CONFIRMATION_PATH_SEGMENT"
     }
 
     private fun addSelectOptionsToModel(model: Model) {
@@ -56,6 +59,10 @@ class InviteLocalAuthorityAdminController(
         model.addAttribute("selectOptions", localAuthoritiesSelectOptions)
     }
 
-    @GetMapping("/invite-la-admin/success")
+    @GetMapping("/$INVITE_LA_ADMIN_PATH_SEGMENT/$CONFIRMATION_PATH_SEGMENT")
     fun confirmation(): String = "inviteLocalAuthorityAdminSuccess"
+
+    companion object {
+        const val INVITE_LA_ADMIN_ROUTE = "/$SYSTEM_OPERATOR_PATH_SEGMENT/$INVITE_LA_ADMIN_PATH_SEGMENT"
+    }
 }

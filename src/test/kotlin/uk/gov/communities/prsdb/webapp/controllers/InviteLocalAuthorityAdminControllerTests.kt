@@ -10,6 +10,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
@@ -25,7 +26,7 @@ class InviteLocalAuthorityAdminControllerTests(
 
     @Test
     fun `inviteLocalAuthorityAdmin redirects unauthenticated users`() {
-        mvc.get("/system-operator/invite-la-admin").andExpect {
+        mvc.get(InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_ROUTE).andExpect {
             status { is3xxRedirection() }
         }
     }
@@ -33,7 +34,7 @@ class InviteLocalAuthorityAdminControllerTests(
     @Test
     @WithMockUser
     fun `inviteLocalAuthorityAdmin returns 403 for unauthorized users`() {
-        mvc.get("/system-operator/invite-la-admin").andExpect {
+        mvc.get(InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_ROUTE).andExpect {
             status { isForbidden() }
         }
     }
@@ -46,7 +47,7 @@ class InviteLocalAuthorityAdminControllerTests(
             localAuthorities,
         )
 
-        mvc.get("/system-operator/invite-la-admin").andExpect {
+        mvc.get(InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_ROUTE).andExpect {
             status { isOk() }
             model { attributeExists("selectOptions", "inviteLocalAuthorityAdminModel") }
         }
@@ -55,22 +56,19 @@ class InviteLocalAuthorityAdminControllerTests(
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `sendInvitation redirects to success page for valid form submission`() {
+        val testEmail = "new-user@example.com"
+        val urlEncodedTestEmail = URLEncoder.encode(testEmail, "UTF-8")
+        val urlEncodedModel =
+            "email=$urlEncodedTestEmail&confirmEmail=$urlEncodedTestEmail&localAuthorityId=${MockLocalAuthorityData.DEFAULT_LA_ID}"
+
         mvc
-            .post("/system-operator/invite-la-admin") {
+            .post(InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_ROUTE) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
-                content = urlEncodedInviteLocalAuthorityAdminModel("new-user@example.com", MockLocalAuthorityData.DEFAULT_LA_ID)
+                content = urlEncodedModel
                 with(csrf())
             }.andExpect {
                 status { is3xxRedirection() }
-                redirectedUrl("/system-operator/invite-la-admin/success")
+                redirectedUrl("${InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
             }
-    }
-
-    private fun urlEncodedInviteLocalAuthorityAdminModel(
-        @Suppress("SameParameterValue") testEmail: String,
-        @Suppress("SameParameterValue") localAuthorityId: Int,
-    ): String {
-        val encodedTestEmail = URLEncoder.encode(testEmail, "UTF-8")
-        return "email=$encodedTestEmail&confirmEmail=$encodedTestEmail&localAuthorityId=$localAuthorityId"
     }
 }

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.controllers.InviteLocalAuthorityAdminController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Select
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
@@ -8,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class InviteLaAdminPage(
     page: Page,
-) : BasePage(page, "/system-operator/invite-la-admin") {
+) : BasePage(page, InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_ROUTE) {
     val form = InviteLaAdminForm(page)
 
     fun fillInFormAndSubmit(
