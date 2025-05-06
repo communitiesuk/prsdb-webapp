@@ -19,9 +19,8 @@ class LocalAuthorityInvitationService(
         authority: LocalAuthority,
         admin: Boolean = false,
     ): String {
-        // TODO: PRSD-1096 - include the admin flag
         val token = UUID.randomUUID()
-        invitationRepository.save(LocalAuthorityInvitation(token, email, authority))
+        invitationRepository.save(LocalAuthorityInvitation(token, email, authority, admin))
         return token.toString()
     }
 
