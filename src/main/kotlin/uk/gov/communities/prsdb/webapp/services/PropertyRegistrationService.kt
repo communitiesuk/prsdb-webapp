@@ -117,11 +117,9 @@ class PropertyRegistrationService(
     private fun filterIncompleteProperties(incompleteProperties: List<FormContext>): List<FormContext>? {
         val filteredIncompleteProperties = mutableListOf<FormContext>()
 
-        val currentDate = DateTimeHelper().getCurrentDateInUK()
-
         incompleteProperties.forEach { property ->
-            val completeByDate = getCompleteByDate(property.createdDate)
-            if (!DateTimeHelper.isDateInPast(completeByDate, currentDate)) {
+            val completeByDate = getIncompletePropertyCompleteByDate(property.createdDate)
+            if (!DateTimeHelper().isDateInPast(completeByDate)) {
                 filteredIncompleteProperties.add(property)
             }
         }
