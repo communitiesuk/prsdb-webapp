@@ -10,7 +10,7 @@ data class LocalAuthorityAdminInvitationEmail(
     private val localAuthorityKey = "name of council"
     private val invitationKey = "invitation url"
 
-    override val templateId = EmailTemplateId.LOCAL_AUTHORITY_INVITATION_EMAIL
+    override val templateId = EmailTemplateId.LOCAL_AUTHORITY_ADMIN_INVITATION_EMAIL
 
     override fun toHashMap(): HashMap<String, String> =
         hashMapOf(

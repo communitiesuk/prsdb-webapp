@@ -13,8 +13,8 @@ Once you've registered you can view:
 You can only view these records that fall within your local authority area ((name of council)).
 
 You can also
-* view and edit other local authority users in ((name of council))
-* invite new local authority users to ((name of council))
+* view and edit other users in your local authority
+* invite new users to your local authority
 
 It's a legal requirement for landlords and letting agents to register on the database, so you can get a better picture of housing in your local authority area.
 
