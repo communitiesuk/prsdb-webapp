@@ -583,7 +583,7 @@ class PropertyRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
-            handleSubmitAndRedirect = { _, _ -> checkAnswersSubmitAndRedirect() },
+            handleSubmitAndRedirect = { _, _, _ -> checkAnswersSubmitAndRedirect() },
         )
 
     private fun occupancyNextAction(journeyData: JourneyData): Pair<RegisterPropertyStepId, Int?> =
