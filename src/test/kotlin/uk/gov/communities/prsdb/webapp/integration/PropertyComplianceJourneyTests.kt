@@ -333,7 +333,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
         fun `Submitting with no file staged returns an error`() {
             val gasSafetyUploadPage = navigator.goToPropertyComplianceGasSafetyUploadPage(PROPERTY_OWNERSHIP_ID)
             gasSafetyUploadPage.form.submit()
-            assertThat(gasSafetyUploadPage.form.getErrorMessage()).containsText("Select a file")
+            assertThat(gasSafetyUploadPage.form.getErrorMessage()).containsText("Select a gas safety certificate")
         }
 
         @Test
@@ -458,7 +458,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
         fun `Submitting with no file staged returns an error`() {
             val eicrUploadPage = navigator.goToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
             eicrUploadPage.form.submit()
-            assertThat(eicrUploadPage.form.getErrorMessage()).containsText("Select a file")
+            assertThat(eicrUploadPage.form.getErrorMessage()).containsText("Select an EICR")
         }
 
         @Test

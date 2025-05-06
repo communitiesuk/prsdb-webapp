@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class ConfirmedEmailRequestModel(
+open class ConfirmedEmailRequestModel(
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
@@ -21,7 +21,7 @@ class ConfirmedEmailRequestModel(
             ),
         ],
     )
-    val email: String = "",
+    var email: String = "",
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
@@ -35,7 +35,7 @@ class ConfirmedEmailRequestModel(
             ),
         ],
     )
-    val confirmEmail: String = "",
+    var confirmEmail: String = "",
 ) {
     fun isConfirmEmailSameAsEmail(): Boolean = email.trim() == confirmEmail.trim()
 }
