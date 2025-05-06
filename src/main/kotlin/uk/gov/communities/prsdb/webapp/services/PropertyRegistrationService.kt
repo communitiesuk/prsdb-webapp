@@ -107,16 +107,16 @@ class PropertyRegistrationService(
 
     fun getLastPrnRegisteredThisSession() = session.getAttribute(PROPERTY_REGISTRATION_NUMBER)?.toString()?.toLong()
 
-    fun getNumberOfIncompletePropertyRegistrationsForLandlord(principalName: String): Int? {
+    fun getNumberOfIncompletePropertyRegistrationsForLandlord(principalName: String): Int {
         val incompleteProperties =
-            formContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION) ?: return null
+            formContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION)
 
-        val filteredIncompleteProperties = filterIncompleteProperties(incompleteProperties) ?: return null
+        val filteredIncompleteProperties = filterIncompleteProperties(incompleteProperties)
 
         return filteredIncompleteProperties.size
     }
 
-    private fun filterIncompleteProperties(incompleteProperties: List<FormContext>): List<FormContext>? {
+    private fun filterIncompleteProperties(incompleteProperties: List<FormContext>): List<FormContext> {
         val filteredIncompleteProperties = mutableListOf<FormContext>()
 
         incompleteProperties.forEach { property ->
@@ -125,7 +125,7 @@ class PropertyRegistrationService(
                 filteredIncompleteProperties.add(property)
             }
         }
-        return filteredIncompleteProperties.ifEmpty { null }
+        return filteredIncompleteProperties
     }
 
     fun getIncompletePropertiesForLandlord(principalName: String): List<IncompletePropertiesDataModel> {
