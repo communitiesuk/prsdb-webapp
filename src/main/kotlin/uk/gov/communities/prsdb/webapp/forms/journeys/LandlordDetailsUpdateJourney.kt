@@ -43,13 +43,13 @@ class LandlordDetailsUpdateJourney(
     addressLookupService: AddressLookupService,
     private val landlordService: LandlordService,
     private val landlordBaseUserId: String,
+    stepName: String,
 ) : UpdateJourney<UpdateLandlordDetailsStepId>(
         journeyType = JourneyType.LANDLORD_DETAILS_UPDATE,
         initialStepId = UpdateLandlordDetailsStepId.UpdateEmail,
         validator = validator,
         journeyDataService = journeyDataService,
-        // TODO PRSD-1101 Use the actual step name
-        "",
+        stepName,
     ) {
     init {
         initializeJourneyDataIfNotInitialized()

@@ -2,13 +2,27 @@ package uk.gov.communities.prsdb.webapp.forms.steps
 
 enum class UpdateLandlordDetailsStepId(
     override val urlPathSegment: String,
-) : StepId {
-    UpdateEmail("email"),
-    UpdateName("name"),
-    UpdateDateOfBirth("date-of-birth"),
-    UpdatePhoneNumber("phone-number"),
-    LookupEnglandAndWalesAddress("lookup-address"),
-    NoAddressFound("no-address-found"),
-    SelectEnglandAndWalesAddress("select-address"),
-    ManualEnglandAndWalesAddress("manual-address"),
+    override val groupIdentifier: UpdateLandlordDetailsStepGroupIdentifier,
+) : GroupedStepId<UpdateLandlordDetailsStepGroupIdentifier> {
+    UpdateEmail("email", UpdateLandlordDetailsStepGroupIdentifier.Email),
+    UpdateName("name", UpdateLandlordDetailsStepGroupIdentifier.Name),
+    UpdateDateOfBirth("date-of-birth", UpdateLandlordDetailsStepGroupIdentifier.DateOfBirth),
+    UpdatePhoneNumber("phone-number", UpdateLandlordDetailsStepGroupIdentifier.PhoneNumber),
+    LookupEnglandAndWalesAddress("lookup-address", UpdateLandlordDetailsStepGroupIdentifier.Address),
+    NoAddressFound("no-address-found", UpdateLandlordDetailsStepGroupIdentifier.Address),
+    SelectEnglandAndWalesAddress("select-address", UpdateLandlordDetailsStepGroupIdentifier.Address),
+    ManualEnglandAndWalesAddress("manual-address", UpdateLandlordDetailsStepGroupIdentifier.Address),
+    ;
+
+    companion object {
+        fun fromPathSegment(segment: String) = UpdateLandlordDetailsStepId.entries.find { it.urlPathSegment == segment }
+    }
+}
+
+enum class UpdateLandlordDetailsStepGroupIdentifier {
+    Email,
+    Name,
+    DateOfBirth,
+    PhoneNumber,
+    Address,
 }

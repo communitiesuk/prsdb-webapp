@@ -43,8 +43,8 @@ class LandlordDetailsController(
         // TODO: PRSD-355 Remove this way of showing submit button
         model.addAttribute("shouldShowSubmitButton", true)
         return landlordDetailsUpdateJourneyFactory
-            .create(principal.name)
-            .getModelAndViewForStep(DETAILS_PATH_SEGMENT, subPageNumber = null)
+            .create(principal.name, DETAILS_PATH_SEGMENT)
+            .getModelAndViewForStep()
     }
 
     @PreAuthorize("hasRole('LANDLORD')")
@@ -89,8 +89,8 @@ class LandlordDetailsController(
         principal: Principal,
     ): ModelAndView =
         landlordDetailsUpdateJourneyFactory
-            .create(principal.name)
-            .getModelAndViewForStep(stepName, subPageNumber = null)
+            .create(principal.name, stepName)
+            .getModelAndViewForStep()
 
     @PreAuthorize("hasRole('LANDLORD')")
     @PostMapping("${UPDATE_PATH_SEGMENT}/{stepName}")
@@ -101,13 +101,8 @@ class LandlordDetailsController(
         principal: Principal,
     ): ModelAndView =
         landlordDetailsUpdateJourneyFactory
-            .create(principal.name)
-            .completeStep(
-                stepName,
-                formData,
-                subPageNumber = null,
-                principal,
-            )
+            .create(principal.name, stepName)
+            .completeStep(formData, principal)
 
     @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
     @GetMapping("/{id}")
