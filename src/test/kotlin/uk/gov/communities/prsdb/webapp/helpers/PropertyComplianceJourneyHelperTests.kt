@@ -7,7 +7,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
@@ -46,7 +45,7 @@ class PropertyComplianceJourneyHelperTests {
 
         assertEquals(
             expectedFileName,
-            PropertyComplianceJourneyDataExtensions.getCertFilename(PROPERTY_OWNERSHIP_ID, stepName, originalFileName),
+            PropertyComplianceJourneyHelper.getCertFilename(PROPERTY_OWNERSHIP_ID, stepName, originalFileName),
         )
     }
 
@@ -56,7 +55,7 @@ class PropertyComplianceJourneyHelperTests {
         val originalFileName = "any-name.$ORIGINAL_FILE_EXT"
 
         assertThrows<IllegalStateException> {
-            PropertyComplianceJourneyDataExtensions.getCertFilename(PROPERTY_OWNERSHIP_ID, invalidStepName, originalFileName)
+            PropertyComplianceJourneyHelper.getCertFilename(PROPERTY_OWNERSHIP_ID, invalidStepName, originalFileName)
         }
     }
 
