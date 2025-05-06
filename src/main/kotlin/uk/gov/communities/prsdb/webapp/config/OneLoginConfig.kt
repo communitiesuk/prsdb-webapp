@@ -13,9 +13,8 @@ import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient
 import org.springframework.security.oauth2.client.endpoint.NimbusJwtClientAuthenticationParametersConverter
-import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequestEntityConverter
+import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient
 import org.springframework.security.oauth2.client.oidc.authentication.OidcIdTokenDecoderFactory
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod
@@ -62,17 +61,10 @@ class OneLoginConfig {
     }
 
     @Bean
-    fun oneloginAuthorizationCodeTokenResponseClient(): DefaultAuthorizationCodeTokenResponseClient {
-        val requestEntityConverter = OAuth2AuthorizationCodeGrantRequestEntityConverter()
-        requestEntityConverter.addParametersConverter(
-            NimbusJwtClientAuthenticationParametersConverter(::oneloginJWKResolver),
-        )
-
-        val tokenResponseClient = DefaultAuthorizationCodeTokenResponseClient()
-        tokenResponseClient.setRequestEntityConverter(requestEntityConverter)
-
-        return tokenResponseClient
-    }
+    fun oneloginAuthorizationCodeTokenResponseClient() =
+        RestClientAuthorizationCodeTokenResponseClient().apply {
+            addParametersConverter(NimbusJwtClientAuthenticationParametersConverter(::oneloginJWKResolver))
+        }
 
     @Bean
     fun idTokenDecoderFactory(): JwtDecoderFactory<ClientRegistration?> {

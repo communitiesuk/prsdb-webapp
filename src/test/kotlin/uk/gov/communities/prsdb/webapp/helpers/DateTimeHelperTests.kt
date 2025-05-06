@@ -4,6 +4,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toLocalDateTime
@@ -69,6 +70,22 @@ class DateTimeHelperTests {
                     null,
                 ),
             )
+
+        @JvmStatic
+        private fun provideDatesForIsDateInPast() =
+            listOf(
+                Arguments.of(Named.of("date is before current date", LocalDate(2024, 3, 7)), true),
+                Arguments.of(Named.of("date is same as current date", LocalDate(2024, 3, 8)), false),
+                Arguments.of(Named.of("date is after current date", LocalDate(2024, 3, 9)), false),
+            )
+
+        @JvmStatic
+        private fun provideDatesForGet28DaysFromDate() =
+            listOf(
+                Arguments.of(LocalDate(2024, 1, 31), LocalDate(2024, 2, 28)),
+                Arguments.of(LocalDate(2024, 2, 1), LocalDate(2024, 2, 29)),
+                Arguments.of(LocalDate(2024, 2, 2), LocalDate(2024, 3, 1)),
+            )
     }
 
     @ParameterizedTest(name = "on a {0} in {1}")
@@ -119,5 +136,37 @@ class DateTimeHelperTests {
     ) {
         val (day, month, year) = dayMonthYear
         assertEquals(DateTimeHelper.parseDateOrNull(day, month, year), expectedDateOrNull)
+    }
+
+    @ParameterizedTest(name = "{1} when {0}")
+    @MethodSource("provideDatesForGet28DaysFromDate")
+    fun `get28DaysFromDate returns correct date`(
+        date: LocalDate,
+        expectedDate: LocalDate,
+    ) {
+        val result = DateTimeHelper.get28DaysFromDate(date)
+
+        assertEquals(expectedDate, result)
+    }
+
+    @ParameterizedTest(name = "{1} when {0}")
+    @MethodSource("provideDatesForIsDateInPast")
+    fun `isDateInPast returns`(
+        date: LocalDate,
+        expectedResult: Boolean,
+    ) {
+        val currentDateTime = LocalDateTime(2024, 3, 8, 0, 0, 0)
+
+        val dateTimeHelper =
+            DateTimeHelper(
+                Clock.fixed(
+                    currentDateTime.toInstant(TimeZone.of("Europe/London")).toJavaInstant(),
+                    ZoneId.of("Europe/London"),
+                ),
+            )
+
+        val result = dateTimeHelper.isDateInPast(date)
+
+        assertEquals(expectedResult, result)
     }
 }

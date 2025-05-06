@@ -248,7 +248,8 @@ class PropertyDetailsViewModelTests {
 
         val changeLinkCount = viewModel.propertyRecord.count { it.changeUrl != null }
 
-        assertEquals(5, changeLinkCount)
+        // TODO PRSD-1107, PRSD-1108, PRSD-1109: Update expected count when tickets implemented
+        assertEquals(0, changeLinkCount)
     }
 
     @Test

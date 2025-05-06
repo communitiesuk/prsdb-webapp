@@ -11,13 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
+import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
-import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -129,5 +130,23 @@ class RegisterPropertyController(
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
 
         return "registerPropertyConfirmation"
+    }
+
+    @GetMapping("/delete-incomplete-property")
+    fun deleteIncompleteProperty(model: Model): String {
+        model.addAttribute("todoComment", "TODO PRSD-700 deregister draft property page")
+
+        return "todo"
+    }
+
+    companion object {
+        const val CONTEXT_ID_URL_PARAMETER = "contextId"
+
+        const val RESUME_PROPERTY_REGISTRATION_JOURNEY_ROUTE =
+            "/$REGISTER_PROPERTY_JOURNEY_URL/$RESUME_PAGE_PATH_SEGMENT" +
+                "?$CONTEXT_ID_URL_PARAMETER={contextId}"
+
+        fun getResumePropertyRegistrationPath(contextId: Long): String =
+            UriTemplate(RESUME_PROPERTY_REGISTRATION_JOURNEY_ROUTE).expand(contextId).toASCIIString()
     }
 }

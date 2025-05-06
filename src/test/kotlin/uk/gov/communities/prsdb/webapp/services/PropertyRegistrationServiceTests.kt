@@ -62,6 +62,9 @@ class PropertyRegistrationServiceTests {
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @Mock
+    private lateinit var localAuthorityService: LocalAuthorityService
+
+    @Mock
     private lateinit var mockSession: HttpSession
 
     @InjectMocks

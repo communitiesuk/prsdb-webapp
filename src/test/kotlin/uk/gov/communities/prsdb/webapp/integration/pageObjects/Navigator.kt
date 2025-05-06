@@ -19,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
-import uk.gov.communities.prsdb.webapp.controllers.LandlordDashboardController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
@@ -83,7 +83,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ReasonPagePropertyDeregistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.PropertyDetailsUpdatePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.DeclarationFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
@@ -588,14 +587,6 @@ class Navigator(
         detailsPage.personalDetailsSummaryList.addressRow.actions.actionLink
             .clickAndWait()
         return createValidPage(page, LookupAddressFormPageUpdateLandlordDetails::class)
-    }
-
-    fun goToPropertyDetailsUpdatePage(propertyOwnershipId: Long): PropertyDetailsUpdatePage {
-        navigate(
-            PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) +
-                "/${UpdatePropertyDetailsStepId.UpdateDetails.urlPathSegment}",
-        )
-        return createValidPage(page, PropertyDetailsUpdatePage::class, mapOf("propertyOwnershipId" to propertyOwnershipId.toString()))
     }
 
     fun skipToPropertyDetailsUpdateNumberOfHouseholdsPage(propertyOwnershipId: Long) {
