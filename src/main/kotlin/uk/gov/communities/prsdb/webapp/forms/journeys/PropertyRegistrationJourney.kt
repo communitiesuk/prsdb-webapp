@@ -4,6 +4,7 @@ import jakarta.persistence.EntityExistsException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.FIND_LOCAL_AUTHORITY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -277,6 +278,7 @@ class PropertyRegistrationJourney(
                             "fieldSetHeading" to "forms.selectLocalAuthority.fieldSetHeading",
                             "fieldSetHint" to "forms.selectLocalAuthority.fieldSetHint",
                             "selectLabel" to "forms.selectLocalAuthority.select.label",
+                            "findLocalAuthorityUrl" to FIND_LOCAL_AUTHORITY_URL,
                         ),
                     localAuthorityService = localAuthorityService,
                     displaySectionHeader = true,
