@@ -18,6 +18,12 @@
     "bodyLocation": "/emails/LocalAuthorityInvitationCancellation.md"
   },
   {
+    "id": "de70ee4b-8dda-4374-b528-d9975369790f",
+    "name": "LA Admin Invitation",
+    "subject": "PRD – You’ve been invited to register as a local authority admin on the Privately Rented Database",
+    "bodyLocation": "/emails/LocalAuthorityAdminInvitation.md"
+  },
+  {
     "id": "1bd9e020-d6f8-494f-ae6a-904e642d3f55",
     "name": "Landlord Registration Confirmation",
     "subject": "GOV.UK - Your landlord registration number",
