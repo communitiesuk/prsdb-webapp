@@ -3,8 +3,8 @@
         <h2 class="govuk-summary-card__title" th:text="${cardNumber != null} ? #{${title}} + ' ' + ${cardNumber} : #{${title}}">
             Title of the summary card
         </h2>
-        <ul th:unless="${actions == null or #lists.isEmpty(actions)}" class="govuk-summary-card__actions" th:each="action: ${actions}">
-            <li class="govuk-summary-card__action">
+        <ul th:unless="${actions == null or #lists.isEmpty(actions)}" class="govuk-summary-card__actions">
+            <li class="govuk-summary-card__action"  th:each="action: ${actions}">
                 <a class="govuk-link" th:href="@{${action.url}}" th:text="#{${action.text}}">Link text</a>
             </li>
         </ul>
