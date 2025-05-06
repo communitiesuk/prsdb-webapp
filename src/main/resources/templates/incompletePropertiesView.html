@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{landlord.incompleteProperties.title}, ~{::main}, false)}">
+<html id="main-content" th:replace="~{fragments/layout :: layout(#{landlord.incompleteProperties.title},~{::#main-content/content()}, false)}">
+<a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
 <main class="govuk-main-wrapper">
     <div id="page-content">
         <h1 class="govuk-heading-l" th:text="#{landlord.incompleteProperties.heading}">landlord.incompleteProperties.heading</h1>
