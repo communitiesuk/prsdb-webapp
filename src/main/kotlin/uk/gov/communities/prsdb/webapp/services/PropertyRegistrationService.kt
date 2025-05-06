@@ -6,7 +6,9 @@ import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toKotlinInstant
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -168,5 +170,27 @@ class PropertyRegistrationService(
         val lookedUpAddresses = formContextJourneyData.getLookedUpAddresses()
         // TODO PRSD-1127 set this to return a not nullable AddressDataModel
         return PropertyRegistrationJourneyDataHelper.getAddress(formContextJourneyData, lookedUpAddresses)
+    }
+
+    fun getIncompletePropertyForLandlord(
+        contextId: Long,
+        principalName: String,
+    ): FormContext {
+        val formContext =
+            formContextRepository.findByIdAndUser_IdAndJourneyType(contextId, principalName, JourneyType.PROPERTY_REGISTRATION)
+                ?: throw ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Form context with ID: $contextId and journey type: " +
+                        "${JourneyType.PROPERTY_REGISTRATION.name} not found for base user: $principalName",
+                )
+        val completeByDate = getIncompletePropertyCompleteByDate(formContext.createdDate)
+
+        if (DateTimeHelper().isDateInPast(completeByDate)) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Completed date for orm context with ID: $contextId is in the past",
+            )
+        }
+        return formContext
     }
 }
