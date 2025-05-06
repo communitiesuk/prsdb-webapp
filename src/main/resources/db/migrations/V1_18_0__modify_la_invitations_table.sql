@@ -1,16 +1,15 @@
 ALTER TABLE local_authority_invitation
     ADD COLUMN invited_as_admin BOOLEAN;
 
-DROP VIEW local_authority_user_or_invitation;
+DROP VIEW IF EXISTS local_authority_user_or_invitation;
 
 CREATE VIEW local_authority_user_or_invitation AS
 SELECT  u.id,
-        olu.name,
+        u.name,
         u.is_manager,
         u.local_authority_id,
         'local_authority_user' AS entity_type
 FROM local_authority_user u
-         JOIN one_login_user olu ON olu.id = u.subject_identifier
 UNION ALL
 SELECT  i.id,
         i.invited_email AS name,
