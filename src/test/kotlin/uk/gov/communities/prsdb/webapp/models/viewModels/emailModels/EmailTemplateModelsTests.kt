@@ -22,6 +22,10 @@ class EmailTemplateModelsTests {
                     "/emails/LocalAuthorityInvitationCancellation.md",
                 ),
                 EmailTemplateTestData(
+                    LocalAuthorityAdminInvitationEmail(createLocalAuthority(1, "name"), URI("https://example.com")),
+                    "/emails/LocalAuthorityAdminInvitation.md",
+                ),
+                EmailTemplateTestData(
                     LandlordRegistrationConfirmationEmail("L-CCCC_CCCC", "https://emample.com"),
                     "/emails/LandlordRegistrationConfirmation.md",
                 ),
