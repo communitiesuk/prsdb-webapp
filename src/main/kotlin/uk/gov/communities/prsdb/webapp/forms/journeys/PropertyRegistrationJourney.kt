@@ -356,6 +356,7 @@ class PropertyRegistrationJourney(
                                         hintMsgKey = "forms.ownershipType.radios.option.leasehold.hint",
                                     ),
                                 ),
+                            "submitButtonText" to "forms.buttons.saveAndContinue",
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
