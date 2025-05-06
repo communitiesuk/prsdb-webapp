@@ -528,7 +528,7 @@ class LandlordRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
-            handleSubmitAndRedirect = { _, _ -> declarationHandleSubmitAndRedirect() },
+            handleSubmitAndRedirect = { _, _, _ -> declarationHandleSubmitAndRedirect() },
             saveAfterSubmit = false,
         )
 
