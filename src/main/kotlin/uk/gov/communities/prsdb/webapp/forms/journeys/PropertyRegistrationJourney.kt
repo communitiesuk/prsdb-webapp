@@ -81,47 +81,10 @@ class PropertyRegistrationJourney(
             listOf("registerProperty.taskList.subtitle"),
         )
 
-    override fun isStepAllowedForChangingAnswersTo(
+    override fun isDestinationInSameGroupAsStep(
         destinationStep: RegisterPropertyStepId?,
-        changingAnswersFor: RegisterPropertyStepId?,
-    ): Boolean =
-        when (changingAnswersFor) {
-            RegisterPropertyStepId.LookupAddress, RegisterPropertyStepId.ManualAddress ->
-                listOf(
-                    RegisterPropertyStepId.LookupAddress,
-                    RegisterPropertyStepId.SelectAddress,
-                    RegisterPropertyStepId.ManualAddress,
-                    RegisterPropertyStepId.NoAddressFound,
-                    RegisterPropertyStepId.LocalAuthority,
-                    RegisterPropertyStepId.AlreadyRegistered,
-                ).contains(destinationStep)
-
-            RegisterPropertyStepId.Occupancy ->
-                listOf(
-                    RegisterPropertyStepId.Occupancy,
-                    RegisterPropertyStepId.NumberOfHouseholds,
-                    RegisterPropertyStepId.NumberOfPeople,
-                ).contains(destinationStep)
-
-            RegisterPropertyStepId.NumberOfHouseholds ->
-                listOf(
-                    RegisterPropertyStepId.NumberOfHouseholds,
-                    RegisterPropertyStepId.NumberOfPeople,
-                ).contains(destinationStep)
-
-            RegisterPropertyStepId.LicensingType ->
-                listOf(
-                    RegisterPropertyStepId.LicensingType,
-                    RegisterPropertyStepId.SelectiveLicence,
-                    RegisterPropertyStepId.HmoMandatoryLicence,
-                    RegisterPropertyStepId.HmoAdditionalLicence,
-                ).contains(destinationStep)
-            else ->
-                super.isStepAllowedForChangingAnswersTo(
-                    destinationStep,
-                    changingAnswersFor,
-                )
-        }
+        groupStep: RegisterPropertyStepId?,
+    ): Boolean = destinationStep != null && destinationStep.groupIdentifier == groupStep?.groupIdentifier
 
     private fun registerPropertyTasks(): List<JourneyTask<RegisterPropertyStepId>> =
         listOf(
