@@ -2,12 +2,14 @@ package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.Address
+import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropertyCount
 import uk.gov.communities.prsdb.webapp.database.entity.License
@@ -112,6 +114,24 @@ class MockLandlordData {
             ReflectionTestUtils.setField(propertyOwnership, "createdDate", createdDate)
 
             return propertyOwnership
+        }
+
+        fun createFormContext(
+            journeyType: JourneyType = JourneyType.PROPERTY_REGISTRATION,
+            context: String =
+                "{\"lookup-address\":{\"houseNameOrNumber\":\"73\",\"postcode\":\"WC2R 1LA\"}," +
+                    "\"looked-up-addresses\":\"[{\\\"singleLineAddress\\\":\\\"2, Example Road, EG\\\"," +
+                    "\\\"localAuthorityId\\\":241,\\\"uprn\\\":2123456,\\\"buildingNumber\\\":\\\"2\\\"," +
+                    "\\\"postcode\\\":\\\"EG\\\"}]\",\"select-address\":{\"address\":\"2, Example Road, EG\"}}",
+            user: OneLoginUser = createOneLoginUser(),
+            createdDate: Instant = Instant.now(),
+            id: Long = 0,
+        ): FormContext {
+            val formContext = FormContext(journeyType, context, user)
+
+            ReflectionTestUtils.setField(formContext, "createdDate", createdDate)
+            ReflectionTestUtils.setField(formContext, "id", id)
+            return formContext
         }
     }
 }
