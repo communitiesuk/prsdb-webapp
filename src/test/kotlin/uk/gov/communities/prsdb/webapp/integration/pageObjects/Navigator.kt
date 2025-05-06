@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
@@ -26,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
@@ -41,6 +43,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalAuthorityView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.CheckAnswersPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
@@ -556,6 +559,27 @@ class Navigator(
         return createValidPage(page, LocalAuthorityViewLandlordDetailsPage::class)
     }
 
+    fun goToUpdateLandlordDetailsUpdateLookupAddressPage(): LookupAddressFormPageUpdateLandlordDetails {
+        val detailsPage = goToLandlordDetails()
+        detailsPage.personalDetailsSummaryList.addressRow.actions.actionLink
+            .clickAndWait()
+        return createValidPage(page, LookupAddressFormPageUpdateLandlordDetails::class)
+    }
+
+    fun goToLandlordDetailsUpdateSelectAddressPage(): SelectAddressFormPageUpdateLandlordDetails {
+        val lookupAddressPage = goToUpdateLandlordDetailsUpdateLookupAddressPage()
+        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG", "1")
+        return createValidPage(page, SelectAddressFormPageUpdateLandlordDetails::class)
+    }
+
+    fun skipToLandlordDetailsUpdateNamePage() {
+        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${UpdateLandlordDetailsStepId.UpdateName.urlPathSegment}")
+    }
+
+    fun skipToLandlordDetailsUpdateDateOfBirthPage() {
+        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${UpdateLandlordDetailsStepId.UpdateDateOfBirth.urlPathSegment}")
+    }
+
     fun goToPropertyDetailsLandlordView(id: Long): PropertyDetailsPageLandlordView {
         navigate("/property-details/$id")
         return createValidPage(
@@ -572,13 +596,6 @@ class Navigator(
             PropertyDetailsPageLocalAuthorityView::class,
             mapOf("propertyOwnershipId" to id.toString()),
         )
-    }
-
-    fun goToUpdateLandlordDetailsLookupAddressPage(): LookupAddressFormPageUpdateLandlordDetails {
-        val detailsPage = goToLandlordDetails()
-        detailsPage.personalDetailsSummaryList.addressRow.actions.actionLink
-            .clickAndWait()
-        return createValidPage(page, LookupAddressFormPageUpdateLandlordDetails::class)
     }
 
     fun skipToPropertyDetailsUpdateNumberOfHouseholdsPage(propertyOwnershipId: Long) {
