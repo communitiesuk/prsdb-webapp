@@ -168,14 +168,16 @@ class RegisterPropertyControllerTests(
     fun `getResume redirects to task-list after calling load journey data method from propertyRegistrationService`() {
         val contextId = "1"
         val formContext = createFormContext()
-        whenever(propertyRegistrationService.getIncompletePropertyForLandlord(contextId.toLong(), "user")).thenReturn(formContext)
+        whenever(
+            propertyRegistrationService.getIncompletePropertyFormContextForLandlordIfNotExpired(contextId.toLong(), "user"),
+        ).thenReturn(formContext)
         mvc
             .get("/$REGISTER_PROPERTY_JOURNEY_URL/$RESUME_PAGE_PATH_SEGMENT?contextId=$contextId")
             .andExpect {
                 status { is3xxRedirection() }
                 redirectedUrl(TASK_LIST_PATH_SEGMENT)
             }
-        verify(propertyRegistrationService).getIncompletePropertyForLandlord(contextId.toLong(), "user")
+        verify(propertyRegistrationService).getIncompletePropertyFormContextForLandlordIfNotExpired(contextId.toLong(), "user")
         verify(journeyDataService).loadJourneyDataIntoSession(formContext)
     }
 }

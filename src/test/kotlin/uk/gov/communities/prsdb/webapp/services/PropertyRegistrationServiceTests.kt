@@ -45,7 +45,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createFormContext
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 
 @ExtendWith(MockitoExtension::class)
@@ -346,9 +346,9 @@ class PropertyRegistrationServiceTests {
             val principalName = "principalName"
             val incompleteProperties =
                 listOf(
-                    createFormContext(createdDate = createdTodayDate),
-                    createFormContext(createdDate = createdYesterdayDate),
-                    createFormContext(createdDate = outOfDateCreatedDate),
+                    MockLandlordData.createFormContext(createdDate = createdTodayDate),
+                    MockLandlordData.createFormContext(createdDate = createdYesterdayDate),
+                    MockLandlordData.createFormContext(createdDate = outOfDateCreatedDate),
                 )
 
             val expectedIncompletePropertiesNumber = 2
@@ -379,10 +379,10 @@ class PropertyRegistrationServiceTests {
         }
 
         @Test
-        fun `getIncompletePropertyForLandlord returns the form context for a valid incomplete property`() {
+        fun `getIncompletePropertyFormContextForLandlordIfNotExpired returns the form context for a valid incomplete property`() {
             val createdTodayDate = currentInstant.toJavaInstant()
 
-            val expectedFormContext = createFormContext(createdDate = createdTodayDate)
+            val expectedFormContext = MockLandlordData.createFormContext(createdDate = createdTodayDate)
             val principalName = "user"
 
             whenever(
@@ -394,13 +394,13 @@ class PropertyRegistrationServiceTests {
             ).thenReturn(expectedFormContext)
 
             val formContext =
-                propertyRegistrationService.getIncompletePropertyForLandlord(expectedFormContext.id, principalName)
+                propertyRegistrationService.getIncompletePropertyFormContextForLandlordIfNotExpired(expectedFormContext.id, principalName)
 
             assertEquals(expectedFormContext, formContext)
         }
 
         @Test
-        fun `getIncompletePropertyForLandlord returns NOT_FOUND error for an invalid incomplete property`() {
+        fun `getIncompletePropertyFormContextForLandlordIfNotExpired returns NOT_FOUND error for an invalid incomplete property`() {
             val formContextId: Long = 123
             val principalName = "user"
 
@@ -415,20 +415,20 @@ class PropertyRegistrationServiceTests {
             // Act and Assert
             val exception =
                 assertThrows<ResponseStatusException> {
-                    propertyRegistrationService.getIncompletePropertyForLandlord(formContextId, principalName)
+                    propertyRegistrationService.getIncompletePropertyFormContextForLandlordIfNotExpired(formContextId, principalName)
                 }
             kotlin.test.assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
             kotlin.test.assertEquals(expectedErrorMessage, exception.message)
         }
 
         @Test
-        fun `getIncompletePropertyForLandlord returns BAD_REQUEST error for an out of date incomplete property`() {
+        fun `getIncompletePropertyFormContextForLandlordIfNotExpired returns BAD_REQUEST error for an out of date incomplete property`() {
             val outOfDateCreatedDate = currentInstant.minus(29, DateTimeUnit.DAY, TimeZone.of("Europe/London")).toJavaInstant()
 
             val principalName = "user"
-            val formContext = createFormContext(createdDate = outOfDateCreatedDate)
+            val formContext = MockLandlordData.createFormContext(createdDate = outOfDateCreatedDate)
 
-            val expectedErrorMessage = "400 BAD_REQUEST \"Completed date for orm context with ID: ${formContext.id} is in the past\""
+            val expectedErrorMessage = "400 NOT_FOUND \"Complete by date for form context with ID: ${formContext.id} is in the past\""
 
             whenever(
                 mockFormContextRepository.findByIdAndUser_IdAndJourneyType(
@@ -441,7 +441,7 @@ class PropertyRegistrationServiceTests {
             // Act and Assert
             val exception =
                 assertThrows<ResponseStatusException> {
-                    propertyRegistrationService.getIncompletePropertyForLandlord(formContext.id, principalName)
+                    propertyRegistrationService.getIncompletePropertyFormContextForLandlordIfNotExpired(formContext.id, principalName)
                 }
             kotlin.test.assertEquals(HttpStatus.BAD_REQUEST, exception.statusCode)
             kotlin.test.assertEquals(expectedErrorMessage, exception.message)

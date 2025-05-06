@@ -172,7 +172,7 @@ class PropertyRegistrationService(
         return PropertyRegistrationJourneyDataHelper.getAddress(formContextJourneyData, lookedUpAddresses)
     }
 
-    fun getIncompletePropertyForLandlord(
+    fun getIncompletePropertyFormContextForLandlordIfNotExpired(
         contextId: Long,
         principalName: String,
     ): FormContext {
@@ -187,8 +187,8 @@ class PropertyRegistrationService(
 
         if (DateTimeHelper().isDateInPast(completeByDate)) {
             throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "Completed date for orm context with ID: $contextId is in the past",
+                HttpStatus.NOT_FOUND,
+                "Complete by date for form context with ID: $contextId is in the past",
             )
         }
         return formContext

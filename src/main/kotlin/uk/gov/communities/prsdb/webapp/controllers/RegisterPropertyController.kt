@@ -57,7 +57,11 @@ class RegisterPropertyController(
         principal: Principal,
         @RequestParam(value = "contextId", required = true) contextId: String,
     ): String {
-        val formContext = propertyRegistrationService.getIncompletePropertyForLandlord(contextId.toLong(), principal.name)
+        val formContext =
+            propertyRegistrationService.getIncompletePropertyFormContextForLandlordIfNotExpired(
+                contextId.toLong(),
+                principal.name,
+            )
         journeyDataServiceFactory
             .create(
                 REGISTER_PROPERTY_JOURNEY_URL,
