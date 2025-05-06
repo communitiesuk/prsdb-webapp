@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.constants.DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
@@ -34,40 +33,16 @@ class LandlordDetailsController(
     private val landlordDetailsUpdateJourneyFactory: LandlordDetailsUpdateJourneyFactory,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
-    @GetMapping("$UPDATE_PATH_SEGMENT/$DETAILS_PATH_SEGMENT")
-    fun getUpdateUserLandlordDetails(
-        model: Model,
-        principal: Principal,
-    ): ModelAndView {
-        addLandlordDetailsToModel(model, principal, includeChangeLinks = true)
-        // TODO: PRSD-355 Remove this way of showing submit button
-        model.addAttribute("shouldShowSubmitButton", true)
-        return landlordDetailsUpdateJourneyFactory
-            .create(principal.name, DETAILS_PATH_SEGMENT)
-            .getModelAndViewForStep()
-    }
-
-    @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping
     fun getUserLandlordDetails(
         model: Model,
         principal: Principal,
     ): String {
-        addLandlordDetailsToModel(model, principal, includeChangeLinks = false)
-
-        return "landlordDetailsView"
-    }
-
-    private fun addLandlordDetailsToModel(
-        model: Model,
-        principal: Principal,
-        includeChangeLinks: Boolean,
-    ) {
         val landlord =
             landlordService.retrieveLandlordByBaseUserId(principal.name)
                 ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
 
-        val landlordViewModel = LandlordViewModel(landlord, includeChangeLinks)
+        val landlordViewModel = LandlordViewModel(landlord, withChangeLinks = true)
 
         model.addAttribute("name", landlordViewModel.name)
         model.addAttribute("landlord", landlordViewModel)
@@ -79,6 +54,8 @@ class LandlordDetailsController(
         model.addAttribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_PATH_SEGMENT)
 
         model.addAttribute("deleteLandlordRecordUrl", DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
+
+        return "landlordDetailsView"
     }
 
     @PreAuthorize("hasRole('LANDLORD')")

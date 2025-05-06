@@ -15,7 +15,6 @@ import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordUpdateDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManualAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
@@ -55,7 +54,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
         @Test
         fun `An unverified Landlord can update all of their details on the Update Details Journey`(page: Page) {
             // Update details page
-            var landlordDetailsUpdatePage = navigator.goToUpdateLandlordDetailsPage()
+            var landlordDetailsUpdatePage = navigator.goToLandlordDetails()
             assertThat(landlordDetailsUpdatePage.heading).containsText("Alexander Smith")
 
             val landlordName = "landlord name"
@@ -90,7 +89,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
         @Test
         fun `A Landlord can update just their name on the Update Details Journey`(page: Page) {
             // Update details page
-            var landlordDetailsUpdatePage = navigator.goToUpdateLandlordDetailsPage()
+            var landlordDetailsUpdatePage = navigator.goToLandlordDetails()
             assertThat(landlordDetailsUpdatePage.heading).containsText("Alexander Smith")
 
             val landlordName = "landlord name"
@@ -107,7 +106,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
         @Test
         fun `A Landlord can update just their email on the Update Details Journey`(page: Page) {
             // Update details page
-            var landlordDetailsUpdatePage = navigator.goToUpdateLandlordDetailsPage()
+            var landlordDetailsUpdatePage = navigator.goToLandlordDetails()
             assertThat(landlordDetailsUpdatePage.heading).containsText("Alexander Smith")
 
             val landlordEmail = "new@email.test"
@@ -124,7 +123,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
         @Test
         fun `A Landlord can update just their phone number on the Update Details Journey`(page: Page) {
             // Update details page
-            var landlordDetailsUpdatePage = navigator.goToUpdateLandlordDetailsPage()
+            var landlordDetailsUpdatePage = navigator.goToLandlordDetails()
             assertThat(landlordDetailsUpdatePage.heading).containsText("Alexander Smith")
 
             val landlordPhoneNumber = phoneNumberUtil.getFormattedUkPhoneNumber()
@@ -141,7 +140,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
         @Test
         fun `A Landlord can update just their date of birth on the Update Details Journey`(page: Page) {
             // Update details page
-            var landlordDetailsUpdatePage = navigator.goToUpdateLandlordDetailsPage()
+            var landlordDetailsUpdatePage = navigator.goToLandlordDetails()
             assertThat(landlordDetailsUpdatePage.heading).containsText("Alexander Smith")
 
             val landlordDateOfBirth = LocalDate(1990, 1, 1)
@@ -164,7 +163,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
         @Test
         fun `A verified Landlord can update all of their details on the Update Details Journey`(page: Page) {
             // Update details page
-            var landlordDetailsUpdatePage = navigator.goToUpdateLandlordDetailsPage()
+            var landlordDetailsUpdatePage = navigator.goToLandlordDetails()
             assertThat(landlordDetailsUpdatePage.heading).containsText("Alexander Smith")
 
             val landlordEmail = "new@email.test"
@@ -189,7 +188,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
         @Test
         fun `A verified Landlord can not view the date of birth page on the Update Details Journey`(page: Page) {
             // Go to landlord details update page (initializes journey data)
-            navigator.goToUpdateLandlordDetailsPage()
+            navigator.goToLandlordDetails()
 
             // Go to update date of birth page
             navigator.navigate("${LandlordDetailsController.UPDATE_ROUTE}/date-of-birth")
@@ -201,7 +200,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
         @Test
         fun `A verified Landlord can not view the name page on the Update Details Journey`(page: Page) {
             // Go to landlord details update page (initializes journey data)
-            navigator.goToUpdateLandlordDetailsPage()
+            navigator.goToLandlordDetails()
 
             // Go to update name page
             navigator.navigate("${LandlordDetailsController.UPDATE_ROUTE}/name")
@@ -217,7 +216,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
         @Test
         fun `A Landlord can update their address to a manually entered address`(page: Page) {
             // Update details page
-            var landlordDetailsUpdatePage = navigator.goToUpdateLandlordDetailsPage()
+            var landlordDetailsUpdatePage = navigator.goToLandlordDetails()
             assertThat(landlordDetailsUpdatePage.heading).containsText("Alexander Smith")
 
             val newFirstLine = "3 Example Road"
