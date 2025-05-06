@@ -107,6 +107,8 @@ class PropertyDetailsUpdateJourney(
                                         hintMsgKey = "forms.ownershipType.radios.option.leasehold.hint",
                                     ),
                                 ),
+                            "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+                            "showWarning" to true,
                             BACK_URL_ATTR_NAME to RELATIVE_PROPERTY_DETAILS_PATH,
                         ),
                 ),
