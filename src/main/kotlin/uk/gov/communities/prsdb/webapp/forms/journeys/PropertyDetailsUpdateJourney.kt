@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
-import uk.gov.communities.prsdb.webapp.constants.DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -108,7 +107,7 @@ class PropertyDetailsUpdateJourney(
                                         hintMsgKey = "forms.ownershipType.radios.option.leasehold.hint",
                                     ),
                                 ),
-                            BACK_URL_ATTR_NAME to DETAILS_PATH_SEGMENT,
+                            BACK_URL_ATTR_NAME to RELATIVE_PROPERTY_DETAILS_PATH,
                         ),
                 ),
             handleSubmitAndRedirect = { journeyData, _ -> updatePropertyAndRedirect(journeyData) },
@@ -151,7 +150,7 @@ class PropertyDetailsUpdateJourney(
                                         labelMsgKey = "forms.licensingType.radios.option.noLicensing.label",
                                     ),
                                 ),
-                            BACK_URL_ATTR_NAME to DETAILS_PATH_SEGMENT,
+                            BACK_URL_ATTR_NAME to RELATIVE_PROPERTY_DETAILS_PATH,
                         ),
                 ),
             handleSubmitAndRedirect = { journeyData, _ -> licensingTypeHandleSubmitAndRedirect(journeyData) },
@@ -262,7 +261,7 @@ class PropertyDetailsUpdateJourney(
                                         hintMsgKey = "forms.occupancy.radios.option.no.hint",
                                     ),
                                 ),
-                            BACK_URL_ATTR_NAME to DETAILS_PATH_SEGMENT,
+                            BACK_URL_ATTR_NAME to RELATIVE_PROPERTY_DETAILS_PATH,
                         ),
                 ),
             nextAction = { journeyData, _ -> occupancyNextAction(journeyData) },
@@ -361,14 +360,14 @@ class PropertyDetailsUpdateJourney(
         if (hasPropertyOccupancyBeenUpdated()) {
             UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment
         } else {
-            DETAILS_PATH_SEGMENT
+            RELATIVE_PROPERTY_DETAILS_PATH
         }
 
     private fun getNumberOfPeopleStepBackUrl() =
         if (hasPropertyOccupancyBeenUpdated()) {
             UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment
         } else {
-            DETAILS_PATH_SEGMENT
+            RELATIVE_PROPERTY_DETAILS_PATH
         }
 
     private fun occupancyNextAction(journeyData: JourneyData) =
@@ -392,10 +391,7 @@ class PropertyDetailsUpdateJourney(
 
         journeyDataService.removeJourneyDataAndContextIdFromSession()
 
-        // The path for the update journey is "{propertyDetailsPath}/update/{pathSegment}". As there is no trailing slash, any relative path is
-        // relative to ".../update/". Therefore, the relative path to the "{propertyDetailsPath}" is just the parent of the current path.
-        val relativePathToPropertyDetails = ".."
-        return relativePathToPropertyDetails
+        return RELATIVE_PROPERTY_DETAILS_PATH
     }
 
     private fun wasPropertyOriginallyOccupied() = journeyDataService.getJourneyDataFromSession().getOriginalIsOccupied(originalDataKey)!!
@@ -417,6 +413,12 @@ class PropertyDetailsUpdateJourney(
 
         val redirectStepId = PropertyDetailsUpdateJourneyExtensions.getLicenceNumberUpdateStepId(licensingType)
 
-        return redirectStepId?.urlPathSegment ?: DETAILS_PATH_SEGMENT
+        return redirectStepId?.urlPathSegment ?: RELATIVE_PROPERTY_DETAILS_PATH
+    }
+
+    companion object {
+        // The path for the update journey is "{propertyDetailsPath}/update/{pathSegment}". As there is no trailing slash, any relative path is
+        // relative to ".../update/". Therefore, the relative path to the "{propertyDetailsPath}" is just the parent of the current path.
+        private const val RELATIVE_PROPERTY_DETAILS_PATH = ".."
     }
 }
