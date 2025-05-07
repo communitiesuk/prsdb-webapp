@@ -21,6 +21,7 @@
             <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${inviteAnotherUserUrl}}, #{addLAUserSuccess.inviteAnother})}">
                 addLAUserSuccess.inviteAnother
             </a>
+            <!--TODO PRSD-672 - replace with an enabled button-->
             <a th:replace="~{fragments/buttons/disabledSecondaryButtonLink :: disabledSecondaryButtonLink(@{${dashboardUrl}}, #{addLAUserSuccess.returnToDashboard})}">
                 addLAUserSuccess.returnToDashboard
             </a>

@@ -98,6 +98,7 @@ class InviteLocalAuthorityAdminController(
         }
 
         model.addAttribute("inviteAnotherUserUrl", INVITE_LA_ADMIN_ROUTE)
+        // TODO PRSD-672: Add link to the system operator dashboard
         model.addAttribute("dashboardUrl", "#")
 
         return "inviteLocalAuthorityAdminConfirmation"
