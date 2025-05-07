@@ -7,7 +7,6 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.constants.DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
@@ -26,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
@@ -35,7 +35,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordUpdateDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddressFormPageUpdateLandlordDetails
@@ -44,6 +43,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalAuthorityView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.CheckAnswersPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
@@ -559,6 +559,27 @@ class Navigator(
         return createValidPage(page, LocalAuthorityViewLandlordDetailsPage::class)
     }
 
+    fun goToUpdateLandlordDetailsUpdateLookupAddressPage(): LookupAddressFormPageUpdateLandlordDetails {
+        val detailsPage = goToLandlordDetails()
+        detailsPage.personalDetailsSummaryList.addressRow.actions.actionLink
+            .clickAndWait()
+        return createValidPage(page, LookupAddressFormPageUpdateLandlordDetails::class)
+    }
+
+    fun goToLandlordDetailsUpdateSelectAddressPage(): SelectAddressFormPageUpdateLandlordDetails {
+        val lookupAddressPage = goToUpdateLandlordDetailsUpdateLookupAddressPage()
+        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG", "1")
+        return createValidPage(page, SelectAddressFormPageUpdateLandlordDetails::class)
+    }
+
+    fun skipToLandlordDetailsUpdateNamePage() {
+        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LandlordDetailsUpdateStepId.UpdateName.urlPathSegment}")
+    }
+
+    fun skipToLandlordDetailsUpdateDateOfBirthPage() {
+        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LandlordDetailsUpdateStepId.UpdateDateOfBirth.urlPathSegment}")
+    }
+
     fun goToPropertyDetailsLandlordView(id: Long): PropertyDetailsPageLandlordView {
         navigate("/property-details/$id")
         return createValidPage(
@@ -575,18 +596,6 @@ class Navigator(
             PropertyDetailsPageLocalAuthorityView::class,
             mapOf("propertyOwnershipId" to id.toString()),
         )
-    }
-
-    fun goToUpdateLandlordDetailsPage(): LandlordUpdateDetailsPage {
-        navigate("${LandlordDetailsController.UPDATE_ROUTE}/$DETAILS_PATH_SEGMENT")
-        return createValidPage(page, LandlordUpdateDetailsPage::class)
-    }
-
-    fun goToUpdateLandlordDetailsLookupAddressPage(): LookupAddressFormPageUpdateLandlordDetails {
-        val detailsPage = goToUpdateLandlordDetailsPage()
-        detailsPage.personalDetailsSummaryList.addressRow.actions.actionLink
-            .clickAndWait()
-        return createValidPage(page, LookupAddressFormPageUpdateLandlordDetails::class)
     }
 
     fun skipToPropertyDetailsUpdateNumberOfHouseholdsPage(propertyOwnershipId: Long) {

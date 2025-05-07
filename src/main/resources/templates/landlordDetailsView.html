@@ -1,73 +1,48 @@
 <!DOCTYPE html>
 <html id="main-content" th:replace="~{fragments/layout :: layout(#{landlordDetails.title},~{::#main-content/content()}, false)}">
-<a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
-<main class="govuk-main-wrapper">
-    <div id="page-contents">
-        <h2 class="govuk-heading-m" th:text="#{landlordDetails.heading}">landlordDetails.heading</h2>
+    <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+    <main class="govuk-main-wrapper">
+        <div id="page-contents">
+            <h2 class="govuk-heading-m" th:text="#{landlordDetails.heading}">landlordDetails.heading</h2>
 
-        <div th:replace="~{fragments/buttons/pageHeaderActions :: pageHeaderActions(${name}, ~{:: #delete-record-button})}">
-            <th:block id="delete-record-button">
+            <div id="delete-record-button" th:replace="~{fragments/buttons/pageHeaderActions :: pageHeaderActions(${name}, ~{::#delete-record-button/content()})}">
                 <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${deleteLandlordRecordUrl}, #{landlordDetails.removeRecord})}"></a>
-            </th:block>
-        </div>
+            </div>
 
-        <div th:replace="~{fragments/tabs/tabs :: tabs(~{:: #tabs-content})}">
-            <th:block id="tabs-content">
-                <ul th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{:: #tab-headings})}">
-                    <th:block id="tab-headings">
-                        <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('personal-details', #{landlordDetails.personalDetails.heading})}">
-                        </li>
-                        <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${registeredPropertiesTabId}, #{landlordDetails.registeredProperties.heading})}">
-                        </li>
-                    </th:block>
+            <div id="tabs-content" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs-content/content()})}">
+                <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">
+                    <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('personal-details', #{landlordDetails.personalDetails.heading})}"></li>
+                    <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${registeredPropertiesTabId}, #{landlordDetails.registeredProperties.heading})}"></li>
                 </ul>
 
-                <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('personal-details', ~{:: #personal-details-panel-content})}">
-                    <th:block id="personal-details-panel-content">
-                        <dl th:replace="~{fragments/summaryList :: summaryList(${landlord.personalDetails})}" ></dl>
-                        <h2 class="govuk-heading-m" th:text="#{landlordDetails.personalDetails.optionalChoices.heading}">landlordDetails.personalDetails.optionalChoices.heading</h2>
-                        <p class="govuk-hint" th:text="#{landlordDetails.personalDetails.optionalChoices.hint}">landlordDetails.personalDetails.optionalChoices.hint</p>
-                        <dl th:replace="~{fragments/summaryList :: summaryList(${landlord.consentInformation})}" ></dl>
-
-                        <form th:action="@{''}" method="post" novalidate th:if="${shouldShowSubmitButton}">
-                            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton('TODO: PRSD-355 Confirmation page for update landlord details')}"></button>
-                        </form>
-                    </th:block>
+                <div id="personal-details-panel-content" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('personal-details', ~{::#personal-details-panel-content/content()})}">
+                    <dl th:replace="~{fragments/summaryList :: summaryList(${landlord.personalDetails})}" ></dl>
+                    <h2 class="govuk-heading-m" th:text="#{landlordDetails.personalDetails.optionalChoices.heading}">landlordDetails.personalDetails.optionalChoices.heading</h2>
+                    <p class="govuk-hint" th:text="#{landlordDetails.personalDetails.optionalChoices.hint}">landlordDetails.personalDetails.optionalChoices.hint</p>
+                    <dl th:replace="~{fragments/summaryList :: summaryList(${landlord.consentInformation})}" ></dl>
                 </div>
 
-                <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${registeredPropertiesTabId}, ~{:: #registered-properties-panel-content})}">
-                    <th:block id="registered-properties-panel-content">
-                        <table th:replace="~{fragments/tables/table :: table(
-                            ${ { 'landlordDetails.registeredProperties.table.addressHeading', 'landlordDetails.registeredProperties.table.localAuthorityHeading', 'landlordDetails.registeredProperties.table.licenceHeading', 'landlordDetails.registeredProperties.table.tenantedHeading' } },
-                            ~{::tbody},
-                            null
-                        )}
-                    ">
-                            <tbody class="govuk-table__body">
+                <div id="registered-properties-panel-content" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${registeredPropertiesTabId}, ~{::#registered-properties-panel-content/content()})}">
+                    <table th:replace="~{fragments/tables/table :: table(
+                        ${ { 'landlordDetails.registeredProperties.table.addressHeading', 'landlordDetails.registeredProperties.table.localAuthorityHeading', 'landlordDetails.registeredProperties.table.licenceHeading', 'landlordDetails.registeredProperties.table.tenantedHeading' } },
+                        ~{::tbody},
+                        null
+                    )}">
+                        <tbody class="govuk-table__body">
                             <tr class="govuk_table__row" th:each="property: ${registeredPropertiesList}">
                                 <td class="govuk-table__cell govuk-!-width-one-quarter">
-                                    <a class="govuk-link" th:text="${property.address}"
-                                       th:href="@{${property.recordLink}}">
-                                        ${property.address}
-                                    </a>
+                                    <a class="govuk-link" th:text="${property.address}" th:href="@{${property.recordLink}}">${property.address}</a>
                                     <br>
                                     <span th:remove="tag" th:text="${property.registrationNumber}"></span>
                                 </td>
-                                <td class="govuk-table__cell govuk-!-width-one-quarter"
-                                    th:text="${property.localAuthorityName}"></td>
-                                <td class="govuk-table__cell govuk-!-width-one-quarter"
-                                    th:text="#{${property.licenseTypeMessageKey}}"></td>
-                                <td class="govuk-table__cell govuk-!-width-one-quarter"
-                                    th:text="#{${property.isTenantedMessageKey}}"></td>
+                                <td class="govuk-table__cell govuk-!-width-one-quarter" th:text="${property.localAuthorityName}"></td>
+                                <td class="govuk-table__cell govuk-!-width-one-quarter" th:text="#{${property.licenseTypeMessageKey}}"></td>
+                                <td class="govuk-table__cell govuk-!-width-one-quarter" th:text="#{${property.isTenantedMessageKey}}"></td>
                             </tr>
-                            </tbody>
-                        </table>
-                    </th:block>
+                        </tbody>
+                    </table>
                 </div>
-            </th:block>
+            </div>
         </div>
-
-
-    </div>
-</main>
+    </main>
 </html>

@@ -2,8 +2,8 @@ package uk.gov.communities.prsdb.webapp.helpers
 
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.journeys.UpdateLandlordDetailsJourney
-import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
+import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDetailsUpdateJourney
+import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddress
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -14,29 +14,29 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumb
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import java.time.LocalDate
 
-class UpdateLandlordDetailsJourneyDataHelper : JourneyDataHelper() {
+class LandlordDetailsUpdateJourneyDataHelper : JourneyDataHelper() {
     companion object {
         fun getIsIdentityVerified(journeyData: JourneyData): Boolean =
-            getStringValueByKey(journeyData, UpdateLandlordDetailsJourney.IS_IDENTITY_VERIFIED_KEY).toBoolean()
+            getStringValueByKey(journeyData, LandlordDetailsUpdateJourney.IS_IDENTITY_VERIFIED_KEY).toBoolean()
 
         fun getEmailUpdateIfPresent(journeyData: JourneyData) =
             getFieldStringValue(
                 journeyData,
-                UpdateLandlordDetailsStepId.UpdateEmail.urlPathSegment,
+                LandlordDetailsUpdateStepId.UpdateEmail.urlPathSegment,
                 EmailFormModel::emailAddress.name,
             )
 
         fun getNameUpdateIfPresent(journeyData: JourneyData) =
             getFieldStringValue(
                 journeyData,
-                UpdateLandlordDetailsStepId.UpdateName.urlPathSegment,
+                LandlordDetailsUpdateStepId.UpdateName.urlPathSegment,
                 NameFormModel::name.name,
             )
 
         fun getPhoneNumberIfPresent(journeyData: JourneyData) =
             getFieldStringValue(
                 journeyData,
-                UpdateLandlordDetailsStepId.UpdatePhoneNumber.urlPathSegment,
+                LandlordDetailsUpdateStepId.UpdatePhoneNumber.urlPathSegment,
                 PhoneNumberFormModel::phoneNumber.name,
             )
 
@@ -44,12 +44,12 @@ class UpdateLandlordDetailsJourneyDataHelper : JourneyDataHelper() {
             val selectedAddress =
                 getFieldStringValue(
                     journeyData,
-                    UpdateLandlordDetailsStepId.SelectEnglandAndWalesAddress.urlPathSegment,
+                    LandlordDetailsUpdateStepId.SelectEnglandAndWalesAddress.urlPathSegment,
                     SelectAddressFormModel::address.name,
                 )
 
             return if (journeyData.getLookedUpAddresses().isEmpty() || selectedAddress == MANUAL_ADDRESS_CHOSEN) {
-                getManualAddress(journeyData, UpdateLandlordDetailsStepId.ManualEnglandAndWalesAddress.urlPathSegment)
+                getManualAddress(journeyData, LandlordDetailsUpdateStepId.ManualEnglandAndWalesAddress.urlPathSegment)
             } else if (selectedAddress != null) {
                 journeyData.getLookedUpAddress(selectedAddress)
             } else {
@@ -61,21 +61,21 @@ class UpdateLandlordDetailsJourneyDataHelper : JourneyDataHelper() {
             val day =
                 getFieldIntegerValue(
                     journeyData,
-                    UpdateLandlordDetailsStepId.UpdateDateOfBirth.urlPathSegment,
+                    LandlordDetailsUpdateStepId.UpdateDateOfBirth.urlPathSegment,
                     DateOfBirthFormModel::day.name,
                 ) ?: return null
 
             val month =
                 getFieldIntegerValue(
                     journeyData,
-                    UpdateLandlordDetailsStepId.UpdateDateOfBirth.urlPathSegment,
+                    LandlordDetailsUpdateStepId.UpdateDateOfBirth.urlPathSegment,
                     DateOfBirthFormModel::month.name,
                 ) ?: return null
 
             val year =
                 getFieldIntegerValue(
                     journeyData,
-                    UpdateLandlordDetailsStepId.UpdateDateOfBirth.urlPathSegment,
+                    LandlordDetailsUpdateStepId.UpdateDateOfBirth.urlPathSegment,
                     DateOfBirthFormModel::year.name,
                 ) ?: return null
 
