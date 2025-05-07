@@ -115,7 +115,7 @@ VALUES (1, true, 0, 1, 1, 2, 13, 1, 1, '2024-10-15 00:00:00+00', null);
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
 INSERT INTO form_context (id, created_date, last_modified_date, journey_type, context, subject_identifier)
-VALUES (1, '09/13/24', '09/13/24', 3, '{"lookup-address":{"houseNameOrNumber":"6","postcode":"NW5"}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo');
+VALUES (1, current_date, current_date, 3, '{"lookup-address":{"houseNameOrNumber":"6","postcode":"NW5"}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo');
 
 SELECT setval(pg_get_serial_sequence('form_context', 'id'), (SELECT MAX(id) FROM form_context));
 

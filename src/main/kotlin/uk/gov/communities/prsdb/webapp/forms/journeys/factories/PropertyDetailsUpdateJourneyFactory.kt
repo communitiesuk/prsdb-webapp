@@ -1,9 +1,10 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys.factories
 
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDetailsUpdateJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -35,5 +36,5 @@ class PropertyDetailsUpdateJourneyFactory(
     }
 
     private fun throwInvalidStepNameException(stepName: String): Nothing =
-        throw PrsdbWebException("Invalid PropertyDetailsUpdateJourney step name: $stepName")
+        throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid PropertyDetailsUpdateJourney step name: $stepName")
 }

@@ -7,12 +7,36 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
+import kotlin.reflect.KClass
 import kotlin.test.assertEquals
 
 class PropertyComplianceJourneyHelperTests {
     @ParameterizedTest(name = "for the {0} step")
-    @MethodSource("provideFileUploadStepNames")
+    @MethodSource("provideFileUploadStepNamesAndFormModelClasses")
+    fun `getUploadCertificateFormModelClass returns the corresponding form model`(
+        stepName: String,
+        expectedFormModel: KClass<out UploadCertificateFormModel>,
+    ) {
+        assertEquals(
+            expectedFormModel,
+            PropertyComplianceJourneyHelper.getUploadCertificateFormModelClass(stepName),
+        )
+    }
+
+    @Test
+    fun `getUploadCertificateFormModelClass throws an IllegalStateException for invalid file upload step names`() {
+        val invalidStepName = "invalid-step"
+
+        assertThrows<IllegalStateException> {
+            PropertyComplianceJourneyHelper.getUploadCertificateFormModelClass(invalidStepName)
+        }
+    }
+
+    @ParameterizedTest(name = "for the {0} step")
+    @MethodSource("provideFileUploadStepAndFileNames")
     fun `getCertFilename returns the corresponding file name`(
         stepName: String,
         expectedFileName: String,
@@ -21,7 +45,7 @@ class PropertyComplianceJourneyHelperTests {
 
         assertEquals(
             expectedFileName,
-            PropertyComplianceJourneyDataExtensions.getCertFilename(PROPERTY_OWNERSHIP_ID, stepName, originalFileName),
+            PropertyComplianceJourneyHelper.getCertFilename(PROPERTY_OWNERSHIP_ID, stepName, originalFileName),
         )
     }
 
@@ -31,7 +55,7 @@ class PropertyComplianceJourneyHelperTests {
         val originalFileName = "any-name.$ORIGINAL_FILE_EXT"
 
         assertThrows<IllegalStateException> {
-            PropertyComplianceJourneyDataExtensions.getCertFilename(PROPERTY_OWNERSHIP_ID, invalidStepName, originalFileName)
+            PropertyComplianceJourneyHelper.getCertFilename(PROPERTY_OWNERSHIP_ID, invalidStepName, originalFileName)
         }
     }
 
@@ -40,7 +64,20 @@ class PropertyComplianceJourneyHelperTests {
         private const val ORIGINAL_FILE_EXT = "png"
 
         @JvmStatic
-        private fun provideFileUploadStepNames() =
+        private fun provideFileUploadStepNamesAndFormModelClasses() =
+            arrayOf(
+                Arguments.of(
+                    Named.of(PropertyComplianceStepId.GasSafetyUpload.name, PropertyComplianceStepId.GasSafetyUpload.urlPathSegment),
+                    GasSafetyUploadCertificateFormModel::class,
+                ),
+                Arguments.of(
+                    Named.of(PropertyComplianceStepId.EicrUpload.name, PropertyComplianceStepId.EicrUpload.urlPathSegment),
+                    EicrUploadCertificateFormModel::class,
+                ),
+            )
+
+        @JvmStatic
+        private fun provideFileUploadStepAndFileNames() =
             arrayOf(
                 Arguments.of(
                     Named.of(PropertyComplianceStepId.GasSafetyUpload.name, PropertyComplianceStepId.GasSafetyUpload.urlPathSegment),

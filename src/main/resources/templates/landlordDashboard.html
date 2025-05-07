@@ -3,8 +3,8 @@
 <main class="govuk-main-wrapper">
     <div id="page-content">
         <div id="notification-banner"
-             th:replace="${incompleteProperties != null} ? ~{fragments/banners/notificationBanner :: notificationBanner(#{landlord.dashboard.notification.banner.title},
-             #{landlord.dashboard.notification.banner.subheadingBeforeNumber} + ' ' + ${incompleteProperties} + ' ' + (${incompleteProperties != 1} ? #{landlord.dashboard.notification.banner.subheadingAfterNumber} : #{landlord.dashboard.notification.banner.subheadingAfterNumberIsOne}) + ' ',
+             th:replace="${numberOfIncompleteProperties != 0} ? ~{fragments/banners/notificationBanner :: notificationBanner(#{landlord.dashboard.notification.banner.title},
+             #{landlord.dashboard.notification.banner.subheadingBeforeNumber} + ' ' + ${numberOfIncompleteProperties} + ' ' + (${numberOfIncompleteProperties != 1} ? #{landlord.dashboard.notification.banner.subheadingAfterNumber} : #{landlord.dashboard.notification.banner.subheadingAfterNumberIsOne}) + ' ',
              ${viewIncompletePropertiesUrl}, #{landlord.dashboard.notification.banner.linkText})} : ~{}">
             Incomplete properties notification banner
         </div>

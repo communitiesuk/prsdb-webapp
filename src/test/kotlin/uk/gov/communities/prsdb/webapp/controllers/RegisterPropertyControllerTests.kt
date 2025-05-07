@@ -20,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
@@ -30,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createFormContext
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 
 @WebMvcTest(RegisterPropertyController::class)
@@ -167,12 +167,17 @@ class RegisterPropertyControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `getResume redirects to task-list after calling load journey data method from propertyRegistrationService`() {
         val contextId = "1"
+        val formContext = createFormContext()
+        whenever(
+            propertyRegistrationService.getIncompletePropertyFormContextForLandlordIfNotExpired(contextId.toLong(), "user"),
+        ).thenReturn(formContext)
         mvc
             .get("/$REGISTER_PROPERTY_JOURNEY_URL/$RESUME_PAGE_PATH_SEGMENT?contextId=$contextId")
             .andExpect {
                 status { is3xxRedirection() }
                 redirectedUrl(TASK_LIST_PATH_SEGMENT)
             }
-        verify(journeyDataService).loadJourneyDataIntoSession(contextId.toLong(), "user", JourneyType.PROPERTY_REGISTRATION)
+        verify(propertyRegistrationService).getIncompletePropertyFormContextForLandlordIfNotExpired(contextId.toLong(), "user")
+        verify(journeyDataService).loadJourneyDataIntoSession(formContext)
     }
 }
