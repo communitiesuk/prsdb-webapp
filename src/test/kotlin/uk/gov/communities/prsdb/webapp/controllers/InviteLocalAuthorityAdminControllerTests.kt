@@ -72,33 +72,13 @@ class InviteLocalAuthorityAdminControllerTests(
 
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-    fun `sendInvitation redirects to success page for valid form submission`() {
-        val testEmail = "new-user@example.com"
-
-        whenever(localAuthorityInvitationService.createInvitationToken(any(), any(), any()))
-            .thenReturn("test-token")
-        whenever(absoluteUrlProvider.buildInvitationUri("test-token"))
-            .thenReturn(URI("https://test-service.gov.uk/sign-up-la-user"))
-        whenever(localAuthorityService.retrieveLocalAuthorityById(MockLocalAuthorityData.DEFAULT_LA_ID))
-            .thenReturn(createLocalAuthority(MockLocalAuthorityData.DEFAULT_LA_ID))
-
-        mvc
-            .post(InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_ROUTE) {
-                contentType = MediaType.APPLICATION_FORM_URLENCODED
-                content = urlEncodedInviteLocalAuthorityAdminModel(testEmail, MockLocalAuthorityData.DEFAULT_LA_ID)
-                with(csrf())
-            }.andExpect {
-                status { is3xxRedirection() }
-                redirectedUrl("${InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
-            }
-    }
-
-    @Test
-    @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-    fun `sendInvitation sends invitation for valid form submission`() {
-        val testEmail = "new-user@example.com"
+    fun `sendInvitation sends an invitation email then redirects to success page for valid form submission`() {
         val localAuthority = createLocalAuthority(MockLocalAuthorityData.DEFAULT_LA_ID)
+        val testEmail = "new-user@example.com"
+        val encodedTestEmail = URLEncoder.encode(testEmail, "UTF-8")
+        val urlEncodedModel = "email=$encodedTestEmail&confirmEmail=$encodedTestEmail&localAuthorityId=${localAuthority.id}"
         val invitationUri = URI("https://test-service.gov.uk/sign-up-la-user")
+
         whenever(localAuthorityInvitationService.createInvitationToken(any(), any(), any()))
             .thenReturn("test-token")
         whenever(absoluteUrlProvider.buildInvitationUri("test-token"))
@@ -109,20 +89,14 @@ class InviteLocalAuthorityAdminControllerTests(
         mvc
             .post(InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_ROUTE) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
-                content = urlEncodedInviteLocalAuthorityAdminModel(testEmail, MockLocalAuthorityData.DEFAULT_LA_ID)
+                content = urlEncodedModel
                 with(csrf())
             }.andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl("${InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
                 flash { attribute("invitedEmailAddress", testEmail) }
             }
 
         verify(emailNotificationService).sendEmail(testEmail, LocalAuthorityAdminInvitationEmail(localAuthority, invitationUri))
-    }
-
-    private fun urlEncodedInviteLocalAuthorityAdminModel(
-        @Suppress("SameParameterValue") testEmail: String,
-        @Suppress("SameParameterValue") localAuthorityId: Int,
-    ): String {
-        val encodedTestEmail = URLEncoder.encode(testEmail, "UTF-8")
-        return "email=$encodedTestEmail&confirmEmail=$encodedTestEmail&localAuthorityId=$localAuthorityId"
     }
 }

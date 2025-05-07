@@ -25,14 +25,14 @@ import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 
 @PreAuthorize("hasRole('SYSTEM_OPERATOR')")
 @Controller
-@RequestMapping("/$SYSTEM_OPERATOR_PATH_SEGMENT")
+@RequestMapping("/$SYSTEM_OPERATOR_PATH_SEGMENT/$INVITE_LA_ADMIN_PATH_SEGMENT")
 class InviteLocalAuthorityAdminController(
     private val localAuthorityService: LocalAuthorityService,
     private val invitationEmailSender: EmailNotificationService<LocalAuthorityAdminInvitationEmail>,
     private val invitationService: LocalAuthorityInvitationService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
-    @GetMapping("/$INVITE_LA_ADMIN_PATH_SEGMENT")
+    @GetMapping
     fun inviteLocalAuthorityAdmin(model: Model): String {
         addSelectOptionsToModel(model)
         model.addAttribute("inviteLocalAuthorityAdminModel", InviteLocalAuthorityAdminModel())
@@ -40,7 +40,7 @@ class InviteLocalAuthorityAdminController(
         return "inviteLocalAuthorityAdminUser"
     }
 
-    @PostMapping("/$INVITE_LA_ADMIN_PATH_SEGMENT", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
+    @PostMapping("", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
     fun sendInvitation(
         model: Model,
         @Valid
@@ -61,7 +61,7 @@ class InviteLocalAuthorityAdminController(
                 invitationService.createInvitationToken(
                     inviteLocalAuthorityAdminModel.email,
                     localAuthority,
-                    admin = true,
+                    invitedAsAdmin = true,
                 )
             val invitationLinkAddress = absoluteUrlProvider.buildInvitationUri(token)
             invitationEmailSender.sendEmail(
@@ -88,10 +88,12 @@ class InviteLocalAuthorityAdminController(
         model.addAttribute("selectOptions", localAuthoritiesSelectOptions)
     }
 
-    @GetMapping("/$INVITE_LA_ADMIN_PATH_SEGMENT/$CONFIRMATION_PATH_SEGMENT")
+    @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun confirmation(): String = "inviteLocalAuthorityAdminSuccess"
 
     companion object {
         const val INVITE_LA_ADMIN_ROUTE = "/$SYSTEM_OPERATOR_PATH_SEGMENT/$INVITE_LA_ADMIN_PATH_SEGMENT"
+
+        const val INVITE_LA_ADMIN_CONFIRMATION_ROUTE = "$INVITE_LA_ADMIN_ROUTE/$CONFIRMATION_PATH_SEGMENT"
     }
 }

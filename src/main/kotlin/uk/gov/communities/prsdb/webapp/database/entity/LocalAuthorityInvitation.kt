@@ -24,7 +24,7 @@ class LocalAuthorityInvitation(
     lateinit var invitedEmail: String
         private set
 
-    @Column
+    @Column(nullable = false)
     var invitedAsAdmin: Boolean = false
 
     @ManyToOne(optional = false)

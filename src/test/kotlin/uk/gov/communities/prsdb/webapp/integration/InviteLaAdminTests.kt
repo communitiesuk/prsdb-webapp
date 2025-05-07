@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.jdbc.Sql
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminSuccessPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import java.net.URI
 
@@ -19,7 +19,7 @@ class InviteLaAdminTests : IntegrationTest() {
 
         val invitePage = navigator.goToInviteLaAdmin()
         invitePage.fillInFormAndSubmit("ISLE OF ", "ISLE OF MAN", "admin@example.com", "admin@example.com")
-        assertPageIs(page, InviteLaAdminSuccessPage::class)
+        assertPageIs(page, InviteLaAdminConfirmationPage::class)
     }
 
     @Test

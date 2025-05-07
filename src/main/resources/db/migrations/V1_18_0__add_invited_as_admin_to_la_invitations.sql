@@ -1,5 +1,5 @@
 ALTER TABLE local_authority_invitation
-    ADD COLUMN invited_as_admin BOOLEAN;
+    ADD COLUMN invited_as_admin BOOLEAN NOT NULL DEFAULT false;
 
 DROP VIEW IF EXISTS local_authority_user_or_invitation;
 
