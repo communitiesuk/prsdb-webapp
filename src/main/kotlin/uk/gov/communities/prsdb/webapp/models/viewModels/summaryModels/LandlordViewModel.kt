@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 import kotlinx.datetime.toKotlinInstant
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.UPDATE_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
-import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
@@ -53,14 +53,14 @@ class LandlordViewModel(
                 addRow(
                     "landlordDetails.personalDetails.name",
                     landlord.name,
-                    if (!landlord.isVerified) "$UPDATE_ROUTE/${UpdateLandlordDetailsStepId.UpdateName.urlPathSegment}" else null,
+                    if (!landlord.isVerified) "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.UpdateName.urlPathSegment}" else null,
                     // TODO PRSD-1101: Set to withChangeLinks
                     withChangeLinks = false,
                 )
                 addRow(
                     "landlordDetails.personalDetails.dateOfBirth",
                     landlord.dateOfBirth,
-                    if (!landlord.isVerified) "$UPDATE_ROUTE/${UpdateLandlordDetailsStepId.UpdateDateOfBirth.urlPathSegment}" else null,
+                    if (!landlord.isVerified) "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.UpdateDateOfBirth.urlPathSegment}" else null,
                     // TODO PRSD-1102: Set to withChangeLinks
                     withChangeLinks = false,
                 )
@@ -73,14 +73,14 @@ class LandlordViewModel(
                 addRow(
                     "landlordDetails.personalDetails.emailAddress",
                     landlord.email,
-                    "$UPDATE_ROUTE/${UpdateLandlordDetailsStepId.UpdateEmail.urlPathSegment}",
+                    "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.UpdateEmail.urlPathSegment}",
                     // TODO PRSD-1103: Set to withChangeLinks
                     withChangeLinks = false,
                 )
                 addRow(
                     "landlordDetails.personalDetails.telephoneNumber",
                     landlord.phoneNumber,
-                    "$UPDATE_ROUTE/${UpdateLandlordDetailsStepId.UpdatePhoneNumber.urlPathSegment}",
+                    "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.UpdatePhoneNumber.urlPathSegment}",
                     // TODO PRSD-1105: Set to withChangeLinks
                     withChangeLinks = false,
                 )
@@ -95,7 +95,7 @@ class LandlordViewModel(
                     addRow(
                         "landlordDetails.personalDetails.contactAddress",
                         landlord.address.singleLineAddress,
-                        "$UPDATE_ROUTE/${UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment}",
+                        "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.LookupEnglandAndWalesAddress.urlPathSegment}",
                         // TODO PRSD-355: Set to withChangeLinks
                         withChangeLinks = false,
                     )

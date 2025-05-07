@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.steps
 
-enum class UpdateLandlordDetailsStepId(
+enum class LandlordDetailsUpdateStepId(
     override val urlPathSegment: String,
     override val groupIdentifier: UpdateLandlordDetailsStepGroupIdentifier,
 ) : GroupedStepId<UpdateLandlordDetailsStepGroupIdentifier> {
@@ -15,7 +15,7 @@ enum class UpdateLandlordDetailsStepId(
     ;
 
     companion object {
-        fun fromPathSegment(segment: String) = UpdateLandlordDetailsStepId.entries.find { it.urlPathSegment == segment }
+        fun fromPathSegment(segment: String) = LandlordDetailsUpdateStepId.entries.find { it.urlPathSegment == segment }
     }
 }
 

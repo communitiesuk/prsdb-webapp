@@ -12,9 +12,9 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
@@ -342,12 +342,12 @@ class JourneyDataBuilder(
     }
 
     fun withEmailAddressUpdate(newEmail: String): JourneyDataBuilder {
-        journeyData[UpdateLandlordDetailsStepId.UpdateEmail.urlPathSegment] = mapOf("emailAddress" to newEmail)
+        journeyData[LandlordDetailsUpdateStepId.UpdateEmail.urlPathSegment] = mapOf("emailAddress" to newEmail)
         return this
     }
 
     fun withNameUpdate(newName: String): JourneyDataBuilder {
-        journeyData[UpdateLandlordDetailsStepId.UpdateName.urlPathSegment] = mapOf("name" to newName)
+        journeyData[LandlordDetailsUpdateStepId.UpdateName.urlPathSegment] = mapOf("name" to newName)
         return this
     }
 

@@ -6,7 +6,7 @@ import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_LANDLORD_DETAILS_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDetailsUpdateJourney
-import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
@@ -32,7 +32,7 @@ class LandlordDetailsUpdateJourneyFactory(
 
     private fun getJourneyDataKey(stepName: String): String {
         val step =
-            UpdateLandlordDetailsStepId.fromPathSegment(stepName)
+            LandlordDetailsUpdateStepId.fromPathSegment(stepName)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid LandlordDetailsUpdateJourney step name: $stepName")
 
         return "$UPDATE_LANDLORD_DETAILS_URL-${step.groupIdentifier}"
