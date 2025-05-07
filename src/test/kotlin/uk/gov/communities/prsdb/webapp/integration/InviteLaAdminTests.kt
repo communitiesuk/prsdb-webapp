@@ -6,20 +6,30 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.jdbc.Sql
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminConfirmationPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import java.net.URI
 
 @Sql("/data-local.sql")
 class InviteLaAdminTests : IntegrationTest() {
     @Test
-    fun `inviting a new LA admin ends with a success page with a confirmation message`(page: Page) {
+    fun `inviting a new LA admin ends with a confirmation page`(page: Page) {
         whenever(absoluteUrlProvider.buildInvitationUri(anyString()))
             .thenReturn(URI("www.prsd.gov.uk/register-la-user/test-token"))
 
         val invitePage = navigator.goToInviteLaAdmin()
         invitePage.fillInFormAndSubmit("ISLE OF ", "ISLE OF MAN", "admin@example.com", "admin@example.com")
-        assertPageIs(page, InviteLaAdminConfirmationPage::class)
+
+        // Confirmation page
+        val confirmationPage = assertPageIs(page, InviteLaAdminConfirmationPage::class)
+        assertThat(confirmationPage.confirmationBanner).containsText("admin@example.com")
+        assertThat(confirmationPage.confirmationBanner).containsText("ISLE OF MAN")
+
+        // Invite another user
+        confirmationPage.inviteAnotherUserButton.clickAndWait()
+        assertPageIs(page, InviteLaAdminPage::class)
     }
 
     @Test
