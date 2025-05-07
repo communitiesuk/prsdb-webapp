@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -132,5 +134,55 @@ class LandlordRegistrationJourneyDataHelperTests {
         val addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(mockJourneyData, mockJourneyData.getLookedUpAddresses())
 
         assertEquals(expectedAddressDataModel, addressDataModel)
+    }
+
+    @Test
+    fun `isManualAddressChosen returns true if manual address is selected`() {
+        val journeyData =
+            journeyDataBuilder
+                .withLookedUpAddresses()
+                .withManualAddressSelected()
+                .build()
+
+        assertTrue(LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData))
+    }
+
+    @Test
+    fun `isManualAddressChosen returns true if passed an empty list of lookedUpAddresses`() {
+        val journeyData =
+            journeyDataBuilder
+                .withLookedUpAddresses()
+                .build()
+        val lookedUpAddresses = listOf<AddressDataModel>()
+
+        assertTrue(LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData, lookedUpAddresses = lookedUpAddresses))
+    }
+
+    @Test
+    fun `isManualAddressChosen returns false if passed a populated list of lookedUpAddresses and manual address was not selected`() {
+        val journeyData =
+            journeyDataBuilder
+                .withSelectedAddress("1 Street Address")
+                .build()
+        val lookedUpAddresses =
+            listOf(
+                AddressDataModel("1 Street Address"),
+            )
+
+        assertFalse(LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData, lookedUpAddresses = lookedUpAddresses))
+    }
+
+    @Test
+    fun `isManualAddressChosen returns true if JourneyData's lookedUpAddresses is an empty list`() {
+        val journeyData = journeyDataBuilder.withEmptyLookedUpAddresses().build()
+
+        assertTrue(LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData))
+    }
+
+    @Test
+    fun `isManualAddressChosen returns false if JourneyData's lookedUpAddresses is a populated list and manual address was not selected`() {
+        val journeyData = journeyDataBuilder.withSelectedAddress("1 Street Address").build()
+
+        assertFalse(LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData))
     }
 }

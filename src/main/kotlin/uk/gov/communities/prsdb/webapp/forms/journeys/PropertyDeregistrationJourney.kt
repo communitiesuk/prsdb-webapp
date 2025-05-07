@@ -144,7 +144,7 @@ class PropertyDeregistrationJourney(
             ),
         )
 
-        journeyDataService.clearJourneyDataFromSession()
+        journeyDataService.removeJourneyDataAndContextIdFromSession()
 
         return CONFIRMATION_PATH_SEGMENT
     }

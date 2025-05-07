@@ -4,8 +4,8 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
@@ -24,22 +24,22 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 class PropertyDeregistrationJourneyTests {
     val alwaysTrueValidator: AlwaysTrueValidator = AlwaysTrueValidator()
 
-    @MockBean
+    @MockitoBean
     private lateinit var mockJourneyDataService: JourneyDataService
 
-    @MockBean
+    @MockitoBean
     private lateinit var mockJourneyDataServiceFactory: JourneyDataServiceFactory
 
-    @MockBean
+    @MockitoBean
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
-    @MockBean
+    @MockitoBean
     private lateinit var mockPropertyDeregistrationService: PropertyDeregistrationService
 
-    @MockBean
+    @MockitoBean
     lateinit var mockConfirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmail>
 
-    @SpyBean
+    @MockitoSpyBean
     private lateinit var propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory
 
     @BeforeEach

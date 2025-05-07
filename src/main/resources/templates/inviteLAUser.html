@@ -32,7 +32,7 @@
             <input th:replace="~{fragments/forms/emailInput :: emailInput(#{addLAUser.form.primaryEmailLabel}, 'email', null)}">
             <input th:replace="~{fragments/forms/emailInput :: emailInput(#{addLAUser.form.confirmEmailLabel}, 'confirmEmail', null)}">
             <!--/*/ </th:block> /*/-->
-            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{addLAUser.form.submitButton})}"></button>
+            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.submit})}"></button>
         </form>
     </div>
 </main>

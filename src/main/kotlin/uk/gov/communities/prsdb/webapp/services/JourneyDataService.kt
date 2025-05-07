@@ -24,8 +24,9 @@ class JourneyDataService(
         session.setAttribute(journeyDataKey, journeyData)
     }
 
-    fun clearJourneyDataFromSession() {
-        session.setAttribute(journeyDataKey, null)
+    fun removeJourneyDataAndContextIdFromSession() {
+        session.removeAttribute(CONTEXT_ID)
+        session.removeAttribute(journeyDataKey)
     }
 
     fun getContextId(): Long? = session.getAttribute(CONTEXT_ID) as? Long
@@ -67,22 +68,23 @@ class JourneyDataService(
         return savedFormContext.id
     }
 
+    fun loadJourneyDataIntoSession(formContext: FormContext) {
+        setJourneyDataInSession(formContext.toJourneyData())
+        setContextId(formContext.id)
+    }
+
     fun loadJourneyDataIntoSession(contextId: Long) {
         val formContext =
             formContextRepository
                 .findById(contextId)
                 .orElseThrow { IllegalStateException("FormContext with ID $contextId not found") }!!
-        val loadedJourneyData =
-            objectToStringKeyedMap(objectMapper.readValue(formContext.context, Any::class.java)) ?: mapOf()
-        setJourneyDataInSession(loadedJourneyData)
-        setContextId(contextId)
+        loadJourneyDataIntoSession(formContext)
     }
 
     fun deleteJourneyData() {
-        val contextId = getContextId() ?: return
-        formContextRepository.deleteById(contextId)
+        val contextId = getContextId()
+        contextId?.let { formContextRepository.deleteById(it) }
 
-        session.removeAttribute(CONTEXT_ID)
-        clearJourneyDataFromSession()
+        removeJourneyDataAndContextIdFromSession()
     }
 }

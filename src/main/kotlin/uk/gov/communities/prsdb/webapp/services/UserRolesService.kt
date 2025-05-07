@@ -4,13 +4,16 @@ import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
+import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.SystemOperatorRepository
 
 @Service
 class UserRolesService(
     val landlordRepository: LandlordRepository,
     val localAuthorityUserRepository: LocalAuthorityUserRepository,
+    val systemOperatorRepository: SystemOperatorRepository,
 ) {
     fun getRolesForSubjectId(subjectId: String): List<String> {
         val roles = mutableListOf<String>()
@@ -26,6 +29,11 @@ class UserRolesService(
                 roles.add(ROLE_LA_ADMIN)
             }
             roles.add(ROLE_LA_USER)
+        }
+
+        val matchingSystemOperator = systemOperatorRepository.findByBaseUser_Id(subjectId)
+        if (matchingSystemOperator != null) {
+            roles.add(ROLE_SYSTEM_OPERATOR)
         }
 
         return roles

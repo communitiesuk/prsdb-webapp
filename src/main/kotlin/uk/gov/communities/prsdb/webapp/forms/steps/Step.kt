@@ -1,13 +1,15 @@
 package uk.gov.communities.prsdb.webapp.forms.steps
 
 import org.springframework.validation.BindingResult
+import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.forms.pages.AbstractPage
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
+import java.util.Optional
 
-class Step<T : StepId>(
+open class Step<T : StepId>(
     val id: T,
     val page: AbstractPage,
     val handleSubmitAndRedirect: ((journeyData: JourneyData, subPageNumber: Int?) -> String)? = null,
@@ -48,4 +50,17 @@ class Step<T : StepId>(
     }
 
     override fun toString() = id.toString()
+
+    companion object {
+        fun generateUrl(
+            stepId: StepId,
+            subPageNumber: Int?,
+        ): String =
+            UriComponentsBuilder
+                .newInstance()
+                .path(stepId.urlPathSegment)
+                .queryParamIfPresent("subpage", Optional.ofNullable(subPageNumber))
+                .build(true)
+                .toUriString()
+    }
 }

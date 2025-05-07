@@ -4,7 +4,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
-import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -18,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import java.security.Principal
-import java.util.Optional
 import kotlin.reflect.cast
 
 abstract class Journey<T : StepId>(
@@ -58,7 +56,7 @@ abstract class Journey<T : StepId>(
             return ModelAndView("redirect:$unreachableStepRedirect")
         }
         val prevStepDetails = getPrevStep(requestedStep, subPageNumber)
-        val prevStepUrl = prevStepDetails?.let { getStepUrl(it.step.id, it.subPageNumber) }
+        val prevStepUrl = prevStepDetails?.let { Step.generateUrl(it.step.id, it.subPageNumber) }
         val pageData =
             submittedPageData
                 ?: JourneyDataHelper.getPageData(journeyDataService.getJourneyDataFromSession(), requestedStep.name, subPageNumber)
@@ -119,7 +117,7 @@ abstract class Journey<T : StepId>(
         if (newStepId == null) {
             throw IllegalStateException("Cannot compute next step from step ${currentStep.id.urlPathSegment}")
         }
-        return getStepUrl(newStepId, newSubPageNumber)
+        return Step.generateUrl(newStepId, newSubPageNumber)
     }
 
     override fun iterator(): Iterator<StepDetails<T>> =
@@ -166,15 +164,4 @@ abstract class Journey<T : StepId>(
         zipWithNext()
             .singleOrNull { (_, next) -> next.step == targetStep && next.subPageNumber == targetSubPageNumber }
             ?.first
-
-    private fun getStepUrl(
-        stepId: T,
-        subPageNumber: Int?,
-    ): String =
-        UriComponentsBuilder
-            .newInstance()
-            .path(stepId.urlPathSegment)
-            .queryParamIfPresent("subpage", Optional.ofNullable(subPageNumber))
-            .build(true)
-            .toUriString()
 }

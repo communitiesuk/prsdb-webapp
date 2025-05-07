@@ -5,6 +5,6 @@ INSERT INTO local_authority_user (subject_identifier, is_manager, local_authorit
                                   name, email)
 VALUES ('urn:fdc:gov.uk:2022:UVWXY', true, 1, '10/14/24', '10/14/24', 'Mock User', 'test@example.com');
 
-INSERT INTO local_authority_invitation (invited_email, inviting_authority_id, token)
-VALUES ('invited.user@example.com', 1, 'e98583f2-91b1-46ed-afb1-6cfcbaf97e63'),
-       ('z.user@example.com', 1, 'e98583f2-91b1-46ed-afb1-6cfcbaf97e64');
+INSERT INTO local_authority_invitation (invited_email, inviting_authority_id, token, invited_as_admin)
+VALUES ('invited.user@example.com', 1, 'e98583f2-91b1-46ed-afb1-6cfcbaf97e63', false),
+       ('z.user@example.com', 1, 'e98583f2-91b1-46ed-afb1-6cfcbaf97e64', false);

@@ -876,7 +876,7 @@ class JourneyTests {
             TestJourneyFactory(journeyType, mockJourneyDataService).create(principalName)
 
             // Assert
-            verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any())
+            verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any<Long>())
         }
 
         @Test
@@ -906,7 +906,7 @@ class JourneyTests {
             TestJourneyFactory(JourneyType.PROPERTY_REGISTRATION, mockJourneyDataService).create(principalName)
 
             // Assert
-            verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any())
+            verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any<Long>())
         }
     }
 }

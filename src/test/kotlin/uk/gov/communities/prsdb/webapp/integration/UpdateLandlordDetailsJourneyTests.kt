@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.DateOfBirthFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.EmailFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NameFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NoAddressFoundFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.PhoneNumberFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhoneNumber
@@ -231,6 +232,33 @@ class UpdateLandlordDetailsJourneyTests : IntegrationTest() {
             // Check changes have occurred
             val newSingleLineAddress = AddressDataModel.manualAddressDataToSingleLineAddress(newFirstLine, newTown, newPostcode)
             assertThat(landlordDetailsPage.personalDetailsSummaryList.addressRow.value).containsText(newSingleLineAddress)
+        }
+
+        @Test
+        fun `If Lookup Address finds no addresses, user can search again or enter address manually via the No Address Found step`(
+            page: Page,
+        ) {
+            // Lookup address finds no results
+            val houseNumber = "15"
+            val postcode = "AB1 2CD"
+            whenever(osPlacesClient.search(houseNumber, postcode)).thenReturn("{}")
+            val lookupAddressPage = navigator.goToUpdateLandlordDetailsLookupAddressPage()
+            lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
+
+            // redirect to noAddressFoundPage
+            val noAddressFoundPage = assertPageIs(page, NoAddressFoundFormPageUpdateLandlordDetails::class)
+            assertThat(noAddressFoundPage.heading).containsText(houseNumber)
+            assertThat(noAddressFoundPage.heading).containsText(postcode)
+
+            // Search again
+            noAddressFoundPage.searchAgain.clickAndWait()
+            val lookupAddressPageAgain = assertPageIs(page, LookupAddressFormPageUpdateLandlordDetails::class)
+            lookupAddressPageAgain.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
+
+            // Submit no address found page
+            val noAddressFoundPageAgain = assertPageIs(page, NoAddressFoundFormPageUpdateLandlordDetails::class)
+            noAddressFoundPageAgain.form.submit()
+            assertPageIs(page, ManualAddressFormPageUpdateLandlordDetails::class)
         }
     }
 

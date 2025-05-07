@@ -22,10 +22,6 @@
                     <h2 class="govuk-heading-m" th:text="#{propertyDetails.heading}">propertyDetails.heading</h2>
                     <p class="govuk-hint" th:text="#{propertyDetails.description}">propertyDetails.description</p>
                     <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.propertyRecord})}"></dl>
-
-                    <form th:action="@{''}" method="post" novalidate th:if="${shouldShowSubmitButton}">
-                        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton('TODO: PRSD-355 Confirmation page for update property details')}"></button>
-                    </form>
                 </div>
 
                 <div  id="landlord-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('landlord-details', ~{::#landlord-details-panel/content()})}">

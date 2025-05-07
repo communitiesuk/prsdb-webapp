@@ -74,13 +74,6 @@ class JourneyDataServiceTests {
 
             verify(mockHttpSession).setAttribute(journeyDataKey, journeyData)
         }
-
-        @Test
-        fun `clearJourneyDataFromSession clears the journey data from session`() {
-            journeyDataService.clearJourneyDataFromSession()
-
-            verify(mockHttpSession).setAttribute(journeyDataKey, null)
-        }
     }
 
     @Nested
@@ -204,31 +197,29 @@ class JourneyDataServiceTests {
 
     @Nested
     inner class LoadJourneyDataIntoSessionTests {
-        @Test
-        fun `stores the new journey data in the session`() {
-            // Function Args
-            val journeyType = JourneyType.LANDLORD_REGISTRATION
+        lateinit var journeyData: JourneyData
+        lateinit var formContext: FormContext
 
+        @BeforeEach
+        fun setUp() {
             // JourneyData
             val pageName = "testPage"
             val key = "testKey"
             val value = "testValue"
-            val journeyData: JourneyData =
+            journeyData =
                 mapOf(
                     pageName to mapOf(key to value),
                 )
             val serializedJourneyData = ObjectMapper().writeValueAsString(journeyData)
 
-            // OneLoginUser
-            val oneLoginUser = OneLoginUser()
-
             // FormContext
-            val contextId: Long = 123
-            val formContext = FormContext(journeyType, serializedJourneyData, oneLoginUser)
-            whenever(mockFormContextRepository.findById(contextId)).thenReturn(Optional.ofNullable(formContext))
+            formContext = FormContext(JourneyType.PROPERTY_REGISTRATION, serializedJourneyData, OneLoginUser())
+        }
 
+        @Test
+        fun `saves journey data to session`() {
             // Act
-            journeyDataService.loadJourneyDataIntoSession(contextId)
+            journeyDataService.loadJourneyDataIntoSession(formContext)
             val formContextCaptor = captor<JourneyData>()
             verify(mockHttpSession).setAttribute(eq(journeyDataKey), formContextCaptor.capture())
             val contextIdCaptor = captor<Long>()
@@ -236,19 +227,46 @@ class JourneyDataServiceTests {
 
             // Assert
             assertEquals(journeyData, formContextCaptor.value)
-            assertEquals(contextId, contextIdCaptor.value)
+            assertEquals(formContext.id, contextIdCaptor.value)
         }
 
-        @Test
-        fun `throws an illegal state exception if form context is missing`() {
-            // Arrange
-            val contextId: Long = 123
-            whenever(mockFormContextRepository.findById(contextId)).thenReturn(Optional.ofNullable(null))
+        @Nested
+        inner class WithOnlyContextIdTests {
+            @Test
+            fun `calls loadJourneyDataIntoSession when form context exists`() {
+                // Arrange
+                whenever(mockFormContextRepository.findById(formContext.id)).thenReturn(Optional.ofNullable(formContext))
 
-            // Act and Assert
-            assertThrows<IllegalStateException> {
-                journeyDataService.loadJourneyDataIntoSession(contextId)
+                // Act
+                journeyDataService.loadJourneyDataIntoSession(formContext.id)
+                val formContextCaptor = captor<JourneyData>()
+                verify(mockHttpSession).setAttribute(eq(journeyDataKey), formContextCaptor.capture())
+                val contextIdCaptor = captor<Long>()
+                verify(mockHttpSession).setAttribute(eq(CONTEXT_ID), contextIdCaptor.capture())
+
+                // Assert
+                assertEquals(journeyData, formContextCaptor.value)
+                assertEquals(formContext.id, contextIdCaptor.value)
+            }
+
+            @Test
+            fun `throws an illegal state exception if form context is missing`() {
+                // Arrange
+                val formContextId: Long = 123
+                whenever(mockFormContextRepository.findById(formContextId)).thenReturn(Optional.ofNullable(null))
+
+                // Act and Assert
+                assertThrows<IllegalStateException> {
+                    journeyDataService.loadJourneyDataIntoSession(formContextId)
+                }
             }
         }
+    }
+
+    @Test
+    fun `removeJourneyDataAndContextIdFromSession removes journeyData and contextId from session`() {
+        journeyDataService.removeJourneyDataAndContextIdFromSession()
+        verify(mockHttpSession).removeAttribute(CONTEXT_ID)
+        verify(mockHttpSession).removeAttribute(journeyDataKey)
     }
 }

@@ -9,6 +9,7 @@ enum class UpdateLandlordDetailsStepId(
     UpdateName("name"),
     UpdatePhoneNumber("phone-number"),
     LookupEnglandAndWalesAddress("lookup-address"),
+    NoAddressFound("no-address-found"),
     SelectEnglandAndWalesAddress("select-address"),
     ManualEnglandAndWalesAddress("manual-address"),
     UpdateDateOfBirth("date-of-birth"),

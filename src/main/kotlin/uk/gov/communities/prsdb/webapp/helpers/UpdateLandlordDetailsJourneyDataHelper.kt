@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.UpdateLandlordDetailsJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddress
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DateOfBirthFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
@@ -47,7 +48,7 @@ class UpdateLandlordDetailsJourneyDataHelper : JourneyDataHelper() {
                     SelectAddressFormModel::address.name,
                 )
 
-            return if (selectedAddress == MANUAL_ADDRESS_CHOSEN) {
+            return if (journeyData.getLookedUpAddresses().isEmpty() || selectedAddress == MANUAL_ADDRESS_CHOSEN) {
                 getManualAddress(journeyData, UpdateLandlordDetailsStepId.ManualEnglandAndWalesAddress.urlPathSegment)
             } else if (selectedAddress != null) {
                 journeyData.getLookedUpAddress(selectedAddress)

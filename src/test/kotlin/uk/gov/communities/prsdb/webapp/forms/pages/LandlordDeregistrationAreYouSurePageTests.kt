@@ -9,8 +9,8 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.whenever
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpStatus
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
@@ -23,7 +23,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import kotlin.test.assertNotNull
 
 class LandlordDeregistrationAreYouSurePageTests {
-    @MockBean
+    @MockitoBean
     private lateinit var journeyDataService: JourneyDataService
 
     private lateinit var page: LandlordDeregistrationAreYouSurePage

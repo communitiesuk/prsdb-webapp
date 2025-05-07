@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 import kotlinx.datetime.toKotlinInstant
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -17,6 +18,8 @@ class PropertyDetailsViewModel(
     landlordDetailsUrl: String = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
 ) {
     val address: String = propertyOwnership.property.address.singleLineAddress
+
+    private val baseChangeLink = PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnership.id)
 
     val isTenantedKey: String = MessageKeyConverter.convert(propertyOwnership.isOccupied)
 
@@ -67,7 +70,7 @@ class PropertyDetailsViewModel(
                 addRow(
                     "propertyDetails.propertyRecord.ownershipType",
                     MessageKeyConverter.convert(propertyOwnership.ownershipType),
-                    UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment,
+                    "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment}",
                     withChangeLinks,
                 )
                 addRow(
@@ -79,27 +82,31 @@ class PropertyDetailsViewModel(
                             listOf(MessageKeyConverter.convert(it.licenseType), it.licenseNumber)
                         }
                     } ?: MessageKeyConverter.convert(LicensingType.NO_LICENSING),
-                    UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment,
-                    withChangeLinks,
+                    "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment}",
+                    // TODO PRSD-1108: Set to withChangeLinks when ticket has been implemented
+                    withChangeLinks = false,
                 )
                 addRow(
                     "propertyDetails.propertyRecord.occupied",
                     isTenantedKey,
-                    UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment,
-                    withChangeLinks,
+                    "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment}",
+                    // TODO PRSD-1109: Set to withChangeLinks when ticket has been implemented
+                    withChangeLinks = false,
                 )
                 if (propertyOwnership.isOccupied) {
                     addRow(
                         "propertyDetails.propertyRecord.numberOfHouseholds",
                         propertyOwnership.currentNumHouseholds,
-                        UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment,
-                        withChangeLinks,
+                        "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment}",
+                        // TODO PRSD-1109: Set to withChangeLinks when ticket has been implemented
+                        withChangeLinks = false,
                     )
                     addRow(
                         "propertyDetails.propertyRecord.numberOfPeople",
                         propertyOwnership.currentNumTenants,
-                        UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment,
-                        withChangeLinks,
+                        "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment}",
+                        // TODO PRSD-1109: Set to withChangeLinks when ticket has been implemented
+                        withChangeLinks = false,
                     )
                 }
             }.toList()

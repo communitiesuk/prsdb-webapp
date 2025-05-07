@@ -1,11 +1,15 @@
 package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions
 
 import kotlinx.datetime.yearsUntil
+import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
@@ -41,5 +45,35 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                     PropertyComplianceStepId.GasSafetyExemptionReason.urlPathSegment,
                     GasSafetyExemptionReasonFormModel::exemptionReason.name,
                 )?.let { it == GasSafetyExemptionReason.OTHER }
+
+        fun JourneyData.getHasEICR() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.EICR.urlPathSegment,
+                EicrFormModel::hasCert.name,
+            )
+
+        fun JourneyData.getIsEicrOutdated(): Boolean? {
+            val issueDate =
+                this.getFieldSetLocalDateValue(PropertyComplianceStepId.EicrIssueDate.urlPathSegment)
+                    ?: return null
+            val today = DateTimeHelper().getCurrentDateInUK()
+            return issueDate.yearsUntil(today) >= 5
+        }
+
+        fun JourneyData.getHasEicrExemption() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.EicrExemption.urlPathSegment,
+                EicrExemptionFormModel::hasExemption.name,
+            )
+
+        fun JourneyData.getIsEicrExemptionReasonOther() =
+            JourneyDataHelper
+                .getFieldEnumValue<EicrExemptionReason>(
+                    this,
+                    PropertyComplianceStepId.EicrExemptionReason.urlPathSegment,
+                    EicrExemptionReasonFormModel::exemptionReason.name,
+                )?.let { it == EicrExemptionReason.OTHER }
     }
 }

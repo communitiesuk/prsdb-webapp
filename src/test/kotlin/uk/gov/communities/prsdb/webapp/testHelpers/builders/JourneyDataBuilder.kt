@@ -5,6 +5,7 @@ import kotlinx.serialization.json.Json
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -16,6 +17,9 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
@@ -116,6 +120,22 @@ class JourneyDataBuilder(
     ): JourneyDataBuilder {
         val lookupAddressKey = if (isContactAddress) "lookup-contact-address" else "lookup-address"
         journeyData[lookupAddressKey] = mapOf("houseNameOrNumber" to houseNameOrNumber, "postcode" to postcode)
+        return this
+    }
+
+    fun withEmptyLookedUpAddresses(): JourneyDataBuilder {
+        journeyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY] = "[]"
+        return this
+    }
+
+    fun withLookedUpAddresses(): JourneyDataBuilder {
+        journeyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY] = "[{\"singleLineAddress\":\"1 Street Address, City, AB1 2CD\"}]"
+        return this
+    }
+
+    fun withManualAddressSelected(isContactAddress: Boolean = false): JourneyDataBuilder {
+        val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
+        journeyData[selectAddressKey] = mapOf("address" to MANUAL_ADDRESS_CHOSEN)
         return this
     }
 
@@ -434,6 +454,33 @@ class JourneyDataBuilder(
     fun withGasSafetyCertExemptionReason(gasSafetyCertExemptionReason: GasSafetyExemptionReason): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafetyExemptionReason.urlPathSegment] =
             mapOf(GasSafetyExemptionReasonFormModel::exemptionReason.name to gasSafetyCertExemptionReason)
+        return this
+    }
+
+    fun withEicrStatus(hasEICR: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EICR.urlPathSegment] = mapOf(EicrFormModel::hasCert.name to hasEICR)
+        return this
+    }
+
+    fun withEicrIssueDate(issueDate: LocalDate): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EicrIssueDate.urlPathSegment] =
+            mapOf(
+                TodayOrPastDateFormModel::day.name to issueDate.dayOfMonth,
+                TodayOrPastDateFormModel::month.name to issueDate.monthValue,
+                TodayOrPastDateFormModel::year.name to issueDate.year,
+            )
+        return this
+    }
+
+    fun withEicrExemptionStatus(hasEicrExemption: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EicrExemption.urlPathSegment] =
+            mapOf(EicrExemptionFormModel::hasExemption.name to hasEicrExemption)
+        return this
+    }
+
+    fun withEicrExemptionReason(eicrExemptionReason: EicrExemptionReason): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EicrExemptionReason.urlPathSegment] =
+            mapOf(EicrExemptionReasonFormModel::exemptionReason.name to eicrExemptionReason)
         return this
     }
 }

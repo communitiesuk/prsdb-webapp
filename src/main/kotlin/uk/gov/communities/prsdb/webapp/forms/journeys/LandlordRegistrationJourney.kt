@@ -14,9 +14,11 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.VerifyIdentityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
+import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -28,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailForm
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NonEnglandOrWalesAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
@@ -108,10 +111,12 @@ class LandlordRegistrationJourney(
             LandlordRegistrationStepId.LookupAddress,
             setOf(
                 lookupAddressStep(),
+                noAddressFoundStep(),
                 selectAddressStep(),
                 manualAddressStep(),
                 nonEnglandOrWalesAddressStep(),
                 lookupContactAddressStep(),
+                noContactAddressFoundStep(),
                 selectContactAddressStep(),
                 manualContactAddressStep(),
             ),
@@ -270,7 +275,7 @@ class LandlordRegistrationJourney(
         )
 
     private fun lookupAddressStep() =
-        Step(
+        LookupAddressStep(
             id = LandlordRegistrationStepId.LookupAddress,
             page =
                 Page(
@@ -289,9 +294,39 @@ class LandlordRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
-            nextAction = { _, _ -> Pair(LandlordRegistrationStepId.SelectAddress, null) },
+            nextStepIfAddressesFound = LandlordRegistrationStepId.SelectAddress,
+            nextStepIfNoAddressesFound = LandlordRegistrationStepId.NoAddressFound,
+            addressLookupService = addressLookupService,
+            journeyDataService = journeyDataService,
             saveAfterSubmit = false,
         )
+
+    private fun noAddressFoundStep() =
+        Step(
+            id = LandlordRegistrationStepId.NoAddressFound,
+            page =
+                Page(
+                    formModel = NoInputFormModel::class,
+                    templateName = "noAddressFoundPage",
+                    content =
+                        mapOf(
+                            "title" to "registerAsALandlord.title",
+                            "postcode" to getHouseNameOrNumberAndPostcode(LandlordRegistrationStepId.LookupAddress).second,
+                            "houseNameOrNumber" to getHouseNameOrNumberAndPostcode(LandlordRegistrationStepId.LookupAddress).first,
+                            "searchAgainUrl" to
+                                "/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.LookupAddress.urlPathSegment}",
+                        ),
+                    shouldDisplaySectionHeader = true,
+                ),
+            nextAction = { _, _ -> Pair(LandlordRegistrationStepId.ManualAddress, null) },
+        )
+
+    private fun getHouseNameOrNumberAndPostcode(lookupAddressStepId: LandlordRegistrationStepId) =
+        JourneyDataHelper
+            .getLookupAddressHouseNameOrNumberAndPostcode(
+                journeyDataService.getJourneyDataFromSession(),
+                lookupAddressStepId.urlPathSegment,
+            ) ?: Pair("", "")
 
     private fun selectAddressStep() =
         Step(
@@ -310,7 +345,6 @@ class LandlordRegistrationJourney(
                                 LandlordRegistrationStepId.LookupAddress.urlPathSegment,
                         ),
                     lookupAddressPathSegment = LandlordRegistrationStepId.LookupAddress.urlPathSegment,
-                    addressLookupService = addressLookupService,
                     journeyDataService = journeyDataService,
                     displaySectionHeader = true,
                 ),
@@ -366,7 +400,7 @@ class LandlordRegistrationJourney(
         )
 
     private fun lookupContactAddressStep() =
-        Step(
+        LookupAddressStep(
             id = LandlordRegistrationStepId.LookupContactAddress,
             page =
                 Page(
@@ -384,8 +418,31 @@ class LandlordRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
-            nextAction = { _, _ -> Pair(LandlordRegistrationStepId.SelectContactAddress, null) },
+            nextStepIfAddressesFound = LandlordRegistrationStepId.SelectContactAddress,
+            nextStepIfNoAddressesFound = LandlordRegistrationStepId.NoContactAddressFound,
+            addressLookupService = addressLookupService,
+            journeyDataService = journeyDataService,
             saveAfterSubmit = false,
+        )
+
+    private fun noContactAddressFoundStep() =
+        Step(
+            id = LandlordRegistrationStepId.NoContactAddressFound,
+            page =
+                Page(
+                    formModel = NoInputFormModel::class,
+                    templateName = "noAddressFoundPage",
+                    content =
+                        mapOf(
+                            "title" to "registerAsALandlord.title",
+                            "postcode" to getHouseNameOrNumberAndPostcode(LandlordRegistrationStepId.LookupContactAddress).second,
+                            "houseNameOrNumber" to getHouseNameOrNumberAndPostcode(LandlordRegistrationStepId.LookupContactAddress).first,
+                            "searchAgainUrl" to
+                                "/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.LookupContactAddress.urlPathSegment}",
+                        ),
+                    shouldDisplaySectionHeader = true,
+                ),
+            nextAction = { _, _ -> Pair(LandlordRegistrationStepId.ManualContactAddress, null) },
         )
 
     private fun selectContactAddressStep() =
@@ -405,7 +462,6 @@ class LandlordRegistrationJourney(
                                 LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
                         ),
                     lookupAddressPathSegment = LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
-                    addressLookupService = addressLookupService,
                     journeyDataService = journeyDataService,
                     displaySectionHeader = true,
                 ),
@@ -523,7 +579,7 @@ class LandlordRegistrationJourney(
             ),
         )
 
-        journeyDataService.clearJourneyDataFromSession()
+        journeyDataService.removeJourneyDataAndContextIdFromSession()
 
         refreshUserRoles()
 

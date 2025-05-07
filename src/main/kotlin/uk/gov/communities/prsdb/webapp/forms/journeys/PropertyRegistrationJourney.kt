@@ -4,6 +4,7 @@ import jakarta.persistence.EntityExistsException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.FIND_LOCAL_AUTHORITY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -16,10 +17,12 @@ import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationCheckAnsw
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationNumberOfPeoplePage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
+import uk.gov.communities.prsdb.webapp.forms.steps.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
+import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -108,6 +111,7 @@ class PropertyRegistrationJourney(
             RegisterPropertyStepId.LookupAddress,
             setOf(
                 lookupAddressStep(),
+                noAddressFoundStep(),
                 selectAddressStep(),
                 alreadyRegisteredStep(),
                 manualAddressStep(),
@@ -140,7 +144,7 @@ class PropertyRegistrationJourney(
         )
 
     private fun lookupAddressStep() =
-        Step(
+        LookupAddressStep(
             id = RegisterPropertyStepId.LookupAddress,
             page =
                 Page(
@@ -159,7 +163,10 @@ class PropertyRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
-            nextAction = { _, _ -> Pair(RegisterPropertyStepId.SelectAddress, null) },
+            nextStepIfAddressesFound = RegisterPropertyStepId.SelectAddress,
+            nextStepIfNoAddressesFound = RegisterPropertyStepId.NoAddressFound,
+            addressLookupService = addressLookupService,
+            journeyDataService = journeyDataService,
         )
 
     private fun selectAddressStep() =
@@ -179,7 +186,6 @@ class PropertyRegistrationJourney(
                                 RegisterPropertyStepId.LookupAddress.urlPathSegment,
                         ),
                     lookupAddressPathSegment = RegisterPropertyStepId.LookupAddress.urlPathSegment,
-                    addressLookupService = addressLookupService,
                     journeyDataService = journeyDataService,
                     displaySectionHeader = true,
                 ),
@@ -208,6 +214,34 @@ class PropertyRegistrationJourney(
                     selectedAddressPathSegment = RegisterPropertyStepId.SelectAddress.urlPathSegment,
                 ),
         )
+
+    private fun noAddressFoundStep() =
+        Step(
+            id = RegisterPropertyStepId.NoAddressFound,
+            page =
+                Page(
+                    formModel = NoInputFormModel::class,
+                    templateName = "noAddressFoundPage",
+                    content =
+                        mapOf(
+                            "title" to "registerProperty.title",
+                            "postcode" to getHouseNameOrNumberAndPostcode().second,
+                            "houseNameOrNumber" to getHouseNameOrNumberAndPostcode().first,
+                            "searchAgainUrl" to
+                                "/$REGISTER_PROPERTY_JOURNEY_URL/" +
+                                RegisterPropertyStepId.LookupAddress.urlPathSegment,
+                        ),
+                    shouldDisplaySectionHeader = true,
+                ),
+            nextAction = { _, _ -> Pair(RegisterPropertyStepId.ManualAddress, null) },
+        )
+
+    private fun getHouseNameOrNumberAndPostcode() =
+        JourneyDataHelper
+            .getLookupAddressHouseNameOrNumberAndPostcode(
+                journeyDataService.getJourneyDataFromSession(),
+                RegisterPropertyStepId.LookupAddress.urlPathSegment,
+            ) ?: Pair("", "")
 
     private fun manualAddressStep() =
         Step(
@@ -244,6 +278,7 @@ class PropertyRegistrationJourney(
                             "fieldSetHeading" to "forms.selectLocalAuthority.fieldSetHeading",
                             "fieldSetHint" to "forms.selectLocalAuthority.fieldSetHint",
                             "selectLabel" to "forms.selectLocalAuthority.select.label",
+                            "findLocalAuthorityUrl" to FIND_LOCAL_AUTHORITY_URL,
                         ),
                     localAuthorityService = localAuthorityService,
                     displaySectionHeader = true,
@@ -321,6 +356,7 @@ class PropertyRegistrationJourney(
                                         hintMsgKey = "forms.ownershipType.radios.option.leasehold.hint",
                                     ),
                                 ),
+                            "submitButtonText" to "forms.buttons.saveAndContinue",
                         ),
                     shouldDisplaySectionHeader = true,
                 ),

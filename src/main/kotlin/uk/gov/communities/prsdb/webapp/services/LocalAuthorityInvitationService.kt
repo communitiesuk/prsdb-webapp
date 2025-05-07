@@ -17,9 +17,10 @@ class LocalAuthorityInvitationService(
     fun createInvitationToken(
         email: String,
         authority: LocalAuthority,
+        invitedAsAdmin: Boolean = false,
     ): String {
         val token = UUID.randomUUID()
-        invitationRepository.save(LocalAuthorityInvitation(token, email, authority))
+        invitationRepository.save(LocalAuthorityInvitation(token, email, authority, invitedAsAdmin))
         return token.toString()
     }
 
