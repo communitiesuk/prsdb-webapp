@@ -102,7 +102,7 @@ class UpdateLandlordDetailsJourney(
                         BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                     ),
                 ),
-            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { journeyData, _, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
         )
 
     private val emailStep =
@@ -122,7 +122,7 @@ class UpdateLandlordDetailsJourney(
                             BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
+            handleSubmitAndRedirect = { _, _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
             nextAction = { journeyData, _ ->
                 if (UpdateLandlordDetailsJourneyDataHelper.getIsIdentityVerified(journeyData)) {
                     Pair(UpdateLandlordDetailsStepId.UpdatePhoneNumber, null)
@@ -150,7 +150,7 @@ class UpdateLandlordDetailsJourney(
                             BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
+            handleSubmitAndRedirect = { _, _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
             nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.UpdateDateOfBirth, null) },
             saveAfterSubmit = false,
         )
@@ -171,7 +171,7 @@ class UpdateLandlordDetailsJourney(
                             BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
+            handleSubmitAndRedirect = { _, _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
             nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.UpdatePhoneNumber, null) },
             saveAfterSubmit = false,
         )
@@ -194,7 +194,7 @@ class UpdateLandlordDetailsJourney(
                             BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
+            handleSubmitAndRedirect = { _, _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
             nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress, null) },
             saveAfterSubmit = false,
         )

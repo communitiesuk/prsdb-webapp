@@ -67,6 +67,7 @@ class PropertyRegistrationJourney(
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
+    override val checkYourAnswersStepId = RegisterPropertyStepId.CheckAnswers
     override val sections =
         listOf(
             JourneySection(registerPropertyTasks(), "registerProperty.taskList.register.heading", "register-property"),
@@ -79,6 +80,11 @@ class PropertyRegistrationJourney(
             "registerProperty.taskList.heading",
             listOf("registerProperty.taskList.subtitle"),
         )
+
+    override fun isDestinationInSameGroupAsStep(
+        destinationStep: RegisterPropertyStepId?,
+        groupStep: RegisterPropertyStepId?,
+    ): Boolean = destinationStep != null && destinationStep.groupIdentifier == groupStep?.groupIdentifier
 
     private fun registerPropertyTasks(): List<JourneyTask<RegisterPropertyStepId>> =
         listOf(
@@ -571,7 +577,7 @@ class PropertyRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
-            handleSubmitAndRedirect = { _, _ -> checkAnswersSubmitAndRedirect() },
+            handleSubmitAndRedirect = { _, _, _ -> checkAnswersSubmitAndRedirect() },
         )
 
     private fun occupancyNextAction(journeyData: JourneyData): Pair<RegisterPropertyStepId, Int?> =

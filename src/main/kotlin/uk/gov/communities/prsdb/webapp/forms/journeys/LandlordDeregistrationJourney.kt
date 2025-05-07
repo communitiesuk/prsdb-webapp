@@ -83,7 +83,7 @@ class LandlordDeregistrationJourney(
                     journeyDataService = journeyDataService,
                 ),
             // handleSubmitAndRedirect will execute. It does not have to redirect to the step specified in nextAction.
-            handleSubmitAndRedirect = { journeyData, subPage -> areYouSureContinueOrExitJourney(journeyData, subPage) },
+            handleSubmitAndRedirect = { journeyData, subPage, _ -> areYouSureContinueOrExitJourney(journeyData, subPage) },
             // This gets checked when determining whether the next step is reachable
             nextAction = { _, _ -> Pair(DeregisterLandlordStepId.Reason, null) },
             saveAfterSubmit = false,
@@ -104,7 +104,7 @@ class LandlordDeregistrationJourney(
                             "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> deregisterLandlordAndProperties(userHadActiveProperties = true) },
+            handleSubmitAndRedirect = { _, _, _ -> deregisterLandlordAndProperties(userHadActiveProperties = true) },
             saveAfterSubmit = false,
         )
 
