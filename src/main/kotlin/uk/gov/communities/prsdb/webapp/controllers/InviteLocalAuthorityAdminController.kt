@@ -89,7 +89,14 @@ class InviteLocalAuthorityAdminController(
     }
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
-    fun confirmation(): String = "inviteLocalAuthorityAdminSuccess"
+    fun confirmation(model: Model): String {
+        model.addAttribute("invitedEmailAddress", "HARDCODED@EXAMPLE.COM")
+        model.addAttribute("localAuthorityName", "HARDCODED LOCAL AUTHORITY NAME")
+        model.addAttribute("inviteAnotherUserUrl", INVITE_LA_ADMIN_ROUTE)
+        model.addAttribute("dashboardUrl", "#")
+
+        return "inviteLocalAuthorityAdminConfirmation"
+    }
 
     companion object {
         const val INVITE_LA_ADMIN_ROUTE = "/$SYSTEM_OPERATOR_PATH_SEGMENT/$INVITE_LA_ADMIN_PATH_SEGMENT"
