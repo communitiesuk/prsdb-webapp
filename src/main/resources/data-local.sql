@@ -55,11 +55,11 @@ VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 1, '10/07/24', '10/07/24', 'Ford Pref
         'PRSDB La User',
         'Team-PRSDB+lauser@softwire.com');
 
-INSERT INTO local_authority_invitation (invited_email, inviting_authority_id, token)
-VALUES ('invited.user@example.com', 1, gen_random_uuid()),
-       ('user.invited@example.com', 1, gen_random_uuid()),
-       ('further.user@example.com', 1, gen_random_uuid()),
-       ('another.user@example.com', 1, gen_random_uuid());
+INSERT INTO local_authority_invitation (invited_email, inviting_authority_id, token, invited_as_admin)
+VALUES ('invited.user@example.com', 1, gen_random_uuid(), false),
+       ('user.invited@example.com', 1, gen_random_uuid(), false),
+       ('further.user@example.com', 1, gen_random_uuid(), false),
+       ('another.user@example.com', 1, gen_random_uuid(), false);
 
 INSERT INTO registration_number (id, created_date, number, type)
 VALUES (1, '09/13/24', 2001001001, 1),

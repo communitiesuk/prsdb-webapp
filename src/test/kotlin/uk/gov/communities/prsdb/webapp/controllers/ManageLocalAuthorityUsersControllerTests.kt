@@ -125,7 +125,7 @@ class ManageLocalAuthorityUsersControllerTests(
         val localAuthority = LocalAuthority(DEFAULT_LA_ID, "Test Local Authority", "custodian code")
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenReturn(Pair(loggedInUserModel, localAuthority))
-        whenever(localAuthorityInvitationService.createInvitationToken(any(), any()))
+        whenever(localAuthorityInvitationService.createInvitationToken(any(), any(), any()))
             .thenReturn("test-token")
         whenever(absoluteUrlProvider.buildInvitationUri("test-token"))
             .thenReturn(URI("https://test-service.gov.uk/sign-up-la-user"))

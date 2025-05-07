@@ -24,15 +24,24 @@ class LocalAuthorityInvitation(
     lateinit var invitedEmail: String
         private set
 
+    @Column(nullable = false)
+    var invitedAsAdmin: Boolean = false
+
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false, foreignKey = ForeignKey(name = "FK_LA_INVITATION_LA"))
     lateinit var invitingAuthority: LocalAuthority
         private set
 
-    constructor(token: UUID, email: String, invitingAuthority: LocalAuthority) : this() {
+    constructor(
+        token: UUID,
+        email: String,
+        invitingAuthority: LocalAuthority,
+        invitedAsAdmin: Boolean = false,
+    ) : this() {
         this.token = token
         this.invitedEmail = email
         this.invitingAuthority = invitingAuthority
+        this.invitedAsAdmin = invitedAsAdmin
     }
 
     constructor(id: Long, token: UUID, email: String, invitingAuthority: LocalAuthority) : this(id) {
