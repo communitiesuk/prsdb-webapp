@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.validation.Valid
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INVITE_LA_ADMIN_PATH_SEGMENT
@@ -70,6 +72,7 @@ class InviteLocalAuthorityAdminController(
             )
 
             redirectAttributes.addFlashAttribute("invitedEmailAddress", inviteLocalAuthorityAdminModel.email)
+            redirectAttributes.addFlashAttribute("localAuthorityName", localAuthority.name)
             return "redirect:/$SYSTEM_OPERATOR_PATH_SEGMENT/$INVITE_LA_ADMIN_PATH_SEGMENT/$CONFIRMATION_PATH_SEGMENT"
         } catch (retryException: TransientEmailSentException) {
             bindingResult.reject("addLAUser.error.retryable")
@@ -89,7 +92,17 @@ class InviteLocalAuthorityAdminController(
     }
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
-    fun confirmation(): String = "inviteLocalAuthorityAdminSuccess"
+    fun confirmation(model: Model): String {
+        if (model.getAttribute("invitedEmailAddress") == null || model.getAttribute("localAuthorityName") == null) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing attributes, has the user navigated directly to this page?")
+        }
+
+        model.addAttribute("inviteAnotherUserUrl", INVITE_LA_ADMIN_ROUTE)
+        // TODO PRSD-672: Add link to the system operator dashboard
+        model.addAttribute("dashboardUrl", "#")
+
+        return "inviteLocalAuthorityAdminConfirmation"
+    }
 
     companion object {
         const val INVITE_LA_ADMIN_ROUTE = "/$SYSTEM_OPERATOR_PATH_SEGMENT/$INVITE_LA_ADMIN_PATH_SEGMENT"

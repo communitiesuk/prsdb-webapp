@@ -95,8 +95,17 @@ class InviteLocalAuthorityAdminControllerTests(
                 status { is3xxRedirection() }
                 redirectedUrl("${InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
                 flash { attribute("invitedEmailAddress", testEmail) }
+                flash { attribute("localAuthorityName", localAuthority.name) }
             }
 
         verify(emailNotificationService).sendEmail(testEmail, LocalAuthorityAdminInvitationEmail(localAuthority, invitationUri))
+    }
+
+    @Test
+    @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+    fun `navigating straight to the confirmation page returns 400`() {
+        mvc.get(InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_CONFIRMATION_ROUTE).andExpect {
+            status { isBadRequest() }
+        }
     }
 }

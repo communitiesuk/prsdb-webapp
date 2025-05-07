@@ -11,4 +11,5 @@ class InviteLaAdminConfirmationPage(
 ) : BasePage(page, InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_CONFIRMATION_ROUTE) {
     val confirmationBanner = ConfirmationBanner(page)
     val returnToDashboardButton = Button.byText(page, "Return to dashboard")
+    val inviteAnotherUserButton = Button.byText(page, "Invite another user")
 }
