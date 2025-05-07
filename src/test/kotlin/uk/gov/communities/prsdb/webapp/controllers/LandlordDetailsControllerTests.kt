@@ -59,11 +59,13 @@ class LandlordDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `getUserLandlordDetails returns 200 for a valid request from a landlord`() {
-            whenever(landlordService.retrieveLandlordByBaseUserId("user")).thenReturn(MockLandlordData.createLandlord())
+            val landlord = MockLandlordData.createLandlord()
+            whenever(landlordService.retrieveLandlordByBaseUserId("user")).thenReturn(landlord)
             whenever(propertyOwnershipService.getRegisteredPropertiesForLandlordUser("user")).thenReturn(emptyList())
 
             mvc.get(LandlordDetailsController.LANDLORD_DETAILS_ROUTE).andExpect {
                 status { isOk() }
+                model { attribute("name", landlord.name) }
             }
         }
     }
@@ -155,17 +157,17 @@ class LandlordDetailsControllerTests(
 
     @Nested
     inner class GetLandlordDetailsTests {
-        private val landlordId = 1L
+        private val landlord = MockLandlordData.createLandlord()
 
         @BeforeEach
         fun setUp() {
-            whenever(landlordService.retrieveLandlordById(landlordId)).thenReturn(MockLandlordData.createLandlord())
-            whenever(propertyOwnershipService.getRegisteredPropertiesForLandlord(landlordId)).thenReturn(emptyList())
+            whenever(landlordService.retrieveLandlordById(landlord.id)).thenReturn(landlord)
+            whenever(propertyOwnershipService.getRegisteredPropertiesForLandlord(landlord.id)).thenReturn(emptyList())
         }
 
         @Test
         fun `getLandlordDetails returns a redirect for an unauthenticated user`() {
-            mvc.get("${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/$landlordId").andExpect {
+            mvc.get("${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/${landlord.id}").andExpect {
                 status { is3xxRedirection() }
             }
         }
@@ -173,7 +175,7 @@ class LandlordDetailsControllerTests(
         @Test
         @WithMockUser
         fun `getLandlordDetails returns 403 for an unauthorized user`() {
-            mvc.get("${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/$landlordId").andExpect {
+            mvc.get("${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/${landlord.id}").andExpect {
                 status { isForbidden() }
             }
         }
@@ -181,16 +183,18 @@ class LandlordDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LA_USER"])
         fun `getLandlordDetails returns 200 for a valid request from an LA user`() {
-            mvc.get("${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/$landlordId").andExpect {
+            mvc.get("${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/${landlord.id}").andExpect {
                 status { isOk() }
+                model { attribute("name", landlord.name) }
             }
         }
 
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `getLandlordDetails returns 200 for a valid request from an LA admin`() {
-            mvc.get("${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/$landlordId").andExpect {
+            mvc.get("${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/${landlord.id}").andExpect {
                 status { isOk() }
+                model { attribute("name", landlord.name) }
             }
         }
     }
