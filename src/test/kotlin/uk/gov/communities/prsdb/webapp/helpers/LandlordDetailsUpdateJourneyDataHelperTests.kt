@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import java.time.LocalDate
 import kotlin.test.assertEquals
 
-class UpdateLandlordDetailsJourneyDataHelperTests {
+class LandlordDetailsUpdateJourneyDataHelperTests {
     private lateinit var journeyDataBuilder: JourneyDataBuilder
 
     @BeforeEach
@@ -23,7 +23,7 @@ class UpdateLandlordDetailsJourneyDataHelperTests {
         val newEmail = "new email address value"
         val testJourneyData = journeyDataBuilder.withEmailAddressUpdate(newEmail).build()
 
-        val emailUpdate = UpdateLandlordDetailsJourneyDataHelper.getEmailUpdateIfPresent(testJourneyData)
+        val emailUpdate = LandlordDetailsUpdateJourneyDataHelper.getEmailUpdateIfPresent(testJourneyData)
 
         assertEquals(newEmail, emailUpdate)
     }
@@ -32,7 +32,7 @@ class UpdateLandlordDetailsJourneyDataHelperTests {
     fun `getEmailUpdateIfPresent returns null if the email page is in not journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
-        val emailUpdate = UpdateLandlordDetailsJourneyDataHelper.getEmailUpdateIfPresent(testJourneyData)
+        val emailUpdate = LandlordDetailsUpdateJourneyDataHelper.getEmailUpdateIfPresent(testJourneyData)
 
         assertNull(emailUpdate)
     }
@@ -42,7 +42,7 @@ class UpdateLandlordDetailsJourneyDataHelperTests {
         val newName = "New Name"
         val testJourneyData = journeyDataBuilder.withNameUpdate(newName).build()
 
-        val nameUpdate = UpdateLandlordDetailsJourneyDataHelper.getNameUpdateIfPresent(testJourneyData)
+        val nameUpdate = LandlordDetailsUpdateJourneyDataHelper.getNameUpdateIfPresent(testJourneyData)
 
         assertEquals(newName, nameUpdate)
     }
@@ -51,7 +51,7 @@ class UpdateLandlordDetailsJourneyDataHelperTests {
     fun `getNameUpdateIfPresent returns null if the name page is in not journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
-        val nameUpdate = UpdateLandlordDetailsJourneyDataHelper.getNameUpdateIfPresent(testJourneyData)
+        val nameUpdate = LandlordDetailsUpdateJourneyDataHelper.getNameUpdateIfPresent(testJourneyData)
 
         assertNull(nameUpdate)
     }
@@ -63,7 +63,7 @@ class UpdateLandlordDetailsJourneyDataHelperTests {
         val authority = LocalAuthority()
         val testJourneyData = journeyDataBuilder.withSelectedAddress(singleLineAddress, uprn, authority).build()
 
-        val addressUpdate = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(testJourneyData)
+        val addressUpdate = LandlordDetailsUpdateJourneyDataHelper.getAddressIfPresent(testJourneyData)
 
         assertEquals(AddressDataModel(singleLineAddress, uprn = uprn, localAuthorityId = authority.id), addressUpdate)
     }
@@ -80,7 +80,7 @@ class UpdateLandlordDetailsJourneyDataHelperTests {
                 .withManualAddress(lineOne, locality, postcode)
                 .build()
 
-        val addressUpdate = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(testJourneyData)
+        val addressUpdate = LandlordDetailsUpdateJourneyDataHelper.getAddressIfPresent(testJourneyData)
 
         assertEquals(
             AddressDataModel(
@@ -99,7 +99,7 @@ class UpdateLandlordDetailsJourneyDataHelperTests {
         val postcode = "EG1 9ZY"
         val testJourneyData = journeyDataBuilder.withEmptyLookedUpAddresses().withManualAddress(lineOne, locality, postcode).build()
 
-        val addressUpdate = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(testJourneyData)
+        val addressUpdate = LandlordDetailsUpdateJourneyDataHelper.getAddressIfPresent(testJourneyData)
 
         assertEquals(
             AddressDataModel(
@@ -115,7 +115,7 @@ class UpdateLandlordDetailsJourneyDataHelperTests {
     fun `getAddressUpdateIfPresent returns null if the address pages are not journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
-        val addressUpdate = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(testJourneyData)
+        val addressUpdate = LandlordDetailsUpdateJourneyDataHelper.getAddressIfPresent(testJourneyData)
 
         assertNull(addressUpdate)
     }
@@ -125,7 +125,7 @@ class UpdateLandlordDetailsJourneyDataHelperTests {
         val newPhoneNumber = "new phone number"
         val testJourneyData = journeyDataBuilder.withPhoneNumber(newPhoneNumber).build()
 
-        val phoneNumberUpdate = UpdateLandlordDetailsJourneyDataHelper.getPhoneNumberIfPresent(testJourneyData)
+        val phoneNumberUpdate = LandlordDetailsUpdateJourneyDataHelper.getPhoneNumberIfPresent(testJourneyData)
 
         assertEquals(newPhoneNumber, phoneNumberUpdate)
     }
@@ -134,7 +134,7 @@ class UpdateLandlordDetailsJourneyDataHelperTests {
     fun `getPhoneNumberIfPresent returns null if the phone number page is in not journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
-        val phoneNumberUpdate = UpdateLandlordDetailsJourneyDataHelper.getPhoneNumberIfPresent(testJourneyData)
+        val phoneNumberUpdate = LandlordDetailsUpdateJourneyDataHelper.getPhoneNumberIfPresent(testJourneyData)
 
         assertNull(phoneNumberUpdate)
     }
@@ -144,7 +144,7 @@ class UpdateLandlordDetailsJourneyDataHelperTests {
         val newDateOfBirth = LocalDate.of(1991, 1, 1)
         val testJourneyData = journeyDataBuilder.withDateOfBirthUpdate(newDateOfBirth).build()
 
-        val dateOfBirthUpdate = UpdateLandlordDetailsJourneyDataHelper.getDateOfBirthIfPresent(testJourneyData)
+        val dateOfBirthUpdate = LandlordDetailsUpdateJourneyDataHelper.getDateOfBirthIfPresent(testJourneyData)
 
         assertEquals(newDateOfBirth, dateOfBirthUpdate)
     }
@@ -153,7 +153,7 @@ class UpdateLandlordDetailsJourneyDataHelperTests {
     fun `getDateOfBirthIfPresent returns null if the date of birth page is in not journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
-        val dateOfBirthUpdate = UpdateLandlordDetailsJourneyDataHelper.getDateOfBirthIfPresent(testJourneyData)
+        val dateOfBirthUpdate = LandlordDetailsUpdateJourneyDataHelper.getDateOfBirthIfPresent(testJourneyData)
 
         assertEquals(null, dateOfBirthUpdate)
     }

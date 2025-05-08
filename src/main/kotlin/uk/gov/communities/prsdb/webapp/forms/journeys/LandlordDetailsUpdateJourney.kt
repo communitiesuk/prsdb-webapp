@@ -12,13 +12,13 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
+import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
-import uk.gov.communities.prsdb.webapp.forms.steps.UpdateLandlordDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.LandlordDetailsUpdateJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.UpdateLandlordDetailsJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getSerializedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -37,19 +37,19 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import kotlin.reflect.KFunction
 
-class UpdateLandlordDetailsJourney(
+class LandlordDetailsUpdateJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     addressLookupService: AddressLookupService,
     private val landlordService: LandlordService,
     private val landlordBaseUserId: String,
-) : UpdateJourney<UpdateLandlordDetailsStepId>(
+    stepName: String,
+) : UpdateJourney<LandlordDetailsUpdateStepId>(
         journeyType = JourneyType.LANDLORD_DETAILS_UPDATE,
-        initialStepId = UpdateLandlordDetailsStepId.UpdateEmail,
+        initialStepId = LandlordDetailsUpdateStepId.UpdateEmail,
         validator = validator,
         journeyDataService = journeyDataService,
-        // TODO PRSD-1101 Use the actual step name
-        "",
+        stepName,
     ) {
     init {
         initializeJourneyDataIfNotInitialized()
@@ -65,16 +65,16 @@ class UpdateLandlordDetailsJourney(
             mutableMapOf(
                 IS_IDENTITY_VERIFIED_KEY to landlord.isVerified,
                 LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to Json.encodeToString(listOf(AddressDataModel.fromAddress(landlord.address))),
-                UpdateLandlordDetailsStepId.UpdateEmail toPageData EmailFormModel::fromLandlord,
-                UpdateLandlordDetailsStepId.UpdateName toPageData NameFormModel::fromLandlord,
-                UpdateLandlordDetailsStepId.UpdatePhoneNumber toPageData PhoneNumberFormModel::fromLandlord,
-                UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress toPageData LookupAddressFormModel::fromLandlord,
-                UpdateLandlordDetailsStepId.SelectEnglandAndWalesAddress toPageData SelectAddressFormModel::fromLandlord,
-                UpdateLandlordDetailsStepId.UpdateDateOfBirth toPageData DateOfBirthFormModel::fromLandlord,
+                LandlordDetailsUpdateStepId.UpdateEmail toPageData EmailFormModel::fromLandlord,
+                LandlordDetailsUpdateStepId.UpdateName toPageData NameFormModel::fromLandlord,
+                LandlordDetailsUpdateStepId.UpdateDateOfBirth toPageData DateOfBirthFormModel::fromLandlord,
+                LandlordDetailsUpdateStepId.UpdatePhoneNumber toPageData PhoneNumberFormModel::fromLandlord,
+                LandlordDetailsUpdateStepId.LookupEnglandAndWalesAddress toPageData LookupAddressFormModel::fromLandlord,
+                LandlordDetailsUpdateStepId.SelectEnglandAndWalesAddress toPageData SelectAddressFormModel::fromLandlord,
             )
 
         if (landlord.address.uprn == null) {
-            originalLandlordData += UpdateLandlordDetailsStepId.ManualEnglandAndWalesAddress toPageData ManualAddressFormModel::fromLandlord
+            originalLandlordData += LandlordDetailsUpdateStepId.ManualEnglandAndWalesAddress toPageData ManualAddressFormModel::fromLandlord
         }
 
         return originalLandlordData
@@ -91,23 +91,9 @@ class UpdateLandlordDetailsJourney(
         }
     }
 
-    private val updateDetailsStep =
-        Step(
-            id = UpdateLandlordDetailsStepId.UpdateDetails,
-            page =
-                Page(
-                    NoInputFormModel::class,
-                    "landlordDetailsView",
-                    mapOf(
-                        BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
-                    ),
-                ),
-            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
-        )
-
     private val emailStep =
         Step(
-            id = UpdateLandlordDetailsStepId.UpdateEmail,
+            id = LandlordDetailsUpdateStepId.UpdateEmail,
             page =
                 Page(
                     formModel = EmailFormModel::class,
@@ -119,23 +105,17 @@ class UpdateLandlordDetailsJourney(
                             "fieldSetHint" to "forms.email.fieldSetHint",
                             "label" to "forms.email.label",
                             "submitButtonText" to "forms.buttons.continue",
-                            BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
+                            BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
-            nextAction = { journeyData, _ ->
-                if (UpdateLandlordDetailsJourneyDataHelper.getIsIdentityVerified(journeyData)) {
-                    Pair(UpdateLandlordDetailsStepId.UpdatePhoneNumber, null)
-                } else {
-                    Pair(UpdateLandlordDetailsStepId.UpdateName, null)
-                }
-            },
+            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
+            nextAction = { journeyData, _ -> emailNextAction(journeyData) },
             saveAfterSubmit = false,
         )
 
     private val nameStep =
         Step(
-            id = UpdateLandlordDetailsStepId.UpdateName,
+            id = LandlordDetailsUpdateStepId.UpdateName,
             page =
                 Page(
                     formModel = NameFormModel::class,
@@ -147,17 +127,17 @@ class UpdateLandlordDetailsJourney(
                             "fieldSetHint" to "forms.name.fieldSetHint",
                             "label" to "forms.name.label",
                             "submitButtonText" to "forms.buttons.continue",
-                            BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
+                            BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
-            nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.UpdateDateOfBirth, null) },
+            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
+            nextAction = { _, _ -> Pair(LandlordDetailsUpdateStepId.UpdateDateOfBirth, null) },
             saveAfterSubmit = false,
         )
 
     private val dateOfBirthStep =
         Step(
-            id = UpdateLandlordDetailsStepId.UpdateDateOfBirth,
+            id = LandlordDetailsUpdateStepId.UpdateDateOfBirth,
             page =
                 Page(
                     formModel = DateOfBirthFormModel::class,
@@ -168,17 +148,17 @@ class UpdateLandlordDetailsJourney(
                             "fieldSetHeading" to "forms.update.dateOfBirth.fieldSetHeading",
                             "fieldSetHint" to "forms.dateOfBirth.fieldSetHint",
                             "submitButtonText" to "forms.buttons.continue",
-                            BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
+                            BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
-            nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.UpdatePhoneNumber, null) },
+            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
+            nextAction = { _, _ -> Pair(LandlordDetailsUpdateStepId.UpdatePhoneNumber, null) },
             saveAfterSubmit = false,
         )
 
     private val phoneNumberStep =
         Step(
-            id = UpdateLandlordDetailsStepId.UpdatePhoneNumber,
+            id = LandlordDetailsUpdateStepId.UpdatePhoneNumber,
             page =
                 Page(
                     formModel = PhoneNumberFormModel::class,
@@ -191,17 +171,17 @@ class UpdateLandlordDetailsJourney(
                             "label" to "forms.phoneNumber.label",
                             "submitButtonText" to "forms.buttons.continue",
                             "hint" to "forms.phoneNumber.hint",
-                            BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
+                            BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment },
-            nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress, null) },
+            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
+            nextAction = { _, _ -> Pair(LandlordDetailsUpdateStepId.LookupEnglandAndWalesAddress, null) },
             saveAfterSubmit = false,
         )
 
     private val lookupAddressStep =
         LookupAddressStep(
-            id = UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress,
+            id = LandlordDetailsUpdateStepId.LookupEnglandAndWalesAddress,
             page =
                 Page(
                     formModel = LookupAddressFormModel::class,
@@ -216,12 +196,12 @@ class UpdateLandlordDetailsJourney(
                             "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
                             "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
                             "submitButtonText" to "forms.buttons.continue",
-                            BACK_URL_ATTR_NAME to UpdateLandlordDetailsStepId.UpdateDetails.urlPathSegment,
+                            BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                     shouldDisplaySectionHeader = false,
                 ),
-            nextStepIfAddressesFound = UpdateLandlordDetailsStepId.SelectEnglandAndWalesAddress,
-            nextStepIfNoAddressesFound = UpdateLandlordDetailsStepId.NoAddressFound,
+            nextStepIfAddressesFound = LandlordDetailsUpdateStepId.SelectEnglandAndWalesAddress,
+            nextStepIfNoAddressesFound = LandlordDetailsUpdateStepId.NoAddressFound,
             addressLookupService = addressLookupService,
             journeyDataService = journeyDataService,
             saveAfterSubmit = false,
@@ -229,7 +209,7 @@ class UpdateLandlordDetailsJourney(
 
     private val selectAddressStep =
         Step(
-            id = UpdateLandlordDetailsStepId.SelectEnglandAndWalesAddress,
+            id = LandlordDetailsUpdateStepId.SelectEnglandAndWalesAddress,
             page =
                 SelectAddressPage(
                     formModel = SelectAddressFormModel::class,
@@ -241,26 +221,20 @@ class UpdateLandlordDetailsJourney(
                             "submitButtonText" to "forms.buttons.useThisAddress",
                             "searchAgainUrl" to
                                 "${LandlordDetailsController.UPDATE_ROUTE}/" +
-                                UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
+                                LandlordDetailsUpdateStepId.LookupEnglandAndWalesAddress.urlPathSegment,
                         ),
-                    lookupAddressPathSegment = UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
+                    lookupAddressPathSegment = LandlordDetailsUpdateStepId.LookupEnglandAndWalesAddress.urlPathSegment,
                     journeyDataService = journeyDataService,
                     displaySectionHeader = false,
                 ),
+            handleSubmitAndRedirect = { journeyData, _ -> selectAddressHandleSubmitAndRedirect(journeyData) },
             nextAction = { journeyData, _ -> selectAddressNextAction(journeyData) },
             saveAfterSubmit = false,
         )
 
-    private fun selectAddressNextAction(journeyData: JourneyData): Pair<UpdateLandlordDetailsStepId, Int?> =
-        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
-            Pair(UpdateLandlordDetailsStepId.ManualEnglandAndWalesAddress, null)
-        } else {
-            Pair(UpdateLandlordDetailsStepId.UpdateDetails, null)
-        }
-
     private val noAddressFoundStep =
         Step(
-            id = UpdateLandlordDetailsStepId.NoAddressFound,
+            id = LandlordDetailsUpdateStepId.NoAddressFound,
             page =
                 Page(
                     formModel = NoInputFormModel::class,
@@ -272,22 +246,15 @@ class UpdateLandlordDetailsJourney(
                             "houseNameOrNumber" to getHouseNameOrNumberAndPostcode().first,
                             "searchAgainUrl" to
                                 "${LandlordDetailsController.UPDATE_ROUTE}/" +
-                                UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
+                                LandlordDetailsUpdateStepId.LookupEnglandAndWalesAddress.urlPathSegment,
                         ),
                 ),
-            nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.ManualEnglandAndWalesAddress, null) },
+            nextAction = { _, _ -> Pair(LandlordDetailsUpdateStepId.ManualEnglandAndWalesAddress, null) },
         )
-
-    private fun getHouseNameOrNumberAndPostcode() =
-        JourneyDataHelper
-            .getLookupAddressHouseNameOrNumberAndPostcode(
-                journeyDataService.getJourneyDataFromSession(),
-                UpdateLandlordDetailsStepId.LookupEnglandAndWalesAddress.urlPathSegment,
-            ) ?: Pair("", "")
 
     private val manualAddressStep =
         Step(
-            id = UpdateLandlordDetailsStepId.ManualEnglandAndWalesAddress,
+            id = LandlordDetailsUpdateStepId.ManualEnglandAndWalesAddress,
             page =
                 Page(
                     formModel = ManualAddressFormModel::class,
@@ -306,7 +273,7 @@ class UpdateLandlordDetailsJourney(
                         ),
                     shouldDisplaySectionHeader = false,
                 ),
-            nextAction = { _, _ -> Pair(UpdateLandlordDetailsStepId.UpdateDetails, null) },
+            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
             saveAfterSubmit = false,
         )
 
@@ -323,18 +290,38 @@ class UpdateLandlordDetailsJourney(
                 noAddressFoundStep,
                 selectAddressStep,
                 manualAddressStep,
-                updateDetailsStep,
             ),
         )
+
+    private fun emailNextAction(journeyData: JourneyData) =
+        if (LandlordDetailsUpdateJourneyDataHelper.getIsIdentityVerified(journeyData)) {
+            Pair(LandlordDetailsUpdateStepId.UpdatePhoneNumber, null)
+        } else {
+            Pair(LandlordDetailsUpdateStepId.UpdateName, null)
+        }
+
+    private fun selectAddressNextAction(journeyData: JourneyData): Pair<LandlordDetailsUpdateStepId?, Int?> =
+        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
+            Pair(LandlordDetailsUpdateStepId.ManualEnglandAndWalesAddress, null)
+        } else {
+            Pair(null, null)
+        }
+
+    private fun selectAddressHandleSubmitAndRedirect(journeyData: JourneyData): String =
+        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
+            LandlordDetailsUpdateStepId.ManualEnglandAndWalesAddress.urlPathSegment
+        } else {
+            updateLandlordWithChangesAndRedirect(journeyData)
+        }
 
     private fun updateLandlordWithChangesAndRedirect(journeyData: JourneyData): String {
         val landlordUpdate =
             LandlordUpdateModel(
-                email = UpdateLandlordDetailsJourneyDataHelper.getEmailUpdateIfPresent(journeyData),
-                name = UpdateLandlordDetailsJourneyDataHelper.getNameUpdateIfPresent(journeyData),
-                phoneNumber = UpdateLandlordDetailsJourneyDataHelper.getPhoneNumberIfPresent(journeyData),
-                address = UpdateLandlordDetailsJourneyDataHelper.getAddressIfPresent(journeyData),
-                dateOfBirth = UpdateLandlordDetailsJourneyDataHelper.getDateOfBirthIfPresent(journeyData),
+                email = LandlordDetailsUpdateJourneyDataHelper.getEmailUpdateIfPresent(journeyData),
+                name = LandlordDetailsUpdateJourneyDataHelper.getNameUpdateIfPresent(journeyData),
+                phoneNumber = LandlordDetailsUpdateJourneyDataHelper.getPhoneNumberIfPresent(journeyData),
+                address = LandlordDetailsUpdateJourneyDataHelper.getAddressIfPresent(journeyData),
+                dateOfBirth = LandlordDetailsUpdateJourneyDataHelper.getDateOfBirthIfPresent(journeyData),
             )
 
         landlordService.updateLandlordForBaseUserId(
@@ -346,6 +333,13 @@ class UpdateLandlordDetailsJourney(
 
         return LandlordDetailsController.LANDLORD_DETAILS_ROUTE
     }
+
+    private fun getHouseNameOrNumberAndPostcode() =
+        JourneyDataHelper
+            .getLookupAddressHouseNameOrNumberAndPostcode(
+                journeyDataService.getJourneyDataFromSession(),
+                LandlordDetailsUpdateStepId.LookupEnglandAndWalesAddress.urlPathSegment,
+            ) ?: Pair("", "")
 
     companion object {
         const val IS_IDENTITY_VERIFIED_KEY = "isIdentityVerified"
