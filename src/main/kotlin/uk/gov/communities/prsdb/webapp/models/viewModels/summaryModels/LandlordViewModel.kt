@@ -54,15 +54,13 @@ class LandlordViewModel(
                     "landlordDetails.personalDetails.name",
                     landlord.name,
                     if (!landlord.isVerified) "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.UpdateName.urlPathSegment}" else null,
-                    // TODO PRSD-1101: Set to withChangeLinks
-                    withChangeLinks = false,
+                    withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.dateOfBirth",
                     landlord.dateOfBirth,
                     if (!landlord.isVerified) "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.UpdateDateOfBirth.urlPathSegment}" else null,
-                    // TODO PRSD-1102: Set to withChangeLinks
-                    withChangeLinks = false,
+                    withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.oneLoginVerified",
@@ -74,8 +72,7 @@ class LandlordViewModel(
                     "landlordDetails.personalDetails.emailAddress",
                     landlord.email,
                     "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.UpdateEmail.urlPathSegment}",
-                    // TODO PRSD-1103: Set to withChangeLinks
-                    withChangeLinks = false,
+                    withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.telephoneNumber",

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import kotlin.test.Test
@@ -31,8 +32,7 @@ class LandlordDashboardTests : IntegrationTest() {
     fun `the view incomplete properties button links to the incomplete properties page`(page: Page) {
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.viewIncompletePropertiesButton.clickAndWait()
-        // TODO PRSD-1078 change the assert to check the page is the incomplete properties page
-        assertTrue(page.url().contains("/landlord/incomplete-properties"))
+        assertPageIs(page, LandlordIncompletePropertiesPage::class)
     }
 
     @Test
@@ -78,8 +78,7 @@ class LandlordDashboardTests : IntegrationTest() {
     fun `the link in the notification banner redirects to the incomplete properties page`(page: Page) {
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.notificationBanner.link.clickAndWait()
-        // TODO PRSD-1078 change the assert to check the page is the incomplete properties page
-        assertTrue(page.url().contains("/landlord/incomplete-properties"))
+        assertPageIs(page, LandlordIncompletePropertiesPage::class)
     }
 
     @Test

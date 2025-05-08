@@ -50,7 +50,7 @@ class LaUserRegistrationJourneyTests {
         val invitedAsAdmin = true
         val baseUserId = "test-base-user-id"
 
-        val expectedLaUser = arrange(name, email, localAuthority, invitedAsAdmin, baseUserId)
+        val expectedLaUser = setupInvitationAndLAUSerMocks(name, email, localAuthority, invitedAsAdmin, baseUserId)
 
         // Act
         completeHandleSubmitAndRedirect()
@@ -62,7 +62,7 @@ class LaUserRegistrationJourneyTests {
 
     @Test
     fun `handleSubmitAndRedirect deletes the invitation from the database`() {
-        arrange()
+        setupInvitationAndLAUSerMocks()
 
         // Act
         completeHandleSubmitAndRedirect()
@@ -73,7 +73,7 @@ class LaUserRegistrationJourneyTests {
 
     @Test
     fun `handleSubmitAndRedirect updates user roles`() {
-        arrange()
+        setupInvitationAndLAUSerMocks()
 
         // Act
         completeHandleSubmitAndRedirect()
@@ -84,7 +84,7 @@ class LaUserRegistrationJourneyTests {
 
     @Test
     fun `handleSubmitAndRedirect clears data from the session`() {
-        arrange()
+        setupInvitationAndLAUSerMocks()
 
         // Act
         completeHandleSubmitAndRedirect()
@@ -113,7 +113,7 @@ class LaUserRegistrationJourneyTests {
         )
     }
 
-    private fun arrange(
+    private fun setupInvitationAndLAUSerMocks(
         name: String = "Test user",
         email: String = "test.user@example.com",
         localAuthority: LocalAuthority = createLocalAuthority(),

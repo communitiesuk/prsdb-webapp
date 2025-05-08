@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
@@ -319,12 +321,13 @@ class LocalAuthorityDataServiceTests {
         Assertions.assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
     }
 
-    @Test
-    fun `registerUserAndReturnID adds a new user to local_authority_user and returns the generated ID`() {
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `registerUserAndReturnID adds a new user to local_authority_user and returns the generated ID`(isManager: Boolean) {
         // Arrange
         val baseUser = createOneLoginUser()
         val localAuthority = createLocalAuthority()
-        val newLocalAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority, isManager = false)
+        val newLocalAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority, isManager = isManager)
 
         whenever(oneLoginUserService.findOrCreate1LUser(baseUser.id)).thenReturn(baseUser)
         whenever(localAuthorityUserRepository.save(any())).thenReturn(newLocalAuthorityUser)
