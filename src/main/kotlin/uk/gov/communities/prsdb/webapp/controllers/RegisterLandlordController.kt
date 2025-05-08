@@ -70,10 +70,11 @@ class RegisterLandlordController(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
         model: Model,
+        @RequestParam(value = "changingAnswerFor", required = false) changingAnswerFor: String? = null,
     ): ModelAndView =
         landlordRegistrationJourneyFactory
             .create()
-            .getModelAndViewForStep(stepName, subpage)
+            .getModelAndViewForStep(stepName, subpage, changingAnswersForStep = changingAnswerFor)
 
     @PostMapping("/{stepName}")
     fun postJourneyData(
@@ -82,6 +83,7 @@ class RegisterLandlordController(
         @RequestParam formData: PageData,
         model: Model,
         principal: Principal,
+        @RequestParam(value = "changingAnswerFor", required = false) changingAnswerFor: String? = null,
     ): ModelAndView =
         landlordRegistrationJourneyFactory
             .create()
@@ -90,6 +92,7 @@ class RegisterLandlordController(
                 formData,
                 subpage,
                 principal,
+                changingAnswersForStep = changingAnswerFor,
             )
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")

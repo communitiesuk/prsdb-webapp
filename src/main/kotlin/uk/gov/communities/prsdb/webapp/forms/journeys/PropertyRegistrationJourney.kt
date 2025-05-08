@@ -81,11 +81,6 @@ class PropertyRegistrationJourney(
             listOf("registerProperty.taskList.subtitle"),
         )
 
-    override fun isDestinationInSameGroupAsStep(
-        destinationStep: RegisterPropertyStepId?,
-        groupStep: RegisterPropertyStepId?,
-    ): Boolean = destinationStep != null && destinationStep.groupIdentifier == groupStep?.groupIdentifier
-
     private fun registerPropertyTasks(): List<JourneyTask<RegisterPropertyStepId>> =
         listOf(
             addressTask(),
