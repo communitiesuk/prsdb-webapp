@@ -336,6 +336,7 @@ class LocalAuthorityDataServiceTests {
                 localAuthority,
                 newLocalAuthorityUser.name,
                 newLocalAuthorityUser.email,
+                newLocalAuthorityUser.isManager,
             )
 
         // Assert

@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
@@ -15,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
@@ -111,6 +113,17 @@ class JourneyDataBuilder(
                 709902,
                 createLocalAuthority(),
             )
+
+        fun localAuthorityUser(
+            name: String,
+            email: String,
+        ) = JourneyDataBuilder(
+            mock(),
+            mapOf(
+                RegisterLaUserStepId.Name.urlPathSegment to mapOf("name" to name),
+                RegisterLaUserStepId.Email.urlPathSegment to mapOf("emailAddress" to email),
+            ),
+        )
     }
 
     fun withLookupAddress(
