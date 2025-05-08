@@ -127,7 +127,7 @@ class LandlordDetailsUpdateJourney(
                             "fieldSetHint" to "forms.name.fieldSetHint",
                             "label" to "forms.name.label",
                             "showWarning" to true,
-                            "submitButtonText" to "forms.buttons.continue",
+                            "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
                             BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
