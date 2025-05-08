@@ -118,8 +118,6 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
         }
     }
 
-    // TODO PRSD-1103: Re-enable and update to match flow
-    @Disabled
     @Nested
     inner class EmailUpdates {
         @Test
@@ -131,7 +129,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
             val updateEmailPage = assertPageIs(page, EmailFormPageUpdateLandlordDetails::class)
 
             // Update Email page
-            val newEmail = "new landlord name"
+            val newEmail = "newEmail@test.com"
             updateEmailPage.submitEmail(newEmail)
             landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
 
