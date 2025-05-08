@@ -49,8 +49,6 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
         )
     }
 
-    // TODO PRSD-1101: Re-enable and update to match flow
-    @Disabled
     @Nested
     inner class NameUpdates {
         @Sql("/data-unverified-landlord.sql")

@@ -336,9 +336,8 @@ class LandlordViewModelTests {
                 // "landlordDetails.personalDetails.contactAddress",
             )
         val changeableByUnverifiedLandlordsPersonalDetailKeys =
-            listOf<String>(
-                // TODO PRSD-1101: uncomment
-                // "landlordDetails.personalDetails.name",
+            listOf(
+                "landlordDetails.personalDetails.name",
                 // TODO PRSD-1102: uncomment
                 // "landlordDetails.personalDetails.dateOfBirth",
             )
