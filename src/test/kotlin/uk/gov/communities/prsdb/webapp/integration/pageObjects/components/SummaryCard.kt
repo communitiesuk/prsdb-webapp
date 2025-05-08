@@ -7,13 +7,13 @@ open class SummaryCard(
     parentLocator: Locator,
     index: Int = 0,
 ) : BaseComponent(parentLocator.locator(".govuk-summary-card").nth(index)) {
-    constructor(page: Page) : this(page.locator("html"))
+    constructor(page: Page, index: Int = 0) : this(page.locator("html"), index)
 
     val title = Heading(locator.locator("h2.govuk-summary-card__title"))
 
     fun actions(text: String) = SummaryCardActions(locator, text)
 
-    val summaryCardLocator = locator
+    open val summaryCardList = SummaryList(locator)
 
     class SummaryCardActions(
         parentLocator: Locator,

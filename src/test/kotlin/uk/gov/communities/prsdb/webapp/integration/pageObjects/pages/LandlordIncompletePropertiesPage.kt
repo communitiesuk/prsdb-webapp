@@ -16,19 +16,29 @@ class LandlordIncompletePropertiesPage(
     val subHeading = Heading(page.locator("p.govuk-body-l"))
     val text = Heading(page.locator("p.govuk-body"))
     val viewRegisteredPropertiesLink = Link.byText(page, "view registered properties")
-    val registerANewPropertyLinks = Link.byText(page, "register a new property")
+    val registerANewPropertyLink = Link.byText(page, "register a new property")
 
-    val firstSummaryCard = SummaryCard(page.locator("html"), 0)
-    val secondSummaryCard = SummaryCard(page.locator("html"), 1)
+    val firstSummaryCard = IncompletePropertySummaryCard(page, 0)
+    val secondSummaryCard = IncompletePropertySummaryCard(page, 1)
 
-    val firstSummaryCardList = IncompletePropertiesSummaryCardList(firstSummaryCard.summaryCardLocator)
-    val secondSummaryCardList = IncompletePropertiesSummaryCardList(secondSummaryCard.summaryCardLocator)
+    class IncompletePropertySummaryCard(
+        parentLocator: Locator,
+        index: Int,
+    ) : SummaryCard(parentLocator, index) {
+        constructor(page: Page, index: Int) : this(page.locator("html"), index)
 
-    class IncompletePropertiesSummaryCardList(
-        locator: Locator,
-    ) : SummaryList(locator) {
-        val propertyAddressRow = getRow("Property address")
-        val localAuthorityRow = getRow("Local authority")
-        val completeByRow = getRow("Complete by")
+        override val summaryCardList = IncompletePropertiesSummaryCardList(locator)
+
+        val continueLink = this.actions("Continue").actionLink
+
+        val deleteLink = this.actions("Delete").actionLink
+
+        class IncompletePropertiesSummaryCardList(
+            locator: Locator,
+        ) : SummaryList(locator) {
+            val propertyAddressRow = getRow("Property address")
+            val localAuthorityRow = getRow("Local authority")
+            val completeByRow = getRow("Complete by")
+        }
     }
 }

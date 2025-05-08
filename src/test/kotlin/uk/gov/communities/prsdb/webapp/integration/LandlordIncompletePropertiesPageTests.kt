@@ -24,7 +24,6 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
         fun `the page loads with heading and subheading`() {
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
             assertThat(incompletePropertiesPage.heading).containsText("Your incomplete properties")
-            println(incompletePropertiesPage.page.content())
             assertThat(
                 incompletePropertiesPage.subHeading,
             ).containsText("You have 28 days to complete a property registration or the property will be deleted from the database")
@@ -45,36 +44,30 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
 
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
 
-            assertThat(incompletePropertiesPage.firstSummaryCardList.propertyAddressRow).containsText("4, Example Road, EG")
-            assertThat(incompletePropertiesPage.firstSummaryCardList.localAuthorityRow).containsText("ANGUS COUNCIL")
+            assertThat(incompletePropertiesPage.firstSummaryCard.summaryCardList.propertyAddressRow).containsText("4, Example Road, EG")
+            assertThat(incompletePropertiesPage.firstSummaryCard.summaryCardList.localAuthorityRow).containsText("ANGUS COUNCIL")
             assertThat(
-                incompletePropertiesPage.firstSummaryCardList.completeByRow,
+                incompletePropertiesPage.firstSummaryCard.summaryCardList.completeByRow,
             ).containsText(formattedCompleteByDate, LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
 
-            assertThat(incompletePropertiesPage.secondSummaryCardList.propertyAddressRow).containsText("5, Example Road, EG")
-            assertThat(incompletePropertiesPage.secondSummaryCardList.localAuthorityRow).containsText("ANTRIM AND NEWTOWNABBEY")
+            assertThat(incompletePropertiesPage.secondSummaryCard.summaryCardList.propertyAddressRow).containsText("5, Example Road, EG")
+            assertThat(incompletePropertiesPage.secondSummaryCard.summaryCardList.localAuthorityRow).containsText("ANTRIM AND NEWTOWNABBEY")
             assertThat(
-                incompletePropertiesPage.secondSummaryCardList.completeByRow,
+                incompletePropertiesPage.secondSummaryCard.summaryCardList.completeByRow,
             ).containsText(formattedCompleteByDate, LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
         }
 
         @Test
         fun `Clicking on a summary card Continue link redirects to the task list page`(page: Page) {
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
-            incompletePropertiesPage.firstSummaryCard
-                .actions("Continue")
-                .actionLink
-                .clickAndWait()
+            incompletePropertiesPage.firstSummaryCard.continueLink.clickAndWait()
             assertPageIs(page, TaskListPagePropertyRegistration::class)
         }
 
         @Test
         fun `Clicking on a summary card Delete link redirects to the task list page`(page: Page) {
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
-            incompletePropertiesPage.firstSummaryCard
-                .actions("Delete")
-                .actionLink
-                .clickAndWait()
+            incompletePropertiesPage.firstSummaryCard.deleteLink.clickAndWait()
             // TODO PRSD-700 change the assertion to check the page is the property registration deregister page
             assertTrue(page.url().contains("/delete-incomplete-property"))
         }
@@ -102,7 +95,7 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
         @Test
         fun `the register a new property link goes to the property registration start page`(page: Page) {
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
-            incompletePropertiesPage.registerANewPropertyLinks.clickAndWait()
+            incompletePropertiesPage.registerANewPropertyLink.clickAndWait()
             assertPageIs(page, RegisterPropertyStartPage::class)
         }
     }
