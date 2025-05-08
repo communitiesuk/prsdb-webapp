@@ -149,6 +149,7 @@ class LandlordDetailsUpdateJourney(
                             "title" to "forms.update.title",
                             "fieldSetHeading" to "forms.update.dateOfBirth.fieldSetHeading",
                             "fieldSetHint" to "forms.dateOfBirth.fieldSetHint",
+                            "showWarning" to true,
                             "submitButtonText" to "forms.buttons.continue",
                             BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
