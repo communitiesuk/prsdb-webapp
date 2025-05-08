@@ -74,8 +74,7 @@ class LandlordViewModel(
                     "landlordDetails.personalDetails.emailAddress",
                     landlord.email,
                     "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.UpdateEmail.urlPathSegment}",
-                    // TODO PRSD-1103: Set to withChangeLinks
-                    withChangeLinks = false,
+                    withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.telephoneNumber",

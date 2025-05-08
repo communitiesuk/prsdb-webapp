@@ -328,9 +328,8 @@ class LandlordViewModelTests {
         // Arrange
         val testLandlord = MockLandlordData.createLandlord(isVerified = isVerified)
         val changeableByAllLandlordsPersonalDetailKeys =
-            listOf<String>(
-                // TODO PRSD-1103: uncomment
-                // "landlordDetails.personalDetails.emailAddress",
+            listOf(
+                "landlordDetails.personalDetails.emailAddress",
                 // TODO PRSD-1105: uncomment
                 // "landlordDetails.personalDetails.telephoneNumber",
                 // TODO PRSD-355 (address update): uncomment
