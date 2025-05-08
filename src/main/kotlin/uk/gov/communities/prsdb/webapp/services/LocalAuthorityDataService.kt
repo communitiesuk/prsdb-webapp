@@ -77,6 +77,7 @@ class LocalAuthorityDataService(
         localAuthority: LocalAuthority,
         currentPageNumber: Int,
         pageSize: Int = MAX_ENTRIES_IN_LA_USERS_TABLE_PAGE,
+        filterOutLaAdminInvitations: Boolean = true,
     ): Page<LocalAuthorityUserOrInvitationDataModel> {
         val pageRequest =
             PageRequest.of(
@@ -84,6 +85,21 @@ class LocalAuthorityDataService(
                 pageSize,
                 Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("name")),
             )
+        if (filterOutLaAdminInvitations) {
+            return localAuthorityUserOrInvitationRepository
+                .findByLocalAuthorityNotIncludingAdminInvitations(
+                    localAuthority,
+                    pageRequest,
+                ).map {
+                    LocalAuthorityUserOrInvitationDataModel(
+                        id = it.id,
+                        userNameOrEmail = it.name,
+                        localAuthorityName = localAuthority.name,
+                        isManager = it.isManager,
+                        isPending = it.entityType == "local_authority_invitation",
+                    )
+                }
+        }
         return localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest).map {
             LocalAuthorityUserOrInvitationDataModel(
                 id = it.id,
