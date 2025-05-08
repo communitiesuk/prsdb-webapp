@@ -174,6 +174,7 @@ class LandlordDetailsUpdateJourney(
                             "label" to "forms.phoneNumber.label",
                             "submitButtonText" to "forms.buttons.continue",
                             "hint" to "forms.phoneNumber.hint",
+                            "showWarning" to true,
                             BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
