@@ -58,6 +58,7 @@ class PropertyComplianceJourney(
         loadJourneyDataIfNotLoaded(principalName)
     }
 
+    // TODO PRSD-1165: Update task list to match new design
     override val sections =
         listOf(
             JourneySection(uploadTasks, "propertyCompliance.taskList.upload.heading", "upload-certificates"),
@@ -89,9 +90,8 @@ class PropertyComplianceJourney(
                     placeholderStep(PropertyComplianceStepId.CheckAndSubmit, "TODO PRSD-962: Implement check and submit task"),
                     "propertyCompliance.taskList.checkAndSubmit.check",
                 ),
-                // TODO PRSD-963: Implement declaration task
                 JourneyTask.withOneStep(
-                    placeholderStep(PropertyComplianceStepId.Declaration, "TODO PRSD-963: Implement declaration task"),
+                    placeholderStep(PropertyComplianceStepId.Declaration, "TODO PRSD-1165: Update task list to match new design"),
                     "propertyCompliance.taskList.checkAndSubmit.declare",
                 ),
             )
@@ -135,11 +135,11 @@ class PropertyComplianceJourney(
                 "propertyCompliance.taskList.upload.eicr",
             )
 
-    // TODO PRSD-395: Implement EPC upload task
+    // TODO PRSD-1134: Implement EPC upload task
     private val epcTask
         get() =
             JourneyTask.withOneStep(
-                placeholderStep(PropertyComplianceStepId.EPC, "TODO PRSD-395: Implement EPC task"),
+                placeholderStep(PropertyComplianceStepId.EPC, "TODO PRSD-1134: Implement EPC task"),
                 "propertyCompliance.taskList.upload.epc",
                 "propertyCompliance.taskList.upload.epc.hint",
             )
