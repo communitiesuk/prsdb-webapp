@@ -29,9 +29,10 @@ import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
+import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import java.security.Principal
 
-@PreAuthorize("hasRole('LA_ADMIN')")
+@PreAuthorize("hasAnyRole('LA_ADMIN', 'SYSTEM_OPERATOR')")
 @Controller
 @RequestMapping("/$LOCAL_AUTHORITY_PATH_SEGMENT/{localAuthorityId}")
 class ManageLocalAuthorityUsersController(
@@ -40,6 +41,7 @@ class ManageLocalAuthorityUsersController(
     var invitationService: LocalAuthorityInvitationService,
     val localAuthorityDataService: LocalAuthorityDataService,
     val absoluteUrlProvider: AbsoluteUrlProvider,
+    val userRolesService: UserRolesService,
 ) {
     @GetMapping("/manage-users")
     fun index(
@@ -56,6 +58,7 @@ class ManageLocalAuthorityUsersController(
             localAuthorityDataService.getPaginatedUsersAndInvitations(
                 currentUserLocalAuthority,
                 page - 1,
+                filterOutLaAdminInvitations = !getIsCurrentUserSystemOperator(principal),
             )
 
         if (pagedUserList.totalPages < page) {
@@ -319,4 +322,9 @@ class ManageLocalAuthorityUsersController(
         @PathVariable localAuthorityId: String,
         model: Model,
     ): String = "cancelLAUserInvitationSuccess"
+
+    private fun getIsCurrentUserSystemOperator(principal: Principal): Boolean {
+        val roles = userRolesService.getUserRolesForPrincipal(principal)
+        return roles.contains("ROLE_SYSTEM_OPERATOR")
+    }
 }
