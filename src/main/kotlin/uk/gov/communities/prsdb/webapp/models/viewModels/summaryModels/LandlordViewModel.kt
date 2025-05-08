@@ -60,8 +60,7 @@ class LandlordViewModel(
                     "landlordDetails.personalDetails.dateOfBirth",
                     landlord.dateOfBirth,
                     if (!landlord.isVerified) "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.UpdateDateOfBirth.urlPathSegment}" else null,
-                    // TODO PRSD-1102: Set to withChangeLinks
-                    withChangeLinks = false,
+                    withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.oneLoginVerified",

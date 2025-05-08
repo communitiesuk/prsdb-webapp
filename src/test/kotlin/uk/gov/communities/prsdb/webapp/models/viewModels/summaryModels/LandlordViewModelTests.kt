@@ -338,8 +338,7 @@ class LandlordViewModelTests {
         val changeableByUnverifiedLandlordsPersonalDetailKeys =
             listOf(
                 "landlordDetails.personalDetails.name",
-                // TODO PRSD-1102: uncomment
-                // "landlordDetails.personalDetails.dateOfBirth",
+                "landlordDetails.personalDetails.dateOfBirth",
             )
 
         // Act

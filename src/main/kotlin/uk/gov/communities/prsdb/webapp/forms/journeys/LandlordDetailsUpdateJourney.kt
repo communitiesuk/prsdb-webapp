@@ -146,10 +146,11 @@ class LandlordDetailsUpdateJourney(
                     templateName = "forms/dateForm",
                     content =
                         mapOf(
-                            "title" to "forms.update.title",
+                            "title" to "landlordDetails.update.title",
                             "fieldSetHeading" to "forms.update.dateOfBirth.fieldSetHeading",
                             "fieldSetHint" to "forms.dateOfBirth.fieldSetHint",
-                            "submitButtonText" to "forms.buttons.continue",
+                            "showWarning" to true,
+                            "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
                             BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
