@@ -72,7 +72,7 @@ class MockOneLoginController {
     @Value("\${local.id-verification-user-info-file:${VERIFIED_USER_FILE}}")
     lateinit var postVerificationUserInfoFile: String
 
-    private val userId = "urn:fdc:gov.uk:2022:UVWXY"
+    private val userId = "urn:fdc:gov.uk:2022:KLMNO"
 
     // These values are from One-Login's publicly available docs (https://docs.sign-in.service.gov.uk/integrate-with-integration-environment/authenticate-your-user/)
     private val userEmail = "test@example.com"

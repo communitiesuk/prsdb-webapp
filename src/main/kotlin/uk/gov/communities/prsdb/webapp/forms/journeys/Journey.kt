@@ -58,7 +58,7 @@ abstract class Journey<T : StepId>(
             return ModelAndView("redirect:$unreachableStepRedirect")
         }
         val prevStepDetails = getPrevStep(requestedStep, subPageNumber)
-        val prevStepUrl = buildPreviousStepUrl(prevStepDetails, requestedStep.id, changingAnswersForStep?.let { getStep(it) }?.id)
+        val prevStepUrl = buildPreviousStepUrl(prevStepDetails, changingAnswersForStep?.let { getStep(it) }?.id)
         val pageData =
             submittedPageData
                 ?: JourneyDataHelper.getPageData(journeyDataService.getJourneyDataFromSession(), requestedStep.name, subPageNumber)
@@ -79,7 +79,7 @@ abstract class Journey<T : StepId>(
         formData: PageData,
         subPageNumber: Int?,
         principal: Principal,
-        changingAnswersFor: String? = null,
+        changingAnswersForStep: String? = null,
     ): ModelAndView {
         val currentStep = getStep(stepPathSegment)
 
@@ -103,7 +103,7 @@ abstract class Journey<T : StepId>(
             journeyDataService.saveJourneyData(journeyDataContextId, newJourneyData, journeyType, principal)
         }
 
-        val changingAnswersForId = changingAnswersFor?.let { getStep(it).id }
+        val changingAnswersForId = changingAnswersForStep?.let { getStep(it).id }
         if (currentStep.handleSubmitAndRedirect != null) {
             return ModelAndView(
                 "redirect:${currentStep.handleSubmitAndRedirect.invoke(newJourneyData, subPageNumber, changingAnswersForId)}",
@@ -114,20 +114,16 @@ abstract class Journey<T : StepId>(
         return ModelAndView("redirect:$redirectUrl")
     }
 
-    protected open fun isDestinationInSameGroupAsStep(
+    protected open fun isDestinationAllowedWhenChangingAnswerTo(
         destinationStep: T?,
-        groupStep: T?,
-    ): Boolean = destinationStep != null && destinationStep == groupStep
+        stepBeingChanged: T?,
+    ): Boolean = destinationStep != null && destinationStep == stepBeingChanged
 
     private fun buildPreviousStepUrl(
         prevStepDetails: StepDetails<T>?,
-        currentStepId: T?,
         changingAnswersFor: T?,
     ): String? =
-        if (changingAnswersFor == null ||
-            isDestinationInSameGroupAsStep(prevStepDetails?.step?.id, changingAnswersFor) &&
-            currentStepId != changingAnswersFor
-        ) {
+        if (changingAnswersFor == null || isDestinationAllowedWhenChangingAnswerTo(prevStepDetails?.step?.id, changingAnswersFor)) {
             prevStepDetails?.let { Step.generateUrl(it.step.id, it.subPageNumber, changingAnswersFor) }
         } else {
             checkYourAnswersStepId?.let { Step.generateUrl(it, null, null) }
@@ -141,7 +137,7 @@ abstract class Journey<T : StepId>(
     ): String {
         val (newStepId: T?, newSubPageNumber: Int?) = currentStep.nextAction(newJourneyData, subPageNumber)
 
-        return if (changingAnswersFor == null || isDestinationInSameGroupAsStep(newStepId, changingAnswersFor)) {
+        return if (changingAnswersFor == null || isDestinationAllowedWhenChangingAnswerTo(newStepId, changingAnswersFor)) {
             if (newStepId == null) {
                 throw IllegalStateException("Cannot compute next step from step ${currentStep.id.urlPathSegment}")
             }
