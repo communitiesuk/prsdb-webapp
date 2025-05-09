@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.Response
+import com.microsoft.playwright.options.RequestOptions
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
@@ -24,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
@@ -104,7 +106,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.VerifiedIdentityModel
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
+import uk.gov.communities.prsdb.webapp.testHelpers.api.controllers.JourneyDataController
+import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyDataRequestModel
 import java.time.LocalDate
+import kotlin.test.assertTrue
 
 class Navigator(
     private val page: Page,
@@ -659,4 +664,17 @@ class Navigator(
     }
 
     fun navigate(path: String): Response? = page.navigate("http://localhost:$port$path")
+
+    fun setJourneyDataInSession(
+        journeyDataKey: String,
+        journeyData: JourneyData,
+    ) {
+        val response =
+            page.request().post(
+                "http://localhost:$port/${JourneyDataController.SET_JOURNEY_DATA_ROUTE}",
+                RequestOptions.create().setData(SetJourneyDataRequestModel(journeyDataKey, journeyData)),
+            )
+        assertTrue(response.ok(), "Failed to set journey data. Received status code: ${response.status()}")
+        response.dispose()
+    }
 }
