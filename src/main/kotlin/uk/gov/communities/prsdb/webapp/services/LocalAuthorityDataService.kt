@@ -119,12 +119,13 @@ class LocalAuthorityDataService(
         localAuthority: LocalAuthority,
         name: String,
         email: String,
+        invitedAsAdmin: Boolean,
     ): Long {
         val localAuthorityUser =
             localAuthorityUserRepository.save(
                 LocalAuthorityUser(
                     baseUser = oneLoginUserService.findOrCreate1LUser(baseUserId),
-                    isManager = false,
+                    isManager = invitedAsAdmin,
                     localAuthority = localAuthority,
                     name = name,
                     email = email,

@@ -131,7 +131,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             assertThat(eicrUploadConfirmationPage.heading).containsText("Your file is being scanned")
             eicrUploadConfirmationPage.saveAndContinueButton.clickAndWait()
 
-            // TODO PRSD-395: Continue test (EPC task)
+            // TODO PRSD-1134: Continue test
             assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
         }
 
@@ -177,7 +177,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             assertThat(eicrOutdatedPage.heading).containsText("This property’s EICR is out of date")
             eicrOutdatedPage.returnToTaskListButton.clickAndWait()
 
-            // TODO PRSD-395: Continue test (EPC task)
+            // TODO PRSD-1134: Continue test
             assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
         }
 
@@ -233,7 +233,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             assertThat(eicrExemptionConfirmationPage.heading).containsText("You’ve marked this property as exempt from needing an EICR")
             eicrExemptionConfirmationPage.saveAndReturnToTaskListButton.clickAndWait()
 
-            // TODO PRSD-395: Continue test (EPC task)
+            // TODO PRSD-1134: Continue test
             assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
         }
 
@@ -278,7 +278,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             assertThat(eicrExemptionMissingPage.heading).containsText("You must get a valid EICR for this property")
             eicrExemptionMissingPage.returnToTaskListButton.clickAndWait()
 
-            // TODO PRSD-395: Continue test (EPC task)
+            // TODO PRSD-1134: Continue test
             assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
         }
     }

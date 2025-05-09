@@ -7,6 +7,7 @@ import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toLocalDateTime
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertIterableEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -330,7 +331,8 @@ class LandlordViewModelTests {
             listOf(
                 "landlordDetails.personalDetails.emailAddress",
                 "landlordDetails.personalDetails.telephoneNumber",
-                "landlordDetails.personalDetails.contactAddress",
+                // TODO PRSD-355 (address update): uncomment
+                // "landlordDetails.personalDetails.contactAddress",
             )
         val changeableByUnverifiedLandlordsPersonalDetailKeys =
             listOf(
@@ -342,10 +344,9 @@ class LandlordViewModelTests {
         val viewModel = LandlordViewModel(testLandlord)
 
         // Assert
-//         TODO: Uncomment this when PRSD-1103, PRSD-1105 and PRSD-355 (address update) are implemented
-//         for (i in viewModel.personalDetails.filter { detail -> detail.fieldHeading in changeableByAllLandlordsPersonalDetailKeys }) {
-//            assertNotNull(i.changeUrl)
-//         }
+        for (i in viewModel.personalDetails.filter { detail -> detail.fieldHeading in changeableByAllLandlordsPersonalDetailKeys }) {
+            assertNotNull(i.changeUrl)
+        }
 
         if (isVerified) {
             for (i in viewModel.personalDetails.filter { detail ->
@@ -354,15 +355,13 @@ class LandlordViewModelTests {
                 assertNull(i.changeUrl)
             }
         } else {
-//            TODO: Uncomment this when PRSD-1101 and PRSD-1102 are implemented
-//            for (i in viewModel.personalDetails.filter { detail ->
-//                detail.fieldHeading in changeableByUnverifiedLandlordsPersonalDetailKeys
-//            }) {
-//                assertNotNull(i.changeUrl)
-//            }
             for (i in viewModel.personalDetails.filter { detail ->
-                detail.fieldHeading !in
-                    changeableByAllLandlordsPersonalDetailKeys + changeableByUnverifiedLandlordsPersonalDetailKeys
+                detail.fieldHeading in changeableByUnverifiedLandlordsPersonalDetailKeys
+            }) {
+                assertNotNull(i.changeUrl)
+            }
+            for (i in viewModel.personalDetails.filter { detail ->
+                detail.fieldHeading !in changeableByAllLandlordsPersonalDetailKeys + changeableByUnverifiedLandlordsPersonalDetailKeys
             }) {
                 assertNull(i.changeUrl)
             }
