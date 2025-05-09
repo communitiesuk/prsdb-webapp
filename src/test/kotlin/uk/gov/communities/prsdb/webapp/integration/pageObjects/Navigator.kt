@@ -671,7 +671,7 @@ class Navigator(
     ) {
         val response =
             page.request().post(
-                "http://localhost:$port${JourneyDataController.SET_JOURNEY_DATA_ROUTE}",
+                "http://localhost:$port/${JourneyDataController.SET_JOURNEY_DATA_ROUTE}",
                 RequestOptions.create().setData(SetJourneyDataRequestModel(journeyDataKey, journeyData)),
             )
         assertTrue(response.ok(), "Failed to set journey data. Received status code: ${response.status()}")

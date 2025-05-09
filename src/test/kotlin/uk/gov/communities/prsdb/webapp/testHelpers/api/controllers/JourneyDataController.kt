@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyD
 
 @Profile("local")
 @RestController
-@RequestMapping(JourneyDataController.SET_JOURNEY_DATA_ROUTE)
+@RequestMapping("/${JourneyDataController.SET_JOURNEY_DATA_ROUTE}")
 class JourneyDataController(
     private val session: HttpSession,
 ) {
@@ -22,6 +22,6 @@ class JourneyDataController(
     }
 
     companion object {
-        const val SET_JOURNEY_DATA_ROUTE = "/local/set-journey-data"
+        const val SET_JOURNEY_DATA_ROUTE = "local/set-journey-data"
     }
 }
