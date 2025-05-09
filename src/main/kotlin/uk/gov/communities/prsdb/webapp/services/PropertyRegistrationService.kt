@@ -143,14 +143,13 @@ class PropertyRegistrationService(
     ): IncompletePropertiesDataModel {
         val address = getAddressData(formContext)
 
-        // TODO PRSD-1127 remove the "Not yet completed" options as address and local authority should no longer be nullable
-        val localAuthorityName = address?.localAuthorityId?.let { localAuthorityService.retrieveLocalAuthorityById(it).name }
+        val localAuthorityName = localAuthorityService.retrieveLocalAuthorityById(address.localAuthorityId!!).name
 
         return IncompletePropertiesDataModel(
             contextId = formContext.id,
             completeByDate = completeByDate,
-            singleLineAddress = address?.singleLineAddress ?: "Not yet completed",
-            localAuthorityName = localAuthorityName ?: "Not yet completed",
+            singleLineAddress = address.singleLineAddress,
+            localAuthorityName = localAuthorityName,
         )
     }
 
@@ -159,11 +158,10 @@ class PropertyRegistrationService(
         return DateTimeHelper.get28DaysFromDate(createdDateInUk)
     }
 
-    private fun getAddressData(formContext: FormContext): AddressDataModel? {
+    private fun getAddressData(formContext: FormContext): AddressDataModel {
         val formContextJourneyData = formContext.toJourneyData()
         val lookedUpAddresses = formContextJourneyData.getLookedUpAddresses()
-        // TODO PRSD-1127 set this to return a not nullable AddressDataModel
-        return PropertyRegistrationJourneyDataHelper.getAddress(formContextJourneyData, lookedUpAddresses)
+        return PropertyRegistrationJourneyDataHelper.getAddress(formContextJourneyData, lookedUpAddresses)!!
     }
 
     fun getIncompletePropertyFormContextForLandlordIfNotExpired(
