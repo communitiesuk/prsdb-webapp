@@ -175,7 +175,7 @@ class RegisterPropertyController(
         }
 
         if (formModel.wantsToProceed == true) {
-            propertyRegistrationService.deleteFormContext(contextId.toLong(), principal.name)
+            propertyRegistrationService.deleteIncompleteProperty(contextId.toLong(), principal.name)
         }
 
         return "redirect:$INCOMPLETE_PROPERTIES_URL"

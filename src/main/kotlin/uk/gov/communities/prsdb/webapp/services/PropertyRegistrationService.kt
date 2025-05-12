@@ -168,7 +168,7 @@ class PropertyRegistrationService(
         contextId: Long,
         principalName: String,
     ): FormContext {
-        val formContext = getIncompletePropertyFormContextForLandlordIfExists(contextId, principalName)
+        val formContext = getIncompletePropertyFormContextForLandlordOrThrowNotFound(contextId, principalName)
         val completeByDate = getIncompletePropertyCompleteByDate(formContext.createdDate)
 
         if (DateTimeHelper().isDateInPast(completeByDate)) {
@@ -180,7 +180,7 @@ class PropertyRegistrationService(
         return formContext
     }
 
-    fun getIncompletePropertyFormContextForLandlordIfExists(
+    fun getIncompletePropertyFormContextForLandlordOrThrowNotFound(
         contextId: Long,
         principalName: String,
     ): FormContext =
@@ -191,11 +191,11 @@ class PropertyRegistrationService(
                     "${JourneyType.PROPERTY_REGISTRATION.name} not found for base user: $principalName",
             )
 
-    fun deleteFormContext(
+    fun deleteIncompleteProperty(
         contextId: Long,
         principalName: String,
     ) {
-        getIncompletePropertyFormContextForLandlordIfExists(contextId, principalName)
-        formContextRepository.deleteById(contextId)
+        val formContext = getIncompletePropertyFormContextForLandlordOrThrowNotFound(contextId, principalName)
+        formContextRepository.delete(formContext)
     }
 }

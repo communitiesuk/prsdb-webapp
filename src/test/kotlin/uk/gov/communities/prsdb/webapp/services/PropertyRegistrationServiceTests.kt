@@ -53,7 +53,6 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesDat
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
-import kotlin.test.assertTrue
 
 @ExtendWith(MockitoExtension::class)
 class PropertyRegistrationServiceTests {
@@ -407,29 +406,7 @@ class PropertyRegistrationServiceTests {
         }
 
         @Test
-        fun `getIncompletePropertyFormContextForLandlordIfNotExpired returns NOT_FOUND error for an invalid incomplete property`() {
-            val formContextId: Long = 123
-            val principalName = "user"
-
-            val expectedErrorMessage =
-                "404 NOT_FOUND \"Form context with ID: $formContextId and journey type: " +
-                    "${JourneyType.PROPERTY_REGISTRATION.name} not found for base user: $principalName\""
-
-            whenever(
-                mockFormContextRepository.findByIdAndUser_IdAndJourneyType(formContextId, principalName, JourneyType.PROPERTY_REGISTRATION),
-            ).thenReturn(null)
-
-            // Act and Assert
-            val exception =
-                assertThrows<ResponseStatusException> {
-                    propertyRegistrationService.getIncompletePropertyFormContextForLandlordIfNotExpired(formContextId, principalName)
-                }
-            kotlin.test.assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
-            kotlin.test.assertEquals(expectedErrorMessage, exception.message)
-        }
-
-        @Test
-        fun `getIncompletePropertyFormContextForLandlordIfNotExpired returns BAD_REQUEST error for an out of date incomplete property`() {
+        fun `getIncompletePropertyFormContextForLandlordIfNotExpired throws NOT_FOUND error for an out of date incomplete property`() {
             val outOfDateCreatedDate = currentInstant.minus(29, DateTimeUnit.DAY, TimeZone.of("Europe/London")).toJavaInstant()
 
             val principalName = "user"
@@ -450,8 +427,54 @@ class PropertyRegistrationServiceTests {
                 assertThrows<ResponseStatusException> {
                     propertyRegistrationService.getIncompletePropertyFormContextForLandlordIfNotExpired(formContext.id, principalName)
                 }
-            kotlin.test.assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
-            kotlin.test.assertEquals(expectedErrorMessage, exception.message)
+            assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+            assertEquals(expectedErrorMessage, exception.message)
+        }
+
+        @Test
+        fun `getIncompletePropertyFormContextForLandlordOrThrowNotFound returns the form context for a valid incomplete property`() {
+            val createdTodayDate = currentInstant.toJavaInstant()
+
+            val expectedFormContext = MockLandlordData.createFormContext(createdDate = createdTodayDate)
+            val principalName = "user"
+
+            whenever(
+                mockFormContextRepository.findByIdAndUser_IdAndJourneyType(
+                    expectedFormContext.id,
+                    principalName,
+                    JourneyType.PROPERTY_REGISTRATION,
+                ),
+            ).thenReturn(expectedFormContext)
+
+            val formContext =
+                propertyRegistrationService.getIncompletePropertyFormContextForLandlordOrThrowNotFound(
+                    expectedFormContext.id,
+                    principalName,
+                )
+
+            assertEquals(expectedFormContext, formContext)
+        }
+
+        @Test
+        fun `getIncompletePropertyFormContextForLandlordOrThrowNotFound throws NOT_FOUND error for an invalid incomplete property`() {
+            val formContextId: Long = 123
+            val principalName = "user"
+
+            val expectedErrorMessage =
+                "404 NOT_FOUND \"Form context with ID: $formContextId and journey type: " +
+                    "${JourneyType.PROPERTY_REGISTRATION.name} not found for base user: $principalName\""
+
+            whenever(
+                mockFormContextRepository.findByIdAndUser_IdAndJourneyType(formContextId, principalName, JourneyType.PROPERTY_REGISTRATION),
+            ).thenReturn(null)
+
+            // Act and Assert
+            val exception =
+                assertThrows<ResponseStatusException> {
+                    propertyRegistrationService.getIncompletePropertyFormContextForLandlordOrThrowNotFound(formContextId, principalName)
+                }
+            assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+            assertEquals(expectedErrorMessage, exception.message)
         }
 
         @Test
@@ -540,6 +563,48 @@ class PropertyRegistrationServiceTests {
             val incompleteProperties = propertyRegistrationService.getIncompletePropertiesForLandlord(principalName)
 
             assertTrue(incompleteProperties.isEmpty())
+        }
+
+        @Test
+        fun `deleteIncompleteProperty deletes the form context for a valid incomplete property`() {
+            val createdTodayDate = currentInstant.toJavaInstant()
+
+            val formContext = MockLandlordData.createFormContext(createdDate = createdTodayDate)
+            val principalName = "user"
+
+            whenever(
+                mockFormContextRepository.findByIdAndUser_IdAndJourneyType(
+                    formContext.id,
+                    principalName,
+                    JourneyType.PROPERTY_REGISTRATION,
+                ),
+            ).thenReturn(formContext)
+
+            propertyRegistrationService.deleteIncompleteProperty(formContext.id, principalName)
+
+            verify(mockFormContextRepository).delete(formContext)
+        }
+
+        @Test
+        fun `deleteIncompleteProperty throws NOT_FOUND error for an invalid incomplete property`() {
+            val formContextId: Long = 123
+            val principalName = "user"
+
+            val expectedErrorMessage =
+                "404 NOT_FOUND \"Form context with ID: $formContextId and journey type: " +
+                    "${JourneyType.PROPERTY_REGISTRATION.name} not found for base user: $principalName\""
+
+            whenever(
+                mockFormContextRepository.findByIdAndUser_IdAndJourneyType(formContextId, principalName, JourneyType.PROPERTY_REGISTRATION),
+            ).thenReturn(null)
+
+            // Act and Assert
+            val exception =
+                assertThrows<ResponseStatusException> {
+                    propertyRegistrationService.deleteIncompleteProperty(formContextId, principalName)
+                }
+            assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+            assertEquals(expectedErrorMessage, exception.message)
         }
     }
 }

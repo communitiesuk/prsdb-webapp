@@ -4,11 +4,11 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.LocatorAssertions
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteIncompletePropertyRegistrationAreYouSurePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
@@ -68,8 +68,7 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
         fun `Clicking on a summary card Delete link redirects to the task list page`(page: Page) {
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
             incompletePropertiesPage.firstSummaryCard.deleteLink.clickAndWait()
-            // TODO PRSD-700 change the assertion to check the page is the property registration deregister page
-            assertTrue(page.url().contains("/delete-incomplete-property"))
+            assertPageIs(page, DeleteIncompletePropertyRegistrationAreYouSurePage::class)
         }
     }
 
