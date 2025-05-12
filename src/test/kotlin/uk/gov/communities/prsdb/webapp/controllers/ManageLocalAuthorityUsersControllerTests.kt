@@ -19,6 +19,8 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
+import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
@@ -190,7 +192,7 @@ class ManageLocalAuthorityUsersControllerTests(
     fun `getEditUserAccessLevelPage returns 403 for admin user accessing another LA`() {
         createdLoggedInUserModel()
         whenever(userRolesService.getUserRolesForPrincipal(any()))
-            .thenReturn(listOf("ROLE_LA_ADMIN"))
+            .thenReturn(listOf(ROLE_LA_ADMIN))
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenThrow(AccessDeniedException(""))
 
@@ -231,7 +233,7 @@ class ManageLocalAuthorityUsersControllerTests(
         val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = createLocalAuthority()
         whenever(userRolesService.getUserRolesForPrincipal(any()))
-            .thenReturn(listOf("ROLE_LA_ADMIN"))
+            .thenReturn(listOf(ROLE_LA_ADMIN))
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenReturn(Pair(loggedInUserModel, localAuthority))
         whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(loggedInUserModel.id, DEFAULT_LA_ID))
@@ -278,7 +280,7 @@ class ManageLocalAuthorityUsersControllerTests(
         val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = createLocalAuthority()
         whenever(userRolesService.getUserRolesForPrincipal(any()))
-            .thenReturn(listOf("ROLE_LA_ADMIN"))
+            .thenReturn(listOf(ROLE_LA_ADMIN))
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenReturn(Pair(loggedInUserModel, localAuthority))
 
@@ -359,7 +361,7 @@ class ManageLocalAuthorityUsersControllerTests(
         val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = createLocalAuthority()
         whenever(userRolesService.getUserRolesForPrincipal(any()))
-            .thenReturn(listOf("ROLE_LA_ADMIN"))
+            .thenReturn(listOf(ROLE_LA_ADMIN))
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenReturn(Pair(loggedInUserModel, localAuthority))
 
@@ -411,13 +413,13 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `deleteUser gives a 403 if attempting to remove the current user`() {
-        attemptToDeleteCurrentUser(userRoles = listOf("ROLE_LA_ADMIN"))
+        attemptToDeleteCurrentUser(userRoles = listOf(ROLE_LA_ADMIN))
     }
 
     @Test
     @WithMockUser(roles = ["LA_ADMIN", "SYSTEM_OPERATOR"])
     fun `deleteUser gives a 403 if attempting to remove the current user even if they are a system operator`() {
-        attemptToDeleteCurrentUser(userRoles = listOf("ROLE_LA_ADMIN", "ROLE_SYSTEM_OPERATOR"))
+        attemptToDeleteCurrentUser(userRoles = listOf(ROLE_LA_ADMIN, ROLE_SYSTEM_OPERATOR))
     }
 
     private fun attemptToDeleteCurrentUser(userRoles: List<String>) {
@@ -552,7 +554,7 @@ class ManageLocalAuthorityUsersControllerTests(
     private fun getLocalAuthorityIfSystemOperator(laId: Int = DEFAULT_LA_ID): LocalAuthority {
         val localAuthority = createLocalAuthority(id = laId)
         whenever(userRolesService.getUserRolesForPrincipal(any()))
-            .thenReturn(listOf("ROLE_SYSTEM_OPERATOR"))
+            .thenReturn(listOf(ROLE_SYSTEM_OPERATOR))
         whenever(localAuthorityService.retrieveLocalAuthorityById(laId))
             .thenReturn(localAuthority)
 

@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
+import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
@@ -284,12 +287,12 @@ class ManageLocalAuthorityUsersController(
 
     private fun getIsCurrentUserSystemOperator(principal: Principal): Boolean {
         val roles = userRolesService.getUserRolesForPrincipal(principal)
-        return roles.contains("ROLE_SYSTEM_OPERATOR")
+        return roles.contains(ROLE_SYSTEM_OPERATOR)
     }
 
     private fun getIsCurrentUserLaUserOrLaAdmin(principal: Principal): Boolean {
         val roles = userRolesService.getUserRolesForPrincipal(principal)
-        return roles.contains("ROLE_LA_USER") || roles.contains("ROLE_LA_ADMIN")
+        return roles.contains(ROLE_LA_USER) || roles.contains(ROLE_LA_ADMIN)
     }
 
     private fun throwErrorIfUserIsUpdatingTheirOwnAccessLevel(

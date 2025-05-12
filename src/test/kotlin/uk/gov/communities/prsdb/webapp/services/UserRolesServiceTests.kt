@@ -4,7 +4,10 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.GrantedAuthority
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
@@ -16,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockOneLoginUserData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSystemOperatorData
+import java.security.Principal
 
 class UserRolesServiceTests {
     private lateinit var landlordRepository: LandlordRepository
@@ -156,5 +160,40 @@ class UserRolesServiceTests {
 
         // Assert
         Assertions.assertFalse(hasLandlordUserRole)
+    }
+
+    @Test
+    fun `getUserRolesForPrincipal returns a list of role strings`() {
+        // Arrange
+        val authentication = mock<Authentication>()
+        whenever(authentication.authorities)
+            .thenReturn(
+                listOf(
+                    GrantedAuthority { ROLE_LANDLORD },
+                    GrantedAuthority { ROLE_LA_ADMIN },
+                    GrantedAuthority { ROLE_LA_USER },
+                    GrantedAuthority { ROLE_SYSTEM_OPERATOR },
+                ),
+            )
+
+        val principal = authentication as Principal
+
+        // Act
+        val roles = userRolesService.getUserRolesForPrincipal(principal)
+
+        // Assert
+        Assertions.assertEquals(4, roles.size)
+        Assertions.assertEquals(listOf(ROLE_LANDLORD, ROLE_LA_ADMIN, ROLE_LA_USER, ROLE_SYSTEM_OPERATOR), roles)
+    }
+
+    @Test
+    fun `getUserRolesForPrincipal throws exception if principal is not an instance of Authentication`() {
+        // Arrange
+        val principal = mock<Principal>()
+
+        // Act & Assert
+        Assertions.assertThrows(IllegalArgumentException::class.java) {
+            userRolesService.getUserRolesForPrincipal(principal)
+        }
     }
 }
