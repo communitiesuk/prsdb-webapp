@@ -80,6 +80,7 @@ dependencies {
 
     // Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
     // PhoneNumbers
     implementation("com.googlecode.libphonenumber:libphonenumber:8.13.49")

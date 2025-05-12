@@ -18,7 +18,7 @@ class JourneyDataController(
     fun index(
         @RequestBody requestBody: SetJourneyDataRequestModel,
     ) {
-        session.setAttribute(requestBody.journeyDataKey, requestBody.journeyData)
+        session.setAttribute(requestBody.journeyDataKey, requestBody.getJourneyData())
     }
 
     companion object {
