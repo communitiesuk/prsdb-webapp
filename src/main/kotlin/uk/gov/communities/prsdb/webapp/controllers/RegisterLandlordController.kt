@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
@@ -70,7 +71,7 @@ class RegisterLandlordController(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
         model: Model,
-        @RequestParam(value = "changingAnswerFor", required = false) changingAnswerFor: String? = null,
+        @RequestParam(value = CHANGE_ANSWER_FOR_PARAMETER_NAME, required = false) changingAnswerFor: String? = null,
     ): ModelAndView =
         landlordRegistrationJourneyFactory
             .create()
@@ -83,7 +84,7 @@ class RegisterLandlordController(
         @RequestParam formData: PageData,
         model: Model,
         principal: Principal,
-        @RequestParam(value = "changingAnswerFor", required = false) changingAnswerFor: String? = null,
+        @RequestParam(value = CHANGE_ANSWER_FOR_PARAMETER_NAME, required = false) changingAnswerFor: String? = null,
     ): ModelAndView =
         landlordRegistrationJourneyFactory
             .create()

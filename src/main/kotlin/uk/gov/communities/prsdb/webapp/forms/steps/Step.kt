@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.steps
 
 import org.springframework.validation.BindingResult
 import org.springframework.web.util.UriComponentsBuilder
+import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
@@ -61,7 +62,7 @@ open class Step<T : StepId>(
                 .newInstance()
                 .path(stepId.urlPathSegment)
                 .queryParamIfPresent("subpage", Optional.ofNullable(subPageNumber))
-                .queryParamIfPresent("changingAnswerFor", Optional.ofNullable(changingAnswersFor?.urlPathSegment))
+                .queryParamIfPresent(CHANGE_ANSWER_FOR_PARAMETER_NAME, Optional.ofNullable(changingAnswersFor?.urlPathSegment))
                 .build(true)
                 .toUriString()
     }

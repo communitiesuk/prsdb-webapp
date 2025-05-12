@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
@@ -73,7 +74,7 @@ class RegisterPropertyController(
     fun getJourneyStep(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
-        @RequestParam(value = "changingAnswerFor", required = false) changingAnswerFor: String? = null,
+        @RequestParam(value = CHANGE_ANSWER_FOR_PARAMETER_NAME, required = false) changingAnswerFor: String? = null,
         model: Model,
         principal: Principal,
     ): ModelAndView =
@@ -95,7 +96,7 @@ class RegisterPropertyController(
     fun postJourneyData(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
-        @RequestParam(value = "changingAnswerFor", required = false) changingAnswerFor: String? = null,
+        @RequestParam(value = CHANGE_ANSWER_FOR_PARAMETER_NAME, required = false) changingAnswerFor: String? = null,
         @RequestParam formData: PageData,
         model: Model,
         principal: Principal,
