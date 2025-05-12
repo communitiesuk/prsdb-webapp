@@ -77,6 +77,8 @@ class ManageLocalAuthorityUsersController(
             "paginationViewModel",
             PaginationViewModel(page, pagedUserList.totalPages, httpServletRequest),
         )
+
+        // TODO: PRSD-672 - if the user is not an la admin, make this a link to the system operator dashboard
         model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
 
         return "manageLAUsers"

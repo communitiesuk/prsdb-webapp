@@ -295,6 +295,66 @@ class LocalAuthorityDataServiceTests {
     }
 
     @Test
+    fun `getPaginatedUsersAndInvitations returns all users and invitations if filterOutLaAdminInvitations is false`() {
+        // Arrange
+        val localAuthority = createLocalAuthority(123)
+        val pageRequest =
+            PageRequest.of(
+                1,
+                10,
+                Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("name")),
+            )
+        val user1 = LocalAuthorityUserOrInvitation(1, "local_authority_user", "User 1", true, localAuthority)
+        val user2 = LocalAuthorityUserOrInvitation(2, "local_authority_user", "User 2", false, localAuthority)
+        val invitation =
+            LocalAuthorityUserOrInvitation(3, "local_authority_invitation", "invite@test.com", false, localAuthority)
+        val adminInvitation =
+            LocalAuthorityUserOrInvitation(3, "local_authority_invitation", "invite.admin@test.com", true, localAuthority)
+        whenever(localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest))
+            .thenReturn(PageImpl(listOf(user1, user2, invitation, adminInvitation), pageRequest, 4))
+        val expectedAdminInvitationDataModel =
+            LocalAuthorityUserOrInvitationDataModel(3, "invite.admin@test.com", localAuthority.name, true, true)
+
+        // Act
+        val userList = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 1, filterOutLaAdminInvitations = false)
+
+        // Assert
+        Assertions.assertEquals(4, userList.content.size)
+        Assertions.assertTrue(userList.contains(expectedAdminInvitationDataModel))
+    }
+
+    @Test
+    fun `getPaginatedUsersAndInvitations returns users and non-admin invitations if filterOutLaAdminInvitations is true`() {
+        // TODO: PRSD-1129
+        // Arrange
+        val localAuthority = createLocalAuthority(123)
+        val pageRequest =
+            PageRequest.of(
+                1,
+                10,
+                Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("name")),
+            )
+        val user1 = LocalAuthorityUserOrInvitation(1, "local_authority_user", "User 1", true, localAuthority)
+        val user2 = LocalAuthorityUserOrInvitation(2, "local_authority_admin", "User 2", false, localAuthority)
+        val nonAdminInvitation =
+            LocalAuthorityUserOrInvitation(3, "local_authority_invitation", "invite@test.com", false, localAuthority)
+
+        whenever(localAuthorityUserOrInvitationRepository.findByLocalAuthorityNotIncludingAdminInvitations(localAuthority, pageRequest))
+            .thenReturn(PageImpl(listOf(user1, user2, nonAdminInvitation), pageRequest, 3))
+
+        // Act
+        val userList =
+            localAuthorityDataService.getPaginatedUsersAndInvitations(
+                localAuthority,
+                1,
+                filterOutLaAdminInvitations = true,
+            )
+
+        // Assert
+        assertEquals(3, userList.content.size)
+    }
+
+    @Test
     fun `updateUserAccessLevel updates the user's isManager attribute if the user exists`() {
         // Arrange
         val localAuthority = createLocalAuthority()
