@@ -1,10 +1,13 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
+import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -12,15 +15,20 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeleteIncompletePropertyRegistrationAreYouSureFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
@@ -136,11 +144,72 @@ class RegisterPropertyController(
         return "registerPropertyConfirmation"
     }
 
-    @GetMapping("/delete-incomplete-property")
-    fun deleteIncompleteProperty(model: Model): String {
-        model.addAttribute("todoComment", "TODO PRSD-700 deregister draft property page")
+    @GetMapping("/$DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT")
+    fun deleteIncompletePropertyAreYouSure(
+        model: Model,
+        principal: Principal,
+        @RequestParam(value = "contextId", required = true) contextId: String,
+    ): String {
+        populateDeleteIncompletePropertyRegistrationModel(model, contextId, principal.name)
+        model.addAttribute(
+            "deleteIncompletePropertyRegistrationAreYouSureFormModel",
+            DeleteIncompletePropertyRegistrationAreYouSureFormModel(),
+        )
 
-        return "todo"
+        return "deleteIncompletePropertyRegistration"
+    }
+
+    @PostMapping("/$DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT")
+    fun deleteIncompletePropertyAreYouSure(
+        model: Model,
+        principal: Principal,
+        @RequestParam(value = "contextId", required = true) contextId: String,
+        @Valid
+        @ModelAttribute
+        formModel: DeleteIncompletePropertyRegistrationAreYouSureFormModel,
+        bindingResult: BindingResult,
+    ): String {
+        if (bindingResult.hasErrors()) {
+            populateDeleteIncompletePropertyRegistrationModel(model, contextId, principal.name)
+            return "deleteIncompletePropertyRegistration"
+        }
+
+        if (formModel.wantsToProceed == true) {
+            propertyRegistrationService.deleteFormContext(contextId.toLong(), principal.name)
+        }
+
+        return "redirect:$INCOMPLETE_PROPERTIES_URL"
+    }
+
+    fun populateDeleteIncompletePropertyRegistrationModel(
+        model: Model,
+        contextId: String,
+        principalName: String,
+    ) {
+        val formContext =
+            propertyRegistrationService.getIncompletePropertyFormContextForLandlordIfNotExpired(
+                contextId.toLong(),
+                principalName,
+            )
+        val singleLineAddress = propertyRegistrationService.getAddressData(formContext).singleLineAddress
+
+        model.addAttribute(
+            "radioOptions",
+            listOf(
+                RadiosButtonViewModel(
+                    value = true,
+                    valueStr = "yes",
+                    labelMsgKey = "forms.radios.option.yes.label",
+                ),
+                RadiosButtonViewModel(
+                    value = false,
+                    valueStr = "no",
+                    labelMsgKey = "forms.radios.option.no.label",
+                ),
+            ),
+        )
+        model.addAttribute("singleLineAddress", singleLineAddress)
+        model.addAttribute(BACK_URL_ATTR_NAME, INCOMPLETE_PROPERTIES_URL)
     }
 
     companion object {
@@ -150,7 +219,14 @@ class RegisterPropertyController(
             "/$REGISTER_PROPERTY_JOURNEY_URL/$RESUME_PAGE_PATH_SEGMENT" +
                 "?$CONTEXT_ID_URL_PARAMETER={contextId}"
 
+        const val DELETE_INCOMPLETE_PROPERTY_ROUTE =
+            "/$REGISTER_PROPERTY_JOURNEY_URL/$DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT" +
+                "?$CONTEXT_ID_URL_PARAMETER={contextId}"
+
         fun getResumePropertyRegistrationPath(contextId: Long): String =
             UriTemplate(RESUME_PROPERTY_REGISTRATION_JOURNEY_ROUTE).expand(contextId).toASCIIString()
+
+        fun deleteIncompletePropertyPath(contextId: Long): String =
+            UriTemplate(DELETE_INCOMPLETE_PROPERTY_ROUTE).expand(contextId).toASCIIString()
     }
 }

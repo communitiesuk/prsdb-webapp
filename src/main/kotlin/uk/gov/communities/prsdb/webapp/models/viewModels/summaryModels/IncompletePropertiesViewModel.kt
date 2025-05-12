@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import kotlinx.datetime.LocalDate
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addAction
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
@@ -51,8 +50,7 @@ class IncompletePropertiesViewModel(
                 )
                 addAction(
                     "landlord.incompleteProperties.action.delete",
-                    // TODO PRSD-700 change url below to point to the delete incomplete properties endpoint
-                    "/$REGISTER_PROPERTY_JOURNEY_URL/delete-incomplete-property?contextId=$contextId",
+                    RegisterPropertyController.deleteIncompletePropertyPath(contextId),
                 )
             }.toList()
 }
