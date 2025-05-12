@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.VerifyIdentityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
@@ -53,12 +54,29 @@ class LandlordRegistrationJourney(
     val absoluteUrlProvider: AbsoluteUrlProvider,
     val emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
     val securityContextService: SecurityContextService,
-) : GroupedJourney<LandlordRegistrationStepId>(
+) : Journey<LandlordRegistrationStepId>(
         journeyType = JourneyType.LANDLORD_REGISTRATION,
         initialStepId = LandlordRegistrationStepId.VerifyIdentity,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
+    protected class LandlordRegistrationStepRouter(
+        journey: Iterable<StepDetails<LandlordRegistrationStepId>>,
+    ) : GroupedStepRouter<LandlordRegistrationStepId>(journey) {
+        override fun isDestinationAllowedWhenChangingAnswerTo(
+            destinationStep: LandlordRegistrationStepId?,
+            stepBeingChanged: LandlordRegistrationStepId?,
+        ): Boolean =
+            when (stepBeingChanged) {
+                LandlordRegistrationStepId.NonEnglandOrWalesAddress ->
+                    destinationStep ==
+                        LandlordRegistrationStepId.NonEnglandOrWalesAddress
+                else -> super.isDestinationAllowedWhenChangingAnswerTo(destinationStep, stepBeingChanged)
+            }
+    }
+
+    override val stepRouter = LandlordRegistrationStepRouter(this)
+
     override val checkYourAnswersStepId = LandlordRegistrationStepId.CheckAnswers
     override val sections =
         listOf(
@@ -78,15 +96,6 @@ class LandlordRegistrationJourney(
                 "check-and-submit",
             ),
         )
-
-    override fun isDestinationAllowedWhenChangingAnswerTo(
-        destinationStep: LandlordRegistrationStepId?,
-        stepBeingChanged: LandlordRegistrationStepId?,
-    ): Boolean =
-        when (stepBeingChanged) {
-            LandlordRegistrationStepId.NonEnglandOrWalesAddress -> destinationStep == LandlordRegistrationStepId.NonEnglandOrWalesAddress
-            else -> super.isDestinationAllowedWhenChangingAnswerTo(destinationStep, stepBeingChanged)
-        }
 
     fun privacyNoticeTasks(): List<JourneyTask<LandlordRegistrationStepId>> = emptyList()
 

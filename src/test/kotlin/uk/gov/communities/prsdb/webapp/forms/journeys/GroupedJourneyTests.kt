@@ -50,9 +50,11 @@ class GroupedJourneyTests {
         validator: SpringValidatorAdapter,
         journeyDataService: JourneyDataService,
         steps: Set<Step<TestGroupedStepId>>,
-    ) : GroupedJourney<TestGroupedStepId>(journeyType, initialStepId, validator, journeyDataService) {
+    ) : Journey<TestGroupedStepId>(journeyType, initialStepId, validator, journeyDataService) {
         override val checkYourAnswersStepId = TestGroupedStepId.CYAStep
         override val sections = createSingleSectionWithSingleTaskFromSteps(initialStepId, steps)
+
+        override val stepRouter = GroupedStepRouter(this)
     }
 
     private lateinit var validatorFactory: ValidatorFactory

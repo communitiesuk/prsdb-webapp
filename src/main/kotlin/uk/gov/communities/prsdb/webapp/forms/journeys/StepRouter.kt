@@ -1,21 +1,26 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
-import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.steps.GroupedStepId
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
+import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 
-abstract class GroupedJourney<T : GroupedStepId<*>>(
-    journeyType: JourneyType,
-    initialStepId: T,
-    validator: Validator,
-    journeyDataService: JourneyDataService,
-) : Journey<T>(
-        journeyType = journeyType,
-        initialStepId = initialStepId,
-        validator = validator,
-        journeyDataService = journeyDataService,
-    ) {
+interface StepRouter<T : StepId> {
+    fun isDestinationAllowedWhenChangingAnswerTo(
+        destinationStep: T?,
+        stepBeingChanged: T?,
+    ): Boolean
+}
+
+open class IsolatedStepRouter<T : StepId> : StepRouter<T> {
+    override fun isDestinationAllowedWhenChangingAnswerTo(
+        destinationStep: T?,
+        stepBeingChanged: T?,
+    ): Boolean = destinationStep != null && destinationStep == stepBeingChanged
+}
+
+open class GroupedStepRouter<T : GroupedStepId<*>>(
+    private val steps: Iterable<StepDetails<T>>,
+) : StepRouter<T> {
     override fun isDestinationAllowedWhenChangingAnswerTo(
         destinationStep: T?,
         stepBeingChanged: T?,
@@ -24,12 +29,12 @@ abstract class GroupedJourney<T : GroupedStepId<*>>(
             destinationStep.groupIdentifier == stepBeingChanged?.groupIdentifier &&
             isDestinationNotBeforeOtherStep(destinationStep, stepBeingChanged)
 
-    protected fun isDestinationNotBeforeOtherStep(
+    private fun isDestinationNotBeforeOtherStep(
         destinationStep: T?,
         otherStep: T?,
     ): Boolean =
         destinationStep != null &&
-            fold(null) { destinationIsAfterOtherStep, stepDetails ->
+            steps.fold(null) { destinationIsAfterOtherStep, stepDetails ->
                 destinationIsAfterOtherStep
                     ?: when (stepDetails.step.id) {
                         otherStep -> true

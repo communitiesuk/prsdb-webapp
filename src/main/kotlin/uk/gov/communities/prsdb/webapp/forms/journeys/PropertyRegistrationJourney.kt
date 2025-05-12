@@ -67,6 +67,7 @@ class PropertyRegistrationJourney(
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
+    override val stepRouter = GroupedStepRouter(this)
     override val checkYourAnswersStepId = RegisterPropertyStepId.CheckAnswers
     override val sections =
         listOf(

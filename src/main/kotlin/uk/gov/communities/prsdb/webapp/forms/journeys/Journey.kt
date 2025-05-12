@@ -27,6 +27,8 @@ abstract class Journey<T : StepId>(
 ) : Iterable<StepDetails<T>> {
     abstract val sections: List<JourneySection<T>>
 
+    protected open val stepRouter: StepRouter<T> = IsolatedStepRouter()
+
     protected val steps: Set<Step<T>>
         get() = sections.flatMap { section -> section.tasks }.flatMap { task -> task.steps }.toSet()
 
@@ -114,16 +116,18 @@ abstract class Journey<T : StepId>(
         return ModelAndView("redirect:$redirectUrl")
     }
 
-    protected open fun isDestinationAllowedWhenChangingAnswerTo(
+    private fun isDestinationAllowedWhenChangingAnswerTo(
         destinationStep: T?,
         stepBeingChanged: T?,
-    ): Boolean = destinationStep != null && destinationStep == stepBeingChanged
+    ): Boolean = stepRouter.isDestinationAllowedWhenChangingAnswerTo(destinationStep, stepBeingChanged)
 
     private fun buildPreviousStepUrl(
         prevStepDetails: StepDetails<T>?,
         changingAnswersFor: T?,
     ): String? =
-        if (changingAnswersFor == null || isDestinationAllowedWhenChangingAnswerTo(prevStepDetails?.step?.id, changingAnswersFor)) {
+        if (changingAnswersFor == null ||
+            stepRouter.isDestinationAllowedWhenChangingAnswerTo(prevStepDetails?.step?.id, changingAnswersFor)
+        ) {
             prevStepDetails?.let { Step.generateUrl(it.step.id, it.subPageNumber, changingAnswersFor) }
         } else {
             checkYourAnswersStepId?.let { Step.generateUrl(it, null, null) }
