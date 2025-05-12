@@ -203,7 +203,7 @@ class LocalAuthorityDataServiceTests {
             )
 
         // Act
-        val userList = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 1)
+        val userList = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 1, filterOutLaAdminInvitations = false)
 
         // Assert
         Assertions.assertIterableEquals(expectedLaUserList, userList)
@@ -227,7 +227,7 @@ class LocalAuthorityDataServiceTests {
             .thenReturn(PageImpl(listOf(user1, user2, invitation), pageRequest, 3))
 
         // Act
-        val userList = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 1)
+        val userList = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 1, filterOutLaAdminInvitations = false)
 
         // Assert
         Assertions.assertEquals(3, userList.content.size)
@@ -276,8 +276,18 @@ class LocalAuthorityDataServiceTests {
         }
 
         // Act
-        val userListPage1 = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 1)
-        val userListPage2 = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 2)
+        val userListPage1 =
+            localAuthorityDataService.getPaginatedUsersAndInvitations(
+                localAuthority,
+                1,
+                filterOutLaAdminInvitations = false,
+            )
+        val userListPage2 =
+            localAuthorityDataService.getPaginatedUsersAndInvitations(
+                localAuthority,
+                2,
+                filterOutLaAdminInvitations = false,
+            )
 
         // Assert
         Assertions.assertIterableEquals(expectedUserListPage1, userListPage1)
