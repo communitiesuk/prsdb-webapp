@@ -8,19 +8,21 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLaUserInvitationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLaUserInvitationSuccessPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.ACCESS_LEVEL_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.ACCOUNT_STATUS_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.USERNAME_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 
-@Sql("/data-la-users-and-invitations.sql")
 class CancelLaUserInvitationTests : IntegrationTest() {
     @Test
+    @Sql("/data-la-users-and-invitations.sql")
     fun `an la user invitation can be cancelled`(page: Page) {
         // Changing the pending user takes you to the cancel invitation page
+        var pendingInvitationRowIndex = 2
         var manageUsersPage = navigator.goToManageLaUsers(1)
-        assertThat(manageUsersPage.table.getCell(1, ACCOUNT_STATUS_COL_INDEX)).containsText("PENDING")
-        assertThat(manageUsersPage.table.getCell(1, USERNAME_COL_INDEX)).containsText("invited.user@example.com")
-        manageUsersPage.getChangeLink(rowIndex = 1).clickAndWait()
+        assertThat(manageUsersPage.table.getCell(pendingInvitationRowIndex, ACCOUNT_STATUS_COL_INDEX)).containsText("PENDING")
+        assertThat(manageUsersPage.table.getCell(pendingInvitationRowIndex, USERNAME_COL_INDEX)).containsText("invited.user@example.com")
+        manageUsersPage.getChangeLink(rowIndex = pendingInvitationRowIndex).clickAndWait()
         val cancelInvitationPage = assertPageIs(page, CancelLaUserInvitationPage::class)
 
         // Cancel invitation
@@ -34,6 +36,36 @@ class CancelLaUserInvitationTests : IntegrationTest() {
         manageUsersPage = assertPageIs(page, ManageLaUsersPage::class)
 
         // The invited user is no longer in the table
-        assertThat(manageUsersPage.table.getCell(1, USERNAME_COL_INDEX)).not().containsText("invited.user@example.com")
+        assertThat(
+            manageUsersPage.table.getCell(pendingInvitationRowIndex, USERNAME_COL_INDEX),
+        ).not().containsText("invited.user@example.com")
+    }
+
+    @Test
+    @Sql("/data-la-invitations-user-is-system-operator.sql")
+    fun `an la admin invitation can be cancelled by a system operator`(page: Page) {
+        // Changing the pending user takes you to the cancel invitation page
+        var pendingInvitationRowIndex = 3
+        var manageUsersPage = navigator.goToManageLaUsers(1)
+        assertThat(manageUsersPage.table.getCell(pendingInvitationRowIndex, ACCOUNT_STATUS_COL_INDEX)).containsText("PENDING")
+        assertThat(manageUsersPage.table.getCell(pendingInvitationRowIndex, USERNAME_COL_INDEX)).containsText("x.adminuser@example.com")
+        assertThat(manageUsersPage.table.getCell(pendingInvitationRowIndex, ACCESS_LEVEL_COL_INDEX)).containsText("Admin")
+        manageUsersPage.getChangeLink(rowIndex = pendingInvitationRowIndex).clickAndWait()
+        val cancelInvitationPage = assertPageIs(page, CancelLaUserInvitationPage::class)
+
+        // Cancel invitation
+        assertThat(cancelInvitationPage.userDetailsSection).containsText("x.adminuser@example.com")
+        cancelInvitationPage.form.submit()
+        val successPage = assertPageIs(page, CancelLaUserInvitationSuccessPage::class)
+
+        // The success page confirms the user is deleted
+        assertThat(successPage.confirmationBanner).containsText("You've cancelled x.adminuser@example.com's invitation from ISLE OF MAN")
+        successPage.returnButton.clickAndWait()
+        manageUsersPage = assertPageIs(page, ManageLaUsersPage::class)
+
+        // The invited user is no longer in the table
+        assertThat(
+            manageUsersPage.table.getCell(pendingInvitationRowIndex, USERNAME_COL_INDEX),
+        ).not().containsText("x.adminuser@example.com")
     }
 }
