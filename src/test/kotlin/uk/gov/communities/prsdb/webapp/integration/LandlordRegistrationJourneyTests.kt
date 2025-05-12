@@ -659,4 +659,25 @@ class LandlordRegistrationJourneyTests : IntegrationTest() {
             assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
         }
     }
+
+    @Nested
+    inner class LandlordRegistrationStepCheckAnswers {
+        @Test
+        fun `After changing an answer, submitting or going back returns to the CYA page`(page: Page) {
+            var checkAnswersPage = navigator.goToLandlordRegistrationCheckAnswersPage()
+            checkAnswersPage.form.summaryList.emailRow.actions.actionLink
+                .clickAndWait()
+            var emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
+
+            emailPage.submitEmail("New@email.com")
+            checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
+
+            checkAnswersPage.form.summaryList.emailRow.actions.actionLink
+                .clickAndWait()
+            emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
+
+            emailPage.backLink.clickAndWait()
+            assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
+        }
+    }
 }
