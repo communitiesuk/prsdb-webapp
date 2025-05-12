@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_ID
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_INVITATION_ID
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_USER_ID
@@ -50,6 +51,9 @@ class ManageLocalAuthorityUsersControllerTests(
 
     @MockitoBean
     lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
+    @MockitoBean
+    lateinit var localAuthorityService: LocalAuthorityService
 
     @MockitoBean
     private lateinit var localAuthorityDataService: LocalAuthorityDataService
@@ -153,6 +157,8 @@ class ManageLocalAuthorityUsersControllerTests(
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `getEditUserAccessLevelPage returns 403 for admin user accessing another LA`() {
         createdLoggedInUserModel()
+        whenever(userRolesService.getUserRolesForPrincipal(any()))
+            .thenReturn(listOf("ROLE_LA_ADMIN"))
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenThrow(AccessDeniedException(""))
 
@@ -195,6 +201,8 @@ class ManageLocalAuthorityUsersControllerTests(
     fun `getEditUserAccessLevelPage returns 403 for admin user accessing their own edit page`() {
         val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = createLocalAuthority()
+        whenever(userRolesService.getUserRolesForPrincipal(any()))
+            .thenReturn(listOf("ROLE_LA_ADMIN"))
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenReturn(Pair(loggedInUserModel, localAuthority))
         whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(loggedInUserModel.id, DEFAULT_LA_ID))
@@ -239,6 +247,8 @@ class ManageLocalAuthorityUsersControllerTests(
     fun `updateUserAccessLevel gives a 403 when trying to update currently logged in user`() {
         val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = createLocalAuthority()
+        whenever(userRolesService.getUserRolesForPrincipal(any()))
+            .thenReturn(listOf("ROLE_LA_ADMIN"))
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenReturn(Pair(loggedInUserModel, localAuthority))
 
@@ -310,6 +320,8 @@ class ManageLocalAuthorityUsersControllerTests(
     fun `confirmDeleteUser gives a 403 when trying to delete currently logged in user`() {
         val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = createLocalAuthority()
+        whenever(userRolesService.getUserRolesForPrincipal(any()))
+            .thenReturn(listOf("ROLE_LA_ADMIN"))
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenReturn(Pair(loggedInUserModel, localAuthority))
 
@@ -362,6 +374,8 @@ class ManageLocalAuthorityUsersControllerTests(
     fun `deleteUser gives a 403 if attempting to remove the current user`() {
         val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = createLocalAuthority()
+        whenever(userRolesService.getUserRolesForPrincipal(any()))
+            .thenReturn(listOf("ROLE_LA_ADMIN"))
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenReturn(Pair(loggedInUserModel, localAuthority))
 
