@@ -32,13 +32,14 @@ data class SummaryListRowViewModel(
         fun forCheckYourAnswersPage(
             fieldHeading: String,
             fieldValue: Any?,
-            changeUrl: String,
+            changeUrl: String?,
             valueUrl: String? = null,
         ): SummaryListRowViewModel =
             SummaryListRowViewModel(
                 fieldHeading = fieldHeading,
                 fieldValue = fieldValue,
-                changeUrl = "$changeUrl?$CHANGE_ANSWER_FOR_PARAMETER_NAME=$changeUrl",
+                changeUrl = changeUrl?.let { "$it?$CHANGE_ANSWER_FOR_PARAMETER_NAME=$it" },
+                valueUrl = valueUrl,
             )
     }
 }
