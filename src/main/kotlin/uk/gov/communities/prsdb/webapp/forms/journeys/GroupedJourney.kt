@@ -22,9 +22,9 @@ abstract class GroupedJourney<T : GroupedStepId<*>>(
     ): Boolean =
         destinationStep != null &&
             destinationStep.groupIdentifier == stepBeingChanged?.groupIdentifier &&
-            isDestinationAfterOtherStep(destinationStep, stepBeingChanged)
+            isDestinationNotBeforeOtherStep(destinationStep, stepBeingChanged)
 
-    protected fun isDestinationAfterOtherStep(
+    protected fun isDestinationNotBeforeOtherStep(
         destinationStep: T?,
         otherStep: T?,
     ): Boolean =
@@ -32,8 +32,8 @@ abstract class GroupedJourney<T : GroupedStepId<*>>(
             fold(null) { destinationIsAfterOtherStep, stepDetails ->
                 destinationIsAfterOtherStep
                     ?: when (stepDetails.step.id) {
-                        destinationStep -> false
                         otherStep -> true
+                        destinationStep -> false
                         else -> destinationIsAfterOtherStep
                     }
             } ?: false
