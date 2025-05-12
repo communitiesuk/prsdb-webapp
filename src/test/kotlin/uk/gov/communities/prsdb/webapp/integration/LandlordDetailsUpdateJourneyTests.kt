@@ -134,8 +134,6 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
         }
     }
 
-    // TODO PRSD-1105: Re-enable and update to match flow
-    @Disabled
     @Nested
     inner class PhoneNumberUpdates {
         @Test

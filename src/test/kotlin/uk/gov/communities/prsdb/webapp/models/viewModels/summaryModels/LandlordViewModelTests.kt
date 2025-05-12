@@ -330,8 +330,7 @@ class LandlordViewModelTests {
         val changeableByAllLandlordsPersonalDetailKeys =
             listOf(
                 "landlordDetails.personalDetails.emailAddress",
-                // TODO PRSD-1105: uncomment
-                // "landlordDetails.personalDetails.telephoneNumber",
+                "landlordDetails.personalDetails.telephoneNumber",
                 // TODO PRSD-355 (address update): uncomment
                 // "landlordDetails.personalDetails.contactAddress",
             )

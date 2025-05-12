@@ -304,6 +304,7 @@ class JourneyDataBuilder(
         name: String,
         dob: LocalDate,
     ): JourneyDataBuilder {
+        journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment] = emptyMap<String, Any?>()
         journeyData[LandlordRegistrationStepId.Name.urlPathSegment] = mapOf("name" to name)
         journeyData[LandlordRegistrationStepId.DateOfBirth.urlPathSegment] =
             mapOf("day" to dob.dayOfMonth, "month" to dob.monthValue, "year" to dob.year)
