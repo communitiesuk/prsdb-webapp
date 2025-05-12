@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_ID
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_INVITATION_ID
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_USER_ID
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.NON_ADMIN_LA_ID
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthorityUser
@@ -60,7 +63,7 @@ class ManageLocalAuthorityUsersControllerTests(
 
     @Test
     fun `index returns a redirect for unauthenticated user`() {
-        mvc.get("/local-authority/1/manage-users").andExpect {
+        mvc.get("/local-authority/$DEFAULT_LA_ID/manage-users").andExpect {
             status { is3xxRedirection() }
         }
     }
@@ -69,7 +72,7 @@ class ManageLocalAuthorityUsersControllerTests(
     @WithMockUser
     fun `index returns 403 for unauthorized user`() {
         mvc
-            .get("/local-authority/1/manage-users")
+            .get("/local-authority/$DEFAULT_LA_ID/manage-users")
             .andExpect {
                 status { isForbidden() }
             }
@@ -106,6 +109,19 @@ class ManageLocalAuthorityUsersControllerTests(
     }
 
     @Test
+    @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+    fun `index returns 200 for a system operator`() {
+        val localAuthority = getLocalAuthorityIfSystemOperator(NON_ADMIN_LA_ID)
+        whenever(localAuthorityDataService.getPaginatedUsersAndInvitations(eq(localAuthority), eq(0), anyOrNull(), anyOrNull()))
+            .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
+        mvc
+            .get("/local-authority/${NON_ADMIN_LA_ID}/manage-users")
+            .andExpect {
+                status { isOk() }
+            }
+    }
+
+    @Test
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `index returns 404 for authorized user accessing a page less than 1`() {
         val loggedInUserModel = createdLoggedInUserModel()
@@ -124,7 +140,7 @@ class ManageLocalAuthorityUsersControllerTests(
 
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
-    fun `inviting new user with valid form redirects to confirmation page`() {
+    fun `inviting new user as an la admin with valid form redirects to confirmation page`() {
         val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = LocalAuthority(DEFAULT_LA_ID, "Test Local Authority", "custodian code")
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
@@ -134,8 +150,24 @@ class ManageLocalAuthorityUsersControllerTests(
         whenever(absoluteUrlProvider.buildInvitationUri("test-token"))
             .thenReturn(URI("https://test-service.gov.uk/sign-up-la-user"))
 
+        postToSendInvitationAndAssertSuccess()
+    }
+
+    @Test
+    @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+    fun `inviting new user as a system operator with valid form redirects to confirmation page`() {
+        val localAuthority = getLocalAuthorityIfSystemOperator(DEFAULT_LA_ID)
+        whenever(localAuthorityInvitationService.createInvitationToken(any(), any(), any()))
+            .thenReturn("test-token")
+        whenever(absoluteUrlProvider.buildInvitationUri("test-token"))
+            .thenReturn(URI("https://test-service.gov.uk/sign-up-la-user"))
+
+        postToSendInvitationAndAssertSuccess()
+    }
+
+    private fun postToSendInvitationAndAssertSuccess() {
         mvc
-            .post("/local-authority/123/invite-new-user") {
+            .post("/local-authority/${DEFAULT_LA_ID}/invite-new-user") {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 content = urlEncodedConfirmedEmailDataModel("new-user@example.com")
                 with(csrf())
@@ -222,6 +254,31 @@ class ManageLocalAuthorityUsersControllerTests(
         val localAuthority = createLocalAuthority()
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenReturn(Pair(loggedInUserModel, localAuthority))
+
+        setupLocalAuthorityUserToEdit(localAuthority)
+
+        mvc
+            .get("/local-authority/$DEFAULT_LA_ID/edit-user/$DEFAULT_LA_USER_ID")
+            .andExpect {
+                status { isOk() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+    fun `getEditUserAccessLevelPage returns 200 for system operator`() {
+        val localAuthority = getLocalAuthorityIfSystemOperator(DEFAULT_LA_ID)
+
+        setupLocalAuthorityUserToEdit(localAuthority)
+
+        mvc
+            .get("/local-authority/$DEFAULT_LA_ID/edit-user/$DEFAULT_LA_USER_ID")
+            .andExpect {
+                status { isOk() }
+            }
+    }
+
+    private fun setupLocalAuthorityUserToEdit(localAuthority: LocalAuthority) {
         val baseUser = createOneLoginUser("user")
         val localAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority)
         whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(DEFAULT_LA_USER_ID, DEFAULT_LA_ID))
@@ -234,12 +291,6 @@ class ManageLocalAuthorityUsersControllerTests(
                     localAuthorityUser.email,
                 ),
             )
-
-        mvc
-            .get("/local-authority/$DEFAULT_LA_ID/edit-user/$DEFAULT_LA_USER_ID")
-            .andExpect {
-                status { isOk() }
-            }
     }
 
     @Test
@@ -264,12 +315,24 @@ class ManageLocalAuthorityUsersControllerTests(
 
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
-    fun `updateUserAccessLevel updates the given user's access level`() {
+    fun `updateUserAccessLevel updates the given user's access level when called by an la admin`() {
         val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = createLocalAuthority()
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenReturn(Pair(loggedInUserModel, localAuthority))
 
+        postUpdateUserAccessLevelAndAssertSuccess()
+    }
+
+    @Test
+    @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+    fun `updateUserAccessLevel updates the given user's access level when called by a system operator`() {
+        getLocalAuthorityIfSystemOperator(DEFAULT_LA_ID)
+
+        postUpdateUserAccessLevelAndAssertSuccess()
+    }
+
+    private fun postUpdateUserAccessLevelAndAssertSuccess() {
         mvc
             .post("/local-authority/$DEFAULT_LA_ID/edit-user/$DEFAULT_LA_USER_ID") {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
@@ -479,5 +542,14 @@ class ManageLocalAuthorityUsersControllerTests(
 
         verify(emailNotificationService)
             .sendEmail(invitation.invitedEmail, LocalAuthorityInvitationCancellationEmail(invitation.invitingAuthority))
+    }
+
+    private fun getLocalAuthorityIfSystemOperator(laId: Int = DEFAULT_LA_ID): LocalAuthority {
+        val localAuthority = createLocalAuthority()
+        whenever(userRolesService.getUserRolesForPrincipal(any()))
+            .thenReturn(listOf("ROLE_SYSTEM_OPERATOR"))
+        whenever(localAuthorityService.retrieveLocalAuthorityById(laId))
+            .thenReturn(localAuthority)
+        return localAuthority
     }
 }
