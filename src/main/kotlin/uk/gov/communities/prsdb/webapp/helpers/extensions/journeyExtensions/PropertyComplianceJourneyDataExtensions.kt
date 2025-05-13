@@ -77,7 +77,7 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                     EicrExemptionReasonFormModel::exemptionReason.name,
                 )?.let { it == EicrExemptionReason.OTHER }
 
-        fun JourneyData.getHasEpc() =
+        fun JourneyData.getHasEPC() =
             JourneyDataHelper.getFieldEnumValue<HasEpc>(
                 this,
                 PropertyComplianceStepId.EPC.urlPathSegment,
