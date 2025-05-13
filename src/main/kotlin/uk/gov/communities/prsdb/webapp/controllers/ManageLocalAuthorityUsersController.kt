@@ -69,7 +69,7 @@ class ManageLocalAuthorityUsersController(
                 filterOutLaAdminInvitations = !getIsCurrentUserSystemOperator(principal),
             )
 
-        if (pagedUserList.totalPages in 1..<page) {
+        if (pagedUserList.totalPages != 0 && pagedUserList.totalPages < page) {
             return "redirect:/local-authority/{localAuthorityId}/manage-users"
         }
 
