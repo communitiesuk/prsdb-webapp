@@ -27,12 +27,14 @@ import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardContro
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteIncompletePropertyRegistrationAreYouSurePage
@@ -356,35 +358,51 @@ class Navigator(
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
     }
 
-    fun goToLaUserRegistrationLandingPage(token: String): LandingPageLaUserRegistration {
-        navigate("/$REGISTER_LA_USER_JOURNEY_URL?token=$token")
+    fun skipToLaUserRegistrationLandingPage(token: UUID): LandingPageLaUserRegistration {
+        storeInvitationTokenInSession(token)
+        navigate("/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.LandingPage.urlPathSegment}")
         return createValidPage(page, LandingPageLaUserRegistration::class)
     }
 
-    fun goToLaUserRegistrationNameFormPage(token: String): NameFormPageLaUserRegistration {
-        val landingPage = goToLaUserRegistrationLandingPage(token)
-        landingPage.clickBeginButton()
-        val namePage = createValidPage(page, NameFormPageLaUserRegistration::class)
-        return namePage
+    fun skipToLaUserRegistrationNameFormPage(token: UUID): NameFormPageLaUserRegistration {
+        storeInvitationTokenInSession(token)
+        setJourneyDataInSession(
+            LaUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder().withLandingPageReached().build(),
+        )
+        navigate("/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.Name.urlPathSegment}")
+        return createValidPage(page, NameFormPageLaUserRegistration::class)
     }
 
-    fun goToLaUserRegistrationEmailFormPage(token: String): EmailFormPageLaUserRegistration {
-        val namePage = goToLaUserRegistrationNameFormPage(token)
-        namePage.submitName("Test user")
-        val emailPage = createValidPage(page, EmailFormPageLaUserRegistration::class)
-        return emailPage
+    fun skipToLaUserRegistrationEmailFormPage(token: UUID): EmailFormPageLaUserRegistration {
+        storeInvitationTokenInSession(token)
+        setJourneyDataInSession(
+            LaUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withLandingPageReached()
+                .withName()
+                .build(),
+        )
+        navigate("/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.Email.urlPathSegment}")
+        return createValidPage(page, EmailFormPageLaUserRegistration::class)
     }
 
-    fun goToLaUserRegistrationCheckAnswersPage(token: String): CheckAnswersPageLaUserRegistration {
-        val emailPage = goToLaUserRegistrationEmailFormPage(token)
-        emailPage.submitEmail("test.user@example.com")
-        val checkAnswersPage = createValidPage(page, CheckAnswersPageLaUserRegistration::class)
-        return checkAnswersPage
+    fun skipToLaUserRegistrationCheckAnswersPage(token: UUID): CheckAnswersPageLaUserRegistration {
+        storeInvitationTokenInSession(token)
+        setJourneyDataInSession(
+            LaUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withLandingPageReached()
+                .withName()
+                .withEmailAddress()
+                .build(),
+        )
+        navigate("/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.CheckAnswers.urlPathSegment}")
+        return createValidPage(page, CheckAnswersPageLaUserRegistration::class)
     }
 
-    fun skipToLaUserRegistrationConfirmationPage(): ErrorPage {
+    fun navigateToLaUserRegistrationConfirmationPage() {
         navigate("/$REGISTER_LA_USER_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
-        return createValidPage(page, ErrorPage::class)
     }
 
     fun goToPropertyRegistrationStartPage(): RegisterPropertyStartPage {
