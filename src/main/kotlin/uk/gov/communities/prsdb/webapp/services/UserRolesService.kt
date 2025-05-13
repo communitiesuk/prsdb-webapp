@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
@@ -9,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SystemOperatorRepository
-import java.security.Principal
 
 @Service
 class UserRolesService(
@@ -44,13 +42,5 @@ class UserRolesService(
     fun getHasLandlordUserRole(subjectId: String): Boolean {
         val roles = getRolesForSubjectId(subjectId)
         return roles.contains(ROLE_LANDLORD)
-    }
-
-    fun getUserRolesForPrincipal(principal: Principal): List<String> {
-        if (principal is Authentication) {
-            return principal.authorities
-                .map { it.authority }
-        }
-        throw IllegalArgumentException("Principal is not an instance of Authentication")
     }
 }

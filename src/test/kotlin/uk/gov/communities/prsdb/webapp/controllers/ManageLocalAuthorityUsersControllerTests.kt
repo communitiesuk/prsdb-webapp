@@ -13,7 +13,6 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -21,8 +20,6 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
-import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
@@ -165,7 +162,7 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `inviting new user as a system operator with valid form redirects to confirmation page`() {
-        val localAuthority = getLocalAuthorityIfSystemOperator(NON_ADMIN_LA_ID)
+        getLocalAuthorityIfSystemOperator(NON_ADMIN_LA_ID)
         whenever(localAuthorityInvitationService.createInvitationToken(any(), any(), any()))
             .thenReturn("test-token")
         whenever(absoluteUrlProvider.buildInvitationUri("test-token"))
@@ -198,8 +195,6 @@ class ManageLocalAuthorityUsersControllerTests(
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `getEditUserAccessLevelPage returns 403 for admin user accessing another LA`() {
         createdLoggedInUserModel()
-        whenever(userRolesService.getUserRolesForPrincipal(any()))
-            .thenReturn(listOf(ROLE_LA_ADMIN))
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenThrow(AccessDeniedException(""))
 
@@ -239,8 +234,6 @@ class ManageLocalAuthorityUsersControllerTests(
     fun `getEditUserAccessLevelPage returns 403 for admin user accessing their own edit page`() {
         val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = createLocalAuthority()
-        whenever(userRolesService.getUserRolesForPrincipal(any()))
-            .thenReturn(listOf(ROLE_LA_ADMIN))
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenReturn(Pair(loggedInUserModel, localAuthority))
         whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(loggedInUserModel.id, DEFAULT_LA_ID))
@@ -286,8 +279,6 @@ class ManageLocalAuthorityUsersControllerTests(
     fun `updateUserAccessLevel gives a 403 when trying to update currently logged in user`() {
         val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = createLocalAuthority()
-        whenever(userRolesService.getUserRolesForPrincipal(any()))
-            .thenReturn(listOf(ROLE_LA_ADMIN))
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenReturn(Pair(loggedInUserModel, localAuthority))
 
@@ -367,8 +358,6 @@ class ManageLocalAuthorityUsersControllerTests(
     fun `confirmDeleteUser gives a 403 when trying to delete currently logged in user`() {
         val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = createLocalAuthority()
-        whenever(userRolesService.getUserRolesForPrincipal(any()))
-            .thenReturn(listOf(ROLE_LA_ADMIN))
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenReturn(Pair(loggedInUserModel, localAuthority))
 
@@ -405,12 +394,6 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR", "LA_ADMIN"])
     fun `deleteUser adds a redirectFlashAttribute if a system operator deleted themself as an la user`() {
-        val userRoles =
-            SecurityContextHolder
-                .getContext()
-                .authentication.authorities
-                .map { it.authority }
-
         val subjectId = "user"
 
         val loggedInUserModel = createdLoggedInUserModel(DEFAULT_LOGGED_IN_LA_USER_ID)
@@ -420,8 +403,6 @@ class ManageLocalAuthorityUsersControllerTests(
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, subjectId))
             .thenReturn(Pair(loggedInUserModel, localAuthority))
         whenever(localAuthorityDataService.getLocalAuthorityUser(subjectId)).thenReturn(localAuthorityUser)
-        whenever(userRolesService.getUserRolesForPrincipal(any()))
-            .thenReturn(userRoles)
         whenever(localAuthorityService.retrieveLocalAuthorityById(DEFAULT_LA_ID))
             .thenReturn(localAuthority)
         whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(DEFAULT_LOGGED_IN_LA_USER_ID, localAuthority.id))
@@ -468,15 +449,8 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `deleteUser gives a 403 if attempting to remove the current user`() {
-        val userRoles =
-            SecurityContextHolder
-                .getContext()
-                .authentication.authorities
-                .map { it.authority }
         val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = createLocalAuthority()
-        whenever(userRolesService.getUserRolesForPrincipal(any()))
-            .thenReturn(userRoles)
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenReturn(Pair(loggedInUserModel, localAuthority))
 
@@ -627,8 +601,6 @@ class ManageLocalAuthorityUsersControllerTests(
 
     private fun getLocalAuthorityIfSystemOperator(laId: Int = DEFAULT_LA_ID): LocalAuthority {
         val localAuthority = createLocalAuthority(id = laId)
-        whenever(userRolesService.getUserRolesForPrincipal(any()))
-            .thenReturn(listOf(ROLE_SYSTEM_OPERATOR))
         whenever(localAuthorityService.retrieveLocalAuthorityById(laId))
             .thenReturn(localAuthority)
 
