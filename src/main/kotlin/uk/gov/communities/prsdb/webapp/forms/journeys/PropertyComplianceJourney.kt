@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEpc
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCertExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrExemptionReasonOther
@@ -138,11 +139,16 @@ class PropertyComplianceJourney(
                 "propertyCompliance.taskList.upload.eicr",
             )
 
-    // TODO PRSD-1134: Implement EPC upload task
     private val epcTask
         get() =
-            JourneyTask.withOneStep(
-                placeholderStep(PropertyComplianceStepId.EPC, "TODO PRSD-1134: Implement EPC task"),
+            JourneyTask(
+                PropertyComplianceStepId.EPC,
+                setOf(
+                    epcStep,
+                    placeholderStep(PropertyComplianceStepId.CheckMatchedEpc, "TODO PRSD-1132: Implement Check Matched EPC step"),
+                    placeholderStep(PropertyComplianceStepId.EpcMissing, "TODO PRSD-1137: Implement EPC Missing step"),
+                    placeholderStep(PropertyComplianceStepId.EpcExemptionReason, "TODO PRSD-1135: Implement EPC Exemption Reason step"),
+                ),
                 "propertyCompliance.taskList.upload.epc",
                 "propertyCompliance.taskList.upload.epc.hint",
             )
@@ -715,8 +721,12 @@ class PropertyComplianceJourney(
             Pair(PropertyComplianceStepId.EicrExemptionConfirmation, null)
         }
 
-    private fun epcStepNextAction(journeyData: JourneyData) = Pair(PropertyComplianceStepId.EicrIssueDate, null)
-    // TODO: PRSD-1134
+    private fun epcStepNextAction(journeyData: JourneyData) =
+        when (journeyData.getHasEpc()!!) {
+            HasEpc.YES -> Pair(PropertyComplianceStepId.CheckMatchedEpc, null)
+            HasEpc.NO -> Pair(PropertyComplianceStepId.EpcMissing, null)
+            HasEpc.NOT_REQUIRED -> Pair(PropertyComplianceStepId.EpcExemptionReason, null)
+        }
 
     private fun getPropertyAddress() =
         propertyOwnershipService

@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions
 import kotlinx.datetime.yearsUntil
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -75,5 +76,12 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                     PropertyComplianceStepId.EicrExemptionReason.urlPathSegment,
                     EicrExemptionReasonFormModel::exemptionReason.name,
                 )?.let { it == EicrExemptionReason.OTHER }
+
+        fun JourneyData.getHasEpc() =
+            JourneyDataHelper.getFieldEnumValue<HasEpc>(
+                this,
+                PropertyComplianceStepId.EPC.urlPathSegment,
+                EicrFormModel::hasCert.name,
+            )
     }
 }
