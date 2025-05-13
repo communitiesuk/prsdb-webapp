@@ -30,10 +30,11 @@ class DeleteIncompletePropertyRegistrationAreYouSurePageTests : IntegrationTest(
     }
 
     @Test
-    fun `the page redirects to the incomplete properties page if the user selects No`(page: Page) {
+    fun `the property is deleted and the page redirects to the incomplete properties page if the user selects No`(page: Page) {
         val areYouSurePage = navigator.goToDeleteIncompletePropertyRegistrationAreYouSurePage(contextId)
         areYouSurePage.submitDoesNotWantToProceed()
-        assertPageIs(page, LandlordIncompletePropertiesPage::class)
+        val incompletePropertiesPage = assertPageIs(page, LandlordIncompletePropertiesPage::class)
+        BaseComponent.assertThat(incompletePropertiesPage.firstSummaryCard.title).containsText("Incomplete Property 1")
     }
 
     @Test

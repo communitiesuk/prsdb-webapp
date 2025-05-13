@@ -9,10 +9,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.A
 
 class DeleteIncompletePropertyRegistrationAreYouSurePage(
     page: Page,
+    urlArguments: Map<String, String>,
 ) : AreYouSureFormBasePage(
         page,
         "/$REGISTER_PROPERTY_JOURNEY_URL/$DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT" +
-            "?$CONTEXT_ID_URL_PARAMETER=",
+            "?$CONTEXT_ID_URL_PARAMETER=${urlArguments["contextId"]}",
     ) {
     val heading = Heading(page.locator("h1.govuk-heading-l"))
 }

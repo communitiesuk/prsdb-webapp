@@ -68,7 +68,7 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
         fun `Clicking on a summary card Delete link redirects to the task list page`(page: Page) {
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
             incompletePropertiesPage.firstSummaryCard.deleteLink.clickAndWait()
-            assertPageIs(page, DeleteIncompletePropertyRegistrationAreYouSurePage::class)
+            assertPageIs(page, DeleteIncompletePropertyRegistrationAreYouSurePage::class, mapOf("contextId" to "1"))
         }
     }
 

@@ -666,7 +666,7 @@ class Navigator(
             "/$REGISTER_PROPERTY_JOURNEY_URL/$DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT" +
                 "?$CONTEXT_ID_URL_PARAMETER=$contextId",
         )
-        return createValidPage(page, DeleteIncompletePropertyRegistrationAreYouSurePage::class)
+        return createValidPage(page, DeleteIncompletePropertyRegistrationAreYouSurePage::class, mapOf("contextId" to contextId))
     }
 
     fun goToInviteLaAdmin(): InviteLaAdminPage {

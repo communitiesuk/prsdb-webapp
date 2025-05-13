@@ -148,7 +148,7 @@ class RegisterPropertyController(
     fun deleteIncompletePropertyAreYouSure(
         model: Model,
         principal: Principal,
-        @RequestParam(value = "contextId", required = true) contextId: String,
+        @RequestParam(value = "contextId", required = true) contextId: Long,
     ): String {
         populateDeleteIncompletePropertyRegistrationModel(model, contextId, principal.name)
         model.addAttribute(
@@ -163,7 +163,7 @@ class RegisterPropertyController(
     fun deleteIncompletePropertyAreYouSure(
         model: Model,
         principal: Principal,
-        @RequestParam(value = "contextId", required = true) contextId: String,
+        @RequestParam(value = "contextId", required = true) contextId: Long,
         @Valid
         @ModelAttribute
         formModel: DeleteIncompletePropertyRegistrationAreYouSureFormModel,
@@ -183,12 +183,12 @@ class RegisterPropertyController(
 
     fun populateDeleteIncompletePropertyRegistrationModel(
         model: Model,
-        contextId: String,
+        contextId: Long,
         principalName: String,
     ) {
         val formContext =
             propertyRegistrationService.getIncompletePropertyFormContextForLandlordIfNotExpired(
-                contextId.toLong(),
+                contextId,
                 principalName,
             )
         val singleLineAddress = propertyRegistrationService.getAddressData(formContext).singleLineAddress

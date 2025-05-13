@@ -1,19 +1,8 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
-import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
-import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
-import uk.gov.communities.prsdb.webapp.validation.NotNullConstraintValidator
-import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
+import jakarta.validation.constraints.NotNull
 
-@IsValidPrioritised
 class DeleteIncompletePropertyRegistrationAreYouSureFormModel : FormModel {
-    @ValidatedBy(
-        constraints = [
-            ConstraintDescriptor(
-                messageKey = "registerProperty.deleteIncompleteProperties.areYouSure.radios.error.missing",
-                validatorType = NotNullConstraintValidator::class,
-            ),
-        ],
-    )
+    @NotNull(message = "registerProperty.deleteIncompleteProperties.areYouSure.radios.error.missing")
     var wantsToProceed: Boolean? = null
 }

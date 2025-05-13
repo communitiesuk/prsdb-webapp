@@ -180,7 +180,7 @@ class PropertyRegistrationService(
         return formContext
     }
 
-    fun getIncompletePropertyFormContextForLandlordOrThrowNotFound(
+    private fun getIncompletePropertyFormContextForLandlordOrThrowNotFound(
         contextId: Long,
         principalName: String,
     ): FormContext =
