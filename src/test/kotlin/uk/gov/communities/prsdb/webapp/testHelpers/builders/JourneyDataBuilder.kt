@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
@@ -28,6 +29,9 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
@@ -144,8 +148,9 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withLookedUpAddresses(): JourneyDataBuilder {
-        journeyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY] = "[{\"singleLineAddress\":\"1 Street Address, City, AB1 2CD\"}]"
+    fun withLookedUpAddresses(customLookedUpAddresses: List<AddressDataModel>? = null): JourneyDataBuilder {
+        val defaultLookedUpAddresses = listOf(AddressDataModel("1 Street Address, City, AB1 2CD"))
+        journeyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY] = Json.encodeToString(customLookedUpAddresses ?: defaultLookedUpAddresses)
         return this
     }
 
@@ -178,9 +183,9 @@ class JourneyDataBuilder(
     }
 
     fun withManualAddress(
-        addressLineOne: String,
-        townOrCity: String,
-        postcode: String,
+        addressLineOne: String = "1 Street Address",
+        townOrCity: String = "City",
+        postcode: String = "AB1 2CD",
         localAuthority: LocalAuthority? = null,
         isContactAddress: Boolean = false,
     ): JourneyDataBuilder {
@@ -223,7 +228,7 @@ class JourneyDataBuilder(
     }
 
     fun withPropertyType(
-        type: PropertyType,
+        type: PropertyType = PropertyType.DETACHED_HOUSE,
         customType: String = "type",
     ): JourneyDataBuilder {
         journeyData["property-type"] =
@@ -235,16 +240,21 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withOwnershipType(ownershipType: OwnershipType): JourneyDataBuilder {
+    fun withOwnershipType(ownershipType: OwnershipType = OwnershipType.FREEHOLD): JourneyDataBuilder {
         journeyData["ownership-type"] = mapOf("ownershipType" to ownershipType.name)
         return this
     }
 
-    fun withLicensingType(
+    fun withLicensingType(licensingType: LicensingType): JourneyDataBuilder {
+        journeyData["licensing-type"] = mapOf("licensingType" to licensingType.name)
+        return this
+    }
+
+    fun withLicensing(
         licensingType: LicensingType,
         licenseNumber: String? = null,
     ): JourneyDataBuilder {
-        journeyData["licensing-type"] = mapOf("licensingType" to licensingType.name)
+        withLicensingType(licensingType)
         when (licensingType) {
             LicensingType.SELECTIVE_LICENCE -> withLicenceNumber("selective-licence", licenseNumber)
             LicensingType.HMO_MANDATORY_LICENCE -> withLicenceNumber("hmo-mandatory-licence", licenseNumber)
@@ -254,7 +264,7 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withLicenceNumber(
+    private fun withLicenceNumber(
         urlPathSegment: String,
         licenceNumber: String?,
     ): JourneyDataBuilder {
@@ -276,23 +286,22 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withTenants(
-        households: Int,
-        people: Int,
-    ): JourneyDataBuilder {
-        journeyData["occupancy"] =
-            mapOf(
-                "occupied" to "true",
-            )
-        journeyData["number-of-households"] =
-            mapOf(
-                "numberOfHouseholds" to households.toString(),
-            )
-        journeyData["number-of-people"] =
-            mapOf(
-                "numberOfPeople" to people.toString(),
-            )
+    fun withOccupancyStatus(occupied: Boolean): JourneyDataBuilder {
+        journeyData[RegisterPropertyStepId.Occupancy.urlPathSegment] = mapOf(OccupancyFormModel::occupied.name to occupied)
+        return this
+    }
 
+    fun withTenants(
+        households: Int = 2,
+        people: Int? = 4,
+    ): JourneyDataBuilder {
+        withOccupancyStatus(true)
+        journeyData[RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment] =
+            mapOf(NumberOfHouseholdsFormModel::numberOfHouseholds.name to households.toString())
+        people?.let {
+            journeyData[RegisterPropertyStepId.NumberOfPeople.urlPathSegment] =
+                mapOf(NumberOfPeopleFormModel::numberOfPeople.name to people.toString())
+        }
         return this
     }
 

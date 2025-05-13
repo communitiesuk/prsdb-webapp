@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.constants.DELETE_INCOMPLETE_PROPERTY_PATH
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
@@ -18,8 +17,6 @@ import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
-import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
@@ -29,16 +26,17 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteIncompletePropertyRegistrationAreYouSurePage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
@@ -112,6 +110,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalAuthorityFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.controllers.SessionController
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyDataRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreInvitationTokenRequestModel
@@ -416,102 +415,216 @@ class Navigator(
     }
 
     fun goToPropertyRegistrationLookupAddressPage(): LookupAddressFormPagePropertyRegistration {
-        val taskListPage = goToPropertyRegistrationTaskList()
-        taskListPage.clickRegisterTaskWithName("Add the property address")
+        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.LookupAddress.urlPathSegment}")
         return createValidPage(page, LookupAddressFormPagePropertyRegistration::class)
     }
 
-    fun goToPropertyRegistrationSelectAddressPage(): SelectAddressFormPagePropertyRegistration {
-        val addressLookupPage = goToPropertyRegistrationLookupAddressPage()
-        addressLookupPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AB", "5")
+    fun skipToPropertyRegistrationSelectAddressPage(
+        customLookedUpAddresses: List<AddressDataModel>? = null,
+    ): SelectAddressFormPagePropertyRegistration {
+        setJourneyDataInSession(
+            PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withLookupAddress()
+                .withLookedUpAddresses(customLookedUpAddresses)
+                .build(),
+        )
+        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.SelectAddress.urlPathSegment}")
         return createValidPage(page, SelectAddressFormPagePropertyRegistration::class)
     }
 
-    fun goToPropertyRegistrationManualAddressPage(): ManualAddressFormPagePropertyRegistration {
-        val addressSelectPage = goToPropertyRegistrationSelectAddressPage()
-        addressSelectPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
+    fun skipToPropertyRegistrationManualAddressPage(): ManualAddressFormPagePropertyRegistration {
+        setJourneyDataInSession(
+            PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withLookupAddress()
+                .withLookedUpAddresses()
+                .withManualAddressSelected()
+                .build(),
+        )
+        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.ManualAddress.urlPathSegment}")
         return createValidPage(page, ManualAddressFormPagePropertyRegistration::class)
     }
 
-    fun goToPropertyRegistrationSelectLocalAuthorityPage(): SelectLocalAuthorityFormPagePropertyRegistration {
-        val manualAddressPage = goToPropertyRegistrationManualAddressPage()
-        manualAddressPage.submitAddress(
-            addressLineOne = "Test address line 1",
-            townOrCity = "Testville",
-            postcode = "EG1 2AB",
+    fun skipToPropertyRegistrationSelectLocalAuthorityPage(): SelectLocalAuthorityFormPagePropertyRegistration {
+        setJourneyDataInSession(
+            PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withLookupAddress()
+                .withLookedUpAddresses()
+                .withManualAddress()
+                .build(),
         )
+        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.LocalAuthority.urlPathSegment}")
         return createValidPage(page, SelectLocalAuthorityFormPagePropertyRegistration::class)
     }
 
-    fun goToPropertyRegistrationPropertyTypePage(): PropertyTypeFormPagePropertyRegistration {
-        val selectAddressPage = goToPropertyRegistrationSelectAddressPage()
-        selectAddressPage.selectAddressAndSubmit("1, Example Road, EG1 2AB")
+    fun skipToPropertyRegistrationPropertyTypePage(): PropertyTypeFormPagePropertyRegistration {
+        setJourneyDataInSession(
+            PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withLookupAddress()
+                .withSelectedAddress()
+                .build(),
+        )
+        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.PropertyType.urlPathSegment}")
         return createValidPage(page, PropertyTypeFormPagePropertyRegistration::class)
     }
 
-    fun goToPropertyRegistrationOwnershipTypePage(): OwnershipTypeFormPagePropertyRegistration {
-        val propertyTypePage = goToPropertyRegistrationPropertyTypePage()
-        propertyTypePage.submitPropertyType(PropertyType.DETACHED_HOUSE)
+    fun skipToPropertyRegistrationOwnershipTypePage(): OwnershipTypeFormPagePropertyRegistration {
+        setJourneyDataInSession(
+            PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withLookupAddress()
+                .withSelectedAddress()
+                .withPropertyType()
+                .build(),
+        )
+        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.OwnershipType.urlPathSegment}")
         return createValidPage(page, OwnershipTypeFormPagePropertyRegistration::class)
     }
 
-    fun goToPropertyRegistrationLicensingTypePage(): LicensingTypeFormPagePropertyRegistration {
-        val ownershipTypePage = goToPropertyRegistrationOwnershipTypePage()
-        ownershipTypePage.submitOwnershipType(OwnershipType.FREEHOLD)
+    fun skipToPropertyRegistrationLicensingTypePage(): LicensingTypeFormPagePropertyRegistration {
+        setJourneyDataInSession(
+            PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withLookupAddress()
+                .withSelectedAddress()
+                .withPropertyType()
+                .withOwnershipType()
+                .build(),
+        )
+        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.LicensingType.urlPathSegment}")
         return createValidPage(page, LicensingTypeFormPagePropertyRegistration::class)
     }
 
-    fun goToPropertyRegistrationSelectiveLicencePage(): SelectiveLicenceFormPagePropertyRegistration {
-        val licensingTypePage = goToPropertyRegistrationLicensingTypePage()
-        licensingTypePage.submitLicensingType(LicensingType.SELECTIVE_LICENCE)
+    fun skipToPropertyRegistrationSelectiveLicencePage(): SelectiveLicenceFormPagePropertyRegistration {
+        setJourneyDataInSession(
+            PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withLookupAddress()
+                .withSelectedAddress()
+                .withPropertyType()
+                .withOwnershipType()
+                .withLicensingType(LicensingType.SELECTIVE_LICENCE)
+                .build(),
+        )
+        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.SelectiveLicence.urlPathSegment}")
         return createValidPage(page, SelectiveLicenceFormPagePropertyRegistration::class)
     }
 
-    fun goToPropertyRegistrationHmoMandatoryLicencePage(): HmoMandatoryLicenceFormPagePropertyRegistration {
-        val licensingTypePage = goToPropertyRegistrationLicensingTypePage()
-        licensingTypePage.submitLicensingType(LicensingType.HMO_MANDATORY_LICENCE)
+    fun skipToPropertyRegistrationHmoMandatoryLicencePage(): HmoMandatoryLicenceFormPagePropertyRegistration {
+        setJourneyDataInSession(
+            PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withLookupAddress()
+                .withSelectedAddress()
+                .withPropertyType()
+                .withOwnershipType()
+                .withLicensingType(LicensingType.HMO_MANDATORY_LICENCE)
+                .build(),
+        )
+        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment}")
         return createValidPage(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
     }
 
-    fun goToPropertyRegistrationHmoAdditionalLicencePage(): HmoAdditionalLicenceFormPagePropertyRegistration {
-        val licensingTypePage = goToPropertyRegistrationLicensingTypePage()
-        licensingTypePage.submitLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
+    fun skipToPropertyRegistrationHmoAdditionalLicencePage(): HmoAdditionalLicenceFormPagePropertyRegistration {
+        setJourneyDataInSession(
+            PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withLookupAddress()
+                .withSelectedAddress()
+                .withPropertyType()
+                .withOwnershipType()
+                .withLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
+                .build(),
+        )
+        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment}")
         return createValidPage(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
     }
 
-    fun goToPropertyRegistrationOccupancyPage(): OccupancyFormPagePropertyRegistration {
-        val licensingTypePage = goToPropertyRegistrationLicensingTypePage()
-        licensingTypePage.submitLicensingType(LicensingType.NO_LICENSING)
+    fun skipToPropertyRegistrationOccupancyPage(): OccupancyFormPagePropertyRegistration {
+        setJourneyDataInSession(
+            PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withLookupAddress()
+                .withSelectedAddress()
+                .withPropertyType()
+                .withOwnershipType()
+                .withLicensingType(LicensingType.NO_LICENSING)
+                .build(),
+        )
+        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.Occupancy.urlPathSegment}")
         return createValidPage(page, OccupancyFormPagePropertyRegistration::class)
     }
 
-    fun goToPropertyRegistrationHouseholdsPage(): NumberOfHouseholdsFormPagePropertyRegistration {
-        val occupancyPage = goToPropertyRegistrationOccupancyPage()
-        occupancyPage.submitIsOccupied()
+    fun skipToPropertyRegistrationHouseholdsPage(): NumberOfHouseholdsFormPagePropertyRegistration {
+        setJourneyDataInSession(
+            PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withLookupAddress()
+                .withSelectedAddress()
+                .withPropertyType()
+                .withOwnershipType()
+                .withLicensingType(LicensingType.NO_LICENSING)
+                .withOccupancyStatus(true)
+                .build(),
+        )
+        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment}")
         return createValidPage(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
     }
 
-    fun goToPropertyRegistrationPeoplePage(): NumberOfPeopleFormPagePropertyRegistration {
-        val householdsPage = goToPropertyRegistrationHouseholdsPage()
-        householdsPage.submitNumberOfHouseholds(2)
+    fun skipToPropertyRegistrationPeoplePage(): NumberOfPeopleFormPagePropertyRegistration {
+        setJourneyDataInSession(
+            PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withLookupAddress()
+                .withSelectedAddress()
+                .withPropertyType()
+                .withOwnershipType()
+                .withLicensingType(LicensingType.NO_LICENSING)
+                .withTenants(people = null)
+                .build(),
+        )
+        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.NumberOfPeople.urlPathSegment}")
         return createValidPage(page, NumberOfPeopleFormPagePropertyRegistration::class)
     }
 
-    fun goToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
-        val peoplePage = goToPropertyRegistrationPeoplePage()
-        peoplePage.submitNumOfPeople(4)
+    fun skipToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
+        setJourneyDataInSession(
+            PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withLookupAddress()
+                .withSelectedAddress()
+                .withPropertyType()
+                .withOwnershipType()
+                .withLicensingType(LicensingType.NO_LICENSING)
+                .withOccupancyStatus(false)
+                .build(),
+        )
+        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.CheckAnswers.urlPathSegment}")
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 
-    fun goToPropertyRegistrationDeclarationPage(): DeclarationFormPagePropertyRegistration {
-        val checkAnswersPage = goToPropertyRegistrationCheckAnswersPage()
-        checkAnswersPage.confirm()
+    fun skipToPropertyRegistrationDeclarationPage(): DeclarationFormPagePropertyRegistration {
+        setJourneyDataInSession(
+            PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withLookupAddress()
+                .withSelectedAddress()
+                .withPropertyType()
+                .withOwnershipType()
+                .withLicensingType(LicensingType.NO_LICENSING)
+                .withOccupancyStatus(false)
+                .withCheckedAnswers()
+                .build(),
+        )
+        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.Declaration.urlPathSegment}")
         return createValidPage(page, DeclarationFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationConfirmationPage(): ErrorPage {
+    fun navigateToPropertyRegistrationConfirmationPage() {
         navigate("/$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
-        return createValidPage(page, ErrorPage::class)
     }
 
     fun goToPropertyComplianceStartPage(propertyOwnershipId: Long): StartPagePropertyCompliance {
