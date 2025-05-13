@@ -110,9 +110,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalAuthorityFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.testHelpers.api.controllers.JourneyDataController
+import uk.gov.communities.prsdb.webapp.testHelpers.api.controllers.SessionController
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyDataRequestModel
+import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreInvitationTokenRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
+import java.util.UUID
 import kotlin.test.assertTrue
 
 class Navigator(
@@ -789,10 +791,20 @@ class Navigator(
     ) {
         val response =
             page.request().post(
-                "http://localhost:$port/${JourneyDataController.SET_JOURNEY_DATA_ROUTE}",
+                "http://localhost:$port/${SessionController.SET_JOURNEY_DATA_ROUTE}",
                 RequestOptions.create().setData(SetJourneyDataRequestModel(journeyDataKey, journeyData)),
             )
         assertTrue(response.ok(), "Failed to set journey data. Received status code: ${response.status()}")
+        response.dispose()
+    }
+
+    private fun storeInvitationTokenInSession(token: UUID) {
+        val response =
+            page.request().post(
+                "http://localhost:$port/${SessionController.STORE_INVITATION_TOKEN_ROUTE}",
+                RequestOptions.create().setData(StoreInvitationTokenRequestModel(token)),
+            )
+        assertTrue(response.ok(), "Failed to store invitation token. Received status code: ${response.status()}")
         response.dispose()
     }
 }
