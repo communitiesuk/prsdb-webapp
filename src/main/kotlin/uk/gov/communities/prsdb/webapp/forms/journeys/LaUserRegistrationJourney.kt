@@ -127,7 +127,7 @@ class LaUserRegistrationJourney(
                         ),
                     invitationService,
                 ),
-            handleSubmitAndRedirect = { journeyData, _ ->
+            handleSubmitAndRedirect = { journeyData, _, _ ->
                 checkAnswersHandleSubmitAndRedirect(journeyData)
             },
             saveAfterSubmit = false,

@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.VerifyIdentityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
@@ -59,6 +60,24 @@ class LandlordRegistrationJourney(
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
+    protected class LandlordRegistrationStepRouter(
+        journey: Iterable<StepDetails<LandlordRegistrationStepId>>,
+    ) : GroupedStepRouter<LandlordRegistrationStepId>(journey) {
+        override fun isDestinationAllowedWhenChangingAnswerTo(
+            destinationStep: LandlordRegistrationStepId?,
+            stepBeingChanged: LandlordRegistrationStepId?,
+        ): Boolean =
+            when (stepBeingChanged) {
+                LandlordRegistrationStepId.NonEnglandOrWalesAddress ->
+                    destinationStep ==
+                        LandlordRegistrationStepId.NonEnglandOrWalesAddress
+                else -> super.isDestinationAllowedWhenChangingAnswerTo(destinationStep, stepBeingChanged)
+            }
+    }
+
+    override val stepRouter = LandlordRegistrationStepRouter(this)
+
+    override val checkYourAnswersStepId = LandlordRegistrationStepId.CheckAnswers
     override val sections =
         listOf(
             JourneySection(
@@ -78,7 +97,7 @@ class LandlordRegistrationJourney(
             ),
         )
 
-    private fun privacyNoticeTasks(): List<JourneyTask<LandlordRegistrationStepId>> = emptyList()
+    fun privacyNoticeTasks(): List<JourneyTask<LandlordRegistrationStepId>> = emptyList()
 
     private fun registerDetailsTasks(): List<JourneyTask<LandlordRegistrationStepId>> =
         listOf(
@@ -528,7 +547,7 @@ class LandlordRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
-            handleSubmitAndRedirect = { _, _ -> declarationHandleSubmitAndRedirect() },
+            handleSubmitAndRedirect = { _, _, _ -> declarationHandleSubmitAndRedirect() },
             saveAfterSubmit = false,
         )
 
