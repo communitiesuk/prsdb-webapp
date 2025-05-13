@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemp
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
@@ -471,13 +472,19 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withGasSafetyIssueDate(issueDate: LocalDate): JourneyDataBuilder {
+    fun withGasSafetyIssueDate(issueDate: LocalDate = LocalDate.now()): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafetyIssueDate.urlPathSegment] =
             mapOf(
                 TodayOrPastDateFormModel::day.name to issueDate.dayOfMonth,
                 TodayOrPastDateFormModel::month.name to issueDate.monthValue,
                 TodayOrPastDateFormModel::year.name to issueDate.year,
             )
+        return this
+    }
+
+    fun withGasSafeEngineerNum(engineerNum: String = "1234567"): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.GasSafetyEngineerNum.urlPathSegment] =
+            mapOf(GasSafeEngineerNumFormModel::engineerNumber.name to engineerNum)
         return this
     }
 
@@ -493,12 +500,19 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withMissingGasSafetyExemption(): JourneyDataBuilder {
+        withGasSafetyCertStatus(false)
+        withGasSafetyCertExemptionStatus(false)
+        journeyData[PropertyComplianceStepId.GasSafetyExemptionMissing.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
     fun withEicrStatus(hasEICR: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EICR.urlPathSegment] = mapOf(EicrFormModel::hasCert.name to hasEICR)
         return this
     }
 
-    fun withEicrIssueDate(issueDate: LocalDate): JourneyDataBuilder {
+    fun withEicrIssueDate(issueDate: LocalDate = LocalDate.now()): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EicrIssueDate.urlPathSegment] =
             mapOf(
                 TodayOrPastDateFormModel::day.name to issueDate.dayOfMonth,
@@ -517,6 +531,13 @@ class JourneyDataBuilder(
     fun withEicrExemptionReason(eicrExemptionReason: EicrExemptionReason): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EicrExemptionReason.urlPathSegment] =
             mapOf(EicrExemptionReasonFormModel::exemptionReason.name to eicrExemptionReason)
+        return this
+    }
+
+    fun withMissingEicrExemption(): JourneyDataBuilder {
+        withEicrStatus(false)
+        withEicrExemptionStatus(false)
+        journeyData[PropertyComplianceStepId.EicrExemptionMissing.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 

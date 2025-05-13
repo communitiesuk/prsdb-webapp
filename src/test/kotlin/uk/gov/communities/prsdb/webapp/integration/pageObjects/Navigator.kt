@@ -14,9 +14,11 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
@@ -26,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
@@ -35,7 +38,6 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
-import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteIncompletePropertyRegistrationAreYouSurePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
@@ -73,7 +75,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.StartPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionMissingPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionReasonPagePropertyCompliance
@@ -83,7 +84,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionMissingPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionReasonPagePropertyCompliance
@@ -640,9 +640,17 @@ class Navigator(
         return createValidPage(page, GasSafetyPagePropertyCompliance::class, mapOf("propertyOwnershipId" to propertyOwnershipId.toString()))
     }
 
-    fun goToPropertyComplianceGasSafetyIssueDatePage(propertyOwnershipId: Long): GasSafetyIssueDatePagePropertyCompliance {
-        val gasSafetyPage = goToPropertyComplianceGasSafetyPage(propertyOwnershipId)
-        gasSafetyPage.submitHasCert()
+    fun skipToPropertyComplianceGasSafetyIssueDatePage(propertyOwnershipId: Long): GasSafetyIssueDatePagePropertyCompliance {
+        setJourneyDataInSession(
+            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
+            JourneyDataBuilder()
+                .withGasSafetyCertStatus(true)
+                .build(),
+        )
+        navigate(
+            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+                "/${PropertyComplianceStepId.GasSafetyIssueDate.urlPathSegment}",
+        )
         return createValidPage(
             page,
             GasSafetyIssueDatePagePropertyCompliance::class,
@@ -650,9 +658,18 @@ class Navigator(
         )
     }
 
-    fun goToPropertyComplianceGasSafetyEngineerNumPage(propertyOwnershipId: Long): GasSafeEngineerNumPagePropertyCompliance {
-        val gasSafetyIssueDatePage = goToPropertyComplianceGasSafetyIssueDatePage(propertyOwnershipId)
-        gasSafetyIssueDatePage.submitDate(DateTimeHelper().getCurrentDateInUK())
+    fun skipToPropertyComplianceGasSafetyEngineerNumPage(propertyOwnershipId: Long): GasSafeEngineerNumPagePropertyCompliance {
+        setJourneyDataInSession(
+            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
+            JourneyDataBuilder()
+                .withGasSafetyCertStatus(true)
+                .withGasSafetyIssueDate()
+                .build(),
+        )
+        navigate(
+            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+                "/${PropertyComplianceStepId.GasSafetyEngineerNum.urlPathSegment}",
+        )
         return createValidPage(
             page,
             GasSafeEngineerNumPagePropertyCompliance::class,
@@ -660,9 +677,19 @@ class Navigator(
         )
     }
 
-    fun goToPropertyComplianceGasSafetyUploadPage(propertyOwnershipId: Long): GasSafetyUploadPagePropertyCompliance {
-        val gasSafetyEngineerNumPage = goToPropertyComplianceGasSafetyEngineerNumPage(propertyOwnershipId)
-        gasSafetyEngineerNumPage.submitEngineerNum("1234567")
+    fun skipToPropertyComplianceGasSafetyUploadPage(propertyOwnershipId: Long): GasSafetyUploadPagePropertyCompliance {
+        setJourneyDataInSession(
+            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
+            JourneyDataBuilder()
+                .withGasSafetyCertStatus(true)
+                .withGasSafetyIssueDate()
+                .withGasSafeEngineerNum()
+                .build(),
+        )
+        navigate(
+            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+                "/${PropertyComplianceStepId.GasSafetyUpload.urlPathSegment}",
+        )
         return createValidPage(
             page,
             GasSafetyUploadPagePropertyCompliance::class,
@@ -670,9 +697,17 @@ class Navigator(
         )
     }
 
-    fun goToPropertyComplianceGasSafetyExemptionPage(propertyOwnershipId: Long): GasSafetyExemptionPagePropertyCompliance {
-        val gasSafetyPage = goToPropertyComplianceGasSafetyPage(propertyOwnershipId)
-        gasSafetyPage.submitHasNoCert()
+    fun skipToPropertyComplianceGasSafetyExemptionPage(propertyOwnershipId: Long): GasSafetyExemptionPagePropertyCompliance {
+        setJourneyDataInSession(
+            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
+            JourneyDataBuilder()
+                .withGasSafetyCertStatus(false)
+                .build(),
+        )
+        navigate(
+            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+                "/${PropertyComplianceStepId.GasSafetyExemption.urlPathSegment}",
+        )
         return createValidPage(
             page,
             GasSafetyExemptionPagePropertyCompliance::class,
@@ -680,9 +715,18 @@ class Navigator(
         )
     }
 
-    fun goToPropertyComplianceGasSafetyExemptionReasonPage(propertyOwnershipId: Long): GasSafetyExemptionReasonPagePropertyCompliance {
-        val gasSafetyExemptionPage = goToPropertyComplianceGasSafetyExemptionPage(propertyOwnershipId)
-        gasSafetyExemptionPage.submitHasExemption()
+    fun skipToPropertyComplianceGasSafetyExemptionReasonPage(propertyOwnershipId: Long): GasSafetyExemptionReasonPagePropertyCompliance {
+        setJourneyDataInSession(
+            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
+            JourneyDataBuilder()
+                .withGasSafetyCertStatus(false)
+                .withGasSafetyCertExemptionStatus(true)
+                .build(),
+        )
+        navigate(
+            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+                "/${PropertyComplianceStepId.GasSafetyExemptionReason.urlPathSegment}",
+        )
         return createValidPage(
             page,
             GasSafetyExemptionReasonPagePropertyCompliance::class,
@@ -690,11 +734,21 @@ class Navigator(
         )
     }
 
-    fun goToPropertyComplianceGasSafetyExemptionOtherReasonPage(
+    fun skipToPropertyComplianceGasSafetyExemptionOtherReasonPage(
         propertyOwnershipId: Long,
     ): GasSafetyExemptionOtherReasonPagePropertyCompliance {
-        val gasSafetyExemptionReasonPage = goToPropertyComplianceGasSafetyExemptionReasonPage(propertyOwnershipId)
-        gasSafetyExemptionReasonPage.submitExemptionReason(GasSafetyExemptionReason.OTHER)
+        setJourneyDataInSession(
+            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
+            JourneyDataBuilder()
+                .withGasSafetyCertStatus(false)
+                .withGasSafetyCertExemptionStatus(true)
+                .withGasSafetyCertExemptionReason(GasSafetyExemptionReason.OTHER)
+                .build(),
+        )
+        navigate(
+            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+                "/${PropertyComplianceStepId.GasSafetyExemptionOtherReason.urlPathSegment}",
+        )
         return createValidPage(
             page,
             GasSafetyExemptionOtherReasonPagePropertyCompliance::class,
@@ -702,16 +756,11 @@ class Navigator(
         )
     }
 
-    fun goToPropertyComplianceEicrPage(propertyOwnershipId: Long): EicrPagePropertyCompliance {
-        val gasSafetyExemptionPage = goToPropertyComplianceGasSafetyExemptionPage(propertyOwnershipId)
-        gasSafetyExemptionPage.submitHasNoExemption()
-        val gasSafetyExemptionMissingPage =
-            createValidPage(
-                page,
-                GasSafetyExemptionMissingPagePropertyCompliance::class,
-                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
-            )
-        gasSafetyExemptionMissingPage.saveAndContinueToEicrButton.clickAndWait()
+    fun skipToPropertyComplianceEicrPage(propertyOwnershipId: Long): EicrPagePropertyCompliance {
+        setJourneyDataInSession(
+            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
+            JourneyDataBuilder().withMissingGasSafetyExemption().build(),
+        )
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.EICR.urlPathSegment}",
@@ -719,9 +768,18 @@ class Navigator(
         return createValidPage(page, EicrPagePropertyCompliance::class, mapOf("propertyOwnershipId" to propertyOwnershipId.toString()))
     }
 
-    fun goToPropertyComplianceEicrIssueDatePage(propertyOwnershipId: Long): EicrIssueDatePagePropertyCompliance {
-        val eicrPage = goToPropertyComplianceEicrPage(propertyOwnershipId)
-        eicrPage.submitHasCert()
+    fun skipToPropertyComplianceEicrIssueDatePage(propertyOwnershipId: Long): EicrIssueDatePagePropertyCompliance {
+        setJourneyDataInSession(
+            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
+            JourneyDataBuilder()
+                .withMissingGasSafetyExemption()
+                .withEicrStatus(true)
+                .build(),
+        )
+        navigate(
+            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+                "/${PropertyComplianceStepId.EicrIssueDate.urlPathSegment}",
+        )
         return createValidPage(
             page,
             EicrIssueDatePagePropertyCompliance::class,
@@ -729,9 +787,19 @@ class Navigator(
         )
     }
 
-    fun goToPropertyComplianceEicrUploadPage(propertyOwnershipId: Long): EicrUploadPagePropertyCompliance {
-        val gasSafetyIssueDatePage = goToPropertyComplianceEicrIssueDatePage(propertyOwnershipId)
-        gasSafetyIssueDatePage.submitDate(DateTimeHelper().getCurrentDateInUK())
+    fun skipToPropertyComplianceEicrUploadPage(propertyOwnershipId: Long): EicrUploadPagePropertyCompliance {
+        setJourneyDataInSession(
+            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
+            JourneyDataBuilder()
+                .withMissingGasSafetyExemption()
+                .withEicrStatus(true)
+                .withEicrIssueDate()
+                .build(),
+        )
+        navigate(
+            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+                "/${PropertyComplianceStepId.EicrUpload.urlPathSegment}",
+        )
         return createValidPage(
             page,
             EicrUploadPagePropertyCompliance::class,
@@ -739,9 +807,18 @@ class Navigator(
         )
     }
 
-    fun goToPropertyComplianceEicrExemptionPage(propertyOwnershipId: Long): EicrExemptionPagePropertyCompliance {
-        val eicrPage = goToPropertyComplianceEicrPage(propertyOwnershipId)
-        eicrPage.submitHasNoCert()
+    fun skipToPropertyComplianceEicrExemptionPage(propertyOwnershipId: Long): EicrExemptionPagePropertyCompliance {
+        setJourneyDataInSession(
+            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
+            JourneyDataBuilder()
+                .withMissingGasSafetyExemption()
+                .withEicrStatus(false)
+                .build(),
+        )
+        navigate(
+            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+                "/${PropertyComplianceStepId.EicrExemption.urlPathSegment}",
+        )
         return createValidPage(
             page,
             EicrExemptionPagePropertyCompliance::class,
@@ -749,9 +826,19 @@ class Navigator(
         )
     }
 
-    fun goToPropertyComplianceEicrExemptionReasonPage(propertyOwnershipId: Long): EicrExemptionReasonPagePropertyCompliance {
-        val eicrExemptionPage = goToPropertyComplianceEicrExemptionPage(propertyOwnershipId)
-        eicrExemptionPage.submitHasExemption()
+    fun skipToPropertyComplianceEicrExemptionReasonPage(propertyOwnershipId: Long): EicrExemptionReasonPagePropertyCompliance {
+        setJourneyDataInSession(
+            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
+            JourneyDataBuilder()
+                .withMissingGasSafetyExemption()
+                .withEicrStatus(false)
+                .withEicrExemptionStatus(true)
+                .build(),
+        )
+        navigate(
+            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+                "/${PropertyComplianceStepId.EicrExemptionReason.urlPathSegment}",
+        )
         return createValidPage(
             page,
             EicrExemptionReasonPagePropertyCompliance::class,
@@ -759,9 +846,20 @@ class Navigator(
         )
     }
 
-    fun goToPropertyComplianceEicrExemptionOtherReasonPage(propertyOwnershipId: Long): EicrExemptionOtherReasonPagePropertyCompliance {
-        val eicrExemptionReasonPage = goToPropertyComplianceEicrExemptionReasonPage(propertyOwnershipId)
-        eicrExemptionReasonPage.submitExemptionReason(EicrExemptionReason.OTHER)
+    fun skipToPropertyComplianceEicrExemptionOtherReasonPage(propertyOwnershipId: Long): EicrExemptionOtherReasonPagePropertyCompliance {
+        setJourneyDataInSession(
+            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
+            JourneyDataBuilder()
+                .withMissingGasSafetyExemption()
+                .withEicrStatus(false)
+                .withEicrExemptionStatus(true)
+                .withEicrExemptionReason(EicrExemptionReason.OTHER)
+                .build(),
+        )
+        navigate(
+            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+                "/${PropertyComplianceStepId.EicrExemptionOtherReason.urlPathSegment}",
+        )
         return createValidPage(
             page,
             EicrExemptionOtherReasonPagePropertyCompliance::class,
@@ -769,29 +867,34 @@ class Navigator(
         )
     }
 
-    fun goToPropertyComplianceEpcPage(propertyOwnershipId: Long): EpcPagePropertyCompliance {
-        val eicrExemptionPage = goToPropertyComplianceEicrExemptionPage(propertyOwnershipId)
-        eicrExemptionPage.submitHasNoExemption()
-
-        val eicrExemptionMissingPage =
-            createValidPage(
-                page,
-                EicrExemptionMissingPagePropertyCompliance::class,
-                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
-            )
-        eicrExemptionMissingPage.saveAndContinueToEicrButton.clickAndWait()
-
+    fun skipToPropertyComplianceEpcPage(propertyOwnershipId: Long): EpcPagePropertyCompliance {
+        setJourneyDataInSession(
+            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
+            JourneyDataBuilder()
+                .withMissingGasSafetyExemption()
+                .withMissingEicrExemption()
+                .build(),
+        )
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.EPC.urlPathSegment}",
         )
-
         return createValidPage(page, EpcPagePropertyCompliance::class, mapOf("propertyOwnershipId" to propertyOwnershipId.toString()))
     }
 
-    fun goToPropertyComplianceEpcExemptionReasonPage(propertyOwnershipId: Long): EpcExemptionReasonPagePropertyCompliance {
-        val epcPage = goToPropertyComplianceEpcPage(propertyOwnershipId)
-        epcPage.submitCertNotRequired()
+    fun skipToPropertyComplianceEpcExemptionReasonPage(propertyOwnershipId: Long): EpcExemptionReasonPagePropertyCompliance {
+        setJourneyDataInSession(
+            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
+            JourneyDataBuilder()
+                .withMissingGasSafetyExemption()
+                .withMissingEicrExemption()
+                .withEpcStatus(HasEpc.NOT_REQUIRED)
+                .build(),
+        )
+        navigate(
+            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+                "/${PropertyComplianceStepId.EpcExemptionReason.urlPathSegment}",
+        )
         return createValidPage(
             page,
             EpcExemptionReasonPagePropertyCompliance::class,
