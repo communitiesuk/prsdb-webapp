@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import kotlinx.datetime.LocalDate
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addAction
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
@@ -50,7 +51,7 @@ class IncompletePropertiesViewModel(
                 )
                 addAction(
                     "landlord.incompleteProperties.action.delete",
-                    RegisterPropertyController.deleteIncompletePropertyPath(contextId),
+                    LandlordController.deleteIncompletePropertyPath(contextId),
                 )
             }.toList()
 }
