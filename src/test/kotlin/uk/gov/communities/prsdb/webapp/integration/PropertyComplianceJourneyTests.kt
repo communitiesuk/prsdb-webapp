@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.CheckMatchedEpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionMissingPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionOtherReasonPagePropertyCompliance
@@ -33,6 +34,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrUploadConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrUploadPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcExemptionReasonPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcMissingPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionMissingPagePropertyCompliance
@@ -130,9 +134,17 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             // EICR Upload Confirmation page
             assertThat(eicrUploadConfirmationPage.heading).containsText("Your file is being scanned")
             eicrUploadConfirmationPage.saveAndContinueButton.clickAndWait()
+            taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-1134: Continue test
-            assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+            // Task List page
+            taskListPage.clickUploadTaskWithName("Confirm the energy performance certificate (EPC)")
+            val epcPage = assertPageIs(page, EpcPagePropertyCompliance::class, urlArguments)
+
+            // EPC page
+            epcPage.submitHasCert()
+            val checkMatchedEpcPage = assertPageIs(page, CheckMatchedEpcPagePropertyCompliance::class, urlArguments)
+
+            // TODO PRSD-1132: continue test
         }
 
         @Test
@@ -177,8 +189,17 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             assertThat(eicrOutdatedPage.heading).containsText("This property’s EICR is out of date")
             eicrOutdatedPage.returnToTaskListButton.clickAndWait()
 
-            // TODO PRSD-1134: Continue test
-            assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+            taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+
+            // Task List page
+            taskListPage.clickUploadTaskWithName("Confirm the energy performance certificate (EPC)")
+            val epcPage = assertPageIs(page, EpcPagePropertyCompliance::class, urlArguments)
+
+            // EPC page
+            epcPage.submitHasCert()
+            val checkMatchedEpcpage = assertPageIs(page, CheckMatchedEpcPagePropertyCompliance::class, urlArguments)
+
+            // TODO PRSD-1132: continue test
         }
 
         @Test
@@ -232,9 +253,17 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             // Gas Safety Exemption Confirmation page
             assertThat(eicrExemptionConfirmationPage.heading).containsText("You’ve marked this property as exempt from needing an EICR")
             eicrExemptionConfirmationPage.saveAndReturnToTaskListButton.clickAndWait()
+            taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-1134: Continue test
-            assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+            // Task List page
+            taskListPage.clickUploadTaskWithName("Confirm the energy performance certificate (EPC)")
+            val epcPage = assertPageIs(page, EpcPagePropertyCompliance::class, urlArguments)
+
+            // EPC page
+            epcPage.submitCertNotRequired()
+            val epcExemptionReasonPage = assertPageIs(page, EpcExemptionReasonPagePropertyCompliance::class, urlArguments)
+
+            // TODO PRSD-1135 - continue test
         }
 
         @Test
@@ -278,8 +307,17 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             assertThat(eicrExemptionMissingPage.heading).containsText("You must get a valid EICR for this property")
             eicrExemptionMissingPage.returnToTaskListButton.clickAndWait()
 
-            // TODO PRSD-1134: Continue test
-            assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+            taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+
+            // Task List page
+            taskListPage.clickUploadTaskWithName("Confirm the energy performance certificate (EPC)")
+            val epcPage = assertPageIs(page, EpcPagePropertyCompliance::class, urlArguments)
+
+            // EPC page
+            epcPage.submitHasNoCert()
+            val epcMissingPage = assertPageIs(page, EpcMissingPagePropertyCompliance::class, urlArguments)
+
+            // TODO: PRSD-1137 - continue test
         }
     }
 
@@ -548,6 +586,16 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             val eicrExemptionOtherReasonPage = navigator.goToPropertyComplianceEicrExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
             eicrExemptionOtherReasonPage.submitReason("valid reason")
             assertPageIs(page, EicrExemptionConfirmationPagePropertyCompliance::class, urlArguments)
+        }
+    }
+
+    @Nested
+    inner class EpcStepTests {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val epcPage = navigator.goToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
+            epcPage.form.submit()
+            assertThat(epcPage.form.getErrorMessage()).containsText("Select whether you have an EPC for this property")
         }
     }
 
