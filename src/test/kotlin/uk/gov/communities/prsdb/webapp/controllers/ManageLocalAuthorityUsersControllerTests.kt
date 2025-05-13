@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -12,6 +13,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -31,9 +33,11 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_ID
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_INVITATION_ID
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_USER_ID
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LOGGED_IN_LA_USER_ID
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.NON_ADMIN_LA_ID
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthorityInvitation
@@ -62,6 +66,9 @@ class ManageLocalAuthorityUsersControllerTests(
 
     @MockitoBean
     private lateinit var localAuthorityDataService: LocalAuthorityDataService
+
+    @MockitoBean
+    private lateinit var securityContextService: SecurityContextService
 
     @Test
     fun `index returns a redirect for unauthenticated user`() {
@@ -395,6 +402,54 @@ class ManageLocalAuthorityUsersControllerTests(
         postDeleteUserAndAssertSuccess(NON_ADMIN_LA_ID)
     }
 
+    @Test
+    @WithMockUser(roles = ["SYSTEM_OPERATOR", "LA_ADMIN"])
+    fun `deleteUser adds a redirectFlashAttribute if a system operator deleted themself as an la user`() {
+        val userRoles =
+            SecurityContextHolder
+                .getContext()
+                .authentication.authorities
+                .map { it.authority }
+
+        val subjectId = "user"
+
+        val loggedInUserModel = createdLoggedInUserModel(DEFAULT_LOGGED_IN_LA_USER_ID)
+        val localAuthority = createLocalAuthority(DEFAULT_LA_ID)
+        val baseUser = createOneLoginUser(subjectId)
+        val localAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority, id = DEFAULT_LOGGED_IN_LA_USER_ID)
+        whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, subjectId))
+            .thenReturn(Pair(loggedInUserModel, localAuthority))
+        whenever(localAuthorityDataService.getLocalAuthorityUser(subjectId)).thenReturn(localAuthorityUser)
+        whenever(userRolesService.getUserRolesForPrincipal(any()))
+            .thenReturn(userRoles)
+        whenever(localAuthorityService.retrieveLocalAuthorityById(DEFAULT_LA_ID))
+            .thenReturn(localAuthority)
+        whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(DEFAULT_LOGGED_IN_LA_USER_ID, localAuthority.id))
+            .thenReturn(
+                LocalAuthorityUserDataModel(
+                    DEFAULT_LOGGED_IN_LA_USER_ID,
+                    localAuthorityUser.name,
+                    localAuthority.name,
+                    localAuthorityUser.isManager,
+                    localAuthorityUser.email,
+                ),
+            )
+
+        mvc
+            .post("/local-authority/$DEFAULT_LA_ID/delete-user/$DEFAULT_LOGGED_IN_LA_USER_ID") {
+                contentType = MediaType.APPLICATION_FORM_URLENCODED
+                with(csrf())
+            }.andExpect {
+                status {
+                    is3xxRedirection()
+                    redirectedUrl("../delete-user/success")
+                    flash { attribute("currentUserDeletedThemself", true) }
+                }
+            }
+
+        verify(localAuthorityDataService).deleteUser(DEFAULT_LOGGED_IN_LA_USER_ID)
+    }
+
     private fun postDeleteUserAndAssertSuccess(laId: Int = DEFAULT_LA_ID) {
         mvc
             .post("/local-authority/$laId/delete-user/$DEFAULT_LA_USER_ID") {
@@ -413,16 +468,11 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `deleteUser gives a 403 if attempting to remove the current user`() {
-        attemptToDeleteCurrentUser(userRoles = listOf(ROLE_LA_ADMIN))
-    }
-
-    @Test
-    @WithMockUser(roles = ["LA_ADMIN", "SYSTEM_OPERATOR"])
-    fun `deleteUser gives a 403 if attempting to remove the current user even if they are a system operator`() {
-        attemptToDeleteCurrentUser(userRoles = listOf(ROLE_LA_ADMIN, ROLE_SYSTEM_OPERATOR))
-    }
-
-    private fun attemptToDeleteCurrentUser(userRoles: List<String>) {
+        val userRoles =
+            SecurityContextHolder
+                .getContext()
+                .authentication.authorities
+                .map { it.authority }
         val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = createLocalAuthority()
         whenever(userRolesService.getUserRolesForPrincipal(any()))
@@ -437,6 +487,30 @@ class ManageLocalAuthorityUsersControllerTests(
             }.andExpect {
                 status { isForbidden() }
             }
+    }
+
+    @Test
+    @WithMockUser(roles = ["SYSTEM_OPERATOR", "LA_ADMIN"])
+    fun `deleteUserSuccess refreshes user roles after a system operator deletes themself`() {
+        getLocalAuthorityIfSystemOperator(DEFAULT_LA_ID)
+
+        mvc
+            .get("/local-authority/$DEFAULT_LA_ID/delete-user/success") {
+                flashAttr("currentUserDeletedThemself", true)
+            }
+
+        verify(securityContextService).refreshContext()
+    }
+
+    @Test
+    @WithMockUser(roles = ["SYSTEM_OPERATOR", "LA_ADMIN"])
+    fun `deleteUserSuccess does not refreshes user roles if the logged in user was not deleted`() {
+        getLocalAuthorityIfSystemOperator(DEFAULT_LA_ID)
+
+        mvc
+            .get("/local-authority/$DEFAULT_LA_ID/delete-user/success")
+
+        verify(securityContextService, never()).refreshContext()
     }
 
     @Test
@@ -570,13 +644,16 @@ class ManageLocalAuthorityUsersControllerTests(
         return localAuthority
     }
 
-    private fun setupLocalAuthorityUserToEdit(localAuthority: LocalAuthority) {
+    private fun setupLocalAuthorityUserToEdit(
+        localAuthority: LocalAuthority,
+        laUserId: Long = DEFAULT_LA_USER_ID,
+    ) {
         val baseUser = createOneLoginUser("user")
         val localAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority)
-        whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(DEFAULT_LA_USER_ID, localAuthority.id))
+        whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(laUserId, localAuthority.id))
             .thenReturn(
                 LocalAuthorityUserDataModel(
-                    DEFAULT_LA_USER_ID,
+                    laUserId,
                     localAuthorityUser.name,
                     localAuthority.name,
                     localAuthorityUser.isManager,

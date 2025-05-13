@@ -35,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import java.security.Principal
 
@@ -49,6 +50,7 @@ class ManageLocalAuthorityUsersController(
     val absoluteUrlProvider: AbsoluteUrlProvider,
     val userRolesService: UserRolesService,
     val localAuthorityService: LocalAuthorityService,
+    val securityContextService: SecurityContextService,
 ) {
     @GetMapping("/manage-users")
     fun index(
@@ -80,6 +82,7 @@ class ManageLocalAuthorityUsersController(
             "paginationViewModel",
             PaginationViewModel(page, pagedUserList.totalPages, httpServletRequest),
         )
+        model.addAttribute("userCanEditTheirOwnAccount", getIsCurrentUserSystemOperator(principal))
 
         // TODO: PRSD-672 - if the user is not an la admin, make this a link to the system operator dashboard
         model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
@@ -94,7 +97,7 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         model: Model,
     ): String {
-        throwErrorIfUserIsUpdatingTheirOwnAccessLevel(principal, localAuthorityId, localAuthorityUserId)
+        throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, localAuthorityUserId)
 
         val localAuthorityUser =
             localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
@@ -129,7 +132,7 @@ class ManageLocalAuthorityUsersController(
         @ModelAttribute localAuthorityUserAccessLevel: LocalAuthorityUserAccessLevelRequestModel,
         principal: Principal,
     ): String {
-        throwErrorIfUserIsUpdatingTheirOwnAccessLevel(principal, localAuthorityId, localAuthorityUserId)
+        throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, localAuthorityUserId)
 
         localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
 
@@ -144,7 +147,7 @@ class ManageLocalAuthorityUsersController(
         model: Model,
         principal: Principal,
     ): String {
-        throwErrorIfUserIsUpdatingTheirOwnAccessLevel(principal, localAuthorityId, localAuthorityUserId)
+        throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, localAuthorityUserId)
 
         val userToDelete =
             localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
@@ -160,8 +163,15 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         redirectAttributes: RedirectAttributes,
     ): String {
-        throwErrorIfUserIsUpdatingTheirOwnAccessLevel(principal, localAuthorityId, localAuthorityUserId)
+        throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, localAuthorityUserId)
         val user = localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
+
+        if (getIsCurrentUserSystemOperator(principal) && getIsCurrentUserLaUserOrLaAdmin(principal)) {
+            val currentUser = localAuthorityDataService.getLocalAuthorityUser(principal.name)
+            if (currentUser.id == user.id) {
+                redirectAttributes.addFlashAttribute("currentUserDeletedThemself", true)
+            }
+        }
 
         localAuthorityDataService.deleteUser(localAuthorityUserId)
 
@@ -176,6 +186,10 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
     ): String {
         model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId))
+
+        if (model.getAttribute("currentUserDeletedThemself") == true) {
+            securityContextService.refreshContext()
+        }
         return "deleteLAUserSuccess"
     }
 
@@ -295,12 +309,12 @@ class ManageLocalAuthorityUsersController(
         return roles.contains(ROLE_LA_USER) || roles.contains(ROLE_LA_ADMIN)
     }
 
-    private fun throwErrorIfUserIsUpdatingTheirOwnAccessLevel(
+    private fun throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(
         principal: Principal,
         localAuthorityId: Int,
         localAuthorityUserId: Long,
     ) {
-        if (getIsCurrentUserLaUserOrLaAdmin(principal)) {
+        if (!getIsCurrentUserSystemOperator(principal)) {
             val (currentUser, _) =
                 localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
                     localAuthorityId,
