@@ -3,8 +3,6 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.Response
 import com.microsoft.playwright.options.RequestOptions
-import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT
@@ -29,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardContro
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
@@ -111,17 +110,14 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalAuthorityFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.VerifiedIdentityModel
-import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.testHelpers.api.controllers.JourneyDataController
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyDataRequestModel
-import java.time.LocalDate
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import kotlin.test.assertTrue
 
 class Navigator(
     private val page: Page,
     private val port: Int,
-    private val identityService: OneLoginIdentityService,
 ) {
     fun goToManageLaUsers(authorityId: Int): ManageLaUsersPage {
         navigate("/local-authority/$authorityId/manage-users")
@@ -148,137 +144,214 @@ class Navigator(
         return createValidPage(page, StartPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationConfirmIdentityFormPage(): ConfirmIdentityFormPageLandlordRegistration {
-        val verifiedIdentityMap =
-            mutableMapOf<String, Any?>(
-                VerifiedIdentityModel.NAME_KEY to "Arthur Dent",
-                VerifiedIdentityModel.BIRTH_DATE_KEY to LocalDate.of(2000, 6, 8),
-            )
-        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentityMap)
-
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.VerifyIdentity.urlPathSegment}")
+    fun skipToLandlordRegistrationConfirmIdentityPage(): ConfirmIdentityFormPageLandlordRegistration {
+        setJourneyDataInSession(
+            LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder().withVerifiedUser().build(),
+        )
+        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.ConfirmIdentity.urlPathSegment}")
         return createValidPage(page, ConfirmIdentityFormPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationVerifyIdentityAsRegisteredLandlord(): LandlordDashboardPage {
+    fun navigateToLandlordRegistrationVerifyIdentityPage() {
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.VerifyIdentity.urlPathSegment}")
-        return createValidPage(page, LandlordDashboardPage::class)
     }
 
-    fun goToLandlordRegistrationNameFormPage(): NameFormPageLandlordRegistration {
-        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
-
+    fun skipToLandlordRegistrationNamePage(): NameFormPageLandlordRegistration {
+        setJourneyDataInSession(
+            LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder().withUnverifiedUser(name = null).build(),
+        )
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.Name.urlPathSegment}")
         return createValidPage(page, NameFormPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationDateOfBirthFormPage(): DateOfBirthFormPageLandlordRegistration {
-        val nameFormPage = goToLandlordRegistrationNameFormPage()
-        nameFormPage.submitName("Arthur Dent")
-        val dateOfBirthFormPage = createValidPage(page, DateOfBirthFormPageLandlordRegistration::class)
-        return dateOfBirthFormPage
+    fun skipToLandlordRegistrationDateOfBirthPage(): DateOfBirthFormPageLandlordRegistration {
+        setJourneyDataInSession(
+            LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder().withUnverifiedUser(dob = null).build(),
+        )
+        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.DateOfBirth.urlPathSegment}")
+        return createValidPage(page, DateOfBirthFormPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationEmailFormPage(): EmailFormPageLandlordRegistration {
-        val dateOfBirthFormPage = goToLandlordRegistrationDateOfBirthFormPage()
-        dateOfBirthFormPage.submitDate("8", "6", "2000")
-        val emailFormPage = createValidPage(page, EmailFormPageLandlordRegistration::class)
-        return emailFormPage
+    fun skipToLandlordRegistrationEmailPage(): EmailFormPageLandlordRegistration {
+        setJourneyDataInSession(
+            LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder().withVerifiedUser().build(),
+        )
+        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.Email.urlPathSegment}")
+        return createValidPage(page, EmailFormPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationPhoneNumberFormPage(): PhoneNumberFormPageLandlordRegistration {
-        val emailFormPage = goToLandlordRegistrationEmailFormPage()
-        emailFormPage.submitEmail("test@example.com")
-        val phoneNumberPage = createValidPage(page, PhoneNumberFormPageLandlordRegistration::class)
-        return phoneNumberPage
+    fun skipToLandlordRegistrationPhoneNumberPage(): PhoneNumberFormPageLandlordRegistration {
+        setJourneyDataInSession(
+            LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withVerifiedUser()
+                .withEmailAddress()
+                .build(),
+        )
+        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.PhoneNumber.urlPathSegment}")
+        return createValidPage(page, PhoneNumberFormPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationCountryOfResidencePage(): CountryOfResidenceFormPageLandlordRegistration {
-        val phoneNumberPage = goToLandlordRegistrationPhoneNumberFormPage()
-        phoneNumberPage.submitPhoneNumber("07456097576")
+    fun skipToLandlordRegistrationCountryOfResidencePage(): CountryOfResidenceFormPageLandlordRegistration {
+        setJourneyDataInSession(
+            LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withVerifiedUser()
+                .withEmailAddress()
+                .withPhoneNumber()
+                .build(),
+        )
+        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}")
         return createValidPage(page, CountryOfResidenceFormPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationLookupAddressPage(): LookupAddressFormPageLandlordRegistration {
-        val countryOfResidencePage = goToLandlordRegistrationCountryOfResidencePage()
-        countryOfResidencePage.submitUk()
+    fun skipToLandlordRegistrationLookupAddressPage(): LookupAddressFormPageLandlordRegistration {
+        setJourneyDataInSession(
+            LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withVerifiedUser()
+                .withEmailAddress()
+                .withPhoneNumber()
+                .withEnglandOrWalesResidence()
+                .build(),
+        )
+        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.LookupAddress.urlPathSegment}")
         return createValidPage(page, LookupAddressFormPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationSelectAddressPage(): SelectAddressFormPageLandlordRegistration {
-        val lookupAddressPage = goToLandlordRegistrationLookupAddressPage()
-        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG", "1")
+    fun skipToLandlordRegistrationSelectAddressPage(): SelectAddressFormPageLandlordRegistration {
+        setJourneyDataInSession(
+            LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withVerifiedUser()
+                .withEmailAddress()
+                .withPhoneNumber()
+                .withEnglandOrWalesResidence()
+                .withLookupAddress()
+                .withLookedUpAddresses()
+                .build(),
+        )
+        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.SelectAddress.urlPathSegment}")
         return createValidPage(page, SelectAddressFormPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationManualAddressPage(): ManualAddressFormPageLandlordRegistration {
-        val selectAddressPage = goToLandlordRegistrationSelectAddressPage()
-        selectAddressPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
+    fun skipToLandlordRegistrationManualAddressPage(): ManualAddressFormPageLandlordRegistration {
+        setJourneyDataInSession(
+            LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withVerifiedUser()
+                .withEmailAddress()
+                .withPhoneNumber()
+                .withEnglandOrWalesResidence()
+                .withLookupAddress()
+                .withLookedUpAddresses()
+                .withManualAddressSelected()
+                .build(),
+        )
+        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.ManualAddress.urlPathSegment}")
         return createValidPage(page, ManualAddressFormPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationNonEnglandOrWalesAddressPage(): NonEnglandOrWalesAddressFormPageLandlordRegistration {
-        val countryOfResidencePage = goToLandlordRegistrationCountryOfResidencePage()
-        countryOfResidencePage.submitNonUkCountrySelectedByPartialName("Zimbabwe", "Zimbabwe")
+    fun skipToLandlordRegistrationNonEnglandOrWalesAddressPage(): NonEnglandOrWalesAddressFormPageLandlordRegistration {
+        setJourneyDataInSession(
+            LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withVerifiedUser()
+                .withEmailAddress()
+                .withPhoneNumber()
+                .withNonEnglandOrWalesAddress(nonEnglandOrWalesAddress = null)
+                .build(),
+        )
+        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment}")
         return createValidPage(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationLookupContactAddressPage(): LookupContactAddressFormPageLandlordRegistration {
-        val nonEnglandOrWalesAddressPage = goToLandlordRegistrationNonEnglandOrWalesAddressPage()
-        nonEnglandOrWalesAddressPage.submitAddress("test address")
+    fun skipToLandlordRegistrationLookupContactAddressPage(): LookupContactAddressFormPageLandlordRegistration {
+        setJourneyDataInSession(
+            LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withVerifiedUser()
+                .withEmailAddress()
+                .withPhoneNumber()
+                .withNonEnglandOrWalesAddress()
+                .build(),
+        )
+        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.LookupContactAddress.urlPathSegment}")
         return createValidPage(page, LookupContactAddressFormPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationSelectContactAddressPage(): SelectContactAddressFormPageLandlordRegistration {
-        val lookupContactAddressPage = goToLandlordRegistrationLookupContactAddressPage()
-        lookupContactAddressPage.submitPostcodeAndBuildingNameOrNumber("EG", "5")
+    fun skipToLandlordRegistrationSelectContactAddressPage(): SelectContactAddressFormPageLandlordRegistration {
+        setJourneyDataInSession(
+            LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withVerifiedUser()
+                .withEmailAddress()
+                .withPhoneNumber()
+                .withNonEnglandOrWalesAddress()
+                .withLookupAddress(isContactAddress = true)
+                .withLookedUpAddresses()
+                .build(),
+        )
+        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.SelectContactAddress.urlPathSegment}")
         return createValidPage(page, SelectContactAddressFormPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationManualContactAddressPage(): ManualContactAddressFormPageLandlordRegistration {
-        val selectAddressPage = goToLandlordRegistrationSelectContactAddressPage()
-        selectAddressPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
+    fun skipToLandlordRegistrationManualContactAddressPage(): ManualContactAddressFormPageLandlordRegistration {
+        setJourneyDataInSession(
+            LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withVerifiedUser()
+                .withEmailAddress()
+                .withPhoneNumber()
+                .withNonEnglandOrWalesAddress()
+                .withLookupAddress(isContactAddress = true)
+                .withLookedUpAddresses()
+                .withManualAddressSelected(isContactAddress = true)
+                .build(),
+        )
+        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.ManualContactAddress.urlPathSegment}")
         return createValidPage(page, ManualContactAddressFormPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationCheckAnswersPage(
-        livesInEnglandOrWales: Boolean = true,
-        isManualAddressChosen: Boolean = false,
-    ): CheckAnswersPageLandlordRegistration {
-        if (isManualAddressChosen) {
-            val manualAddressPage =
-                if (livesInEnglandOrWales) {
-                    goToLandlordRegistrationManualAddressPage()
-                } else {
-                    goToLandlordRegistrationManualContactAddressPage()
-                }
-            manualAddressPage.submitAddress(
-                addressLineOne = "1 Example Road",
-                townOrCity = "Townville",
-                postcode = "EG1 2AB",
-            )
-            return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
-        } else {
-            val selectAddressPage =
-                if (livesInEnglandOrWales) {
-                    goToLandlordRegistrationSelectAddressPage()
-                } else {
-                    goToLandlordRegistrationSelectContactAddressPage()
-                }
-            selectAddressPage.selectAddressAndSubmit("1, Example Road, EG1 2AB")
-            return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
-        }
+    fun skipToLandlordRegistrationCheckAnswersPage(): CheckAnswersPageLandlordRegistration {
+        setJourneyDataInSession(
+            LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withVerifiedUser()
+                .withEmailAddress()
+                .withPhoneNumber()
+                .withEnglandOrWalesResidence()
+                .withLookupAddress()
+                .withSelectedAddress()
+                .build(),
+        )
+        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.CheckAnswers.urlPathSegment}")
+        return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationDeclarationPage(): DeclarationFormPageLandlordRegistration {
-        val checkAnswersPage = goToLandlordRegistrationCheckAnswersPage()
-        checkAnswersPage.confirm()
+    fun skipToLandlordRegistrationDeclarationPage(): DeclarationFormPageLandlordRegistration {
+        setJourneyDataInSession(
+            LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyDataBuilder()
+                .withVerifiedUser()
+                .withEmailAddress()
+                .withPhoneNumber()
+                .withEnglandOrWalesResidence()
+                .withLookupAddress()
+                .withSelectedAddress()
+                .withCheckedAnswers()
+                .build(),
+        )
+        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.Declaration.urlPathSegment}")
         return createValidPage(page, DeclarationFormPageLandlordRegistration::class)
     }
 
-    fun skipToLandlordRegistrationConfirmationPage(): ErrorPage {
+    fun navigateToLandlordRegistrationConfirmationPage() {
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
-        return createValidPage(page, ErrorPage::class)
     }
 
     fun goToLaUserRegistrationLandingPage(token: String): LandingPageLaUserRegistration {
@@ -710,7 +783,7 @@ class Navigator(
 
     fun navigate(path: String): Response? = page.navigate("http://localhost:$port$path")
 
-    fun setJourneyDataInSession(
+    private fun setJourneyDataInSession(
         journeyDataKey: String,
         journeyData: JourneyData,
     ) {

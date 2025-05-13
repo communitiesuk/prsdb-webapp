@@ -33,7 +33,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorit
 import java.time.LocalDate
 
 class JourneyDataBuilder(
-    private val mockLocalAuthorityService: LocalAuthorityService,
+    private val mockLocalAuthorityService: LocalAuthorityService = mock(),
     initialJourneyData: JourneyData? = null,
 ) {
     private val journeyData = initialJourneyData?.toMutableMap() ?: mutableMapOf()
@@ -129,8 +129,8 @@ class JourneyDataBuilder(
     }
 
     fun withLookupAddress(
-        houseNameOrNumber: String,
-        postcode: String,
+        houseNameOrNumber: String = "4",
+        postcode: String = "EG1 2AB",
         isContactAddress: Boolean = false,
     ): JourneyDataBuilder {
         val lookupAddressKey = if (isContactAddress) "lookup-contact-address" else "lookup-address"
@@ -155,9 +155,9 @@ class JourneyDataBuilder(
     }
 
     fun withSelectedAddress(
-        singleLineAddress: String,
+        singleLineAddress: String = "1 Street Address, City, AB1 2CD",
         uprn: Long? = null,
-        localAuthority: LocalAuthority? = null,
+        localAuthority: LocalAuthority? = createLocalAuthority(),
         isContactAddress: Boolean = false,
     ): JourneyDataBuilder {
         localAuthority?.let {
@@ -208,11 +208,16 @@ class JourneyDataBuilder(
         return this
     }
 
-    private fun withEnglandOrWalesResidence(): JourneyDataBuilder {
+    fun withEnglandOrWalesResidence(): JourneyDataBuilder {
         journeyData[LandlordRegistrationStepId.CountryOfResidence.urlPathSegment] =
             mapOf(
                 "livesInEnglandOrWales" to true,
             )
+        return this
+    }
+
+    fun withCheckedAnswers(): JourneyDataBuilder {
+        journeyData["check-answers"] = emptyMap<String, Any?>()
         return this
     }
 
@@ -291,34 +296,37 @@ class JourneyDataBuilder(
     }
 
     fun withVerifiedUser(
-        name: String,
-        dob: LocalDate,
+        name: String = "Arthur Dent",
+        dob: LocalDate = LocalDate.of(2000, 6, 8),
     ): JourneyDataBuilder {
         journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment] =
             mapOf(
                 "name" to name,
                 "birthDate" to dob,
             )
+        journeyData[LandlordRegistrationStepId.ConfirmIdentity.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 
     fun withUnverifiedUser(
-        name: String,
-        dob: LocalDate,
+        name: String? = "Arthur Dent",
+        dob: LocalDate? = LocalDate.of(2000, 6, 8),
     ): JourneyDataBuilder {
         journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment] = emptyMap<String, Any?>()
-        journeyData[LandlordRegistrationStepId.Name.urlPathSegment] = mapOf("name" to name)
-        journeyData[LandlordRegistrationStepId.DateOfBirth.urlPathSegment] =
-            mapOf("day" to dob.dayOfMonth, "month" to dob.monthValue, "year" to dob.year)
+        name?.let { journeyData[LandlordRegistrationStepId.Name.urlPathSegment] = mapOf("name" to name) }
+        dob?.let {
+            journeyData[LandlordRegistrationStepId.DateOfBirth.urlPathSegment] =
+                mapOf("day" to dob.dayOfMonth, "month" to dob.monthValue, "year" to dob.year)
+        }
         return this
     }
 
-    fun withEmailAddress(emailAddress: String): JourneyDataBuilder {
+    fun withEmailAddress(emailAddress: String = "email@test.com"): JourneyDataBuilder {
         journeyData[LandlordRegistrationStepId.Email.urlPathSegment] = mapOf("emailAddress" to emailAddress)
         return this
     }
 
-    fun withPhoneNumber(phoneNumber: String): JourneyDataBuilder {
+    fun withPhoneNumber(phoneNumber: String = "07456097576"): JourneyDataBuilder {
         journeyData[LandlordRegistrationStepId.PhoneNumber.urlPathSegment] = mapOf("phoneNumber" to phoneNumber)
         return this
     }
@@ -343,17 +351,19 @@ class JourneyDataBuilder(
             .withNonEnglandOrWalesAddress(countryOfResidence, nonEnglandOrWalesAddress)
             .withManualAddress(addressLineOne, townOrCity, postcode, isContactAddress = true)
 
-    private fun withNonEnglandOrWalesAddress(
-        countryOfResidence: String,
-        nonEnglandOrWalesAddress: String,
+    fun withNonEnglandOrWalesAddress(
+        countryOfResidence: String = "Zimbabwe",
+        nonEnglandOrWalesAddress: String? = "123 Example Road, Harare",
     ): JourneyDataBuilder {
         journeyData[LandlordRegistrationStepId.CountryOfResidence.urlPathSegment] =
             mapOf(
                 "livesInEnglandOrWales" to false,
                 "countryOfResidence" to countryOfResidence,
             )
-        journeyData[LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment] =
-            mapOf("nonEnglandOrWalesAddress" to nonEnglandOrWalesAddress)
+        nonEnglandOrWalesAddress?.let {
+            journeyData[LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment] =
+                mapOf("nonEnglandOrWalesAddress" to nonEnglandOrWalesAddress)
+        }
         return this
     }
 
