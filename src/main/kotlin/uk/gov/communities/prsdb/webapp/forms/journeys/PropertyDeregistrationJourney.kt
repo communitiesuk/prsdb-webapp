@@ -74,7 +74,9 @@ class PropertyDeregistrationJourney(
                         ),
                 ) { mapOf("optionalFieldSetHeadingParam" to getPropertySingleLineAddress()) },
             // handleSubmitAndRedirect will execute. It does not have to redirect to the step specified in nextAction.
-            handleSubmitAndRedirect = { newJourneyData, subPage -> areYouSureContinueToNextActionOrExitJourney(newJourneyData, subPage) },
+            handleSubmitAndRedirect = { newJourneyData, subPage, _ ->
+                areYouSureContinueToNextActionOrExitJourney(newJourneyData, subPage)
+            },
             // This gets checked when determining whether the next step is reachable
             nextAction = { _, _ -> Pair(DeregisterPropertyStepId.Reason, null) },
             saveAfterSubmit = false,
@@ -96,7 +98,7 @@ class PropertyDeregistrationJourney(
                             "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _ -> deregisterPropertyAndRedirectToConfirmation() },
+            handleSubmitAndRedirect = { _, _, _ -> deregisterPropertyAndRedirectToConfirmation() },
             saveAfterSubmit = false,
         )
 

@@ -94,7 +94,7 @@ class LookupAddressStepTests {
                 .build()
 
         // Act
-        val redirectedUrl = lookupAddressStep.handleSubmitAndRedirect?.let { it(originalJourneyData, null) }
+        val redirectedUrl = lookupAddressStep.handleSubmitAndRedirect?.let { it(originalJourneyData, null, null) }
 
         // Assert
         verify(mockAddressLookupService).search(houseNumber, postcode)
