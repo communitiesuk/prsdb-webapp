@@ -66,6 +66,11 @@ class PropertyComplianceJourney(
     override val sections =
         listOf(
             JourneySection(uploadTasks, "propertyCompliance.taskList.upload.heading", "upload-certificates"),
+            JourneySection(
+                landlordResponsibilities,
+                "propertyCompliance.taskList.landlordResponsibilities.heading",
+                "landlord-responsibilities",
+            ),
             JourneySection(checkAndSubmitTasks, "propertyCompliance.taskList.checkAndSubmit.heading", "check-and-submit"),
         )
 
@@ -84,6 +89,26 @@ class PropertyComplianceJourney(
                 gasSafetyTask,
                 eicrTask,
                 epcTask,
+            )
+
+    private val landlordResponsibilities
+        get() =
+            listOf(
+                fireSafetyTask,
+                JourneyTask.withOneStep(
+                    placeholderStep(
+                        PropertyComplianceStepId.KeepPropertySafe,
+                        "TODO PRSD-1152: Compliance (LL resp): H&S Declaration page",
+                    ),
+                    "propertyCompliance.taskList.landlordResponsibilities.keepPropertySafe",
+                ),
+                JourneyTask.withOneStep(
+                    placeholderStep(
+                        PropertyComplianceStepId.ResponsibilityToTenants,
+                        "TODO PRSD-1153: Compliance (LL resp): Legal Responsibilities Declaration page",
+                    ),
+                    "propertyCompliance.taskList.landlordResponsibilities.tenants",
+                ),
             )
 
     private val checkAndSubmitTasks
@@ -151,6 +176,23 @@ class PropertyComplianceJourney(
                 ),
                 "propertyCompliance.taskList.upload.epc",
                 "propertyCompliance.taskList.upload.epc.hint",
+            )
+
+    private val fireSafetyTask
+        get() =
+            JourneyTask(
+                PropertyComplianceStepId.FireSafetyDeclaration,
+                setOf(
+                    placeholderStep(
+                        PropertyComplianceStepId.FireSafetyDeclaration,
+                        "TODO PRSD-1150: Compliance (LL resp): Fire Safety Declaration page",
+                    ),
+                    placeholderStep(
+                        PropertyComplianceStepId.FireSafetyRisk,
+                        "TODO PRSD-1151: Compliance (LL resp): Fire Safety Risk Info page",
+                    ),
+                ),
+                "propertyCompliance.taskList.landlordResponsibilities.fireSafety",
             )
 
     private val gasSafetyStep
