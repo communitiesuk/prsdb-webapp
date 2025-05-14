@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
@@ -913,23 +914,24 @@ class Navigator(
     }
 
     fun goToUpdateLandlordDetailsUpdateLookupAddressPage(): LookupAddressFormPageUpdateLandlordDetails {
-        val detailsPage = goToLandlordDetails()
-        detailsPage.personalDetailsSummaryList.addressRow.actions.actionLink
-            .clickAndWait()
+        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LandlordDetailsUpdateStepId.LookupEnglandAndWalesAddress.urlPathSegment}")
         return createValidPage(page, LookupAddressFormPageUpdateLandlordDetails::class)
     }
 
-    fun goToLandlordDetailsUpdateSelectAddressPage(): SelectAddressFormPageUpdateLandlordDetails {
-        val lookupAddressPage = goToUpdateLandlordDetailsUpdateLookupAddressPage()
-        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG", "1")
+    fun skipToLandlordDetailsUpdateSelectAddressPage(): SelectAddressFormPageUpdateLandlordDetails {
+        setJourneyDataInSession(
+            LandlordDetailsUpdateJourneyFactory.getJourneyDataKey(LandlordDetailsUpdateStepId.SelectEnglandAndWalesAddress.urlPathSegment),
+            JourneyDataBuilder().withLookupAddress().build(),
+        )
+        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LandlordDetailsUpdateStepId.SelectEnglandAndWalesAddress.urlPathSegment}")
         return createValidPage(page, SelectAddressFormPageUpdateLandlordDetails::class)
     }
 
-    fun skipToLandlordDetailsUpdateNamePage() {
+    fun navigateToLandlordDetailsUpdateNamePage() {
         navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LandlordDetailsUpdateStepId.UpdateName.urlPathSegment}")
     }
 
-    fun skipToLandlordDetailsUpdateDateOfBirthPage() {
+    fun navigateToLandlordDetailsUpdateDateOfBirthPage() {
         navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LandlordDetailsUpdateStepId.UpdateDateOfBirth.urlPathSegment}")
     }
 
@@ -951,14 +953,14 @@ class Navigator(
         )
     }
 
-    fun skipToPropertyDetailsUpdateNumberOfHouseholdsPage(propertyOwnershipId: Long) {
+    fun navigateToPropertyDetailsUpdateNumberOfHouseholdsPage(propertyOwnershipId: Long) {
         navigate(
             PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) +
                 "/${UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment}",
         )
     }
 
-    fun skipToPropertyDetailsUpdateNumberOfPeoplePage(propertyOwnershipId: Long) {
+    fun navigateToPropertyDetailsUpdateNumberOfPeoplePage(propertyOwnershipId: Long) {
         navigate(
             PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) +
                 "/${UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment}",
