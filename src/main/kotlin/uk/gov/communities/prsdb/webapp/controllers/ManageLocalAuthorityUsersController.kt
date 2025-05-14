@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
@@ -57,7 +58,7 @@ class ManageLocalAuthorityUsersController(
         @RequestParam(value = "page", required = false) @Min(1) page: Int = 1,
         request: HttpServletRequest,
     ): String {
-        val currentUser = getCurrentUserIfTheyAreAnLAAdminForTheCurrentLA(principal, localAuthorityId, request)
+        val loggedInLaAdmin = getCurrentUserIfTheyAreAnLAAdminForTheCurrentLA(principal, localAuthorityId, request)
 
         val localAuthority = getLocalAuthority(principal, localAuthorityId, request)
 
@@ -72,7 +73,7 @@ class ManageLocalAuthorityUsersController(
             return "redirect:/local-authority/{localAuthorityId}/manage-users"
         }
 
-        model.addAttribute("currentUserId", currentUser?.id)
+        model.addAttribute("currentUserId", loggedInLaAdmin?.id)
         model.addAttribute("localAuthority", localAuthority)
         model.addAttribute("userList", pagedUserList)
         model.addAttribute(
@@ -167,7 +168,12 @@ class ManageLocalAuthorityUsersController(
         throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, localAuthorityUserId, request)
         val user = localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
 
-        if (request.isUserInRole(ROLE_SYSTEM_OPERATOR) && request.isUserInRole(ROLE_LA_ADMIN)) {
+        if (request.isUserInRole(ROLE_SYSTEM_OPERATOR) &&
+            (request.isUserInRole(ROLE_LA_ADMIN) || request.isUserInRole(ROLE_LA_USER))
+        ) {
+            // If the user is a system operator they can delete themself from the local_authority_user table
+            // If this happens we will need to update their user roles as the Manage LA Users page
+            // will throw an error if they have the LA_ADMIN role but are no longer in the local_authority_users table.
             val currentUser = localAuthorityDataService.getLocalAuthorityUser(principal.name)
             if (currentUser.id == user.id) {
                 redirectAttributes.addFlashAttribute("currentUserDeletedThemself", true)
@@ -190,6 +196,7 @@ class ManageLocalAuthorityUsersController(
         model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId, request))
 
         if (model.getAttribute("currentUserDeletedThemself") == true) {
+            // This will only update the roles of the current user so is only needed if they have deleted themself.
             securityContextService.refreshContext()
         }
         return "deleteLAUserSuccess"
@@ -327,20 +334,17 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         localAuthorityId: Int,
         request: HttpServletRequest,
-    ): LocalAuthority {
-        lateinit var localAuthority: LocalAuthority
+    ): LocalAuthority =
         if (request.isUserInRole(ROLE_SYSTEM_OPERATOR)) {
-            localAuthority = localAuthorityService.retrieveLocalAuthorityById(localAuthorityId)
+            localAuthorityService.retrieveLocalAuthorityById(localAuthorityId)
         } else {
             val laUserAndla =
                 localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
                     localAuthorityId,
                     principal.name,
                 )
-            localAuthority = laUserAndla.second
+            laUserAndla.second
         }
-        return localAuthority
-    }
 
     private fun getCurrentUserIfTheyAreAnLAAdminForTheCurrentLA(
         principal: Principal,

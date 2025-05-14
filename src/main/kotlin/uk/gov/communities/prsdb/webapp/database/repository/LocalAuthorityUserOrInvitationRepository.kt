@@ -17,8 +17,7 @@ interface LocalAuthorityUserOrInvitationRepository : JpaRepository<LocalAuthorit
         "SELECT u " +
             "FROM LocalAuthorityUserOrInvitation u " +
             "WHERE u.localAuthority = :localAuthority " +
-            "AND u.entityType = 'local_authority_user'" +
-            "OR (u.entityType = 'local_authority_invitation' AND u.isManager = false)",
+            "AND NOT (u.entityType = 'local_authority_invitation' AND u.isManager = true)",
     )
     fun findByLocalAuthorityNotIncludingAdminInvitations(
         localAuthority: LocalAuthority,

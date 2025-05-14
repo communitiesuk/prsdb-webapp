@@ -325,7 +325,6 @@ class LocalAuthorityDataServiceTests {
 
     @Test
     fun `getPaginatedUsersAndInvitations returns users and non-admin invitations if filterOutLaAdminInvitations is true`() {
-        // TODO: PRSD-1129
         // Arrange
         val localAuthority = createLocalAuthority(123)
         val pageRequest =

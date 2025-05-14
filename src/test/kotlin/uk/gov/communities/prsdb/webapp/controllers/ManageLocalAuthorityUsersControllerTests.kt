@@ -85,6 +85,18 @@ class ManageLocalAuthorityUsersControllerTests(
     }
 
     @Test
+    @WithMockUser(roles = ["LA_USER"])
+    fun `index returns 403 for a local authority (non-admin) user`() {
+        mvc
+            .get("/local-authority/$DEFAULT_LA_ID/manage-users")
+            .andExpect {
+                status { isForbidden() }
+            }
+
+        verify(localAuthorityDataService, never()).getPaginatedUsersAndInvitations(any(), any(), anyOrNull(), anyOrNull())
+    }
+
+    @Test
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `index returns 200 for authorized user`() {
         val loggedInUserModel = createdLoggedInUserModel()
