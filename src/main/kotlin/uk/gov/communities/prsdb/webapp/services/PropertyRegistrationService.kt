@@ -158,7 +158,7 @@ class PropertyRegistrationService(
         return DateTimeHelper.get28DaysFromDate(createdDateInUk)
     }
 
-    private fun getAddressData(formContext: FormContext): AddressDataModel {
+    fun getAddressData(formContext: FormContext): AddressDataModel {
         val formContextJourneyData = formContext.toJourneyData()
         val lookedUpAddresses = formContextJourneyData.getLookedUpAddresses()
         return PropertyRegistrationJourneyDataHelper.getAddress(formContextJourneyData, lookedUpAddresses)!!
@@ -168,13 +168,7 @@ class PropertyRegistrationService(
         contextId: Long,
         principalName: String,
     ): FormContext {
-        val formContext =
-            formContextRepository.findByIdAndUser_IdAndJourneyType(contextId, principalName, JourneyType.PROPERTY_REGISTRATION)
-                ?: throw ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Form context with ID: $contextId and journey type: " +
-                        "${JourneyType.PROPERTY_REGISTRATION.name} not found for base user: $principalName",
-                )
+        val formContext = getIncompletePropertyFormContextForLandlordOrThrowNotFound(contextId, principalName)
         val completeByDate = getIncompletePropertyCompleteByDate(formContext.createdDate)
 
         if (DateTimeHelper().isDateInPast(completeByDate)) {
@@ -184,5 +178,24 @@ class PropertyRegistrationService(
             )
         }
         return formContext
+    }
+
+    private fun getIncompletePropertyFormContextForLandlordOrThrowNotFound(
+        contextId: Long,
+        principalName: String,
+    ): FormContext =
+        formContextRepository.findByIdAndUser_IdAndJourneyType(contextId, principalName, JourneyType.PROPERTY_REGISTRATION)
+            ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Form context with ID: $contextId and journey type: " +
+                    "${JourneyType.PROPERTY_REGISTRATION.name} not found for base user: $principalName",
+            )
+
+    fun deleteIncompleteProperty(
+        contextId: Long,
+        principalName: String,
+    ) {
+        val formContext = getIncompletePropertyFormContextForLandlordOrThrowNotFound(contextId, principalName)
+        formContextRepository.delete(formContext)
     }
 }
