@@ -16,5 +16,5 @@ class EicrExemptionMissingPagePropertyCompliance(
             "/${PropertyComplianceStepId.EicrExemptionMissing.urlPathSegment}",
     ) {
     val heading: Locator = page.locator(".govuk-heading-l")
-    val returnToTaskListButton = Button.byText(page, "Return to task list")
+    val saveAndContinueToEicrButton = Button.byText(page, "Save and continue to EPC")
 }

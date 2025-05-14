@@ -101,10 +101,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             // Gas Safety Cert. Upload Confirmation page
             assertThat(gasSafetyUploadConfirmationPage.heading).containsText("Your file is being scanned")
             gasSafetyUploadConfirmationPage.saveAndContinueButton.clickAndWait()
-            taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
 
-            // Task List page
-            taskListPage.clickUploadTaskWithName("Upload the Electrical Installation Condition Report (EICR)")
             val eicrPage = assertPageIs(page, EicrPagePropertyCompliance::class, urlArguments)
 
             // EICR page
@@ -134,10 +131,6 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             // EICR Upload Confirmation page
             assertThat(eicrUploadConfirmationPage.heading).containsText("Your file is being scanned")
             eicrUploadConfirmationPage.saveAndContinueButton.clickAndWait()
-            taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
-
-            // Task List page
-            taskListPage.clickUploadTaskWithName("Confirm the energy performance certificate (EPC)")
             val epcPage = assertPageIs(page, EpcPagePropertyCompliance::class, urlArguments)
 
             // EPC page
@@ -170,11 +163,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // Gas Safety Outdated page
             assertThat(gasSafetyOutdatedPage.heading).containsText("Your gas safety certificate is out of date")
-            gasSafetyOutdatedPage.saveAndReturnToTaskListButton.clickAndWait()
-            taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
-
-            // Task List page
-            taskListPage.clickUploadTaskWithName("Upload the Electrical Installation Condition Report (EICR)")
+            gasSafetyOutdatedPage.saveAndContinueToEicrButton.clickAndWait()
             val eicrPage = assertPageIs(page, EicrPagePropertyCompliance::class, urlArguments)
 
             // EICR page
@@ -187,12 +176,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // EICR Outdated page
             assertThat(eicrOutdatedPage.heading).containsText("This property’s EICR is out of date")
-            eicrOutdatedPage.returnToTaskListButton.clickAndWait()
-
-            taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
-
-            // Task List page
-            taskListPage.clickUploadTaskWithName("Confirm the energy performance certificate (EPC)")
+            eicrOutdatedPage.saveAndContinueToEpcButton.clickAndWait()
             val epcPage = assertPageIs(page, EpcPagePropertyCompliance::class, urlArguments)
 
             // EPC page
@@ -230,11 +214,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             // Gas Safety Exemption Confirmation page
             assertThat(gasSafetyExemptionConfirmationPage.heading)
                 .containsText("You’ve marked this property as not needing a gas safety certificate")
-            gasSafetyExemptionConfirmationPage.saveAndReturnToTaskListButton.clickAndWait()
-            taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
-
-            // Task List page
-            taskListPage.clickUploadTaskWithName("Upload the Electrical Installation Condition Report (EICR)")
+            gasSafetyExemptionConfirmationPage.saveAndContinueToEicrButton.clickAndWait()
             val eicrPage = assertPageIs(page, EicrPagePropertyCompliance::class, urlArguments)
 
             // EICR page
@@ -252,11 +232,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // Gas Safety Exemption Confirmation page
             assertThat(eicrExemptionConfirmationPage.heading).containsText("You’ve marked this property as exempt from needing an EICR")
-            eicrExemptionConfirmationPage.saveAndReturnToTaskListButton.clickAndWait()
-            taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
-
-            // Task List page
-            taskListPage.clickUploadTaskWithName("Confirm the energy performance certificate (EPC)")
+            eicrExemptionConfirmationPage.saveAndContinueToEpcButton.clickAndWait()
             val epcPage = assertPageIs(page, EpcPagePropertyCompliance::class, urlArguments)
 
             // EPC page
@@ -288,11 +264,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // Gas Safety Exemption Missing page
             assertThat(gasSafetyExemptionMissingPage.heading).containsText("You must get a valid gas safety certificate for this property")
-            gasSafetyExemptionMissingPage.saveAndReturnToTaskListButton.clickAndWait()
-            taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
-
-            // Task List page
-            taskListPage.clickUploadTaskWithName("Upload the Electrical Installation Condition Report (EICR)")
+            gasSafetyExemptionMissingPage.saveAndContinueToEicrButton.clickAndWait()
             val eicrPage = assertPageIs(page, EicrPagePropertyCompliance::class, urlArguments)
 
             // EICR page
@@ -305,12 +277,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // EICR Exemption Missing page
             assertThat(eicrExemptionMissingPage.heading).containsText("You must get a valid EICR for this property")
-            eicrExemptionMissingPage.returnToTaskListButton.clickAndWait()
-
-            taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
-
-            // Task List page
-            taskListPage.clickUploadTaskWithName("Confirm the energy performance certificate (EPC)")
+            eicrExemptionMissingPage.saveAndContinueToEicrButton.clickAndWait()
             val epcPage = assertPageIs(page, EpcPagePropertyCompliance::class, urlArguments)
 
             // EPC page
