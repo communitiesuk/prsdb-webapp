@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
@@ -33,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormM
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
@@ -554,6 +556,12 @@ class JourneyDataBuilder(
 
     fun withName(name: String = "Mary Margaret"): JourneyDataBuilder {
         journeyData[RegisterLaUserStepId.Name.urlPathSegment] = mapOf(NameFormModel::name.name to name)
+        return this
+    }
+
+    fun withWantsToProceed(): JourneyDataBuilder {
+        journeyData[DeregisterPropertyStepId.AreYouSure.urlPathSegment] =
+            mapOf(PropertyDeregistrationAreYouSureFormModel::wantsToProceed.name to true)
         return this
     }
 }

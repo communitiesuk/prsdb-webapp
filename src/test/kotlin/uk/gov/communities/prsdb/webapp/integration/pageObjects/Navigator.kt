@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
@@ -30,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrati
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
@@ -968,7 +968,7 @@ class Navigator(
     }
 
     fun goToPropertyDeregistrationAreYouSurePage(propertyOwnershipId: Long): AreYouSureFormPagePropertyDeregistration {
-        navigate("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/${DeregisterPropertyStepId.AreYouSure.urlPathSegment}")
+        navigate(DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
         return createValidPage(
             page,
             AreYouSureFormPagePropertyDeregistration::class,
@@ -976,9 +976,15 @@ class Navigator(
         )
     }
 
-    fun goToPropertyDeregistrationReasonPage(propertyOwnershipId: Long): ReasonPagePropertyDeregistration {
-        val areYouSurePage = goToPropertyDeregistrationAreYouSurePage(propertyOwnershipId)
-        areYouSurePage.submitWantsToProceed()
+    fun skipToPropertyDeregistrationReasonPage(propertyOwnershipId: Long): ReasonPagePropertyDeregistration {
+        setJourneyDataInSession(
+            PropertyDeregistrationJourneyFactory.getJourneyKey(propertyOwnershipId),
+            JourneyDataBuilder().withWantsToProceed().build(),
+        )
+        navigate(
+            DeregisterPropertyController.getPropertyDeregistrationBasePath(propertyOwnershipId) +
+                "/${DeregisterPropertyStepId.Reason.urlPathSegment}",
+        )
         return createValidPage(
             page,
             ReasonPagePropertyDeregistration::class,
