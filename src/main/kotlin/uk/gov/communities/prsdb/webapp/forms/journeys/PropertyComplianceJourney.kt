@@ -99,6 +99,7 @@ class PropertyComplianceJourney(
                     placeholderStep(
                         PropertyComplianceStepId.KeepPropertySafe,
                         "TODO PRSD-1152: Compliance (LL resp): H&S Declaration page",
+                        PropertyComplianceStepId.CheckAndSubmit,
                     ),
                     "propertyCompliance.taskList.landlordResponsibilities.keepPropertySafe",
                 ),
@@ -106,6 +107,7 @@ class PropertyComplianceJourney(
                     placeholderStep(
                         PropertyComplianceStepId.ResponsibilityToTenants,
                         "TODO PRSD-1153: Compliance (LL resp): Legal Responsibilities Declaration page",
+                        PropertyComplianceStepId.CheckAndSubmit,
                     ),
                     "propertyCompliance.taskList.landlordResponsibilities.tenants",
                 ),
@@ -170,9 +172,21 @@ class PropertyComplianceJourney(
                 PropertyComplianceStepId.EPC,
                 setOf(
                     epcStep,
-                    placeholderStep(PropertyComplianceStepId.CheckMatchedEpc, "TODO PRSD-1132: Implement Check Matched EPC step"),
-                    placeholderStep(PropertyComplianceStepId.EpcMissing, "TODO PRSD-1137: Implement EPC Missing step"),
-                    placeholderStep(PropertyComplianceStepId.EpcExemptionReason, "TODO PRSD-1135: Implement EPC Exemption Reason step"),
+                    placeholderStep(
+                        PropertyComplianceStepId.CheckMatchedEpc,
+                        "TODO PRSD-1132: Implement Check Matched EPC step",
+                        PropertyComplianceStepId.FireSafetyDeclaration,
+                    ),
+                    placeholderStep(
+                        PropertyComplianceStepId.EpcMissing,
+                        "TODO PRSD-1137: Implement EPC Missing step",
+                        PropertyComplianceStepId.FireSafetyDeclaration,
+                    ),
+                    placeholderStep(
+                        PropertyComplianceStepId.EpcExemptionReason,
+                        "TODO PRSD-1135: Implement EPC Exemption Reason step",
+                        PropertyComplianceStepId.FireSafetyDeclaration,
+                    ),
                 ),
                 "propertyCompliance.taskList.upload.epc",
                 "propertyCompliance.taskList.upload.epc.hint",
@@ -186,10 +200,12 @@ class PropertyComplianceJourney(
                     placeholderStep(
                         PropertyComplianceStepId.FireSafetyDeclaration,
                         "TODO PRSD-1150: Compliance (LL resp): Fire Safety Declaration page",
+                        PropertyComplianceStepId.CheckAndSubmit,
                     ),
                     placeholderStep(
                         PropertyComplianceStepId.FireSafetyRisk,
                         "TODO PRSD-1151: Compliance (LL resp): Fire Safety Risk Info page",
+                        PropertyComplianceStepId.CheckAndSubmit,
                     ),
                 ),
                 "propertyCompliance.taskList.landlordResponsibilities.fireSafety",
@@ -702,9 +718,11 @@ class PropertyComplianceJourney(
     private fun placeholderStep(
         stepId: PropertyComplianceStepId,
         todoComment: String,
+        nextStepId: PropertyComplianceStepId? = null,
     ) = Step(
         id = stepId,
-        page = Page(formModel = NoInputFormModel::class, templateName = "todo", content = mapOf("todoComment" to todoComment)),
+        page = Page(formModel = NoInputFormModel::class, templateName = "forms/todo", content = mapOf("todoComment" to todoComment)),
+        nextAction = { _, _ -> Pair(nextStepId, null) },
     )
 
     private fun gasSafetyStepNextAction(journeyData: JourneyData) =
