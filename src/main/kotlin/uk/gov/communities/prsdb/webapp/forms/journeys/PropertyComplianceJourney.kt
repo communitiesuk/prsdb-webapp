@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
@@ -18,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCertExemption
@@ -30,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemp
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionOtherReasonFormModel
@@ -39,6 +42,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
@@ -135,11 +139,16 @@ class PropertyComplianceJourney(
                 "propertyCompliance.taskList.upload.eicr",
             )
 
-    // TODO PRSD-1134: Implement EPC upload task
     private val epcTask
         get() =
-            JourneyTask.withOneStep(
-                placeholderStep(PropertyComplianceStepId.EPC, "TODO PRSD-1134: Implement EPC task"),
+            JourneyTask(
+                PropertyComplianceStepId.EPC,
+                setOf(
+                    epcStep,
+                    placeholderStep(PropertyComplianceStepId.CheckMatchedEpc, "TODO PRSD-1132: Implement Check Matched EPC step"),
+                    placeholderStep(PropertyComplianceStepId.EpcMissing, "TODO PRSD-1137: Implement EPC Missing step"),
+                    placeholderStep(PropertyComplianceStepId.EpcExemptionReason, "TODO PRSD-1135: Implement EPC Exemption Reason step"),
+                ),
                 "propertyCompliance.taskList.upload.epc",
                 "propertyCompliance.taskList.upload.epc.hint",
             )
@@ -611,6 +620,43 @@ class PropertyComplianceJourney(
                 nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
             )
 
+    private val epcStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EPC,
+                page =
+                    PageWithContentProvider(
+                        formModel = EpcFormModel::class,
+                        templateName = "forms/certificateForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.epc.fieldSetHeading",
+                                "fieldSetHint" to "forms.epc.fieldSetHint",
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = HasEpc.YES,
+                                            labelMsgKey = "forms.radios.option.yes.label",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = HasEpc.NO,
+                                            labelMsgKey = "forms.radios.option.no.label",
+                                        ),
+                                        RadiosDividerViewModel(
+                                            "forms.radios.dividerText",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = HasEpc.NOT_REQUIRED,
+                                            labelMsgKey = "forms.epc.radios.option.notRequired.label",
+                                        ),
+                                    ),
+                                BACK_URL_ATTR_NAME to taskListUrlSegment,
+                            ),
+                    ) { mapOf("address" to getPropertyAddress()) },
+                nextAction = { journeyData, _ -> epcStepNextAction(journeyData) },
+            )
+
     private fun placeholderStep(
         stepId: PropertyComplianceStepId,
         todoComment: String,
@@ -673,6 +719,13 @@ class PropertyComplianceJourney(
             Pair(PropertyComplianceStepId.EicrExemptionOtherReason, null)
         } else {
             Pair(PropertyComplianceStepId.EicrExemptionConfirmation, null)
+        }
+
+    private fun epcStepNextAction(journeyData: JourneyData) =
+        when (journeyData.getHasEPC()!!) {
+            HasEpc.YES -> Pair(PropertyComplianceStepId.CheckMatchedEpc, null)
+            HasEpc.NO -> Pair(PropertyComplianceStepId.EpcMissing, null)
+            HasEpc.NOT_REQUIRED -> Pair(PropertyComplianceStepId.EpcExemptionReason, null)
         }
 
     private fun getPropertyAddress() =
