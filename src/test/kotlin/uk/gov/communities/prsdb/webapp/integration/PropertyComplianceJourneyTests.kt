@@ -37,6 +37,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcMissingPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyDeclarationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionMissingPagePropertyCompliance
@@ -282,9 +283,13 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // EPC page
             epcPage.submitHasNoCert()
-            assertPageIs(page, EpcMissingPagePropertyCompliance::class, urlArguments)
+            val epcMissingPage = assertPageIs(page, EpcMissingPagePropertyCompliance::class, urlArguments)
 
-            // TODO: PRSD-1137 - continue test
+            // EPC missing page
+            epcMissingPage.saveAndContinueButton.clickAndWait()
+            assertPageIs(page, FireSafetyDeclarationPage::class, urlArguments)
+
+            // TODO: PRSD-1150 continue test
         }
     }
 
