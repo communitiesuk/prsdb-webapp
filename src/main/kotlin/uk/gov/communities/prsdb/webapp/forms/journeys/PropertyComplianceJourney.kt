@@ -3,7 +3,9 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
+import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
+import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
@@ -146,7 +148,7 @@ class PropertyComplianceJourney(
                 setOf(
                     epcStep,
                     placeholderStep(PropertyComplianceStepId.CheckMatchedEpc, "TODO PRSD-1132: Implement Check Matched EPC step"),
-                    placeholderStep(PropertyComplianceStepId.EpcMissing, "TODO PRSD-1137: Implement EPC Missing step"),
+                    epcMissingStep,
                     placeholderStep(PropertyComplianceStepId.EpcExemptionReason, "TODO PRSD-1135: Implement EPC Exemption Reason step"),
                 ),
                 "propertyCompliance.taskList.upload.epc",
@@ -655,6 +657,25 @@ class PropertyComplianceJourney(
                             ),
                     ) { mapOf("address" to getPropertyAddress()) },
                 nextAction = { journeyData, _ -> epcStepNextAction(journeyData) },
+            )
+
+    private val epcMissingStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EpcMissing,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/epcMissingForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "findEpcUrl" to FIND_EPC_URL,
+                                "getNewEpcUrl" to GET_NEW_EPC_URL,
+                            ),
+                    ),
+                // TODO PRSD-1137: link this to the first step of the first task in landlord responsibilities once PR #430 is merged
+                // nextAction = { _, _ -> Pair(fireSafetyTask.startingStepId, null) },
             )
 
     private fun placeholderStep(

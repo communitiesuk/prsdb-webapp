@@ -11,3 +11,7 @@ const val RCP_ELECTRICAL_INFO_URL = "https://www.electricalsafetyroundtable.co.u
 const val RCP_ELECTRICAL_REGISTER_URL = "https://electricalcompetentperson.co.uk"
 
 const val FIND_LOCAL_AUTHORITY_URL = "https://www.gov.uk/find-local-council"
+
+const val FIND_EPC_URL = "https://www.gov.uk/find-energy-certificate"
+
+const val GET_NEW_EPC_URL = "https://www.gov.uk/get-new-energy-certificate"

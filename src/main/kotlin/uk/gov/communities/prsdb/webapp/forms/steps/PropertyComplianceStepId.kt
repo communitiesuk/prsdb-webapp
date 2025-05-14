@@ -30,6 +30,7 @@ enum class PropertyComplianceStepId(
     CheckMatchedEpc("check-matched-epc"),
     EpcMissing("epc-missing"),
     EpcExemptionReason("epc-exemption-reason"),
+    FireSafety("fire-safety"),
     CheckAndSubmit("check-and-submit"),
     Declaration("declaration"),
 }
