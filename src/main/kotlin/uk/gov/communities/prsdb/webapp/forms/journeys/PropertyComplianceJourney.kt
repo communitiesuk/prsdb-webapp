@@ -716,8 +716,7 @@ class PropertyComplianceJourney(
                                 "getNewEpcUrl" to GET_NEW_EPC_URL,
                             ),
                     ),
-                // TODO PRSD-1137: link this to the first step of the first task in landlord responsibilities once PR #430 is merged
-                // nextAction = { _, _ -> Pair(fireSafetyTask.startingStepId, null) },
+                nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
             )
 
     private fun placeholderStep(
