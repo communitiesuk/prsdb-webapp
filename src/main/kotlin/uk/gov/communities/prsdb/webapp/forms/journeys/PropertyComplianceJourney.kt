@@ -252,9 +252,9 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                                "submitButtonText" to "forms.buttons.saveAndContinueToEICR",
                             ),
                     ),
-                handleSubmitAndRedirect = { _, _, _ -> taskListUrlSegment },
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
             )
 
@@ -271,7 +271,6 @@ class PropertyComplianceJourney(
                                 "title" to "propertyCompliance.title",
                             ),
                     ),
-                handleSubmitAndRedirect = { _, _, _ -> taskListUrlSegment },
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
             )
 
@@ -371,7 +370,6 @@ class PropertyComplianceJourney(
                                 "title" to "propertyCompliance.title",
                             ),
                     ),
-                handleSubmitAndRedirect = { _, _, _ -> taskListUrlSegment },
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
             )
 
@@ -388,7 +386,6 @@ class PropertyComplianceJourney(
                                 "title" to "propertyCompliance.title",
                             ),
                     ),
-                handleSubmitAndRedirect = { _, _, _ -> taskListUrlSegment },
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
             )
 
@@ -472,9 +469,9 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                                "submitButtonText" to "forms.buttons.saveAndContinueToEPC",
                             ),
                     ),
-                handleSubmitAndRedirect = { _, _, _ -> taskListUrlSegment },
                 nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
             )
 
@@ -493,7 +490,6 @@ class PropertyComplianceJourney(
                                 "rcpElectricalRegisterUrl" to RCP_ELECTRICAL_REGISTER_URL,
                             ),
                     ),
-                handleSubmitAndRedirect = { _, _, _ -> taskListUrlSegment },
                 nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
             )
 
@@ -597,7 +593,6 @@ class PropertyComplianceJourney(
                                 "title" to "propertyCompliance.title",
                             ),
                     ),
-                handleSubmitAndRedirect = { _, _, _ -> taskListUrlSegment },
                 nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
             )
 
@@ -616,7 +611,6 @@ class PropertyComplianceJourney(
                                 "rcpElectricalRegisterUrl" to RCP_ELECTRICAL_REGISTER_URL,
                             ),
                     ),
-                handleSubmitAndRedirect = { _, _, _ -> taskListUrlSegment },
                 nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
             )
 
