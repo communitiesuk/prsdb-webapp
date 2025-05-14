@@ -321,6 +321,8 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             // EPC missing page
             epcMissingPage.saveAndContinueButton.clickAndWait()
             assertPageIs(page, FireSafetyDeclarationPage::class, urlArguments)
+
+            // TODO: PRSD-1150 continue test
         }
     }
 
