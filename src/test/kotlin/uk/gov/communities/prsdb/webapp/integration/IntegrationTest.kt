@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.junit.UsePlaywright
 import org.flywaydb.core.Flyway
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.mockito.kotlin.whenever
@@ -101,14 +100,6 @@ abstract class IntegrationTest {
     @BeforeEach
     fun setUp(page: Page) {
         navigator = Navigator(page, port)
-    }
-
-    @AfterEach
-    fun resetDatabase(
-        @Autowired flyway: Flyway,
-    ) {
-        flyway.clean()
-        flyway.migrate()
     }
 
     companion object {
