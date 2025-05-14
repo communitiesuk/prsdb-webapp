@@ -67,6 +67,8 @@ class PropertyRegistrationJourney(
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
+    override val stepRouter = GroupedStepRouter(this)
+    override val checkYourAnswersStepId = RegisterPropertyStepId.CheckAnswers
     override val sections =
         listOf(
             JourneySection(registerPropertyTasks(), "registerProperty.taskList.register.heading", "register-property"),
@@ -577,7 +579,7 @@ class PropertyRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
-            handleSubmitAndRedirect = { _, _ -> checkAnswersSubmitAndRedirect() },
+            handleSubmitAndRedirect = { _, _, _ -> checkAnswersSubmitAndRedirect() },
         )
 
     private fun occupancyNextAction(journeyData: JourneyData): Pair<RegisterPropertyStepId, Int?> =
