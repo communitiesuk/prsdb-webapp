@@ -1,6 +1,7 @@
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="todoComment" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout('TODO', ~{::main}, false)}">
+<html th:replace="~{fragments/forms/questionPage :: questionPage('TODO', ${formModel}, ~{::main}, '#', null)}">
   <main class="govuk-main-wrapper" id="main-content">
     <h1 class="govuk-heading-xl" th:text="${todoComment}">todoComment</h1>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>

@@ -721,7 +721,7 @@ class PropertyComplianceJourney(
         nextStepId: PropertyComplianceStepId? = null,
     ) = Step(
         id = stepId,
-        page = Page(formModel = NoInputFormModel::class, templateName = "todo", content = mapOf("todoComment" to todoComment)),
+        page = Page(formModel = NoInputFormModel::class, templateName = "forms/todo", content = mapOf("todoComment" to todoComment)),
         nextAction = { _, _ -> Pair(nextStepId, null) },
     )
 
