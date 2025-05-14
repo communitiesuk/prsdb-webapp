@@ -110,6 +110,10 @@ class ManageLocalAuthorityUsersControllerTests(
             .get("/local-authority/$DEFAULT_LA_ID/manage-users")
             .andExpect {
                 status { isOk() }
+                model {
+                    attribute("currentUserId", loggedInUserModel.id)
+                    attribute("localAuthority", localAuthority)
+                }
             }
     }
 
@@ -129,13 +133,16 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `index returns 200 for a system operator`() {
-        val localAuthority = getLocalAuthorityIfSystemOperator(NON_ADMIN_LA_ID)
+        val localAuthority = setupLocalAuthorityForSystemOperator(NON_ADMIN_LA_ID)
         whenever(localAuthorityDataService.getPaginatedUsersAndInvitations(eq(localAuthority), eq(0), anyOrNull(), anyOrNull()))
             .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
         mvc
             .get("/local-authority/${NON_ADMIN_LA_ID}/manage-users")
             .andExpect {
                 status { isOk() }
+                model {
+                    attribute("localAuthority", localAuthority)
+                }
             }
     }
 
@@ -174,7 +181,7 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `inviting new user as a system operator with valid form redirects to confirmation page`() {
-        getLocalAuthorityIfSystemOperator(NON_ADMIN_LA_ID)
+        setupLocalAuthorityForSystemOperator(NON_ADMIN_LA_ID)
         whenever(localAuthorityInvitationService.createInvitationToken(any(), any(), any()))
             .thenReturn("test-token")
         whenever(absoluteUrlProvider.buildInvitationUri("test-token"))
@@ -220,7 +227,7 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `getEditUserAccessLevelPage returns 404 for admin user accessing a LA user that does not exist or is from another LA`() {
-        getDefaultLocalAuthorityIfLaAdmin()
+        setupDefaultLocalAuthorityForLaAdmin()
         whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(DEFAULT_LA_USER_ID, DEFAULT_LA_ID))
             .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
 
@@ -261,7 +268,7 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `getEditUserAccessLevelPage returns 200 for admin user accessing a user from its LA`() {
-        val localAuthority = getDefaultLocalAuthorityIfLaAdmin()
+        val localAuthority = setupDefaultLocalAuthorityForLaAdmin()
 
         setupLocalAuthorityUserToEdit(localAuthority)
 
@@ -269,13 +276,14 @@ class ManageLocalAuthorityUsersControllerTests(
             .get("/local-authority/$DEFAULT_LA_ID/edit-user/$DEFAULT_LA_USER_ID")
             .andExpect {
                 status { isOk() }
+                model { attributeExists("localAuthorityUser", "options") }
             }
     }
 
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `getEditUserAccessLevelPage returns 200 for system operator`() {
-        val localAuthority = getLocalAuthorityIfSystemOperator(NON_ADMIN_LA_ID)
+        val localAuthority = setupLocalAuthorityForSystemOperator(NON_ADMIN_LA_ID)
 
         setupLocalAuthorityUserToEdit(localAuthority)
 
@@ -283,6 +291,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .get("/local-authority/$NON_ADMIN_LA_ID/edit-user/$DEFAULT_LA_USER_ID")
             .andExpect {
                 status { isOk() }
+                model { attributeExists("localAuthorityUser", "options") }
             }
     }
 
@@ -307,7 +316,7 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `updateUserAccessLevel updates the given user's access level when called by an la admin`() {
-        getDefaultLocalAuthorityIfLaAdmin()
+        setupDefaultLocalAuthorityForLaAdmin()
 
         postUpdateUserAccessLevelAndAssertSuccess(DEFAULT_LA_ID)
     }
@@ -315,7 +324,7 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `updateUserAccessLevel updates the given user's access level when called by a system operator`() {
-        getLocalAuthorityIfSystemOperator(NON_ADMIN_LA_ID)
+        setupLocalAuthorityForSystemOperator(NON_ADMIN_LA_ID)
 
         postUpdateUserAccessLevelAndAssertSuccess()
     }
@@ -342,26 +351,28 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `confirmDeleteUser gives a 200 for admins of the LA containing the user`() {
-        val localAuthority = getDefaultLocalAuthorityIfLaAdmin()
+        val localAuthority = setupDefaultLocalAuthorityForLaAdmin()
         setupLocalAuthorityUserToEdit(localAuthority)
 
         mvc
             .get("/local-authority/$DEFAULT_LA_ID/delete-user/$DEFAULT_LA_USER_ID")
             .andExpect {
                 status { isOk() }
+                model { attributeExists("user") }
             }
     }
 
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `confirmDeleteUser gives a 200 for system operators`() {
-        val localAuthority = getLocalAuthorityIfSystemOperator(NON_ADMIN_LA_ID)
+        val localAuthority = setupLocalAuthorityForSystemOperator(NON_ADMIN_LA_ID)
         setupLocalAuthorityUserToEdit(localAuthority)
 
         mvc
             .get("/local-authority/$NON_ADMIN_LA_ID/delete-user/$DEFAULT_LA_USER_ID")
             .andExpect {
                 status { isOk() }
+                model { attributeExists("user") }
             }
     }
 
@@ -386,7 +397,7 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `deleteUser deletes the specified user for an la admin`() {
-        val localAuthority = getDefaultLocalAuthorityIfLaAdmin()
+        val localAuthority = setupDefaultLocalAuthorityForLaAdmin()
 
         setupLocalAuthorityUserToEdit(localAuthority)
 
@@ -396,7 +407,7 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `deleteUser deletes the specified user for a system operator`() {
-        val localAuthority = getLocalAuthorityIfSystemOperator(NON_ADMIN_LA_ID)
+        val localAuthority = setupLocalAuthorityForSystemOperator(NON_ADMIN_LA_ID)
 
         setupLocalAuthorityUserToEdit(localAuthority)
 
@@ -478,7 +489,7 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR", "LA_ADMIN"])
     fun `deleteUserSuccess refreshes user roles after a system operator deletes themself`() {
-        getLocalAuthorityIfSystemOperator(DEFAULT_LA_ID)
+        setupLocalAuthorityForSystemOperator(DEFAULT_LA_ID)
 
         mvc
             .get("/local-authority/$DEFAULT_LA_ID/delete-user/success") {
@@ -491,7 +502,7 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR", "LA_ADMIN"])
     fun `deleteUserSuccess does not refreshes user roles if the logged in user was not deleted`() {
-        getLocalAuthorityIfSystemOperator(DEFAULT_LA_ID)
+        setupLocalAuthorityForSystemOperator(DEFAULT_LA_ID)
 
         mvc
             .get("/local-authority/$DEFAULT_LA_ID/delete-user/success")
@@ -502,7 +513,7 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `confirmCancelInvitation returns a 200 for admins of the inviting LA`() {
-        getDefaultLocalAuthorityIfLaAdmin()
+        setupDefaultLocalAuthorityForLaAdmin()
 
         val invitation = createLocalAuthorityInvitation()
         whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
@@ -511,13 +522,14 @@ class ManageLocalAuthorityUsersControllerTests(
             .get("/local-authority/$DEFAULT_LA_ID/cancel-invitation/$DEFAULT_LA_INVITATION_ID")
             .andExpect {
                 status { isOk() }
+                model { attribute("email", invitation.invitedEmail) }
             }
     }
 
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `confirmCancelInvitation returns a 200 for system operator`() {
-        getLocalAuthorityIfSystemOperator(NON_ADMIN_LA_ID)
+        setupLocalAuthorityForSystemOperator(NON_ADMIN_LA_ID)
 
         val invitation = createLocalAuthorityInvitation(localAuthorityId = NON_ADMIN_LA_ID)
         whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
@@ -526,6 +538,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .get("/local-authority/$NON_ADMIN_LA_ID/cancel-invitation/$DEFAULT_LA_INVITATION_ID")
             .andExpect {
                 status { isOk() }
+                model { attribute("email", invitation.invitedEmail) }
             }
     }
 
@@ -548,7 +561,7 @@ class ManageLocalAuthorityUsersControllerTests(
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `confirmCancelInvitation returns 403 for admin user accessing an invitation from another LA`() {
-        getDefaultLocalAuthorityIfLaAdmin()
+        setupDefaultLocalAuthorityForLaAdmin()
 
         val invitation = createLocalAuthorityInvitation(localAuthorityId = 789)
         whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
@@ -611,7 +624,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .sendEmail(invitation.invitedEmail, LocalAuthorityInvitationCancellationEmail(invitation.invitingAuthority))
     }
 
-    private fun getLocalAuthorityIfSystemOperator(laId: Int = DEFAULT_LA_ID): LocalAuthority {
+    private fun setupLocalAuthorityForSystemOperator(laId: Int = DEFAULT_LA_ID): LocalAuthority {
         val localAuthority = createLocalAuthority(id = laId)
         whenever(localAuthorityService.retrieveLocalAuthorityById(laId))
             .thenReturn(localAuthority)
@@ -619,7 +632,7 @@ class ManageLocalAuthorityUsersControllerTests(
         return localAuthority
     }
 
-    private fun getDefaultLocalAuthorityIfLaAdmin(): LocalAuthority {
+    private fun setupDefaultLocalAuthorityForLaAdmin(): LocalAuthority {
         val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = createLocalAuthority()
         whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
