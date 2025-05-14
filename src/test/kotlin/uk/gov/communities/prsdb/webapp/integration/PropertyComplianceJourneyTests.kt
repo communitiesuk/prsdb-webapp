@@ -142,7 +142,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // EPC page
             epcPage.submitHasCert()
-            val checkMatchedEpcPage = assertPageIs(page, CheckMatchedEpcPagePropertyCompliance::class, urlArguments)
+            assertPageIs(page, CheckMatchedEpcPagePropertyCompliance::class, urlArguments)
 
             // TODO PRSD-1132: continue test
         }
@@ -197,7 +197,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // EPC page
             epcPage.submitHasCert()
-            val checkMatchedEpcpage = assertPageIs(page, CheckMatchedEpcPagePropertyCompliance::class, urlArguments)
+            assertPageIs(page, CheckMatchedEpcPagePropertyCompliance::class, urlArguments)
 
             // TODO PRSD-1132: continue test
         }
@@ -261,7 +261,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // EPC page
             epcPage.submitCertNotRequired()
-            val epcExemptionReasonPage = assertPageIs(page, EpcExemptionReasonPagePropertyCompliance::class, urlArguments)
+            assertPageIs(page, EpcExemptionReasonPagePropertyCompliance::class, urlArguments)
 
             // TODO PRSD-1135 - continue test
         }
@@ -315,7 +315,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // EPC page
             epcPage.submitHasNoCert()
-            val epcMissingPage = assertPageIs(page, EpcMissingPagePropertyCompliance::class, urlArguments)
+            assertPageIs(page, EpcMissingPagePropertyCompliance::class, urlArguments)
 
             // TODO: PRSD-1137 - continue test
         }
