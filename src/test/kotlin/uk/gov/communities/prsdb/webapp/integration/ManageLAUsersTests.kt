@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@Sql("/data-local.sql")
 class ManageLAUsersTests : IntegrationTest() {
     val localAuthorityId = 1
 
@@ -51,13 +52,6 @@ class ManageLAUsersTests : IntegrationTest() {
         }
 
         @Test
-        fun `invite button goes to invite new user page`(page: Page) {
-            val managePage = navigator.goToManageLaUsers(localAuthorityId)
-            managePage.inviteAnotherUserButton.clickAndWait()
-            assertPageIs(page, InviteNewLaUserPage::class)
-        }
-
-        @Test
         fun `return to dashboard button goes to LA dashboard`(page: Page) {
             val managePage = navigator.goToManageLaUsers(localAuthorityId)
             managePage.returnToDashboardButton.clickAndWait()
@@ -65,7 +59,13 @@ class ManageLAUsersTests : IntegrationTest() {
         }
     }
 
-    @Sql("/data-local.sql")
+    @Test
+    fun `invite button goes to invite new user page`(page: Page) {
+        val managePage = navigator.goToManageLaUsers(localAuthorityId)
+        managePage.inviteAnotherUserButton.clickAndWait()
+        assertPageIs(page, InviteNewLaUserPage::class)
+    }
+
     @Test
     fun `pagination component renders with more than 10 table entries`(page: Page) {
         var managePage = navigator.goToManageLaUsers(localAuthorityId)
