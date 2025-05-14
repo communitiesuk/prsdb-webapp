@@ -351,7 +351,7 @@ class JourneyDataBuilder(
     ): JourneyDataBuilder =
         this
             .withNonEnglandOrWalesAddress(countryOfResidence, nonEnglandOrWalesAddress)
-            .withSelectedAddress(selectedAddress, isContactAddress = true)
+            .withSelectedAddress(selectedAddress, localAuthority = null, isContactAddress = true)
 
     fun withNonEnglandOrWalesAndManualContactAddress(
         countryOfResidence: String,
