@@ -233,7 +233,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             val eicrExemptionConfirmationPage =
                 assertPageIs(page, EicrExemptionConfirmationPagePropertyCompliance::class, urlArguments)
 
-            // Gas Safety Exemption Confirmation page
+            // EICR Exemption Confirmation page
             assertThat(eicrExemptionConfirmationPage.heading).containsText("You’ve marked this property as exempt from needing an EICR")
             eicrExemptionConfirmationPage.saveAndContinueToEpcButton.clickAndWait()
             val epcPage = assertPageIs(page, EpcPagePropertyCompliance::class, urlArguments)
@@ -244,9 +244,15 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // EPC exemption reason page
             epcExemptionReasonPage.submitExemptionReason(EpcExemptionReason.LISTED_BUILDING)
-            assertPageIs(page, EpcExemptionConfirmationPagePropertyCompliance::class, urlArguments)
+            val epcExemptionConfirmationPage = assertPageIs(page, EpcExemptionConfirmationPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-1136 - continue test
+            // EPC Exemption Confirmation page
+            assertThat(epcExemptionConfirmationPage.heading)
+                .containsText("You’ve marked this property as not needing an EPC")
+            epcExemptionConfirmationPage.saveAndContinueToLandlordResponsibilitiesButton.clickAndWait()
+            assertPageIs(page, FireSafetyDeclarationPage::class, urlArguments)
+
+            // TODO PRSD-1150 - continue test
         }
 
         @Test

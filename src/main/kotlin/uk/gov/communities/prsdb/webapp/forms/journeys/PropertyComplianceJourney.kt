@@ -184,11 +184,7 @@ class PropertyComplianceJourney(
                     ),
                     epcMissingStep,
                     epcExemptionReasonStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.EpcExemptionConfirmation,
-                        "TODO PRSD-1136: Implement EPC Exemption Confirmation step",
-                        PropertyComplianceStepId.FireSafetyDeclaration,
-                    ),
+                    epcExemptionConfirmationStep,
                 ),
                 "propertyCompliance.taskList.upload.epc",
                 "propertyCompliance.taskList.upload.epc.hint",
@@ -773,6 +769,22 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.EpcExemptionConfirmation, null) },
+            )
+
+    private val epcExemptionConfirmationStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EpcExemptionConfirmation,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/epcExemptionConfirmationForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
             )
 
     private fun placeholderStep(
