@@ -169,4 +169,6 @@ class DateTimeHelperTests {
 
         assertEquals(expectedResult, result)
     }
+
+    // TODO PRSD-1138 - add tests for getDateInUKFromDateString
 }
