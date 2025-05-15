@@ -3,9 +3,9 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions
 import org.junit.jupiter.api.Test
-import org.springframework.test.context.jdbc.Sql
+import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 
-@Sql("/data-local.sql")
+@SqlBeforeAll("/data-local.sql")
 class InviteLaAdminSinglePageTests : IntegrationTest() {
     @Test
     fun `inviting a new LA admin shows validation errors if the email is invalid or the email addresses don't match`(page: Page) {

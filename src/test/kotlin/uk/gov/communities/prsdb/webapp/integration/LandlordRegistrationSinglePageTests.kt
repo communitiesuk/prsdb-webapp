@@ -12,7 +12,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.whenever
-import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
@@ -27,15 +26,16 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NoAddressFoundFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NoContactAddressFoundFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedInternationalPhoneNumber
 
-@Sql("/data-mockuser-not-landlord.sql")
+@SqlBeforeAll("/data-mockuser-not-landlord.sql")
 class LandlordRegistrationSinglePageTests : IntegrationTest() {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
 
+    @SqlBeforeAll("/data-local.sql")
     @Nested
-    @Sql("/data-local.sql")
-    inner class LandlordRegistrationStepVerifyIdentity {
+    inner class LandlordRegistrationStepVerifyIdentity : NestedTestWithSeedData() {
         @Test
         fun `Navigating here as a registered landlord redirects to the landlord dashboard page`(page: Page) {
             navigator.navigateToLandlordRegistrationVerifyIdentityPage()

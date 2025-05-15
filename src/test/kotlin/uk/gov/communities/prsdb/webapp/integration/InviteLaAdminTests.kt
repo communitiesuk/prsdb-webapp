@@ -4,14 +4,14 @@ import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.whenever
-import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeEach
 import java.net.URI
 
-@Sql("/data-local.sql")
+@SqlBeforeEach("/data-local.sql")
 class InviteLaAdminTests : JourneyIntegrationTest() {
     @Test
     fun `inviting a new LA admin ends with a confirmation page`(page: Page) {

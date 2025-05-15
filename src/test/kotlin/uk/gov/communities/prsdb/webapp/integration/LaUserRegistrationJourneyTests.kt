@@ -9,7 +9,6 @@ import org.mockito.ArgumentCaptor.captor
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
-import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
@@ -23,8 +22,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegis
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeEach
 
-@Sql("/data-mockuser-not-lauser.sql")
+@SqlBeforeEach("/data-mockuser-not-lauser.sql")
 class LaUserRegistrationJourneyTests : JourneyIntegrationTest() {
     @Autowired
     lateinit var localAuthorityService: LocalAuthorityService

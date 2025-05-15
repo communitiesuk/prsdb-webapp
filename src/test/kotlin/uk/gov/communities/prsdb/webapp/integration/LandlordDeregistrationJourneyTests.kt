@@ -4,15 +4,15 @@ import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.ConfirmationPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.ReasonFormPageLandlordDeregistration
+import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeEach
 
 class LandlordDeregistrationJourneyTests : JourneyIntegrationTest() {
+    @SqlBeforeEach("/data-mockuser-landlord-with-properties.sql")
     @Nested
-    @Sql("/data-mockuser-landlord-with-properties.sql")
     inner class LandlordWithProperties {
         @Test
         fun `User with properties can navigate the whole journey`(page: Page) {
@@ -40,8 +40,8 @@ class LandlordDeregistrationJourneyTests : JourneyIntegrationTest() {
         }
     }
 
+    @SqlBeforeEach("/data-unverified-landlord.sql")
     @Nested
-    @Sql("/data-unverified-landlord.sql")
     inner class LandlordWithoutProperties {
         @Test
         fun `User with no properties can navigate the whole journey`(page: Page) {

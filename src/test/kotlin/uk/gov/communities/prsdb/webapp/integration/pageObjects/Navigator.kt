@@ -480,6 +480,14 @@ class Navigator(
     }
 
     fun goToPropertyComplianceGasSafetyPage(propertyOwnershipId: Long): GasSafetyPagePropertyCompliance {
+        /* TODO PRSD-1195: We currently set dummy journey data in session to prevent the PropertyComplianceJourney from attempting to load
+            in a form context from the database. Completing this ticket should make this unnecessary.
+         */
+        setJourneyDataInSession(
+            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
+            mapOf("not-a-key" to "not-a-value"),
+        )
+
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.GasSafety.urlPathSegment}",

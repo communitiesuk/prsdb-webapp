@@ -4,9 +4,9 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import com.microsoft.playwright.options.AriaRole
 import org.junit.jupiter.api.Test
-import org.springframework.test.context.jdbc.Sql
+import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 
-@Sql("/data-local.sql")
+@SqlBeforeAll("/data-local.sql")
 class CheckHomePageTests : IntegrationTest() {
     @Test
     fun `check a home for rent page renders`(page: Page) {
