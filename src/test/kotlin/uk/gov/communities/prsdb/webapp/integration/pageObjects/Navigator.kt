@@ -504,7 +504,7 @@ class Navigator(
                 GasSafetyExemptionMissingPagePropertyCompliance::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        gasSafetyExemptionMissingPage.saveAndReturnToTaskListButton.clickAndWait()
+        gasSafetyExemptionMissingPage.saveAndContinueToEicrButton.clickAndWait()
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.EICR.urlPathSegment}",
@@ -572,7 +572,7 @@ class Navigator(
                 EicrExemptionMissingPagePropertyCompliance::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        eicrExemptionMissingPage.returnToTaskListButton.clickAndWait()
+        eicrExemptionMissingPage.saveAndContinueToEicrButton.clickAndWait()
 
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +

@@ -4,7 +4,9 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
+import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
+import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
@@ -180,11 +182,7 @@ class PropertyComplianceJourney(
                         "TODO PRSD-1132: Implement Check Matched EPC step",
                         PropertyComplianceStepId.FireSafetyDeclaration,
                     ),
-                    placeholderStep(
-                        PropertyComplianceStepId.EpcMissing,
-                        "TODO PRSD-1137: Implement EPC Missing step",
-                        PropertyComplianceStepId.FireSafetyDeclaration,
-                    ),
+                    epcMissingStep,
                     epcExemptionReasonStep,
                     placeholderStep(
                         PropertyComplianceStepId.EpcExemptionConfirmation,
@@ -314,9 +312,9 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                                "submitButtonText" to "forms.buttons.saveAndContinueToEICR",
                             ),
                     ),
-                handleSubmitAndRedirect = { _, _, _ -> taskListUrlSegment },
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
             )
 
@@ -333,7 +331,6 @@ class PropertyComplianceJourney(
                                 "title" to "propertyCompliance.title",
                             ),
                     ),
-                handleSubmitAndRedirect = { _, _, _ -> taskListUrlSegment },
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
             )
 
@@ -433,7 +430,6 @@ class PropertyComplianceJourney(
                                 "title" to "propertyCompliance.title",
                             ),
                     ),
-                handleSubmitAndRedirect = { _, _, _ -> taskListUrlSegment },
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
             )
 
@@ -450,7 +446,6 @@ class PropertyComplianceJourney(
                                 "title" to "propertyCompliance.title",
                             ),
                     ),
-                handleSubmitAndRedirect = { _, _, _ -> taskListUrlSegment },
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
             )
 
@@ -534,9 +529,9 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                                "submitButtonText" to "forms.buttons.saveAndContinueToEPC",
                             ),
                     ),
-                handleSubmitAndRedirect = { _, _, _ -> taskListUrlSegment },
                 nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
             )
 
@@ -555,7 +550,6 @@ class PropertyComplianceJourney(
                                 "rcpElectricalRegisterUrl" to RCP_ELECTRICAL_REGISTER_URL,
                             ),
                     ),
-                handleSubmitAndRedirect = { _, _, _ -> taskListUrlSegment },
                 nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
             )
 
@@ -659,7 +653,6 @@ class PropertyComplianceJourney(
                                 "title" to "propertyCompliance.title",
                             ),
                     ),
-                handleSubmitAndRedirect = { _, _, _ -> taskListUrlSegment },
                 nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
             )
 
@@ -678,7 +671,6 @@ class PropertyComplianceJourney(
                                 "rcpElectricalRegisterUrl" to RCP_ELECTRICAL_REGISTER_URL,
                             ),
                     ),
-                handleSubmitAndRedirect = { _, _, _ -> taskListUrlSegment },
                 nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
             )
 
@@ -717,6 +709,24 @@ class PropertyComplianceJourney(
                             ),
                     ) { mapOf("address" to getPropertyAddress()) },
                 nextAction = { journeyData, _ -> epcStepNextAction(journeyData) },
+            )
+
+    private val epcMissingStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EpcMissing,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/epcMissingForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "findEpcUrl" to FIND_EPC_URL,
+                                "getNewEpcUrl" to GET_NEW_EPC_URL,
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
             )
 
     private val epcExemptionReasonStep
