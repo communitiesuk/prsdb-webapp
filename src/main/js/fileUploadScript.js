@@ -1,5 +1,5 @@
 export function addFileUploadListener() {
-    const form = document.querySelector('form[enctype="multipart/form-data"]');
+    const form = document.querySelector('form#single-file-upload-form[enctype="multipart/form-data"]');
     if (form)
         form.addEventListener('submit', function (event) {
             const file = getInputFile(form);
