@@ -32,7 +32,7 @@
                         <a th:href="@{${user.pending ? 'cancel-invitation/' + user.id : 'edit-user/' + user.id}}"
                            class="govuk-link"
                            th:text="#{manageLAUsers.table.change}"
-                           th:if="(${currentUser.id} != ${user.id}) or ${user.pending}"
+                           th:if="(${currentUserId} != ${user.id}) or ${user.pending} or ${userCanEditTheirOwnAccount}"
                         >
                             manageLAUsers.table.change
                         </a>
@@ -41,6 +41,10 @@
                 </tbody>
             </table>
             <nav th:replace="~{fragments/pagination/pagination :: pagination(${paginationViewModel})}"></nav>
+
+            <div th:if="${userList.content.size() == 0}">
+                <h2 class="govuk-heading-m" th:text="#{manageLAUsers.noUsersText}"></h2>
+            </div>
             <div class="govuk-button-group" id="action-buttons">
                 <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/local-authority/{id}/invite-new-user(id=${localAuthority.id})}, #{manageLAUsers.inviteAnotherUserButtonText})}">
                     manageLAUsers.inviteAnotherUserButtonText

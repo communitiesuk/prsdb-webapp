@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <th:block id="main-content" th:replace="~{fragments/layout :: layout(#{registerProperty.deleteIncompleteProperties.incompleteProperties.title}, ~{::#main-content/content()}, ${#fields.hasErrors('${deleteIncompletePropertyRegistrationAreYouSureFormModel.*}')})}">
+    <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+    <main class="govuk-main-wrapper">
+        <div id="page-contents"
+             th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+            <header id="header">
+                <h1 class="govuk-heading-l" th:text="#{registerProperty.deleteIncompleteProperties.areYouSure.heading(${singleLineAddress})}"></h1>
+            </header>
+            <!--/*/ <th:block th:object="${deleteIncompletePropertyRegistrationAreYouSureFormModel}" th:if="deleteIncompletePropertyRegistrationAreYouSureFormModel != null"> /*/-->
+            <div th:replace="~{fragments/forms/errorSummary :: errorSummary }"></div>
+            <!--/*/ </th:block> /*/-->
+            <form th:action="@{''}" class="form" id="are-you-sure-form" method="post" th:object="${deleteIncompletePropertyRegistrationAreYouSureFormModel}"
+                  novalidate>
+                <th:block th:replace="~{fragments/forms/radios :: radios(null,'wantsToProceed',null, ${radioOptions})}"></th:block>
+                <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
+            </form>
+        </div>
+        </main>
+    </th:block>
+</html>

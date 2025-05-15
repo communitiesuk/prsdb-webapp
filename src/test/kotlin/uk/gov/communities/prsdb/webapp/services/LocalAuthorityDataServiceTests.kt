@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
@@ -201,7 +203,7 @@ class LocalAuthorityDataServiceTests {
             )
 
         // Act
-        val userList = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 1)
+        val userList = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 1, filterOutLaAdminInvitations = false)
 
         // Assert
         Assertions.assertIterableEquals(expectedLaUserList, userList)
@@ -225,7 +227,7 @@ class LocalAuthorityDataServiceTests {
             .thenReturn(PageImpl(listOf(user1, user2, invitation), pageRequest, 3))
 
         // Act
-        val userList = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 1)
+        val userList = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 1, filterOutLaAdminInvitations = false)
 
         // Assert
         Assertions.assertEquals(3, userList.content.size)
@@ -274,12 +276,81 @@ class LocalAuthorityDataServiceTests {
         }
 
         // Act
-        val userListPage1 = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 1)
-        val userListPage2 = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 2)
+        val userListPage1 =
+            localAuthorityDataService.getPaginatedUsersAndInvitations(
+                localAuthority,
+                1,
+                filterOutLaAdminInvitations = false,
+            )
+        val userListPage2 =
+            localAuthorityDataService.getPaginatedUsersAndInvitations(
+                localAuthority,
+                2,
+                filterOutLaAdminInvitations = false,
+            )
 
         // Assert
         Assertions.assertIterableEquals(expectedUserListPage1, userListPage1)
         Assertions.assertIterableEquals(expectedUserListPage2, userListPage2)
+    }
+
+    @Test
+    fun `getPaginatedUsersAndInvitations returns all users and invitations if filterOutLaAdminInvitations is false`() {
+        // Arrange
+        val localAuthority = createLocalAuthority(123)
+        val pageRequest =
+            PageRequest.of(
+                1,
+                10,
+                Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("name")),
+            )
+        val user1 = LocalAuthorityUserOrInvitation(1, "local_authority_user", "User 1", true, localAuthority)
+        val user2 = LocalAuthorityUserOrInvitation(2, "local_authority_user", "User 2", false, localAuthority)
+        val invitation =
+            LocalAuthorityUserOrInvitation(3, "local_authority_invitation", "invite@test.com", false, localAuthority)
+        val adminInvitation =
+            LocalAuthorityUserOrInvitation(3, "local_authority_invitation", "invite.admin@test.com", true, localAuthority)
+        whenever(localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest))
+            .thenReturn(PageImpl(listOf(user1, user2, invitation, adminInvitation), pageRequest, 4))
+        val expectedAdminInvitationDataModel =
+            LocalAuthorityUserOrInvitationDataModel(3, "invite.admin@test.com", localAuthority.name, true, true)
+
+        // Act
+        val userList = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 1, filterOutLaAdminInvitations = false)
+
+        // Assert
+        Assertions.assertEquals(4, userList.content.size)
+        Assertions.assertTrue(userList.contains(expectedAdminInvitationDataModel))
+    }
+
+    @Test
+    fun `getPaginatedUsersAndInvitations returns users and non-admin invitations if filterOutLaAdminInvitations is true`() {
+        // Arrange
+        val localAuthority = createLocalAuthority(123)
+        val pageRequest =
+            PageRequest.of(
+                1,
+                10,
+                Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("name")),
+            )
+        val user1 = LocalAuthorityUserOrInvitation(1, "local_authority_user", "User 1", true, localAuthority)
+        val user2 = LocalAuthorityUserOrInvitation(2, "local_authority_admin", "User 2", false, localAuthority)
+        val nonAdminInvitation =
+            LocalAuthorityUserOrInvitation(3, "local_authority_invitation", "invite@test.com", false, localAuthority)
+
+        whenever(localAuthorityUserOrInvitationRepository.findByLocalAuthorityNotIncludingAdminInvitations(localAuthority, pageRequest))
+            .thenReturn(PageImpl(listOf(user1, user2, nonAdminInvitation), pageRequest, 3))
+
+        // Act
+        val userList =
+            localAuthorityDataService.getPaginatedUsersAndInvitations(
+                localAuthority,
+                1,
+                filterOutLaAdminInvitations = true,
+            )
+
+        // Assert
+        assertEquals(3, userList.content.size)
     }
 
     @Test
@@ -319,12 +390,13 @@ class LocalAuthorityDataServiceTests {
         Assertions.assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
     }
 
-    @Test
-    fun `registerUserAndReturnID adds a new user to local_authority_user and returns the generated ID`() {
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `registerUserAndReturnID adds a new user to local_authority_user and returns the generated ID`(isManager: Boolean) {
         // Arrange
         val baseUser = createOneLoginUser()
         val localAuthority = createLocalAuthority()
-        val newLocalAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority, isManager = false)
+        val newLocalAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority, isManager = isManager)
 
         whenever(oneLoginUserService.findOrCreate1LUser(baseUser.id)).thenReturn(baseUser)
         whenever(localAuthorityUserRepository.save(any())).thenReturn(newLocalAuthorityUser)
@@ -336,6 +408,7 @@ class LocalAuthorityDataServiceTests {
                 localAuthority,
                 newLocalAuthorityUser.name,
                 newLocalAuthorityUser.email,
+                newLocalAuthorityUser.isManager,
             )
 
         // Assert

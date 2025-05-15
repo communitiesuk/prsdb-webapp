@@ -25,11 +25,15 @@ class LandlordRegistrationJourneyFactory(
     fun create() =
         LandlordRegistrationJourney(
             validator,
-            journeyDataServiceFactory.create(REGISTER_LANDLORD_JOURNEY_URL),
+            journeyDataServiceFactory.create(JOURNEY_DATA_KEY),
             addressLookupService,
             landlordService,
             absoluteUrlProvider,
             emailNotificationService,
             securityContextService,
         )
+
+    companion object {
+        const val JOURNEY_DATA_KEY = REGISTER_LANDLORD_JOURNEY_URL
+    }
 }

@@ -143,14 +143,13 @@ class PropertyRegistrationService(
     ): IncompletePropertiesDataModel {
         val address = getAddressData(formContext)
 
-        // TODO PRSD-1127 remove the "Not yet completed" options as address and local authority should no longer be nullable
-        val localAuthorityName = address?.localAuthorityId?.let { localAuthorityService.retrieveLocalAuthorityById(it).name }
+        val localAuthorityName = localAuthorityService.retrieveLocalAuthorityById(address.localAuthorityId!!).name
 
         return IncompletePropertiesDataModel(
             contextId = formContext.id,
             completeByDate = completeByDate,
-            singleLineAddress = address?.singleLineAddress ?: "Not yet completed",
-            localAuthorityName = localAuthorityName ?: "Not yet completed",
+            singleLineAddress = address.singleLineAddress,
+            localAuthorityName = localAuthorityName,
         )
     }
 
@@ -159,24 +158,17 @@ class PropertyRegistrationService(
         return DateTimeHelper.get28DaysFromDate(createdDateInUk)
     }
 
-    private fun getAddressData(formContext: FormContext): AddressDataModel? {
+    fun getAddressData(formContext: FormContext): AddressDataModel {
         val formContextJourneyData = formContext.toJourneyData()
         val lookedUpAddresses = formContextJourneyData.getLookedUpAddresses()
-        // TODO PRSD-1127 set this to return a not nullable AddressDataModel
-        return PropertyRegistrationJourneyDataHelper.getAddress(formContextJourneyData, lookedUpAddresses)
+        return PropertyRegistrationJourneyDataHelper.getAddress(formContextJourneyData, lookedUpAddresses)!!
     }
 
     fun getIncompletePropertyFormContextForLandlordIfNotExpired(
         contextId: Long,
         principalName: String,
     ): FormContext {
-        val formContext =
-            formContextRepository.findByIdAndUser_IdAndJourneyType(contextId, principalName, JourneyType.PROPERTY_REGISTRATION)
-                ?: throw ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Form context with ID: $contextId and journey type: " +
-                        "${JourneyType.PROPERTY_REGISTRATION.name} not found for base user: $principalName",
-                )
+        val formContext = getIncompletePropertyFormContextForLandlordOrThrowNotFound(contextId, principalName)
         val completeByDate = getIncompletePropertyCompleteByDate(formContext.createdDate)
 
         if (DateTimeHelper().isDateInPast(completeByDate)) {
@@ -186,5 +178,24 @@ class PropertyRegistrationService(
             )
         }
         return formContext
+    }
+
+    private fun getIncompletePropertyFormContextForLandlordOrThrowNotFound(
+        contextId: Long,
+        principalName: String,
+    ): FormContext =
+        formContextRepository.findByIdAndUser_IdAndJourneyType(contextId, principalName, JourneyType.PROPERTY_REGISTRATION)
+            ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Form context with ID: $contextId and journey type: " +
+                    "${JourneyType.PROPERTY_REGISTRATION.name} not found for base user: $principalName",
+            )
+
+    fun deleteIncompleteProperty(
+        contextId: Long,
+        principalName: String,
+    ) {
+        val formContext = getIncompletePropertyFormContextForLandlordOrThrowNotFound(contextId, principalName)
+        formContextRepository.delete(formContext)
     }
 }

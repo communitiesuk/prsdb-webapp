@@ -686,4 +686,28 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
             assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
         }
     }
+
+    @Nested
+    inner class PropertyRegistrationStepCheckAnswers {
+        @Test
+        fun `After changing an answer, submitting a full section returns the CYA page`(page: Page) {
+            var checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPage()
+
+            checkAnswersPage.form.summaryList.ownershipRow.actions.actionLink
+                .clickAndWait()
+            var ownershipPage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
+
+            ownershipPage.submitOwnershipType(OwnershipType.LEASEHOLD)
+            checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            checkAnswersPage.form.summaryList.licensingRow.actions.actionLink
+                .clickAndWait()
+            val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
+
+            licensingTypePage.submitLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
+            val licenceNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
+            licenceNumberPage.submitLicenseNumber("licence number")
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+    }
 }

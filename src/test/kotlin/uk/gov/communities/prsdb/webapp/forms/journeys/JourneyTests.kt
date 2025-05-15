@@ -49,6 +49,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.text.get
 
 class JourneyTests {
     private lateinit var validatorFactory: ValidatorFactory
@@ -61,6 +62,7 @@ class JourneyTests {
         StepTwo("step2"),
         StepThree("step3"),
         StepFour("step4"),
+        CYAStep("check-your-answers"),
     }
 
     class TestJourney(
@@ -81,6 +83,8 @@ class JourneyTests {
                 ),
             ),
     ) : Journey<TestStepId>(journeyType, initialStepId, validator, journeyDataService) {
+        override val checkYourAnswersStepId = TestStepId.CYAStep
+
         override val sections: List<JourneySection<TestStepId>> =
             createSingleSectionWithSingleTaskFromSteps(initialStepId, steps)
     }
@@ -790,7 +794,7 @@ class JourneyTests {
                                         "stepOneTemplate",
                                         mapOf("testKey" to "testValue"),
                                     ),
-                                handleSubmitAndRedirect = { _, _ -> "/customRedirect" },
+                                handleSubmitAndRedirect = { _, _, _ -> "/customRedirect" },
                             ),
                             Step(
                                 TestStepId.StepTwo,
@@ -907,6 +911,109 @@ class JourneyTests {
 
             // Assert
             verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any<Long>())
+        }
+    }
+
+    @Nested
+    inner class ChangingAnswersTests {
+        @Test
+        fun `getModelAndViewForStep returns back button to check your answers page when changing answers`() {
+            // Arrange
+            val testJourney =
+                TestJourney(
+                    JourneyType.LANDLORD_REGISTRATION,
+                    initialStepId = TestStepId.StepOne,
+                    journeyDataService = mockJourneyDataService,
+                    validator = validator,
+                    steps =
+                        setOf(
+                            Step(
+                                TestStepId.StepOne,
+                                page =
+                                    Page(
+                                        TestFormModel::class,
+                                        "stepOneTemplate",
+                                        mapOf("testKey" to "testValue"),
+                                    ),
+                                nextAction = { _, _ -> Pair(TestStepId.StepTwo, null) },
+                            ),
+                            Step(
+                                TestStepId.StepTwo,
+                                page =
+                                    Page(
+                                        TestFormModel::class,
+                                        "stepTwoTemplate",
+                                        mapOf("anotherTestKey" to "anotherTestValue"),
+                                    ),
+                            ),
+                        ),
+                )
+
+            val pageData: PageData = mapOf("testProperty" to "testPropertyValue")
+            val journeyData: JourneyData = mapOf(TestStepId.StepOne.urlPathSegment to pageData)
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
+
+            // Act
+            val result =
+                testJourney.getModelAndViewForStep(
+                    TestStepId.StepTwo.urlPathSegment,
+                    null,
+                    null,
+                    TestStepId.StepTwo.urlPathSegment,
+                )
+
+            // Assert
+            assertContains(result.model, "backUrl")
+            assertEquals(TestStepId.CYAStep.urlPathSegment, result.model["backUrl"])
+        }
+
+        @Test
+        fun `completeStep redirects to check your answers page when changing answers`() {
+            // Arrange
+            val testJourney =
+                TestJourney(
+                    JourneyType.LANDLORD_REGISTRATION,
+                    initialStepId = TestStepId.StepOne,
+                    journeyDataService = mockJourneyDataService,
+                    validator = validator,
+                    steps =
+                        setOf(
+                            Step(
+                                TestStepId.StepOne,
+                                page =
+                                    Page(
+                                        TestFormModel::class,
+                                        "stepOneTemplate",
+                                        mapOf("testKey" to "testValue"),
+                                    ),
+                                nextAction = { _, _ -> Pair(TestStepId.StepTwo, null) },
+                            ),
+                            Step(
+                                TestStepId.StepTwo,
+                                page =
+                                    Page(
+                                        TestFormModel::class,
+                                        "stepTwoTemplate",
+                                        mapOf("anotherTestKey" to "anotherTestValue"),
+                                    ),
+                            ),
+                        ),
+                )
+            val principal = Principal { "testPrincipalId" }
+            val pageData: PageData = mapOf("testProperty" to "testPropertyValue")
+
+            // Act
+            val result =
+                testJourney.completeStep(
+                    TestStepId.StepTwo.urlPathSegment,
+                    pageData,
+                    null,
+                    principal,
+                    TestStepId.StepTwo.urlPathSegment,
+                )
+
+            // Assert
+            assertEquals("redirect:${TestStepId.CYAStep.urlPathSegment}", result.viewName)
         }
     }
 }

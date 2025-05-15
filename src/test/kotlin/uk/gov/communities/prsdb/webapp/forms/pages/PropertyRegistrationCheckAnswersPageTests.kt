@@ -67,7 +67,8 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.address",
                 addressName,
-                RegisterPropertyStepId.LookupAddress.urlPathSegment,
+                RegisterPropertyStepId.LookupAddress.urlPathSegment +
+                    "?changingAnswerFor=${RegisterPropertyStepId.LookupAddress.urlPathSegment}",
             ),
             propertyDetails.single {
                 it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.address"
@@ -116,7 +117,8 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.address",
                 AddressDataModel.manualAddressDataToSingleLineAddress(addressLineOne, townOrCity, postcode),
-                RegisterPropertyStepId.ManualAddress.urlPathSegment,
+                RegisterPropertyStepId.ManualAddress.urlPathSegment +
+                    "?changingAnswerFor=${RegisterPropertyStepId.ManualAddress.urlPathSegment}",
             ),
             propertyDetails.single {
                 it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.address"
@@ -126,7 +128,8 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.localAuthority",
                 localAuthority.name,
-                RegisterPropertyStepId.LocalAuthority.urlPathSegment,
+                RegisterPropertyStepId.LocalAuthority.urlPathSegment +
+                    "?changingAnswerFor=${RegisterPropertyStepId.LocalAuthority.urlPathSegment}",
             ),
             propertyDetails.single {
                 it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.localAuthority"
@@ -152,7 +155,8 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.type",
                 PropertyType.DETACHED_HOUSE,
-                RegisterPropertyStepId.PropertyType.urlPathSegment,
+                RegisterPropertyStepId.PropertyType.urlPathSegment +
+                    "?changingAnswerFor=${RegisterPropertyStepId.PropertyType.urlPathSegment}",
             ),
             propertyDetails.single {
                 it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.type"
@@ -174,7 +178,8 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.type",
                 listOf(PropertyType.OTHER, customType),
-                RegisterPropertyStepId.PropertyType.urlPathSegment,
+                RegisterPropertyStepId.PropertyType.urlPathSegment +
+                    "?changingAnswerFor=${RegisterPropertyStepId.PropertyType.urlPathSegment}",
             ),
             propertyDetails.single {
                 it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.type"
@@ -195,7 +200,8 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.ownership",
                 OwnershipType.FREEHOLD,
-                RegisterPropertyStepId.OwnershipType.urlPathSegment,
+                RegisterPropertyStepId.OwnershipType.urlPathSegment +
+                    "?changingAnswerFor=${RegisterPropertyStepId.OwnershipType.urlPathSegment}",
             ),
             propertyDetails.single {
                 it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.ownership"
@@ -216,7 +222,8 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.licensing",
                 LicensingType.NO_LICENSING,
-                RegisterPropertyStepId.LicensingType.urlPathSegment,
+                RegisterPropertyStepId.LicensingType.urlPathSegment +
+                    "?changingAnswerFor=${RegisterPropertyStepId.LicensingType.urlPathSegment}",
             ),
             propertyDetails.single {
                 it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.licensing"
@@ -238,7 +245,8 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.licensing",
                 listOf(LicensingType.SELECTIVE_LICENCE, licenceNumber),
-                RegisterPropertyStepId.LicensingType.urlPathSegment,
+                RegisterPropertyStepId.LicensingType.urlPathSegment +
+                    "?changingAnswerFor=${RegisterPropertyStepId.LicensingType.urlPathSegment}",
             ),
             propertyDetails.single {
                 it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.licensing"
@@ -259,7 +267,8 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.occupied",
                 false,
-                RegisterPropertyStepId.Occupancy.urlPathSegment,
+                RegisterPropertyStepId.Occupancy.urlPathSegment +
+                    "?changingAnswerFor=${RegisterPropertyStepId.Occupancy.urlPathSegment}",
             ),
             propertyDetails.single {
                 it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.occupied"
@@ -282,7 +291,8 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.occupied",
                 true,
-                RegisterPropertyStepId.Occupancy.urlPathSegment,
+                RegisterPropertyStepId.Occupancy.urlPathSegment +
+                    "?changingAnswerFor=${RegisterPropertyStepId.Occupancy.urlPathSegment}",
             ),
             propertyDetails.single {
                 it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.occupied"
@@ -292,7 +302,8 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.households",
                 households,
-                RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment,
+                RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment +
+                    "?changingAnswerFor=${RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment}",
             ),
             propertyDetails
                 .single {
@@ -303,7 +314,8 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.people",
                 people,
-                RegisterPropertyStepId.NumberOfPeople.urlPathSegment,
+                RegisterPropertyStepId.NumberOfPeople.urlPathSegment +
+                    "?changingAnswerFor=${RegisterPropertyStepId.NumberOfPeople.urlPathSegment}",
             ),
             propertyDetails.single {
                 it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.people"

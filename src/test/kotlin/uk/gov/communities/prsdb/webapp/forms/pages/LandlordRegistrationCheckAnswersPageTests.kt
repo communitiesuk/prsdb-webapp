@@ -92,7 +92,8 @@ class LandlordRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.name",
                 name,
-                LandlordRegistrationStepId.Name.urlPathSegment,
+                "${LandlordRegistrationStepId.Name.urlPathSegment}?changingAnswerFor=" +
+                    LandlordRegistrationStepId.Name.urlPathSegment,
             ),
             formData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.name"
@@ -102,7 +103,8 @@ class LandlordRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.dateOfBirth",
                 dob,
-                LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
+                "${LandlordRegistrationStepId.DateOfBirth.urlPathSegment}?changingAnswerFor=" +
+                    LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
             ),
             formData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.dateOfBirth"
@@ -122,7 +124,8 @@ class LandlordRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.email",
                 emailAddress,
-                LandlordRegistrationStepId.Email.urlPathSegment,
+                "${LandlordRegistrationStepId.Email.urlPathSegment}?changingAnswerFor=" +
+                    LandlordRegistrationStepId.Email.urlPathSegment,
             ),
             formData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.email"
@@ -132,7 +135,8 @@ class LandlordRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.telephoneNumber",
                 phoneNumber,
-                LandlordRegistrationStepId.PhoneNumber.urlPathSegment,
+                "${LandlordRegistrationStepId.PhoneNumber.urlPathSegment}?changingAnswerFor=" +
+                    LandlordRegistrationStepId.PhoneNumber.urlPathSegment,
             ),
             formData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.telephoneNumber"
@@ -150,7 +154,8 @@ class LandlordRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesResident",
                 true,
-                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
+                "${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}?changingAnswerFor=" +
+                    LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
             ),
             formData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesResident"
@@ -168,7 +173,8 @@ class LandlordRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.contactAddress",
                 DEFAULT_ADDRESS,
-                LandlordRegistrationStepId.LookupAddress.urlPathSegment,
+                "${LandlordRegistrationStepId.LookupAddress.urlPathSegment}?changingAnswerFor=" +
+                    LandlordRegistrationStepId.LookupAddress.urlPathSegment,
             ),
             formData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.contactAddress"
@@ -192,7 +198,8 @@ class LandlordRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.contactAddress",
                 AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode).singleLineAddress,
-                LandlordRegistrationStepId.ManualAddress.urlPathSegment,
+                "${LandlordRegistrationStepId.ManualAddress.urlPathSegment}?changingAnswerFor=" +
+                    LandlordRegistrationStepId.ManualAddress.urlPathSegment,
             ),
             formData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.contactAddress"
@@ -219,7 +226,8 @@ class LandlordRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence",
                 countryOfResidence,
-                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
+                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment +
+                    "?changingAnswerFor=${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}",
             ),
             formData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence"
@@ -229,7 +237,8 @@ class LandlordRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress",
                 nonEnglandOrWalesAddress,
-                LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment,
+                LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment +
+                    "?changingAnswerFor=${LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment}",
             ),
             formData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress"
@@ -239,7 +248,8 @@ class LandlordRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress",
                 selectedAddress,
-                LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
+                LandlordRegistrationStepId.LookupContactAddress.urlPathSegment +
+                    "?changingAnswerFor=${LandlordRegistrationStepId.LookupContactAddress.urlPathSegment}",
             ),
             formData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress"
@@ -270,7 +280,8 @@ class LandlordRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence",
                 countryOfResidence,
-                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
+                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment +
+                    "?changingAnswerFor=${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}",
             ),
             formData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence"
@@ -280,7 +291,8 @@ class LandlordRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress",
                 nonEnglandOrWalesAddress,
-                LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment,
+                LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment +
+                    "?changingAnswerFor=${LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment}",
             ),
             formData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress"
@@ -290,7 +302,8 @@ class LandlordRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress",
                 AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode).singleLineAddress,
-                LandlordRegistrationStepId.ManualContactAddress.urlPathSegment,
+                "${LandlordRegistrationStepId.ManualContactAddress.urlPathSegment}?changingAnswerFor=" +
+                    "${LandlordRegistrationStepId.ManualContactAddress.urlPathSegment}",
             ),
             formData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress"

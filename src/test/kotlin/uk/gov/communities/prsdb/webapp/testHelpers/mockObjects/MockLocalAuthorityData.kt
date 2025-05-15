@@ -11,6 +11,8 @@ class MockLocalAuthorityData {
     companion object {
         const val DEFAULT_LA_ID = 123
 
+        const val NON_ADMIN_LA_ID = 456
+
         fun createLocalAuthority(id: Int = DEFAULT_LA_ID): LocalAuthority = LocalAuthority(id, "name", "custodian code")
 
         const val DEFAULT_LA_USER_ID = 456L

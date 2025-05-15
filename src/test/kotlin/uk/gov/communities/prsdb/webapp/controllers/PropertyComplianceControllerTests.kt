@@ -216,6 +216,7 @@ class PropertyComplianceControllerTests(
                     anyOrNull(),
                     eq(null),
                     anyOrNull(),
+                    anyOrNull(),
                 ),
             ).thenReturn(ModelAndView("redirect:$propertyComplianceJourneyRedirectUrl"))
         }
@@ -295,6 +296,7 @@ class PropertyComplianceControllerTests(
                     eq(PropertyComplianceStepId.GasSafetyUpload.urlPathSegment),
                     argWhere { pageData -> UploadCertificateFormModel::class.memberProperties.all { it.name in pageData.keys } },
                     eq(null),
+                    anyOrNull(),
                     anyOrNull(),
                 ),
             ).thenReturn(ModelAndView("redirect:$propertyComplianceJourneyRedirectUrl"))

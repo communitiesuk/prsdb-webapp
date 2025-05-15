@@ -43,12 +43,12 @@ class LandlordRegistrationCheckAnswersPage(
         val isIdentityVerified = LandlordRegistrationJourneyDataHelper.isIdentityVerified(journeyData)
 
         return listOf(
-            SummaryListRowViewModel(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.name",
                 LandlordRegistrationJourneyDataHelper.getName(journeyData)!!,
                 if (isIdentityVerified) null else LandlordRegistrationStepId.Name.urlPathSegment,
             ),
-            SummaryListRowViewModel(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.dateOfBirth",
                 LandlordRegistrationJourneyDataHelper.getDOB(journeyData)!!,
                 if (isIdentityVerified) null else LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
@@ -58,12 +58,12 @@ class LandlordRegistrationCheckAnswersPage(
 
     private fun getEmailAndPhoneFormData(journeyData: JourneyData): List<SummaryListRowViewModel> =
         listOf(
-            SummaryListRowViewModel(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.email",
                 LandlordRegistrationJourneyDataHelper.getEmail(journeyData)!!,
                 LandlordRegistrationStepId.Email.urlPathSegment,
             ),
-            SummaryListRowViewModel(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.telephoneNumber",
                 LandlordRegistrationJourneyDataHelper.getPhoneNumber(journeyData)!!,
                 LandlordRegistrationStepId.PhoneNumber.urlPathSegment,
@@ -83,7 +83,7 @@ class LandlordRegistrationCheckAnswersPage(
 
     private fun getLivesInEnglandOrWalesFormData(livesInEnglandOrWales: Boolean): List<SummaryListRowViewModel> =
         listOf(
-            SummaryListRowViewModel(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesResident",
                 livesInEnglandOrWales,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
@@ -92,12 +92,12 @@ class LandlordRegistrationCheckAnswersPage(
 
     private fun getNonEnglandOrWalesAddressFormData(journeyData: JourneyData): List<SummaryListRowViewModel> =
         listOf(
-            SummaryListRowViewModel(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence",
                 LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesCountryOfResidence(journeyData)!!,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
             ),
-            SummaryListRowViewModel(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress",
                 LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesAddress(journeyData)!!,
                 LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment,
@@ -109,7 +109,7 @@ class LandlordRegistrationCheckAnswersPage(
         lookedUpAddresses: List<AddressDataModel>,
         livesInEnglandOrWales: Boolean,
     ): SummaryListRowViewModel =
-        SummaryListRowViewModel(
+        SummaryListRowViewModel.forCheckYourAnswersPage(
             if (livesInEnglandOrWales) {
                 "registerAsALandlord.checkAnswers.rowHeading.contactAddress"
             } else {

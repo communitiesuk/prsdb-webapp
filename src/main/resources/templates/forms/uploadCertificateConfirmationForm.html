@@ -2,6 +2,7 @@
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
     <header>
@@ -14,5 +15,5 @@
         <h2 class="govuk-heading-s" th:text="#{forms.uploadCertificateConfirmation.subsection.heading}">forms.uploadCertificateConfirmation.subsection.heading</h2>
         <p class="govuk-body" th:text="#{forms.uploadCertificateConfirmation.subsection.paragraph}">forms.uploadCertificateConfirmation.subsection.paragraph</p>
     </section>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </html>

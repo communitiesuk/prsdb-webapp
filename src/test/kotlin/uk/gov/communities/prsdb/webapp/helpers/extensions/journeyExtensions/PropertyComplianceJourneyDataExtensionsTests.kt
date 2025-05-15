@@ -12,8 +12,10 @@ import org.mockito.Mockito.mockConstruction
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCertExemption
@@ -237,5 +239,24 @@ class PropertyComplianceJourneyDataExtensionsTests {
         val retrievedIsEicrExemptionReasonOther = testJourneyData.getIsEicrExemptionReasonOther()
 
         assertNull(retrievedIsEicrExemptionReasonOther)
+    }
+
+    @Test
+    fun `getHasEpc returns an enum if the corresponding page is in journeyData`() {
+        val hasEpc = HasEpc.NOT_REQUIRED
+        val testJourneyData = journeyDataBuilder.withEpcStatus(hasEpc).build()
+
+        val retrievedHasEpc = testJourneyData.getHasEPC()
+
+        assertEquals(hasEpc, retrievedHasEpc)
+    }
+
+    @Test
+    fun `getHasEpc returns null if the corresponding page is not in journeyData`() {
+        val testJourneyData = journeyDataBuilder.build()
+
+        val retrievedHasEICR = testJourneyData.getHasEPC()
+
+        assertNull(retrievedHasEICR)
     }
 }

@@ -76,17 +76,17 @@ class PropertyRegistrationCheckAnswersPage(
 
     private fun getSelectedAddressDetails(address: AddressDataModel): List<SummaryListRowViewModel> =
         listOf(
-            SummaryListRowViewModel(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.address",
                 address.singleLineAddress,
                 RegisterPropertyStepId.LookupAddress.urlPathSegment,
             ),
-            SummaryListRowViewModel(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.uprn",
                 address.uprn,
                 null,
             ),
-            SummaryListRowViewModel(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.localAuthority",
                 localAuthorityService.retrieveLocalAuthorityById(address.localAuthorityId!!).name,
                 null,
@@ -95,12 +95,12 @@ class PropertyRegistrationCheckAnswersPage(
 
     private fun getManualAddressDetails(address: AddressDataModel): List<SummaryListRowViewModel> =
         listOf(
-            SummaryListRowViewModel(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.address",
                 address.singleLineAddress,
                 RegisterPropertyStepId.ManualAddress.urlPathSegment,
             ),
-            SummaryListRowViewModel(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.localAuthority",
                 localAuthorityService.retrieveLocalAuthorityById(address.localAuthorityId!!).name,
                 RegisterPropertyStepId.LocalAuthority.urlPathSegment,
@@ -110,7 +110,7 @@ class PropertyRegistrationCheckAnswersPage(
     private fun getPropertyTypeDetails(journeyData: JourneyData): SummaryListRowViewModel {
         val propertyType = DataHelper.getPropertyType(journeyData)!!
         val customType = DataHelper.getCustomPropertyType(journeyData)
-        return SummaryListRowViewModel(
+        return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.type",
             getPropertyTypeSummaryValue(propertyType, customType),
             RegisterPropertyStepId.PropertyType.urlPathSegment,
@@ -128,7 +128,7 @@ class PropertyRegistrationCheckAnswersPage(
         }
 
     private fun getOwnershipTypeDetails(journeyData: JourneyData) =
-        SummaryListRowViewModel(
+        SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.ownership",
             DataHelper.getOwnershipType(journeyData)!!,
             RegisterPropertyStepId.OwnershipType.urlPathSegment,
@@ -138,7 +138,7 @@ class PropertyRegistrationCheckAnswersPage(
         val licensingType = DataHelper.getLicensingType(journeyData)!!
         val licenceNumber = DataHelper.getLicenseNumber(journeyData)!!
         val licensingSummaryValue = getLicensingSummaryValue(licenceNumber, licensingType)
-        return SummaryListRowViewModel(
+        return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.licensing",
             licensingSummaryValue,
             RegisterPropertyStepId.LicensingType.urlPathSegment,
@@ -161,7 +161,7 @@ class PropertyRegistrationCheckAnswersPage(
             getOccupyingTenantsDetails(journeyData)
         } else {
             listOf(
-                SummaryListRowViewModel(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.occupied",
                     false,
                     RegisterPropertyStepId.Occupancy.urlPathSegment,
@@ -172,17 +172,17 @@ class PropertyRegistrationCheckAnswersPage(
 
     private fun getOccupyingTenantsDetails(journeyData: JourneyData): List<SummaryListRowViewModel> =
         listOf(
-            SummaryListRowViewModel(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.occupied",
                 true,
                 RegisterPropertyStepId.Occupancy.urlPathSegment,
             ),
-            SummaryListRowViewModel(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.households",
                 DataHelper.getNumberOfHouseholds(journeyData),
                 RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment,
             ),
-            SummaryListRowViewModel(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.people",
                 DataHelper.getNumberOfTenants(journeyData),
                 RegisterPropertyStepId.NumberOfPeople.urlPathSegment,
