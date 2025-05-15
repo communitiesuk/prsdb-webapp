@@ -9,5 +9,8 @@
     <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'certificate', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
         <div th:replace="~{fragments/forms/fileUpload :: fileUpload(#{forms.uploadCertificate.label}, 'certificate', null)}"></div>
     </th:block>
+    <noscript>
+        <div th:replace="~{fragments/warningText :: warningText('You do not have JavaScript enabled.')}">warning</div>
+    </noscript>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
 </html>
