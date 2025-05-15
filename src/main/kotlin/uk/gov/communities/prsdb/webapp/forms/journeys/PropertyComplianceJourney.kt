@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
@@ -9,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
@@ -34,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemp
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
@@ -180,9 +183,10 @@ class PropertyComplianceJourney(
                         PropertyComplianceStepId.FireSafetyDeclaration,
                     ),
                     epcMissingStep,
+                    epcExemptionReasonStep,
                     placeholderStep(
-                        PropertyComplianceStepId.EpcExemptionReason,
-                        "TODO PRSD-1135: Implement EPC Exemption Reason step",
+                        PropertyComplianceStepId.EpcExemptionConfirmation,
+                        "TODO PRSD-1136: Implement EPC Exemption Confirmation step",
                         PropertyComplianceStepId.FireSafetyDeclaration,
                     ),
                 ),
@@ -723,6 +727,52 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
+            )
+
+    private val epcExemptionReasonStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EpcExemptionReason,
+                page =
+                    Page(
+                        formModel = EpcExemptionReasonFormModel::class,
+                        templateName = "forms/epcExemptionReasonForm.html",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.epcExemptionReason.fieldSetHeading",
+                                "epcGuideUrl" to EPC_GUIDE_URL,
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = EpcExemptionReason.LISTED_BUILDING,
+                                            labelMsgKey = "forms.epcExemptionReason.radios.listedBuilding.label",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = EpcExemptionReason.ANNUAL_USE_LESS_THAN_4_MONTHS,
+                                            labelMsgKey = "forms.epcExemptionReason.radios.annualUseLessThan4Months.label",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = EpcExemptionReason.ANNUAL_ENERGY_CONSUMPTION_LESS_THAN_25_PERCENT,
+                                            labelMsgKey = "forms.epcExemptionReason.radios.annualEnergyConsumptionLessThan25Percent.label",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = EpcExemptionReason.TEMPORARY_BUILDING,
+                                            labelMsgKey = "forms.epcExemptionReason.radios.temporaryBuilding.label",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = EpcExemptionReason.STANDALONE_SMALL_BUILDING,
+                                            labelMsgKey = "forms.epcExemptionReason.radios.standaloneSmallBuilding.label",
+                                            hintMsgKey = "forms.epcExemptionReason.radios.standaloneSmallBuilding.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = EpcExemptionReason.DUE_FOR_DEMOLITION,
+                                            labelMsgKey = "forms.epcExemptionReason.radios.dueForDemolition.label",
+                                        ),
+                                    ),
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.EpcExemptionConfirmation, null) },
             )
 
     private fun placeholderStep(

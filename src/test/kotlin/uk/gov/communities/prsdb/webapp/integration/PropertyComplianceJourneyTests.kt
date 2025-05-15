@@ -18,6 +18,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -34,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrUploadConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrUploadPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcMissingPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcPagePropertyCompliance
@@ -65,7 +67,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
             assertThat(startPage.heading).containsText("Compliance certificates")
             startPage.startButton.clickAndWait()
-            var taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+            val taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
 
             // Task List page
             taskListPage.clickUploadTaskWithName("Upload the gas safety certificate")
@@ -147,7 +149,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
             assertThat(startPage.heading).containsText("Compliance certificates")
             startPage.startButton.clickAndWait()
-            var taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+            val taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
 
             // Task List page
             taskListPage.clickUploadTaskWithName("Upload the gas safety certificate")
@@ -193,7 +195,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
             assertThat(startPage.heading).containsText("Compliance certificates")
             startPage.startButton.clickAndWait()
-            var taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+            val taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
 
             // Task List page
             taskListPage.clickUploadTaskWithName("Upload the gas safety certificate")
@@ -238,9 +240,13 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
             // EPC page
             epcPage.submitCertNotRequired()
-            assertPageIs(page, EpcExemptionReasonPagePropertyCompliance::class, urlArguments)
+            val epcExemptionReasonPage = assertPageIs(page, EpcExemptionReasonPagePropertyCompliance::class, urlArguments)
 
-            // TODO PRSD-1135 - continue test
+            // EPC exemption reason page
+            epcExemptionReasonPage.submitExemptionReason(EpcExemptionReason.LISTED_BUILDING)
+            assertPageIs(page, EpcExemptionConfirmationPagePropertyCompliance::class, urlArguments)
+
+            // TODO PRSD-1136 - continue test
         }
 
         @Test
@@ -249,7 +255,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
             assertThat(startPage.heading).containsText("Compliance certificates")
             startPage.startButton.clickAndWait()
-            var taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
+            val taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
 
             // Task List page
             taskListPage.clickUploadTaskWithName("Upload the gas safety certificate")
@@ -568,6 +574,17 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             val epcPage = navigator.goToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
             epcPage.form.submit()
             assertThat(epcPage.form.getErrorMessage()).containsText("Select whether you have an EPC for this property")
+        }
+    }
+
+    @Nested
+    inner class EpcExemptionReasonTests {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val epcExemptionReasonPage = navigator.goToPropertyComplianceEpcExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
+            epcExemptionReasonPage.form.submit()
+            assertThat(epcExemptionReasonPage.form.getErrorMessage())
+                .containsText("Select why this property has an EPC exemption")
         }
     }
 

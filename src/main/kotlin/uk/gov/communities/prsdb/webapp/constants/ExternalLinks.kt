@@ -15,3 +15,8 @@ const val FIND_LOCAL_AUTHORITY_URL = "https://www.gov.uk/find-local-council"
 const val FIND_EPC_URL = "https://www.gov.uk/find-energy-certificate"
 
 const val GET_NEW_EPC_URL = "https://www.gov.uk/get-new-energy-certificate"
+
+const val EPC_GUIDE_URL =
+    "https://www.gov.uk/government/publications" +
+        "/energy-performance-certificates-for-the-construction-sale-and-let-of-dwellings" +
+        "/a-guide-to-energy-performance-certificates-for-the-marketing-sale-and-let-of-dwellings"

@@ -81,6 +81,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrIssueDatePagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrUploadPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionMissingPagePropertyCompliance
@@ -580,6 +581,16 @@ class Navigator(
         )
 
         return createValidPage(page, EpcPagePropertyCompliance::class, mapOf("propertyOwnershipId" to propertyOwnershipId.toString()))
+    }
+
+    fun goToPropertyComplianceEpcExemptionReasonPage(propertyOwnershipId: Long): EpcExemptionReasonPagePropertyCompliance {
+        val epcPage = goToPropertyComplianceEpcPage(propertyOwnershipId)
+        epcPage.submitCertNotRequired()
+        return createValidPage(
+            page,
+            EpcExemptionReasonPagePropertyCompliance::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
     }
 
     fun goToLandlordDetails(): LandlordDetailsPage {
