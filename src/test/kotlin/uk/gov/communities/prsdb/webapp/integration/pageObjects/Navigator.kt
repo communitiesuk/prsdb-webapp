@@ -13,10 +13,6 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
-import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -115,7 +111,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.controllers.SessionController
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyDataRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreInvitationTokenRequestModel
-import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyPageDataBuilder
 import java.util.UUID
 import kotlin.test.assertTrue
 
@@ -151,7 +147,7 @@ class Navigator(
     fun skipToLandlordRegistrationConfirmIdentityPage(): ConfirmIdentityFormPageLandlordRegistration {
         setJourneyDataInSession(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder().withVerifiedUser().build(),
+            JourneyPageDataBuilder.beforeLandlordRegistrationConfirmIdentity().build(),
         )
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.ConfirmIdentity.urlPathSegment}")
         return createValidPage(page, ConfirmIdentityFormPageLandlordRegistration::class)
@@ -164,7 +160,7 @@ class Navigator(
     fun skipToLandlordRegistrationNamePage(): NameFormPageLandlordRegistration {
         setJourneyDataInSession(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder().withUnverifiedUser(name = null).build(),
+            JourneyPageDataBuilder.beforeLandlordRegistrationName().build(),
         )
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.Name.urlPathSegment}")
         return createValidPage(page, NameFormPageLandlordRegistration::class)
@@ -173,7 +169,7 @@ class Navigator(
     fun skipToLandlordRegistrationDateOfBirthPage(): DateOfBirthFormPageLandlordRegistration {
         setJourneyDataInSession(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder().withUnverifiedUser(dob = null).build(),
+            JourneyPageDataBuilder.beforeLandlordRegistrationDob().build(),
         )
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.DateOfBirth.urlPathSegment}")
         return createValidPage(page, DateOfBirthFormPageLandlordRegistration::class)
@@ -182,7 +178,7 @@ class Navigator(
     fun skipToLandlordRegistrationEmailPage(): EmailFormPageLandlordRegistration {
         setJourneyDataInSession(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder().withVerifiedUser().build(),
+            JourneyPageDataBuilder.beforeLandlordRegistrationEmail().build(),
         )
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.Email.urlPathSegment}")
         return createValidPage(page, EmailFormPageLandlordRegistration::class)
@@ -191,10 +187,7 @@ class Navigator(
     fun skipToLandlordRegistrationPhoneNumberPage(): PhoneNumberFormPageLandlordRegistration {
         setJourneyDataInSession(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withVerifiedUser()
-                .withEmailAddress()
-                .build(),
+            JourneyPageDataBuilder.beforeLandlordRegistrationPhoneNumber().build(),
         )
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.PhoneNumber.urlPathSegment}")
         return createValidPage(page, PhoneNumberFormPageLandlordRegistration::class)
@@ -203,11 +196,7 @@ class Navigator(
     fun skipToLandlordRegistrationCountryOfResidencePage(): CountryOfResidenceFormPageLandlordRegistration {
         setJourneyDataInSession(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withVerifiedUser()
-                .withEmailAddress()
-                .withPhoneNumber()
-                .build(),
+            JourneyPageDataBuilder.beforeLandlordRegistrationCountryOfResidence().build(),
         )
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}")
         return createValidPage(page, CountryOfResidenceFormPageLandlordRegistration::class)
@@ -216,12 +205,7 @@ class Navigator(
     fun skipToLandlordRegistrationLookupAddressPage(): LookupAddressFormPageLandlordRegistration {
         setJourneyDataInSession(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withVerifiedUser()
-                .withEmailAddress()
-                .withPhoneNumber()
-                .withEnglandOrWalesResidence()
-                .build(),
+            JourneyPageDataBuilder.beforeLandlordRegistrationLookupAddress().build(),
         )
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.LookupAddress.urlPathSegment}")
         return createValidPage(page, LookupAddressFormPageLandlordRegistration::class)
@@ -230,14 +214,7 @@ class Navigator(
     fun skipToLandlordRegistrationSelectAddressPage(): SelectAddressFormPageLandlordRegistration {
         setJourneyDataInSession(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withVerifiedUser()
-                .withEmailAddress()
-                .withPhoneNumber()
-                .withEnglandOrWalesResidence()
-                .withLookupAddress()
-                .withLookedUpAddresses()
-                .build(),
+            JourneyPageDataBuilder.beforeLandlordRegistrationSelectAddress().build(),
         )
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.SelectAddress.urlPathSegment}")
         return createValidPage(page, SelectAddressFormPageLandlordRegistration::class)
@@ -246,15 +223,7 @@ class Navigator(
     fun skipToLandlordRegistrationManualAddressPage(): ManualAddressFormPageLandlordRegistration {
         setJourneyDataInSession(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withVerifiedUser()
-                .withEmailAddress()
-                .withPhoneNumber()
-                .withEnglandOrWalesResidence()
-                .withLookupAddress()
-                .withLookedUpAddresses()
-                .withManualAddressSelected()
-                .build(),
+            JourneyPageDataBuilder.beforeLandlordRegistrationManualAddress().build(),
         )
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.ManualAddress.urlPathSegment}")
         return createValidPage(page, ManualAddressFormPageLandlordRegistration::class)
@@ -263,12 +232,7 @@ class Navigator(
     fun skipToLandlordRegistrationNonEnglandOrWalesAddressPage(): NonEnglandOrWalesAddressFormPageLandlordRegistration {
         setJourneyDataInSession(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withVerifiedUser()
-                .withEmailAddress()
-                .withPhoneNumber()
-                .withNonEnglandOrWalesAddress(nonEnglandOrWalesAddress = null)
-                .build(),
+            JourneyPageDataBuilder.beforeLandlordRegistrationNonEnglandOrWalesAddress().build(),
         )
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment}")
         return createValidPage(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
@@ -277,12 +241,7 @@ class Navigator(
     fun skipToLandlordRegistrationLookupContactAddressPage(): LookupContactAddressFormPageLandlordRegistration {
         setJourneyDataInSession(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withVerifiedUser()
-                .withEmailAddress()
-                .withPhoneNumber()
-                .withNonEnglandOrWalesAddress()
-                .build(),
+            JourneyPageDataBuilder.beforeLandlordRegistrationLookupContactAddress().build(),
         )
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.LookupContactAddress.urlPathSegment}")
         return createValidPage(page, LookupContactAddressFormPageLandlordRegistration::class)
@@ -291,14 +250,7 @@ class Navigator(
     fun skipToLandlordRegistrationSelectContactAddressPage(): SelectContactAddressFormPageLandlordRegistration {
         setJourneyDataInSession(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withVerifiedUser()
-                .withEmailAddress()
-                .withPhoneNumber()
-                .withNonEnglandOrWalesAddress()
-                .withLookupAddress(isContactAddress = true)
-                .withLookedUpAddresses()
-                .build(),
+            JourneyPageDataBuilder.beforeLandlordRegistrationSelectContactAddress().build(),
         )
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.SelectContactAddress.urlPathSegment}")
         return createValidPage(page, SelectContactAddressFormPageLandlordRegistration::class)
@@ -307,15 +259,7 @@ class Navigator(
     fun skipToLandlordRegistrationManualContactAddressPage(): ManualContactAddressFormPageLandlordRegistration {
         setJourneyDataInSession(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withVerifiedUser()
-                .withEmailAddress()
-                .withPhoneNumber()
-                .withNonEnglandOrWalesAddress()
-                .withLookupAddress(isContactAddress = true)
-                .withLookedUpAddresses()
-                .withManualAddressSelected(isContactAddress = true)
-                .build(),
+            JourneyPageDataBuilder.beforeLandlordRegistrationManualContactAddress().build(),
         )
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.ManualContactAddress.urlPathSegment}")
         return createValidPage(page, ManualContactAddressFormPageLandlordRegistration::class)
@@ -324,14 +268,7 @@ class Navigator(
     fun skipToLandlordRegistrationCheckAnswersPage(): CheckAnswersPageLandlordRegistration {
         setJourneyDataInSession(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withVerifiedUser()
-                .withEmailAddress()
-                .withPhoneNumber()
-                .withEnglandOrWalesResidence()
-                .withLookupAddress()
-                .withSelectedAddress()
-                .build(),
+            JourneyPageDataBuilder.beforeLandlordRegistrationCheckAnswers().build(),
         )
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.CheckAnswers.urlPathSegment}")
         return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
@@ -340,15 +277,7 @@ class Navigator(
     fun skipToLandlordRegistrationDeclarationPage(): DeclarationFormPageLandlordRegistration {
         setJourneyDataInSession(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withVerifiedUser()
-                .withEmailAddress()
-                .withPhoneNumber()
-                .withEnglandOrWalesResidence()
-                .withLookupAddress()
-                .withSelectedAddress()
-                .withCheckedAnswers()
-                .build(),
+            JourneyPageDataBuilder.beforeLandlordRegistrationDeclaration().build(),
         )
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.Declaration.urlPathSegment}")
         return createValidPage(page, DeclarationFormPageLandlordRegistration::class)
@@ -368,7 +297,7 @@ class Navigator(
         storeInvitationTokenInSession(token)
         setJourneyDataInSession(
             LaUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder().withLandingPageReached().build(),
+            JourneyPageDataBuilder.beforeLaUserRegistrationName().build(),
         )
         navigate("/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.Name.urlPathSegment}")
         return createValidPage(page, NameFormPageLaUserRegistration::class)
@@ -378,10 +307,7 @@ class Navigator(
         storeInvitationTokenInSession(token)
         setJourneyDataInSession(
             LaUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withLandingPageReached()
-                .withName()
-                .build(),
+            JourneyPageDataBuilder.beforeLaUserRegistrationEmail().build(),
         )
         navigate("/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.Email.urlPathSegment}")
         return createValidPage(page, EmailFormPageLaUserRegistration::class)
@@ -391,11 +317,7 @@ class Navigator(
         storeInvitationTokenInSession(token)
         setJourneyDataInSession(
             LaUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withLandingPageReached()
-                .withName()
-                .withEmailAddress()
-                .build(),
+            JourneyPageDataBuilder.beforeLaUserRegistrationCheckAnswers().build(),
         )
         navigate("/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.CheckAnswers.urlPathSegment}")
         return createValidPage(page, CheckAnswersPageLaUserRegistration::class)
@@ -425,10 +347,7 @@ class Navigator(
     ): SelectAddressFormPagePropertyRegistration {
         setJourneyDataInSession(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withLookupAddress()
-                .withLookedUpAddresses(customLookedUpAddresses)
-                .build(),
+            JourneyPageDataBuilder.beforePropertyRegistrationSelectAddress(customLookedUpAddresses).build(),
         )
         navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.SelectAddress.urlPathSegment}")
         return createValidPage(page, SelectAddressFormPagePropertyRegistration::class)
@@ -437,11 +356,7 @@ class Navigator(
     fun skipToPropertyRegistrationManualAddressPage(): ManualAddressFormPagePropertyRegistration {
         setJourneyDataInSession(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withLookupAddress()
-                .withLookedUpAddresses()
-                .withManualAddressSelected()
-                .build(),
+            JourneyPageDataBuilder.beforePropertyRegistrationManualAddress().build(),
         )
         navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.ManualAddress.urlPathSegment}")
         return createValidPage(page, ManualAddressFormPagePropertyRegistration::class)
@@ -450,11 +365,7 @@ class Navigator(
     fun skipToPropertyRegistrationSelectLocalAuthorityPage(): SelectLocalAuthorityFormPagePropertyRegistration {
         setJourneyDataInSession(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withLookupAddress()
-                .withLookedUpAddresses()
-                .withManualAddress()
-                .build(),
+            JourneyPageDataBuilder.beforePropertyRegistrationSelectLocalAuthority().build(),
         )
         navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.LocalAuthority.urlPathSegment}")
         return createValidPage(page, SelectLocalAuthorityFormPagePropertyRegistration::class)
@@ -463,10 +374,7 @@ class Navigator(
     fun skipToPropertyRegistrationPropertyTypePage(): PropertyTypeFormPagePropertyRegistration {
         setJourneyDataInSession(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withLookupAddress()
-                .withSelectedAddress()
-                .build(),
+            JourneyPageDataBuilder.beforePropertyRegistrationPropertyType().build(),
         )
         navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.PropertyType.urlPathSegment}")
         return createValidPage(page, PropertyTypeFormPagePropertyRegistration::class)
@@ -475,11 +383,7 @@ class Navigator(
     fun skipToPropertyRegistrationOwnershipTypePage(): OwnershipTypeFormPagePropertyRegistration {
         setJourneyDataInSession(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withLookupAddress()
-                .withSelectedAddress()
-                .withPropertyType()
-                .build(),
+            JourneyPageDataBuilder.beforePropertyRegistrationOwnershipType().build(),
         )
         navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.OwnershipType.urlPathSegment}")
         return createValidPage(page, OwnershipTypeFormPagePropertyRegistration::class)
@@ -488,12 +392,7 @@ class Navigator(
     fun skipToPropertyRegistrationLicensingTypePage(): LicensingTypeFormPagePropertyRegistration {
         setJourneyDataInSession(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withLookupAddress()
-                .withSelectedAddress()
-                .withPropertyType()
-                .withOwnershipType()
-                .build(),
+            JourneyPageDataBuilder.beforePropertyRegistrationLicensingType().build(),
         )
         navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.LicensingType.urlPathSegment}")
         return createValidPage(page, LicensingTypeFormPagePropertyRegistration::class)
@@ -502,13 +401,7 @@ class Navigator(
     fun skipToPropertyRegistrationSelectiveLicencePage(): SelectiveLicenceFormPagePropertyRegistration {
         setJourneyDataInSession(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withLookupAddress()
-                .withSelectedAddress()
-                .withPropertyType()
-                .withOwnershipType()
-                .withLicensingType(LicensingType.SELECTIVE_LICENCE)
-                .build(),
+            JourneyPageDataBuilder.beforePropertyRegistrationSelectiveLicence().build(),
         )
         navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.SelectiveLicence.urlPathSegment}")
         return createValidPage(page, SelectiveLicenceFormPagePropertyRegistration::class)
@@ -517,13 +410,7 @@ class Navigator(
     fun skipToPropertyRegistrationHmoMandatoryLicencePage(): HmoMandatoryLicenceFormPagePropertyRegistration {
         setJourneyDataInSession(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withLookupAddress()
-                .withSelectedAddress()
-                .withPropertyType()
-                .withOwnershipType()
-                .withLicensingType(LicensingType.HMO_MANDATORY_LICENCE)
-                .build(),
+            JourneyPageDataBuilder.beforePropertyRegistrationHmoMandatoryLicence().build(),
         )
         navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment}")
         return createValidPage(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
@@ -532,13 +419,7 @@ class Navigator(
     fun skipToPropertyRegistrationHmoAdditionalLicencePage(): HmoAdditionalLicenceFormPagePropertyRegistration {
         setJourneyDataInSession(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withLookupAddress()
-                .withSelectedAddress()
-                .withPropertyType()
-                .withOwnershipType()
-                .withLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
-                .build(),
+            JourneyPageDataBuilder.beforePropertyRegistrationHmoAdditionalLicence().build(),
         )
         navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment}")
         return createValidPage(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
@@ -547,13 +428,7 @@ class Navigator(
     fun skipToPropertyRegistrationOccupancyPage(): OccupancyFormPagePropertyRegistration {
         setJourneyDataInSession(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withLookupAddress()
-                .withSelectedAddress()
-                .withPropertyType()
-                .withOwnershipType()
-                .withLicensingType(LicensingType.NO_LICENSING)
-                .build(),
+            JourneyPageDataBuilder.beforePropertyRegistrationOccupancy().build(),
         )
         navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.Occupancy.urlPathSegment}")
         return createValidPage(page, OccupancyFormPagePropertyRegistration::class)
@@ -562,14 +437,7 @@ class Navigator(
     fun skipToPropertyRegistrationHouseholdsPage(): NumberOfHouseholdsFormPagePropertyRegistration {
         setJourneyDataInSession(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withLookupAddress()
-                .withSelectedAddress()
-                .withPropertyType()
-                .withOwnershipType()
-                .withLicensingType(LicensingType.NO_LICENSING)
-                .withOccupancyStatus(true)
-                .build(),
+            JourneyPageDataBuilder.beforePropertyRegistrationHouseholds().build(),
         )
         navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment}")
         return createValidPage(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
@@ -578,14 +446,7 @@ class Navigator(
     fun skipToPropertyRegistrationPeoplePage(): NumberOfPeopleFormPagePropertyRegistration {
         setJourneyDataInSession(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withLookupAddress()
-                .withSelectedAddress()
-                .withPropertyType()
-                .withOwnershipType()
-                .withLicensingType(LicensingType.NO_LICENSING)
-                .withTenants(people = null)
-                .build(),
+            JourneyPageDataBuilder.beforePropertyRegistrationPeople().build(),
         )
         navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.NumberOfPeople.urlPathSegment}")
         return createValidPage(page, NumberOfPeopleFormPagePropertyRegistration::class)
@@ -594,14 +455,7 @@ class Navigator(
     fun skipToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
         setJourneyDataInSession(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withLookupAddress()
-                .withSelectedAddress()
-                .withPropertyType()
-                .withOwnershipType()
-                .withLicensingType(LicensingType.NO_LICENSING)
-                .withOccupancyStatus(false)
-                .build(),
+            JourneyPageDataBuilder.beforePropertyRegistrationCheckAnswers().build(),
         )
         navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.CheckAnswers.urlPathSegment}")
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
@@ -610,15 +464,7 @@ class Navigator(
     fun skipToPropertyRegistrationDeclarationPage(): DeclarationFormPagePropertyRegistration {
         setJourneyDataInSession(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder()
-                .withLookupAddress()
-                .withSelectedAddress()
-                .withPropertyType()
-                .withOwnershipType()
-                .withLicensingType(LicensingType.NO_LICENSING)
-                .withOccupancyStatus(false)
-                .withCheckedAnswers()
-                .build(),
+            JourneyPageDataBuilder.beforePropertyRegistrationDeclaration().build(),
         )
         navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.Declaration.urlPathSegment}")
         return createValidPage(page, DeclarationFormPagePropertyRegistration::class)
@@ -644,9 +490,7 @@ class Navigator(
     fun skipToPropertyComplianceGasSafetyIssueDatePage(propertyOwnershipId: Long): GasSafetyIssueDatePagePropertyCompliance {
         setJourneyDataInSession(
             PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyDataBuilder()
-                .withGasSafetyCertStatus(true)
-                .build(),
+            JourneyPageDataBuilder.beforePropertyComplianceGasSafetyIssueDate().build(),
         )
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
@@ -662,10 +506,7 @@ class Navigator(
     fun skipToPropertyComplianceGasSafetyEngineerNumPage(propertyOwnershipId: Long): GasSafeEngineerNumPagePropertyCompliance {
         setJourneyDataInSession(
             PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyDataBuilder()
-                .withGasSafetyCertStatus(true)
-                .withGasSafetyIssueDate()
-                .build(),
+            JourneyPageDataBuilder.beforePropertyComplianceGasSafetyEngineerNum().build(),
         )
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
@@ -681,11 +522,7 @@ class Navigator(
     fun skipToPropertyComplianceGasSafetyUploadPage(propertyOwnershipId: Long): GasSafetyUploadPagePropertyCompliance {
         setJourneyDataInSession(
             PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyDataBuilder()
-                .withGasSafetyCertStatus(true)
-                .withGasSafetyIssueDate()
-                .withGasSafeEngineerNum()
-                .build(),
+            JourneyPageDataBuilder.beforePropertyComplianceGasSafetyUpload().build(),
         )
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
@@ -701,9 +538,7 @@ class Navigator(
     fun skipToPropertyComplianceGasSafetyExemptionPage(propertyOwnershipId: Long): GasSafetyExemptionPagePropertyCompliance {
         setJourneyDataInSession(
             PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyDataBuilder()
-                .withGasSafetyCertStatus(false)
-                .build(),
+            JourneyPageDataBuilder.beforePropertyComplianceGasSafetyExemption().build(),
         )
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
@@ -719,10 +554,7 @@ class Navigator(
     fun skipToPropertyComplianceGasSafetyExemptionReasonPage(propertyOwnershipId: Long): GasSafetyExemptionReasonPagePropertyCompliance {
         setJourneyDataInSession(
             PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyDataBuilder()
-                .withGasSafetyCertStatus(false)
-                .withGasSafetyCertExemptionStatus(true)
-                .build(),
+            JourneyPageDataBuilder.beforePropertyComplianceGasSafetyExemptionReason().build(),
         )
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
@@ -740,11 +572,7 @@ class Navigator(
     ): GasSafetyExemptionOtherReasonPagePropertyCompliance {
         setJourneyDataInSession(
             PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyDataBuilder()
-                .withGasSafetyCertStatus(false)
-                .withGasSafetyCertExemptionStatus(true)
-                .withGasSafetyCertExemptionReason(GasSafetyExemptionReason.OTHER)
-                .build(),
+            JourneyPageDataBuilder.beforePropertyComplianceGasSafetyExemptionOtherReason().build(),
         )
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
@@ -760,7 +588,7 @@ class Navigator(
     fun skipToPropertyComplianceEicrPage(propertyOwnershipId: Long): EicrPagePropertyCompliance {
         setJourneyDataInSession(
             PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyDataBuilder().withMissingGasSafetyExemption().build(),
+            JourneyPageDataBuilder.beforePropertyComplianceEicr().build(),
         )
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
@@ -772,10 +600,7 @@ class Navigator(
     fun skipToPropertyComplianceEicrIssueDatePage(propertyOwnershipId: Long): EicrIssueDatePagePropertyCompliance {
         setJourneyDataInSession(
             PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyDataBuilder()
-                .withMissingGasSafetyExemption()
-                .withEicrStatus(true)
-                .build(),
+            JourneyPageDataBuilder.beforePropertyComplianceEicrIssueDate().build(),
         )
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
@@ -791,11 +616,7 @@ class Navigator(
     fun skipToPropertyComplianceEicrUploadPage(propertyOwnershipId: Long): EicrUploadPagePropertyCompliance {
         setJourneyDataInSession(
             PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyDataBuilder()
-                .withMissingGasSafetyExemption()
-                .withEicrStatus(true)
-                .withEicrIssueDate()
-                .build(),
+            JourneyPageDataBuilder.beforePropertyComplianceEicrUpload().build(),
         )
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
@@ -811,10 +632,7 @@ class Navigator(
     fun skipToPropertyComplianceEicrExemptionPage(propertyOwnershipId: Long): EicrExemptionPagePropertyCompliance {
         setJourneyDataInSession(
             PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyDataBuilder()
-                .withMissingGasSafetyExemption()
-                .withEicrStatus(false)
-                .build(),
+            JourneyPageDataBuilder.beforePropertyComplianceEicrExemption().build(),
         )
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
@@ -830,11 +648,7 @@ class Navigator(
     fun skipToPropertyComplianceEicrExemptionReasonPage(propertyOwnershipId: Long): EicrExemptionReasonPagePropertyCompliance {
         setJourneyDataInSession(
             PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyDataBuilder()
-                .withMissingGasSafetyExemption()
-                .withEicrStatus(false)
-                .withEicrExemptionStatus(true)
-                .build(),
+            JourneyPageDataBuilder.beforePropertyComplianceEicrExemptionReason().build(),
         )
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
@@ -850,12 +664,7 @@ class Navigator(
     fun skipToPropertyComplianceEicrExemptionOtherReasonPage(propertyOwnershipId: Long): EicrExemptionOtherReasonPagePropertyCompliance {
         setJourneyDataInSession(
             PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyDataBuilder()
-                .withMissingGasSafetyExemption()
-                .withEicrStatus(false)
-                .withEicrExemptionStatus(true)
-                .withEicrExemptionReason(EicrExemptionReason.OTHER)
-                .build(),
+            JourneyPageDataBuilder.beforePropertyComplianceEicrExemptionOtherReason().build(),
         )
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
@@ -871,10 +680,7 @@ class Navigator(
     fun skipToPropertyComplianceEpcPage(propertyOwnershipId: Long): EpcPagePropertyCompliance {
         setJourneyDataInSession(
             PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyDataBuilder()
-                .withMissingGasSafetyExemption()
-                .withMissingEicrExemption()
-                .build(),
+            JourneyPageDataBuilder.beforePropertyComplianceEpc().build(),
         )
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
@@ -886,11 +692,7 @@ class Navigator(
     fun skipToPropertyComplianceEpcExemptionReasonPage(propertyOwnershipId: Long): EpcExemptionReasonPagePropertyCompliance {
         setJourneyDataInSession(
             PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyDataBuilder()
-                .withMissingGasSafetyExemption()
-                .withMissingEicrExemption()
-                .withEpcStatus(HasEpc.NOT_REQUIRED)
-                .build(),
+            JourneyPageDataBuilder.beforePropertyComplianceEpcExemptionReason().build(),
         )
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
@@ -921,7 +723,7 @@ class Navigator(
     fun skipToLandlordDetailsUpdateSelectAddressPage(): SelectAddressFormPageUpdateLandlordDetails {
         setJourneyDataInSession(
             LandlordDetailsUpdateJourneyFactory.getJourneyDataKey(LandlordDetailsUpdateStepId.SelectEnglandAndWalesAddress.urlPathSegment),
-            JourneyDataBuilder().withLookupAddress().build(),
+            JourneyPageDataBuilder.beforeLandlordDetailsUpdateSelectAddress().build(),
         )
         navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LandlordDetailsUpdateStepId.SelectEnglandAndWalesAddress.urlPathSegment}")
         return createValidPage(page, SelectAddressFormPageUpdateLandlordDetails::class)
@@ -979,7 +781,7 @@ class Navigator(
     fun skipToPropertyDeregistrationReasonPage(propertyOwnershipId: Long): ReasonPagePropertyDeregistration {
         setJourneyDataInSession(
             PropertyDeregistrationJourneyFactory.getJourneyKey(propertyOwnershipId),
-            JourneyDataBuilder().withWantsToProceed().build(),
+            JourneyPageDataBuilder.beforePropertyDeregistrationReason().build(),
         )
         navigate(
             DeregisterPropertyController.getPropertyDeregistrationBasePath(propertyOwnershipId) +
