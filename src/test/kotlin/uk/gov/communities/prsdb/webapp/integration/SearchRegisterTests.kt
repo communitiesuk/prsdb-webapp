@@ -5,7 +5,6 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -21,10 +20,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPrope
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.PROPERTY_LANDLORD_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.REG_NUM_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 import kotlin.test.assertContains
 import kotlin.test.assertTrue
 
-@Sql("/data-search.sql")
+@SqlBeforeAll("/data-search.sql")
 class SearchRegisterTests : IntegrationTest() {
     @Nested
     inner class LandlordSearchTests {

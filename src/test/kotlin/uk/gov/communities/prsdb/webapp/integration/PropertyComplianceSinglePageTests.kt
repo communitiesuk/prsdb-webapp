@@ -14,7 +14,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
-import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -27,8 +26,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.services.FileUploader
+import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 
-@Sql("/data-local.sql")
+@SqlBeforeAll("/data-local.sql")
 class PropertyComplianceSinglePageTests : IntegrationTest() {
     @MockitoBean
     private lateinit var fileUploader: FileUploader

@@ -2,16 +2,17 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.springframework.test.context.jdbc.Sql
+import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
+import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@Sql("/data-local.sql")
+@SqlBeforeAll("/data-local.sql")
 class LandlordDashboardTests : IntegrationTest() {
     @Test
     fun `the dashboard loads displaying the user's name and lrn`() {
@@ -57,34 +58,42 @@ class LandlordDashboardTests : IntegrationTest() {
         assertTrue(page.url().contains("https://www.gov.uk/government/publications/guide-to-the-renters-rights-bill"))
     }
 
-    @Test
-    @Sql("/data-mockuser-landlord-with-one-incomplete-property.sql")
-    fun `the dashboard loads with a notification banner and correct message when the landlord has one incomplete property`(page: Page) {
-        val dashboard = navigator.goToLandlordDashboard()
-        assertThat(dashboard.notificationBanner.title).containsText("Important")
-        assertThat(dashboard.notificationBanner.subheading).containsText("You have 1 incomplete property: View incomplete properties")
+    @SqlBeforeAll("/data-mockuser-landlord-with-one-incomplete-property.sql")
+    @Nested
+    inner class LandlordWithOneIncompleteProperty : NestedTestWithSeedData() {
+        @Test
+        fun `the dashboard loads with a notification banner and correct message when the landlord has one incomplete property`(page: Page) {
+            val dashboard = navigator.goToLandlordDashboard()
+            assertThat(dashboard.notificationBanner.title).containsText("Important")
+            assertThat(dashboard.notificationBanner.subheading).containsText("You have 1 incomplete property: View incomplete properties")
+        }
     }
 
-    @Test
-    @Sql("/data-mockuser-landlord-with-incomplete-properties.sql")
-    fun `the dashboard loads with a notification banner when the landlord has incomplete properties`(page: Page) {
-        val dashboard = navigator.goToLandlordDashboard()
-        assertThat(dashboard.notificationBanner.title).containsText("Important")
-        assertThat(dashboard.notificationBanner.subheading).containsText("You have 2 incomplete properties: View incomplete properties")
+    @SqlBeforeAll("/data-mockuser-landlord-with-incomplete-properties.sql")
+    @Nested
+    inner class LandlordWithIncompleteProperties : NestedTestWithSeedData() {
+        @Test
+        fun `the dashboard loads with a notification banner when the landlord has incomplete properties`(page: Page) {
+            val dashboard = navigator.goToLandlordDashboard()
+            assertThat(dashboard.notificationBanner.title).containsText("Important")
+            assertThat(dashboard.notificationBanner.subheading).containsText("You have 2 incomplete properties: View incomplete properties")
+        }
+
+        @Test
+        fun `the link in the notification banner redirects to the incomplete properties page`(page: Page) {
+            val dashboard = navigator.goToLandlordDashboard()
+            dashboard.notificationBanner.link.clickAndWait()
+            assertPageIs(page, LandlordIncompletePropertiesPage::class)
+        }
     }
 
-    @Test
-    @Sql("/data-mockuser-landlord-with-incomplete-properties.sql")
-    fun `the link in the notification banner redirects to the incomplete properties page`(page: Page) {
-        val dashboard = navigator.goToLandlordDashboard()
-        dashboard.notificationBanner.link.clickAndWait()
-        assertPageIs(page, LandlordIncompletePropertiesPage::class)
-    }
-
-    @Test
-    @Sql("/data-mockuser-landlord-with-properties.sql")
-    fun `the dashboard loads without a notification banner when the landlord has no incomplete properties`() {
-        val dashboard = navigator.goToLandlordDashboard()
-        assertThat(dashboard.notificationBanner).isHidden()
+    @SqlBeforeAll("/data-mockuser-landlord-with-properties.sql")
+    @Nested
+    inner class LandlordWithoutIncompleteProperties : NestedTestWithSeedData() {
+        @Test
+        fun `the dashboard loads without a notification banner when the landlord has no incomplete properties`() {
+            val dashboard = navigator.goToLandlordDashboard()
+            assertThat(dashboard.notificationBanner).isHidden()
+        }
     }
 }

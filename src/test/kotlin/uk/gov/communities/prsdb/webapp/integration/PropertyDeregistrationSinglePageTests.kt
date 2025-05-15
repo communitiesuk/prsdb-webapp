@@ -4,11 +4,11 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 
-@Sql("/data-local.sql")
+@SqlBeforeAll("/data-local.sql")
 class PropertyDeregistrationSinglePageTests : IntegrationTest() {
     @Nested
     inner class AreYouSureStep {

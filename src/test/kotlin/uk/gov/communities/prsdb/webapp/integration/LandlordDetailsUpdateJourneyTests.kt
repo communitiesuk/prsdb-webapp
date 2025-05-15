@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
-import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddressFormPageUpdateLandlordDetails
@@ -23,9 +22,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NameFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.PhoneNumberFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeEach
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhoneNumber
 
-@Sql("/data-local.sql")
+@SqlBeforeEach("/data-local.sql")
 class LandlordDetailsUpdateJourneyTests : JourneyIntegrationTest() {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
     val addressFound = "Entirely new test address"
@@ -47,9 +47,9 @@ class LandlordDetailsUpdateJourneyTests : JourneyIntegrationTest() {
         )
     }
 
+    @SqlBeforeEach("/data-unverified-landlord.sql")
     @Nested
     inner class NameUpdates {
-        @Sql("/data-unverified-landlord.sql")
         @Test
         fun `An unverified landlord can update their name`(page: Page) {
             // Details page
@@ -68,9 +68,9 @@ class LandlordDetailsUpdateJourneyTests : JourneyIntegrationTest() {
         }
     }
 
+    @SqlBeforeEach("/data-unverified-landlord.sql")
     @Nested
     inner class DateOfBirthUpdates {
-        @Sql("/data-unverified-landlord.sql")
         @Test
         fun `An unverified landlord can update their date of birth`(page: Page) {
             // Details page

@@ -4,14 +4,14 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 
 class LandlordDeregistrationSinglePageTests : IntegrationTest() {
+    @SqlBeforeAll("/data-mockuser-landlord-with-properties.sql")
     @Nested
-    @Sql("/data-mockuser-landlord-with-properties.sql")
-    inner class LandlordWithProperties {
+    inner class LandlordWithProperties : NestedTestWithSeedData() {
         @Test
         fun `User is returned to the landlord details page if they submit No`(page: Page) {
             val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
@@ -37,9 +37,9 @@ class LandlordDeregistrationSinglePageTests : IntegrationTest() {
         }
     }
 
+    @SqlBeforeAll("/data-unverified-landlord.sql")
     @Nested
-    @Sql("/data-unverified-landlord.sql")
-    inner class LandlordWithoutProperties {
+    inner class LandlordWithoutProperties : NestedTestWithSeedData() {
         @Test
         fun `Submitting with no option selected returns an error`() {
             val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()

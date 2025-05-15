@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
@@ -15,8 +14,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegis
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 
-@Sql("/data-mockuser-not-lauser.sql")
+@SqlBeforeAll("/data-mockuser-not-lauser.sql")
 class LaUserRegistrationSinglePageTests : IntegrationTest() {
     @Autowired
     lateinit var localAuthorityService: LocalAuthorityService
