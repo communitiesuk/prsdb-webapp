@@ -13,8 +13,7 @@ export function addFileUploadListener() {
                         _csrf: form.querySelector('input[name="_csrf"]').value,
                         name: file.name,
                         contentType: file.type,
-                        contentLength: file.size,
-                        isUploadSuccessfulOrNull: true
+                        contentLength: file.size
                     });
                 } else {
                     // If the file is valid, allow the form to be submitted normally but prevent users resubmitting
