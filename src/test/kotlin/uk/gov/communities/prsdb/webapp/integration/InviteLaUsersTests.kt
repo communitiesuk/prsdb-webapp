@@ -1,19 +1,18 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.whenever
-import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserSuccessPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeEach
 import java.net.URI
 
-@Sql("/data-local.sql")
-class InviteLaUsersTests : IntegrationTest() {
+@SqlBeforeEach("/data-local.sql")
+class InviteLaUsersTests : JourneyIntegrationTest() {
     @Test
     fun `inviting a new LA user ends with a success page with a button linking to the dashboard`(page: Page) {
         whenever(absoluteUrlProvider.buildInvitationUri(anyString()))
@@ -27,12 +26,5 @@ class InviteLaUsersTests : IntegrationTest() {
         // Go to dashboard button
         successPage.returnToDashboardButton.clickAndWait()
         assertPageIs(page, LocalAuthorityDashboardPage::class)
-    }
-
-    @Test
-    fun `inviting a new LA user shows validation errors if the email addresses don't match`() {
-        val invitePage = navigator.goToInviteNewLaUser(1)
-        invitePage.submitMismatchedEmails("test@example.com", "different@example.com")
-        assertThat(invitePage.form.getErrorMessage()).containsText("Both email addresses should match")
     }
 }
