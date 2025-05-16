@@ -27,7 +27,7 @@ abstract class UpdateJourney<T : UpdateStepId<*>>(
 
     abstract override val stepRouter: GroupedStepRouter<T>
 
-    override val unreachableStepRedirect get() = last().step.id.urlPathSegment
+    abstract override val unreachableStepRedirect: String
 
     override val checkYourAnswersStepId: T?
         get() {

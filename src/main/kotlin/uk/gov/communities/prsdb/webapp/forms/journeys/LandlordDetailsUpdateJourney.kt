@@ -57,6 +57,8 @@ class LandlordDetailsUpdateJourney(
 
     override val stepRouter = GroupedStepRouter(this)
 
+    override val unreachableStepRedirect = LandlordDetailsController.LANDLORD_DETAILS_ROUTE
+
     override fun createOriginalJourneyData(): JourneyData {
         val landlord = landlordService.retrieveLandlordByBaseUserId(landlordBaseUserId)!!
 
