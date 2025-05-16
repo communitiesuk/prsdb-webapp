@@ -5,6 +5,7 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -373,6 +374,13 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
         }
 
         @Test
+        fun `Submitting valid file metadata to complete file upload does not succeed`() {
+            val gasSafetyUploadPage = navigator.goToPropertyComplianceGasSafetyUploadPage(PROPERTY_OWNERSHIP_ID)
+            val response = gasSafetyUploadPage.metadataOnlySubmission("metadata.pdf", 1000, "application/pdf")
+            Assertions.assertEquals(response.status(), 500)
+        }
+
+        @Test
         fun `Submitting a valid file returns an error if the upload attempt is unsuccessful`() {
             whenever(
                 fileUploader.uploadFile(
@@ -515,6 +523,13 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
             val eicrUploadPage = navigator.goToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
             eicrUploadPage.uploadCertificate("validFile.png")
             assertThat(eicrUploadPage.form.getErrorMessage()).containsText("The selected file could not be uploaded - try again")
+        }
+
+        @Test
+        fun `Submitting valid file metadata to complete file upload does not succeed`() {
+            val gasSafetyUploadPage = navigator.goToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
+            val response = gasSafetyUploadPage.metadataOnlySubmission("metadata.pdf", 1000, "application/pdf")
+            Assertions.assertEquals(response.status(), 500)
         }
     }
 

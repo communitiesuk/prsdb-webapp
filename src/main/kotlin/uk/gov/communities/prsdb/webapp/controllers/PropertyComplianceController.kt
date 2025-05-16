@@ -109,9 +109,13 @@ class PropertyComplianceController(
     ): ModelAndView {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
+        // We must ensure that we can distinguish between a metadata-only file upload and a normal file upload when
+        // postJourneyData() is used for a file upload endpoint.
+        val annotatedFormData = formData + ("metadataOnly" to true)
+
         return propertyComplianceJourneyFactory
             .create(propertyOwnershipId, principal.name)
-            .completeStep(stepName, formData, subpage, principal)
+            .completeStep(stepName, annotatedFormData, subpage, principal)
     }
 
     @PostMapping("/{stepName}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])

@@ -16,6 +16,8 @@ abstract class UploadCertificateFormModel : FormModel {
 
     var isUploadSuccessfulOrNull: Boolean? = null
 
+    var isMetadataOnly: Boolean = true
+
     fun isNameNotBlank() = name.isNotBlank()
 
     fun isFileTypeValid() = !isNameNotBlank() || FilenameUtils.getExtension(name) in validExtensions && contentType in validMimeTypes
@@ -47,6 +49,7 @@ abstract class UploadCertificateFormModel : FormModel {
                 this.contentType = fileItemInput.contentType
                 this.contentLength = fileLength
                 this.isUploadSuccessfulOrNull = isUploadSuccessfulOrNull
+                this.isMetadataOnly = false
             }
         }
     }
