@@ -410,7 +410,7 @@ class PropertyDetailsUpdateJourney(
 
         val nextActionStepId =
             PropertyDetailsUpdateJourneyExtensions.getLicenceNumberUpdateStepId(licensingType)
-                ?: UpdatePropertyDetailsStepId.UpdateOccupancy
+                ?: UpdatePropertyDetailsStepId.CheckYourLicensingAnswers
 
         return Pair(nextActionStepId, null)
     }
