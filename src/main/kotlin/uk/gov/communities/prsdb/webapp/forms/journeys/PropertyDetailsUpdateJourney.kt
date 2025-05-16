@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.pages.CheckLicensingPage
+import uk.gov.communities.prsdb.webapp.forms.pages.CheckLicensingAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.CheckOccupancyPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationNumberOfPeoplePage
@@ -237,7 +237,7 @@ class PropertyDetailsUpdateJourney(
     private val checkLicensingAnswers =
         Step(
             id = UpdatePropertyDetailsStepId.CheckYourLicensingAnswers,
-            page = CheckLicensingPage(),
+            page = CheckLicensingAnswersPage(),
             nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateOccupancy, null) },
             handleSubmitAndRedirect = { journeyData, _, _ -> updatePropertyAndRedirect(journeyData) },
         )
