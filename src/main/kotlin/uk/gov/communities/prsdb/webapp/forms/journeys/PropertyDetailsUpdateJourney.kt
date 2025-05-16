@@ -391,7 +391,7 @@ class PropertyDetailsUpdateJourney(
                 numberOfHouseholds = journeyData.getNumberOfHouseholdsUpdateIfPresent(),
                 numberOfPeople = journeyData.getNumberOfPeopleUpdateIfPresent(),
                 licensingType = journeyData.getLicensingTypeUpdateIfPresent(),
-                licenceNumber = journeyData.getLicenceNumberUpdateIfPresent(originalDataKey),
+                licenceNumber = journeyData.getLicenceNumberUpdateIfPresent(),
             )
 
         propertyOwnershipService.updatePropertyOwnership(propertyOwnershipId, propertyUpdate)
