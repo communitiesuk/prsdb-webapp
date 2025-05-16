@@ -157,12 +157,12 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
             var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
 
             // Check number of households/people pages can be reached
-            navigator.skipToPropertyDetailsUpdateNumberOfHouseholdsPage(occupiedPropertyOwnershipId)
+            navigator.navigateToPropertyDetailsUpdateNumberOfHouseholdsPage(occupiedPropertyOwnershipId)
             val updateNumberOfHouseholdsPage =
                 assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
             assertThat(updateNumberOfHouseholdsPage.form.fieldsetHeading).containsText("Update the number of households in the property")
 
-            navigator.skipToPropertyDetailsUpdateNumberOfPeoplePage(occupiedPropertyOwnershipId)
+            navigator.navigateToPropertyDetailsUpdateNumberOfPeoplePage(occupiedPropertyOwnershipId)
             val updateNumberOfPeoplePage =
                 assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
             assertThat(updateNumberOfPeoplePage.form.fieldsetHeading).containsText("Update how many people live in your property")
@@ -176,10 +176,10 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
             assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
             // Check number of households/people pages can't be reached
-            navigator.skipToPropertyDetailsUpdateNumberOfHouseholdsPage(occupiedPropertyOwnershipId)
+            navigator.navigateToPropertyDetailsUpdateNumberOfHouseholdsPage(occupiedPropertyOwnershipId)
             assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
-            navigator.skipToPropertyDetailsUpdateNumberOfPeoplePage(occupiedPropertyOwnershipId)
+            navigator.navigateToPropertyDetailsUpdateNumberOfPeoplePage(occupiedPropertyOwnershipId)
             propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
             // Check changes have occurred
@@ -189,10 +189,10 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
         @Test
         fun `Step access and fieldset headings work correctly when a property is updated from vacant to occupied`(page: Page) {
             // Check number of households/people pages can't be reached
-            navigator.skipToPropertyDetailsUpdateNumberOfHouseholdsPage(vacantPropertyOwnershipId)
+            navigator.navigateToPropertyDetailsUpdateNumberOfHouseholdsPage(vacantPropertyOwnershipId)
             assertPageIs(page, PropertyDetailsPageLandlordView::class, vacantPropertyUrlArguments)
 
-            navigator.skipToPropertyDetailsUpdateNumberOfPeoplePage(vacantPropertyOwnershipId)
+            navigator.navigateToPropertyDetailsUpdateNumberOfPeoplePage(vacantPropertyOwnershipId)
             var propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, vacantPropertyUrlArguments)
 
             // Update occupancy to occupied
@@ -203,7 +203,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTest() {
             assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 
             // Check number of people page can't be reached
-            navigator.skipToPropertyDetailsUpdateNumberOfPeoplePage(vacantPropertyOwnershipId)
+            navigator.navigateToPropertyDetailsUpdateNumberOfPeoplePage(vacantPropertyOwnershipId)
             val updateNumberOfHouseholdsPage =
                 assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 

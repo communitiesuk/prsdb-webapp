@@ -30,11 +30,13 @@ class LandlordDetailsUpdateJourneyFactory(
         stepName,
     )
 
-    private fun getJourneyDataKey(stepName: String): String {
-        val step =
-            LandlordDetailsUpdateStepId.fromPathSegment(stepName)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid LandlordDetailsUpdateJourney step name: $stepName")
+    companion object {
+        fun getJourneyDataKey(stepName: String): String {
+            val step =
+                LandlordDetailsUpdateStepId.fromPathSegment(stepName)
+                    ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid LandlordDetailsUpdateJourney step name: $stepName")
 
-        return "$UPDATE_LANDLORD_DETAILS_URL-${step.groupIdentifier}"
+            return "$UPDATE_LANDLORD_DETAILS_URL-${step.groupIdentifier}"
+        }
     }
 }

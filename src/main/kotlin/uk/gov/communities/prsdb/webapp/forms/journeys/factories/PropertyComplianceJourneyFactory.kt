@@ -18,9 +18,14 @@ class PropertyComplianceJourneyFactory(
         principalName: String,
     ) = PropertyComplianceJourney(
         validator,
-        journeyDataService = journeyDataServiceFactory.create(PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId)),
+        journeyDataService = journeyDataServiceFactory.create(getJourneyDataKey(propertyOwnershipId)),
         propertyOwnershipService,
         propertyOwnershipId,
         principalName,
     )
+
+    companion object {
+        fun getJourneyDataKey(propertyOwnershipId: Long): String =
+            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId)
+    }
 }

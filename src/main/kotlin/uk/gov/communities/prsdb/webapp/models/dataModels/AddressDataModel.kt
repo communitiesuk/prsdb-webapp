@@ -59,4 +59,6 @@ data class AddressDataModel(
                 postcode = address.postcode,
             )
     }
+
+    fun getHouseNameOrNumber() = this.buildingName ?: this.buildingNumber
 }

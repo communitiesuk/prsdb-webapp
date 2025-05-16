@@ -325,7 +325,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
         ) {
             val (day, month, year) = dayMonthYear
 
-            val gasSafetyIssueDatePage = navigator.goToPropertyComplianceGasSafetyIssueDatePage(PROPERTY_OWNERSHIP_ID)
+            val gasSafetyIssueDatePage = navigator.skipToPropertyComplianceGasSafetyIssueDatePage(PROPERTY_OWNERSHIP_ID)
             gasSafetyIssueDatePage.submitDate(day, month, year)
             assertThat(gasSafetyIssueDatePage.form.getErrorMessage()).containsText(expectedErrorMessage)
         }
@@ -335,7 +335,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
     inner class GasSafetyEngineerNumStepTests {
         @Test
         fun `Submitting with no value entered returns an error`() {
-            val gasSafeEngineerNumPage = navigator.goToPropertyComplianceGasSafetyEngineerNumPage(PROPERTY_OWNERSHIP_ID)
+            val gasSafeEngineerNumPage = navigator.skipToPropertyComplianceGasSafetyEngineerNumPage(PROPERTY_OWNERSHIP_ID)
             gasSafeEngineerNumPage.form.submit()
             assertThat(gasSafeEngineerNumPage.form.getErrorMessage())
                 .containsText("You need to enter a Gas Safe engineer's registered number.")
@@ -343,7 +343,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
         @Test
         fun `Submitting with an invalid value entered returns an error`() {
-            val gasSafeEngineerNumPage = navigator.goToPropertyComplianceGasSafetyEngineerNumPage(PROPERTY_OWNERSHIP_ID)
+            val gasSafeEngineerNumPage = navigator.skipToPropertyComplianceGasSafetyEngineerNumPage(PROPERTY_OWNERSHIP_ID)
             gasSafeEngineerNumPage.submitEngineerNum("ABCDEFG")
             assertThat(gasSafeEngineerNumPage.form.getErrorMessage()).containsText("Enter a 7-digit number.")
         }
@@ -353,21 +353,21 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
     inner class GasSafetyUploadStepTests {
         @Test
         fun `Submitting with no file staged returns an error`() {
-            val gasSafetyUploadPage = navigator.goToPropertyComplianceGasSafetyUploadPage(PROPERTY_OWNERSHIP_ID)
+            val gasSafetyUploadPage = navigator.skipToPropertyComplianceGasSafetyUploadPage(PROPERTY_OWNERSHIP_ID)
             gasSafetyUploadPage.form.submit()
             assertThat(gasSafetyUploadPage.form.getErrorMessage()).containsText("Select a gas safety certificate")
         }
 
         @Test
         fun `Submitting with an invalid file (wrong type) staged returns an error`() {
-            val gasSafetyUploadPage = navigator.goToPropertyComplianceGasSafetyUploadPage(PROPERTY_OWNERSHIP_ID)
+            val gasSafetyUploadPage = navigator.skipToPropertyComplianceGasSafetyUploadPage(PROPERTY_OWNERSHIP_ID)
             gasSafetyUploadPage.uploadCertificate("invalidFileType.bmp")
             assertThat(gasSafetyUploadPage.form.getErrorMessage()).containsText("The selected file must be a PDF, PNG or JPG")
         }
 
         @Test
         fun `Submitting with an invalid file (too big) staged returns an error`() {
-            val gasSafetyUploadPage = navigator.goToPropertyComplianceGasSafetyUploadPage(PROPERTY_OWNERSHIP_ID)
+            val gasSafetyUploadPage = navigator.skipToPropertyComplianceGasSafetyUploadPage(PROPERTY_OWNERSHIP_ID)
             gasSafetyUploadPage.uploadCertificate("invalidFileSize.jpg")
             assertThat(gasSafetyUploadPage.form.getErrorMessage()).containsText("The selected file must be smaller than 15MB")
         }
@@ -387,7 +387,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
                 ),
             ).thenReturn(false)
 
-            val gasSafetyUploadPage = navigator.goToPropertyComplianceGasSafetyUploadPage(PROPERTY_OWNERSHIP_ID)
+            val gasSafetyUploadPage = navigator.skipToPropertyComplianceGasSafetyUploadPage(PROPERTY_OWNERSHIP_ID)
             gasSafetyUploadPage.uploadCertificate("validFile.png")
             assertThat(gasSafetyUploadPage.form.getErrorMessage()).containsText("The selected file could not be uploaded - try again")
         }
@@ -397,7 +397,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
     inner class GasSafetyExemptionStepTests {
         @Test
         fun `Submitting with no option selected returns an error`() {
-            val gasSafetyExemptionPage = navigator.goToPropertyComplianceGasSafetyExemptionPage(PROPERTY_OWNERSHIP_ID)
+            val gasSafetyExemptionPage = navigator.skipToPropertyComplianceGasSafetyExemptionPage(PROPERTY_OWNERSHIP_ID)
             gasSafetyExemptionPage.form.submit()
             assertThat(gasSafetyExemptionPage.form.getErrorMessage())
                 .containsText("Select whether you have a gas safety certificate exemption")
@@ -408,7 +408,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
     inner class GasSafetyExemptionReasonStepTests {
         @Test
         fun `Submitting with no option selected returns an error`() {
-            val gasSafetyExemptionReasonPage = navigator.goToPropertyComplianceGasSafetyExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
+            val gasSafetyExemptionReasonPage = navigator.skipToPropertyComplianceGasSafetyExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
             gasSafetyExemptionReasonPage.form.submit()
             assertThat(gasSafetyExemptionReasonPage.form.getErrorMessage())
                 .containsText("Select why this property is exempt from gas safety")
@@ -416,7 +416,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
         @Test
         fun `Submitting with 'other' selected redirects to the gas safety exemption other reason page`(page: Page) {
-            val gasSafetyExemptionReasonPage = navigator.goToPropertyComplianceGasSafetyExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
+            val gasSafetyExemptionReasonPage = navigator.skipToPropertyComplianceGasSafetyExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
             gasSafetyExemptionReasonPage.submitExemptionReason(GasSafetyExemptionReason.OTHER)
             assertPageIs(page, GasSafetyExemptionOtherReasonPagePropertyCompliance::class, urlArguments)
         }
@@ -426,7 +426,10 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
     inner class GasSafetyExemptionOtherReasonStepTests {
         @Test
         fun `Submitting with no reason returns an error`() {
-            val gasSafetyExemptionOtherReasonPage = navigator.goToPropertyComplianceGasSafetyExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
+            val gasSafetyExemptionOtherReasonPage =
+                navigator.skipToPropertyComplianceGasSafetyExemptionOtherReasonPage(
+                    PROPERTY_OWNERSHIP_ID,
+                )
             gasSafetyExemptionOtherReasonPage.form.submit()
             assertThat(gasSafetyExemptionOtherReasonPage.form.getErrorMessage())
                 .containsText("Explain why your property is exempt from having a gas safety certificate")
@@ -434,7 +437,10 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
         @Test
         fun `Submitting with a too long reason returns an error`() {
-            val gasSafetyExemptionOtherReasonPage = navigator.goToPropertyComplianceGasSafetyExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
+            val gasSafetyExemptionOtherReasonPage =
+                navigator.skipToPropertyComplianceGasSafetyExemptionOtherReasonPage(
+                    PROPERTY_OWNERSHIP_ID,
+                )
             gasSafetyExemptionOtherReasonPage.submitReason("too long reason".repeat(EXEMPTION_OTHER_REASON_MAX_LENGTH))
             assertThat(gasSafetyExemptionOtherReasonPage.form.getErrorMessage("otherReason"))
                 .containsText("Explanation must be 200 characters or fewer")
@@ -442,7 +448,10 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
         @Test
         fun `Submitting with a valid reason redirects to the gas safety exemption confirmation page`(page: Page) {
-            val gasSafetyExemptionOtherReasonPage = navigator.goToPropertyComplianceGasSafetyExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
+            val gasSafetyExemptionOtherReasonPage =
+                navigator.skipToPropertyComplianceGasSafetyExemptionOtherReasonPage(
+                    PROPERTY_OWNERSHIP_ID,
+                )
             gasSafetyExemptionOtherReasonPage.submitReason("valid reason")
             assertPageIs(page, GasSafetyExemptionConfirmationPagePropertyCompliance::class, urlArguments)
         }
@@ -452,7 +461,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
     inner class EicrStepTests {
         @Test
         fun `Submitting with no option selected returns an error`() {
-            val eicrPage = navigator.goToPropertyComplianceEicrPage(PROPERTY_OWNERSHIP_ID)
+            val eicrPage = navigator.skipToPropertyComplianceEicrPage(PROPERTY_OWNERSHIP_ID)
             eicrPage.form.submit()
             assertThat(eicrPage.form.getErrorMessage()).containsText("Select whether you have an EICR for this property")
         }
@@ -468,7 +477,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
         ) {
             val (day, month, year) = dayMonthYear
 
-            val eicrIssueDatePage = navigator.goToPropertyComplianceEicrIssueDatePage(PROPERTY_OWNERSHIP_ID)
+            val eicrIssueDatePage = navigator.skipToPropertyComplianceEicrIssueDatePage(PROPERTY_OWNERSHIP_ID)
             eicrIssueDatePage.submitDate(day, month, year)
             assertThat(eicrIssueDatePage.form.getErrorMessage()).containsText(expectedErrorMessage)
         }
@@ -478,21 +487,21 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
     inner class EicrUploadStepTests {
         @Test
         fun `Submitting with no file staged returns an error`() {
-            val eicrUploadPage = navigator.goToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
+            val eicrUploadPage = navigator.skipToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
             eicrUploadPage.form.submit()
             assertThat(eicrUploadPage.form.getErrorMessage()).containsText("Select an EICR")
         }
 
         @Test
         fun `Submitting with an invalid file (wrong type) staged returns an error`() {
-            val eicrUploadPage = navigator.goToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
+            val eicrUploadPage = navigator.skipToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
             eicrUploadPage.uploadCertificate("invalidFileType.bmp")
             assertThat(eicrUploadPage.form.getErrorMessage()).containsText("The selected file must be a PDF, PNG or JPG")
         }
 
         @Test
         fun `Submitting with an invalid file (too big) staged returns an error`() {
-            val eicrUploadPage = navigator.goToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
+            val eicrUploadPage = navigator.skipToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
             eicrUploadPage.uploadCertificate("invalidFileSize.jpg")
             assertThat(eicrUploadPage.form.getErrorMessage()).containsText("The selected file must be smaller than 15MB")
         }
@@ -512,7 +521,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
                 ),
             ).thenReturn(false)
 
-            val eicrUploadPage = navigator.goToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
+            val eicrUploadPage = navigator.skipToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
             eicrUploadPage.uploadCertificate("validFile.png")
             assertThat(eicrUploadPage.form.getErrorMessage()).containsText("The selected file could not be uploaded - try again")
         }
@@ -522,7 +531,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
     inner class EicrExemptionStepTests {
         @Test
         fun `Submitting with no option selected returns an error`() {
-            val eicrExemptionPage = navigator.goToPropertyComplianceEicrExemptionPage(PROPERTY_OWNERSHIP_ID)
+            val eicrExemptionPage = navigator.skipToPropertyComplianceEicrExemptionPage(PROPERTY_OWNERSHIP_ID)
             eicrExemptionPage.form.submit()
             assertThat(eicrExemptionPage.form.getErrorMessage())
                 .containsText("Select whether this property has an EICR exemption")
@@ -533,7 +542,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
     inner class EicrExemptionReasonStepTests {
         @Test
         fun `Submitting with no option selected returns an error`() {
-            val eicrExemptionReasonPage = navigator.goToPropertyComplianceEicrExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
+            val eicrExemptionReasonPage = navigator.skipToPropertyComplianceEicrExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
             eicrExemptionReasonPage.form.submit()
             assertThat(eicrExemptionReasonPage.form.getErrorMessage())
                 .containsText("Select why this property has an EICR exemption")
@@ -541,7 +550,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
         @Test
         fun `Submitting with 'other' selected redirects to the EICR exemption other reason page`(page: Page) {
-            val eicrExemptionReasonPage = navigator.goToPropertyComplianceEicrExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
+            val eicrExemptionReasonPage = navigator.skipToPropertyComplianceEicrExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
             eicrExemptionReasonPage.submitExemptionReason(EicrExemptionReason.OTHER)
             assertPageIs(page, EicrExemptionOtherReasonPagePropertyCompliance::class, urlArguments)
         }
@@ -551,7 +560,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
     inner class EicrExemptionOtherReasonStepTests {
         @Test
         fun `Submitting with no reason returns an error`() {
-            val eicrExemptionOtherReasonPage = navigator.goToPropertyComplianceEicrExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
+            val eicrExemptionOtherReasonPage = navigator.skipToPropertyComplianceEicrExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
             eicrExemptionOtherReasonPage.form.submit()
             assertThat(eicrExemptionOtherReasonPage.form.getErrorMessage())
                 .containsText("Explain why your property is exempt from needing an EICR")
@@ -559,7 +568,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
         @Test
         fun `Submitting with a too long reason returns an error`() {
-            val eicrExemptionOtherReasonPage = navigator.goToPropertyComplianceEicrExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
+            val eicrExemptionOtherReasonPage = navigator.skipToPropertyComplianceEicrExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
             eicrExemptionOtherReasonPage.submitReason("too long reason".repeat(EXEMPTION_OTHER_REASON_MAX_LENGTH))
             assertThat(eicrExemptionOtherReasonPage.form.getErrorMessage("otherReason"))
                 .containsText("Explanation must be 200 characters or fewer")
@@ -567,7 +576,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
 
         @Test
         fun `Submitting with a valid reason redirects to the gas safety exemption confirmation page`(page: Page) {
-            val eicrExemptionOtherReasonPage = navigator.goToPropertyComplianceEicrExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
+            val eicrExemptionOtherReasonPage = navigator.skipToPropertyComplianceEicrExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
             eicrExemptionOtherReasonPage.submitReason("valid reason")
             assertPageIs(page, EicrExemptionConfirmationPagePropertyCompliance::class, urlArguments)
         }
@@ -577,7 +586,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
     inner class EpcStepTests {
         @Test
         fun `Submitting with no option selected returns an error`() {
-            val epcPage = navigator.goToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
+            val epcPage = navigator.skipToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
             epcPage.form.submit()
             assertThat(epcPage.form.getErrorMessage()).containsText("Select whether you have an EPC for this property")
         }
@@ -587,7 +596,7 @@ class PropertyComplianceJourneyTests : IntegrationTest() {
     inner class EpcExemptionReasonTests {
         @Test
         fun `Submitting with no option selected returns an error`() {
-            val epcExemptionReasonPage = navigator.goToPropertyComplianceEpcExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
+            val epcExemptionReasonPage = navigator.skipToPropertyComplianceEpcExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
             epcExemptionReasonPage.form.submit()
             assertThat(epcExemptionReasonPage.form.getErrorMessage())
                 .containsText("Select why this property has an EPC exemption")

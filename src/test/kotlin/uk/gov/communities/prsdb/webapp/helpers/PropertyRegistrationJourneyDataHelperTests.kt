@@ -156,7 +156,7 @@ class PropertyRegistrationJourneyDataHelperTests {
     @Test
     fun `getLicensingType returns the licensing type`() {
         val expectedLicensingType = LicensingType.SELECTIVE_LICENCE
-        val mockJourneyData = journeyDataBuilder.withLicensingType(expectedLicensingType).build()
+        val mockJourneyData = journeyDataBuilder.withLicensing(expectedLicensingType).build()
 
         val licensingType = PropertyRegistrationJourneyDataHelper.getLicensingType(mockJourneyData)
 
@@ -167,7 +167,7 @@ class PropertyRegistrationJourneyDataHelperTests {
     fun `getLicenceNumber returns the selective license number`() {
         val expectedLicenseNumber = "L1234"
         val mockJourneyData =
-            journeyDataBuilder.withLicensingType(LicensingType.SELECTIVE_LICENCE, expectedLicenseNumber).build()
+            journeyDataBuilder.withLicensing(LicensingType.SELECTIVE_LICENCE, expectedLicenseNumber).build()
 
         val licenseNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(mockJourneyData)
 
@@ -178,7 +178,7 @@ class PropertyRegistrationJourneyDataHelperTests {
     fun `getLicenceNumber returns the HmoMandatoryLicence number `() {
         val expectedLicenseNumber = "L1234"
         val mockJourneyData =
-            journeyDataBuilder.withLicensingType(LicensingType.HMO_MANDATORY_LICENCE, expectedLicenseNumber).build()
+            journeyDataBuilder.withLicensing(LicensingType.HMO_MANDATORY_LICENCE, expectedLicenseNumber).build()
 
         val licenseNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(mockJourneyData)
 
@@ -189,7 +189,7 @@ class PropertyRegistrationJourneyDataHelperTests {
     fun `getLicenceNumber returns the HmoAdditionalLicence number `() {
         val expectedLicenseNumber = "L1234"
         val mockJourneyData =
-            journeyDataBuilder.withLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE, expectedLicenseNumber).build()
+            journeyDataBuilder.withLicensing(LicensingType.HMO_ADDITIONAL_LICENCE, expectedLicenseNumber).build()
 
         val licenseNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(mockJourneyData)
 
@@ -199,7 +199,7 @@ class PropertyRegistrationJourneyDataHelperTests {
     @Test
     fun `getLicenceNumber returns the no licence number `() {
         val expectedLicenseNumber = ""
-        val mockJourneyData = journeyDataBuilder.withLicensingType(LicensingType.NO_LICENSING).build()
+        val mockJourneyData = journeyDataBuilder.withLicensing(LicensingType.NO_LICENSING).build()
 
         val licenseNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(mockJourneyData)
 

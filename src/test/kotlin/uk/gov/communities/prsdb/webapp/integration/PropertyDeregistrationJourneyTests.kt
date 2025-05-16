@@ -73,7 +73,7 @@ class PropertyDeregistrationJourneyTests : IntegrationTest() {
         @Test
         fun `Reason page can be submitted without being filled in`(page: Page) {
             val propertyOwnershipId = 1.toLong()
-            val deregisterPropertyReasonPage = navigator.goToPropertyDeregistrationReasonPage(propertyOwnershipId)
+            val deregisterPropertyReasonPage = navigator.skipToPropertyDeregistrationReasonPage(propertyOwnershipId)
             deregisterPropertyReasonPage.form.submit()
             assertPageIs(
                 page,
@@ -89,7 +89,7 @@ class PropertyDeregistrationJourneyTests : IntegrationTest() {
                     "This is my life story, it is far too long to go in this field." +
                     "This is my life story, it is far too long to go in this field." +
                     "This is my life story, it is far too long to go in this field."
-            val deregisterPropertyReasonPage = navigator.goToPropertyDeregistrationReasonPage(1.toLong())
+            val deregisterPropertyReasonPage = navigator.skipToPropertyDeregistrationReasonPage(1.toLong())
             deregisterPropertyReasonPage.submitReason(longReason)
             assertThat(deregisterPropertyReasonPage.form.getErrorMessage("reason"))
                 .containsText("Your reason for deleting this property must be 200 characters or fewer")
