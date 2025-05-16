@@ -32,7 +32,7 @@ class PropertyDetailsUpdateJourneyFactory(
         stepName: String,
     ): String {
         val step = UpdatePropertyDetailsStepId.fromPathSegment(stepName) ?: throwInvalidStepNameException(stepName)
-        return PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) + step.groupIdentifier.identifierString
+        return PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) + step.groupIdentifier
     }
 
     private fun throwInvalidStepNameException(stepName: String): Nothing =

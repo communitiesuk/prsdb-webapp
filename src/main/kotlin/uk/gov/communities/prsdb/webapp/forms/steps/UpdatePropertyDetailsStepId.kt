@@ -2,29 +2,28 @@ package uk.gov.communities.prsdb.webapp.forms.steps
 
 enum class UpdatePropertyDetailsStepId(
     override val urlPathSegment: String,
-    override val groupIdentifier: UpdateGroupIdentifier,
-) : GroupedStepId<UpdateGroupIdentifier> {
-    UpdateOwnershipType("ownership-type", UpdateGroupIdentifier.Ownership),
-    UpdateOccupancy("occupancy", UpdateGroupIdentifier.Occupancy),
-    UpdateNumberOfHouseholds("number-of-households", UpdateGroupIdentifier.Occupancy),
-    UpdateNumberOfPeople("number-of-people", UpdateGroupIdentifier.Occupancy),
-    CheckYourOccupancyAnswers("check-occupancy-answers", UpdateGroupIdentifier.Occupancy),
-    UpdateLicensingType("licensing-type", UpdateGroupIdentifier.Licensing),
-    UpdateSelectiveLicence("selective-licence", UpdateGroupIdentifier.Licensing),
-    UpdateHmoMandatoryLicence("hmo-mandatory-licence", UpdateGroupIdentifier.Licensing),
-    UpdateHmoAdditionalLicence("hmo-additional-licence", UpdateGroupIdentifier.Licensing),
-    CheckYourLicensingAnswers("check-licensing-answers", UpdateGroupIdentifier.Licensing),
+    override val groupIdentifier: UpdatePropertyDetailsGroupIdentifier,
+    override val isCheckYourAnswersStepId: Boolean = false,
+) : UpdateStepId<UpdatePropertyDetailsGroupIdentifier> {
+    UpdateOwnershipType("ownership-type", UpdatePropertyDetailsGroupIdentifier.Ownership),
+    UpdateOccupancy("occupancy", UpdatePropertyDetailsGroupIdentifier.Occupancy),
+    UpdateNumberOfHouseholds("number-of-households", UpdatePropertyDetailsGroupIdentifier.Occupancy),
+    UpdateNumberOfPeople("number-of-people", UpdatePropertyDetailsGroupIdentifier.Occupancy),
+    CheckYourOccupancyAnswers("check-occupancy-answers", UpdatePropertyDetailsGroupIdentifier.Occupancy, true),
+    UpdateLicensingType("licensing-type", UpdatePropertyDetailsGroupIdentifier.Licensing),
+    UpdateSelectiveLicence("selective-licence", UpdatePropertyDetailsGroupIdentifier.Licensing),
+    UpdateHmoMandatoryLicence("hmo-mandatory-licence", UpdatePropertyDetailsGroupIdentifier.Licensing),
+    UpdateHmoAdditionalLicence("hmo-additional-licence", UpdatePropertyDetailsGroupIdentifier.Licensing),
+    CheckYourLicensingAnswers("check-licensing-answers", UpdatePropertyDetailsGroupIdentifier.Licensing, true),
     ;
 
     companion object {
-        fun fromPathSegment(segment: String): UpdatePropertyDetailsStepId? = entries.find { it.urlPathSegment == segment }
+        fun fromPathSegment(segment: String) = entries.find { it.urlPathSegment == segment }
     }
 }
 
-enum class UpdateGroupIdentifier(
-    val identifierString: String,
-) {
-    Ownership("-OWNERSHIP"),
-    Occupancy("-OCCUPANCY"),
-    Licensing("-LICENSING"),
+enum class UpdatePropertyDetailsGroupIdentifier {
+    Ownership,
+    Occupancy,
+    Licensing,
 }
