@@ -26,6 +26,7 @@ class UploadCertificateFormModelTests {
                 this.contentType = contentType
                 this.contentLength = contentLength
                 this.isUploadSuccessfulOrNull = isUploadSuccessful
+                this.isMetadataOnly = false
             }
 
         val returnedModel =
