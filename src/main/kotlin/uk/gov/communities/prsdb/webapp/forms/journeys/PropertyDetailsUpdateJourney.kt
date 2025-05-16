@@ -57,6 +57,8 @@ class PropertyDetailsUpdateJourney(
         initializeJourneyDataIfNotInitialized()
     }
 
+    override val stepRouter = GroupedStepRouter(this)
+
     override fun createOriginalJourneyData(): JourneyData {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
 

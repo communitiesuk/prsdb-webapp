@@ -55,6 +55,8 @@ class LandlordDetailsUpdateJourney(
         initializeJourneyDataIfNotInitialized()
     }
 
+    override val stepRouter = GroupedStepRouter(this)
+
     override fun createOriginalJourneyData(): JourneyData {
         val landlord = landlordService.retrieveLandlordByBaseUserId(landlordBaseUserId)!!
 
