@@ -160,7 +160,6 @@ class PropertyDetailsUpdateJourney(
                             BACK_URL_ATTR_NAME to RELATIVE_PROPERTY_DETAILS_PATH,
                         ),
                 ),
-            handleSubmitAndRedirect = { journeyData, _, _ -> licensingTypeHandleSubmitAndRedirect(journeyData) },
             nextAction = { journeyData, _ -> licensingTypeNextAction(journeyData) },
             saveAfterSubmit = false,
         )
@@ -377,6 +376,16 @@ class PropertyDetailsUpdateJourney(
             RELATIVE_PROPERTY_DETAILS_PATH
         }
 
+    private fun licensingTypeNextAction(journeyData: JourneyData): Pair<UpdatePropertyDetailsStepId, Int?> {
+        val licensingType = journeyData.getLicensingTypeUpdateIfPresent()!!
+
+        val nextActionStepId =
+            PropertyDetailsUpdateJourneyExtensions.getLicenceNumberUpdateStepId(licensingType)
+                ?: UpdatePropertyDetailsStepId.CheckYourLicensingAnswers
+
+        return Pair(nextActionStepId, null)
+    }
+
     private fun occupancyNextAction(journeyData: JourneyData) =
         if (journeyData.getIsOccupiedUpdateIfPresent()!!) {
             Pair(UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds, null)
@@ -404,24 +413,6 @@ class PropertyDetailsUpdateJourney(
     private fun wasPropertyOriginallyOccupied() = journeyDataService.getJourneyDataFromSession().getOriginalIsOccupied(originalDataKey)!!
 
     private fun hasPropertyOccupancyBeenUpdated() = journeyDataService.getJourneyDataFromSession().getIsOccupiedUpdateIfPresent() != null
-
-    private fun licensingTypeNextAction(journeyData: JourneyData): Pair<UpdatePropertyDetailsStepId, Int?> {
-        val licensingType = journeyData.getLicensingTypeUpdateIfPresent()!!
-
-        val nextActionStepId =
-            PropertyDetailsUpdateJourneyExtensions.getLicenceNumberUpdateStepId(licensingType)
-                ?: UpdatePropertyDetailsStepId.CheckYourLicensingAnswers
-
-        return Pair(nextActionStepId, null)
-    }
-
-    private fun licensingTypeHandleSubmitAndRedirect(journeyData: JourneyData): String {
-        val licensingType = journeyData.getLicensingTypeUpdateIfPresent()!!
-
-        val redirectStepId = PropertyDetailsUpdateJourneyExtensions.getLicenceNumberUpdateStepId(licensingType)
-
-        return redirectStepId?.urlPathSegment ?: RELATIVE_PROPERTY_DETAILS_PATH
-    }
 
     companion object {
         // The path for the update journey is "{propertyDetailsPath}/update/{pathSegment}". As there is no trailing slash, any relative path is
