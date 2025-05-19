@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import com.microsoft.playwright.assertions.PlaywrightAssertions
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -41,7 +41,7 @@ class LaUserRegistrationSinglePageTests : SinglePageTestWithSeedData("data-mocku
         fun `Submitting an empty name returns an error`() {
             val namePage = navigator.skipToLaUserRegistrationNameFormPage(invitation.token)
             namePage.submitName("")
-            PlaywrightAssertions.assertThat(namePage.form.getErrorMessage()).containsText("You must enter your full name")
+            assertThat(namePage.form.getErrorMessage()).containsText("You must enter your full name")
         }
     }
 
@@ -51,8 +51,7 @@ class LaUserRegistrationSinglePageTests : SinglePageTestWithSeedData("data-mocku
         fun `Submitting an empty e-mail address returns an error`() {
             val emailPage = navigator.skipToLaUserRegistrationEmailFormPage(invitation.token)
             emailPage.submitEmail("")
-            PlaywrightAssertions
-                .assertThat(emailPage.form.getErrorMessage())
+            assertThat(emailPage.form.getErrorMessage())
                 .containsText("Enter a valid email address to continue. An email is required for contact purposes.")
         }
 
@@ -60,7 +59,7 @@ class LaUserRegistrationSinglePageTests : SinglePageTestWithSeedData("data-mocku
         fun `Submitting an invalid e-mail address returns an error`() {
             val emailPage = navigator.skipToLaUserRegistrationEmailFormPage(invitation.token)
             emailPage.submitEmail("notAnEmail")
-            PlaywrightAssertions.assertThat(emailPage.form.getErrorMessage()).containsText("Enter an email address in the right format")
+            assertThat(emailPage.form.getErrorMessage()).containsText("Enter an email address in the right format")
         }
     }
 

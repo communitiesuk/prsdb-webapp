@@ -6,12 +6,21 @@ import org.springframework.util.ResourceUtils
 
 class IntegrationTestHelper {
     companion object {
-        fun resetDatabase(flyway: Flyway) {
+        fun resetAndSeedDatabase(
+            flyway: Flyway,
+            scripts: List<String>,
+            jdbcTemplate: JdbcTemplate,
+        ) {
+            resetDatabase(flyway)
+            seedDatabase(scripts, jdbcTemplate)
+        }
+
+        private fun resetDatabase(flyway: Flyway) {
             flyway.clean()
             flyway.migrate()
         }
 
-        fun seedDatabase(
+        private fun seedDatabase(
             scripts: List<String>,
             jdbcTemplate: JdbcTemplate,
         ) {

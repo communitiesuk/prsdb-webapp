@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.microsoft.playwright.Page
-import com.microsoft.playwright.assertions.PlaywrightAssertions
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
@@ -47,7 +47,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         fun `Submitting an empty name returns an error`() {
             val namePage = navigator.skipToLandlordRegistrationNamePage()
             namePage.submitName("")
-            PlaywrightAssertions.assertThat(namePage.form.getErrorMessage()).containsText("You must enter your full name")
+            assertThat(namePage.form.getErrorMessage()).containsText("You must enter your full name")
         }
     }
 
@@ -76,7 +76,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         ) {
             val dateOfBirthPage = navigator.skipToLandlordRegistrationDateOfBirthPage()
             dateOfBirthPage.submitDate(day, month, year)
-            PlaywrightAssertions.assertThat(dateOfBirthPage.form.getErrorMessage()).containsText(expectedErrorMessage)
+            assertThat(dateOfBirthPage.form.getErrorMessage()).containsText(expectedErrorMessage)
         }
 
         @ParameterizedTest
@@ -103,7 +103,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         ) {
             val dateOfBirthPage = navigator.skipToLandlordRegistrationDateOfBirthPage()
             dateOfBirthPage.submitDate(day, month, year)
-            PlaywrightAssertions.assertThat(dateOfBirthPage.form.getErrorMessage()).containsText(expectedErrorMessage)
+            assertThat(dateOfBirthPage.form.getErrorMessage()).containsText(expectedErrorMessage)
         }
 
         @Nested
@@ -133,9 +133,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
                 val date = currentDate.minus(DatePeriod(years = 18)).plus(DatePeriod(days = 1))
                 val dateOfBirthPage = navigator.skipToLandlordRegistrationDateOfBirthPage()
                 dateOfBirthPage.submitDate(date)
-                PlaywrightAssertions.assertThat(dateOfBirthPage.form.getErrorMessage()).containsText(
-                    "The minimum age to register as a landlord is 18",
-                )
+                assertThat(dateOfBirthPage.form.getErrorMessage()).containsText("The minimum age to register as a landlord is 18")
             }
 
             @Test
@@ -143,7 +141,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
                 val date = currentDate.minus(DatePeriod(years = 121))
                 val dateOfBirthPage = navigator.skipToLandlordRegistrationDateOfBirthPage()
                 dateOfBirthPage.submitDate(date)
-                PlaywrightAssertions.assertThat(dateOfBirthPage.form.getErrorMessage()).containsText("You must enter a valid date of birth")
+                assertThat(dateOfBirthPage.form.getErrorMessage()).containsText("You must enter a valid date of birth")
             }
         }
     }
@@ -154,20 +152,16 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         fun `Submitting an empty e-mail address returns an error`(page: Page) {
             val emailPage = navigator.skipToLandlordRegistrationEmailPage()
             emailPage.submitEmail("")
-            PlaywrightAssertions
-                .assertThat(
-                    emailPage.form.getErrorMessage(),
-                ).containsText("Enter a valid email address to continue. An email is required for contact purposes.")
+            assertThat(emailPage.form.getErrorMessage())
+                .containsText("Enter a valid email address to continue. An email is required for contact purposes.")
         }
 
         @Test
         fun `Submitting an invalid e-mail address returns an error`() {
             val emailPage = navigator.skipToLandlordRegistrationEmailPage()
             emailPage.submitEmail("")
-            PlaywrightAssertions
-                .assertThat(
-                    emailPage.form.getErrorMessage(),
-                ).containsText("Enter a valid email address to continue. An email is required for contact purposes.")
+            assertThat(emailPage.form.getErrorMessage())
+                .containsText("Enter a valid email address to continue. An email is required for contact purposes.")
         }
     }
 
@@ -190,7 +184,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         fun `Submitting an empty phone number returns an error`() {
             val phoneNumPage = navigator.skipToLandlordRegistrationPhoneNumberPage()
             phoneNumPage.submitPhoneNumber("")
-            PlaywrightAssertions.assertThat(phoneNumPage.form.getErrorMessage()).containsText("Enter a phone number")
+            assertThat(phoneNumPage.form.getErrorMessage()).containsText("Enter a phone number")
         }
 
         @ParameterizedTest
@@ -205,10 +199,8 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         fun `Submitting an invalid phone number returns an error`(invalidPhoneNumber: String) {
             val phoneNumPage = navigator.skipToLandlordRegistrationPhoneNumberPage()
             phoneNumPage.submitPhoneNumber(invalidPhoneNumber)
-            PlaywrightAssertions
-                .assertThat(
-                    phoneNumPage.form.getErrorMessage(),
-                ).containsText("Enter a phone number including the country code for international numbers")
+            assertThat(phoneNumPage.form.getErrorMessage())
+                .containsText("Enter a phone number including the country code for international numbers")
         }
     }
 
@@ -218,7 +210,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         fun `Submitting with no option selected returns an error`(page: Page) {
             val countryOfResidencePage = navigator.skipToLandlordRegistrationCountryOfResidencePage()
             countryOfResidencePage.form.submit()
-            PlaywrightAssertions.assertThat(countryOfResidencePage.form.getErrorMessage()).containsText("Select an option")
+            assertThat(countryOfResidencePage.form.getErrorMessage()).containsText("Select an option")
         }
 
         @Test
@@ -226,8 +218,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
             val countryOfResidencePage = navigator.skipToLandlordRegistrationCountryOfResidencePage()
             countryOfResidencePage.form.selectNonUk()
             countryOfResidencePage.form.submit()
-            PlaywrightAssertions
-                .assertThat(countryOfResidencePage.form.getErrorMessage())
+            assertThat(countryOfResidencePage.form.getErrorMessage())
                 .containsText("Select the country or territory you are currently living in")
         }
     }
@@ -238,11 +229,8 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         fun `Submitting with empty data fields returns an error`(page: Page) {
             val lookupAddressPage = navigator.skipToLandlordRegistrationLookupAddressPage()
             lookupAddressPage.form.submit()
-            PlaywrightAssertions.assertThat(lookupAddressPage.form.getErrorMessage("postcode")).containsText("Enter a postcode")
-            PlaywrightAssertions
-                .assertThat(
-                    lookupAddressPage.form.getErrorMessage("houseNameOrNumber"),
-                ).containsText("Enter a house name or number")
+            assertThat(lookupAddressPage.form.getErrorMessage("postcode")).containsText("Enter a postcode")
+            assertThat(lookupAddressPage.form.getErrorMessage("houseNameOrNumber")).containsText("Enter a house name or number")
         }
 
         @Test
@@ -277,7 +265,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         fun `Submitting with no option selected returns an error`(page: Page) {
             val selectAddressPage = navigator.skipToLandlordRegistrationSelectAddressPage()
             selectAddressPage.form.submit()
-            PlaywrightAssertions.assertThat(selectAddressPage.form.getErrorMessage()).containsText("Select an address")
+            assertThat(selectAddressPage.form.getErrorMessage()).containsText("Select an address")
         }
 
         @Test
@@ -294,11 +282,10 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         fun `Submitting empty data fields returns errors`(page: Page) {
             val manualAddressPage = navigator.skipToLandlordRegistrationManualAddressPage()
             manualAddressPage.form.submit()
-            PlaywrightAssertions
-                .assertThat(manualAddressPage.form.getErrorMessage("addressLineOne"))
+            assertThat(manualAddressPage.form.getErrorMessage("addressLineOne"))
                 .containsText("Enter the first line of an address, typically the building and street")
-            PlaywrightAssertions.assertThat(manualAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
-            PlaywrightAssertions.assertThat(manualAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
+            assertThat(manualAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
+            assertThat(manualAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
         }
     }
 
@@ -308,17 +295,14 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         fun `Submitting with no address returns an error`(page: Page) {
             val nonEnglandOrWalesAddressPage = navigator.skipToLandlordRegistrationNonEnglandOrWalesAddressPage()
             nonEnglandOrWalesAddressPage.form.submit()
-            PlaywrightAssertions.assertThat(nonEnglandOrWalesAddressPage.form.getErrorMessage()).containsText("You must include an address")
+            assertThat(nonEnglandOrWalesAddressPage.form.getErrorMessage()).containsText("You must include an address")
         }
 
         @Test
         fun `Submitting with a too long address returns an error`(page: Page) {
             val nonEnglandOrWalesAddressPage = navigator.skipToLandlordRegistrationNonEnglandOrWalesAddressPage()
             nonEnglandOrWalesAddressPage.submitAddress("too long address".repeat(1001))
-            PlaywrightAssertions
-                .assertThat(
-                    nonEnglandOrWalesAddressPage.form.getErrorMessage().nth(0),
-                ).containsText("Address must be 1000 characters or fewer")
+            assertThat(nonEnglandOrWalesAddressPage.form.getErrorMessage().nth(0)).containsText("Address must be 1000 characters or fewer")
         }
     }
 
@@ -328,11 +312,8 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         fun `Submitting with empty data fields returns an error`(page: Page) {
             val lookupContactAddressPage = navigator.skipToLandlordRegistrationLookupContactAddressPage()
             lookupContactAddressPage.form.submit()
-            PlaywrightAssertions.assertThat(lookupContactAddressPage.form.getErrorMessage("postcode")).containsText("Enter a postcode")
-            PlaywrightAssertions
-                .assertThat(
-                    lookupContactAddressPage.form.getErrorMessage("houseNameOrNumber"),
-                ).containsText("Enter a house name or number")
+            assertThat(lookupContactAddressPage.form.getErrorMessage("postcode")).containsText("Enter a postcode")
+            assertThat(lookupContactAddressPage.form.getErrorMessage("houseNameOrNumber")).containsText("Enter a house name or number")
         }
 
         @Test
@@ -370,7 +351,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         fun `Submitting with no option selected returns an error`(page: Page) {
             val selectContactAddressPage = navigator.skipToLandlordRegistrationSelectContactAddressPage()
             selectContactAddressPage.form.submit()
-            PlaywrightAssertions.assertThat(selectContactAddressPage.form.getErrorMessage()).containsText("Select an address")
+            assertThat(selectContactAddressPage.form.getErrorMessage()).containsText("Select an address")
         }
 
         @Test
@@ -387,11 +368,10 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         fun `Submitting empty data fields returns errors`(page: Page) {
             val manualContactAddressPage = navigator.skipToLandlordRegistrationManualContactAddressPage()
             manualContactAddressPage.form.submit()
-            PlaywrightAssertions
-                .assertThat(manualContactAddressPage.form.getErrorMessage("addressLineOne"))
+            assertThat(manualContactAddressPage.form.getErrorMessage("addressLineOne"))
                 .containsText("Enter the first line of an address, typically the building and street")
-            PlaywrightAssertions.assertThat(manualContactAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
-            PlaywrightAssertions.assertThat(manualContactAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
+            assertThat(manualContactAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
+            assertThat(manualContactAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
         }
     }
 
@@ -401,10 +381,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         fun `Submitting without checking the checkbox returns an error`(page: Page) {
             val declarationPage = navigator.skipToLandlordRegistrationDeclarationPage()
             declarationPage.form.submit()
-            PlaywrightAssertions
-                .assertThat(
-                    declarationPage.form.getErrorMessage(),
-                ).containsText("You must agree to the declaration to continue")
+            assertThat(declarationPage.form.getErrorMessage()).containsText("You must agree to the declaration to continue")
         }
     }
 

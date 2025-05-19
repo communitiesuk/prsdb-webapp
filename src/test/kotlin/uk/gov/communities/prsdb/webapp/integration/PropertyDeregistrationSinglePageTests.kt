@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import com.microsoft.playwright.assertions.PlaywrightAssertions
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
@@ -38,8 +38,7 @@ class PropertyDeregistrationSinglePageTests : SinglePageTestWithSeedData("data-l
         fun `Submitting with no option selected returns an error`(page: Page) {
             val deregisterPropertyAreYouSurePage = navigator.goToPropertyDeregistrationAreYouSurePage(1.toLong())
             deregisterPropertyAreYouSurePage.form.submit()
-            PlaywrightAssertions
-                .assertThat(deregisterPropertyAreYouSurePage.form.getErrorMessage("wantsToProceed"))
+            assertThat(deregisterPropertyAreYouSurePage.form.getErrorMessage("wantsToProceed"))
                 .containsText("Select whether you want to delete this property from the database")
         }
     }
@@ -55,8 +54,7 @@ class PropertyDeregistrationSinglePageTests : SinglePageTestWithSeedData("data-l
                     "This is my life story, it is far too long to go in this field."
             val deregisterPropertyReasonPage = navigator.skipToPropertyDeregistrationReasonPage(1.toLong())
             deregisterPropertyReasonPage.submitReason(longReason)
-            PlaywrightAssertions
-                .assertThat(deregisterPropertyReasonPage.form.getErrorMessage("reason"))
+            assertThat(deregisterPropertyReasonPage.form.getErrorMessage("reason"))
                 .containsText("Your reason for deleting this property must be 200 characters or fewer")
         }
     }

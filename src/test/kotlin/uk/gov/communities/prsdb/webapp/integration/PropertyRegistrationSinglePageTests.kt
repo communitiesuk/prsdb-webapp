@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import com.microsoft.playwright.assertions.PlaywrightAssertions
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
@@ -55,11 +55,8 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         fun `Submitting with empty data fields returns an error`(page: Page) {
             val lookupAddressPage = navigator.goToPropertyRegistrationLookupAddressPage()
             lookupAddressPage.form.submit()
-            PlaywrightAssertions.assertThat(lookupAddressPage.form.getErrorMessage("postcode")).containsText("Enter a postcode")
-            PlaywrightAssertions
-                .assertThat(
-                    lookupAddressPage.form.getErrorMessage("houseNameOrNumber"),
-                ).containsText("Enter a house name or number")
+            assertThat(lookupAddressPage.form.getErrorMessage("postcode")).containsText("Enter a postcode")
+            assertThat(lookupAddressPage.form.getErrorMessage("houseNameOrNumber")).containsText("Enter a house name or number")
         }
 
         @Test
@@ -94,7 +91,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         fun `Submitting with no option selected returns an error`(page: Page) {
             val selectAddressPage = navigator.skipToPropertyRegistrationSelectAddressPage()
             selectAddressPage.form.submit()
-            PlaywrightAssertions.assertThat(selectAddressPage.form.getErrorMessage()).containsText("Select an address")
+            assertThat(selectAddressPage.form.getErrorMessage()).containsText("Select an address")
         }
 
         @Test
@@ -119,11 +116,10 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         fun `Submitting empty data fields returns errors`(page: Page) {
             val manualAddressPage = navigator.skipToPropertyRegistrationManualAddressPage()
             manualAddressPage.submitAddress()
-            PlaywrightAssertions
-                .assertThat(manualAddressPage.form.getErrorMessage("addressLineOne"))
+            assertThat(manualAddressPage.form.getErrorMessage("addressLineOne"))
                 .containsText("Enter the first line of an address, typically the building and street")
-            PlaywrightAssertions.assertThat(manualAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
-            PlaywrightAssertions.assertThat(manualAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
+            assertThat(manualAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
+            assertThat(manualAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
         }
     }
 
@@ -133,8 +129,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         fun `Submitting without selecting an LA return an error`(page: Page) {
             val selectLocalAuthorityPage = navigator.skipToPropertyRegistrationSelectLocalAuthorityPage()
             selectLocalAuthorityPage.form.submit()
-            PlaywrightAssertions
-                .assertThat(selectLocalAuthorityPage.form.getErrorMessage("localAuthorityId"))
+            assertThat(selectLocalAuthorityPage.form.getErrorMessage("localAuthorityId"))
                 .containsText("Select a local authority to continue")
         }
     }
@@ -145,14 +140,14 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         fun `Submitting with no propertyType selected returns an error`(page: Page) {
             val propertyTypePage = navigator.skipToPropertyRegistrationPropertyTypePage()
             propertyTypePage.form.submit()
-            PlaywrightAssertions.assertThat(propertyTypePage.form.getErrorMessage()).containsText("Select the type of property")
+            assertThat(propertyTypePage.form.getErrorMessage()).containsText("Select the type of property")
         }
 
         @Test
         fun `Submitting with the Other propertyType selected but an empty customPropertyType field returns an error`(page: Page) {
             val propertyTypePage = navigator.skipToPropertyRegistrationPropertyTypePage()
             propertyTypePage.submitCustomPropertyType("")
-            PlaywrightAssertions.assertThat(propertyTypePage.form.getErrorMessage()).containsText("Enter the property type")
+            assertThat(propertyTypePage.form.getErrorMessage()).containsText("Enter the property type")
         }
     }
 
@@ -162,7 +157,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         fun `Submitting with no ownershipType selected returns an error`(page: Page) {
             val ownershipTypePage = navigator.skipToPropertyRegistrationOwnershipTypePage()
             ownershipTypePage.form.submit()
-            PlaywrightAssertions.assertThat(ownershipTypePage.form.getErrorMessage()).containsText("Select the ownership type")
+            assertThat(ownershipTypePage.form.getErrorMessage()).containsText("Select the ownership type")
         }
     }
 
@@ -172,10 +167,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         fun `Submitting with no licensingType selected returns an error`(page: Page) {
             val licensingTypePage = navigator.skipToPropertyRegistrationLicensingTypePage()
             licensingTypePage.form.submit()
-            PlaywrightAssertions
-                .assertThat(
-                    licensingTypePage.form.getErrorMessage(),
-                ).containsText("Select the type of licensing for the property")
+            assertThat(licensingTypePage.form.getErrorMessage()).containsText("Select the type of licensing for the property")
         }
 
         @Test
@@ -184,9 +176,8 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
             licensingTypePage.submitLicensingType(LicensingType.HMO_MANDATORY_LICENCE)
             val licenseNumberPage = BasePage.assertPageIs(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
             BaseComponent
-                .assertThat(
-                    licenseNumberPage.form.sectionHeader,
-                ).containsText("Section 1 of 2 \u2014 Register your property details")
+                .assertThat(licenseNumberPage.form.sectionHeader)
+                .containsText("Section 1 of 2 \u2014 Register your property details")
         }
 
         @Test
@@ -195,9 +186,8 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
             licensingTypePage.submitLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
             val licenseNumberPage = BasePage.assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
             BaseComponent
-                .assertThat(
-                    licenseNumberPage.form.sectionHeader,
-                ).containsText("Section 1 of 2 \u2014 Register your property details")
+                .assertThat(licenseNumberPage.form.sectionHeader)
+                .containsText("Section 1 of 2 \u2014 Register your property details")
         }
     }
 
@@ -207,7 +197,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         fun `Submitting with no licence number returns an error`(page: Page) {
             val selectiveLicencePage = navigator.skipToPropertyRegistrationSelectiveLicencePage()
             selectiveLicencePage.form.submit()
-            PlaywrightAssertions.assertThat(selectiveLicencePage.form.getErrorMessage()).containsText("Enter the selective licence number")
+            assertThat(selectiveLicencePage.form.getErrorMessage()).containsText("Enter the selective licence number")
         }
 
         @Test
@@ -220,7 +210,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
                     " maximum length has been selected to be permissive of id numbers we do not expect while still having " +
                     "a cap reachable with a little effort."
             selectiveLicencePage.submitLicenseNumber(aVeryLongString)
-            PlaywrightAssertions.assertThat(selectiveLicencePage.form.getErrorMessage()).containsText("The licensing number is too long")
+            assertThat(selectiveLicencePage.form.getErrorMessage()).containsText("The licensing number is too long")
         }
     }
 
@@ -237,10 +227,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         fun `Submitting with no licence number returns an error`(page: Page) {
             val hmoMandatoryLicencePage = navigator.skipToPropertyRegistrationHmoMandatoryLicencePage()
             hmoMandatoryLicencePage.form.submit()
-            PlaywrightAssertions
-                .assertThat(
-                    hmoMandatoryLicencePage.form.getErrorMessage(),
-                ).containsText("Enter the HMO Mandatory licence number")
+            assertThat(hmoMandatoryLicencePage.form.getErrorMessage()).containsText("Enter the HMO Mandatory licence number")
         }
 
         @Test
@@ -253,7 +240,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
                     " maximum length has been selected to be permissive of id numbers we do not expect while still having " +
                     "a cap reachable with a little effort."
             hmoMandatoryLicencePage.submitLicenseNumber(aVeryLongString)
-            PlaywrightAssertions.assertThat(hmoMandatoryLicencePage.form.getErrorMessage()).containsText("The licensing number is too long")
+            assertThat(hmoMandatoryLicencePage.form.getErrorMessage()).containsText("The licensing number is too long")
         }
     }
 
@@ -270,10 +257,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         fun `Submitting with no licence number returns an error`(page: Page) {
             val hmoAdditionalLicencePage = navigator.skipToPropertyRegistrationHmoAdditionalLicencePage()
             hmoAdditionalLicencePage.form.submit()
-            PlaywrightAssertions
-                .assertThat(
-                    hmoAdditionalLicencePage.form.getErrorMessage(),
-                ).containsText("Enter the HMO additional licence number")
+            assertThat(hmoAdditionalLicencePage.form.getErrorMessage()).containsText("Enter the HMO additional licence number")
         }
 
         @Test
@@ -286,10 +270,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
                     " maximum length has been selected to be permissive of id numbers we do not expect while still having " +
                     "a cap reachable with a little effort."
             hmoAdditionalLicencePage.submitLicenseNumber(aVeryLongString)
-            PlaywrightAssertions
-                .assertThat(
-                    hmoAdditionalLicencePage.form.getErrorMessage(),
-                ).containsText("The licensing number is too long")
+            assertThat(hmoAdditionalLicencePage.form.getErrorMessage()).containsText("The licensing number is too long")
         }
     }
 
@@ -299,7 +280,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         fun `Submitting with no occupancy option selected returns an error`(page: Page) {
             val occupancyPage = navigator.skipToPropertyRegistrationOccupancyPage()
             occupancyPage.form.submit()
-            PlaywrightAssertions.assertThat(occupancyPage.form.getErrorMessage()).containsText("Select whether the property is occupied")
+            assertThat(occupancyPage.form.getErrorMessage()).containsText("Select whether the property is occupied")
         }
     }
 
@@ -309,18 +290,14 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         fun `Submitting with a blank numberOfHouseholds field returns an error`(page: Page) {
             val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.form.submit()
-            PlaywrightAssertions
-                .assertThat(
-                    householdsPage.form.getErrorMessage(),
-                ).containsText("Enter the number of households living in your property")
+            assertThat(householdsPage.form.getErrorMessage()).containsText("Enter the number of households living in your property")
         }
 
         @Test
         fun `Submitting with a non-numerical value in the numberOfHouseholds field returns an error`(page: Page) {
             val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds("not-a-number")
-            PlaywrightAssertions
-                .assertThat(householdsPage.form.getErrorMessage())
+            assertThat(householdsPage.form.getErrorMessage())
                 .containsText("Number of households in your property must be a positive, whole number, like 3")
         }
 
@@ -328,8 +305,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         fun `Submitting with a non-integer number in the numberOfHouseholds field returns an error`(page: Page) {
             val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds("2.3")
-            PlaywrightAssertions
-                .assertThat(householdsPage.form.getErrorMessage())
+            assertThat(householdsPage.form.getErrorMessage())
                 .containsText("Number of households in your property must be a positive, whole number, like 3")
         }
 
@@ -337,8 +313,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         fun `Submitting with a negative integer in the numberOfHouseholds field returns an error`(page: Page) {
             val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds(-2)
-            PlaywrightAssertions
-                .assertThat(householdsPage.form.getErrorMessage())
+            assertThat(householdsPage.form.getErrorMessage())
                 .containsText("Number of households in your property must be a positive, whole number, like 3")
         }
 
@@ -346,8 +321,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         fun `Submitting with a zero integer in the numberOfHouseholds field returns an error`(page: Page) {
             val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds(0)
-            PlaywrightAssertions
-                .assertThat(householdsPage.form.getErrorMessage())
+            assertThat(householdsPage.form.getErrorMessage())
                 .containsText("Number of households in your property must be a positive, whole number, like 3")
         }
     }
@@ -358,18 +332,14 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         fun `Submitting with a blank numberOfPeople field returns an error`(page: Page) {
             val peoplePage = navigator.skipToPropertyRegistrationPeoplePage()
             peoplePage.form.submit()
-            PlaywrightAssertions
-                .assertThat(
-                    peoplePage.form.getErrorMessage(),
-                ).containsText("Enter the number of people living in your property")
+            assertThat(peoplePage.form.getErrorMessage()).containsText("Enter the number of people living in your property")
         }
 
         @Test
         fun `Submitting with a non-numerical value in the numberOfPeople field returns an error`(page: Page) {
             val peoplePage = navigator.skipToPropertyRegistrationPeoplePage()
             peoplePage.submitNumOfPeople("not-a-number")
-            PlaywrightAssertions
-                .assertThat(peoplePage.form.getErrorMessage())
+            assertThat(peoplePage.form.getErrorMessage())
                 .containsText("Number of people in your property must be a positive, whole number, like 3")
         }
 
@@ -377,8 +347,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         fun `Submitting with a non-integer number in the numberOfPeople field returns an error`(page: Page) {
             val peoplePage = navigator.skipToPropertyRegistrationPeoplePage()
             peoplePage.submitNumOfPeople("2.3")
-            PlaywrightAssertions
-                .assertThat(peoplePage.form.getErrorMessage())
+            assertThat(peoplePage.form.getErrorMessage())
                 .containsText("Number of people in your property must be a positive, whole number, like 3")
         }
 
@@ -386,8 +355,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         fun `Submitting with a negative integer in the numberOfPeople field returns an error`(page: Page) {
             val peoplePage = navigator.skipToPropertyRegistrationPeoplePage()
             peoplePage.submitNumOfPeople("-2")
-            PlaywrightAssertions
-                .assertThat(peoplePage.form.getErrorMessage())
+            assertThat(peoplePage.form.getErrorMessage())
                 .containsText("Number of people in your property must be a positive, whole number, like 3")
         }
 
@@ -395,8 +363,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         fun `Submitting with a zero integer in the numberOfPeople field returns an error`(page: Page) {
             val peoplePage = navigator.skipToPropertyRegistrationPeoplePage()
             peoplePage.submitNumOfPeople(0)
-            PlaywrightAssertions
-                .assertThat(peoplePage.form.getErrorMessage())
+            assertThat(peoplePage.form.getErrorMessage())
                 .containsText("Number of people in your property must be a positive, whole number, like 3")
         }
 
@@ -408,8 +375,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
             householdsPage.submitNumberOfHouseholds(3)
             val peoplePage = BasePage.assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
             peoplePage.submitNumOfPeople(2)
-            PlaywrightAssertions
-                .assertThat(peoplePage.form.getErrorMessage())
+            assertThat(peoplePage.form.getErrorMessage())
                 .containsText(
                     "The number of people in the property must be the same as or higher than the number of households in the property",
                 )
@@ -422,10 +388,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         fun `Submitting without checking the checkbox returns an error`(page: Page) {
             val declarationPage = navigator.skipToPropertyRegistrationDeclarationPage()
             declarationPage.form.submit()
-            PlaywrightAssertions
-                .assertThat(
-                    declarationPage.form.getErrorMessage(),
-                ).containsText("You must agree to the declaration to continue")
+            assertThat(declarationPage.form.getErrorMessage()).containsText("You must agree to the declaration to continue")
         }
     }
 

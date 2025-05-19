@@ -16,8 +16,7 @@ abstract class SinglePageTestWithSeedData(
         @Autowired flyway: Flyway,
         @Autowired jdbcTemplate: JdbcTemplate,
     ) {
-        IntegrationTestHelper.resetDatabase(flyway)
-        IntegrationTestHelper.seedDatabase(scripts, jdbcTemplate)
+        IntegrationTestHelper.resetAndSeedDatabase(flyway, scripts, jdbcTemplate)
     }
 
     abstract class NestedSinglePageTestWithSeedData(
@@ -30,8 +29,7 @@ abstract class SinglePageTestWithSeedData(
             @Autowired flyway: Flyway,
             @Autowired jdbcTemplate: JdbcTemplate,
         ) {
-            IntegrationTestHelper.resetDatabase(flyway)
-            IntegrationTestHelper.seedDatabase(scripts, jdbcTemplate)
+            IntegrationTestHelper.resetAndSeedDatabase(flyway, scripts, jdbcTemplate)
         }
     }
 }

@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import com.microsoft.playwright.assertions.PlaywrightAssertions
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.SinglePageTestWithSeedData.NestedSinglePageTestWithSeedData
@@ -30,8 +30,7 @@ class LandlordDeregistrationSinglePageTests : IntegrationTest() {
         fun `Submitting with no option selected returns an error`() {
             val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
             areYouSurePage.form.submit()
-            PlaywrightAssertions
-                .assertThat(areYouSurePage.form.getErrorMessage("wantsToProceed"))
+            assertThat(areYouSurePage.form.getErrorMessage("wantsToProceed"))
                 .containsText("Select whether you want to delete your landlord record and properties")
         }
     }
@@ -42,8 +41,7 @@ class LandlordDeregistrationSinglePageTests : IntegrationTest() {
         fun `Submitting with no option selected returns an error`() {
             val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
             areYouSurePage.form.submit()
-            PlaywrightAssertions
-                .assertThat(areYouSurePage.form.getErrorMessage("wantsToProceed"))
+            assertThat(areYouSurePage.form.getErrorMessage("wantsToProceed"))
                 .containsText("Select whether you want to delete your account from the database")
         }
     }
