@@ -38,8 +38,6 @@ class EpcLookupService(
                 addressLineTwo = epcDataAddress.optString("addressLine2"),
             )
 
-        // TODO PRSD-1138 - manually test this and write unit tests
-
         return EpcDataModel(
             certificateNumber = epcData.getString("epcRrn"),
             singleLineAddress = singleLineAddress,
