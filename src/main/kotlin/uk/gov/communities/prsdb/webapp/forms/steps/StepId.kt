@@ -7,3 +7,7 @@ interface StepId {
 interface GroupedStepId<T : Enum<T>> : StepId {
     val groupIdentifier: T
 }
+
+interface GroupedUpdateStepId<T : Enum<T>> : GroupedStepId<T> {
+    val isCheckYourAnswersStepId: Boolean
+}
