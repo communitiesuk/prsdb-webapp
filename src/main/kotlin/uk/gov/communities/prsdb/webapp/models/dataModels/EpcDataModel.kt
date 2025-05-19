@@ -8,7 +8,6 @@ data class EpcDataModel(
     val certificateNumber: String,
     val singleLineAddress: String,
     val energyRating: String,
-    // TODO PRSD-1132 - design looks like it has a certifcate date but this might not be returned, is the expiryDate ok and does the design need modifying?
     val expiryDate: LocalDate,
     val latestCertificateNumberForThisProperty: String? = null,
 ) {
