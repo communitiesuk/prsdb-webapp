@@ -4,7 +4,7 @@
 
 {Draft | Proposed | Accepted | Rejected | Superseded}
 
-Date of decision: {date}
+Date of decision: {yyyy-MM-dd}
 
 ## Context and Problem Statement
 

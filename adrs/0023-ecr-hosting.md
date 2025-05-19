@@ -2,9 +2,9 @@
 
 ## Status
 
-Proposed
+Accepted
 
-Date of decision: Dec 15 2024
+Date of decision: 2024-12-15
 
 ## Context and Problem Statement
 
