@@ -1,6 +1,9 @@
 package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions
 
 import kotlinx.datetime.yearsUntil
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
@@ -8,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
@@ -83,5 +87,13 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 PropertyComplianceStepId.EPC.urlPathSegment,
                 EicrFormModel::hasCert.name,
             )
+
+        fun JourneyData.getEpcDetails(): EpcDataModel? {
+            val serializedEpcDetails = JourneyDataHelper.getStringValueByKey(this, LOOKED_UP_EPC_JOURNEY_DATA_KEY) ?: return null
+            return Json.decodeFromString<EpcDataModel>(serializedEpcDetails)
+        }
+
+        fun JourneyData.withEpcDetails(epcDetails: EpcDataModel): JourneyData =
+            this + (LOOKED_UP_EPC_JOURNEY_DATA_KEY to Json.encodeToString(epcDetails))
     }
 }

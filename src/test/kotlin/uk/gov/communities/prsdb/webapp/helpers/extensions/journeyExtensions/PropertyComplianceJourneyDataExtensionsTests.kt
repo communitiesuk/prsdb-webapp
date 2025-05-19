@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions
 
 import kotlinx.datetime.toKotlinLocalDate
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Test
@@ -10,10 +12,12 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.mockConstruction
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
@@ -23,6 +27,8 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import java.time.LocalDate
 import kotlin.test.assertEquals
@@ -258,5 +264,46 @@ class PropertyComplianceJourneyDataExtensionsTests {
         val retrievedHasEICR = testJourneyData.getHasEPC()
 
         assertNull(retrievedHasEICR)
+    }
+
+    @Test
+    fun `withEpcDetails returns a JourneyData with the EPC details set`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.build()
+        val lookedUpEpcDetails =
+            EpcDataModel(
+                certificateNumber = "0000-0000-0000-1234-5678",
+                singleLineAddress = "1, Example Road, EG",
+                energyRating = "C",
+                expiryDate = LocalDate.of(2027, 1, 1).toKotlinLocalDate(),
+                latestCertificateNumberForThisProperty = "0000-0000-0000-1234-5678",
+            )
+        val expectedJourneyData = mutableMapOf(LOOKED_UP_EPC_JOURNEY_DATA_KEY to Json.encodeToString(lookedUpEpcDetails))
+
+        // Act
+        val updatedJourneyData = testJourneyData.withEpcDetails(lookedUpEpcDetails)
+
+        // Assert
+        assertEquals(expectedJourneyData, updatedJourneyData)
+    }
+
+    @Test
+    fun `getEpcDetails returns the EPC details from the JourneyData`() {
+        // Arrange
+        val storedEpcDetails =
+            EpcDataModel(
+                certificateNumber = "0000-0000-0000-1234-5678",
+                singleLineAddress = "1, Example Road, EG",
+                energyRating = "C",
+                expiryDate = LocalDate.of(2027, 1, 1).toKotlinLocalDate(),
+                latestCertificateNumberForThisProperty = "0000-0000-0000-1234-5678",
+            )
+        val journeyData = journeyDataBuilder.build().withEpcDetails(storedEpcDetails)
+
+        // Act
+        val retrievedEpcDetails = journeyData.getEpcDetails()
+
+        // Assert
+        assertEquals(storedEpcDetails, retrievedEpcDetails)
     }
 }
