@@ -4,7 +4,7 @@
 
 Accepted
 
-Date of decision: 19/11/24
+Date of decision: 2024-11-19
 
 ## Context and Problem Statement
 
