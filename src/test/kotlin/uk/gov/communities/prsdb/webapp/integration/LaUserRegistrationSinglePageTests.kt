@@ -14,10 +14,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegis
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 
-@SqlBeforeAll("/data-mockuser-not-lauser.sql")
-class LaUserRegistrationSinglePageTests : IntegrationTest() {
+class LaUserRegistrationSinglePageTests : SinglePageTestWithSeedData("data-mockuser-not-lauser.sql") {
     @Autowired
     lateinit var localAuthorityService: LocalAuthorityService
 

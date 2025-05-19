@@ -6,11 +6,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 import kotlin.test.Test
 
-@SqlBeforeAll("/data-local.sql")
-class LocalAuthorityDashboardTests : IntegrationTest() {
+class LocalAuthorityDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
     @Test
     fun `the dashboard loads displaying the user's name and local authority`(page: Page) {
         val dashboard = navigator.goToLocalAuthorityDashboard()

@@ -22,11 +22,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NameFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.PhoneNumberFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeEach
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhoneNumber
 
-@SqlBeforeEach("/data-local.sql")
-class LandlordDetailsUpdateJourneyTests : JourneyIntegrationTest() {
+class LandlordDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sql") {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
     val addressFound = "Entirely new test address"
 
@@ -47,9 +45,8 @@ class LandlordDetailsUpdateJourneyTests : JourneyIntegrationTest() {
         )
     }
 
-    @SqlBeforeEach("/data-unverified-landlord.sql")
     @Nested
-    inner class NameUpdates {
+    inner class NameUpdates : NestedJourneyTestWithSeedData("data-unverified-landlord.sql") {
         @Test
         fun `An unverified landlord can update their name`(page: Page) {
             // Details page
@@ -68,9 +65,8 @@ class LandlordDetailsUpdateJourneyTests : JourneyIntegrationTest() {
         }
     }
 
-    @SqlBeforeEach("/data-unverified-landlord.sql")
     @Nested
-    inner class DateOfBirthUpdates {
+    inner class DateOfBirthUpdates : NestedJourneyTestWithSeedData("data-unverified-landlord.sql") {
         @Test
         fun `An unverified landlord can update their date of birth`(page: Page) {
             // Details page

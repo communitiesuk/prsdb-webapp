@@ -43,10 +43,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyUploadPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.services.FileUploader
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeEach
 
-@SqlBeforeEach("/data-local.sql")
-class PropertyComplianceJourneyTests : JourneyIntegrationTest() {
+class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql") {
     @MockitoBean
     private lateinit var fileUploader: FileUploader
 

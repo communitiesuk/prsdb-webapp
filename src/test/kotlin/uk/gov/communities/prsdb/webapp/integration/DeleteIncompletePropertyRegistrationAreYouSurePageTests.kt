@@ -6,10 +6,9 @@ import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 
-@SqlBeforeAll("/data-mockuser-landlord-with-one-incomplete-property.sql")
-class DeleteIncompletePropertyRegistrationAreYouSurePageTests : IntegrationTest() {
+class DeleteIncompletePropertyRegistrationAreYouSurePageTests :
+    SinglePageTestWithSeedData("data-mockuser-landlord-with-one-incomplete-property.sql") {
     val contextId = "1"
     val singleLineAddress = "1, SAVOY COURT, LONDON, WC2R 0EX"
 
@@ -22,7 +21,7 @@ class DeleteIncompletePropertyRegistrationAreYouSurePageTests : IntegrationTest(
     }
 
     @Test
-    fun `the property is deleted and the page redirects to the incomplete properies page if the user selects Yes`(page: Page) {
+    fun `the property is deleted and the page redirects to the incomplete properties page if the user selects Yes`(page: Page) {
         val areYouSurePage = navigator.goToDeleteIncompletePropertyRegistrationAreYouSurePage(contextId)
         areYouSurePage.submitWantsToProceed()
         val incompletePropertiesPage = assertPageIs(page, LandlordIncompletePropertiesPage::class)
@@ -30,7 +29,7 @@ class DeleteIncompletePropertyRegistrationAreYouSurePageTests : IntegrationTest(
     }
 
     @Test
-    fun `the property is deleted and the page redirects to the incomplete properties page if the user selects No`(page: Page) {
+    fun `the property is not deleted and the page redirects to the incomplete properties page if the user selects No`(page: Page) {
         val areYouSurePage = navigator.goToDeleteIncompletePropertyRegistrationAreYouSurePage(contextId)
         areYouSurePage.submitDoesNotWantToProceed()
         val incompletePropertiesPage = assertPageIs(page, LandlordIncompletePropertiesPage::class)

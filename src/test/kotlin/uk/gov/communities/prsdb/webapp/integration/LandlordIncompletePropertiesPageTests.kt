@@ -6,20 +6,20 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
 import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.integration.SinglePageTestWithSeedData.NestedSinglePageTestWithSeedData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteIncompletePropertyRegistrationAreYouSurePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class LandlordIncompletePropertiesPageTests : IntegrationTest() {
-    @SqlBeforeAll("/data-mockuser-landlord-with-incomplete-properties.sql")
     @Nested
-    inner class LandlordsWithIncompleteProperties : NestedTestWithSeedData() {
+    inner class LandlordsWithIncompleteProperties :
+        NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-incomplete-properties.sql") {
         @Test
         fun `the page loads with heading and subheading`() {
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
@@ -72,9 +72,8 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
         }
     }
 
-    @SqlBeforeAll("/data-mockuser-landlord-with-properties.sql")
     @Nested
-    inner class LandlordsWithNoIncompleteProperties : NestedTestWithSeedData() {
+    inner class LandlordsWithNoIncompleteProperties : NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-properties.sql") {
         @Test
         fun `the page loads with heading and page text`() {
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()

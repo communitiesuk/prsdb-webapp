@@ -12,12 +12,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUse
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.ACTIONS_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.USERNAME_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@SqlBeforeAll("/data-local.sql")
-class ManageLAUsersTests : IntegrationTest() {
+class ManageLAUsersTests : SinglePageTestWithSeedData("data-local.sql") {
     val localAuthorityId = 1
 
     @Test
@@ -43,9 +41,8 @@ class ManageLAUsersTests : IntegrationTest() {
         assertEquals("2", pagination.currentPageNumberLinkText)
     }
 
-    @SqlBeforeAll("/data-la-users-and-invitations.sql")
     @Nested
-    inner class UserIsLaAdminButNotSystemOperator : NestedTestWithSeedData() {
+    inner class UserIsLaAdminButNotSystemOperator : NestedSinglePageTestWithSeedData("data-la-users-and-invitations.sql") {
         @Test
         fun `table of users renders`() {
             val managePage = navigator.goToManageLaUsers(localAuthorityId)
@@ -82,9 +79,8 @@ class ManageLAUsersTests : IntegrationTest() {
         }
     }
 
-    @SqlBeforeAll("/data-la-invitations-user-is-system-operator.sql")
     @Nested
-    inner class UserIsSystemOperatorButNotLaAdmin : NestedTestWithSeedData() {
+    inner class UserIsSystemOperatorButNotLaAdmin : NestedSinglePageTestWithSeedData("data-la-invitations-user-is-system-operator.sql") {
         @Test
         fun `table renders all user types including la admin invitations`() {
             val managePage = navigator.goToManageLaUsers(localAuthorityId)

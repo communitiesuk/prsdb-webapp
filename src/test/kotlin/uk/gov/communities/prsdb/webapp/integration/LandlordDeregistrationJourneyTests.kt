@@ -4,16 +4,15 @@ import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.integration.JourneyTestWithSeedData.NestedJourneyTestWithSeedData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.ConfirmationPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.ReasonFormPageLandlordDeregistration
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeEach
 
-class LandlordDeregistrationJourneyTests : JourneyIntegrationTest() {
-    @SqlBeforeEach("/data-mockuser-landlord-with-properties.sql")
+class LandlordDeregistrationJourneyTests : IntegrationTest() {
     @Nested
-    inner class LandlordWithProperties {
+    inner class LandlordWithProperties : NestedJourneyTestWithSeedData("data-mockuser-landlord-with-properties.sql") {
         @Test
         fun `User with properties can navigate the whole journey`(page: Page) {
             val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
@@ -40,9 +39,8 @@ class LandlordDeregistrationJourneyTests : JourneyIntegrationTest() {
         }
     }
 
-    @SqlBeforeEach("/data-unverified-landlord.sql")
     @Nested
-    inner class LandlordWithoutProperties {
+    inner class LandlordWithoutProperties : NestedJourneyTestWithSeedData("data-unverified-landlord.sql") {
         @Test
         fun `User with no properties can navigate the whole journey`(page: Page) {
             val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()

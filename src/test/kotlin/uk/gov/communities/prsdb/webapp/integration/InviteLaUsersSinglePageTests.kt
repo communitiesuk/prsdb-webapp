@@ -2,10 +2,8 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.assertions.PlaywrightAssertions
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 
-@SqlBeforeAll("/data-local.sql")
-class InviteLaUsersSinglePageTests : IntegrationTest() {
+class InviteLaUsersSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
     @Test
     fun `inviting a new LA user shows validation errors if the email addresses don't match`() {
         val invitePage = navigator.goToInviteNewLaUser(1)

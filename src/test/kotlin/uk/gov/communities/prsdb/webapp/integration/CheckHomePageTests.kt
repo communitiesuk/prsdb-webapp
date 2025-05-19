@@ -4,10 +4,8 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import com.microsoft.playwright.options.AriaRole
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 
-@SqlBeforeAll("/data-local.sql")
-class CheckHomePageTests : IntegrationTest() {
+class CheckHomePageTests : SinglePageTestWithSeedData("data-local.sql") {
     @Test
     fun `check a home for rent page renders`(page: Page) {
         page.navigate("http://localhost:$port/check")

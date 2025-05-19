@@ -4,6 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.integration.JourneyTestWithSeedData.NestedJourneyTestWithSeedData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLaUserInvitationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLaUserInvitationSuccessPage
@@ -12,12 +13,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUse
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.ACCOUNT_STATUS_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.USERNAME_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 
 class CancelLaUserInvitationTests : IntegrationTest() {
-    @SqlBeforeAll("/data-la-users-and-invitations.sql")
     @Nested
-    inner class LaUserInvitation : NestedTestWithSeedData() {
+    inner class LaUserInvitation : NestedJourneyTestWithSeedData("data-la-users-and-invitations.sql") {
         @Test
         fun `an la user invitation can be cancelled`(page: Page) {
             // Changing the pending user takes you to the cancel invitation page
@@ -49,9 +48,8 @@ class CancelLaUserInvitationTests : IntegrationTest() {
         }
     }
 
-    @SqlBeforeAll("/data-la-invitations-user-is-system-operator.sql")
     @Nested
-    inner class LaAdminInvitation : NestedTestWithSeedData() {
+    inner class LaAdminInvitation : NestedJourneyTestWithSeedData("data-la-invitations-user-is-system-operator.sql") {
         @Test
         fun `an la admin invitation can be cancelled by a system operator`(page: Page) {
             // Changing the pending user takes you to the cancel invitation page

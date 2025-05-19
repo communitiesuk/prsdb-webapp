@@ -39,12 +39,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeEach
 import java.net.URI
 import kotlin.test.assertTrue
 
-@SqlBeforeEach("/data-local.sql")
-class PropertyRegistrationJourneyTests : JourneyIntegrationTest() {
+class PropertyRegistrationJourneyTests : JourneyTestWithSeedData("data-local.sql") {
     private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
 
     @MockitoSpyBean

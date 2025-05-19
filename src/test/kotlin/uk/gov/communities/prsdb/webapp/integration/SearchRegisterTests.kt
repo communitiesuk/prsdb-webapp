@@ -20,12 +20,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPrope
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.PROPERTY_LANDLORD_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.REG_NUM_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 import kotlin.test.assertContains
 import kotlin.test.assertTrue
 
-@SqlBeforeAll("/data-search.sql")
-class SearchRegisterTests : IntegrationTest() {
+class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
     @Nested
     inner class LandlordSearchTests {
         @Test

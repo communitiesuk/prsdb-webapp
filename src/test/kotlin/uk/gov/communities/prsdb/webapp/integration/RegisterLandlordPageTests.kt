@@ -12,12 +12,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.VerifiedIdentityModel
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 import java.net.URI
 import java.time.LocalDate
 
-@SqlBeforeAll("/data-mockuser-not-landlord.sql")
-class RegisterLandlordPageTests : IntegrationTest() {
+class RegisterLandlordPageTests : SinglePageTestWithSeedData("data-mockuser-not-landlord.sql") {
     @Test
     fun `registerAsALandlord page renders`(page: Page) {
         page.navigate("http://localhost:$port/register-as-a-landlord")
@@ -47,9 +45,8 @@ class RegisterLandlordPageTests : IntegrationTest() {
         assertEquals("/register-as-a-landlord/confirm-identity", URI(page.url()).path)
     }
 
-    @SqlBeforeAll("/data-local.sql")
     @Nested
-    inner class AlreadyRegistered : NestedTestWithSeedData() {
+    inner class AlreadyRegistered : NestedSinglePageTestWithSeedData("data-local.sql") {
         @Test
         fun `the 'Start Now' button directs a registered landlord to the landlord dashboard page`(page: Page) {
             val startPage = navigator.goToLandlordRegistrationStartPage()

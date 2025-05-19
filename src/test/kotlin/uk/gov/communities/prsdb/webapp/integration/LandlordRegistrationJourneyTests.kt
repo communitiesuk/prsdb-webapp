@@ -32,13 +32,11 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeEach
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhoneNumber
 import java.net.URI
 import kotlin.test.assertNotNull
 
-@SqlBeforeEach("/data-mockuser-not-landlord.sql")
-class LandlordRegistrationJourneyTests : JourneyIntegrationTest() {
+class LandlordRegistrationJourneyTests : JourneyTestWithSeedData("data-mockuser-not-landlord.sql") {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
     private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
 

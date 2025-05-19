@@ -26,16 +26,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NoAddressFoundFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NoContactAddressFoundFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedInternationalPhoneNumber
 
-@SqlBeforeAll("/data-mockuser-not-landlord.sql")
-class LandlordRegistrationSinglePageTests : IntegrationTest() {
+class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-mockuser-not-landlord.sql") {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
 
-    @SqlBeforeAll("/data-local.sql")
     @Nested
-    inner class LandlordRegistrationStepVerifyIdentity : NestedTestWithSeedData() {
+    inner class LandlordRegistrationStepVerifyIdentity : NestedSinglePageTestWithSeedData("data-local.sql") {
         @Test
         fun `Navigating here as a registered landlord redirects to the landlord dashboard page`(page: Page) {
             navigator.navigateToLandlordRegistrationVerifyIdentityPage()

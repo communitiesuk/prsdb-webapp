@@ -8,11 +8,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserSuccessPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeEach
 import java.net.URI
 
-@SqlBeforeEach("/data-local.sql")
-class InviteLaUsersTests : JourneyIntegrationTest() {
+class InviteLaUsersTests : JourneyTestWithSeedData("data-local.sql") {
     @Test
     fun `inviting a new LA user ends with a success page with a button linking to the dashboard`(page: Page) {
         whenever(absoluteUrlProvider.buildInvitationUri(anyString()))

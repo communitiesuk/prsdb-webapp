@@ -8,10 +8,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDas
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmationPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ReasonPagePropertyDeregistration
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeEach
 
-@SqlBeforeEach("/data-local.sql")
-class PropertyDeregistrationJourneyTests : JourneyIntegrationTest() {
+class PropertyDeregistrationJourneyTests : JourneyTestWithSeedData("data-local.sql") {
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in`(page: Page) {
         val propertyOwnershipId = 1

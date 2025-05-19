@@ -22,10 +22,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 
-@SqlBeforeAll("/data-local.sql")
-class PropertyRegistrationSinglePageTests : IntegrationTest() {
+class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
     @Nested
     inner class TaskListStep {
         @Test

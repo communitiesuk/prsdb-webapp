@@ -8,11 +8,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeEach
 import java.net.URI
 
-@SqlBeforeEach("/data-local.sql")
-class InviteLaAdminTests : JourneyIntegrationTest() {
+class InviteLaAdminTests : JourneyTestWithSeedData("data-local.sql") {
     @Test
     fun `inviting a new LA admin ends with a confirmation page`(page: Page) {
         whenever(absoluteUrlProvider.buildInvitationUri(anyString()))

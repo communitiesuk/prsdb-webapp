@@ -12,12 +12,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthor
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 import java.net.URI
 import kotlin.test.assertEquals
 
-@SqlBeforeAll("/data-local.sql")
-class PropertyDetailsTests : IntegrationTest() {
+class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
     @Nested
     inner class PropertyDetailsLandlordView {
         @Test

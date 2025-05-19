@@ -11,12 +11,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUse
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.ACCESS_LEVEL_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.USERNAME_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeEach
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-@SqlBeforeEach("/data-local.sql")
-class EditLAUserTests : JourneyIntegrationTest() {
+class EditLAUserTests : JourneyTestWithSeedData("data-local.sql") {
     @Test
     fun `a user's access level can be updated`(page: Page) {
         // There is a basic user called Arthur Dent

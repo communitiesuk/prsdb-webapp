@@ -3,10 +3,8 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 
-@SqlBeforeAll("/data-local.sql")
-class InviteLaAdminSinglePageTests : IntegrationTest() {
+class InviteLaAdminSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
     @Test
     fun `inviting a new LA admin shows validation errors if the email is invalid or the email addresses don't match`(page: Page) {
         val invitePage = navigator.goToInviteLaAdmin()

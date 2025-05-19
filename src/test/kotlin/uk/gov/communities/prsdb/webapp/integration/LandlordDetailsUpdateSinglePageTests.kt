@@ -11,10 +11,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddre
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManualAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NoAddressFoundFormPageUpdateLandlordDetails
-import uk.gov.communities.prsdb.webapp.testHelpers.SqlBeforeAll
 
-@SqlBeforeAll("/data-local.sql")
-class LandlordDetailsUpdateSinglePageTests : IntegrationTest() {
+class LandlordDetailsUpdateSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
     @Nested
     inner class NameUpdates {
         @Test
