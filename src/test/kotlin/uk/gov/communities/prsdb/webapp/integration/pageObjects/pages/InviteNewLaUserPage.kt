@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.JourneyForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
@@ -27,7 +27,7 @@ class InviteNewLaUserPage(
 
     class InviteNewLaUserForm(
         page: Page,
-    ) : Form(page) {
+    ) : JourneyForm(page) {
         val emailInput = TextInput.emailByFieldName(locator, "email")
         val confirmEmailInput = TextInput.emailByFieldName(locator, "confirmEmail")
     }

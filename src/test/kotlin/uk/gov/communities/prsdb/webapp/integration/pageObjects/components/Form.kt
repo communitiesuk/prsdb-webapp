@@ -8,8 +8,6 @@ open class Form(
 ) : BaseComponent(parentLocator.locator("form")) {
     constructor(page: Page) : this(page.locator("html"))
 
-    val csrfToken: String = locator.locator("input[name='_csrf']").inputValue()
-
     fun getErrorMessage(fieldName: String? = null): Locator =
         locator.locator(if (fieldName == null) ".govuk-error-message" else "p[id='$fieldName-error']")
 

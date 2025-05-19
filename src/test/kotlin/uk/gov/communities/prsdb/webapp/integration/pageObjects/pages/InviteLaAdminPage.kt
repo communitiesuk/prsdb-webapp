@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.InviteLocalAuthorityAdminController
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.JourneyForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Select
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -26,7 +26,7 @@ class InviteLaAdminPage(
 
     class InviteLaAdminForm(
         page: Page,
-    ) : Form(page) {
+    ) : JourneyForm(page) {
         val localAuthoritySelect = Select(locator)
         val emailInput = TextInput.emailByFieldName(locator, "email")
         val confirmEmailInput = TextInput.emailByFieldName(locator, "confirmEmail")
