@@ -27,7 +27,7 @@ class PropertyRegistrationJourneyFactory(
     fun create(principalName: String) =
         PropertyRegistrationJourney(
             validator,
-            journeyDataServiceFactory.create(REGISTER_PROPERTY_JOURNEY_URL),
+            journeyDataServiceFactory.create(JOURNEY_DATA_KEY),
             addressLookupService,
             propertyRegistrationService,
             localAuthorityService,
@@ -35,4 +35,8 @@ class PropertyRegistrationJourneyFactory(
             absoluteUrlProvider,
             confirmationEmailSender,
         )
+
+    companion object {
+        const val JOURNEY_DATA_KEY = REGISTER_PROPERTY_JOURNEY_URL
+    }
 }

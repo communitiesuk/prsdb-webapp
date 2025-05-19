@@ -212,7 +212,7 @@ class PropertyRegistrationCheckAnswersPageTests {
     @Test
     fun `propertyDetails has a simple licensing type summary row when there is no licensing`() {
         // Arrange
-        val journeyData = journeyDataBuilder.withLicensingType(LicensingType.NO_LICENSING).build()
+        val journeyData = journeyDataBuilder.withLicensing(LicensingType.NO_LICENSING).build()
 
         // Act
         val propertyDetails = getPropertyDetails(journeyData)
@@ -235,7 +235,7 @@ class PropertyRegistrationCheckAnswersPageTests {
     fun `propertyDetails has the correct multiline licensing type summary row when there is licensing`() {
         // Arrange
         val licenceNumber = "entered licence number"
-        val journeyData = journeyDataBuilder.withLicensingType(LicensingType.SELECTIVE_LICENCE, licenceNumber).build()
+        val journeyData = journeyDataBuilder.withLicensing(LicensingType.SELECTIVE_LICENCE, licenceNumber).build()
 
         // Act
         val propertyDetails = getPropertyDetails(journeyData)

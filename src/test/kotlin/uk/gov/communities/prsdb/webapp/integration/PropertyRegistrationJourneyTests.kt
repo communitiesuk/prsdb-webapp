@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
@@ -42,6 +43,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalAuthorityFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -319,7 +321,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     inner class TaskListStep {
         @Test
         fun `Completing preceding steps will show a task as not yet started and completed steps as complete`(page: Page) {
-            navigator.goToPropertyRegistrationOccupancyPage()
+            navigator.skipToPropertyRegistrationOccupancyPage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
             assert(taskListPage.taskHasStatus("Add the property address", "Complete"))
             assert(taskListPage.taskHasStatus("Select the type of property", "Complete"))
@@ -330,7 +332,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         @Test
         fun `Completing first step of a task will show a task as in progress and completed steps as complete`(page: Page) {
-            navigator.goToPropertyRegistrationHmoAdditionalLicencePage()
+            navigator.skipToPropertyRegistrationHmoAdditionalLicencePage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
             assert(taskListPage.taskHasStatus("Add the property address", "Complete"))
             assert(taskListPage.taskHasStatus("Select the type of property", "Complete"))
@@ -380,22 +382,23 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     inner class SelectAddressStep {
         @Test
         fun `Submitting with no option selected returns an error`(page: Page) {
-            val selectAddressPage = navigator.goToPropertyRegistrationSelectAddressPage()
+            val selectAddressPage = navigator.skipToPropertyRegistrationSelectAddressPage()
             selectAddressPage.form.submit()
             assertThat(selectAddressPage.form.getErrorMessage()).containsText("Select an address")
         }
 
         @Test
         fun `Clicking Search Again navigates to the previous step`(page: Page) {
-            val selectAddressPage = navigator.goToPropertyRegistrationSelectAddressPage()
+            val selectAddressPage = navigator.skipToPropertyRegistrationSelectAddressPage()
             selectAddressPage.searchAgain.clickAndWait()
             assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
         }
 
         @Test
         fun `Selecting an already-registered address navigates to the AlreadyRegistered step`(page: Page) {
-            val selectAddressPage = navigator.goToPropertyRegistrationSelectAddressPage()
-            selectAddressPage.selectAddressAndSubmit("already registered address")
+            val alreadyRegisteredAddress = AddressDataModel("1 Example Road", uprn = 1123456)
+            val selectAddressPage = navigator.skipToPropertyRegistrationSelectAddressPage(listOf(alreadyRegisteredAddress))
+            selectAddressPage.selectAddressAndSubmit(alreadyRegisteredAddress.singleLineAddress)
             assertPageIs(page, AlreadyRegisteredFormPagePropertyRegistration::class)
         }
     }
@@ -404,7 +407,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     inner class ManualAddressEntryStep {
         @Test
         fun `Submitting empty data fields returns errors`(page: Page) {
-            val manualAddressPage = navigator.goToPropertyRegistrationManualAddressPage()
+            val manualAddressPage = navigator.skipToPropertyRegistrationManualAddressPage()
             manualAddressPage.submitAddress()
             assertThat(manualAddressPage.form.getErrorMessage("addressLineOne"))
                 .containsText("Enter the first line of an address, typically the building and street")
@@ -417,7 +420,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     inner class SelectLocalAuthorityStep {
         @Test
         fun `Submitting without selecting an LA return an error`(page: Page) {
-            val selectLocalAuthorityPage = navigator.goToPropertyRegistrationSelectLocalAuthorityPage()
+            val selectLocalAuthorityPage = navigator.skipToPropertyRegistrationSelectLocalAuthorityPage()
             selectLocalAuthorityPage.form.submit()
             assertThat(selectLocalAuthorityPage.form.getErrorMessage("localAuthorityId"))
                 .containsText("Select a local authority to continue")
@@ -428,14 +431,14 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     inner class PropertyTypeStep {
         @Test
         fun `Submitting with no propertyType selected returns an error`(page: Page) {
-            val propertyTypePage = navigator.goToPropertyRegistrationPropertyTypePage()
+            val propertyTypePage = navigator.skipToPropertyRegistrationPropertyTypePage()
             propertyTypePage.form.submit()
             assertThat(propertyTypePage.form.getErrorMessage()).containsText("Select the type of property")
         }
 
         @Test
         fun `Submitting with the Other propertyType selected but an empty customPropertyType field returns an error`(page: Page) {
-            val propertyTypePage = navigator.goToPropertyRegistrationPropertyTypePage()
+            val propertyTypePage = navigator.skipToPropertyRegistrationPropertyTypePage()
             propertyTypePage.submitCustomPropertyType("")
             assertThat(propertyTypePage.form.getErrorMessage()).containsText("Enter the property type")
         }
@@ -445,7 +448,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     inner class OwnershipTypeStep {
         @Test
         fun `Submitting with no ownershipType selected returns an error`(page: Page) {
-            val ownershipTypePage = navigator.goToPropertyRegistrationOwnershipTypePage()
+            val ownershipTypePage = navigator.skipToPropertyRegistrationOwnershipTypePage()
             ownershipTypePage.form.submit()
             assertThat(ownershipTypePage.form.getErrorMessage()).containsText("Select the ownership type")
         }
@@ -455,14 +458,14 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     inner class LicensingTypeStep {
         @Test
         fun `Submitting with no licensingType selected returns an error`(page: Page) {
-            val licensingTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
+            val licensingTypePage = navigator.skipToPropertyRegistrationLicensingTypePage()
             licensingTypePage.form.submit()
             assertThat(licensingTypePage.form.getErrorMessage()).containsText("Select the type of licensing for the property")
         }
 
         @Test
         fun `Submitting with an HMO mandatory licence redirects to the next step`(page: Page) {
-            val licensingTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
+            val licensingTypePage = navigator.skipToPropertyRegistrationLicensingTypePage()
             licensingTypePage.submitLicensingType(LicensingType.HMO_MANDATORY_LICENCE)
             val licenseNumberPage = assertPageIs(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
             assertThat(licenseNumberPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
@@ -470,7 +473,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         @Test
         fun `Submitting with an HMO additional licence redirects to the next step`(page: Page) {
-            val licensingTypePage = navigator.goToPropertyRegistrationLicensingTypePage()
+            val licensingTypePage = navigator.skipToPropertyRegistrationLicensingTypePage()
             licensingTypePage.submitLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
             val licenseNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
             assertThat(licenseNumberPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
@@ -481,14 +484,14 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     inner class SelectiveLicenceStep {
         @Test
         fun `Submitting with no licence number returns an error`(page: Page) {
-            val selectiveLicencePage = navigator.goToPropertyRegistrationSelectiveLicencePage()
+            val selectiveLicencePage = navigator.skipToPropertyRegistrationSelectiveLicencePage()
             selectiveLicencePage.form.submit()
             assertThat(selectiveLicencePage.form.getErrorMessage()).containsText("Enter the selective licence number")
         }
 
         @Test
         fun `Submitting with a very long licence number returns an error`(page: Page) {
-            val selectiveLicencePage = navigator.goToPropertyRegistrationSelectiveLicencePage()
+            val selectiveLicencePage = navigator.skipToPropertyRegistrationSelectiveLicencePage()
             val aVeryLongString =
                 "This string is very long, so long that it is not feasible that it is a real licence number " +
                     "- therefore if it is submitted there will in fact be an error rather than a successful submission." +
@@ -504,21 +507,21 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     inner class HmoMandatoryLicenceStep {
         @Test
         fun `Submitting with a licence number redirects to the next step`(page: Page) {
-            val hmoMandatoryLicencePage = navigator.goToPropertyRegistrationHmoMandatoryLicencePage()
+            val hmoMandatoryLicencePage = navigator.skipToPropertyRegistrationHmoMandatoryLicencePage()
             hmoMandatoryLicencePage.submitLicenseNumber("licence number")
             assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
         }
 
         @Test
         fun `Submitting with no licence number returns an error`(page: Page) {
-            val hmoMandatoryLicencePage = navigator.goToPropertyRegistrationHmoMandatoryLicencePage()
+            val hmoMandatoryLicencePage = navigator.skipToPropertyRegistrationHmoMandatoryLicencePage()
             hmoMandatoryLicencePage.form.submit()
             assertThat(hmoMandatoryLicencePage.form.getErrorMessage()).containsText("Enter the HMO Mandatory licence number")
         }
 
         @Test
         fun `Submitting with a very long licence number returns an error`(page: Page) {
-            val hmoMandatoryLicencePage = navigator.goToPropertyRegistrationHmoMandatoryLicencePage()
+            val hmoMandatoryLicencePage = navigator.skipToPropertyRegistrationHmoMandatoryLicencePage()
             val aVeryLongString =
                 "This string is very long, so long that it is not feasible that it is a real licence number " +
                     "- therefore if it is submitted there will in fact be an error rather than a successful submission." +
@@ -534,21 +537,21 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     inner class HmoAdditionalLicenceStep {
         @Test
         fun `Submitting with a licence number redirects to the next step`(page: Page) {
-            val hmoAdditionalLicencePage = navigator.goToPropertyRegistrationHmoAdditionalLicencePage()
+            val hmoAdditionalLicencePage = navigator.skipToPropertyRegistrationHmoAdditionalLicencePage()
             hmoAdditionalLicencePage.submitLicenseNumber("licence number")
             assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
         }
 
         @Test
         fun `Submitting with no licence number returns an error`(page: Page) {
-            val hmoAdditionalLicencePage = navigator.goToPropertyRegistrationHmoAdditionalLicencePage()
+            val hmoAdditionalLicencePage = navigator.skipToPropertyRegistrationHmoAdditionalLicencePage()
             hmoAdditionalLicencePage.form.submit()
             assertThat(hmoAdditionalLicencePage.form.getErrorMessage()).containsText("Enter the HMO additional licence number")
         }
 
         @Test
         fun `Submitting with a very long licence number returns an error`(page: Page) {
-            val hmoAdditionalLicencePage = navigator.goToPropertyRegistrationHmoAdditionalLicencePage()
+            val hmoAdditionalLicencePage = navigator.skipToPropertyRegistrationHmoAdditionalLicencePage()
             val aVeryLongString =
                 "This string is very long, so long that it is not feasible that it is a real licence number " +
                     "- therefore if it is submitted there will in fact be an error rather than a successful submission." +
@@ -564,7 +567,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     inner class OccupancyStep {
         @Test
         fun `Submitting with no occupancy option selected returns an error`(page: Page) {
-            val occupancyPage = navigator.goToPropertyRegistrationOccupancyPage()
+            val occupancyPage = navigator.skipToPropertyRegistrationOccupancyPage()
             occupancyPage.form.submit()
             assertThat(occupancyPage.form.getErrorMessage()).containsText("Select whether the property is occupied")
         }
@@ -574,14 +577,14 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     inner class NumberOfHouseholdsStep {
         @Test
         fun `Submitting with a blank numberOfHouseholds field returns an error`(page: Page) {
-            val householdsPage = navigator.goToPropertyRegistrationHouseholdsPage()
+            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.form.submit()
             assertThat(householdsPage.form.getErrorMessage()).containsText("Enter the number of households living in your property")
         }
 
         @Test
         fun `Submitting with a non-numerical value in the numberOfHouseholds field returns an error`(page: Page) {
-            val householdsPage = navigator.goToPropertyRegistrationHouseholdsPage()
+            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds("not-a-number")
             assertThat(householdsPage.form.getErrorMessage())
                 .containsText("Number of households in your property must be a positive, whole number, like 3")
@@ -589,7 +592,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         @Test
         fun `Submitting with a non-integer number in the numberOfHouseholds field returns an error`(page: Page) {
-            val householdsPage = navigator.goToPropertyRegistrationHouseholdsPage()
+            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds("2.3")
             assertThat(householdsPage.form.getErrorMessage())
                 .containsText("Number of households in your property must be a positive, whole number, like 3")
@@ -597,7 +600,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         @Test
         fun `Submitting with a negative integer in the numberOfHouseholds field returns an error`(page: Page) {
-            val householdsPage = navigator.goToPropertyRegistrationHouseholdsPage()
+            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds(-2)
             assertThat(householdsPage.form.getErrorMessage())
                 .containsText("Number of households in your property must be a positive, whole number, like 3")
@@ -605,7 +608,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         @Test
         fun `Submitting with a zero integer in the numberOfHouseholds field returns an error`(page: Page) {
-            val householdsPage = navigator.goToPropertyRegistrationHouseholdsPage()
+            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds(0)
             assertThat(householdsPage.form.getErrorMessage())
                 .containsText("Number of households in your property must be a positive, whole number, like 3")
@@ -616,14 +619,14 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     inner class NumberOfPeopleStep {
         @Test
         fun `Submitting with a blank numberOfPeople field returns an error`(page: Page) {
-            val peoplePage = navigator.goToPropertyRegistrationPeoplePage()
+            val peoplePage = navigator.skipToPropertyRegistrationPeoplePage()
             peoplePage.form.submit()
             assertThat(peoplePage.form.getErrorMessage()).containsText("Enter the number of people living in your property")
         }
 
         @Test
         fun `Submitting with a non-numerical value in the numberOfPeople field returns an error`(page: Page) {
-            val peoplePage = navigator.goToPropertyRegistrationPeoplePage()
+            val peoplePage = navigator.skipToPropertyRegistrationPeoplePage()
             peoplePage.submitNumOfPeople("not-a-number")
             assertThat(peoplePage.form.getErrorMessage())
                 .containsText("Number of people in your property must be a positive, whole number, like 3")
@@ -631,7 +634,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         @Test
         fun `Submitting with a non-integer number in the numberOfPeople field returns an error`(page: Page) {
-            val peoplePage = navigator.goToPropertyRegistrationPeoplePage()
+            val peoplePage = navigator.skipToPropertyRegistrationPeoplePage()
             peoplePage.submitNumOfPeople("2.3")
             assertThat(peoplePage.form.getErrorMessage())
                 .containsText("Number of people in your property must be a positive, whole number, like 3")
@@ -639,7 +642,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         @Test
         fun `Submitting with a negative integer in the numberOfPeople field returns an error`(page: Page) {
-            val peoplePage = navigator.goToPropertyRegistrationPeoplePage()
+            val peoplePage = navigator.skipToPropertyRegistrationPeoplePage()
             peoplePage.submitNumOfPeople("-2")
             assertThat(peoplePage.form.getErrorMessage())
                 .containsText("Number of people in your property must be a positive, whole number, like 3")
@@ -647,7 +650,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
 
         @Test
         fun `Submitting with a zero integer in the numberOfPeople field returns an error`(page: Page) {
-            val peoplePage = navigator.goToPropertyRegistrationPeoplePage()
+            val peoplePage = navigator.skipToPropertyRegistrationPeoplePage()
             peoplePage.submitNumOfPeople(0)
             assertThat(peoplePage.form.getErrorMessage())
                 .containsText("Number of people in your property must be a positive, whole number, like 3")
@@ -657,7 +660,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
         fun `Submitting with an integer in the numberOfPeople field that is less than the numberOfHouseholds returns an error`(
             page: Page,
         ) {
-            val householdsPage = navigator.goToPropertyRegistrationHouseholdsPage()
+            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds(3)
             val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
             peoplePage.submitNumOfPeople(2)
@@ -672,7 +675,7 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     inner class Declaration {
         @Test
         fun `Submitting without checking the checkbox returns an error`(page: Page) {
-            val declarationPage = navigator.goToPropertyRegistrationDeclarationPage()
+            val declarationPage = navigator.skipToPropertyRegistrationDeclarationPage()
             declarationPage.form.submit()
             assertThat(declarationPage.form.getErrorMessage()).containsText("You must agree to the declaration to continue")
         }
@@ -681,8 +684,9 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     @Nested
     inner class Confirmation {
         @Test
-        fun `Navigating here with an incomplete form returns a 400 error page`() {
-            val errorPage = navigator.skipToPropertyRegistrationConfirmationPage()
+        fun `Navigating here with an incomplete form returns a 400 error page`(page: Page) {
+            navigator.navigateToPropertyRegistrationConfirmationPage()
+            val errorPage = assertPageIs(page, ErrorPage::class)
             assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
         }
     }
@@ -691,11 +695,11 @@ class PropertyRegistrationJourneyTests : IntegrationTest() {
     inner class PropertyRegistrationStepCheckAnswers {
         @Test
         fun `After changing an answer, submitting a full section returns the CYA page`(page: Page) {
-            var checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPage()
+            var checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
 
             checkAnswersPage.form.summaryList.ownershipRow.actions.actionLink
                 .clickAndWait()
-            var ownershipPage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
+            val ownershipPage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
 
             ownershipPage.submitOwnershipType(OwnershipType.LEASEHOLD)
             checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)

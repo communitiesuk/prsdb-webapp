@@ -164,8 +164,8 @@ class PropertyRegistrationJourneyTests {
             val journeyData =
                 JourneyDataBuilder
                     .propertyDefault(localAuthorityService)
-                    .withLicensingType(LicensingType.SELECTIVE_LICENCE, LicensingType.SELECTIVE_LICENCE.toString())
-                    .withLicensingType(
+                    .withLicensing(LicensingType.SELECTIVE_LICENCE, LicensingType.SELECTIVE_LICENCE.toString())
+                    .withLicensing(
                         LicensingType.HMO_MANDATORY_LICENCE,
                         LicensingType.HMO_MANDATORY_LICENCE.toString(),
                     ).build()
@@ -194,8 +194,8 @@ class PropertyRegistrationJourneyTests {
             val journeyData =
                 JourneyDataBuilder
                     .propertyDefault(localAuthorityService)
-                    .withLicensingType(LicensingType.SELECTIVE_LICENCE, LicensingType.SELECTIVE_LICENCE.toString())
-                    .withLicensingType(LicensingType.NO_LICENSING)
+                    .withLicensing(LicensingType.SELECTIVE_LICENCE, LicensingType.SELECTIVE_LICENCE.toString())
+                    .withLicensing(LicensingType.NO_LICENSING)
                     .build()
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
