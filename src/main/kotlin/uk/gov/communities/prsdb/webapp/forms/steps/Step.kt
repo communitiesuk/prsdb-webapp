@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.steps
 
 import org.springframework.validation.BindingResult
 import org.springframework.web.util.UriComponentsBuilder
+import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
@@ -12,7 +13,7 @@ import java.util.Optional
 open class Step<T : StepId>(
     val id: T,
     val page: AbstractPage,
-    val handleSubmitAndRedirect: ((journeyData: JourneyData, subPageNumber: Int?) -> String)? = null,
+    val handleSubmitAndRedirect: ((journeyData: JourneyData, subPageNumber: Int?, changingAnswersForStep: T?) -> String)? = null,
     val isSatisfied: (bindingResult: BindingResult) -> Boolean = { bindingResult -> page.isSatisfied(bindingResult) },
     val nextAction: (journeyData: JourneyData, subPageNumber: Int?) -> Pair<T?, Int?> = { _, _ ->
         Pair(
@@ -55,11 +56,13 @@ open class Step<T : StepId>(
         fun generateUrl(
             stepId: StepId,
             subPageNumber: Int?,
+            changingAnswersFor: StepId? = null,
         ): String =
             UriComponentsBuilder
                 .newInstance()
                 .path(stepId.urlPathSegment)
                 .queryParamIfPresent("subpage", Optional.ofNullable(subPageNumber))
+                .queryParamIfPresent(CHANGE_ANSWER_FOR_PARAMETER_NAME, Optional.ofNullable(changingAnswersFor?.urlPathSegment))
                 .build(true)
                 .toUriString()
     }

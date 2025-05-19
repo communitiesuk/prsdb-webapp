@@ -9,7 +9,7 @@
            th:text="${#messages.msgOrNull(value)} ?: ${{value}}">row.convertedFieldValue</p>
     </dd>
     <dd class="govuk-summary-list__actions">
-        <a th:if="${changeUrl} != null" class="govuk-link" th:href="@{${changeUrl}}" th:text="#{forms.links.change}">
+        <a th:if="${changeUrl} != null" class="govuk-link" th:href="@{${changeUrl} }" th:text="#{forms.links.change}">
             <span class="govuk-visually-hidden" th:text="#{${heading}}">fieldHeading</span>
         </a>
     </dd>

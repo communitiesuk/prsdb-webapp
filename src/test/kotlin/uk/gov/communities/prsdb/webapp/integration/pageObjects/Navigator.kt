@@ -2,12 +2,15 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.Response
+import com.microsoft.playwright.options.RequestOptions
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
+import uk.gov.communities.prsdb.webapp.constants.DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.constants.DETAILS_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
@@ -19,23 +22,27 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteIncompletePropertyRegistrationAreYouSurePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordUpdateDetailsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddressFormPageUpdateLandlordDetails
@@ -44,6 +51,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalAuthorityView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.CheckAnswersPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
@@ -66,12 +74,15 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.StartPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionMissingPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrIssueDatePagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrUploadPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcExemptionReasonPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionMissingPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionOtherReasonPagePropertyCompliance
@@ -102,7 +113,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.VerifiedIdentityModel
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
+import uk.gov.communities.prsdb.webapp.testHelpers.api.controllers.JourneyDataController
+import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyDataRequestModel
 import java.time.LocalDate
+import kotlin.test.assertTrue
 
 class Navigator(
     private val page: Page,
@@ -491,7 +505,7 @@ class Navigator(
                 GasSafetyExemptionMissingPagePropertyCompliance::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        gasSafetyExemptionMissingPage.saveAndReturnToTaskListButton.clickAndWait()
+        gasSafetyExemptionMissingPage.saveAndContinueToEicrButton.clickAndWait()
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.EICR.urlPathSegment}",
@@ -549,6 +563,36 @@ class Navigator(
         )
     }
 
+    fun goToPropertyComplianceEpcPage(propertyOwnershipId: Long): EpcPagePropertyCompliance {
+        val eicrExemptionPage = goToPropertyComplianceEicrExemptionPage(propertyOwnershipId)
+        eicrExemptionPage.submitHasNoExemption()
+
+        val eicrExemptionMissingPage =
+            createValidPage(
+                page,
+                EicrExemptionMissingPagePropertyCompliance::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+            )
+        eicrExemptionMissingPage.saveAndContinueToEicrButton.clickAndWait()
+
+        navigate(
+            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+                "/${PropertyComplianceStepId.EPC.urlPathSegment}",
+        )
+
+        return createValidPage(page, EpcPagePropertyCompliance::class, mapOf("propertyOwnershipId" to propertyOwnershipId.toString()))
+    }
+
+    fun goToPropertyComplianceEpcExemptionReasonPage(propertyOwnershipId: Long): EpcExemptionReasonPagePropertyCompliance {
+        val epcPage = goToPropertyComplianceEpcPage(propertyOwnershipId)
+        epcPage.submitCertNotRequired()
+        return createValidPage(
+            page,
+            EpcExemptionReasonPagePropertyCompliance::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
     fun goToLandlordDetails(): LandlordDetailsPage {
         navigate("/landlord-details")
         return createValidPage(page, LandlordDetailsPage::class)
@@ -557,6 +601,27 @@ class Navigator(
     fun goToLandlordDetailsAsALocalAuthorityUser(id: Long): LocalAuthorityViewLandlordDetailsPage {
         navigate("/landlord-details/$id")
         return createValidPage(page, LocalAuthorityViewLandlordDetailsPage::class)
+    }
+
+    fun goToUpdateLandlordDetailsUpdateLookupAddressPage(): LookupAddressFormPageUpdateLandlordDetails {
+        val detailsPage = goToLandlordDetails()
+        detailsPage.personalDetailsSummaryList.addressRow.actions.actionLink
+            .clickAndWait()
+        return createValidPage(page, LookupAddressFormPageUpdateLandlordDetails::class)
+    }
+
+    fun goToLandlordDetailsUpdateSelectAddressPage(): SelectAddressFormPageUpdateLandlordDetails {
+        val lookupAddressPage = goToUpdateLandlordDetailsUpdateLookupAddressPage()
+        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG", "1")
+        return createValidPage(page, SelectAddressFormPageUpdateLandlordDetails::class)
+    }
+
+    fun skipToLandlordDetailsUpdateNamePage() {
+        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LandlordDetailsUpdateStepId.UpdateName.urlPathSegment}")
+    }
+
+    fun skipToLandlordDetailsUpdateDateOfBirthPage() {
+        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LandlordDetailsUpdateStepId.UpdateDateOfBirth.urlPathSegment}")
     }
 
     fun goToPropertyDetailsLandlordView(id: Long): PropertyDetailsPageLandlordView {
@@ -575,18 +640,6 @@ class Navigator(
             PropertyDetailsPageLocalAuthorityView::class,
             mapOf("propertyOwnershipId" to id.toString()),
         )
-    }
-
-    fun goToUpdateLandlordDetailsPage(): LandlordUpdateDetailsPage {
-        navigate("${LandlordDetailsController.UPDATE_ROUTE}/$DETAILS_PATH_SEGMENT")
-        return createValidPage(page, LandlordUpdateDetailsPage::class)
-    }
-
-    fun goToUpdateLandlordDetailsLookupAddressPage(): LookupAddressFormPageUpdateLandlordDetails {
-        val detailsPage = goToUpdateLandlordDetailsPage()
-        detailsPage.personalDetailsSummaryList.addressRow.actions.actionLink
-            .clickAndWait()
-        return createValidPage(page, LookupAddressFormPageUpdateLandlordDetails::class)
     }
 
     fun skipToPropertyDetailsUpdateNumberOfHouseholdsPage(propertyOwnershipId: Long) {
@@ -637,10 +690,36 @@ class Navigator(
         return createValidPage(page, LandlordDashboardPage::class)
     }
 
+    fun goToLandlordIncompleteProperties(): LandlordIncompletePropertiesPage {
+        navigate(INCOMPLETE_PROPERTIES_URL)
+        return createValidPage(page, LandlordIncompletePropertiesPage::class)
+    }
+
+    fun goToDeleteIncompletePropertyRegistrationAreYouSurePage(contextId: String): DeleteIncompletePropertyRegistrationAreYouSurePage {
+        navigate(
+            "/$LANDLORD_PATH_SEGMENT/$DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT" +
+                "?$CONTEXT_ID_URL_PARAMETER=$contextId",
+        )
+        return createValidPage(page, DeleteIncompletePropertyRegistrationAreYouSurePage::class, mapOf("contextId" to contextId))
+    }
+
     fun goToInviteLaAdmin(): InviteLaAdminPage {
         navigate("/$SYSTEM_OPERATOR_PATH_SEGMENT/invite-la-admin")
         return createValidPage(page, InviteLaAdminPage::class)
     }
 
     fun navigate(path: String): Response? = page.navigate("http://localhost:$port$path")
+
+    fun setJourneyDataInSession(
+        journeyDataKey: String,
+        journeyData: JourneyData,
+    ) {
+        val response =
+            page.request().post(
+                "http://localhost:$port/${JourneyDataController.SET_JOURNEY_DATA_ROUTE}",
+                RequestOptions.create().setData(SetJourneyDataRequestModel(journeyDataKey, journeyData)),
+            )
+        assertTrue(response.ok(), "Failed to set journey data. Received status code: ${response.status()}")
+        response.dispose()
+    }
 }

@@ -17,8 +17,13 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
+import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.ConfirmedEmailRequestModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
@@ -29,9 +34,11 @@ import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 import java.security.Principal
 
-@PreAuthorize("hasRole('LA_ADMIN')")
+@PreAuthorize("hasAnyRole('LA_ADMIN', 'SYSTEM_OPERATOR')")
 @Controller
 @RequestMapping("/$LOCAL_AUTHORITY_PATH_SEGMENT/{localAuthorityId}")
 class ManageLocalAuthorityUsersController(
@@ -40,6 +47,8 @@ class ManageLocalAuthorityUsersController(
     var invitationService: LocalAuthorityInvitationService,
     val localAuthorityDataService: LocalAuthorityDataService,
     val absoluteUrlProvider: AbsoluteUrlProvider,
+    val localAuthorityService: LocalAuthorityService,
+    val securityContextService: SecurityContextService,
 ) {
     @GetMapping("/manage-users")
     fun index(
@@ -47,28 +56,33 @@ class ManageLocalAuthorityUsersController(
         model: Model,
         principal: Principal,
         @RequestParam(value = "page", required = false) @Min(1) page: Int = 1,
-        httpServletRequest: HttpServletRequest,
+        request: HttpServletRequest,
     ): String {
-        val (currentUser, currentUserLocalAuthority) =
-            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(localAuthorityId, principal.name)
+        val loggedInLaAdmin = getCurrentUserIfTheyAreAnLAAdminForTheCurrentLA(principal, localAuthorityId, request)
+
+        val localAuthority = getLocalAuthority(principal, localAuthorityId, request)
 
         val pagedUserList =
             localAuthorityDataService.getPaginatedUsersAndInvitations(
-                currentUserLocalAuthority,
+                localAuthority,
                 page - 1,
+                filterOutLaAdminInvitations = !request.isUserInRole(ROLE_SYSTEM_OPERATOR),
             )
 
-        if (pagedUserList.totalPages < page) {
+        if (pagedUserList.totalPages != 0 && pagedUserList.totalPages < page) {
             return "redirect:/local-authority/{localAuthorityId}/manage-users"
         }
 
-        model.addAttribute("currentUser", currentUser)
-        model.addAttribute("localAuthority", currentUserLocalAuthority)
+        model.addAttribute("currentUserId", loggedInLaAdmin?.id)
+        model.addAttribute("localAuthority", localAuthority)
         model.addAttribute("userList", pagedUserList)
         model.addAttribute(
             "paginationViewModel",
-            PaginationViewModel(page, pagedUserList.totalPages, httpServletRequest),
+            PaginationViewModel(page, pagedUserList.totalPages, request),
         )
+        model.addAttribute("userCanEditTheirOwnAccount", request.isUserInRole(ROLE_SYSTEM_OPERATOR))
+
+        // TODO: PRSD-672 - if the user is not an la admin, make this a link to the system operator dashboard
         model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
 
         return "manageLAUsers"
@@ -80,15 +94,9 @@ class ManageLocalAuthorityUsersController(
         @PathVariable localAuthorityUserId: Long,
         principal: Principal,
         model: Model,
+        request: HttpServletRequest,
     ): String {
-        val (currentUser, _) =
-            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
-                localAuthorityId,
-                principal.name,
-            )
-        if (currentUser.id == localAuthorityUserId) {
-            throw AccessDeniedException("Local authority users cannot edit their own accounts; another admin must do so")
-        }
+        throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, localAuthorityUserId, request)
 
         val localAuthorityUser =
             localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
@@ -122,15 +130,10 @@ class ManageLocalAuthorityUsersController(
         @PathVariable localAuthorityUserId: Long,
         @ModelAttribute localAuthorityUserAccessLevel: LocalAuthorityUserAccessLevelRequestModel,
         principal: Principal,
+        request: HttpServletRequest,
     ): String {
-        val (currentUser, _) =
-            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
-                localAuthorityId,
-                principal.name,
-            )
-        if (currentUser.id == localAuthorityUserId) {
-            throw AccessDeniedException("Local authority users cannot edit their own accounts; another admin must do so")
-        }
+        throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, localAuthorityUserId, request)
+
         localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
 
         localAuthorityDataService.updateUserAccessLevel(localAuthorityUserAccessLevel, localAuthorityUserId)
@@ -143,15 +146,10 @@ class ManageLocalAuthorityUsersController(
         @PathVariable localAuthorityUserId: Long,
         model: Model,
         principal: Principal,
+        request: HttpServletRequest,
     ): String {
-        val (currentUser, _) =
-            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
-                localAuthorityId,
-                principal.name,
-            )
-        if (currentUser.id == localAuthorityUserId) {
-            throw AccessDeniedException("Local authority users cannot delete their own accounts; another admin must do so")
-        }
+        throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, localAuthorityUserId, request)
+
         val userToDelete =
             localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
         model.addAttribute("user", userToDelete)
@@ -165,16 +163,22 @@ class ManageLocalAuthorityUsersController(
         @PathVariable localAuthorityUserId: Long,
         principal: Principal,
         redirectAttributes: RedirectAttributes,
+        request: HttpServletRequest,
     ): String {
-        val (currentUser, _) =
-            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
-                localAuthorityId,
-                principal.name,
-            )
-        if (currentUser.id == localAuthorityUserId) {
-            throw AccessDeniedException("Local authority users cannot delete their own accounts; another admin must do so")
-        }
+        throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, localAuthorityUserId, request)
         val user = localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
+
+        if (request.isUserInRole(ROLE_SYSTEM_OPERATOR) &&
+            (request.isUserInRole(ROLE_LA_ADMIN) || request.isUserInRole(ROLE_LA_USER))
+        ) {
+            // If the user is a system operator they can delete themself from the local_authority_user table
+            // If this happens we will need to update their user roles as the Manage LA Users page
+            // will throw an error if they have the LA_ADMIN role but are no longer in the local_authority_users table.
+            val currentUser = localAuthorityDataService.getLocalAuthorityUser(principal.name)
+            if (currentUser.id == user.id) {
+                redirectAttributes.addFlashAttribute("currentUserDeletedThemself", true)
+            }
+        }
 
         localAuthorityDataService.deleteUser(localAuthorityUserId)
 
@@ -187,13 +191,14 @@ class ManageLocalAuthorityUsersController(
         @PathVariable localAuthorityId: Int,
         model: Model,
         principal: Principal,
+        request: HttpServletRequest,
     ): String {
-        val (_, authority) =
-            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
-                localAuthorityId,
-                principal.name,
-            )
-        model.addAttribute("localAuthority", authority)
+        model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId, request))
+
+        if (model.getAttribute("currentUserDeletedThemself") == true) {
+            // This will only update the roles of the current user so is only needed if they have deleted themself.
+            securityContextService.refreshContext()
+        }
         return "deleteLAUserSuccess"
     }
 
@@ -202,13 +207,9 @@ class ManageLocalAuthorityUsersController(
         @PathVariable localAuthorityId: Int,
         model: Model,
         principal: Principal,
+        request: HttpServletRequest,
     ): String {
-        val (_, currentAuthority) =
-            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
-                localAuthorityId,
-                principal.name,
-            )
-        model.addAttribute("councilName", currentAuthority.name)
+        model.addAttribute("councilName", getLocalAuthority(principal, localAuthorityId, request).name)
         model.addAttribute("confirmedEmailRequestModel", ConfirmedEmailRequestModel())
 
         return "inviteLAUser"
@@ -224,12 +225,9 @@ class ManageLocalAuthorityUsersController(
         bindingResult: BindingResult,
         principal: Principal,
         redirectAttributes: RedirectAttributes,
+        request: HttpServletRequest,
     ): String {
-        val (_, currentAuthority) =
-            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
-                localAuthorityId,
-                principal.name,
-            )
+        val currentAuthority = getLocalAuthority(principal, localAuthorityId, request)
         model.addAttribute("councilName", currentAuthority.name)
 
         if (bindingResult.hasErrors()) {
@@ -257,13 +255,9 @@ class ManageLocalAuthorityUsersController(
         @PathVariable localAuthorityId: Int,
         principal: Principal,
         model: Model,
+        request: HttpServletRequest,
     ): String {
-        val (_, currentAuthority) =
-            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
-                localAuthorityId,
-                principal.name,
-            )
-        model.addAttribute("localAuthority", currentAuthority)
+        model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId, request))
         model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
         return "inviteLAUserSuccess"
     }
@@ -274,18 +268,16 @@ class ManageLocalAuthorityUsersController(
         @PathVariable invitationId: Long,
         principal: Principal,
         model: Model,
+        request: HttpServletRequest,
     ): String {
         val invitation = invitationService.getInvitationById(invitationId)
 
-        val (_, authority) =
-            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
-                localAuthorityId,
-                principal.name,
-            )
+        val authority = getLocalAuthority(principal, localAuthorityId, request)
 
         if (authority.id != invitation.invitingAuthority.id) {
             throw AccessDeniedException(
-                "Local authority user for LA ${authority.name} tried to cancel an invitation from LA ${invitation.invitingAuthority.name}",
+                "A user on the Manage LA Users page for ${authority.name} tried to cancel an invitation " +
+                    "from LA ${invitation.invitingAuthority.name}",
             )
         }
 
@@ -319,4 +311,59 @@ class ManageLocalAuthorityUsersController(
         @PathVariable localAuthorityId: String,
         model: Model,
     ): String = "cancelLAUserInvitationSuccess"
+
+    private fun throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(
+        principal: Principal,
+        localAuthorityId: Int,
+        localAuthorityUserId: Long,
+        request: HttpServletRequest,
+    ) {
+        if (!request.isUserInRole(ROLE_SYSTEM_OPERATOR)) {
+            val (currentUser, _) =
+                localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+                    localAuthorityId,
+                    principal.name,
+                )
+            if (currentUser.id == localAuthorityUserId) {
+                throw AccessDeniedException("Local authority users cannot edit their own accounts; another admin must do so")
+            }
+        }
+    }
+
+    private fun getLocalAuthority(
+        principal: Principal,
+        localAuthorityId: Int,
+        request: HttpServletRequest,
+    ): LocalAuthority =
+        if (request.isUserInRole(ROLE_SYSTEM_OPERATOR)) {
+            localAuthorityService.retrieveLocalAuthorityById(localAuthorityId)
+        } else {
+            val laUserAndla =
+                localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+                    localAuthorityId,
+                    principal.name,
+                )
+            laUserAndla.second
+        }
+
+    private fun getCurrentUserIfTheyAreAnLAAdminForTheCurrentLA(
+        principal: Principal,
+        localAuthorityId: Int,
+        request: HttpServletRequest,
+    ): LocalAuthorityUserDataModel? {
+        if (!request.isUserInRole(ROLE_LA_ADMIN)) {
+            return null
+        }
+        try {
+            val (currentUser, _) =
+                localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+                    localAuthorityId,
+                    principal.name,
+                )
+            return currentUser
+        } catch (exception: AccessDeniedException) {
+            // This is expected if the user is not an admin for the current LA
+            return null
+        }
+    }
 }

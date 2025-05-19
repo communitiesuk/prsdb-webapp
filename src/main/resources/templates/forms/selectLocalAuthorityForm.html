@@ -17,6 +17,6 @@
         </p>
         <select th:replace="~{fragments/forms/select :: select(#{${selectLabel}},'localAuthorityId',null, ${selectOptions})}"></select>
     </fieldset>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
 </th:block>
 </html>

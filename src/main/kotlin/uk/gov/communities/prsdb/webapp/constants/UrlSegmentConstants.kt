@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.constants
 
 const val UPDATE_PATH_SEGMENT = "update"
-const val DETAILS_PATH_SEGMENT = "details"
 const val LANDLORD_DETAILS_PATH_SEGMENT = "landlord-details"
 const val PROPERTY_DETAILS_SEGMENT = "property-details"
 const val LOCAL_AUTHORITY_PATH_SEGMENT = "local-authority"
@@ -18,3 +17,4 @@ const val RESUME_PAGE_PATH_SEGMENT = "resume"
 const val INCOMPLETE_PROPERTIES_PATH_SEGMENT = "incomplete-properties"
 const val SYSTEM_OPERATOR_PATH_SEGMENT = "system-operator"
 const val INVITE_LA_ADMIN_PATH_SEGMENT = "invite-la-admin"
+const val DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT = "delete-incomplete-property"

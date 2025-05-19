@@ -67,6 +67,8 @@ class PropertyRegistrationJourney(
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
+    override val stepRouter = GroupedStepRouter(this)
+    override val checkYourAnswersStepId = RegisterPropertyStepId.CheckAnswers
     override val sections =
         listOf(
             JourneySection(registerPropertyTasks(), "registerProperty.taskList.register.heading", "register-property"),
@@ -159,7 +161,7 @@ class PropertyRegistrationJourney(
                             "postcodeHint" to "forms.lookupAddress.postcode.hint",
                             "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
                             "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
-                            "submitButtonText" to "forms.buttons.saveAndContinue",
+                            "submitButtonText" to "forms.buttons.continue",
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
@@ -167,6 +169,7 @@ class PropertyRegistrationJourney(
             nextStepIfNoAddressesFound = RegisterPropertyStepId.NoAddressFound,
             addressLookupService = addressLookupService,
             journeyDataService = journeyDataService,
+            saveAfterSubmit = false,
         )
 
     private fun selectAddressStep() =
@@ -195,6 +198,7 @@ class PropertyRegistrationJourney(
                     propertyRegistrationService,
                 )
             },
+            saveAfterSubmit = false,
         )
 
     private fun alreadyRegisteredStep() =
@@ -213,6 +217,7 @@ class PropertyRegistrationJourney(
                         ),
                     selectedAddressPathSegment = RegisterPropertyStepId.SelectAddress.urlPathSegment,
                 ),
+            saveAfterSubmit = false,
         )
 
     private fun noAddressFoundStep() =
@@ -234,6 +239,7 @@ class PropertyRegistrationJourney(
                     shouldDisplaySectionHeader = true,
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.ManualAddress, null) },
+            saveAfterSubmit = false,
         )
 
     private fun getHouseNameOrNumberAndPostcode() =
@@ -260,11 +266,12 @@ class PropertyRegistrationJourney(
                             "townOrCityLabel" to "forms.manualAddress.townOrCity.label",
                             "countyLabel" to "forms.manualAddress.county.label",
                             "postcodeLabel" to "forms.manualAddress.postcode.label",
-                            "submitButtonText" to "forms.buttons.saveAndContinue",
+                            "submitButtonText" to "forms.buttons.continue",
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.LocalAuthority, null) },
+            saveAfterSubmit = false,
         )
 
     private fun localAuthorityStep() =
@@ -284,6 +291,7 @@ class PropertyRegistrationJourney(
                     displaySectionHeader = true,
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.PropertyType, null) },
+            saveAfterSubmit = false,
         )
 
     private fun propertyTypeStep() =
@@ -571,7 +579,7 @@ class PropertyRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
-            handleSubmitAndRedirect = { _, _ -> checkAnswersSubmitAndRedirect() },
+            handleSubmitAndRedirect = { _, _, _ -> checkAnswersSubmitAndRedirect() },
         )
 
     private fun occupancyNextAction(journeyData: JourneyData): Pair<RegisterPropertyStepId, Int?> =

@@ -331,7 +331,8 @@ class LandlordViewModelTests {
             listOf(
                 "landlordDetails.personalDetails.emailAddress",
                 "landlordDetails.personalDetails.telephoneNumber",
-                "landlordDetails.personalDetails.contactAddress",
+                // TODO PRSD-355 (address update): uncomment
+                // "landlordDetails.personalDetails.contactAddress",
             )
         val changeableByUnverifiedLandlordsPersonalDetailKeys =
             listOf(
@@ -360,8 +361,7 @@ class LandlordViewModelTests {
                 assertNotNull(i.changeUrl)
             }
             for (i in viewModel.personalDetails.filter { detail ->
-                detail.fieldHeading !in
-                    changeableByAllLandlordsPersonalDetailKeys + changeableByUnverifiedLandlordsPersonalDetailKeys
+                detail.fieldHeading !in changeableByAllLandlordsPersonalDetailKeys + changeableByUnverifiedLandlordsPersonalDetailKeys
             }) {
                 assertNull(i.changeUrl)
             }

@@ -26,11 +26,12 @@ class LookupAddressStep<T : StepId>(
             Pair(getNextStep(journeyData, nextStepIfAddressesFound, nextStepIfNoAddressesFound), subPageNumber)
         },
         saveAfterSubmit = saveAfterSubmit,
-        handleSubmitAndRedirect = { journeyData: JourneyData, subPageNumber: Int? ->
+        handleSubmitAndRedirect = { journeyData: JourneyData, subPageNumber: Int?, changingAnswersForStep: T? ->
             performAddressLookupCacheResultsAndGetRedirect(
                 journeyData,
                 subPageNumber,
                 id,
+                changingAnswersForStep,
                 nextStepIfAddressesFound,
                 nextStepIfNoAddressesFound,
                 journeyDataService,
@@ -54,6 +55,7 @@ class LookupAddressStep<T : StepId>(
             journeyData: JourneyData,
             subPageNumber: Int?,
             id: T,
+            changingAnswersForStep: T?,
             nextStepIfAddressesFound: T,
             nextStepIfNoAddressesFound: T,
             journeyDataService: JourneyDataService,
@@ -71,7 +73,7 @@ class LookupAddressStep<T : StepId>(
 
             val nextStepId = getNextStep(updatedJourneyData, nextStepIfAddressesFound, nextStepIfNoAddressesFound)
 
-            return Step.generateUrl(nextStepId, subPageNumber)
+            return Step.generateUrl(nextStepId, subPageNumber, changingAnswersForStep)
         }
     }
 }
