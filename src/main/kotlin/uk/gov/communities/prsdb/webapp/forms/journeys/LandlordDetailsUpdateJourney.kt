@@ -44,7 +44,7 @@ class LandlordDetailsUpdateJourney(
     private val landlordService: LandlordService,
     private val landlordBaseUserId: String,
     stepName: String,
-) : UpdateJourney<LandlordDetailsUpdateStepId>(
+) : GroupedUpdateJourney<LandlordDetailsUpdateStepId>(
         journeyType = JourneyType.LANDLORD_DETAILS_UPDATE,
         initialStepId = LandlordDetailsUpdateStepId.UpdateEmail,
         validator = validator,

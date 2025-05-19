@@ -47,7 +47,7 @@ class PropertyDetailsUpdateJourney(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyOwnershipId: Long,
     stepName: String,
-) : UpdateJourney<UpdatePropertyDetailsStepId>(
+) : GroupedUpdateJourney<UpdatePropertyDetailsStepId>(
         journeyType = JourneyType.PROPERTY_DETAILS_UPDATE,
         initialStepId = UpdatePropertyDetailsStepId.UpdateOwnershipType,
         validator = validator,

@@ -7,17 +7,17 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.ReachableStepDetailsIterator
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
-import uk.gov.communities.prsdb.webapp.forms.steps.UpdateStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import java.security.Principal
 
-abstract class UpdateJourney<T : UpdateStepId<*>>(
+abstract class UpdateJourney<T : StepId>(
     journeyType: JourneyType,
     initialStepId: T,
     validator: Validator,
     journeyDataService: JourneyDataService,
-    private val stepName: String,
+    protected val stepName: String,
 ) : Journey<T>(journeyType, initialStepId, validator, journeyDataService) {
     companion object {
         fun getOriginalJourneyDataKey(journeyDataService: JourneyDataService) = "ORIGINAL_${journeyDataService.journeyDataKey}"
@@ -25,15 +25,7 @@ abstract class UpdateJourney<T : UpdateStepId<*>>(
 
     protected val originalDataKey = getOriginalJourneyDataKey(journeyDataService)
 
-    abstract override val stepRouter: GroupedStepRouter<T>
-
     abstract override val unreachableStepRedirect: String
-
-    override val checkYourAnswersStepId: T?
-        get() {
-            val currentStepId = steps.singleOrNull { it.id.urlPathSegment == stepName }?.id ?: return null
-            return steps.singleOrNull { it.id.isCheckYourAnswersStepId && it.id.groupIdentifier == currentStepId.groupIdentifier }?.id
-        }
 
     protected abstract fun createOriginalJourneyData(): JourneyData
 
@@ -45,14 +37,13 @@ abstract class UpdateJourney<T : UpdateStepId<*>>(
         }
     }
 
-    fun getModelAndViewForStep(changingAnswersForStep: String? = null): ModelAndView =
-        getModelAndViewForStep(stepName, null, null, changingAnswersForStep)
+    fun getModelAndViewForStep(submittedPageData: PageData? = null): ModelAndView =
+        getModelAndViewForStep(stepName, null, submittedPageData, null)
 
     fun completeStep(
         formData: PageData,
         principal: Principal,
-        changingAnswersForStep: String? = null,
-    ): ModelAndView = completeStep(stepName, formData, null, principal, changingAnswersForStep)
+    ): ModelAndView = completeStep(stepName, formData, null, principal, null)
 
     override fun iterator(): Iterator<StepDetails<T>> {
         val journeyData = journeyDataService.getJourneyDataFromSession()

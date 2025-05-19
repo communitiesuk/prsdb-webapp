@@ -4,7 +4,7 @@ enum class LandlordDetailsUpdateStepId(
     override val urlPathSegment: String,
     override val groupIdentifier: UpdateLandlordDetailsStepGroupIdentifier,
     override val isCheckYourAnswersStepId: Boolean = false,
-) : UpdateStepId<UpdateLandlordDetailsStepGroupIdentifier> {
+) : GroupedUpdateStepId<UpdateLandlordDetailsStepGroupIdentifier> {
     UpdateEmail("email", UpdateLandlordDetailsStepGroupIdentifier.Email),
     UpdateName("name", UpdateLandlordDetailsStepGroupIdentifier.Name),
     UpdateDateOfBirth("date-of-birth", UpdateLandlordDetailsStepGroupIdentifier.DateOfBirth),
