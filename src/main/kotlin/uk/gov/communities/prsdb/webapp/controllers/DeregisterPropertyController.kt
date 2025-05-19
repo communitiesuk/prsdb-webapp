@@ -146,12 +146,12 @@ class DeregisterPropertyController(
     companion object {
         const val PROPERTY_DEREGISTRATION_ROUTE = "/$DEREGISTER_PROPERTY_JOURNEY_URL/{propertyOwnershipId}"
 
-        fun getPropertyDeregistrationPath(propertyOwnershipId: Long): String {
-            val initialStepPathSegment = PropertyDeregistrationJourney.initialStepId.urlPathSegment
-
-            return UriTemplate("$PROPERTY_DEREGISTRATION_ROUTE/$initialStepPathSegment")
+        fun getPropertyDeregistrationBasePath(propertyOwnershipId: Long): String =
+            UriTemplate(PROPERTY_DEREGISTRATION_ROUTE)
                 .expand(propertyOwnershipId)
                 .toASCIIString()
-        }
+
+        fun getPropertyDeregistrationPath(propertyOwnershipId: Long): String =
+            "${getPropertyDeregistrationBasePath(propertyOwnershipId)}/${PropertyDeregistrationJourney.initialStepId.urlPathSegment}"
     }
 }

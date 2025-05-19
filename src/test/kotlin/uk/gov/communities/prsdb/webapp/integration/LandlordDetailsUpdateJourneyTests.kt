@@ -76,7 +76,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
             assertThat(landlordDetailsPage.personalDetailsSummaryList.nameRow.actions.actionLink).isHidden()
 
             // Check update name page can't be reached
-            navigator.skipToLandlordDetailsUpdateNamePage()
+            navigator.navigateToLandlordDetailsUpdateNamePage()
             assertPageIs(page, LandlordDetailsPage::class)
         }
     }
@@ -109,7 +109,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
             assertThat(landlordDetailsPage.personalDetailsSummaryList.dateOfBirthRow.actions.actionLink).isHidden()
 
             // Check update date of birth page can't be reached
-            navigator.skipToLandlordDetailsUpdateDateOfBirthPage()
+            navigator.navigateToLandlordDetailsUpdateDateOfBirthPage()
             assertPageIs(page, LandlordDetailsPage::class)
         }
     }
@@ -209,7 +209,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
 
         @Test
         fun `A landlord can search again via the Select Address page`(page: Page) {
-            val selectAddressPage = navigator.goToLandlordRegistrationSelectAddressPage()
+            val selectAddressPage = navigator.skipToLandlordDetailsUpdateSelectAddressPage()
             selectAddressPage.searchAgain.clickAndWait()
             assertPageIs(page, LookupAddressFormPageUpdateLandlordDetails::class)
         }

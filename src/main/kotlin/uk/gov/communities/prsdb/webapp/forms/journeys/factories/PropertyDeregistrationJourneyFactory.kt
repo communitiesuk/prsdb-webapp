@@ -21,10 +21,14 @@ class PropertyDeregistrationJourneyFactory(
     fun create(propertyOwnershipId: Long) =
         PropertyDeregistrationJourney(
             validator,
-            journeyDataServiceFactory.create(DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId)),
+            journeyDataServiceFactory.create(getJourneyKey(propertyOwnershipId)),
             propertyOwnershipService,
             propertyDeregistrationService,
             confirmationEmailSender,
             propertyOwnershipId,
         )
+
+    companion object {
+        fun getJourneyKey(propertyOwnershipId: Long) = DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId)
+    }
 }
