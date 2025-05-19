@@ -38,6 +38,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormM
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionOtherReasonFormModel
@@ -180,8 +181,9 @@ class PropertyComplianceJourney(
                     placeholderStep(
                         PropertyComplianceStepId.CheckMatchedEpc,
                         "TODO PRSD-1132: Implement Check Matched EPC step",
-                        PropertyComplianceStepId.FireSafetyDeclaration,
+                        PropertyComplianceStepId.EpcLookup,
                     ),
+                    epcLookupStep,
                     epcMissingStep,
                     epcExemptionReasonStep,
                     epcExemptionConfirmationStep,
@@ -785,6 +787,27 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
+            )
+
+    private val epcLookupStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EpcLookup,
+                page =
+                    Page(
+                        formModel = EpcLookupFormModel::class,
+                        templateName = "forms/epcLookupForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.epcLookup.fieldSetHeading",
+                                "fieldSetHint" to "forms.epcLookup.fieldSetHint",
+                                "findEpcUrl" to FIND_EPC_URL,
+                                "getNewEpcUrl" to GET_NEW_EPC_URL,
+                            ),
+                    ),
+                // nextAction
+                // handleSubmitAndRedirect
             )
 
     private fun placeholderStep(
