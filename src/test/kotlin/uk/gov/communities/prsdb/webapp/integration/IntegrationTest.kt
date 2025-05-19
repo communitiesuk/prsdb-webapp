@@ -2,16 +2,12 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.junit.UsePlaywright
-import org.flywaydb.core.Flyway
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.TestInfo
+import org.junit.jupiter.api.TestInstance
 import org.mockito.kotlin.whenever
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Import
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.test.context.ActiveProfiles
@@ -25,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.config.OSPlacesConfig
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.Navigator
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
-import uk.gov.communities.prsdb.webapp.testHelpers.IntegrationTestHelper
 import uk.gov.service.notify.NotificationClient
 
 @Import(TestcontainersConfiguration::class)
@@ -33,6 +28,7 @@ import uk.gov.service.notify.NotificationClient
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = ["spring.flyway.clean-disabled=false"],
 )
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @UsePlaywright
 @ActiveProfiles(profiles = ["local", "local-no-auth"])
 abstract class IntegrationTest {
@@ -105,31 +101,6 @@ abstract class IntegrationTest {
         navigator = Navigator(page, port)
     }
 
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun setUpBeforeAll(
-            @Autowired flyway: Flyway,
-            @Autowired jdbcTemplate: JdbcTemplate,
-            testInfo: TestInfo,
-        ) {
-            IntegrationTestHelper.resetDatabase(flyway)
-            IntegrationTestHelper.seedDatabaseBeforeAll(testInfo, jdbcTemplate)
-        }
-    }
-
-    abstract class NestedTestWithSeedData {
-        companion object {
-            @JvmStatic
-            @BeforeAll
-            fun setUpBeforeAll(
-                @Autowired flyway: Flyway,
-                @Autowired jdbcTemplate: JdbcTemplate,
-                testInfo: TestInfo,
-            ) {
-                IntegrationTestHelper.resetDatabase(flyway)
-                IntegrationTestHelper.seedDatabaseBeforeAll(testInfo, jdbcTemplate)
-            }
-        }
-    }
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    abstract class NestedIntegrationTestWithSeedData
 }
