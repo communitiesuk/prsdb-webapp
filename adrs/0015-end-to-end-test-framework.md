@@ -2,7 +2,9 @@
 
 ## Status
 
-Proposed
+Accepted
+
+Date of decision: 2024 Q4
 
 ## Context and Problem Statement
 

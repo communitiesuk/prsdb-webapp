@@ -44,7 +44,7 @@ class LandlordDetailsUpdateJourney(
     private val landlordService: LandlordService,
     private val landlordBaseUserId: String,
     stepName: String,
-) : UpdateJourney<LandlordDetailsUpdateStepId>(
+) : GroupedUpdateJourney<LandlordDetailsUpdateStepId>(
         journeyType = JourneyType.LANDLORD_DETAILS_UPDATE,
         initialStepId = LandlordDetailsUpdateStepId.UpdateEmail,
         validator = validator,
@@ -54,6 +54,10 @@ class LandlordDetailsUpdateJourney(
     init {
         initializeJourneyDataIfNotInitialized()
     }
+
+    override val stepRouter = GroupedStepRouter(this)
+
+    override val unreachableStepRedirect = LandlordDetailsController.LANDLORD_DETAILS_ROUTE
 
     override fun createOriginalJourneyData(): JourneyData {
         val landlord = landlordService.retrieveLandlordByBaseUserId(landlordBaseUserId)!!

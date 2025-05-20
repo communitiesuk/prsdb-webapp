@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.CheckLicensingPage
@@ -46,7 +47,7 @@ class PropertyDetailsUpdateJourney(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyOwnershipId: Long,
     stepName: String,
-) : UpdateJourney<UpdatePropertyDetailsStepId>(
+) : GroupedUpdateJourney<UpdatePropertyDetailsStepId>(
         journeyType = JourneyType.PROPERTY_DETAILS_UPDATE,
         initialStepId = UpdatePropertyDetailsStepId.UpdateOwnershipType,
         validator = validator,
@@ -56,6 +57,10 @@ class PropertyDetailsUpdateJourney(
     init {
         initializeJourneyDataIfNotInitialized()
     }
+
+    override val stepRouter = GroupedStepRouter(this)
+
+    override val unreachableStepRedirect = PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)
 
     override fun createOriginalJourneyData(): JourneyData {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)

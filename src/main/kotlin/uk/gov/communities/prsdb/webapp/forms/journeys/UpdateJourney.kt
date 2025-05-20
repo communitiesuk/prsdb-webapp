@@ -17,7 +17,7 @@ abstract class UpdateJourney<T : StepId>(
     initialStepId: T,
     validator: Validator,
     journeyDataService: JourneyDataService,
-    private val stepName: String,
+    protected val stepName: String,
 ) : Journey<T>(journeyType, initialStepId, validator, journeyDataService) {
     companion object {
         fun getOriginalJourneyDataKey(journeyDataService: JourneyDataService) = "ORIGINAL_${journeyDataService.journeyDataKey}"
@@ -25,7 +25,7 @@ abstract class UpdateJourney<T : StepId>(
 
     protected val originalDataKey = getOriginalJourneyDataKey(journeyDataService)
 
-    override val unreachableStepRedirect get() = last().step.id.urlPathSegment
+    abstract override val unreachableStepRedirect: String
 
     protected abstract fun createOriginalJourneyData(): JourneyData
 
@@ -38,12 +38,12 @@ abstract class UpdateJourney<T : StepId>(
     }
 
     fun getModelAndViewForStep(submittedPageData: PageData? = null): ModelAndView =
-        getModelAndViewForStep(stepName, null, submittedPageData)
+        getModelAndViewForStep(stepName, null, submittedPageData, null)
 
     fun completeStep(
         formData: PageData,
         principal: Principal,
-    ): ModelAndView = completeStep(stepName, formData, null, principal)
+    ): ModelAndView = completeStep(stepName, formData, null, principal, null)
 
     override fun iterator(): Iterator<StepDetails<T>> {
         val journeyData = journeyDataService.getJourneyDataFromSession()
