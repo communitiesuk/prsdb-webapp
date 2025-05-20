@@ -228,7 +228,11 @@ class PropertyDetailsControllerTests(
             whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(eq(propertyOwnership.id), any())).thenReturn(true)
 
             whenever(
-                propertyDetailsUpdateJourney.completeStep(argThat { pageData -> pageData["ownershipType"] == "FREEHOLD" }, any()),
+                propertyDetailsUpdateJourney.completeStep(
+                    argThat { pageData -> pageData["ownershipType"] == "FREEHOLD" },
+                    argThat { principal -> principal.name == "user" },
+                    eq(null),
+                ),
             ).thenReturn(ModelAndView("redirect:$propertyDetailsPath"))
 
             mvc
