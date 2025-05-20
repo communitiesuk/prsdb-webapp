@@ -2,15 +2,13 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import kotlin.test.Test
 
-@Sql("/data-local.sql")
-class LocalAuthorityDashboardTests : IntegrationTest() {
+class LocalAuthorityDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
     @Test
     fun `the dashboard loads displaying the user's name and local authority`(page: Page) {
         val dashboard = navigator.goToLocalAuthorityDashboard()

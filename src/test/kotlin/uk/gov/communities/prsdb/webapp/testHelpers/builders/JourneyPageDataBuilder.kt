@@ -75,7 +75,7 @@ class JourneyPageDataBuilder {
 
         fun beforePropertyRegistrationHouseholds() = beforePropertyRegistrationOccupancy().withOccupancyStatus(true)
 
-        fun beforePropertyRegistrationPeople() = beforePropertyRegistrationOccupancy().withTenants(people = null)
+        fun beforePropertyRegistrationPeople() = beforePropertyRegistrationHouseholds().withHouseholds()
 
         fun beforePropertyRegistrationCheckAnswers() = beforePropertyRegistrationOccupancy().withOccupancyStatus(false)
 

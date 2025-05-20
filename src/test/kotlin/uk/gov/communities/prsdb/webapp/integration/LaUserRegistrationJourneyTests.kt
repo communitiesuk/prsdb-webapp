@@ -4,19 +4,16 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
-import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.CheckAnswersPageLaUserRegistration
@@ -26,8 +23,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegis
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 
-@Sql("/data-mockuser-not-lauser.sql")
-class LaUserRegistrationJourneyTests : IntegrationTest() {
+class LaUserRegistrationJourneyTests : JourneyTestWithSeedData("data-mockuser-not-lauser.sql") {
     @Autowired
     lateinit var localAuthorityService: LocalAuthorityService
 
@@ -98,62 +94,5 @@ class LaUserRegistrationJourneyTests : IntegrationTest() {
         val dashboard = assertPageIs(page, LocalAuthorityDashboardPage::class)
 
         assertThat(dashboard.bannerSubHeading).containsText("Local authority")
-    }
-
-    @Nested
-    inner class LaUserRegistrationStepName {
-        @Test
-        fun `Submitting an empty name returns an error`() {
-            val namePage = navigator.skipToLaUserRegistrationNameFormPage(invitation.token)
-            namePage.submitName("")
-            assertThat(namePage.form.getErrorMessage()).containsText("You must enter your full name")
-        }
-    }
-
-    @Nested
-    inner class LaUserRegistrationStepEmail {
-        @Test
-        fun `Submitting an empty e-mail address returns an error`() {
-            val emailPage = navigator.skipToLaUserRegistrationEmailFormPage(invitation.token)
-            emailPage.submitEmail("")
-            assertThat(emailPage.form.getErrorMessage())
-                .containsText("Enter a valid email address to continue. An email is required for contact purposes.")
-        }
-
-        @Test
-        fun `Submitting an invalid e-mail address returns an error`() {
-            val emailPage = navigator.skipToLaUserRegistrationEmailFormPage(invitation.token)
-            emailPage.submitEmail("notAnEmail")
-            assertThat(emailPage.form.getErrorMessage()).containsText("Enter an email address in the right format")
-        }
-    }
-
-    @Nested
-    inner class LaUserRegistrationCheckAnswers {
-        @Test
-        fun `Change Name link navigates to the name step`(page: Page) {
-            val checkAnswersPage = navigator.skipToLaUserRegistrationCheckAnswersPage(invitation.token)
-            checkAnswersPage.form.summaryList.nameRow
-                .clickActionLinkAndWait()
-            assertPageIs(page, NameFormPageLaUserRegistration::class)
-        }
-
-        @Test
-        fun `Change Email link navigates to the email step`(page: Page) {
-            val checkAnswersPage = navigator.skipToLaUserRegistrationCheckAnswersPage(invitation.token)
-            checkAnswersPage.form.summaryList.emailRow
-                .clickActionLinkAndWait()
-            assertPageIs(page, EmailFormPageLaUserRegistration::class)
-        }
-    }
-
-    @Nested
-    inner class LaUserRegistrationSuccess {
-        @Test
-        fun `Navigating directly to here with an incomplete form returns a 400 error page`(page: Page) {
-            navigator.navigateToLaUserRegistrationConfirmationPage()
-            val errorPage = assertPageIs(page, ErrorPage::class)
-            assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
-        }
     }
 }

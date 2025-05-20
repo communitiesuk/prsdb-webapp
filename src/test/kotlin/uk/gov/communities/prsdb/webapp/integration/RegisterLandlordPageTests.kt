@@ -4,10 +4,10 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import com.microsoft.playwright.options.AriaRole
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
-import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -15,8 +15,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.VerifiedI
 import java.net.URI
 import java.time.LocalDate
 
-@Sql("/data-mockuser-not-landlord.sql")
-class RegisterLandlordPageTests : IntegrationTest() {
+class RegisterLandlordPageTests : SinglePageTestWithSeedData("data-mockuser-not-landlord.sql") {
     @Test
     fun `registerAsALandlord page renders`(page: Page) {
         page.navigate("http://localhost:$port/register-as-a-landlord")
@@ -46,12 +45,14 @@ class RegisterLandlordPageTests : IntegrationTest() {
         assertEquals("/register-as-a-landlord/confirm-identity", URI(page.url()).path)
     }
 
-    @Test
-    @Sql("/data-local.sql")
-    fun `the 'Start Now' button directs a registered landlord to the landlord dashboard page`(page: Page) {
-        val startPage = navigator.goToLandlordRegistrationStartPage()
-        startPage.startButton.clickAndWait()
-        val dashboardPage = assertPageIs(page, LandlordDashboardPage::class)
-        BaseComponent.assertThat(dashboardPage.dashboardBannerHeading).containsText("Alexander Smith")
+    @Nested
+    inner class AlreadyRegistered : NestedSinglePageTestWithSeedData("data-local.sql") {
+        @Test
+        fun `the 'Start Now' button directs a registered landlord to the landlord dashboard page`(page: Page) {
+            val startPage = navigator.goToLandlordRegistrationStartPage()
+            startPage.startButton.clickAndWait()
+            val dashboardPage = assertPageIs(page, LandlordDashboardPage::class)
+            BaseComponent.assertThat(dashboardPage.dashboardBannerHeading).containsText("Alexander Smith")
+        }
     }
 }
