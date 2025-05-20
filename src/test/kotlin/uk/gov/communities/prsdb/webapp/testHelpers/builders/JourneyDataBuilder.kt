@@ -295,17 +295,21 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withTenants(
-        households: Int = 2,
-        people: Int? = 4,
-    ): JourneyDataBuilder {
-        withOccupancyStatus(true)
+    fun withHouseholds(households: Int = 2): JourneyDataBuilder {
         journeyData[RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment] =
             mapOf(NumberOfHouseholdsFormModel::numberOfHouseholds.name to households.toString())
-        people?.let {
-            journeyData[RegisterPropertyStepId.NumberOfPeople.urlPathSegment] =
-                mapOf(NumberOfPeopleFormModel::numberOfPeople.name to people.toString())
-        }
+        return this
+    }
+
+    fun withTenants(
+        households: Int = 2,
+        people: Int = 4,
+    ): JourneyDataBuilder {
+        withOccupancyStatus(true)
+        withHouseholds(households)
+        journeyData[RegisterPropertyStepId.NumberOfPeople.urlPathSegment] =
+            mapOf(NumberOfPeopleFormModel::numberOfPeople.name to people.toString())
+
         return this
     }
 

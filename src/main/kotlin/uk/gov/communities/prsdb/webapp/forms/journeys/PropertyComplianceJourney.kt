@@ -910,6 +910,7 @@ class PropertyComplianceJourney(
             } else {
                 journeyData.withEpcDetails(lookedUpEpc)
             }
+        journeyDataService.setJourneyDataInSession(newJourneyData)
 
         val epcLookupStep = steps.single { it.id == PropertyComplianceStepId.EpcLookup }
         return getRedirectForNextStep(epcLookupStep, newJourneyData, null)

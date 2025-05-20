@@ -5,7 +5,6 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
@@ -14,8 +13,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import java.net.URI
 import kotlin.test.assertEquals
 
-@Sql("/data-local.sql")
-class LandlordDetailTests : IntegrationTest() {
+class LandlordDetailTests : SinglePageTestWithSeedData("data-local.sql") {
     @Nested
     inner class LandlordDetailsView {
         @Test

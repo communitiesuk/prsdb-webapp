@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
-import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
@@ -16,13 +15,34 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@Sql("/data-local.sql")
-class ManageLAUsersTests : IntegrationTest() {
+class ManageLAUsersTests : SinglePageTestWithSeedData("data-local.sql") {
     val localAuthorityId = 1
 
+    @Test
+    fun `invite button goes to invite new user page`(page: Page) {
+        val managePage = navigator.goToManageLaUsers(localAuthorityId)
+        managePage.inviteAnotherUserButton.clickAndWait()
+        assertPageIs(page, InviteNewLaUserPage::class)
+    }
+
+    @Test
+    fun `pagination component renders with more than 10 table entries`(page: Page) {
+        var managePage = navigator.goToManageLaUsers(localAuthorityId)
+        val pagination = managePage.getPaginationComponent()
+        assertThat(pagination.nextLink).isVisible()
+        assertEquals("1", pagination.currentPageNumberLinkText)
+        assertThat(pagination.getPageNumberLink(2)).isVisible()
+
+        pagination.getPageNumberLink(2).clickAndWait()
+        managePage = assertPageIs(page, ManageLaUsersPage::class)
+
+        assertThat(pagination.previousLink).isVisible()
+        assertThat(pagination.getPageNumberLink(1)).isVisible()
+        assertEquals("2", pagination.currentPageNumberLinkText)
+    }
+
     @Nested
-    @Sql("/data-la-users-and-invitations.sql")
-    inner class UserIsLaAdminButNotSystemOperator {
+    inner class UserIsLaAdminButNotSystemOperator : NestedSinglePageTestWithSeedData("data-la-users-and-invitations.sql") {
         @Test
         fun `table of users renders`() {
             val managePage = navigator.goToManageLaUsers(localAuthorityId)
@@ -59,32 +79,8 @@ class ManageLAUsersTests : IntegrationTest() {
         }
     }
 
-    @Test
-    fun `invite button goes to invite new user page`(page: Page) {
-        val managePage = navigator.goToManageLaUsers(localAuthorityId)
-        managePage.inviteAnotherUserButton.clickAndWait()
-        assertPageIs(page, InviteNewLaUserPage::class)
-    }
-
-    @Test
-    fun `pagination component renders with more than 10 table entries`(page: Page) {
-        var managePage = navigator.goToManageLaUsers(localAuthorityId)
-        val pagination = managePage.getPaginationComponent()
-        assertThat(pagination.nextLink).isVisible()
-        assertEquals("1", pagination.currentPageNumberLinkText)
-        assertThat(pagination.getPageNumberLink(2)).isVisible()
-
-        pagination.getPageNumberLink(2).clickAndWait()
-        managePage = assertPageIs(page, ManageLaUsersPage::class)
-
-        assertThat(pagination.previousLink).isVisible()
-        assertThat(pagination.getPageNumberLink(1)).isVisible()
-        assertEquals("2", pagination.currentPageNumberLinkText)
-    }
-
     @Nested
-    @Sql("/data-la-invitations-user-is-system-operator.sql")
-    inner class UserIsSystemOperatorButNotLaAdmin {
+    inner class UserIsSystemOperatorButNotLaAdmin : NestedSinglePageTestWithSeedData("data-la-invitations-user-is-system-operator.sql") {
         @Test
         fun `table renders all user types including la admin invitations`() {
             val managePage = navigator.goToManageLaUsers(localAuthorityId)
