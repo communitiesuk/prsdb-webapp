@@ -4,7 +4,6 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.minus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toLocalDateTime
@@ -172,10 +171,10 @@ class DateTimeHelperTests {
     }
 
     @Test
-    fun `getDateInUKFromDateString returns the date in the UK for the date string specified`() {
+    fun `getDateInUK(String) returns the date in the UK for the date string specified`() {
         val dateString = "2027-01-05T00:00:00.000Z"
         val expectedDate = LocalDate(2027, 1, 5)
 
-        assertEquals(expectedDate, DateTimeHelper.getDateInUKFromDateString(dateString))
+        assertEquals(expectedDate, DateTimeHelper.getDateInUK(dateString))
     }
 }

@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.models.dataModels
 
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
+import org.json.JSONObject
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 
 @Serializable
 data class EpcDataModel(
@@ -14,14 +16,36 @@ data class EpcDataModel(
     fun isLatestCertificateForThisProperty() = certificateNumber == latestCertificateNumberForThisProperty
 
     companion object {
-        fun formatCertificateNumber(certificateNumber: String): String {
+        fun parseCertificateNumberOrNull(certificateNumber: String): String? {
             val certNumberNoHyphens = certificateNumber.replace("-", "")
-            require(certNumberNoHyphens.all { it.isDigit() }) { "Input must contain only digits and hyphens" }
-            require(certNumberNoHyphens.length == 20) { "Input must contain exactly 20 digits" }
+            if (!(certNumberNoHyphens.all { it.isDigit() }) || certNumberNoHyphens.length != 20) {
+                // Certificate number should be of the form XXXX-XXXX-XXXX-XXXX-XXXX
+                return null
+            }
 
             return certNumberNoHyphens
                 .chunked(4)
                 .joinToString("-")
+        }
+
+        fun fromJsonObject(jsonResponse: JSONObject): EpcDataModel {
+            val epcData = jsonResponse.getJSONObject("data")
+            val epcDataAddress = epcData.getJSONObject("address")
+            val singleLineAddress =
+                AddressDataModel.manualAddressDataToSingleLineAddress(
+                    addressLineOne = epcDataAddress.getString("addressLine1"),
+                    townOrCity = epcDataAddress.getString("town"),
+                    postcode = epcDataAddress.getString("postcode"),
+                    addressLineTwo = epcDataAddress.optString("addressLine2"),
+                )
+
+            return EpcDataModel(
+                certificateNumber = epcData.getString("epcRrn"),
+                singleLineAddress = singleLineAddress,
+                energyRating = epcData.getString("currentEnergyEfficiencyBand"),
+                expiryDate = DateTimeHelper.getDateInUK(epcData.getString("expiryDate")),
+                latestCertificateNumberForThisProperty = epcData.getString("latestEpcRrnForAddress"),
+            )
         }
     }
 }

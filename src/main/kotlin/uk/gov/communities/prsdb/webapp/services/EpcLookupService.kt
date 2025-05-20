@@ -5,8 +5,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
-import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
 @Service
@@ -14,7 +12,12 @@ class EpcLookupService(
     private val epcRegisterClient: EpcRegisterClient,
 ) {
     fun getEpcByCertificateNumber(certificateNumber: String): EpcDataModel? {
-        val formattedCertificateNumber = EpcDataModel.formatCertificateNumber(certificateNumber)
+        val formattedCertificateNumber =
+            EpcDataModel.parseCertificateNumberOrNull(certificateNumber)
+                ?: throw ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Certificate number should be of the form XXXX-XXXX-XXXX-XXXX-XXXX",
+                )
         val response = epcRegisterClient.getByRrn(formattedCertificateNumber)
         val jsonResponse = JSONObject(response)
 
@@ -28,23 +31,7 @@ class EpcLookupService(
             }
         }
 
-        val epcData = jsonResponse.getJSONObject("data")
-        val epcDataAddress = epcData.getJSONObject("address")
-        val singleLineAddress =
-            AddressDataModel.manualAddressDataToSingleLineAddress(
-                addressLineOne = epcDataAddress.getString("addressLine1"),
-                townOrCity = epcDataAddress.getString("town"),
-                postcode = epcDataAddress.getString("postcode"),
-                addressLineTwo = epcDataAddress.optString("addressLine2"),
-            )
-
-        return EpcDataModel(
-            certificateNumber = epcData.getString("epcRrn"),
-            singleLineAddress = singleLineAddress,
-            energyRating = epcData.getString("currentEnergyEfficiencyBand"),
-            expiryDate = DateTimeHelper.getDateInUKFromDateString(epcData.getString("expiryDate")),
-            latestCertificateNumberForThisProperty = epcData.getString("latestEpcRrnForAddress"),
-        )
+        return EpcDataModel.fromJsonObject(jsonResponse)
     }
 
     companion object {
