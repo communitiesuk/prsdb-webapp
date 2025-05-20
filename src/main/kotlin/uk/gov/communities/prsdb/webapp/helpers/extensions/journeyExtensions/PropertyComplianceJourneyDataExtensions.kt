@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
@@ -88,12 +89,19 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 EicrFormModel::hasCert.name,
             )
 
+        fun JourneyData.getEpcLookupCertificateNumber(): String? =
+            JourneyDataHelper.getFieldStringValue(
+                this,
+                PropertyComplianceStepId.EpcLookup.urlPathSegment,
+                EpcLookupFormModel::certificateNumber.name,
+            )
+
         fun JourneyData.getEpcDetails(): EpcDataModel? {
             val serializedEpcDetails = JourneyDataHelper.getStringValueByKey(this, LOOKED_UP_EPC_JOURNEY_DATA_KEY) ?: return null
             return Json.decodeFromString<EpcDataModel>(serializedEpcDetails)
         }
 
-        fun JourneyData.withEpcDetails(epcDetails: EpcDataModel): JourneyData =
+        fun JourneyData.withEpcDetails(epcDetails: EpcDataModel?): JourneyData =
             this + (LOOKED_UP_EPC_JOURNEY_DATA_KEY to Json.encodeToString(epcDetails))
     }
 }

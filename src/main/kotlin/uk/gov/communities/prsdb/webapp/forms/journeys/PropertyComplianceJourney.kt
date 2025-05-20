@@ -22,6 +22,8 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcLookupCertificateNumber
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
@@ -31,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionOtherReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
@@ -49,6 +52,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
+import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
@@ -57,6 +61,7 @@ class PropertyComplianceJourney(
     journeyDataService: JourneyDataService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyOwnershipId: Long,
+    private val epcLookupService: EpcLookupService,
     principalName: String,
 ) : JourneyWithTaskList<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE,
@@ -184,6 +189,16 @@ class PropertyComplianceJourney(
                         PropertyComplianceStepId.EpcLookup,
                     ),
                     epcLookupStep,
+                    placeholderStep(
+                        PropertyComplianceStepId.EpcNotFound,
+                        "TODO PRSD-1139: Implement EPC Not Found step",
+                        PropertyComplianceStepId.FireSafetyDeclaration,
+                    ),
+                    placeholderStep(
+                        PropertyComplianceStepId.EpcSuperseded,
+                        "TODO PRSD-1140: Implement EPC Superseded step",
+                        PropertyComplianceStepId.FireSafetyDeclaration,
+                    ),
                     epcMissingStep,
                     epcExemptionReasonStep,
                     epcExemptionConfirmationStep,
@@ -806,8 +821,10 @@ class PropertyComplianceJourney(
                                 "getNewEpcUrl" to GET_NEW_EPC_URL,
                             ),
                     ),
-                // nextAction
-                // handleSubmitAndRedirect
+                nextAction = { journeyData, _ -> epcLookupStepNextAction(journeyData) },
+                handleSubmitAndRedirect = { journeyData, _, _ ->
+                    epcLookupStepHandleSubmitAndRedirect(journeyData)
+                },
             )
 
     private fun placeholderStep(
@@ -882,6 +899,27 @@ class PropertyComplianceJourney(
             HasEpc.NO -> Pair(PropertyComplianceStepId.EpcMissing, null)
             HasEpc.NOT_REQUIRED -> Pair(PropertyComplianceStepId.EpcExemptionReason, null)
         }
+
+    private fun epcLookupStepHandleSubmitAndRedirect(journeyData: JourneyData): String {
+        val certificateNumber = journeyData.getEpcLookupCertificateNumber()!!
+        val lookedUpEpc = epcLookupService.getEpcByCertificateNumber(certificateNumber)
+        val newJourneyData = journeyData.withEpcDetails(lookedUpEpc)
+        journeyDataService.setJourneyDataInSession(newJourneyData)
+
+        val epcLookupStep = steps.single { it.id == PropertyComplianceStepId.EpcLookup }
+        return getRedirectForNextStep(epcLookupStep, newJourneyData, null)
+    }
+
+    private fun epcLookupStepNextAction(journeyData: JourneyData): Pair<PropertyComplianceStepId, Int?> {
+        val lookedUpEpcDetails =
+            journeyData.getEpcDetails()
+                ?: return Pair(PropertyComplianceStepId.EpcNotFound, null)
+        return if (lookedUpEpcDetails.isLatestCertificateForThisProperty()) {
+            Pair(PropertyComplianceStepId.CheckMatchedEpc, null)
+        } else {
+            Pair(PropertyComplianceStepId.EpcSuperseded, null)
+        }
+    }
 
     private fun getPropertyAddress() =
         propertyOwnershipService

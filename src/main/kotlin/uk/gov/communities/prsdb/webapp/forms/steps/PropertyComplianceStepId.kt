@@ -29,6 +29,8 @@ enum class PropertyComplianceStepId(
     EPC("epc"),
     CheckMatchedEpc("check-matched-epc"),
     EpcLookup("epc-lookup"),
+    EpcNotFound("epc-not-found"),
+    EpcSuperseded("epc-superseded"),
     EpcMissing("epc-missing"),
     EpcExemptionReason("epc-exemption-reason"),
     EpcExemptionConfirmation("epc-exemption-confirmation"),

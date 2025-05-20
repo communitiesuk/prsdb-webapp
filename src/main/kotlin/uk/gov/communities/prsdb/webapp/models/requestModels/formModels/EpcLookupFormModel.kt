@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
-import uk.gov.communities.prsdb.webapp.validation.NotNullConstraintValidator
+import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
@@ -14,7 +14,7 @@ class EpcLookupFormModel : FormModel {
         constraints = [
             ConstraintDescriptor(
                 messageKey = "forms.epcLookup.error.missing",
-                validatorType = NotNullConstraintValidator::class,
+                validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(
                 messageKey = "forms.epcLookup.error.invalidFormat",
@@ -23,12 +23,14 @@ class EpcLookupFormModel : FormModel {
             ),
         ],
     )
-    var certificateNumber: String? = null
+    var certificateNumber: String = ""
 
     fun isEpcCertificateNumberFormatValid(): Boolean {
-        val certNumberNoHyphens =
-            certificateNumber?.replace("-", "")
-                ?: return true // a null certificate number does not have an invalid format
+        // a blank certificate number does not have an invalid format
+        if (certificateNumber.isBlank()) return true
+
+        val certNumberNoHyphens = certificateNumber.replace("-", "")
+
         return (certNumberNoHyphens.all { it.isDigit() } && certNumberNoHyphens.length == 20)
     }
 }

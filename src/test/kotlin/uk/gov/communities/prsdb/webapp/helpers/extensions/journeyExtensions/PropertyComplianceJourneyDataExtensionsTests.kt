@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcLookupCertificateNumber
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
@@ -264,6 +265,25 @@ class PropertyComplianceJourneyDataExtensionsTests {
         val retrievedHasEICR = testJourneyData.getHasEPC()
 
         assertNull(retrievedHasEICR)
+    }
+
+    @Test
+    fun `getEpcLookupCertificateNumber the certificate number if it is in journeyData`() {
+        val certificateNumber = "0000-0000-1234-5678-9100"
+        val testJourneyData = journeyDataBuilder.withEpcLookupCertificateNumber(certificateNumber).build()
+
+        val retrievedEpcCertificateNumber = testJourneyData.getEpcLookupCertificateNumber()
+
+        assertEquals(certificateNumber, retrievedEpcCertificateNumber)
+    }
+
+    @Test
+    fun `getEpcLookupCertificateNumber returns null if the EPC certificate number is not in journeyData`() {
+        val testJourneyData = journeyDataBuilder.build()
+
+        val retrievedEpcCertificateNumber = testJourneyData.getEpcLookupCertificateNumber()
+
+        assertNull(retrievedEpcCertificateNumber)
     }
 
     @Test
