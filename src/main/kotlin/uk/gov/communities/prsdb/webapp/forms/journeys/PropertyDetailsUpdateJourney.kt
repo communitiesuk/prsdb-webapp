@@ -370,7 +370,7 @@ class PropertyDetailsUpdateJourney(
         }
 
     private fun getNumberOfPeopleStepBackUrl() =
-        if (hasPropertyOccupancyBeenUpdated()) {
+        if (hasNumberOfHouseholdsBeenUpdated()) {
             UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment
         } else {
             RELATIVE_PROPERTY_DETAILS_PATH
@@ -413,6 +413,9 @@ class PropertyDetailsUpdateJourney(
     private fun wasPropertyOriginallyOccupied() = journeyDataService.getJourneyDataFromSession().getOriginalIsOccupied(originalDataKey)!!
 
     private fun hasPropertyOccupancyBeenUpdated() = journeyDataService.getJourneyDataFromSession().getIsOccupiedUpdateIfPresent() != null
+
+    private fun hasNumberOfHouseholdsBeenUpdated() =
+        journeyDataService.getJourneyDataFromSession().getNumberOfHouseholdsUpdateIfPresent() != null
 
     companion object {
         // The path for the update journey is "{propertyDetailsPath}/update/{pathSegment}". As there is no trailing slash, any relative path is
