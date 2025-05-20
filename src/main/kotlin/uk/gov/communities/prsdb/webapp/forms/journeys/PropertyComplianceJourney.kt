@@ -904,12 +904,7 @@ class PropertyComplianceJourney(
         val certificateNumber = journeyData.getEpcLookupCertificateNumber()!!
         val lookedUpEpc = epcLookupService.getEpcByCertificateNumber(certificateNumber)
 
-        val newJourneyData =
-            if (lookedUpEpc == null) {
-                journeyData
-            } else {
-                journeyData.withEpcDetails(lookedUpEpc)
-            }
+        val newJourneyData = journeyData.withEpcDetails(lookedUpEpc)
         journeyDataService.setJourneyDataInSession(newJourneyData)
 
         val epcLookupStep = steps.single { it.id == PropertyComplianceStepId.EpcLookup }

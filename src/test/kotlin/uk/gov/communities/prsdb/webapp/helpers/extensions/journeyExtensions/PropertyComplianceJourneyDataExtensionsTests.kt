@@ -308,6 +308,19 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
+    fun `withEpcDetails returns a JourneyData with the EPC details set to null if epcDetails is null`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.build()
+        val expectedJourneyData = mutableMapOf(LOOKED_UP_EPC_JOURNEY_DATA_KEY to null)
+
+        // Act
+        val updatedJourneyData = testJourneyData.withEpcDetails(null)
+
+        // Assert
+        assertEquals(expectedJourneyData, updatedJourneyData)
+    }
+
+    @Test
     fun `getEpcDetails returns the EPC details from the JourneyData`() {
         // Arrange
         val storedEpcDetails =

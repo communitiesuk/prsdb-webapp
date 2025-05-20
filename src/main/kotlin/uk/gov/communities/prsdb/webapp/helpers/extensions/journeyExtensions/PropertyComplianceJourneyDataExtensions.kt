@@ -101,7 +101,11 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
             return Json.decodeFromString<EpcDataModel>(serializedEpcDetails)
         }
 
-        fun JourneyData.withEpcDetails(epcDetails: EpcDataModel): JourneyData =
-            this + (LOOKED_UP_EPC_JOURNEY_DATA_KEY to Json.encodeToString(epcDetails))
+        fun JourneyData.withEpcDetails(epcDetails: EpcDataModel?): JourneyData =
+            if (epcDetails == null) {
+                this + (LOOKED_UP_EPC_JOURNEY_DATA_KEY to null)
+            } else {
+                this + (LOOKED_UP_EPC_JOURNEY_DATA_KEY to Json.encodeToString(epcDetails))
+            }
     }
 }
