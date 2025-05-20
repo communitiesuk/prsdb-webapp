@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.CheckLicensingAnswersPage
-import uk.gov.communities.prsdb.webapp.forms.pages.CheckOccupancyPage
+import uk.gov.communities.prsdb.webapp.forms.pages.CheckOccupancyAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationNumberOfPeoplePage
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
@@ -318,7 +318,7 @@ class PropertyDetailsUpdateJourney(
     private val checkOccupancyAnswers =
         Step(
             id = UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers,
-            page = CheckOccupancyPage(),
+            page = CheckOccupancyAnswersPage(),
             handleSubmitAndRedirect = { journeyData, _, _ -> updatePropertyAndRedirect(journeyData) },
             saveAfterSubmit = false,
         )
