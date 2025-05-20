@@ -3,10 +3,8 @@ package uk.gov.communities.prsdb.webapp.services
 import kotlinx.datetime.LocalDate
 import org.json.JSONObject
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertThrows
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
@@ -15,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
 @ExtendWith(MockitoExtension::class)
 class EpcLookupServiceTests {
@@ -25,7 +24,20 @@ class EpcLookupServiceTests {
     private lateinit var epcLookupService: EpcLookupService
 
     @Test
+    fun `getEpcByCertificateNumber throws BAD_REQUEST error if the certificate number is the wrong format`() {
+        val invalidCertificateNumber = "12345678"
+
+        val exception =
+            assertThrows(ResponseStatusException::class.java) {
+                epcLookupService.getEpcByCertificateNumber(invalidCertificateNumber)
+            }
+
+        assertEquals("400 BAD_REQUEST \"Certificate number should be of the form XXXX-XXXX-XXXX-XXXX-XXXX\"", exception.message)
+    }
+
+    @Test
     fun `getEpcByCertificateNumber returns EpcDataModel when valid response`() {
+        // Arrange
         val certificateNumber = "1234-5678-9012-3456-7890"
         val mockResponse =
             """
@@ -44,21 +56,25 @@ class EpcLookupServiceTests {
                 }
             }
             """.trimIndent()
+        val expectedDataModel =
+            EpcDataModel(
+                certificateNumber = certificateNumber,
+                singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT",
+                energyRating = "C",
+                expiryDate = LocalDate(2027, 1, 5),
+                latestCertificateNumberForThisProperty = certificateNumber,
+            )
 
         whenever(mockEpcRegisterClient.getByRrn(certificateNumber)).thenReturn(mockResponse)
 
+        // Act
         val result = epcLookupService.getEpcByCertificateNumber(certificateNumber)
 
-        assertNotNull(result)
-        assertEquals(certificateNumber, result?.certificateNumber)
-        assertEquals("C", result?.energyRating)
-        assertEquals(LocalDate(2027, 1, 5), result?.expiryDate)
-        assertEquals("123 Test Street, Flat 1, Test Town, TT1 1TT", result?.singleLineAddress)
-        assertTrue(result?.isLatestCertificateForThisProperty() == true)
+        assertEquals(expectedDataModel, result)
     }
 
     @Test
-    fun `getEpcByCertificateNumber returns null when NOT_FOUND error`() {
+    fun `getEpcByCertificateNumber returns null when NOT_FOUND error is returned by the client`() {
         val certificateNumber = "1234-5678-9012-3456-7890"
         val mockResponse =
             """
@@ -80,7 +96,7 @@ class EpcLookupServiceTests {
     }
 
     @Test
-    fun `getEpcByCertificateNumber throws BAD_REQUEST for invalid request`() {
+    fun `getEpcByCertificateNumber throws BAD_REQUEST error if this is returned by the client`() {
         val certificateNumber = "1234-5678-9012-3456-7890"
         val mockResponse =
             """
