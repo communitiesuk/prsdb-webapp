@@ -60,8 +60,8 @@ class PropertyDetailsUpdateJourneyExtensions {
                 LicensingTypeFormModel::licensingType.name,
             )
 
-        fun JourneyData.getLicenceNumberUpdateIfPresent(originalJourneyKey: String): String? {
-            val licensingType = this.getLicensingTypeUpdateIfPresent() ?: this.getOriginalLicensingType(originalJourneyKey) ?: return null
+        fun JourneyData.getLicenceNumberUpdateIfPresent(): String? {
+            val licensingType = this.getLicensingTypeUpdateIfPresent() ?: return null
             if (licensingType == LicensingType.NO_LICENSING) {
                 return null
             } else {
@@ -96,9 +96,6 @@ class PropertyDetailsUpdateJourneyExtensions {
                 return journeyDataValue
             }
         }
-
-        private fun JourneyData.getOriginalLicensingType(originalJourneyKey: String) =
-            JourneyDataHelper.getPageData(this, originalJourneyKey)?.getLicensingTypeUpdateIfPresent()
 
         fun PropertyOwnership.getLicenceNumberStepIdAndFormModel(): Pair<UpdatePropertyDetailsStepId, FormModel>? =
             when (this.license?.licenseType) {

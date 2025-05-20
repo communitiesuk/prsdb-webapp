@@ -6,6 +6,8 @@ import com.microsoft.playwright.Page
 class Heading(
     locator: Locator,
 ) : BaseComponent(locator) {
+    fun getText(): String = locator.textContent()
+
     companion object {
         fun default(page: Page) = default(page.locator("html"))
 

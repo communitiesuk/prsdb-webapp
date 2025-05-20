@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckLicensingAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HmoAdditionalLicenceFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HmoMandatoryLicenceFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.LicensingTypeFormPagePropertyDetailsUpdate
@@ -18,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OwnershipTypeFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.SelectiveLicenceFormPagePropertyDetailsUpdate
+import kotlin.test.assertContains
 
 class PropertyDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sql") {
     private val propertyOwnershipId = 1L
@@ -41,102 +43,115 @@ class PropertyDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sq
         }
     }
 
-    // TODO PRSD-1108 - re-enable tests and update them to match new flow
-    @Disabled
     @Nested
     inner class LicenceUpdates {
         @Test
-        fun `A property can have their licence type and number updated for selective licence`(page: Page) {
-            val newLicensingType = LicensingType.SELECTIVE_LICENCE
+        fun `A property can have its licensing updated to a selective licence`(page: Page) {
             val newLicenceNumber = "SL123"
 
             // Details page
             var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-
             propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.clickActionLinkAndWait()
+            val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
             // Update licence to selective
-            val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
-            assertThat(updateLicensingTypePage.form.fieldsetHeading).containsText("Update the type of licensing you have for your property")
-            updateLicensingTypePage.submitLicensingType(newLicensingType)
+            updateLicensingTypePage.submitLicensingType(LicensingType.SELECTIVE_LICENCE)
+            val updateLicenceNumberPage = assertPageIs(page, SelectiveLicenceFormPagePropertyDetailsUpdate::class, urlArguments)
 
             // Update licence number
-            val updateLicenceNumberPage = assertPageIs(page, SelectiveLicenceFormPagePropertyDetailsUpdate::class, urlArguments)
-            assertThat(updateLicenceNumberPage.form.fieldsetHeading).containsText("What is your selective licence number?")
             updateLicenceNumberPage.submitLicenseNumber(newLicenceNumber)
+            val checkLicensingAnswersPage = assertPageIs(page, CheckLicensingAnswersPagePropertyDetailsUpdate::class, urlArguments)
 
+            // Check licensing answers
+            assertContains(checkLicensingAnswersPage.form.summaryName.getText(), "You have updated the property licence")
+            assertThat(checkLicensingAnswersPage.form.summaryList.licensingRow.value).containsText("Selective licence")
+            assertThat(checkLicensingAnswersPage.form.summaryList.licensingRow.value).containsText(newLicenceNumber)
+            checkLicensingAnswersPage.confirm()
             propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
             // Check changes have occurred
-            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.value).containsText(
-                "Selective licence",
-            )
-            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.value).containsText(
-                newLicenceNumber,
-            )
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.value).containsText("Selective licence")
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.value).containsText(newLicenceNumber)
         }
 
         @Test
-        fun `A property can have their licence type and number updated for HMO Mandatory licence`(page: Page) {
-            val newLicensingType = LicensingType.HMO_MANDATORY_LICENCE
+        fun `A property can have its licensing updated to a HMO Mandatory licence`(page: Page) {
             val newLicenceNumber = "MAND123"
 
             // Details page
             var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-
             propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.clickActionLinkAndWait()
-
-            // Update licence to hmp mandatory
             val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
-            assertThat(updateLicensingTypePage.form.fieldsetHeading).containsText("Update the type of licensing you have for your property")
-            updateLicensingTypePage.submitLicensingType(newLicensingType)
 
+            // Update licence to HMO mandatory
+            updateLicensingTypePage.submitLicensingType(LicensingType.HMO_MANDATORY_LICENCE)
             val updateLicenceNumberPage = assertPageIs(page, HmoMandatoryLicenceFormPagePropertyDetailsUpdate::class, urlArguments)
-            assertThat(updateLicenceNumberPage.form.fieldsetHeading).containsText("What is your HMO mandatory licence number?")
-            updateLicenceNumberPage.submitLicenseNumber(newLicenceNumber)
 
+            // Update licence number
+            updateLicenceNumberPage.submitLicenseNumber(newLicenceNumber)
+            val checkLicensingAnswersPage = assertPageIs(page, CheckLicensingAnswersPagePropertyDetailsUpdate::class, urlArguments)
+
+            // Check licensing answers
+            assertContains(checkLicensingAnswersPage.form.summaryName.getText(), "You have updated the property licence")
+            assertThat(checkLicensingAnswersPage.form.summaryList.licensingRow.value).containsText("HMO mandatory licence")
+            assertThat(checkLicensingAnswersPage.form.summaryList.licensingRow.value).containsText(newLicenceNumber)
+            checkLicensingAnswersPage.confirm()
             propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
             // Check changes have occurred
-            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.value).containsText(
-                "HMO mandatory licence",
-            )
-            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.value).containsText(
-                newLicenceNumber,
-            )
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.value).containsText("HMO mandatory licence")
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.value).containsText(newLicenceNumber)
         }
 
         @Test
-        fun `A property can have their licence type and number updated for HMO additional licence`(page: Page) {
-            val newLicensingType = LicensingType.HMO_ADDITIONAL_LICENCE
+        fun `A property can have its licensing updated to a HMO additional licence`(page: Page) {
             val newLicenceNumber = "ADD123"
 
             // Details page
             var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-
             propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.clickActionLinkAndWait()
-
-            // Update licence to selective
             val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
-            assertThat(updateLicensingTypePage.form.fieldsetHeading).containsText("Update the type of licensing you have for your property")
-            updateLicensingTypePage.submitLicensingType(newLicensingType)
 
+            // Update licence to HMO additional
+            updateLicensingTypePage.submitLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
             val updateLicenceNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyDetailsUpdate::class, urlArguments)
-            assertThat(updateLicenceNumberPage.form.fieldsetHeading).containsText("What is your HMO additional licence number?")
-            updateLicenceNumberPage.submitLicenseNumber(newLicenceNumber)
 
+            // Update licence number
+            updateLicenceNumberPage.submitLicenseNumber(newLicenceNumber)
+            val checkLicensingAnswersPage = assertPageIs(page, CheckLicensingAnswersPagePropertyDetailsUpdate::class, urlArguments)
+
+            // Check licensing answers
+            assertContains(checkLicensingAnswersPage.form.summaryName.getText(), "You have updated the property licence")
+            assertThat(checkLicensingAnswersPage.form.summaryList.licensingRow.value).containsText("HMO additional licence")
+            assertThat(checkLicensingAnswersPage.form.summaryList.licensingRow.value).containsText(newLicenceNumber)
+            checkLicensingAnswersPage.confirm()
             propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
             // Check changes have occurred
-            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.value).containsText(
-                "HMO additional licence",
-            )
-            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.value).containsText(
-                newLicenceNumber,
-            )
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.value).containsText("HMO additional licence")
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.value).containsText(newLicenceNumber)
         }
 
-        // TODO PRSD-1108 - add test for updating to no licensing
+        @Test
+        fun `A property can have its licensing removed`(page: Page) {
+            // Details page
+            var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.clickActionLinkAndWait()
+            val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
+
+            // Update licence to no licensing
+            updateLicensingTypePage.submitLicensingType(LicensingType.NO_LICENSING)
+            val checkLicensingAnswersPage = assertPageIs(page, CheckLicensingAnswersPagePropertyDetailsUpdate::class, urlArguments)
+
+            // Check licensing answers
+            assertContains(checkLicensingAnswersPage.form.summaryName.getText(), "You have removed this property’s licence")
+            assertThat(checkLicensingAnswersPage.form.summaryList.licensingRow.value).containsText("None")
+            checkLicensingAnswersPage.confirm()
+            propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+
+            // Check changes have occurred
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingRow.value).containsText("None")
+        }
     }
 
     // TODO PRSD-1109 - re-enable tests and update them to match new flow
@@ -247,16 +262,6 @@ class PropertyDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sq
         }
 
         // TODO PRSD-1109 - add test for updating just number of people
-    }
-
-    private fun updateLicensingTypeToNoneAndReturn(detailsPage: PropertyDetailsPageLandlordView): PropertyDetailsPageLandlordView {
-        val page = detailsPage.page
-        detailsPage.propertyDetailsSummaryList.licensingRow.clickActionLinkAndWait()
-
-        val updateLicensingType = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
-        updateLicensingType.submitLicensingType(LicensingType.NO_LICENSING)
-
-        return assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
     private fun updateOccupancyToVacantAndReturn(detailsPage: PropertyDetailsPageLandlordView): PropertyDetailsPageLandlordView {
