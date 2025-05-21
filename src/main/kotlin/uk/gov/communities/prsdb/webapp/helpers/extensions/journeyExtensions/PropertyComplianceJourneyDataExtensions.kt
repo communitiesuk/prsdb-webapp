@@ -12,7 +12,6 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
@@ -101,15 +100,6 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
             val serializedEpcDetails = JourneyDataHelper.getStringValueByKey(this, LOOKED_UP_EPC_JOURNEY_DATA_KEY) ?: return null
             return Json.decodeFromString<EpcDataModel>(serializedEpcDetails)
         }
-
-        fun JourneyData.getMatchedEpcIsCorrect(): Boolean? =
-            JourneyDataHelper.getFieldBooleanValue(
-                this,
-                PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment,
-                CheckMatchedEpcFormModel::matchedEpcIsCorrect.name,
-            )
-
-        fun JourneyData.resetCheckMatchedEpc(): JourneyData = this - PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment
 
         fun JourneyData.withEpcDetails(epcDetails: EpcDataModel?): JourneyData =
             if (epcDetails == null) {

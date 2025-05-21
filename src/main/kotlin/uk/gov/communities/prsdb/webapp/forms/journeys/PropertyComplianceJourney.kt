@@ -33,9 +33,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMatchedEpcIsCorrect
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionOtherReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
@@ -185,7 +183,11 @@ class PropertyComplianceJourney(
                 PropertyComplianceStepId.EPC,
                 setOf(
                     epcStep,
-                    checkMatchedEpcStep,
+                    placeholderStep(
+                        PropertyComplianceStepId.CheckMatchedEpc,
+                        "TODO PRSD-1132: Implement Check Matched EPC step",
+                        PropertyComplianceStepId.EpcLookup,
+                    ),
                     epcLookupStep,
                     placeholderStep(
                         PropertyComplianceStepId.EpcNotFound,
@@ -802,42 +804,6 @@ class PropertyComplianceJourney(
                 nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
             )
 
-    private val checkMatchedEpcStep
-        get() =
-            // TODO PRSD-1132 - implement this properly
-            Step(
-                id = PropertyComplianceStepId.CheckMatchedEpc,
-                page =
-                    Page(
-                        formModel = CheckMatchedEpcFormModel::class,
-                        templateName = "forms/checkMatchedEpcForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "fieldSetHeading" to "forms.checkMatchedEpc.fieldSetHeading",
-                                "fieldSetHint" to "forms.checkMatchedEpc.fieldSetHint",
-                                "address" to "TEMP",
-                                "radioOptions" to
-                                    listOf(
-                                        RadiosButtonViewModel(
-                                            value = true,
-                                            valueStr = "yes",
-                                            labelMsgKey = "forms.radios.option.yes.label",
-                                        ),
-                                        RadiosButtonViewModel(
-                                            value = false,
-                                            valueStr = "no",
-                                            labelMsgKey = "forms.radios.option.no.label",
-                                        ),
-                                    ),
-                            ),
-                    ),
-                nextAction = { journeyData, _ -> checkMatchedEpcStepNextAction(journeyData) },
-                handleSubmitAndRedirect = { journeyData, _, _ ->
-                    checkMatchedEpcStepHandleSubmitAndRedirect(journeyData)
-                },
-            )
-
     private val epcLookupStep
         get() =
             Step(
@@ -933,19 +899,6 @@ class PropertyComplianceJourney(
             HasEpc.NO -> Pair(PropertyComplianceStepId.EpcMissing, null)
             HasEpc.NOT_REQUIRED -> Pair(PropertyComplianceStepId.EpcExemptionReason, null)
         }
-
-    private fun checkMatchedEpcStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getMatchedEpcIsCorrect() == true) {
-            // TODO: PRSD-1132
-            Pair(PropertyComplianceStepId.FireSafetyDeclaration, null)
-        } else {
-            Pair(PropertyComplianceStepId.EpcLookup, null)
-        }
-
-    private fun checkMatchedEpcStepHandleSubmitAndRedirect(journeyData: JourneyData): String {
-        val checkMatchedEpcStep = steps.single { it.id == PropertyComplianceStepId.CheckMatchedEpc }
-        return getRedirectForNextStep(checkMatchedEpcStep, journeyData, null)
-    }
 
     private fun epcLookupStepHandleSubmitAndRedirect(journeyData: JourneyData): String {
         val certificateNumber = journeyData.getEpcLookupCertificateNumber()!!
