@@ -35,7 +35,6 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMatchedEpcIsCorrect
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.resetCheckMatchedEpc
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.resetEpcLookupCertificateNumber
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
@@ -945,7 +944,14 @@ class PropertyComplianceJourney(
         }
 
     private fun checkMatchedEpcStepHandleSubmitAndRedirect(journeyData: JourneyData): String {
-        val newJourneyData = journeyData.resetEpcLookupCertificateNumber()
+        val epcLookupStep = steps.single { it.id == PropertyComplianceStepId.EpcLookup }
+
+        val newJourneyData =
+            if (epcLookupStep.nextAction(journeyData, null).first == PropertyComplianceStepId.CheckMatchedEpc) {
+                journeyData.withEpcDetails(null)
+            } else {
+                journeyData
+            }
         journeyDataService.setJourneyDataInSession(newJourneyData)
 
         val checkMatchedEpcStep = steps.single { it.id == PropertyComplianceStepId.CheckMatchedEpc }

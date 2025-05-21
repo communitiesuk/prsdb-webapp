@@ -111,8 +111,6 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
 
         fun JourneyData.resetCheckMatchedEpc(): JourneyData = this - PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment
 
-        fun JourneyData.resetEpcLookupCertificateNumber(): JourneyData = this - PropertyComplianceStepId.EpcLookup.urlPathSegment
-
         fun JourneyData.withEpcDetails(epcDetails: EpcDataModel?): JourneyData =
             if (epcDetails == null) {
                 this + (LOOKED_UP_EPC_JOURNEY_DATA_KEY to null)
