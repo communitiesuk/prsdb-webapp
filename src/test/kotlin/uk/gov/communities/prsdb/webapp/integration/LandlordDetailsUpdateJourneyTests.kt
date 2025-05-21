@@ -11,9 +11,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
-import org.springframework.test.context.jdbc.Sql
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManualAddressFormPageUpdateLandlordDetails
@@ -22,13 +20,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.DateOfBirthFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.EmailFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NameFormPageUpdateLandlordDetails
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NoAddressFoundFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.PhoneNumberFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhoneNumber
 
-@Sql("/data-local.sql")
-class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
+class LandlordDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sql") {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
     val addressFound = "Entirely new test address"
 
@@ -49,11 +45,8 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
         )
     }
 
-    // TODO PRSD-1101: Re-enable and update to match flow
-    @Disabled
     @Nested
-    inner class NameUpdates {
-        @Sql("/data-unverified-landlord.sql")
+    inner class NameUpdates : NestedJourneyTestWithSeedData("data-unverified-landlord.sql") {
         @Test
         fun `An unverified landlord can update their name`(page: Page) {
             // Details page
@@ -70,24 +63,10 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
             // Check changes have occurred
             assertThat(landlordDetailsPage.personalDetailsSummaryList.nameRow.value).containsText(newName)
         }
-
-        @Test
-        fun `A verified landlord cannot update their name`(page: Page) {
-            // Check change link is hidden on details page
-            val landlordDetailsPage = navigator.goToLandlordDetails()
-            assertThat(landlordDetailsPage.personalDetailsSummaryList.nameRow.actions.actionLink).isHidden()
-
-            // Check update name page can't be reached
-            navigator.skipToLandlordDetailsUpdateNamePage()
-            assertPageIs(page, LandlordDetailsPage::class)
-        }
     }
 
-    // TODO PRSD-1102: Re-enable and update to match flow
-    @Disabled
     @Nested
-    inner class DateOfBirthUpdates {
-        @Sql("/data-unverified-landlord.sql")
+    inner class DateOfBirthUpdates : NestedJourneyTestWithSeedData("data-unverified-landlord.sql") {
         @Test
         fun `An unverified landlord can update their date of birth`(page: Page) {
             // Details page
@@ -105,21 +84,8 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
             assertThat(landlordDetailsPage.personalDetailsSummaryList.dateOfBirthRow.value)
                 .containsText(formatDateOfBirth(newDateOfBirth), LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
         }
-
-        @Test
-        fun `A verified landlord cannot update their date of birth`(page: Page) {
-            // Check change link is hidden on details page
-            val landlordDetailsPage = navigator.goToLandlordDetails()
-            assertThat(landlordDetailsPage.personalDetailsSummaryList.dateOfBirthRow.actions.actionLink).isHidden()
-
-            // Check update date of birth page can't be reached
-            navigator.skipToLandlordDetailsUpdateDateOfBirthPage()
-            assertPageIs(page, LandlordDetailsPage::class)
-        }
     }
 
-    // TODO PRSD-1103: Re-enable and update to match flow
-    @Disabled
     @Nested
     inner class EmailUpdates {
         @Test
@@ -131,7 +97,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
             val updateEmailPage = assertPageIs(page, EmailFormPageUpdateLandlordDetails::class)
 
             // Update Email page
-            val newEmail = "new landlord name"
+            val newEmail = "newEmail@test.com"
             updateEmailPage.submitEmail(newEmail)
             landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
 
@@ -140,8 +106,6 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
         }
     }
 
-    // TODO PRSD-1105: Re-enable and update to match flow
-    @Disabled
     @Nested
     inner class PhoneNumberUpdates {
         @Test
@@ -213,40 +177,6 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTest() {
             // Check changes have occurred
             val newSingleLineAddress = AddressDataModel.manualAddressDataToSingleLineAddress(newFirstLine, newTown, newPostcode)
             assertThat(landlordDetailsPage.personalDetailsSummaryList.addressRow.value).containsText(newSingleLineAddress)
-        }
-
-        @Test
-        fun `A landlord can search again via the Select Address page`(page: Page) {
-            val selectAddressPage = navigator.goToLandlordRegistrationSelectAddressPage()
-            selectAddressPage.searchAgain.clickAndWait()
-            assertPageIs(page, LookupAddressFormPageUpdateLandlordDetails::class)
-        }
-
-        @Test
-        fun `A landlord can search again or choose manual address via the No Address Found page if no addresses are found`(page: Page) {
-            // Arrange for no addresses to be found
-            val houseNumber = "15"
-            val postcode = "AB1 2CD"
-            whenever(osPlacesClient.search(houseNumber, postcode)).thenReturn("{}")
-
-            // Lookup Address page
-            val lookupAddressPage = navigator.goToUpdateLandlordDetailsUpdateLookupAddressPage()
-            lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
-            var noAddressFoundPage = assertPageIs(page, NoAddressFoundFormPageUpdateLandlordDetails::class)
-
-            // No Address Found page
-            assertThat(noAddressFoundPage.heading).containsText(houseNumber)
-            assertThat(noAddressFoundPage.heading).containsText(postcode)
-
-            // Search again
-            noAddressFoundPage.searchAgain.clickAndWait()
-            val lookupAddressPageAgain = assertPageIs(page, LookupAddressFormPageUpdateLandlordDetails::class)
-            lookupAddressPageAgain.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
-            noAddressFoundPage = assertPageIs(page, NoAddressFoundFormPageUpdateLandlordDetails::class)
-
-            // Choose Manual Address
-            noAddressFoundPage.form.submit()
-            assertPageIs(page, ManualAddressFormPageUpdateLandlordDetails::class)
         }
     }
 

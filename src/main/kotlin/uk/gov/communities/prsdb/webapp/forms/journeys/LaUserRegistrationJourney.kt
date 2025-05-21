@@ -127,7 +127,7 @@ class LaUserRegistrationJourney(
                         ),
                     invitationService,
                 ),
-            handleSubmitAndRedirect = { journeyData, _ ->
+            handleSubmitAndRedirect = { journeyData, _, _ ->
                 checkAnswersHandleSubmitAndRedirect(journeyData)
             },
             saveAfterSubmit = false,
@@ -140,6 +140,7 @@ class LaUserRegistrationJourney(
                 localAuthority = invitation.invitingAuthority,
                 name = LaUserRegistrationJourneyDataHelper.getName(journeyData)!!,
                 email = LaUserRegistrationJourneyDataHelper.getEmail(journeyData)!!,
+                invitedAsAdmin = invitation.invitedAsAdmin,
             )
 
         localAuthorityDataService.setLastUserIdRegisteredThisSession(localAuthorityUserID)

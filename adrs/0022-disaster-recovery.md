@@ -2,9 +2,9 @@
 
 ## Status
 
-Draft (pending input from Service Owner)
+Accepted
 
-Date of decision: {date}
+Date of decision: 2024 Q4
 
 ## Context and Problem Statement
 
@@ -19,8 +19,8 @@ on landlords to register their data.
 ## Considered Options
 
 * Single availability zone deployment for application and data
-* Single availablity zone deployment for application, data backed up to a second availability zone
-* Single availablity zone deployment for application, data backed up to a different availability zone and also a
+* Single availability zone deployment for application, data backed up to a second availability zone
+* Single availability zone deployment for application, data backed up to a different availability zone and also a
   different region (and AWS account)
 * Multi-availability zone deployment for application and data
 * Multi-availability zone deployment for application and data, data backed up to a different region (and AWS account)
@@ -51,7 +51,7 @@ Both the web application and the RDS database would be deployed to single instan
 * Bad because in the case of catastrophic data loss in a region or the AWS account being compromised all data for the
   database would be lost or compromised
 
-### Single availablity zone deployment for application, data backed up to a second availability zone
+### Single availability zone deployment for application, data backed up to a second availability zone
 
 The web application would be deployed to a single availability zone, the RDS database would have a primary instance in
 the same availability zone, and a passive stand-by instance in a second availability zone with data synchronised to it
@@ -64,7 +64,7 @@ the same availability zone, and a passive stand-by instance in a second availabi
 * Bad because in the case of catastrophic data loss in a region or the AWS account being compromised all data for the
   database would be lost or compromised
 
-### Single availablity zone deployment for application, data backed up to a different availability zone and also a different region (and AWS account)
+### Single availability zone deployment for application, data backed up to a different availability zone and also a different region (and AWS account)
 
 The web application would be deployed to a single availability zone, the RDS database would have a primary instance in
 the same availability zone, and a passive stand-by instance in a second availability zone with data synchronised to it.

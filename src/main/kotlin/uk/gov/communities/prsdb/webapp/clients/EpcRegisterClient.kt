@@ -8,6 +8,7 @@ import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import java.net.URLEncoder
 
 @Service
@@ -60,13 +61,5 @@ class EpcRegisterClient(
         return bodyString ?: errorString
     }
 
-    private fun getErrorCode(bodyString: String): String? {
-        val jsonObject = JSONObject(bodyString)
-        val errors = jsonObject.getJSONArray("errors")
-        return if (errors.count() == 1) {
-            errors.getJSONObject(0).getString("code")
-        } else {
-            null
-        }
-    }
+    private fun getErrorCode(bodyString: String): String? = EpcLookupService.getErrorCode(JSONObject(bodyString))
 }

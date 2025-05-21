@@ -83,8 +83,7 @@ class PropertyDetailsViewModel(
                         }
                     } ?: MessageKeyConverter.convert(LicensingType.NO_LICENSING),
                     "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment}",
-                    // TODO PRSD-1108: Set to withChangeLinks when ticket has been implemented
-                    withChangeLinks = false,
+                    withChangeLinks,
                 )
                 addRow(
                     "propertyDetails.propertyRecord.occupied",

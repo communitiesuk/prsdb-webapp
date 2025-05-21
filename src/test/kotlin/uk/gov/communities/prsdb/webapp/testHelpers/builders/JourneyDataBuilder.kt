@@ -2,34 +2,46 @@ package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import java.time.LocalDate
 
 class JourneyDataBuilder(
-    private val mockLocalAuthorityService: LocalAuthorityService,
+    private val mockLocalAuthorityService: LocalAuthorityService = mock(),
     initialJourneyData: JourneyData? = null,
 ) {
     private val journeyData = initialJourneyData?.toMutableMap() ?: mutableMapOf()
@@ -111,11 +123,22 @@ class JourneyDataBuilder(
                 709902,
                 createLocalAuthority(),
             )
+
+        fun localAuthorityUser(
+            name: String,
+            email: String,
+        ) = JourneyDataBuilder(
+            mock(),
+            mapOf(
+                RegisterLaUserStepId.Name.urlPathSegment to mapOf("name" to name),
+                RegisterLaUserStepId.Email.urlPathSegment to mapOf("emailAddress" to email),
+            ),
+        )
     }
 
     fun withLookupAddress(
-        houseNameOrNumber: String,
-        postcode: String,
+        houseNameOrNumber: String = "4",
+        postcode: String = "EG1 2AB",
         isContactAddress: Boolean = false,
     ): JourneyDataBuilder {
         val lookupAddressKey = if (isContactAddress) "lookup-contact-address" else "lookup-address"
@@ -128,8 +151,9 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withLookedUpAddresses(): JourneyDataBuilder {
-        journeyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY] = "[{\"singleLineAddress\":\"1 Street Address, City, AB1 2CD\"}]"
+    fun withLookedUpAddresses(customLookedUpAddresses: List<AddressDataModel>? = null): JourneyDataBuilder {
+        val defaultLookedUpAddresses = listOf(AddressDataModel("1 Street Address, City, AB1 2CD"))
+        journeyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY] = Json.encodeToString(customLookedUpAddresses ?: defaultLookedUpAddresses)
         return this
     }
 
@@ -140,9 +164,9 @@ class JourneyDataBuilder(
     }
 
     fun withSelectedAddress(
-        singleLineAddress: String,
+        singleLineAddress: String = "1 Street Address, City, AB1 2CD",
         uprn: Long? = null,
-        localAuthority: LocalAuthority? = null,
+        localAuthority: LocalAuthority? = createLocalAuthority(),
         isContactAddress: Boolean = false,
     ): JourneyDataBuilder {
         localAuthority?.let {
@@ -162,9 +186,9 @@ class JourneyDataBuilder(
     }
 
     fun withManualAddress(
-        addressLineOne: String,
-        townOrCity: String,
-        postcode: String,
+        addressLineOne: String = "1 Street Address",
+        townOrCity: String = "City",
+        postcode: String = "AB1 2CD",
         localAuthority: LocalAuthority? = null,
         isContactAddress: Boolean = false,
     ): JourneyDataBuilder {
@@ -193,7 +217,7 @@ class JourneyDataBuilder(
         return this
     }
 
-    private fun withEnglandOrWalesResidence(): JourneyDataBuilder {
+    fun withEnglandOrWalesResidence(): JourneyDataBuilder {
         journeyData[LandlordRegistrationStepId.CountryOfResidence.urlPathSegment] =
             mapOf(
                 "livesInEnglandOrWales" to true,
@@ -201,8 +225,13 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withCheckedAnswers(): JourneyDataBuilder {
+        journeyData["check-answers"] = emptyMap<String, Any?>()
+        return this
+    }
+
     fun withPropertyType(
-        type: PropertyType,
+        type: PropertyType = PropertyType.DETACHED_HOUSE,
         customType: String = "type",
     ): JourneyDataBuilder {
         journeyData["property-type"] =
@@ -214,16 +243,21 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withOwnershipType(ownershipType: OwnershipType): JourneyDataBuilder {
+    fun withOwnershipType(ownershipType: OwnershipType = OwnershipType.FREEHOLD): JourneyDataBuilder {
         journeyData["ownership-type"] = mapOf("ownershipType" to ownershipType.name)
         return this
     }
 
-    fun withLicensingType(
+    fun withLicensingType(licensingType: LicensingType): JourneyDataBuilder {
+        journeyData["licensing-type"] = mapOf("licensingType" to licensingType.name)
+        return this
+    }
+
+    fun withLicensing(
         licensingType: LicensingType,
         licenseNumber: String? = null,
     ): JourneyDataBuilder {
-        journeyData["licensing-type"] = mapOf("licensingType" to licensingType.name)
+        withLicensingType(licensingType)
         when (licensingType) {
             LicensingType.SELECTIVE_LICENCE -> withLicenceNumber("selective-licence", licenseNumber)
             LicensingType.HMO_MANDATORY_LICENCE -> withLicenceNumber("hmo-mandatory-licence", licenseNumber)
@@ -233,7 +267,7 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withLicenceNumber(
+    private fun withLicenceNumber(
         urlPathSegment: String,
         licenceNumber: String?,
     ): JourneyDataBuilder {
@@ -255,54 +289,61 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withOccupancyStatus(occupied: Boolean): JourneyDataBuilder {
+        journeyData[RegisterPropertyStepId.Occupancy.urlPathSegment] = mapOf(OccupancyFormModel::occupied.name to occupied)
+        return this
+    }
+
+    fun withHouseholds(households: Int = 2): JourneyDataBuilder {
+        journeyData[RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment] =
+            mapOf(NumberOfHouseholdsFormModel::numberOfHouseholds.name to households.toString())
+        return this
+    }
+
     fun withTenants(
-        households: Int,
-        people: Int,
+        households: Int = 2,
+        people: Int = 4,
     ): JourneyDataBuilder {
-        journeyData["occupancy"] =
-            mapOf(
-                "occupied" to "true",
-            )
-        journeyData["number-of-households"] =
-            mapOf(
-                "numberOfHouseholds" to households.toString(),
-            )
-        journeyData["number-of-people"] =
-            mapOf(
-                "numberOfPeople" to people.toString(),
-            )
+        withOccupancyStatus(true)
+        withHouseholds(households)
+        journeyData[RegisterPropertyStepId.NumberOfPeople.urlPathSegment] =
+            mapOf(NumberOfPeopleFormModel::numberOfPeople.name to people.toString())
 
         return this
     }
 
     fun withVerifiedUser(
-        name: String,
-        dob: LocalDate,
+        name: String = "Arthur Dent",
+        dob: LocalDate = LocalDate.of(2000, 6, 8),
     ): JourneyDataBuilder {
         journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment] =
             mapOf(
                 "name" to name,
                 "birthDate" to dob,
             )
+        journeyData[LandlordRegistrationStepId.ConfirmIdentity.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 
     fun withUnverifiedUser(
-        name: String,
-        dob: LocalDate,
+        name: String? = "Arthur Dent",
+        dob: LocalDate? = LocalDate.of(2000, 6, 8),
     ): JourneyDataBuilder {
-        journeyData[LandlordRegistrationStepId.Name.urlPathSegment] = mapOf("name" to name)
-        journeyData[LandlordRegistrationStepId.DateOfBirth.urlPathSegment] =
-            mapOf("day" to dob.dayOfMonth, "month" to dob.monthValue, "year" to dob.year)
+        journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment] = emptyMap<String, Any?>()
+        name?.let { journeyData[LandlordRegistrationStepId.Name.urlPathSegment] = mapOf("name" to name) }
+        dob?.let {
+            journeyData[LandlordRegistrationStepId.DateOfBirth.urlPathSegment] =
+                mapOf("day" to dob.dayOfMonth, "month" to dob.monthValue, "year" to dob.year)
+        }
         return this
     }
 
-    fun withEmailAddress(emailAddress: String): JourneyDataBuilder {
+    fun withEmailAddress(emailAddress: String = "email@test.com"): JourneyDataBuilder {
         journeyData[LandlordRegistrationStepId.Email.urlPathSegment] = mapOf("emailAddress" to emailAddress)
         return this
     }
 
-    fun withPhoneNumber(phoneNumber: String): JourneyDataBuilder {
+    fun withPhoneNumber(phoneNumber: String = "07456097576"): JourneyDataBuilder {
         journeyData[LandlordRegistrationStepId.PhoneNumber.urlPathSegment] = mapOf("phoneNumber" to phoneNumber)
         return this
     }
@@ -314,7 +355,7 @@ class JourneyDataBuilder(
     ): JourneyDataBuilder =
         this
             .withNonEnglandOrWalesAddress(countryOfResidence, nonEnglandOrWalesAddress)
-            .withSelectedAddress(selectedAddress, isContactAddress = true)
+            .withSelectedAddress(selectedAddress, localAuthority = null, isContactAddress = true)
 
     fun withNonEnglandOrWalesAndManualContactAddress(
         countryOfResidence: String,
@@ -327,17 +368,19 @@ class JourneyDataBuilder(
             .withNonEnglandOrWalesAddress(countryOfResidence, nonEnglandOrWalesAddress)
             .withManualAddress(addressLineOne, townOrCity, postcode, isContactAddress = true)
 
-    private fun withNonEnglandOrWalesAddress(
-        countryOfResidence: String,
-        nonEnglandOrWalesAddress: String,
+    fun withNonEnglandOrWalesAddress(
+        countryOfResidence: String = "Zimbabwe",
+        nonEnglandOrWalesAddress: String? = "123 Example Road, Harare",
     ): JourneyDataBuilder {
         journeyData[LandlordRegistrationStepId.CountryOfResidence.urlPathSegment] =
             mapOf(
                 "livesInEnglandOrWales" to false,
                 "countryOfResidence" to countryOfResidence,
             )
-        journeyData[LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment] =
-            mapOf("nonEnglandOrWalesAddress" to nonEnglandOrWalesAddress)
+        nonEnglandOrWalesAddress?.let {
+            journeyData[LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment] =
+                mapOf("nonEnglandOrWalesAddress" to nonEnglandOrWalesAddress)
+        }
         return this
     }
 
@@ -435,13 +478,19 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withGasSafetyIssueDate(issueDate: LocalDate): JourneyDataBuilder {
+    fun withGasSafetyIssueDate(issueDate: LocalDate = LocalDate.now()): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafetyIssueDate.urlPathSegment] =
             mapOf(
                 TodayOrPastDateFormModel::day.name to issueDate.dayOfMonth,
                 TodayOrPastDateFormModel::month.name to issueDate.monthValue,
                 TodayOrPastDateFormModel::year.name to issueDate.year,
             )
+        return this
+    }
+
+    fun withGasSafeEngineerNum(engineerNum: String = "1234567"): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.GasSafetyEngineerNum.urlPathSegment] =
+            mapOf(GasSafeEngineerNumFormModel::engineerNumber.name to engineerNum)
         return this
     }
 
@@ -457,12 +506,19 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withMissingGasSafetyExemption(): JourneyDataBuilder {
+        withGasSafetyCertStatus(false)
+        withGasSafetyCertExemptionStatus(false)
+        journeyData[PropertyComplianceStepId.GasSafetyExemptionMissing.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
     fun withEicrStatus(hasEICR: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EICR.urlPathSegment] = mapOf(EicrFormModel::hasCert.name to hasEICR)
         return this
     }
 
-    fun withEicrIssueDate(issueDate: LocalDate): JourneyDataBuilder {
+    fun withEicrIssueDate(issueDate: LocalDate = LocalDate.now()): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EicrIssueDate.urlPathSegment] =
             mapOf(
                 TodayOrPastDateFormModel::day.name to issueDate.dayOfMonth,
@@ -481,6 +537,35 @@ class JourneyDataBuilder(
     fun withEicrExemptionReason(eicrExemptionReason: EicrExemptionReason): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EicrExemptionReason.urlPathSegment] =
             mapOf(EicrExemptionReasonFormModel::exemptionReason.name to eicrExemptionReason)
+        return this
+    }
+
+    fun withMissingEicrExemption(): JourneyDataBuilder {
+        withEicrStatus(false)
+        withEicrExemptionStatus(false)
+        journeyData[PropertyComplianceStepId.EicrExemptionMissing.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withEpcStatus(hasEpc: HasEpc): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EPC.urlPathSegment] =
+            mapOf(EpcFormModel::hasCert.name to hasEpc)
+        return this
+    }
+
+    fun withLandingPageReached(): JourneyDataBuilder {
+        journeyData[RegisterLaUserStepId.LandingPage.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withName(name: String = "Mary Margaret"): JourneyDataBuilder {
+        journeyData[RegisterLaUserStepId.Name.urlPathSegment] = mapOf(NameFormModel::name.name to name)
+        return this
+    }
+
+    fun withWantsToProceed(): JourneyDataBuilder {
+        journeyData[DeregisterPropertyStepId.AreYouSure.urlPathSegment] =
+            mapOf(PropertyDeregistrationAreYouSureFormModel::wantsToProceed.name to true)
         return this
     }
 }

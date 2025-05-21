@@ -44,7 +44,7 @@ class LandlordDetailsUpdateJourney(
     private val landlordService: LandlordService,
     private val landlordBaseUserId: String,
     stepName: String,
-) : UpdateJourney<LandlordDetailsUpdateStepId>(
+) : GroupedUpdateJourney<LandlordDetailsUpdateStepId>(
         journeyType = JourneyType.LANDLORD_DETAILS_UPDATE,
         initialStepId = LandlordDetailsUpdateStepId.UpdateEmail,
         validator = validator,
@@ -54,6 +54,10 @@ class LandlordDetailsUpdateJourney(
     init {
         initializeJourneyDataIfNotInitialized()
     }
+
+    override val stepRouter = GroupedStepRouter(this)
+
+    override val unreachableStepRedirect = LandlordDetailsController.LANDLORD_DETAILS_ROUTE
 
     override fun createOriginalJourneyData(): JourneyData {
         val landlord = landlordService.retrieveLandlordByBaseUserId(landlordBaseUserId)!!
@@ -104,11 +108,12 @@ class LandlordDetailsUpdateJourney(
                             "fieldSetHeading" to "forms.update.email.fieldSetHeading",
                             "fieldSetHint" to "forms.email.fieldSetHint",
                             "label" to "forms.email.label",
-                            "submitButtonText" to "forms.buttons.continue",
+                            "showWarning" to true,
+                            "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
                             BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
-            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { journeyData, _, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
             nextAction = { journeyData, _ -> emailNextAction(journeyData) },
             saveAfterSubmit = false,
         )
@@ -126,11 +131,12 @@ class LandlordDetailsUpdateJourney(
                             "fieldSetHeading" to "forms.update.name.fieldSetHeading",
                             "fieldSetHint" to "forms.name.fieldSetHint",
                             "label" to "forms.name.label",
-                            "submitButtonText" to "forms.buttons.continue",
+                            "showWarning" to true,
+                            "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
                             BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
-            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { journeyData, _, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
             nextAction = { _, _ -> Pair(LandlordDetailsUpdateStepId.UpdateDateOfBirth, null) },
             saveAfterSubmit = false,
         )
@@ -144,14 +150,15 @@ class LandlordDetailsUpdateJourney(
                     templateName = "forms/dateForm",
                     content =
                         mapOf(
-                            "title" to "forms.update.title",
+                            "title" to "landlordDetails.update.title",
                             "fieldSetHeading" to "forms.update.dateOfBirth.fieldSetHeading",
                             "fieldSetHint" to "forms.dateOfBirth.fieldSetHint",
-                            "submitButtonText" to "forms.buttons.continue",
+                            "showWarning" to true,
+                            "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
                             BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
-            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { journeyData, _, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
             nextAction = { _, _ -> Pair(LandlordDetailsUpdateStepId.UpdatePhoneNumber, null) },
             saveAfterSubmit = false,
         )
@@ -169,12 +176,13 @@ class LandlordDetailsUpdateJourney(
                             "fieldSetHeading" to "forms.update.phoneNumber.fieldSetHeading",
                             "fieldSetHint" to "forms.phoneNumber.fieldSetHint",
                             "label" to "forms.phoneNumber.label",
-                            "submitButtonText" to "forms.buttons.continue",
                             "hint" to "forms.phoneNumber.hint",
+                            "showWarning" to true,
+                            "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
                             BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
-            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { journeyData, _, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
             nextAction = { _, _ -> Pair(LandlordDetailsUpdateStepId.LookupEnglandAndWalesAddress, null) },
             saveAfterSubmit = false,
         )
@@ -227,7 +235,7 @@ class LandlordDetailsUpdateJourney(
                     journeyDataService = journeyDataService,
                     displaySectionHeader = false,
                 ),
-            handleSubmitAndRedirect = { journeyData, _ -> selectAddressHandleSubmitAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { journeyData, _, _ -> selectAddressHandleSubmitAndRedirect(journeyData) },
             nextAction = { journeyData, _ -> selectAddressNextAction(journeyData) },
             saveAfterSubmit = false,
         )
@@ -273,7 +281,7 @@ class LandlordDetailsUpdateJourney(
                         ),
                     shouldDisplaySectionHeader = false,
                 ),
-            handleSubmitAndRedirect = { journeyData, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { journeyData, _, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
             saveAfterSubmit = false,
         )
 

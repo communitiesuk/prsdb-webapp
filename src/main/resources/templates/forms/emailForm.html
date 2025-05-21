@@ -1,18 +1,19 @@
 <!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="fieldSetHint" type="java.lang.String"*/-->
 <!--/*@thymesVar id="label" type="java.lang.String"*/-->
+<!--/*@thymesVar id="showWarning" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
-<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
-<th:block id="form-content">
-    <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'emailAddress', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
-        <div th:replace="~{fragments/forms/emailInput :: emailInput(#{${label}}, 'emailAddress', null)}">
-        </div>
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'emailAddress', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
+        <div th:replace="~{fragments/forms/emailInput :: emailInput(#{${label}}, 'emailAddress', null)}"></div>
+    </th:block>
+    <th:block th:if="${showWarning}">
+        <div th:replace="~{fragments/warningText :: warningText(#{forms.update.warning})}">forms.update.warning</div>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
-</th:block>
 </html>

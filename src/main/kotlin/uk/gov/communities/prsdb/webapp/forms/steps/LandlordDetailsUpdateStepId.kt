@@ -3,7 +3,8 @@ package uk.gov.communities.prsdb.webapp.forms.steps
 enum class LandlordDetailsUpdateStepId(
     override val urlPathSegment: String,
     override val groupIdentifier: UpdateLandlordDetailsStepGroupIdentifier,
-) : GroupedStepId<UpdateLandlordDetailsStepGroupIdentifier> {
+    override val isCheckYourAnswersStepId: Boolean = false,
+) : GroupedUpdateStepId<UpdateLandlordDetailsStepGroupIdentifier> {
     UpdateEmail("email", UpdateLandlordDetailsStepGroupIdentifier.Email),
     UpdateName("name", UpdateLandlordDetailsStepGroupIdentifier.Name),
     UpdateDateOfBirth("date-of-birth", UpdateLandlordDetailsStepGroupIdentifier.DateOfBirth),

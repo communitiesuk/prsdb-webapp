@@ -2,12 +2,9 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.junit.UsePlaywright
-import org.flywaydb.core.Flyway
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.TestInstance
 import org.mockito.kotlin.whenever
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Import
@@ -31,6 +28,7 @@ import uk.gov.service.notify.NotificationClient
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = ["spring.flyway.clean-disabled=false"],
 )
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @UsePlaywright
 @ActiveProfiles(profiles = ["local", "local-no-auth"])
 abstract class IntegrationTest {
@@ -100,25 +98,9 @@ abstract class IntegrationTest {
 
     @BeforeEach
     fun setUp(page: Page) {
-        navigator = Navigator(page, port, identityService)
+        navigator = Navigator(page, port)
     }
 
-    @AfterEach
-    fun resetDatabase(
-        @Autowired flyway: Flyway,
-    ) {
-        flyway.clean()
-        flyway.migrate()
-    }
-
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun resetDatabaseBeforeAll(
-            @Autowired flyway: Flyway,
-        ) {
-            flyway.clean()
-            flyway.migrate()
-        }
-    }
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    abstract class NestedIntegrationTestWithSeedData
 }

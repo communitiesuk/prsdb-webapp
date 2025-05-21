@@ -21,10 +21,14 @@ class LaUserRegistrationJourneyFactory(
     fun create(invitation: LocalAuthorityInvitation) =
         LaUserRegistrationJourney(
             validator,
-            journeyDataServiceFactory.create(REGISTER_LA_USER_JOURNEY_URL),
+            journeyDataServiceFactory.create(JOURNEY_DATA_KEY),
             invitationService,
             localAuthorityDataService,
             invitation,
             securityContextService,
         )
+
+    companion object {
+        const val JOURNEY_DATA_KEY = REGISTER_LA_USER_JOURNEY_URL
+    }
 }
