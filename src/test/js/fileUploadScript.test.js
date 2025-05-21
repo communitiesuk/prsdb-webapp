@@ -4,7 +4,7 @@ import jsdom from 'global-jsdom';
 import {createFileUploadIntercepter} from '#main-javascript/fileUploadScript';
 
 
-    jsdom(`
+jsdom(`
 <form id="test-form" method="post" enctype="multipart/form-data">
     <input type="hidden" name="_csrf" value="test-csrf-token">
     <input id="test-file-input" class="govuk-file-upload" type="file">
