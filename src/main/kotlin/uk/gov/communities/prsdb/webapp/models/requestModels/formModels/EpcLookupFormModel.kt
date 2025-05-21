@@ -30,7 +30,6 @@ class EpcLookupFormModel : FormModel {
         if (certificateNumber.isBlank()) return true
 
         val certNumberNoHyphens = certificateNumber.replace("-", "")
-
         return (certNumberNoHyphens.all { it.isDigit() } && certNumberNoHyphens.length == 20)
     }
 }

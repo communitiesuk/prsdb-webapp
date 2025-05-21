@@ -5,6 +5,7 @@ import kotlinx.serialization.json.Json
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
+import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -22,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
@@ -564,6 +566,16 @@ class JourneyDataBuilder(
     fun withEpcLookupCertificateNumber(certificateNumber: String = "0000-0000-1234-5678-9100"): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EpcLookup.urlPathSegment] =
             mapOf(EpcLookupFormModel::certificateNumber.name to certificateNumber)
+        return this
+    }
+
+    fun withLookedUpEpcDetails(epcDetails: EpcDataModel): JourneyDataBuilder {
+        journeyData[LOOKED_UP_EPC_JOURNEY_DATA_KEY] = Json.encodeToString(epcDetails)
+        return this
+    }
+
+    fun withNullLookedUpEpcDetails(): JourneyDataBuilder {
+        journeyData[LOOKED_UP_EPC_JOURNEY_DATA_KEY] = null
         return this
     }
 
