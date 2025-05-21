@@ -241,7 +241,7 @@ class PropertyDetailsUpdateJourneyExtensionsTests {
     fun `getLicenceNumberUpdateIfPresent returns null if the corresponding page is not in journeyData and there is a valid licence type`() {
         val testJourneyData = journeyDataBuilder.withLicensingTypeUpdate(LicensingType.SELECTIVE_LICENCE).build()
 
-        val licenceNumberUpdate = testJourneyData.getLicenceNumberUpdateIfPresent("originalJourneyKey")
+        val licenceNumberUpdate = testJourneyData.getLicenceNumberUpdateIfPresent()
 
         assertNull(licenceNumberUpdate)
     }
@@ -250,7 +250,7 @@ class PropertyDetailsUpdateJourneyExtensionsTests {
     fun `getLicenceNumberUpdateIfPresent returns null if the licence type is NO_LICENSING in the journeyData`() {
         val testJourneyData = journeyDataBuilder.withLicensingTypeUpdate(LicensingType.NO_LICENSING).build()
 
-        val licenceNumberUpdate = testJourneyData.getLicenceNumberUpdateIfPresent("originalJourneyKey")
+        val licenceNumberUpdate = testJourneyData.getLicenceNumberUpdateIfPresent()
 
         assertNull(licenceNumberUpdate)
     }
@@ -260,31 +260,7 @@ class PropertyDetailsUpdateJourneyExtensionsTests {
         val newLicenceNumber = "LN123456"
         val testJourneyData = journeyDataBuilder.withLicenceUpdate(LicensingType.SELECTIVE_LICENCE, newLicenceNumber).build()
 
-        val licenceNumberUpdate = testJourneyData.getLicenceNumberUpdateIfPresent("originalJourneyKey")
-
-        assertEquals(newLicenceNumber, licenceNumberUpdate)
-    }
-
-    @Test
-    fun `getLicenceNumberUpdateIfPresent returns a licence number if licence type is in the original journey data`() {
-        val originalJourneyKey = "originalJourneyKey"
-        val originalLicenseType = LicensingType.SELECTIVE_LICENCE
-        val originalJourneyData =
-            mapOf(
-                "licensing-type" to mapOf("licensingType" to originalLicenseType),
-                "selective-licence" to mapOf("licenceNumber" to "LN00000000"),
-            )
-
-        val newLicenceNumber = "LN123456"
-        val testJourneyData =
-            journeyDataBuilder
-                .withLicenceNumberUpdate(
-                    newLicenceNumber,
-                    originalLicenseType,
-                ).withOriginalData(originalJourneyKey, originalJourneyData)
-                .build()
-
-        val licenceNumberUpdate = testJourneyData.getLicenceNumberUpdateIfPresent(originalJourneyKey)
+        val licenceNumberUpdate = testJourneyData.getLicenceNumberUpdateIfPresent()
 
         assertEquals(newLicenceNumber, licenceNumberUpdate)
     }
