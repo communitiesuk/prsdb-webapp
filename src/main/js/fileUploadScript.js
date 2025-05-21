@@ -72,5 +72,3 @@ function isFileTooLarge(file) {
     const megaByteInBytes = 1024 * 1024;
     return file.size > 15 * megaByteInBytes;
 }
-
-export { isFileTooLarge, submitSyntheticForm, createHiddenForm, getInputFileFromForm };
