@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -11,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckLicensingAnswersPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckOccupancyAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HmoAdditionalLicenceFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HmoMandatoryLicenceFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.LicensingTypeFormPagePropertyDetailsUpdate
@@ -154,8 +154,6 @@ class PropertyDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sq
         }
     }
 
-    // TODO PRSD-1109 - re-enable tests and update them to match new flow
-    @Disabled
     @Nested
     inner class OccupancyUpdates {
         private val occupiedPropertyOwnershipId = 1L
@@ -165,34 +163,23 @@ class PropertyDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sq
         private val vacantPropertyUrlArguments = mapOf("propertyOwnershipId" to vacantPropertyOwnershipId.toString())
 
         @Test
-        fun `Step access and fieldset headings work correctly when a property is updated from occupied to vacant`(page: Page) {
+        fun `A property can have its occupancy updated from occupied to vacant`(page: Page) {
             // Details page
             var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
-
-            // Check number of households/people pages can be reached
-            navigator.navigateToPropertyDetailsUpdateNumberOfHouseholdsPage(occupiedPropertyOwnershipId)
-            val updateNumberOfHouseholdsPage =
-                assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
-            assertThat(updateNumberOfHouseholdsPage.form.fieldsetHeading).containsText("Update the number of households in the property")
-
-            navigator.navigateToPropertyDetailsUpdateNumberOfPeoplePage(occupiedPropertyOwnershipId)
-            val updateNumberOfPeoplePage =
-                assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
-            assertThat(updateNumberOfPeoplePage.form.fieldsetHeading).containsText("Update how many people live in your property")
-
-            // Update occupancy to vacant
-            propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
             propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickActionLinkAndWait()
             val updateOccupancyPage = assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+            // Update occupancy to vacant
             assertThat(updateOccupancyPage.form.fieldsetHeading).containsText("Is your property still occupied by tenants?")
             updateOccupancyPage.submitIsVacant()
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
+            val checkOccupancyAnswersPage =
+                assertPageIs(page, CheckOccupancyAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
-            // Check number of households/people pages can't be reached
-            navigator.navigateToPropertyDetailsUpdateNumberOfHouseholdsPage(occupiedPropertyOwnershipId)
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
-
-            navigator.navigateToPropertyDetailsUpdateNumberOfPeoplePage(occupiedPropertyOwnershipId)
+            // Check occupancy answers
+            assertThat(checkOccupancyAnswersPage.form.summaryList.occupancyRow).containsText("No")
+            assertThat(checkOccupancyAnswersPage.form.summaryList.numberOfHouseholdsRow).isHidden()
+            assertThat(checkOccupancyAnswersPage.form.summaryList.numberOfPeopleRow).isHidden()
+            checkOccupancyAnswersPage.confirm()
             propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
             // Check changes have occurred
@@ -200,94 +187,105 @@ class PropertyDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sq
         }
 
         @Test
-        fun `Step access and fieldset headings work correctly when a property is updated from vacant to occupied`(page: Page) {
-            // Check number of households/people pages can't be reached
-            navigator.navigateToPropertyDetailsUpdateNumberOfHouseholdsPage(vacantPropertyOwnershipId)
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, vacantPropertyUrlArguments)
-
-            navigator.navigateToPropertyDetailsUpdateNumberOfPeoplePage(vacantPropertyOwnershipId)
-            var propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, vacantPropertyUrlArguments)
+        fun `A property can have its occupancy updated from vacant to occupied`(page: Page) {
+            // Details page
+            var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(vacantPropertyOwnershipId)
+            propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickActionLinkAndWait()
+            val updateOccupancyPage = assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 
             // Update occupancy to occupied
-            propertyDetailsUpdatePage.propertyDetailsSummaryList.occupancyRow.clickActionLinkAndWait()
-            val updateOccupancyPage = assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
             assertThat(updateOccupancyPage.form.fieldsetHeading).containsText("Is your property occupied by tenants?")
             updateOccupancyPage.submitIsOccupied()
-            assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
-
-            // Check number of people page can't be reached
-            navigator.navigateToPropertyDetailsUpdateNumberOfPeoplePage(vacantPropertyOwnershipId)
             val updateNumberOfHouseholdsPage =
                 assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 
-            // Update number of households/people
+            // Update number of households
             val newNumberOfHouseholds = 1
-            val newNumberOfPeople = 3
             assertThat(updateNumberOfHouseholdsPage.form.fieldsetHeading).containsText("How many households live in your property?")
             updateNumberOfHouseholdsPage.submitNumberOfHouseholds(newNumberOfHouseholds)
             val updateNumberOfPeoplePage =
                 assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
+
+            // Update number of people
+            val newNumberOfPeople = 3
             assertThat(updateNumberOfPeoplePage.form.fieldsetHeading).containsText("How many people live in your property?")
             updateNumberOfPeoplePage.submitNumOfPeople(newNumberOfPeople)
+            val checkOccupancyAnswersPage =
+                assertPageIs(page, CheckOccupancyAnswersPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 
-            propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, vacantPropertyUrlArguments)
+            // Check occupancy answers
+            assertThat(checkOccupancyAnswersPage.form.summaryList.occupancyRow).containsText("Yes")
+            assertThat(checkOccupancyAnswersPage.form.summaryList.numberOfHouseholdsRow).containsText(newNumberOfHouseholds.toString())
+            assertThat(checkOccupancyAnswersPage.form.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople.toString())
+            checkOccupancyAnswersPage.confirm()
+            propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, vacantPropertyUrlArguments)
 
             // Check changes have occurred
-            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
-            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.numberOfHouseholdsRow.value).containsText(
-                newNumberOfHouseholds.toString(),
-            )
-            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.numberOfPeopleRow.value).containsText(
-                newNumberOfPeople.toString(),
-            )
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.value)
+                .containsText(newNumberOfHouseholds.toString())
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.value)
+                .containsText(newNumberOfPeople.toString())
         }
 
         @Test
         fun `A property can have just their number of households and people updated`(page: Page) {
             // Details page
-            var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+            var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+            propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickActionLinkAndWait()
+            val updateNumberOfHouseholdsPage =
+                assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
-            val newNumberOfHouseholds = 3
-            val newNumberOfPeople = 5
-            propertyDetailsPage =
-                updateNumberOfHouseholdsAndPeopleAndReturn(propertyDetailsPage, newNumberOfHouseholds, newNumberOfPeople)
+            // Update number of households
+            val newNumberOfHouseholds = 1
+            assertThat(updateNumberOfHouseholdsPage.form.fieldsetHeading).containsText("Update the number of households in the property")
+            updateNumberOfHouseholdsPage.submitNumberOfHouseholds(newNumberOfHouseholds)
+            val updateNumberOfPeoplePage =
+                assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+            // Update number of people
+            val newNumberOfPeople = 3
+            assertThat(updateNumberOfPeoplePage.form.fieldsetHeading).containsText("Update how many people live in your property")
+            updateNumberOfPeoplePage.submitNumOfPeople(newNumberOfPeople)
+            val checkOccupancyAnswersPage =
+                assertPageIs(page, CheckOccupancyAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+            // Check occupancy answers
+            assertThat(checkOccupancyAnswersPage.form.summaryList.numberOfHouseholdsRow).containsText(newNumberOfHouseholds.toString())
+            assertThat(checkOccupancyAnswersPage.form.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople.toString())
+            checkOccupancyAnswersPage.confirm()
+            propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
             // Check changes have occurred
-            assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.value).containsText(
-                newNumberOfHouseholds.toString(),
-            )
-            assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.value).containsText(
-                newNumberOfPeople.toString(),
-            )
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.value)
+                .containsText(newNumberOfHouseholds.toString())
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.value)
+                .containsText(newNumberOfPeople.toString())
         }
 
-        // TODO PRSD-1109 - add test for updating just number of people
-    }
+        @Test
+        fun `A property can have just their number of people updated`(page: Page) {
+            // Details page
+            var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+            propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.clickActionLinkAndWait()
+            val updateNumberOfPeoplePage =
+                assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
-    private fun updateOccupancyToVacantAndReturn(detailsPage: PropertyDetailsPageLandlordView): PropertyDetailsPageLandlordView {
-        val page = detailsPage.page
-        detailsPage.propertyDetailsSummaryList.occupancyRow.clickActionLinkAndWait()
+            // Update number of people
+            val newNumberOfPeople = 3
+            assertThat(updateNumberOfPeoplePage.form.fieldsetHeading).containsText("Update how many people live in your property")
+            updateNumberOfPeoplePage.submitNumOfPeople(newNumberOfPeople)
+            val checkOccupancyAnswersPage =
+                assertPageIs(page, CheckOccupancyAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
-        val updateOccupancyPage = assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, urlArguments)
-        updateOccupancyPage.submitIsVacant()
+            // Check occupancy answers
+            assertThat(checkOccupancyAnswersPage.form.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople.toString())
+            checkOccupancyAnswersPage.confirm()
+            propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
-        return assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
-    }
-
-    private fun updateNumberOfHouseholdsAndPeopleAndReturn(
-        detailsPage: PropertyDetailsPageLandlordView,
-        newNumberOfHouseholds: Int,
-        newNumberOfPeople: Int,
-    ): PropertyDetailsPageLandlordView {
-        val page = detailsPage.page
-        detailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickActionLinkAndWait()
-
-        val updateNumberOfHouseholdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, urlArguments)
-        updateNumberOfHouseholdsPage.submitNumberOfHouseholds(newNumberOfHouseholds)
-
-        val updateNumberOfPeoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, urlArguments)
-        updateNumberOfPeoplePage.submitNumOfPeople(newNumberOfPeople)
-
-        return assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+            // Check changes have occurred
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.value)
+                .containsText(newNumberOfPeople.toString())
+        }
     }
 }
