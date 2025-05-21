@@ -179,7 +179,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
     }
 
     @Test
-    fun `User can navigate whole journey if pages are filled in correctly (no certs, exemptions)`(page: Page) {
+    fun `User can navigate whole journey if pages are filled in correctly (no certs, exemptions, declaration)`(page: Page) {
         // Start page
         val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
         assertThat(startPage.heading).containsText("Compliance certificates")
