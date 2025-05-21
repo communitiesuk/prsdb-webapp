@@ -34,7 +34,6 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMatchedEpcIsCorrect
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.resetCheckMatchedEpc
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
@@ -944,40 +943,33 @@ class PropertyComplianceJourney(
         }
 
     private fun checkMatchedEpcStepHandleSubmitAndRedirect(journeyData: JourneyData): String {
-        val epcLookupStep = steps.single { it.id == PropertyComplianceStepId.EpcLookup }
-
-        val newJourneyData =
-            if (epcLookupStep.nextAction(journeyData, null).first == PropertyComplianceStepId.CheckMatchedEpc) {
-                journeyData.withEpcDetails(null)
-            } else {
-                journeyData
-            }
-        journeyDataService.setJourneyDataInSession(newJourneyData)
-
         val checkMatchedEpcStep = steps.single { it.id == PropertyComplianceStepId.CheckMatchedEpc }
-        return getRedirectForNextStep(checkMatchedEpcStep, newJourneyData, null)
+        return getRedirectForNextStep(checkMatchedEpcStep, journeyData, null)
     }
 
     private fun epcLookupStepHandleSubmitAndRedirect(journeyData: JourneyData): String {
         val certificateNumber = journeyData.getEpcLookupCertificateNumber()!!
         val lookedUpEpc = epcLookupService.getEpcByCertificateNumber(certificateNumber)
 
-        var newJourneyData = journeyData.withEpcDetails(lookedUpEpc)
-        if (lookedUpEpc != null && lookedUpEpc.isLatestCertificateForThisProperty()) {
-            newJourneyData = newJourneyData.resetCheckMatchedEpc()
-        }
+        val newJourneyData = journeyData.withEpcDetails(lookedUpEpc)
         journeyDataService.setJourneyDataInSession(newJourneyData)
+
+        if (lookedUpEpc?.isLatestCertificateForThisProperty() == true) {
+            // Redirect to CheckMatchedEpc without setting it as the nextAction
+            return Step.generateUrl(PropertyComplianceStepId.CheckMatchedEpc, null)
+        }
 
         val epcLookupStep = steps.single { it.id == PropertyComplianceStepId.EpcLookup }
         return getRedirectForNextStep(epcLookupStep, newJourneyData, null)
     }
 
-    private fun epcLookupStepNextAction(journeyData: JourneyData): Pair<PropertyComplianceStepId, Int?> {
+    private fun epcLookupStepNextAction(journeyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> {
         val lookedUpEpcDetails =
             journeyData.getEpcDetails()
                 ?: return Pair(PropertyComplianceStepId.EpcNotFound, null)
         return if (lookedUpEpcDetails.isLatestCertificateForThisProperty()) {
-            Pair(PropertyComplianceStepId.CheckMatchedEpc, null)
+            // Set this to null instead of CheckMatchedEpc to avoid an infinite loop where the two steps are each other's nextAction
+            Pair(null, null)
         } else {
             Pair(PropertyComplianceStepId.EpcSuperseded, null)
         }
