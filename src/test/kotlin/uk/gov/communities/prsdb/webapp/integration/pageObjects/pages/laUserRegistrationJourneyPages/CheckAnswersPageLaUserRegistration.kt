@@ -4,7 +4,7 @@ import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.JourneyForm
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
@@ -15,7 +15,7 @@ class CheckAnswersPageLaUserRegistration(
 
     class CheckAnswersLaUserRegistrationForm(
         page: Page,
-    ) : JourneyForm(page) {
+    ) : PostForm(page) {
         val summaryList = CheckAnswersLaUserRegistrationSummaryList(locator)
     }
 

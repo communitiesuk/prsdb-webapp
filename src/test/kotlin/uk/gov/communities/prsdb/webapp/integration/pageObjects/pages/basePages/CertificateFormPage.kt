@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.JourneyForm
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 
 abstract class CertificateFormPage(
@@ -22,7 +22,7 @@ abstract class CertificateFormPage(
 
     class CertificateForm(
         page: Page,
-    ) : JourneyForm(page) {
+    ) : PostForm(page) {
         val hasCertRadios = Radios(locator)
     }
 }

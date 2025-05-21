@@ -4,7 +4,7 @@ import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.JourneyForm
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
@@ -35,7 +35,7 @@ class EpcPagePropertyCompliance(
 
     class EpcCertificateForm(
         page: Page,
-    ) : JourneyForm(page) {
+    ) : PostForm(page) {
         val hasCertRadios = Radios(locator)
     }
 }

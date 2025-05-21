@@ -6,7 +6,7 @@ import com.microsoft.playwright.options.FormData
 import com.microsoft.playwright.options.RequestOptions
 import org.springframework.util.ResourceUtils
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FileUpload
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.JourneyForm
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 
 abstract class UploadCertificateFormPage(
     page: Page,
@@ -46,7 +46,7 @@ abstract class UploadCertificateFormPage(
 
     class UploadCertificateForm(
         page: Page,
-    ) : JourneyForm(page) {
+    ) : PostForm(page) {
         val certificateFileUpload = FileUpload(page)
     }
 }

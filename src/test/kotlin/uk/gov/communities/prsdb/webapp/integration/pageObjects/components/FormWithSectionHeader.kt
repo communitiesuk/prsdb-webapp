@@ -5,7 +5,7 @@ import com.microsoft.playwright.Page
 
 open class FormWithSectionHeader(
     page: Page,
-) : JourneyForm(page) {
+) : PostForm(page) {
     val sectionHeader = SectionHeader(locator)
 
     class SectionHeader(
