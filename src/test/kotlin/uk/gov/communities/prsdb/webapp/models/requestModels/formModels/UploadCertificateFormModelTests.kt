@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import kotlinx.serialization.json.Json
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -7,6 +9,8 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFileItemInput
+import java.io.File
+import kotlin.div
 import kotlin.reflect.KClass
 import kotlin.test.assertTrue
 
@@ -56,6 +60,17 @@ class UploadCertificateFormModelTests {
                 isUploadSuccessful,
             )
         }
+    }
+
+    @Test
+    fun `maxFileSizeBytes in javascript matches max size in UploadCertificateFormModel`() {
+        val constantsJsonString = File("src/main/js/fileUploadConstants.json").readText()
+        val jsConstants = Json.decodeFromString<Map<String, Double>>(constantsJsonString)
+        val jsMaxSizeMB = jsConstants["maxFileSizeBytes"]
+
+        val ktMaxSizeMB = UploadCertificateFormModel.maxContentLength
+
+        assertEquals(ktMaxSizeMB, jsMaxSizeMB, "File size limits must match between Kotlin and JavaScript")
     }
 
     companion object {

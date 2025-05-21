@@ -1,3 +1,5 @@
+import fileUploadConstants from './fileUploadConstants.json' with {type: "json"};
+
 export function addFileUploadListener() {
     const form = document.querySelector('form#single-file-upload-form[enctype="multipart/form-data"]');
     if (form)
@@ -69,6 +71,5 @@ function getInputFileFromForm(form){
 }
 
 function isFileTooLarge(file) {
-    const megaByteInBytes = 1024 * 1024;
-    return file.size > 15 * megaByteInBytes;
+    return file.size > fileUploadConstants.maxFileSizeBytes;
 }

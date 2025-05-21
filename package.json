@@ -5,7 +5,7 @@
   "main": "src/javascript/app.js",
   "type": "module",
   "imports": {
-    "#main-javascript/*": "./src/main/js/*.js"
+    "#main-javascript/*": "./src/main/js/*"
   },
   "scripts": {
     "build": "rollup --config",

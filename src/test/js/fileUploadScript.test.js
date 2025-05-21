@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 import jsdom from 'global-jsdom';
-import {createFileUploadIntercepter} from '#main-javascript/fileUploadScript';
+import {createFileUploadIntercepter} from '#main-javascript/fileUploadScript.js';
+import fileUploadConstants from '#main-javascript/fileUploadConstants.json' with {type: "json"};
 
 
 jsdom(`
@@ -22,10 +23,17 @@ function mockFormSubmissions() {
 
     // Mock submit event reaching browser
     document.addEventListener('submit', (event) => {
-        submittedForms.push(event.target)
+        if (!event.defaultPrevented) {
+            submittedForms.push(event.target)
+        }
     });
 
     return submittedForms;
+}
+
+function dispatchSubmitEventTo(form) {
+    const submitEvent = new window.Event('submit', {bubbles: true, cancelable: true});
+    form.dispatchEvent(submitEvent);
 }
 
 describe('File Upload Handler', () => {
@@ -35,7 +43,7 @@ describe('File Upload Handler', () => {
         const mockFile = {
             name: 'test.pdf',
             type: 'application/pdf',
-            size: 16 * 1024 * 1024
+            size: fileUploadConstants.maxFileSizeBytes + 1
         };
 
         const submittedForms = mockFormSubmissions()
@@ -43,8 +51,7 @@ describe('File Upload Handler', () => {
         const handler = createFileUploadIntercepter(form, () => mockFile);
         form.addEventListener('submit', handler);
 
-        const submitEvent = new window.Event('submit');
-        form.dispatchEvent(submitEvent);
+        dispatchSubmitEventTo(form);
 
         assert.strictEqual(submittedForms.length, 1);
         const submittedForm = submittedForms[0];
@@ -61,7 +68,7 @@ describe('File Upload Handler', () => {
         for (const pair of [{key: '_csrf', value: 'test-csrf-token'},
             {key: 'name', value: 'test.pdf'},
             {key: 'contentType', value: 'application/pdf'},
-            {key: 'contentLength', value: 16777216}]) {
+            {key: 'contentLength', value: fileUploadConstants.maxFileSizeBytes + 1}]) {
             const input = submittedForm.querySelector(`input[name="${pair.key}"]`);
             assert.equal(input.value, pair.value.toString());
         }
@@ -74,7 +81,7 @@ describe('File Upload Handler', () => {
         const mockFile = {
             name: 'test.pdf',
             type: 'application/pdf',
-            size: 14 * 1024 * 1024
+            size: fileUploadConstants.maxFileSizeBytes
         };
 
         const submittedForms = mockFormSubmissions()
@@ -82,8 +89,7 @@ describe('File Upload Handler', () => {
         const handler = createFileUploadIntercepter(form, () => mockFile);
         form.addEventListener('submit', handler);
 
-        const submitEvent = new window.Event('submit', {bubbles: true});
-        form.dispatchEvent(submitEvent);
+        dispatchSubmitEventTo(form);
 
         assert.strictEqual(submittedForms.length, 1);
         const submittedForm = submittedForms[0];
