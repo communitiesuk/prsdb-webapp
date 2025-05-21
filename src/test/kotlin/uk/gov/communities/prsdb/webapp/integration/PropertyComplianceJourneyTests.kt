@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.CheckMatchedEpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionConfirmationPagePropertyCompliance
@@ -30,7 +31,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcMissingPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcPagePropertyCompliance
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyDeclarationPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyDeclarationPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyRiskPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionMissingPagePropertyCompliance
@@ -41,6 +43,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyUploadConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyUploadPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.KeepPropertySafePagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 
@@ -236,13 +239,21 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         assertThat(epcExemptionConfirmationPage.heading)
             .containsText("You’ve marked this property as not needing an EPC")
         epcExemptionConfirmationPage.saveAndContinueToLandlordResponsibilitiesButton.clickAndWait()
-        assertPageIs(page, FireSafetyDeclarationPage::class, urlArguments)
+        val fireSafetyDeclarationPage = assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
 
-        // TODO PRSD-1150 - continue test
+        // Fire Safety Declaration page
+        BaseComponent.assertThat(fireSafetyDeclarationPage.heading).containsText("Fire safety in your property")
+        assertThat(
+            fireSafetyDeclarationPage.form.fieldHeading,
+        ).containsText("Have you followed all fire safety responsibilities relevant for this property?")
+        fireSafetyDeclarationPage.submitHasDeclaredFireSafety()
+        assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
+
+        // TODO PRSD-1152 - continue test
     }
 
     @Test
-    fun `User can navigate whole journey if pages are filled in correctly (no certs, no exemptions)`(page: Page) {
+    fun `User can navigate whole journey if pages are filled in correctly (no certs, no exemptions, no declaration)`(page: Page) {
         // Start page
         val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
         assertThat(startPage.heading).containsText("Compliance certificates")
@@ -285,9 +296,13 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
 
         // EPC missing page
         epcMissingPage.saveAndContinueButton.clickAndWait()
-        assertPageIs(page, FireSafetyDeclarationPage::class, urlArguments)
+        val fireSafetyDeclarationPage = assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
 
-        // TODO: PRSD-1150 continue test
+        // Fire Safety Declaration page
+        fireSafetyDeclarationPage.submitHasNotDeclaredFireSafety()
+        assertPageIs(page, FireSafetyRiskPagePropertyCompliance::class, urlArguments)
+
+        // TODO: PRSD-1151 continue test
     }
 
     companion object {

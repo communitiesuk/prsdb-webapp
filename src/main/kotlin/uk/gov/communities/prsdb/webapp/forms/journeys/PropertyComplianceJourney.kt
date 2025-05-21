@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasFireSafetyDeclaration
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCertExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrExemptionReasonOther
@@ -796,7 +797,6 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
-                                "fieldSetHeading" to "forms.landlordResponsibilities.fireSafety.fieldSetHeading",
                                 "housesInMultipleOccupationUrl" to HOUSES_IN_MULTIPLE_OCCUPATION_URL,
                                 "radioOptions" to
                                     listOf(
@@ -814,7 +814,7 @@ class PropertyComplianceJourney(
                                 BACK_URL_ATTR_NAME to taskListUrlSegment,
                             ),
                     ),
-                // TODO 1150 add next action method to to pick the next step depending on users response
+                nextAction = { journeyData, _ -> fireSafetyDeclarationStepNextAction(journeyData) },
             )
 
     private fun placeholderStep(
@@ -888,6 +888,13 @@ class PropertyComplianceJourney(
             HasEpc.YES -> Pair(PropertyComplianceStepId.CheckMatchedEpc, null)
             HasEpc.NO -> Pair(PropertyComplianceStepId.EpcMissing, null)
             HasEpc.NOT_REQUIRED -> Pair(PropertyComplianceStepId.EpcExemptionReason, null)
+        }
+
+    private fun fireSafetyDeclarationStepNextAction(journeyData: JourneyData) =
+        if (journeyData.getHasFireSafetyDeclaration()!!) {
+            Pair(PropertyComplianceStepId.KeepPropertySafe, null)
+        } else {
+            Pair(PropertyComplianceStepId.FireSafetyRisk, null)
         }
 
     private fun getPropertyAddress() =

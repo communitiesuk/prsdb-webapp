@@ -1,12 +1,10 @@
 <!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
-<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
-<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="radioOptions" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="housesInMultipleOccupationUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, null)}">
   <header>
     <h1 class="govuk-heading-l" th:text="#{forms.landlordResponsibilities.fireSafety.heading}">forms.landlordResponsibilities.fireSafety.heading</h1>
   </header>
@@ -34,8 +32,11 @@
     <p class="govuk-body" th:text="#{forms.landlordResponsibilities.fireSafety.paragraph.three}">forms.landlordResponsibilities.fireSafety.paragraph.three</p>
   </section>
   <th:block id="fieldset-content"
-            th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'hasConfirmed', #{${fieldSetHeading}}, null)}">
-    <th:block th:replace="~{fragments/forms/radios :: radios(null,'hasConfirmed',null, ${radioOptions})}"></th:block>
+            th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'hasDeclared', null, null)}">
+    <p class="govuk-body-l govuk-!-font-weight-bold" th:text="#{forms.landlordResponsibilities.fireSafety.fieldHeading}">
+      forms.landlordResponsibilities.fireSafety.fieldHeading
+    </p>
+    <th:block th:replace="~{fragments/forms/radios :: radios(null,'hasDeclared',null, ${radioOptions})}"></th:block>
   </th:block>
   <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
 </html>
