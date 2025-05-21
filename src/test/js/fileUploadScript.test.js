@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import { describe, test, before, after } from 'node:test';
+import { describe, test } from 'node:test';
 import jsdom from 'global-jsdom';
-import {submitSyntheticForm, createFileUploadIntercepter} from '../../main/js/fileUploadScript.js';
+import {createFileUploadIntercepter} from '#main-javascript/fileUploadScript';
 
 
     jsdom(`
