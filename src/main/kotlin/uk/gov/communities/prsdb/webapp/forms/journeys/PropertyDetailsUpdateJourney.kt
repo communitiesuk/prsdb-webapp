@@ -323,7 +323,6 @@ class PropertyDetailsUpdateJourney(
             saveAfterSubmit = false,
         )
 
-    // The next action flow must have the `updateDetailsStep` after all data changing steps to ensure that validation for all of them is run
     override val sections =
         createSingleSectionWithSingleTaskFromSteps(
             initialStepId,
