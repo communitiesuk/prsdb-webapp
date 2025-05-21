@@ -30,7 +30,7 @@ function mockFormSubmissions() {
 
 describe('File Upload Handler', () => {
 
-    test('Intercepts large files', () => {
+    test('Intercepts large files and submits a metadata only synthetic form instead', () => {
         const form = document.querySelector('form#test-form');
         const mockFile = {
             name: 'test.pdf',
@@ -69,7 +69,7 @@ describe('File Upload Handler', () => {
         form.removeEventListener('submit', handler);
     });
 
-    test('Intercepts small files', () => {
+    test('Does not intercept small files form submissions so the default form behaviour occurs', () => {
         const form = document.querySelector('form#test-form');
         const mockFile = {
             name: 'test.pdf',
