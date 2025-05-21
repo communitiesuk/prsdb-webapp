@@ -111,7 +111,7 @@ class PropertyComplianceController(
 
         // We must ensure that we can distinguish between a metadata-only file upload and a normal file upload when
         // postJourneyData() is used for a file upload endpoint.
-        val annotatedFormData = formData + ("metadataOnly" to true)
+        val annotatedFormData = formData + (UploadCertificateFormModel::isMetadataOnly.name to true)
 
         return propertyComplianceJourneyFactory
             .create(propertyOwnershipId, principal.name)
