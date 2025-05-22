@@ -17,7 +17,7 @@ abstract class GroupedUpdateJourney<T : GroupedUpdateStepId<*>>(
     stepName: String,
     protected val isChangingAnswer: Boolean,
 ) : UpdateJourney<T>(journeyType, initialStepId, validator, journeyDataService, stepName) {
-    abstract override val stepRouter: GroupedStepRouter<T>
+    abstract override val stepRouter: GroupedUpdateStepRouter<T>
 
     override val checkYourAnswersStepId: T?
         get() {
