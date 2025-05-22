@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.validation.Validator
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.GroupedUpdateStepId
@@ -14,6 +15,7 @@ abstract class GroupedUpdateJourney<T : GroupedUpdateStepId<*>>(
     validator: Validator,
     journeyDataService: JourneyDataService,
     stepName: String,
+    protected val isChangingAnswer: Boolean,
 ) : UpdateJourney<T>(journeyType, initialStepId, validator, journeyDataService, stepName) {
     abstract override val stepRouter: GroupedStepRouter<T>
 
@@ -33,4 +35,11 @@ abstract class GroupedUpdateJourney<T : GroupedUpdateStepId<*>>(
         principal: Principal,
         changingAnswersForStep: String? = null,
     ): ModelAndView = completeStep(stepName, formData, null, principal, changingAnswersForStep)
+
+    protected fun Map<String, Any>.withBackUrlIfNotChangingAnswer(backUrl: String) =
+        if (isChangingAnswer) {
+            this
+        } else {
+            this + (BACK_URL_ATTR_NAME to backUrl)
+        }
 }
