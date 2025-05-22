@@ -47,18 +47,20 @@ class PropertyDetailsUpdateJourney(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyOwnershipId: Long,
     stepName: String,
+    isChangingAnswer: Boolean,
 ) : GroupedUpdateJourney<UpdatePropertyDetailsStepId>(
         journeyType = JourneyType.PROPERTY_DETAILS_UPDATE,
         initialStepId = UpdatePropertyDetailsStepId.UpdateOwnershipType,
         validator = validator,
         journeyDataService = journeyDataService,
         stepName = stepName,
+        isChangingAnswer = isChangingAnswer,
     ) {
     init {
         initializeJourneyDataIfNotInitialized()
     }
 
-    override val stepRouter = GroupedStepRouter(this)
+    override val stepRouter = GroupedUpdateStepRouter(this)
 
     override val unreachableStepRedirect = PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)
 
@@ -157,8 +159,7 @@ class PropertyDetailsUpdateJourney(
                                         labelMsgKey = "forms.licensingType.radios.option.noLicensing.label",
                                     ),
                                 ),
-                            BACK_URL_ATTR_NAME to RELATIVE_PROPERTY_DETAILS_PATH,
-                        ),
+                        ).withBackUrlIfNotChangingAnswer(RELATIVE_PROPERTY_DETAILS_PATH),
                 ),
             nextAction = { journeyData, _ -> licensingTypeNextAction(journeyData) },
             saveAfterSubmit = false,
@@ -178,7 +179,6 @@ class PropertyDetailsUpdateJourney(
                             "label" to "forms.selectiveLicence.label",
                             "detailSummary" to "forms.selectiveLicence.detail.summary",
                             "detailMainText" to "forms.selectiveLicence.detail.text",
-                            BACK_URL_ATTR_NAME to UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment,
                         ),
                 ),
             nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.CheckYourLicensingAnswers, null) },
@@ -205,7 +205,6 @@ class PropertyDetailsUpdateJourney(
                                     "bulletTwo" to "forms.hmoMandatoryLicence.detail.bullet.two",
                                     "text" to "forms.hmoMandatoryLicence.detail.paragraph.two",
                                 ),
-                            BACK_URL_ATTR_NAME to UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment,
                         ),
                 ),
             nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.CheckYourLicensingAnswers, null) },
@@ -226,7 +225,6 @@ class PropertyDetailsUpdateJourney(
                             "label" to "forms.hmoAdditionalLicence.label",
                             "detailSummary" to "forms.hmoAdditionalLicence.detail.summary",
                             "detailMainText" to "forms.hmoAdditionalLicence.detail.text",
-                            BACK_URL_ATTR_NAME to UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment,
                         ),
                 ),
             nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.CheckYourLicensingAnswers, null) },
@@ -267,8 +265,7 @@ class PropertyDetailsUpdateJourney(
                                         hintMsgKey = "forms.occupancy.radios.option.no.hint",
                                     ),
                                 ),
-                            BACK_URL_ATTR_NAME to RELATIVE_PROPERTY_DETAILS_PATH,
-                        ),
+                        ).withBackUrlIfNotChangingAnswer(RELATIVE_PROPERTY_DETAILS_PATH),
                 ),
             nextAction = { journeyData, _ -> occupancyNextAction(journeyData) },
             saveAfterSubmit = false,
@@ -286,8 +283,7 @@ class PropertyDetailsUpdateJourney(
                             "title" to "propertyDetails.update.title",
                             "fieldSetHeading" to getNumberOfHouseholdsStepFieldSetHeading(),
                             "label" to "forms.numberOfHouseholds.label",
-                            BACK_URL_ATTR_NAME to getNumberOfHouseholdsStepBackUrl(),
-                        ),
+                        ).withBackUrlIfNotChangingAnswer(getNumberOfHouseholdsStepBackUrl()),
                 ),
             nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateNumberOfPeople, null) },
             saveAfterSubmit = false,
@@ -306,8 +302,7 @@ class PropertyDetailsUpdateJourney(
                             "fieldSetHeading" to getNumberOfPeopleStepFieldSetHeading(),
                             "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
                             "label" to "forms.numberOfPeople.label",
-                            BACK_URL_ATTR_NAME to getNumberOfPeopleStepBackUrl(),
-                        ),
+                        ).withBackUrlIfNotChangingAnswer(getNumberOfPeopleStepBackUrl()),
                     latestNumberOfHouseholds =
                         journeyDataService.getJourneyDataFromSession().getLatestNumberOfHouseholds(originalDataKey),
                 ),
