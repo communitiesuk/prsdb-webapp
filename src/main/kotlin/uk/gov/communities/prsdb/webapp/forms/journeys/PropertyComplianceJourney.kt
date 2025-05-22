@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.pages.FileUploadPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PageWithContentProvider
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
@@ -283,9 +284,8 @@ class PropertyComplianceJourney(
             Step(
                 id = PropertyComplianceStepId.GasSafetyUpload,
                 page =
-                    Page(
+                    FileUploadPage(
                         formModel = GasSafetyUploadCertificateFormModel::class,
-                        templateName = "forms/uploadCertificateForm",
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
@@ -500,9 +500,8 @@ class PropertyComplianceJourney(
             Step(
                 id = PropertyComplianceStepId.EicrUpload,
                 page =
-                    Page(
+                    FileUploadPage(
                         formModel = EicrUploadCertificateFormModel::class,
-                        templateName = "forms/uploadCertificateForm",
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",

@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCo
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
@@ -24,7 +24,7 @@ class GasSafeEngineerNumPagePropertyCompliance(
 
     class GasSafeEngineerNumForm(
         page: Page,
-    ) : Form(page) {
+    ) : PostForm(page) {
         val engineerNumberInput = TextInput.textByFieldName(locator, "engineerNumber")
     }
 }

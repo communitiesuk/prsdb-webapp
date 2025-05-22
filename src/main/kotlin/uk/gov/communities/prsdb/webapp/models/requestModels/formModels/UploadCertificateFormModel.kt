@@ -16,6 +16,8 @@ abstract class UploadCertificateFormModel : FormModel {
 
     var isUploadSuccessfulOrNull: Boolean? = null
 
+    var isMetadataOnly: Boolean = true
+
     fun isNameNotBlank() = name.isNotBlank()
 
     fun isFileTypeValid() = !isNameNotBlank() || FilenameUtils.getExtension(name) in validExtensions && contentType in validMimeTypes
@@ -27,7 +29,7 @@ abstract class UploadCertificateFormModel : FormModel {
     companion object {
         private val validExtensions = listOf("pdf", "png", "jpeg", "jpg")
         private val validMimeTypes = listOf("application/pdf", "image/png", "image/jpeg")
-        private val maxContentLength = 15 * 10.0.pow(6) // 15MB
+        val maxContentLength = 15 * 1024.0.pow(2) // 15MB
 
         fun fromFileItemInput(
             desiredClass: KClass<out UploadCertificateFormModel>,
@@ -47,6 +49,7 @@ abstract class UploadCertificateFormModel : FormModel {
                 this.contentType = fileItemInput.contentType
                 this.contentLength = fileLength
                 this.isUploadSuccessfulOrNull = isUploadSuccessfulOrNull
+                this.isMetadataOnly = false
             }
         }
     }
