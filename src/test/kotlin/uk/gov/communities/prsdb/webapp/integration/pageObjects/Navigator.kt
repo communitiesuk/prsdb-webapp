@@ -80,6 +80,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrUploadPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyDeclarationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionPagePropertyCompliance
@@ -709,6 +710,22 @@ class Navigator(
         return createValidPage(
             page,
             EpcExemptionReasonPagePropertyCompliance::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
+    fun skipToPropertyComplianceFireSafetyDeclarationPage(propertyOwnershipId: Long): FireSafetyDeclarationPagePropertyCompliance {
+        setJourneyDataInSession(
+            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
+            JourneyPageDataBuilder.beforePropertyComplianceFireSafetyDeclaration().build(),
+        )
+        navigate(
+            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+                "/${PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment}",
+        )
+        return createValidPage(
+            page,
+            FireSafetyDeclarationPagePropertyCompliance::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }

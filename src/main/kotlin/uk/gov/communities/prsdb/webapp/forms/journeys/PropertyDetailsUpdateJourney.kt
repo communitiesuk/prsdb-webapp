@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.CheckLicensingAnswersPage
-import uk.gov.communities.prsdb.webapp.forms.pages.CheckOccupancyPage
+import uk.gov.communities.prsdb.webapp.forms.pages.CheckOccupancyAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationNumberOfPeoplePage
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
@@ -318,12 +318,11 @@ class PropertyDetailsUpdateJourney(
     private val checkOccupancyAnswers =
         Step(
             id = UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers,
-            page = CheckOccupancyPage(),
+            page = CheckOccupancyAnswersPage(),
             handleSubmitAndRedirect = { journeyData, _, _ -> updatePropertyAndRedirect(journeyData) },
             saveAfterSubmit = false,
         )
 
-    // The next action flow must have the `updateDetailsStep` after all data changing steps to ensure that validation for all of them is run
     override val sections =
         createSingleSectionWithSingleTaskFromSteps(
             initialStepId,
@@ -370,7 +369,7 @@ class PropertyDetailsUpdateJourney(
         }
 
     private fun getNumberOfPeopleStepBackUrl() =
-        if (hasPropertyOccupancyBeenUpdated()) {
+        if (hasNumberOfHouseholdsBeenUpdated()) {
             UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment
         } else {
             RELATIVE_PROPERTY_DETAILS_PATH
@@ -413,6 +412,9 @@ class PropertyDetailsUpdateJourney(
     private fun wasPropertyOriginallyOccupied() = journeyDataService.getJourneyDataFromSession().getOriginalIsOccupied(originalDataKey)!!
 
     private fun hasPropertyOccupancyBeenUpdated() = journeyDataService.getJourneyDataFromSession().getIsOccupiedUpdateIfPresent() != null
+
+    private fun hasNumberOfHouseholdsBeenUpdated() =
+        journeyDataService.getJourneyDataFromSession().getNumberOfHouseholdsUpdateIfPresent() != null
 
     companion object {
         // The path for the update journey is "{propertyDetailsPath}/update/{pathSegment}". As there is no trailing slash, any relative path is

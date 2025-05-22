@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENG
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
+import uk.gov.communities.prsdb.webapp.constants.HOUSES_IN_MULTIPLE_OCCUPATION_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
@@ -26,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasFireSafetyDeclaration
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCertExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrExemptionReasonOther
@@ -39,6 +41,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormM
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FireSafetyDeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionOtherReasonFormModel
@@ -196,11 +199,7 @@ class PropertyComplianceJourney(
             JourneyTask(
                 PropertyComplianceStepId.FireSafetyDeclaration,
                 setOf(
-                    placeholderStep(
-                        PropertyComplianceStepId.FireSafetyDeclaration,
-                        "TODO PRSD-1150: Compliance (LL resp): Fire Safety Declaration page",
-                        PropertyComplianceStepId.CheckAndSubmit,
-                    ),
+                    fireSafetyDeclarationStep,
                     placeholderStep(
                         PropertyComplianceStepId.FireSafetyRisk,
                         "TODO PRSD-1151: Compliance (LL resp): Fire Safety Risk Info page",
@@ -786,6 +785,37 @@ class PropertyComplianceJourney(
                 nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
             )
 
+    private val fireSafetyDeclarationStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.FireSafetyDeclaration,
+                page =
+                    Page(
+                        formModel = FireSafetyDeclarationFormModel::class,
+                        templateName = "forms/fireSafetyDeclarationForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "housesInMultipleOccupationUrl" to HOUSES_IN_MULTIPLE_OCCUPATION_URL,
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = true,
+                                            valueStr = "yes",
+                                            labelMsgKey = "forms.radios.option.yes.label",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = false,
+                                            valueStr = "no",
+                                            labelMsgKey = "forms.radios.option.no.label",
+                                        ),
+                                    ),
+                                BACK_URL_ATTR_NAME to taskListUrlSegment,
+                            ),
+                    ),
+                nextAction = { journeyData, _ -> fireSafetyDeclarationStepNextAction(journeyData) },
+            )
+
     private fun placeholderStep(
         stepId: PropertyComplianceStepId,
         todoComment: String,
@@ -857,6 +887,13 @@ class PropertyComplianceJourney(
             HasEpc.YES -> Pair(PropertyComplianceStepId.CheckMatchedEpc, null)
             HasEpc.NO -> Pair(PropertyComplianceStepId.EpcMissing, null)
             HasEpc.NOT_REQUIRED -> Pair(PropertyComplianceStepId.EpcExemptionReason, null)
+        }
+
+    private fun fireSafetyDeclarationStepNextAction(journeyData: JourneyData) =
+        if (journeyData.getHasFireSafetyDeclaration()!!) {
+            Pair(PropertyComplianceStepId.KeepPropertySafe, null)
+        } else {
+            Pair(PropertyComplianceStepId.FireSafetyRisk, null)
         }
 
     private fun getPropertyAddress() =

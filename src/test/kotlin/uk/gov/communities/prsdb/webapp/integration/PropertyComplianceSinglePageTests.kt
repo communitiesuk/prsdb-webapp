@@ -336,6 +336,17 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
         }
     }
 
+    @Nested
+    inner class FireSafetyDeclarationStepTests {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val fireSafetyDeclarationPage = navigator.skipToPropertyComplianceFireSafetyDeclarationPage(PROPERTY_OWNERSHIP_ID)
+            fireSafetyDeclarationPage.form.submit()
+            assertThat(fireSafetyDeclarationPage.form.getErrorMessage())
+                .containsText("Select whether you have followed fire safety responsibilities")
+        }
+    }
+
     companion object {
         private const val PROPERTY_OWNERSHIP_ID = 1L
         private val urlArguments = mapOf("propertyOwnershipId" to PROPERTY_OWNERSHIP_ID.toString())
