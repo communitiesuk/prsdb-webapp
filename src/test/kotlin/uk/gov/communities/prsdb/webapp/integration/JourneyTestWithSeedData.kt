@@ -21,7 +21,7 @@ abstract class JourneyTestWithSeedData(
 
     abstract class NestedJourneyTestWithSeedData(
         private val scripts: List<String>,
-    ) : NestedIntegrationTestWithSeedData() {
+    ) : NestedIntegrationTest() {
         constructor(script: String) : this(listOf(script))
 
         @BeforeEach

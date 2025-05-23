@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemp
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FireSafetyDeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
@@ -550,6 +551,18 @@ class JourneyDataBuilder(
     fun withEpcStatus(hasEpc: HasEpc): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EPC.urlPathSegment] =
             mapOf(EpcFormModel::hasCert.name to hasEpc)
+        return this
+    }
+
+    fun withMissingEpcExemption(): JourneyDataBuilder {
+        withEpcStatus(HasEpc.NO)
+        journeyData[PropertyComplianceStepId.EpcMissing.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withFireSafetyDeclaration(hasDeclared: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment] =
+            mapOf(FireSafetyDeclarationFormModel::hasDeclared.name to hasDeclared)
         return this
     }
 

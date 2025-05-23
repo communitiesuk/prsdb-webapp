@@ -112,6 +112,8 @@ class JourneyPageDataBuilder {
 
         fun beforePropertyComplianceEpcExemptionReason() = beforePropertyComplianceEpc().withEpcStatus(HasEpc.NOT_REQUIRED)
 
+        fun beforePropertyComplianceFireSafetyDeclaration() = beforePropertyComplianceEpc().withMissingEpcExemption()
+
         fun beforeLandlordDetailsUpdateSelectAddress() = JourneyDataBuilder().withLookupAddress()
 
         fun beforePropertyDeregistrationReason() = JourneyDataBuilder().withWantsToProceed()

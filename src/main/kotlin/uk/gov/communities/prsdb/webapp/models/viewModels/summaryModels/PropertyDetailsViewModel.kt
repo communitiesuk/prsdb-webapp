@@ -89,23 +89,20 @@ class PropertyDetailsViewModel(
                     "propertyDetails.propertyRecord.occupied",
                     isTenantedKey,
                     "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment}",
-                    // TODO PRSD-1109: Set to withChangeLinks when ticket has been implemented
-                    withChangeLinks = false,
+                    withChangeLinks,
                 )
                 if (propertyOwnership.isOccupied) {
                     addRow(
                         "propertyDetails.propertyRecord.numberOfHouseholds",
                         propertyOwnership.currentNumHouseholds,
                         "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment}",
-                        // TODO PRSD-1109: Set to withChangeLinks when ticket has been implemented
-                        withChangeLinks = false,
+                        withChangeLinks,
                     )
                     addRow(
                         "propertyDetails.propertyRecord.numberOfPeople",
                         propertyOwnership.currentNumTenants,
                         "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment}",
-                        // TODO PRSD-1109: Set to withChangeLinks when ticket has been implemented
-                        withChangeLinks = false,
+                        withChangeLinks,
                     )
                 }
             }.toList()

@@ -4,6 +4,7 @@ import copy from "rollup-plugin-copy";
 import del from "rollup-plugin-delete";
 import babel from "@rollup/plugin-babel";
 import sass from 'rollup-plugin-sass';
+import json from '@rollup/plugin-json';
 
 export default {
     input: 'src/main/js/index.js',
@@ -12,6 +13,7 @@ export default {
         format: 'module'
     },
     plugins: [
+        json(),
         commonjs(),
         resolve(),
         babel({babelHelpers: 'bundled'}),

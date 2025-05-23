@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasFireSafetyDeclaration
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCertExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrExemptionReasonOther
@@ -258,5 +259,24 @@ class PropertyComplianceJourneyDataExtensionsTests {
         val retrievedHasEICR = testJourneyData.getHasEPC()
 
         assertNull(retrievedHasEICR)
+    }
+
+    @Test
+    fun `getHasFireSafetyDeclaration returns a boolean if the corresponding page is in journeyData`() {
+        val hasFireSafetyDeclaration = true
+        val testJourneyData = journeyDataBuilder.withFireSafetyDeclaration(hasFireSafetyDeclaration).build()
+
+        val retrievedHasFireSafetyDeclaration = testJourneyData.getHasFireSafetyDeclaration()
+
+        assertEquals(hasFireSafetyDeclaration, retrievedHasFireSafetyDeclaration)
+    }
+
+    @Test
+    fun `getHasFireSafetyDeclaration returns null if the corresponding page is not in journeyData`() {
+        val testJourneyData = journeyDataBuilder.build()
+
+        val retrievedHasFireSafetyDeclaration = testJourneyData.getHasFireSafetyDeclaration()
+
+        assertNull(retrievedHasFireSafetyDeclaration)
     }
 }

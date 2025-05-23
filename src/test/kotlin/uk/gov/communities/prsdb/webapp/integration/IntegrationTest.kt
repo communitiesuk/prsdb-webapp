@@ -102,5 +102,5 @@ abstract class IntegrationTest {
     }
 
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-    abstract class NestedIntegrationTestWithSeedData
+    abstract class NestedIntegrationTest
 }
