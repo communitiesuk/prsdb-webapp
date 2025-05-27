@@ -5,6 +5,7 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -15,6 +16,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -22,8 +24,14 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.CheckMatchedEpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionOtherReasonPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcNotFoundPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcSupersededPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.services.FileUploader
@@ -31,6 +39,66 @@ import uk.gov.communities.prsdb.webapp.services.FileUploader
 class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
     @MockitoBean
     private lateinit var fileUploader: FileUploader
+
+    @MockitoBean
+    lateinit var epcRegisterClient: EpcRegisterClient
+
+    @BeforeEach
+    fun setup() {
+        whenever(epcRegisterClient.getByRrn(CURRENT_EPC_CERTIFICATE_NUMBER))
+            .thenReturn(
+                """
+                {
+                    "data": {
+                        "epcRrn": "$CURRENT_EPC_CERTIFICATE_NUMBER",
+                        "currentEnergyEfficiencyBand": "C",
+                        "expiryDate": "2027-01-05T00:00:00.000Z",
+                        "latestEpcRrnForAddress": "$CURRENT_EPC_CERTIFICATE_NUMBER",
+                        "address": {
+                            "addressLine1": "123 Test Street",
+                            "town": "Test Town",
+                            "postcode": "TT1 1TT",
+                            "addressLine2": "Flat 1"
+                        }
+                    }
+                }
+                """.trimIndent(),
+            )
+
+        whenever(epcRegisterClient.getByRrn(SUPERSEDED_EPC_CERTIFICATE_NUMBER))
+            .thenReturn(
+                """
+                {
+                    "data": {
+                        "epcRrn": "$SUPERSEDED_EPC_CERTIFICATE_NUMBER",
+                        "currentEnergyEfficiencyBand": "C",
+                        "expiryDate": "2027-01-05T00:00:00.000Z",
+                        "latestEpcRrnForAddress": "$CURRENT_EPC_CERTIFICATE_NUMBER",
+                        "address": {
+                            "addressLine1": "123 Test Street",
+                            "town": "Test Town",
+                            "postcode": "TT1 1TT",
+                            "addressLine2": "Flat 1"
+                        }
+                    }
+                }
+                """.trimIndent(),
+            )
+
+        whenever(epcRegisterClient.getByRrn(NONEXISTENT_EPC_CERTIFICATE_NUMBER))
+            .thenReturn(
+                """
+                {
+                    "errors": [
+                        {
+                            "code": "NOT_FOUND",
+                            "title": "Certificate not found"
+                        }
+                    ]
+                }
+                """.trimIndent(),
+            )
+    }
 
     @Nested
     inner class GasSafetyStepTests {
@@ -333,6 +401,44 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
             val epcExemptionReasonPage = navigator.skipToPropertyComplianceEpcExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
             epcExemptionReasonPage.form.submit()
             assertThat(epcExemptionReasonPage.form.getErrorMessage()).containsText("Select why your property does not need an EPC")
+        }
+    }
+
+    @Nested
+    inner class EpcLookupTests {
+        @Test
+        fun `Submitting a blank certificate number returns an error`() {
+            val epcLookupPage = navigator.skipToPropertyComplianceEpcLookupPage(PROPERTY_OWNERSHIP_ID)
+            epcLookupPage.form.submit()
+            assertThat(epcLookupPage.form.getErrorMessage()).containsText("Enter your EPC certificate number")
+        }
+
+        @Test
+        fun `Submitting an invalid certificate number returns an error`() {
+            val epcLookupPage = navigator.skipToPropertyComplianceEpcLookupPage(PROPERTY_OWNERSHIP_ID)
+            epcLookupPage.submitInvalidEpcNumber()
+            assertThat(epcLookupPage.form.getErrorMessage()).containsText("Enter a 20 digit certificate number")
+        }
+
+        @Test
+        fun `Submitting a current certificate number redirects to the check matched EPC step`(page: Page) {
+            val epcLookupPage = navigator.skipToPropertyComplianceEpcLookupPage(PROPERTY_OWNERSHIP_ID)
+            epcLookupPage.submitCurrentEpcNumber()
+            BasePage.assertPageIs(page, CheckMatchedEpcPagePropertyCompliance::class, urlArguments)
+        }
+
+        @Test
+        fun `Submitting a superseded certificate number redirects to the Epc Superseded step`(page: Page) {
+            val epcLookupPage = navigator.skipToPropertyComplianceEpcLookupPage(PROPERTY_OWNERSHIP_ID)
+            epcLookupPage.submitSupersededEpcNumber()
+            BasePage.assertPageIs(page, EpcSupersededPagePropertyCompliance::class, urlArguments)
+        }
+
+        @Test
+        fun `Submitting a non-existent certificate number redirects to the EPC not found`(page: Page) {
+            val epcLookupPage = navigator.skipToPropertyComplianceEpcLookupPage(PROPERTY_OWNERSHIP_ID)
+            epcLookupPage.submitNonexistentEpcNumber()
+            BasePage.assertPageIs(page, EpcNotFoundPagePropertyCompliance::class, urlArguments)
         }
     }
 
