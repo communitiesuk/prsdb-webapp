@@ -23,15 +23,17 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.CheckMatchedEpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionOtherReasonPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcNotFoundPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcSupersededPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyDeclarationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.services.FileUploader
@@ -221,7 +223,7 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
         fun `Submitting with 'other' selected redirects to the gas safety exemption other reason page`(page: Page) {
             val gasSafetyExemptionReasonPage = navigator.skipToPropertyComplianceGasSafetyExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
             gasSafetyExemptionReasonPage.submitExemptionReason(GasSafetyExemptionReason.OTHER)
-            BasePage.assertPageIs(page, GasSafetyExemptionOtherReasonPagePropertyCompliance::class, urlArguments)
+            assertPageIs(page, GasSafetyExemptionOtherReasonPagePropertyCompliance::class, urlArguments)
         }
     }
 
@@ -250,7 +252,7 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
             val gasSafetyExemptionOtherReasonPage =
                 navigator.skipToPropertyComplianceGasSafetyExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
             gasSafetyExemptionOtherReasonPage.submitReason("valid reason")
-            BasePage.assertPageIs(page, GasSafetyExemptionConfirmationPagePropertyCompliance::class, urlArguments)
+            assertPageIs(page, GasSafetyExemptionConfirmationPagePropertyCompliance::class, urlArguments)
         }
     }
 
@@ -354,7 +356,7 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
         fun `Submitting with 'other' selected redirects to the EICR exemption other reason page`(page: Page) {
             val eicrExemptionReasonPage = navigator.skipToPropertyComplianceEicrExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
             eicrExemptionReasonPage.submitExemptionReason(EicrExemptionReason.OTHER)
-            BasePage.assertPageIs(page, EicrExemptionOtherReasonPagePropertyCompliance::class, urlArguments)
+            assertPageIs(page, EicrExemptionOtherReasonPagePropertyCompliance::class, urlArguments)
         }
     }
 
@@ -380,7 +382,7 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
         fun `Submitting with a valid reason redirects to the gas safety exemption confirmation page`(page: Page) {
             val eicrExemptionOtherReasonPage = navigator.skipToPropertyComplianceEicrExemptionOtherReasonPage(PROPERTY_OWNERSHIP_ID)
             eicrExemptionOtherReasonPage.submitReason("valid reason")
-            BasePage.assertPageIs(page, EicrExemptionConfirmationPagePropertyCompliance::class, urlArguments)
+            assertPageIs(page, EicrExemptionConfirmationPagePropertyCompliance::class, urlArguments)
         }
     }
 
@@ -424,21 +426,40 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
         fun `Submitting a current certificate number redirects to the check matched EPC step`(page: Page) {
             val epcLookupPage = navigator.skipToPropertyComplianceEpcLookupPage(PROPERTY_OWNERSHIP_ID)
             epcLookupPage.submitCurrentEpcNumber()
-            BasePage.assertPageIs(page, CheckMatchedEpcPagePropertyCompliance::class, urlArguments)
+            assertPageIs(page, CheckMatchedEpcPagePropertyCompliance::class, urlArguments)
         }
 
         @Test
         fun `Submitting a superseded certificate number redirects to the Epc Superseded step`(page: Page) {
             val epcLookupPage = navigator.skipToPropertyComplianceEpcLookupPage(PROPERTY_OWNERSHIP_ID)
             epcLookupPage.submitSupersededEpcNumber()
-            BasePage.assertPageIs(page, EpcSupersededPagePropertyCompliance::class, urlArguments)
+            assertPageIs(page, EpcSupersededPagePropertyCompliance::class, urlArguments)
         }
 
+        // TODO PRSD-1132 - consider including this in a new journey test with a manual EPC
         @Test
         fun `Submitting a non-existent certificate number redirects to the EPC not found`(page: Page) {
             val epcLookupPage = navigator.skipToPropertyComplianceEpcLookupPage(PROPERTY_OWNERSHIP_ID)
             epcLookupPage.submitNonexistentEpcNumber()
-            BasePage.assertPageIs(page, EpcNotFoundPagePropertyCompliance::class, urlArguments)
+            assertPageIs(page, EpcNotFoundPagePropertyCompliance::class, urlArguments)
+        }
+    }
+
+    @Nested
+    inner class EpcNotFoundStepTests {
+        @Test
+        fun `Clicking the Search Again button returns the user to the EPC lookup step`(page: Page) {
+            val epcNotFoundPage = navigator.skipToPropertyComplianceEpcNotFoundPage(PROPERTY_OWNERSHIP_ID)
+            epcNotFoundPage.searchAgainButton.clickAndWait()
+            assertPageIs(page, EpcLookupPagePropertyCompliance::class, urlArguments)
+        }
+
+        // TODO PRSD-1132 - consider including this in a new journey test with a manual EPC
+        @Test
+        fun `Clicking the Continue button directs the user to the Fire Safety Declaration step`(page: Page) {
+            val epcNotFoundPage = navigator.skipToPropertyComplianceEpcNotFoundPage(PROPERTY_OWNERSHIP_ID)
+            epcNotFoundPage.continueButton.clickAndWait()
+            assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
         }
     }
 

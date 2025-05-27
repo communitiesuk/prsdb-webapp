@@ -21,4 +21,6 @@ const val EPC_GUIDE_URL =
         "/energy-performance-certificates-for-the-construction-sale-and-let-of-dwellings" +
         "/a-guide-to-energy-performance-certificates-for-the-marketing-sale-and-let-of-dwellings"
 
+const val CONTACT_EPC_ASSESSOR_URL = "https://www.gov.uk/get-new-energy-certificate#find-an-assessor"
+
 const val HOUSES_IN_MULTIPLE_OCCUPATION_URL = "https://www.gov.uk/private-renting/houses-in-multiple-occupation"
