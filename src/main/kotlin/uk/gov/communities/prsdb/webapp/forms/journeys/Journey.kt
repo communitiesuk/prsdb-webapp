@@ -116,11 +116,6 @@ abstract class Journey<T : StepId>(
         return ModelAndView("redirect:$redirectUrl")
     }
 
-    private fun isDestinationAllowedWhenChangingAnswerTo(
-        destinationStep: T?,
-        stepBeingChanged: T?,
-    ): Boolean = stepRouter.isDestinationAllowedWhenChangingAnswerTo(destinationStep, stepBeingChanged)
-
     private fun buildPreviousStepUrl(
         prevStepDetails: StepDetails<T>?,
         changingAnswersFor: T?,
@@ -141,17 +136,16 @@ abstract class Journey<T : StepId>(
     ): String {
         val (newStepId: T?, newSubPageNumber: Int?) = currentStep.nextAction(newJourneyData, subPageNumber)
 
-        return if (changingAnswersFor == null || isDestinationAllowedWhenChangingAnswerTo(newStepId, changingAnswersFor)) {
+        return if (changingAnswersFor == null || stepRouter.isDestinationAllowedWhenChangingAnswerTo(newStepId, changingAnswersFor)) {
             if (newStepId == null) {
                 throw IllegalStateException("Cannot compute next step from step ${currentStep.id.urlPathSegment}")
             }
             Step.generateUrl(newStepId, newSubPageNumber, changingAnswersFor)
         } else {
             // Assigning to localCheckYourAnswersStep allows the null check here to smart cast from T? to T
-            val localCheckYourAnswersStep = checkYourAnswersStepId
-            if (localCheckYourAnswersStep == null) {
-                throw IllegalStateException("No check your answers step defined for journey ${journeyType.name}")
-            }
+            val localCheckYourAnswersStep =
+                checkYourAnswersStepId
+                    ?: throw IllegalStateException("No check your answers step defined for journey ${journeyType.name}")
             Step.generateUrl(localCheckYourAnswersStep, null, null)
         }
     }

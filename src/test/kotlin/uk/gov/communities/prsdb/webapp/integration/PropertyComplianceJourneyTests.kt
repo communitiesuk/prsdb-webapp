@@ -300,9 +300,14 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
 
         // Fire Safety Declaration page
         fireSafetyDeclarationPage.submitHasNotDeclaredFireSafety()
-        assertPageIs(page, FireSafetyRiskPagePropertyCompliance::class, urlArguments)
+        val fireSafetyRiskPage = assertPageIs(page, FireSafetyRiskPagePropertyCompliance::class, urlArguments)
 
-        // TODO: PRSD-1151 continue test
+        // Fire Safety Risk page
+        BaseComponent.assertThat(fireSafetyRiskPage.heading).containsText("Your property is at risk of fire")
+        fireSafetyRiskPage.form.submit()
+        assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
+
+        // TODO: PRSD-1152 continue test
     }
 
     companion object {

@@ -76,7 +76,7 @@ class PropertyDetailsController(
     ): ModelAndView =
         if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
             propertyDetailsUpdateJourneyFactory
-                .create(propertyOwnershipId, stepName)
+                .create(propertyOwnershipId, stepName, isChangingAnswer = changingAnswerForStep != null)
                 .getModelAndViewForStep(changingAnswersForStep = changingAnswerForStep)
         } else {
             throw ResponseStatusException(
@@ -97,7 +97,7 @@ class PropertyDetailsController(
     ): ModelAndView =
         if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
             propertyDetailsUpdateJourneyFactory
-                .create(propertyOwnershipId, stepName)
+                .create(propertyOwnershipId, stepName, isChangingAnswer = changingAnswerForStep != null)
                 .completeStep(formData, principal, changingAnswerForStep)
         } else {
             throw ResponseStatusException(

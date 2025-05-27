@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import uk.gov.communities.prsdb.webapp.forms.steps.GroupedStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.GroupedUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 
@@ -34,12 +35,23 @@ open class GroupedStepRouter<T : GroupedStepId<*>>(
         otherStep: T?,
     ): Boolean =
         destinationStep != null &&
-            steps.fold(null) { destinationIsAfterOtherStep, stepDetails ->
+            steps.fold(null as Boolean?) { destinationIsAfterOtherStep, stepDetails ->
                 destinationIsAfterOtherStep
                     ?: when (stepDetails.step.id) {
                         otherStep -> true
                         destinationStep -> false
-                        else -> destinationIsAfterOtherStep
+                        else -> null
                     }
             } ?: false
+}
+
+open class GroupedUpdateStepRouter<T : GroupedUpdateStepId<*>>(
+    steps: Iterable<StepDetails<T>>,
+) : GroupedStepRouter<T>(steps) {
+    override fun isDestinationAllowedWhenChangingAnswerTo(
+        destinationStep: T?,
+        stepBeingChanged: T?,
+    ): Boolean =
+        destinationStep?.isCheckYourAnswersStepId != true &&
+            super.isDestinationAllowedWhenChangingAnswerTo(destinationStep, stepBeingChanged)
 }
