@@ -87,7 +87,6 @@ class MockLandlordData {
         )
 
         fun createPropertyOwnership(
-            id: Long = 1,
             occupancyType: OccupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
             ownershipType: OwnershipType = OwnershipType.FREEHOLD,
             currentNumHouseholds: Int = 0,
@@ -96,11 +95,12 @@ class MockLandlordData {
             primaryLandlord: Landlord = createLandlord(),
             property: Property = createProperty(),
             license: License? = null,
+            incompleteComplianceForm: FormContext = FormContext(JourneyType.PROPERTY_COMPLIANCE, primaryLandlord.baseUser),
+            id: Long = 1,
             createdDate: Instant = Instant.now(),
         ): PropertyOwnership {
             val propertyOwnership =
                 PropertyOwnership(
-                    id = id,
                     occupancyType = occupancyType,
                     ownershipType = ownershipType,
                     currentNumHouseholds = currentNumHouseholds,
@@ -108,9 +108,11 @@ class MockLandlordData {
                     registrationNumber = registrationNumber,
                     primaryLandlord = primaryLandlord,
                     property = property,
+                    incompleteComplianceForm = incompleteComplianceForm,
                     license = license,
                 )
 
+            ReflectionTestUtils.setField(propertyOwnership, "id", id)
             ReflectionTestUtils.setField(propertyOwnership, "createdDate", createdDate)
 
             return propertyOwnership

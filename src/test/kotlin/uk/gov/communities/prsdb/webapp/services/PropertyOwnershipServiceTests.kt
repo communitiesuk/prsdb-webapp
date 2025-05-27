@@ -22,13 +22,14 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.Property
@@ -57,6 +58,9 @@ class PropertyOwnershipServiceTests {
     @Mock
     private lateinit var mockLicenseService: LicenseService
 
+    @Mock
+    private lateinit var mockFormContextService: FormContextService
+
     @InjectMocks
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
@@ -66,9 +70,10 @@ class PropertyOwnershipServiceTests {
         val ownershipType = OwnershipType.FREEHOLD
         val households = 1
         val tenants = 2
-        val landlord = Landlord()
+        val landlord = MockLandlordData.createLandlord()
         val property = Property()
         val license = License()
+        val incompleteComplianceForm = FormContext(JourneyType.PROPERTY_COMPLIANCE, landlord.baseUser)
 
         val expectedPropertyOwnership =
             PropertyOwnership(
@@ -80,10 +85,14 @@ class PropertyOwnershipServiceTests {
                 primaryLandlord = landlord,
                 property = property,
                 license = license,
+                incompleteComplianceForm = incompleteComplianceForm,
             )
 
         whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)).thenReturn(
             registrationNumber,
+        )
+        whenever(mockFormContextService.createEmptyFormContext(JourneyType.PROPERTY_COMPLIANCE, landlord.baseUser)).thenReturn(
+            incompleteComplianceForm,
         )
         whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenReturn(
             expectedPropertyOwnership,
@@ -109,8 +118,9 @@ class PropertyOwnershipServiceTests {
         val ownershipType = OwnershipType.FREEHOLD
         val households = 1
         val tenants = 2
-        val landlord = Landlord()
+        val landlord = MockLandlordData.createLandlord()
         val property = Property()
+        val incompleteComplianceForm = FormContext(JourneyType.PROPERTY_COMPLIANCE, landlord.baseUser)
 
         val expectedPropertyOwnership =
             PropertyOwnership(
@@ -122,10 +132,14 @@ class PropertyOwnershipServiceTests {
                 primaryLandlord = landlord,
                 property = property,
                 license = null,
+                incompleteComplianceForm = incompleteComplianceForm,
             )
 
         whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)).thenReturn(
             registrationNumber,
+        )
+        whenever(mockFormContextService.createEmptyFormContext(JourneyType.PROPERTY_COMPLIANCE, landlord.baseUser)).thenReturn(
+            incompleteComplianceForm,
         )
         whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenReturn(
             expectedPropertyOwnership,
