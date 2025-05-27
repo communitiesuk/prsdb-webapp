@@ -1,0 +1,14 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!DOCTYPE html>
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+    <header>
+        <h1 class="govuk-heading-l" th:text="#{forms.landlordResponsibilities.fireSafetyRisk.heading}">forms.landlordResponsibilities.fireSafetyRisk.heading</h1>
+    </header>
+    <p class="govuk-body" th:text="#{forms.landlordResponsibilities.fireSafetyRisk.paragraph.one}">forms.landlordResponsibilities.fireSafetyRisk.paragraph.one</p>
+    <p class="govuk-body" th:text="#{forms.landlordResponsibilities.fireSafetyRisk.paragraph.two}">forms.landlordResponsibilities.fireSafetyRisk.paragraph.two</p>
+    <p class="govuk-body" th:text="#{forms.landlordResponsibilities.fireSafetyRisk.paragraph.three}">forms.landlordResponsibilities.fireSafetyRisk.paragraph.three</p>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+</html>

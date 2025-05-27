@@ -217,11 +217,7 @@ class PropertyComplianceJourney(
                 PropertyComplianceStepId.FireSafetyDeclaration,
                 setOf(
                     fireSafetyDeclarationStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.FireSafetyRisk,
-                        "TODO PRSD-1151: Compliance (LL resp): Fire Safety Risk Info page",
-                        PropertyComplianceStepId.CheckAndSubmit,
-                    ),
+                    fireSafetyRiskStep,
                 ),
                 "propertyCompliance.taskList.landlordResponsibilities.fireSafety",
             )
@@ -854,6 +850,22 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { journeyData, _ -> fireSafetyDeclarationStepNextAction(journeyData) },
+            )
+
+    private val fireSafetyRiskStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.FireSafetyRisk,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/fireSafetyRiskForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.KeepPropertySafe, null) },
             )
 
     private fun placeholderStep(
