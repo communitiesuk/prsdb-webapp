@@ -980,7 +980,7 @@ class PropertyComplianceJourney(
             journeyDataService
                 .getJourneyDataFromSession()
                 .getEpcLookupCertificateNumber()
-                ?: throw IllegalStateException("EPC lookup certificate number not found in session")
+                ?: return ""
         return EpcDataModel.parseCertificateNumberOrNull(submittedCertificateNumber)!! // Only valid EPC numbers will be in journeyData
     }
 
