@@ -107,5 +107,12 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
             } else {
                 this + (LOOKED_UP_EPC_JOURNEY_DATA_KEY to Json.encodeToString(epcDetails))
             }
+
+        fun JourneyData.getHasFireSafetyDeclaration() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
+                FireSafetyDeclarationFormModel::hasDeclared.name,
+            )
     }
 }

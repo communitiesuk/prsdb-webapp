@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
 
 abstract class NameFormPage(
@@ -17,7 +17,7 @@ abstract class NameFormPage(
 
     class NameForm(
         page: Page,
-    ) : Form(page) {
+    ) : PostForm(page) {
         val nameInput = TextInput.textByFieldName(locator, "name")
     }
 }

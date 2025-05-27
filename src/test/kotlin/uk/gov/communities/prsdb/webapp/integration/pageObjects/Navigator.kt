@@ -730,6 +730,22 @@ class Navigator(
         )
     }
 
+    fun skipToPropertyComplianceFireSafetyDeclarationPage(propertyOwnershipId: Long): FireSafetyDeclarationPagePropertyCompliance {
+        setJourneyDataInSession(
+            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
+            JourneyPageDataBuilder.beforePropertyComplianceFireSafetyDeclaration().build(),
+        )
+        navigate(
+            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+                "/${PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment}",
+        )
+        return createValidPage(
+            page,
+            FireSafetyDeclarationPagePropertyCompliance::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
     fun goToLandlordDetails(): LandlordDetailsPage {
         navigate("/landlord-details")
         return createValidPage(page, LandlordDetailsPage::class)

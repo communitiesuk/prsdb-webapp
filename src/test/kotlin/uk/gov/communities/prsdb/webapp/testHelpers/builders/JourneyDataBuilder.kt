@@ -579,6 +579,18 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withMissingEpcExemption(): JourneyDataBuilder {
+        withEpcStatus(HasEpc.NO)
+        journeyData[PropertyComplianceStepId.EpcMissing.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withFireSafetyDeclaration(hasDeclared: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment] =
+            mapOf(FireSafetyDeclarationFormModel::hasDeclared.name to hasDeclared)
+        return this
+    }
+
     fun withLandingPageReached(): JourneyDataBuilder {
         journeyData[RegisterLaUserStepId.LandingPage.urlPathSegment] = emptyMap<String, Any?>()
         return this

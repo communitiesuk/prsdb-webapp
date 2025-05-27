@@ -4,6 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Nested
@@ -187,6 +188,13 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
             assertThat(gasSafetyUploadPage.form.getErrorMessage())
                 .containsText("The selected file could not be uploaded - try again")
         }
+
+        @Test
+        fun `Submitting valid file metadata to complete file upload does not succeed`() {
+            val gasSafetyUploadPage = navigator.skipToPropertyComplianceGasSafetyUploadPage(PROPERTY_OWNERSHIP_ID)
+            val response = gasSafetyUploadPage.metadataOnlySubmission("metadata.pdf", 1000, "application/pdf")
+            Assertions.assertEquals(response.status(), 500)
+        }
     }
 
     @Nested
@@ -315,6 +323,13 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
             eicrUploadPage.uploadCertificate("validFile.png")
             assertThat(eicrUploadPage.form.getErrorMessage()).containsText("The selected file could not be uploaded - try again")
         }
+
+        @Test
+        fun `Submitting valid file metadata to complete file upload does not succeed`() {
+            val gasSafetyUploadPage = navigator.skipToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
+            val response = gasSafetyUploadPage.metadataOnlySubmission("metadata.pdf", 1000, "application/pdf")
+            Assertions.assertEquals(response.status(), 500)
+        }
     }
 
     @Nested
@@ -425,6 +440,17 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
             val epcLookupPage = navigator.skipToPropertyComplianceEpcLookupPage(PROPERTY_OWNERSHIP_ID)
             epcLookupPage.submitNonexistentEpcNumber()
             BasePage.assertPageIs(page, EpcNotFoundPagePropertyCompliance::class, urlArguments)
+        }
+    }
+
+    @Nested
+    inner class FireSafetyDeclarationStepTests {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val fireSafetyDeclarationPage = navigator.skipToPropertyComplianceFireSafetyDeclarationPage(PROPERTY_OWNERSHIP_ID)
+            fireSafetyDeclarationPage.form.submit()
+            assertThat(fireSafetyDeclarationPage.form.getErrorMessage())
+                .containsText("Select whether you have followed fire safety responsibilities")
         }
     }
 

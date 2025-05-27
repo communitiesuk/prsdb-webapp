@@ -212,11 +212,7 @@ class PropertyComplianceJourney(
             JourneyTask(
                 PropertyComplianceStepId.FireSafetyDeclaration,
                 setOf(
-                    placeholderStep(
-                        PropertyComplianceStepId.FireSafetyDeclaration,
-                        "TODO PRSD-1150: Compliance (LL resp): Fire Safety Declaration page",
-                        PropertyComplianceStepId.CheckAndSubmit,
-                    ),
+                    fireSafetyDeclarationStep,
                     placeholderStep(
                         PropertyComplianceStepId.FireSafetyRisk,
                         "TODO PRSD-1151: Compliance (LL resp): Fire Safety Risk Info page",
@@ -301,9 +297,8 @@ class PropertyComplianceJourney(
             Step(
                 id = PropertyComplianceStepId.GasSafetyUpload,
                 page =
-                    Page(
+                    FileUploadPage(
                         formModel = GasSafetyUploadCertificateFormModel::class,
-                        templateName = "forms/uploadCertificateForm",
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
@@ -518,9 +513,8 @@ class PropertyComplianceJourney(
             Step(
                 id = PropertyComplianceStepId.EicrUpload,
                 page =
-                    Page(
+                    FileUploadPage(
                         formModel = EicrUploadCertificateFormModel::class,
-                        templateName = "forms/uploadCertificateForm",
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
@@ -827,6 +821,37 @@ class PropertyComplianceJourney(
                 },
             )
 
+    private val fireSafetyDeclarationStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.FireSafetyDeclaration,
+                page =
+                    Page(
+                        formModel = FireSafetyDeclarationFormModel::class,
+                        templateName = "forms/fireSafetyDeclarationForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "housesInMultipleOccupationUrl" to HOUSES_IN_MULTIPLE_OCCUPATION_URL,
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = true,
+                                            valueStr = "yes",
+                                            labelMsgKey = "forms.radios.option.yes.label",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = false,
+                                            valueStr = "no",
+                                            labelMsgKey = "forms.radios.option.no.label",
+                                        ),
+                                    ),
+                                BACK_URL_ATTR_NAME to taskListUrlSegment,
+                            ),
+                    ),
+                nextAction = { journeyData, _ -> fireSafetyDeclarationStepNextAction(journeyData) },
+            )
+
     private fun placeholderStep(
         stepId: PropertyComplianceStepId,
         todoComment: String,
@@ -927,6 +952,13 @@ class PropertyComplianceJourney(
             Pair(PropertyComplianceStepId.EpcSuperseded, null)
         }
     }
+
+    private fun fireSafetyDeclarationStepNextAction(journeyData: JourneyData) =
+        if (journeyData.getHasFireSafetyDeclaration()!!) {
+            Pair(PropertyComplianceStepId.KeepPropertySafe, null)
+        } else {
+            Pair(PropertyComplianceStepId.FireSafetyRisk, null)
+        }
 
     private fun getPropertyAddress() =
         propertyOwnershipService
