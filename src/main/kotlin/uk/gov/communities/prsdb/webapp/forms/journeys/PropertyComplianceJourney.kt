@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.constants.CONTACT_EPC_ASSESSOR_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
@@ -37,6 +38,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionOtherReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
@@ -193,11 +195,7 @@ class PropertyComplianceJourney(
                         PropertyComplianceStepId.EpcLookup,
                     ),
                     epcLookupStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.EpcNotFound,
-                        "TODO PRSD-1139: Implement EPC Not Found step",
-                        PropertyComplianceStepId.FireSafetyDeclaration,
-                    ),
+                    epcNotFoundStep,
                     placeholderStep(
                         PropertyComplianceStepId.EpcSuperseded,
                         "TODO PRSD-1140: Implement EPC Superseded step",
@@ -825,6 +823,26 @@ class PropertyComplianceJourney(
                 },
             )
 
+    private val epcNotFoundStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EpcNotFound,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/epcNotFoundForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "contactAssessorUrl" to CONTACT_EPC_ASSESSOR_URL,
+                                "getNewEpcUrl" to GET_NEW_EPC_URL,
+                                "searchAgainUrl" to PropertyComplianceStepId.EpcLookup.urlPathSegment,
+                                "certificateNumber" to getEpcLookupCertificateNumberFromSession(),
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(fireSafetyDeclarationStep.id, null) },
+            )
+
     private val fireSafetyDeclarationStep
         get() =
             Step(
@@ -955,6 +973,15 @@ class PropertyComplianceJourney(
         } else {
             Pair(PropertyComplianceStepId.EpcSuperseded, null)
         }
+    }
+
+    private fun getEpcLookupCertificateNumberFromSession(): String {
+        val submittedCertificateNumber =
+            journeyDataService
+                .getJourneyDataFromSession()
+                .getEpcLookupCertificateNumber()
+                ?: throw IllegalStateException("EPC lookup certificate number not found in session")
+        return EpcDataModel.parseCertificateNumberOrNull(submittedCertificateNumber)!! // Only valid EPC numbers will be in journeyData
     }
 
     private fun fireSafetyDeclarationStepNextAction(journeyData: JourneyData) =
