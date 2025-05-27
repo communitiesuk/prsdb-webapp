@@ -95,7 +95,7 @@ class MockLandlordData {
             primaryLandlord: Landlord = createLandlord(),
             property: Property = createProperty(),
             license: License? = null,
-            incompleteComplianceForm: FormContext = FormContext(JourneyType.PROPERTY_COMPLIANCE, primaryLandlord.baseUser),
+            incompleteComplianceForm: FormContext? = FormContext(JourneyType.PROPERTY_COMPLIANCE, primaryLandlord.baseUser),
             id: Long = 1,
             createdDate: Instant = Instant.now(),
         ): PropertyOwnership {

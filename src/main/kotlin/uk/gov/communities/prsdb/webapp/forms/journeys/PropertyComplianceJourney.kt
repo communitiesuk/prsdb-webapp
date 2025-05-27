@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
+import org.springframework.http.HttpStatus
 import org.springframework.validation.Validator
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONTACT_EPC_ASSESSOR_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
@@ -68,7 +70,6 @@ class PropertyComplianceJourney(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyOwnershipId: Long,
     private val epcLookupService: EpcLookupService,
-    principalName: String,
 ) : JourneyWithTaskList<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE,
         initialStepId = initialStepId,
@@ -76,7 +77,20 @@ class PropertyComplianceJourney(
         journeyDataService = journeyDataService,
     ) {
     init {
-        loadJourneyDataIfNotLoaded(principalName)
+        loadJourneyDataIfNotLoaded()
+    }
+
+    private fun loadJourneyDataIfNotLoaded() {
+        if (journeyDataService.getJourneyDataFromSession().isEmpty()) {
+            val formContext =
+                propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).incompleteComplianceForm
+                    ?: throw ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Property ownership $propertyOwnershipId does not have an incomplete compliance form",
+                    )
+
+            journeyDataService.loadJourneyDataIntoSession(formContext)
+        }
     }
 
     // TODO PRSD-1165: Update task list to match new design

@@ -31,11 +31,6 @@ class JourneyDataService(
 
     fun getContextId(): Long? = session.getAttribute(CONTEXT_ID) as? Long
 
-    fun getContextId(
-        principalName: String,
-        journeyType: JourneyType,
-    ): Long? = formContextRepository.findByUser_IdAndJourneyType(principalName, journeyType)?.id
-
     fun setContextId(contextId: Long) {
         session.setAttribute(CONTEXT_ID, contextId)
     }

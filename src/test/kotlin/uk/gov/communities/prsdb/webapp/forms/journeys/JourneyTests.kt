@@ -16,7 +16,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
@@ -100,17 +99,6 @@ class JourneyTests {
     class TestFormModel : FormModel {
         @NotNull
         var testProperty: String? = null
-    }
-
-    class TestJourneyFactory(
-        private val journeyType: JourneyType,
-        private val journeyDataService: JourneyDataService,
-    ) {
-        fun create(principalName: String): TestJourney {
-            val testJourney = TestJourney(journeyType, mock(), mock(), journeyDataService)
-            testJourney.loadJourneyDataIfNotLoaded(principalName)
-            return testJourney
-        }
     }
 
     @Mock
@@ -864,53 +852,6 @@ class JourneyTests {
                     principal,
                 )
             }
-        }
-    }
-
-    @Nested
-    inner class JourneyDataManipulationTests {
-        @Test
-        fun `when there is no journey data in the session or the database, journey data is not loaded`() {
-            val journeyType = JourneyType.PROPERTY_REGISTRATION
-            val principalName = "principalName"
-
-            whenever(mockJourneyDataService.getContextId(principalName, journeyType)).thenReturn(null)
-
-            // Act
-            TestJourneyFactory(journeyType, mockJourneyDataService).create(principalName)
-
-            // Assert
-            verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any<Long>())
-        }
-
-        @Test
-        fun `when the journey data is not in the session it will be loaded into the session from the database`() {
-            val journeyType = JourneyType.PROPERTY_REGISTRATION
-            val contextId = 67L
-            val principalName = "principalName"
-
-            whenever(mockJourneyDataService.getContextId(principalName, journeyType)).thenReturn(contextId)
-
-            // Act
-            TestJourneyFactory(journeyType, mockJourneyDataService).create(principalName)
-
-            // Assert
-            val captor = argumentCaptor<Long>()
-            verify(mockJourneyDataService).loadJourneyDataIntoSession(captor.capture())
-            assertEquals(contextId, captor.allValues.single())
-        }
-
-        @Test
-        fun `when the journey data is already in the session, journey data is not loaded`() {
-            val principalName = "principalName"
-
-            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf("anything" to "Anything else"))
-
-            // Act
-            TestJourneyFactory(JourneyType.PROPERTY_REGISTRATION, mockJourneyDataService).create(principalName)
-
-            // Assert
-            verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any<Long>())
         }
     }
 
