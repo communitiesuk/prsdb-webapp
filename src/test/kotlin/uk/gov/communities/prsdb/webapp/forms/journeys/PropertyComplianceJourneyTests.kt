@@ -16,6 +16,9 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -63,25 +66,24 @@ class PropertyComplianceJourneyTests {
     inner class EpcLookupTests {
         @Test
         fun `handleAndSubmit updates journeyData with looked up EPC results if an EPC is found`() {
-            val validCertificateNumber = "0000-0000-0000-0554-8410"
             val expectedEpcDetails =
                 EpcDataModel(
-                    certificateNumber = validCertificateNumber,
+                    certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
                     singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT",
                     energyRating = "C",
                     expiryDate = LocalDate(2027, 1, 5),
-                    latestCertificateNumberForThisProperty = validCertificateNumber,
+                    latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
                 )
             val expectedUpdatedJourneyData =
                 journeyDataBuilder
-                    .withEpcLookupCertificateNumber(validCertificateNumber)
+                    .withEpcLookupCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER)
                     .withLookedUpEpcDetails(expectedEpcDetails)
                     .build()
-            whenever(mockEpcLookupService.getEpcByCertificateNumber(validCertificateNumber))
+            whenever(mockEpcLookupService.getEpcByCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER))
                 .thenReturn(expectedEpcDetails)
 
             // Act
-            completeStep(PropertyComplianceStepId.EpcLookup, mapOf("certificateNumber" to validCertificateNumber))
+            completeStep(PropertyComplianceStepId.EpcLookup, mapOf("certificateNumber" to CURRENT_EPC_CERTIFICATE_NUMBER))
 
             // Assert
             verify(mockJourneyDataService).setJourneyDataInSession(expectedUpdatedJourneyData)
@@ -89,15 +91,14 @@ class PropertyComplianceJourneyTests {
 
         @Test
         fun `handleAndSubmit updates journeyData with looked up EPC results with null if no EPC is found`() {
-            val nonExistentCertificateNumber = "0000-0000-0000-0554-8410"
             val expectedUpdatedJourneyData =
                 journeyDataBuilder
-                    .withEpcLookupCertificateNumber(nonExistentCertificateNumber)
+                    .withEpcLookupCertificateNumber(NONEXISTENT_EPC_CERTIFICATE_NUMBER)
                     .withNullLookedUpEpcDetails()
                     .build()
 
             // Act
-            completeStep(PropertyComplianceStepId.EpcLookup, mapOf("certificateNumber" to nonExistentCertificateNumber))
+            completeStep(PropertyComplianceStepId.EpcLookup, mapOf("certificateNumber" to NONEXISTENT_EPC_CERTIFICATE_NUMBER))
 
             // Assert
             verify(mockJourneyDataService).setJourneyDataInSession(expectedUpdatedJourneyData)
@@ -106,22 +107,21 @@ class PropertyComplianceJourneyTests {
         @Test
         fun `handleAndSubmit redirects to checkMatchedEpc if the looked up EPC is found and is the latest available`() {
             // Arrange
-            val currentCertificateNumber = "0000-0000-0000-0554-8410"
             val expectedEpcDetails =
                 EpcDataModel(
-                    certificateNumber = currentCertificateNumber,
+                    certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
                     singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT",
                     energyRating = "C",
                     expiryDate = LocalDate(2027, 1, 5),
-                    latestCertificateNumberForThisProperty = currentCertificateNumber,
+                    latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
                 )
 
-            whenever(mockEpcLookupService.getEpcByCertificateNumber(currentCertificateNumber))
+            whenever(mockEpcLookupService.getEpcByCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER))
                 .thenReturn(expectedEpcDetails)
 
             // Act
             val redirectModelAndView =
-                completeStep(PropertyComplianceStepId.EpcLookup, mapOf("certificateNumber" to currentCertificateNumber))
+                completeStep(PropertyComplianceStepId.EpcLookup, mapOf("certificateNumber" to CURRENT_EPC_CERTIFICATE_NUMBER))
 
             // Assert
             assertEquals("redirect:${PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment}", redirectModelAndView.viewName)
@@ -130,18 +130,17 @@ class PropertyComplianceJourneyTests {
         @Test
         fun `nextAction returns null if the looked up EPC is found and is the latest available`() {
             // Arrange
-            val currentCertificateNumber = "0000-0000-0000-0554-8410"
             val epcDetails =
                 EpcDataModel(
-                    certificateNumber = currentCertificateNumber,
+                    certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
                     singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT",
                     energyRating = "C",
                     expiryDate = LocalDate(2027, 1, 5),
-                    latestCertificateNumberForThisProperty = currentCertificateNumber,
+                    latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
                 )
             val updatedJourneyData =
                 journeyDataBuilder
-                    .withEpcLookupCertificateNumber(currentCertificateNumber)
+                    .withEpcLookupCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER)
                     .withLookedUpEpcDetails(epcDetails)
                     .build()
 
@@ -152,19 +151,17 @@ class PropertyComplianceJourneyTests {
         @Test
         fun `nextAction returns EpcSuperseded if the looked up EPC is not the latest available`() {
             // Arrange
-            val supersededCertificateNumber = "0000-0000-0000-0000-8410"
-            val latestCertificateNumber = "0000-0000-0000-0554-8410"
             val epcDetails =
                 EpcDataModel(
-                    certificateNumber = supersededCertificateNumber,
+                    certificateNumber = SUPERSEDED_EPC_CERTIFICATE_NUMBER,
                     singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT",
                     energyRating = "C",
                     expiryDate = LocalDate(2027, 1, 5),
-                    latestCertificateNumberForThisProperty = latestCertificateNumber,
+                    latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
                 )
             val updatedJourneyData =
                 journeyDataBuilder
-                    .withEpcLookupCertificateNumber(supersededCertificateNumber)
+                    .withEpcLookupCertificateNumber(SUPERSEDED_EPC_CERTIFICATE_NUMBER)
                     .withLookedUpEpcDetails(epcDetails)
                     .build()
 
@@ -178,10 +175,9 @@ class PropertyComplianceJourneyTests {
         @Test
         fun `nextAction returns EpcNotFound if the looked up EPC is not found`() {
             // Arrange
-            val nonExistentCertificateNumber = "0000-0000-0000-0554-8410"
             val updatedJourneyData =
                 journeyDataBuilder
-                    .withEpcLookupCertificateNumber(nonExistentCertificateNumber)
+                    .withEpcLookupCertificateNumber(NONEXISTENT_EPC_CERTIFICATE_NUMBER)
                     .withNullLookedUpEpcDetails()
                     .build()
 

@@ -269,7 +269,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
-    fun `getEpcLookupCertificateNumber the certificate number if it is in journeyData`() {
+    fun `getEpcLookupCertificateNumber returns the certificate number if it is in journeyData`() {
         val certificateNumber = "0000-0000-1234-5678-9100"
         val testJourneyData = journeyDataBuilder.withEpcLookupCertificateNumber(certificateNumber).build()
 

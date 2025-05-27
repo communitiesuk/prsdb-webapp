@@ -27,6 +27,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.CheckMatchedEpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionOtherReasonPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcNotFoundPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcSupersededPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
@@ -42,19 +45,15 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
 
     @BeforeEach
     fun setup() {
-        val currentEpcCertificateNumber = "0000-0000-0000-0554-8410"
-        val supersededEpcCertificateNumber = "0000-0000-0000-0000-8410"
-        val nonexistentEpcCertificateNumber = "1234-0000-0000-0000-8410"
-
-        whenever(epcRegisterClient.getByRrn(currentEpcCertificateNumber))
+        whenever(epcRegisterClient.getByRrn(CURRENT_EPC_CERTIFICATE_NUMBER))
             .thenReturn(
                 """
                 {
                     "data": {
-                        "epcRrn": "$currentEpcCertificateNumber",
+                        "epcRrn": "$CURRENT_EPC_CERTIFICATE_NUMBER",
                         "currentEnergyEfficiencyBand": "C",
                         "expiryDate": "2027-01-05T00:00:00.000Z",
-                        "latestEpcRrnForAddress": "$currentEpcCertificateNumber",
+                        "latestEpcRrnForAddress": "$CURRENT_EPC_CERTIFICATE_NUMBER",
                         "address": {
                             "addressLine1": "123 Test Street",
                             "town": "Test Town",
@@ -66,15 +65,15 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
                 """.trimIndent(),
             )
 
-        whenever(epcRegisterClient.getByRrn(supersededEpcCertificateNumber))
+        whenever(epcRegisterClient.getByRrn(SUPERSEDED_EPC_CERTIFICATE_NUMBER))
             .thenReturn(
                 """
                 {
                     "data": {
-                        "epcRrn": "$supersededEpcCertificateNumber",
+                        "epcRrn": "$SUPERSEDED_EPC_CERTIFICATE_NUMBER",
                         "currentEnergyEfficiencyBand": "C",
                         "expiryDate": "2027-01-05T00:00:00.000Z",
-                        "latestEpcRrnForAddress": "$currentEpcCertificateNumber",
+                        "latestEpcRrnForAddress": "$CURRENT_EPC_CERTIFICATE_NUMBER",
                         "address": {
                             "addressLine1": "123 Test Street",
                             "town": "Test Town",
@@ -86,7 +85,7 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
                 """.trimIndent(),
             )
 
-        whenever(epcRegisterClient.getByRrn(nonexistentEpcCertificateNumber))
+        whenever(epcRegisterClient.getByRrn(NONEXISTENT_EPC_CERTIFICATE_NUMBER))
             .thenReturn(
                 """
                 {

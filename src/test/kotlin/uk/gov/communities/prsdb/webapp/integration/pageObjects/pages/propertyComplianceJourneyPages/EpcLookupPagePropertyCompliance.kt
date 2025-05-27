@@ -18,23 +18,33 @@ class EpcLookupPagePropertyCompliance(
     val form = EpcLookupForm(page)
 
     fun submitCurrentEpcNumber() {
-        form.epcCertificateNumberInput.fill("0000-0000-0000-0554-8410")
+        form.epcCertificateNumberInput.fill(CURRENT_EPC_CERTIFICATE_NUMBER)
         form.submit()
     }
 
     fun submitSupersededEpcNumber() {
-        form.epcCertificateNumberInput.fill("0000-0000-0000-0000-8410")
+        form.epcCertificateNumberInput.fill(SUPERSEDED_EPC_CERTIFICATE_NUMBER)
         form.submit()
     }
 
     fun submitNonexistentEpcNumber() {
-        form.epcCertificateNumberInput.fill("1234-0000-0000-0000-8410")
+        form.epcCertificateNumberInput.fill(NONEXISTENT_EPC_CERTIFICATE_NUMBER)
         form.submit()
     }
 
     fun submitInvalidEpcNumber() {
-        form.epcCertificateNumberInput.fill("invalid-certificate-number")
+        form.epcCertificateNumberInput.fill(INVALID_EPC_CERTIFICATE_NUMBER)
         form.submit()
+    }
+
+    companion object {
+        const val CURRENT_EPC_CERTIFICATE_NUMBER = "0000-0000-0000-0554-8410"
+
+        const val SUPERSEDED_EPC_CERTIFICATE_NUMBER = "0000-0000-0000-0000-8410"
+
+        const val NONEXISTENT_EPC_CERTIFICATE_NUMBER = "1234-0000-0000-0000-8410"
+
+        const val INVALID_EPC_CERTIFICATE_NUMBER = "invalid-certificate-number"
     }
 
     class EpcLookupForm(

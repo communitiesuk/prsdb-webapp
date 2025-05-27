@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
-import jakarta.validation.constraints.NotNull
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
 class EpcLookupFormModel : FormModel {
-    @NotNull(message = "forms.epcLookup.error.missing")
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
@@ -29,7 +28,6 @@ class EpcLookupFormModel : FormModel {
         // a blank certificate number does not have an invalid format
         if (certificateNumber.isBlank()) return true
 
-        val certNumberNoHyphens = certificateNumber.replace("-", "")
-        return (certNumberNoHyphens.all { it.isDigit() } && certNumberNoHyphens.length == 20)
+        return EpcDataModel.parseCertificateNumberOrNull(certificateNumber) != null
     }
 }
