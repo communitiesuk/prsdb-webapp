@@ -400,7 +400,7 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
         fun `Submitting with no option selected returns an error`() {
             val epcExemptionReasonPage = navigator.skipToPropertyComplianceEpcExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
             epcExemptionReasonPage.form.submit()
-            assertThat(epcExemptionReasonPage.form.getErrorMessage()).containsText("Select why this property has an EPC exemption")
+            assertThat(epcExemptionReasonPage.form.getErrorMessage()).containsText("Select why your property does not need an EPC")
         }
     }
 
