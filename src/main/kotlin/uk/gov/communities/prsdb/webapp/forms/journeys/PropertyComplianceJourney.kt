@@ -54,8 +54,10 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.KeepPropertySafeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
@@ -113,11 +115,7 @@ class PropertyComplianceJourney(
             listOf(
                 fireSafetyTask,
                 JourneyTask.withOneStep(
-                    placeholderStep(
-                        PropertyComplianceStepId.KeepPropertySafe,
-                        "TODO PRSD-1152: Compliance (LL resp): H&S Declaration page",
-                        PropertyComplianceStepId.CheckAndSubmit,
-                    ),
+                    keepPropertySafeStep,
                     "propertyCompliance.taskList.landlordResponsibilities.keepPropertySafe",
                 ),
                 JourneyTask.withOneStep(
@@ -884,6 +882,29 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.KeepPropertySafe, null) },
+            )
+
+    private val keepPropertySafeStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.KeepPropertySafe,
+                page =
+                    Page(
+                        formModel = KeepPropertySafeFormModel::class,
+                        templateName = "forms/keepPropertySafeForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "options" to
+                                    listOf(
+                                        CheckboxViewModel(
+                                            value = "true",
+                                            labelMsgKey = "forms.landlordResponsibilities.keepPropertySafe.checkbox.label",
+                                        ),
+                                    ),
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.ResponsibilityToTenants, null) },
             )
 
     private fun placeholderStep(
