@@ -24,3 +24,11 @@ const val EPC_GUIDE_URL =
 const val CONTACT_EPC_ASSESSOR_URL = "https://www.gov.uk/get-new-energy-certificate#find-an-assessor"
 
 const val HOUSES_IN_MULTIPLE_OCCUPATION_URL = "https://www.gov.uk/private-renting/houses-in-multiple-occupation"
+
+const val HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL =
+    "https://www.gov.uk/government/publications/" +
+        "housing-health-and-safety-rating-system-guidance-for-landlords-and-property-related-professionals"
+
+const val HOMES_ACT_2018_URL =
+    "https://www.gov.uk/government/publications/homes-fitness-for-human-habitation-act-2018/" +
+        "guide-for-landlords-homes-fitness-for-human-habitation-act-2018"
