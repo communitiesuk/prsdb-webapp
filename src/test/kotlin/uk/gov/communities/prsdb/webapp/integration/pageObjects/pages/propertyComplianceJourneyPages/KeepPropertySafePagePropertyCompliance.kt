@@ -14,5 +14,5 @@ class KeepPropertySafePagePropertyCompliance(
         PropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${PropertyComplianceStepId.KeepPropertySafe.urlPathSegment}",
     ) {
-    val heading = Heading(page.locator("h1.govuk-heading-l"))
+    val heading = Heading(page.locator("h1.govuk-fieldset__heading"))
 }
