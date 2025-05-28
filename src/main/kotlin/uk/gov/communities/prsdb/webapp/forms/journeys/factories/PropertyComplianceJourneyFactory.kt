@@ -15,13 +15,14 @@ class PropertyComplianceJourneyFactory(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val epcLookupService: EpcLookupService,
 ) {
-    fun create(propertyOwnershipId: Long) = PropertyComplianceJourney(
-        validator,
-        journeyDataService = journeyDataServiceFactory.create(getJourneyDataKey(propertyOwnershipId)),
-        propertyOwnershipService,
-        propertyOwnershipId,
-        epcLookupService,
-    )
+    fun create(propertyOwnershipId: Long) =
+        PropertyComplianceJourney(
+            validator,
+            journeyDataService = journeyDataServiceFactory.create(getJourneyDataKey(propertyOwnershipId)),
+            propertyOwnershipService,
+            propertyOwnershipId,
+            epcLookupService,
+        )
 
     companion object {
         fun getJourneyDataKey(propertyOwnershipId: Long): String =
