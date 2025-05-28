@@ -194,6 +194,11 @@ class PropertyComplianceJourney(
                         "TODO PRSD-1132: Implement Check Matched EPC step",
                         PropertyComplianceStepId.EpcLookup,
                     ),
+                    placeholderStep(
+                        PropertyComplianceStepId.EpcNotAutoMatched,
+                        "TODO PRSD-1200: Implement EPC not automatched step",
+                        PropertyComplianceStepId.EpcLookup,
+                    ),
                     epcLookupStep,
                     epcNotFoundStep,
                     placeholderStep(
@@ -713,6 +718,7 @@ class PropertyComplianceJourney(
                                 BACK_URL_ATTR_NAME to taskListUrlSegment,
                             ),
                     ) { mapOf("address" to getPropertyAddress()) },
+                handleSubmitAndRedirect = { journeyData, _, _ -> epcStepHandleSubmitAndRedirect(journeyData) },
                 nextAction = { journeyData, _ -> epcStepNextAction(journeyData) },
             )
 
@@ -952,9 +958,41 @@ class PropertyComplianceJourney(
             Pair(PropertyComplianceStepId.EicrExemptionConfirmation, null)
         }
 
+    private fun epcStepHandleSubmitAndRedirect(journeyData: JourneyData): String {
+        val epcStep = steps.single { it.id == PropertyComplianceStepId.EPC }
+
+        val uprn =
+            propertyOwnershipService
+                .getPropertyOwnership(propertyOwnershipId)
+                .property.address.uprn
+                ?: return updateEpcDetailsAndRedirect(epcStep, journeyData, null)
+
+        val epcDetails =
+            epcLookupService.getEpcByUprn(uprn)
+                ?: return updateEpcDetailsAndRedirect(epcStep, journeyData, null)
+
+        return updateEpcDetailsAndRedirect(epcStep, journeyData, epcDetails)
+    }
+
+    private fun updateEpcDetailsAndRedirect(
+        currentStep: Step<PropertyComplianceStepId>,
+        journeyData: JourneyData,
+        epcDetails: EpcDataModel?,
+    ): String {
+        val newJourneyData = journeyData.withEpcDetails(epcDetails)
+        journeyDataService.setJourneyDataInSession(newJourneyData)
+        return getRedirectForNextStep(currentStep, newJourneyData, null)
+    }
+
     private fun epcStepNextAction(journeyData: JourneyData) =
         when (journeyData.getHasEPC()!!) {
-            HasEpc.YES -> Pair(PropertyComplianceStepId.CheckMatchedEpc, null)
+            HasEpc.YES -> {
+                if (journeyDataService.getJourneyDataFromSession().getEpcDetails() != null) {
+                    Pair(PropertyComplianceStepId.CheckMatchedEpc, null)
+                } else {
+                    Pair(PropertyComplianceStepId.EpcNotAutoMatched, null)
+                }
+            }
             HasEpc.NO -> Pair(PropertyComplianceStepId.EpcMissing, null)
             HasEpc.NOT_REQUIRED -> Pair(PropertyComplianceStepId.EpcExemptionReason, null)
         }
