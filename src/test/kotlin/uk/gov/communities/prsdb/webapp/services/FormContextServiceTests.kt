@@ -30,7 +30,7 @@ class FormContextServiceTests {
         val expectedFormContext =
             FormContext(
                 journeyType = JourneyType.PROPERTY_COMPLIANCE,
-                context = "",
+                context = "{}",
                 user = MockLandlordData.createOneLoginUser(),
             )
 
