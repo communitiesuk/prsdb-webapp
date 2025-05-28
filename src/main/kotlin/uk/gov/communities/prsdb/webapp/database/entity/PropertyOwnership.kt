@@ -78,7 +78,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         foreignKey = ForeignKey(name = "FK_PROPERTY_OWNERSHIP_INCOMPLETE_COMPLIANCE_FORM"),
     )
     var incompleteComplianceForm: FormContext? = null
-        private set
 
     constructor(
         occupancyType: OccupancyType,

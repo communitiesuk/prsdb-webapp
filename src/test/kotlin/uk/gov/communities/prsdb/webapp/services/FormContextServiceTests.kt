@@ -44,4 +44,13 @@ class FormContextServiceTests {
 
         assertEquals(expectedFormContext, returnedFormContext)
     }
+
+    @Test
+    fun `deleteFormContext deletes the given FormContext`() {
+        val formContext = MockLandlordData.createFormContext()
+
+        formContextService.deleteFormContext(formContext)
+
+        verify(mockFormContextRepository).delete(formContext)
+    }
 }

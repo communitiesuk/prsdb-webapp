@@ -149,7 +149,11 @@ class PropertyComplianceJourney(
             listOf(
                 // TODO PRSD-962: Implement check and submit task
                 JourneyTask.withOneStep(
-                    placeholderStep(PropertyComplianceStepId.CheckAndSubmit, "TODO PRSD-962: Implement check and submit task"),
+                    placeholderStep(
+                        PropertyComplianceStepId.CheckAndSubmit,
+                        "TODO PRSD-962: Implement check and submit task",
+                        handleSubmitAndRedirect = { _, _, _ -> checkAndSubmitHandleSubmitAndRedirect() },
+                    ),
                     "propertyCompliance.taskList.checkAndSubmit.check",
                 ),
                 JourneyTask.withOneStep(
@@ -904,10 +908,12 @@ class PropertyComplianceJourney(
         stepId: PropertyComplianceStepId,
         todoComment: String,
         nextStepId: PropertyComplianceStepId? = null,
+        handleSubmitAndRedirect: ((JourneyData, Int?, PropertyComplianceStepId?) -> String)? = null,
     ) = Step(
         id = stepId,
         page = Page(formModel = NoInputFormModel::class, templateName = "forms/todo", content = mapOf("todoComment" to todoComment)),
         nextAction = { _, _ -> Pair(nextStepId, null) },
+        handleSubmitAndRedirect = handleSubmitAndRedirect,
     )
 
     private fun gasSafetyStepNextAction(journeyData: JourneyData) =
@@ -1001,6 +1007,22 @@ class PropertyComplianceJourney(
         }
     }
 
+    private fun fireSafetyDeclarationStepNextAction(journeyData: JourneyData) =
+        if (journeyData.getHasFireSafetyDeclaration()!!) {
+            Pair(PropertyComplianceStepId.KeepPropertySafe, null)
+        } else {
+            Pair(PropertyComplianceStepId.FireSafetyRisk, null)
+        }
+
+    private fun checkAndSubmitHandleSubmitAndRedirect(): String {
+        // TODO PRSD-1202: Save compliance data to the database
+
+        propertyOwnershipService.deleteIncompleteComplianceForm(propertyOwnershipId)
+
+        // TODO PRSD-962: Redirect to confirmation page
+        return LANDLORD_DASHBOARD_URL
+    }
+
     private fun getEpcLookupCertificateNumberFromSession(): String {
         val submittedCertificateNumber =
             journeyDataService
@@ -1009,13 +1031,6 @@ class PropertyComplianceJourney(
                 ?: return ""
         return EpcDataModel.parseCertificateNumberOrNull(submittedCertificateNumber)!! // Only valid EPC numbers will be in journeyData
     }
-
-    private fun fireSafetyDeclarationStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getHasFireSafetyDeclaration()!!) {
-            Pair(PropertyComplianceStepId.KeepPropertySafe, null)
-        } else {
-            Pair(PropertyComplianceStepId.FireSafetyRisk, null)
-        }
 
     private fun getPropertyAddress() =
         propertyOwnershipService

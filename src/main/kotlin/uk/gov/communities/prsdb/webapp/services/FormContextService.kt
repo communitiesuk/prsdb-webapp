@@ -14,4 +14,8 @@ class FormContextService(
         journeyType: JourneyType,
         baseUser: OneLoginUser,
     ) = formContextRepository.save(FormContext(journeyType, baseUser))
+
+    fun deleteFormContext(formContext: FormContext) {
+        formContextRepository.delete(formContext)
+    }
 }

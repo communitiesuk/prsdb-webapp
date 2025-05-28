@@ -202,4 +202,13 @@ class PropertyOwnershipService(
     fun deletePropertyOwnerships(propertyOwnerships: List<PropertyOwnership>) {
         propertyOwnershipRepository.deleteAll(propertyOwnerships)
     }
+
+    @Transactional
+    fun deleteIncompleteComplianceForm(propertyOwnershipId: Long) {
+        val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
+        propertyOwnership.incompleteComplianceForm?.let {
+            formContextService.deleteFormContext(it)
+            propertyOwnership.incompleteComplianceForm = null
+        }
+    }
 }

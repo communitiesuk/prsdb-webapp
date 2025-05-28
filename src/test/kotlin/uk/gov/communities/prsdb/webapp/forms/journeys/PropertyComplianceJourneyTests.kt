@@ -203,6 +203,17 @@ class PropertyComplianceJourneyTests {
         }
     }
 
+    @Nested
+    inner class CheckAndSubmitHandleSubmitAndRedirectTests {
+        @Test
+        fun `checkAndSubmitHandleSubmitAndRedirect deletes the corresponding compliance form`() {
+            val propertyOwnershipId = 1L
+            completeStep(PropertyComplianceStepId.CheckAndSubmit, propertyOwnershipId = propertyOwnershipId)
+
+            verify(mockPropertyOwnershipService).deleteIncompleteComplianceForm(propertyOwnershipId)
+        }
+    }
+
     private fun createPropertyComplianceJourney(propertyOwnershipId: Long = 1L) =
         PropertyComplianceJourney(
             validator = AlwaysTrueValidator(),
@@ -215,19 +226,28 @@ class PropertyComplianceJourneyTests {
     private fun completeStep(
         stepId: PropertyComplianceStepId,
         pageData: PageData = mapOf(),
-    ): ModelAndView =
-        createPropertyComplianceJourney().completeStep(
+        propertyOwnershipId: Long = 1L,
+    ): ModelAndView {
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
+            .thenReturn(MockLandlordData.createPropertyOwnership(id = propertyOwnershipId))
+
+        return createPropertyComplianceJourney(propertyOwnershipId).completeStep(
             stepPathSegment = stepId.urlPathSegment,
             formData = pageData,
             subPageNumber = null,
             principal = mock(),
         )
+    }
 
     private fun callNextActionAndReturnNextStepId(
         currentStepId: PropertyComplianceStepId,
         journeyData: JourneyData,
-    ): PropertyComplianceStepId? =
-        createPropertyComplianceJourney()
+        propertyOwnershipId: Long = 1L,
+    ): PropertyComplianceStepId? {
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
+            .thenReturn(MockLandlordData.createPropertyOwnership(id = propertyOwnershipId))
+
+        return createPropertyComplianceJourney(propertyOwnershipId)
             .sections
             .flatMap { section -> section.tasks }
             .flatMap { task -> task.steps }
@@ -235,4 +255,5 @@ class PropertyComplianceJourneyTests {
             .nextAction
             .invoke(journeyData, null)
             .first
+    }
 }

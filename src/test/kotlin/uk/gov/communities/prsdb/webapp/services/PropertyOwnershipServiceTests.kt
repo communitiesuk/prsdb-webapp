@@ -704,4 +704,16 @@ class PropertyOwnershipServiceTests {
         // Assert
         assertEquals(expectedPropertyOwnerships, propertyOwnerships)
     }
+
+    @Test
+    fun `deleteIncompleteComplianceForm deletes the corresponding form context and sets its reference to null`() {
+        val incompleteComplianceForm = MockLandlordData.createFormContext()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(incompleteComplianceForm = incompleteComplianceForm)
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+        propertyOwnershipService.deleteIncompleteComplianceForm(propertyOwnership.id)
+
+        verify(mockFormContextService).deleteFormContext(incompleteComplianceForm)
+        assertNull(propertyOwnership.incompleteComplianceForm)
+    }
 }
