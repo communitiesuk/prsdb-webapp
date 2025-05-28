@@ -3,16 +3,20 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
@@ -25,6 +29,8 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import kotlin.test.assertContains
 
 @ExtendWith(MockitoExtension::class)
 class PropertyComplianceJourneyTests {
@@ -37,29 +43,37 @@ class PropertyComplianceJourneyTests {
     @Mock
     private lateinit var mockEpcLookupService: EpcLookupService
 
-    private lateinit var journeyDataBuilder: JourneyDataBuilder
+    @Nested
+    inner class LoadJourneyDataIfNotLoadedTests {
+        @Test
+        fun `when there is journey data in session, it's not loaded from the database`() {
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mapOf("any-key" to "any-value"))
 
-    private val alwaysTrueValidator: AlwaysTrueValidator = AlwaysTrueValidator()
+            createPropertyComplianceJourney()
 
-    private val principalName = "a-user-name"
+            verify(mockJourneyDataService, never()).loadJourneyDataIntoSession(any<FormContext>())
+        }
 
-    private val propertyOwnershipId = 1.toLong()
+        @Test
+        fun `when there isn't journey data in session, it's loaded from the database`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(emptyMap())
+            whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnership.id)).thenReturn(propertyOwnership)
 
-    private lateinit var testJourney: PropertyComplianceJourney
+            createPropertyComplianceJourney(propertyOwnership.id)
 
-    @BeforeEach
-    fun setup() {
-        testJourney =
-            PropertyComplianceJourney(
-                validator = alwaysTrueValidator,
-                journeyDataService = mockJourneyDataService,
-                propertyOwnershipService = mockPropertyOwnershipService,
-                propertyOwnershipId = propertyOwnershipId,
-                epcLookupService = mockEpcLookupService,
-                principalName = principalName,
-            )
+            verify(mockJourneyDataService).loadJourneyDataIntoSession(propertyOwnership.incompleteComplianceForm!!)
+        }
 
-        journeyDataBuilder = JourneyDataBuilder(mock())
+        @Test
+        fun `when there isn't journey data in session or the database, an error is thrown`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(incompleteComplianceForm = null)
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(emptyMap())
+            whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            val errorThrown = assertThrows<ResponseStatusException> { createPropertyComplianceJourney(propertyOwnership.id) }
+            assertContains(errorThrown.message, "Property ownership ${propertyOwnership.id} does not have an incomplete compliance form")
+        }
     }
 
     @Nested
@@ -75,7 +89,7 @@ class PropertyComplianceJourneyTests {
                     latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
                 )
             val expectedUpdatedJourneyData =
-                journeyDataBuilder
+                JourneyDataBuilder()
                     .withEpcLookupCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER)
                     .withLookedUpEpcDetails(expectedEpcDetails)
                     .build()
@@ -92,7 +106,7 @@ class PropertyComplianceJourneyTests {
         @Test
         fun `handleAndSubmit updates journeyData with looked up EPC results with null if no EPC is found`() {
             val expectedUpdatedJourneyData =
-                journeyDataBuilder
+                JourneyDataBuilder()
                     .withEpcLookupCertificateNumber(NONEXISTENT_EPC_CERTIFICATE_NUMBER)
                     .withNullLookedUpEpcDetails()
                     .build()
@@ -139,7 +153,7 @@ class PropertyComplianceJourneyTests {
                     latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
                 )
             val updatedJourneyData =
-                journeyDataBuilder
+                JourneyDataBuilder()
                     .withEpcLookupCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER)
                     .withLookedUpEpcDetails(epcDetails)
                     .build()
@@ -160,7 +174,7 @@ class PropertyComplianceJourneyTests {
                     latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
                 )
             val updatedJourneyData =
-                journeyDataBuilder
+                JourneyDataBuilder()
                     .withEpcLookupCertificateNumber(SUPERSEDED_EPC_CERTIFICATE_NUMBER)
                     .withLookedUpEpcDetails(epcDetails)
                     .build()
@@ -176,7 +190,7 @@ class PropertyComplianceJourneyTests {
         fun `nextAction returns EpcNotFound if the looked up EPC is not found`() {
             // Arrange
             val updatedJourneyData =
-                journeyDataBuilder
+                JourneyDataBuilder()
                     .withEpcLookupCertificateNumber(NONEXISTENT_EPC_CERTIFICATE_NUMBER)
                     .withNullLookedUpEpcDetails()
                     .build()
@@ -189,22 +203,51 @@ class PropertyComplianceJourneyTests {
         }
     }
 
+    @Nested
+    inner class CheckAndSubmitHandleSubmitAndRedirectTests {
+        @Test
+        fun `checkAndSubmitHandleSubmitAndRedirect deletes the corresponding compliance form`() {
+            val propertyOwnershipId = 1L
+            completeStep(PropertyComplianceStepId.CheckAndSubmit, propertyOwnershipId = propertyOwnershipId)
+
+            verify(mockPropertyOwnershipService).deleteIncompleteComplianceForm(propertyOwnershipId)
+        }
+    }
+
+    private fun createPropertyComplianceJourney(propertyOwnershipId: Long = 1L) =
+        PropertyComplianceJourney(
+            validator = AlwaysTrueValidator(),
+            journeyDataService = mockJourneyDataService,
+            propertyOwnershipService = mockPropertyOwnershipService,
+            epcLookupService = mockEpcLookupService,
+            propertyOwnershipId = propertyOwnershipId,
+        )
+
     private fun completeStep(
         stepId: PropertyComplianceStepId,
         pageData: PageData = mapOf(),
-    ): ModelAndView =
-        testJourney.completeStep(
+        propertyOwnershipId: Long = 1L,
+    ): ModelAndView {
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
+            .thenReturn(MockLandlordData.createPropertyOwnership(id = propertyOwnershipId))
+
+        return createPropertyComplianceJourney(propertyOwnershipId).completeStep(
             stepPathSegment = stepId.urlPathSegment,
             formData = pageData,
             subPageNumber = null,
             principal = mock(),
         )
+    }
 
     private fun callNextActionAndReturnNextStepId(
         currentStepId: PropertyComplianceStepId,
         journeyData: JourneyData,
-    ): PropertyComplianceStepId? =
-        testJourney
+        propertyOwnershipId: Long = 1L,
+    ): PropertyComplianceStepId? {
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
+            .thenReturn(MockLandlordData.createPropertyOwnership(id = propertyOwnershipId))
+
+        return createPropertyComplianceJourney(propertyOwnershipId)
             .sections
             .flatMap { section -> section.tasks }
             .flatMap { task -> task.steps }
@@ -212,4 +255,5 @@ class PropertyComplianceJourneyTests {
             .nextAction
             .invoke(journeyData, null)
             .first
+    }
 }

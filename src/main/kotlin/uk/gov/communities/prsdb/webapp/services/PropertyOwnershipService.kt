@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -29,6 +30,7 @@ class PropertyOwnershipService(
     private val registrationNumberService: RegistrationNumberService,
     private val localAuthorityDataService: LocalAuthorityDataService,
     private val licenseService: LicenseService,
+    private val formContextService: FormContextService,
 ) {
     @Transactional
     fun createPropertyOwnership(
@@ -42,6 +44,7 @@ class PropertyOwnershipService(
         occupancyType: OccupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
+        val incompleteComplianceForm = formContextService.createEmptyFormContext(JourneyType.PROPERTY_COMPLIANCE, primaryLandlord.baseUser)
 
         return propertyOwnershipRepository.save(
             PropertyOwnership(
@@ -54,6 +57,7 @@ class PropertyOwnershipService(
                 primaryLandlord = primaryLandlord,
                 property = property,
                 license = license,
+                incompleteComplianceForm = incompleteComplianceForm,
             ),
         )
     }
@@ -197,5 +201,14 @@ class PropertyOwnershipService(
 
     fun deletePropertyOwnerships(propertyOwnerships: List<PropertyOwnership>) {
         propertyOwnershipRepository.deleteAll(propertyOwnerships)
+    }
+
+    @Transactional
+    fun deleteIncompleteComplianceForm(propertyOwnershipId: Long) {
+        val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
+        propertyOwnership.incompleteComplianceForm?.let {
+            formContextService.deleteFormContext(it)
+            propertyOwnership.incompleteComplianceForm = null
+        }
     }
 }

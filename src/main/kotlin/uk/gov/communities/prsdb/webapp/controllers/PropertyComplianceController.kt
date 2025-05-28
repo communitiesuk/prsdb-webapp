@@ -71,7 +71,7 @@ class PropertyComplianceController(
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
         return propertyComplianceJourneyFactory
-            .create(propertyOwnershipId, principal.name)
+            .create(propertyOwnershipId)
             .getModelAndViewForTaskList()
     }
 
@@ -88,7 +88,7 @@ class PropertyComplianceController(
 
         val stepModelAndView =
             propertyComplianceJourneyFactory
-                .create(propertyOwnershipId, principal.name)
+                .create(propertyOwnershipId)
                 .getModelAndViewForStep(stepName, subpage)
 
         if (stepName.contains(FILE_UPLOAD_URL_SUBSTRING)) {
@@ -114,7 +114,7 @@ class PropertyComplianceController(
         val annotatedFormData = formData + (UploadCertificateFormModel::isMetadataOnly.name to true)
 
         return propertyComplianceJourneyFactory
-            .create(propertyOwnershipId, principal.name)
+            .create(propertyOwnershipId)
             .completeStep(stepName, annotatedFormData, subpage, principal)
     }
 
@@ -168,7 +168,7 @@ class PropertyComplianceController(
                 ).toPageData()
 
         return propertyComplianceJourneyFactory
-            .create(propertyOwnershipId, principal.name)
+            .create(propertyOwnershipId)
             .completeStep(
                 stepName,
                 formData,
