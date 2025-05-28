@@ -10,7 +10,9 @@ import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENG
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
+import uk.gov.communities.prsdb.webapp.constants.HOMES_ACT_2018_URL
 import uk.gov.communities.prsdb.webapp.constants.HOUSES_IN_MULTIPLE_OCCUPATION_URL
+import uk.gov.communities.prsdb.webapp.constants.HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
@@ -56,8 +58,10 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.KeepPropertySafeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
@@ -127,11 +131,7 @@ class PropertyComplianceJourney(
             listOf(
                 fireSafetyTask,
                 JourneyTask.withOneStep(
-                    placeholderStep(
-                        PropertyComplianceStepId.KeepPropertySafe,
-                        "TODO PRSD-1152: Compliance (LL resp): H&S Declaration page",
-                        PropertyComplianceStepId.CheckAndSubmit,
-                    ),
+                    keepPropertySafeStep,
                     "propertyCompliance.taskList.landlordResponsibilities.keepPropertySafe",
                 ),
                 JourneyTask.withOneStep(
@@ -902,6 +902,32 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.KeepPropertySafe, null) },
+            )
+
+    private val keepPropertySafeStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.KeepPropertySafe,
+                page =
+                    Page(
+                        formModel = KeepPropertySafeFormModel::class,
+                        templateName = "forms/keepPropertySafeForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "housingHealthAndSafetyRatingSystemUrl" to
+                                    HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL,
+                                "homesAct2018Url" to HOMES_ACT_2018_URL,
+                                "options" to
+                                    listOf(
+                                        CheckboxViewModel(
+                                            value = "true",
+                                            labelMsgKey = "forms.landlordResponsibilities.keepPropertySafe.checkbox.label",
+                                        ),
+                                    ),
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.ResponsibilityToTenants, null) },
             )
 
     private fun placeholderStep(
