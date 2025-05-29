@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.resetCheckMatchedEpc
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
@@ -339,6 +340,19 @@ class PropertyComplianceJourneyDataExtensionsTests {
 
         // Assert
         assertEquals(storedEpcDetails, retrievedEpcDetails)
+    }
+
+    @Test
+    fun `restCheckMatchedEpc removes the check-matched-epc key from the JourneyData`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.withCheckMatchedEpcResult(false).build()
+        val expectedJourneyData = mutableMapOf<String, Any?>()
+
+        // Act
+        val updatedJourneyData = testJourneyData.resetCheckMatchedEpc()
+
+        // Assert
+        assertEquals(expectedJourneyData, updatedJourneyData)
     }
 
     @Test

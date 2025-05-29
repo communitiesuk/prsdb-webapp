@@ -102,6 +102,8 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
             return Json.decodeFromString<EpcDataModel>(serializedEpcDetails)
         }
 
+        fun JourneyData.resetCheckMatchedEpc(): JourneyData = this - PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment
+
         fun JourneyData.withEpcDetails(epcDetails: EpcDataModel?): JourneyData =
             if (epcDetails == null) {
                 this + (LOOKED_UP_EPC_JOURNEY_DATA_KEY to null)
