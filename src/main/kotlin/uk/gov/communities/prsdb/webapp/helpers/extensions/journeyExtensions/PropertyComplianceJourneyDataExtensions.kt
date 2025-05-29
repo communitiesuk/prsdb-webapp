@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
@@ -102,7 +103,19 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
             return Json.decodeFromString<EpcDataModel>(serializedEpcDetails)
         }
 
-        fun JourneyData.resetCheckMatchedEpc(): JourneyData = this - PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment
+        fun JourneyData.getMatchedEpcIsCorrect(): Boolean? =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment,
+                CheckMatchedEpcFormModel::matchedEpcIsCorrect.name,
+            )
+
+        fun JourneyData.setCheckMatchedEpcToNull() =
+            this +
+                (
+                    PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment to
+                        mapOf(CheckMatchedEpcFormModel::matchedEpcIsCorrect.name to null)
+                )
 
         fun JourneyData.withEpcDetails(epcDetails: EpcDataModel?): JourneyData =
             if (epcDetails == null) {

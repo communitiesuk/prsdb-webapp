@@ -558,7 +558,7 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withCheckMatchedEpcResult(matchedEpcIsCorrect: Boolean): JourneyDataBuilder {
+    fun withCheckMatchedEpcResult(matchedEpcIsCorrect: Boolean?): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment] =
             mapOf(CheckMatchedEpcFormModel::matchedEpcIsCorrect.name to matchedEpcIsCorrect)
         return this

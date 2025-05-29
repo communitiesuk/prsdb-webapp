@@ -117,6 +117,7 @@ class PropertyComplianceJourneyTests {
                 JourneyDataBuilder()
                     .withEpcStatus(HasEpc.YES)
                     .withLookedUpEpcDetails(expectedEpcDetails)
+                    .withCheckMatchedEpcResult(null)
                     .build()
 
             // Act
@@ -244,6 +245,7 @@ class PropertyComplianceJourneyTests {
                 JourneyDataBuilder()
                     .withEpcLookupCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER)
                     .withLookedUpEpcDetails(expectedEpcDetails)
+                    .withCheckMatchedEpcResult(null)
                     .build()
 
             // Act
@@ -296,6 +298,7 @@ class PropertyComplianceJourneyTests {
                 JourneyDataBuilder()
                     .withEpcLookupCertificateNumber(NONEXISTENT_EPC_CERTIFICATE_NUMBER)
                     .withNullLookedUpEpcDetails()
+                    .withCheckMatchedEpcResult(null)
                     .build()
 
             // Act

@@ -29,7 +29,8 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.resetCheckMatchedEpc
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMatchedEpcIsCorrect
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.setCheckMatchedEpcToNull
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
@@ -343,16 +344,35 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
-    fun `restCheckMatchedEpc removes the check-matched-epc key from the JourneyData`() {
+    fun `setCheckMatchedEpcToNull sets the check-matched-epc value in the JourneyData to null`() {
         // Arrange
         val testJourneyData = journeyDataBuilder.withCheckMatchedEpcResult(false).build()
-        val expectedJourneyData = mutableMapOf<String, Any?>()
+        val expectedJourneyData = JourneyDataBuilder(mock()).withCheckMatchedEpcResult(null).build()
 
         // Act
-        val updatedJourneyData = testJourneyData.resetCheckMatchedEpc()
+        val updatedJourneyData = testJourneyData.setCheckMatchedEpcToNull()
 
         // Assert
         assertEquals(expectedJourneyData, updatedJourneyData)
+    }
+
+    @Test
+    fun `getMatchedEpcIsCorrect returns a boolean if the corresponding page is in journeyData`() {
+        val matchedEpcIsCorrect = true
+        val testJourneyData = journeyDataBuilder.withCheckMatchedEpcResult(matchedEpcIsCorrect).build()
+
+        val retrievedMatchedEpcIsCorrect = testJourneyData.getMatchedEpcIsCorrect()
+
+        assertEquals(matchedEpcIsCorrect, retrievedMatchedEpcIsCorrect)
+    }
+
+    @Test
+    fun `getMatchedEpcIsCorrect returns null if the corresponding page is not in journeyData`() {
+        val testJourneyData = journeyDataBuilder.build()
+
+        val retrievedMatchedEpcIsCorrect = testJourneyData.getMatchedEpcIsCorrect()
+
+        assertNull(retrievedMatchedEpcIsCorrect)
     }
 
     @Test
