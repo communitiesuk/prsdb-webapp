@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
+import org.springframework.http.HttpStatus
 import org.springframework.validation.Validator
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONTACT_EPC_ASSESSOR_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
@@ -8,7 +10,9 @@ import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENG
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
+import uk.gov.communities.prsdb.webapp.constants.HOMES_ACT_2018_URL
 import uk.gov.communities.prsdb.webapp.constants.HOUSES_IN_MULTIPLE_OCCUPATION_URL
+import uk.gov.communities.prsdb.webapp.constants.HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
@@ -55,8 +59,10 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.KeepPropertySafeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
@@ -69,7 +75,6 @@ class PropertyComplianceJourney(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyOwnershipId: Long,
     private val epcLookupService: EpcLookupService,
-    principalName: String,
 ) : JourneyWithTaskList<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE,
         initialStepId = initialStepId,
@@ -77,7 +82,20 @@ class PropertyComplianceJourney(
         journeyDataService = journeyDataService,
     ) {
     init {
-        loadJourneyDataIfNotLoaded(principalName)
+        loadJourneyDataIfNotLoaded()
+    }
+
+    private fun loadJourneyDataIfNotLoaded() {
+        if (journeyDataService.getJourneyDataFromSession().isEmpty()) {
+            val formContext =
+                propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).incompleteComplianceForm
+                    ?: throw ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Property ownership $propertyOwnershipId does not have an incomplete compliance form",
+                    )
+
+            journeyDataService.loadJourneyDataIntoSession(formContext)
+        }
     }
 
     // TODO PRSD-1165: Update task list to match new design
@@ -114,11 +132,7 @@ class PropertyComplianceJourney(
             listOf(
                 fireSafetyTask,
                 JourneyTask.withOneStep(
-                    placeholderStep(
-                        PropertyComplianceStepId.KeepPropertySafe,
-                        "TODO PRSD-1152: Compliance (LL resp): H&S Declaration page",
-                        PropertyComplianceStepId.CheckAndSubmit,
-                    ),
+                    keepPropertySafeStep,
                     "propertyCompliance.taskList.landlordResponsibilities.keepPropertySafe",
                 ),
                 JourneyTask.withOneStep(
@@ -136,7 +150,11 @@ class PropertyComplianceJourney(
             listOf(
                 // TODO PRSD-962: Implement check and submit task
                 JourneyTask.withOneStep(
-                    placeholderStep(PropertyComplianceStepId.CheckAndSubmit, "TODO PRSD-962: Implement check and submit task"),
+                    placeholderStep(
+                        PropertyComplianceStepId.CheckAndSubmit,
+                        "TODO PRSD-962: Implement check and submit task",
+                        handleSubmitAndRedirect = { _, _, _ -> checkAndSubmitHandleSubmitAndRedirect() },
+                    ),
                     "propertyCompliance.taskList.checkAndSubmit.check",
                 ),
                 JourneyTask.withOneStep(
@@ -893,14 +911,42 @@ class PropertyComplianceJourney(
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.KeepPropertySafe, null) },
             )
 
+    private val keepPropertySafeStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.KeepPropertySafe,
+                page =
+                    Page(
+                        formModel = KeepPropertySafeFormModel::class,
+                        templateName = "forms/keepPropertySafeForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "housingHealthAndSafetyRatingSystemUrl" to
+                                    HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL,
+                                "homesAct2018Url" to HOMES_ACT_2018_URL,
+                                "options" to
+                                    listOf(
+                                        CheckboxViewModel(
+                                            value = "true",
+                                            labelMsgKey = "forms.landlordResponsibilities.keepPropertySafe.checkbox.label",
+                                        ),
+                                    ),
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.ResponsibilityToTenants, null) },
+            )
+
     private fun placeholderStep(
         stepId: PropertyComplianceStepId,
         todoComment: String,
         nextStepId: PropertyComplianceStepId? = null,
+        handleSubmitAndRedirect: ((JourneyData, Int?, PropertyComplianceStepId?) -> String)? = null,
     ) = Step(
         id = stepId,
         page = Page(formModel = NoInputFormModel::class, templateName = "forms/todo", content = mapOf("todoComment" to todoComment)),
         nextAction = { _, _ -> Pair(nextStepId, null) },
+        handleSubmitAndRedirect = handleSubmitAndRedirect,
     )
 
     private fun gasSafetyStepNextAction(journeyData: JourneyData) =
@@ -1041,6 +1087,22 @@ class PropertyComplianceJourney(
         }
     }
 
+    private fun fireSafetyDeclarationStepNextAction(journeyData: JourneyData) =
+        if (journeyData.getHasFireSafetyDeclaration()!!) {
+            Pair(PropertyComplianceStepId.KeepPropertySafe, null)
+        } else {
+            Pair(PropertyComplianceStepId.FireSafetyRisk, null)
+        }
+
+    private fun checkAndSubmitHandleSubmitAndRedirect(): String {
+        // TODO PRSD-1202: Save compliance data to the database
+
+        propertyOwnershipService.deleteIncompleteComplianceForm(propertyOwnershipId)
+
+        // TODO PRSD-962: Redirect to confirmation page
+        return LANDLORD_DASHBOARD_URL
+    }
+
     private fun getEpcLookupCertificateNumberFromSession(): String {
         val submittedCertificateNumber =
             journeyDataService
@@ -1049,13 +1111,6 @@ class PropertyComplianceJourney(
                 ?: return ""
         return EpcDataModel.parseCertificateNumberOrNull(submittedCertificateNumber)!! // Only valid EPC numbers will be in journeyData
     }
-
-    private fun fireSafetyDeclarationStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getHasFireSafetyDeclaration()!!) {
-            Pair(PropertyComplianceStepId.KeepPropertySafe, null)
-        } else {
-            Pair(PropertyComplianceStepId.FireSafetyRisk, null)
-        }
 
     private fun getPropertyAddress() =
         propertyOwnershipService

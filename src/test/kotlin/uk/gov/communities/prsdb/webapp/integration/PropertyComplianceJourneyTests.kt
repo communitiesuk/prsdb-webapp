@@ -44,6 +44,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyUploadConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyUploadPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.KeepPropertySafePagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.ResponsibilityToTenantsPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 
@@ -247,9 +248,14 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
             fireSafetyDeclarationPage.form.fieldHeading,
         ).containsText("Have you followed all fire safety responsibilities relevant for this property?")
         fireSafetyDeclarationPage.submitHasDeclaredFireSafety()
-        assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
+        val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
-        // TODO PRSD-1152 - continue test
+        // Keep Property Safe page
+        BaseComponent.assertThat(keepPropertySafePage.heading).containsText("Keeping this property safe")
+        keepPropertySafePage.agreeAndSubmit()
+        assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
+
+        // TODO PRSD-1153 - continue test
     }
 
     @Test
@@ -305,9 +311,13 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         // Fire Safety Risk page
         BaseComponent.assertThat(fireSafetyRiskPage.heading).containsText("Your property is at risk of fire")
         fireSafetyRiskPage.form.submit()
-        assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
+        val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
-        // TODO: PRSD-1152 continue test
+        // Keep Property Safe page
+        keepPropertySafePage.agreeAndSubmit()
+        assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
+
+        // TODO PRSD-1153 - continue test
     }
 
     companion object {

@@ -39,7 +39,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
@@ -51,7 +50,6 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
 
 @ExtendWith(MockitoExtension::class)
@@ -222,14 +220,13 @@ class PropertyRegistrationServiceTests {
         val ownershipType = OwnershipType.FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
-        val baseUserId = "landlord-user"
-        val landlord = Landlord()
+        val landlord = MockLandlordData.createLandlord()
         val property = Property()
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
         val licence = License(licenceType, licenceNumber)
 
         val expectedPropertyOwnership =
-            createPropertyOwnership(
+            MockLandlordData.createPropertyOwnership(
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
@@ -239,7 +236,7 @@ class PropertyRegistrationServiceTests {
                 registrationNumber = registrationNumber,
             )
 
-        whenever(mockLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
+        whenever(mockLandlordRepository.findByBaseUser_Id(landlord.baseUser.id)).thenReturn(landlord)
         whenever(mockPropertyService.activateOrCreateProperty(addressDataModel, propertyType)).thenReturn(
             property,
         )
@@ -264,7 +261,7 @@ class PropertyRegistrationServiceTests {
                 ownershipType,
                 numberOfHouseholds,
                 numberOfPeople,
-                baseUserId,
+                landlord.baseUser.id,
             )
 
         assertEquals(expectedPropertyOwnership.registrationNumber, propertyRegistrationNumber)
@@ -279,13 +276,12 @@ class PropertyRegistrationServiceTests {
         val ownershipType = OwnershipType.FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
-        val baseUserId = "landlord-user"
-        val landlord = Landlord()
+        val landlord = MockLandlordData.createLandlord()
         val property = Property()
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
 
         val expectedPropertyOwnership =
-            createPropertyOwnership(
+            MockLandlordData.createPropertyOwnership(
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
@@ -295,7 +291,7 @@ class PropertyRegistrationServiceTests {
                 registrationNumber = registrationNumber,
             )
 
-        whenever(mockLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
+        whenever(mockLandlordRepository.findByBaseUser_Id(landlord.baseUser.id)).thenReturn(landlord)
         whenever(mockPropertyService.activateOrCreateProperty(addressDataModel, propertyType)).thenReturn(
             property,
         )
@@ -319,7 +315,7 @@ class PropertyRegistrationServiceTests {
                 ownershipType,
                 numberOfHouseholds,
                 numberOfPeople,
-                baseUserId,
+                landlord.baseUser.id,
             )
 
         assertEquals(expectedPropertyOwnership.registrationNumber, propertyRegistrationNumber)
