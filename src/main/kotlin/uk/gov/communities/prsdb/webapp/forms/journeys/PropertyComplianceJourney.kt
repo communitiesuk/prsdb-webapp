@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAllowCheckMatchedEpcToBeBypassed
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcLookupCertificateNumber
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
@@ -42,7 +43,9 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMatchedEpcIsCorrect
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.setCheckMatchedEpcToNull
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.resetCheckMatchedEpc
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.setAllowCheckMatchedEpcToBeBypassed
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.setEpcNotAutomatched
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
@@ -220,8 +223,8 @@ class PropertyComplianceJourney(
                     epcNotFoundStep,
                     placeholderStep(
                         PropertyComplianceStepId.EpcSuperseded,
-                        "TODO PRSD-1140: Implement EPC Superseded step",
-                        PropertyComplianceStepId.FireSafetyDeclaration,
+                        "TODO PRSD-1140: Implement EPC Superseded step (redirect to checkMatchedEpc but keep nextAction as null)",
+                        null,
                     ),
                     epcMissingStep,
                     epcExemptionReasonStep,
@@ -1043,11 +1046,11 @@ class PropertyComplianceJourney(
                 propertyOwnershipService
                     .getPropertyOwnership(propertyOwnershipId)
                     .property.address.uprn
-                    ?: return updateEpcDetailsInSessionAndRedirectToNextStep(epcStep, journeyData, null)
+                    ?: return updateEpcDetailsInSessionAndRedirectToNextStep(epcStep, journeyData, null, false)
 
             val epcDetails = epcLookupService.getEpcByUprn(uprn)
 
-            return updateEpcDetailsInSessionAndRedirectToNextStep(epcStep, journeyData, epcDetails)
+            return updateEpcDetailsInSessionAndRedirectToNextStep(epcStep, journeyData, epcDetails, false)
         }
 
         return getRedirectForNextStep(epcStep, journeyData, null)
@@ -1057,20 +1060,24 @@ class PropertyComplianceJourney(
         currentStep: Step<PropertyComplianceStepId>,
         journeyData: JourneyData,
         epcDetails: EpcDataModel?,
+        shouldBypassCheckMatchedEpc: Boolean,
     ): String {
-        val newJourneyData = updateEpcDetailsAndResetCheckMatchedEpcAnswerInSession(journeyData, epcDetails)
+        val newJourneyData = updateEpcDetailsAndResetCheckMatchedEpcAnswerInSession(journeyData, epcDetails, shouldBypassCheckMatchedEpc)
         return getRedirectForNextStep(currentStep, newJourneyData, null)
     }
 
     private fun updateEpcDetailsAndResetCheckMatchedEpcAnswerInSession(
         journeyData: JourneyData,
         epcDetails: EpcDataModel?,
+        shouldBypassCheckMatchedEpc: Boolean,
     ): JourneyData {
         if (epcDetails == null || (journeyData.getEpcDetails() != epcDetails)) {
             val newJourneyData =
                 journeyData
                     .withEpcDetails(epcDetails)
-                    .setCheckMatchedEpcToNull()
+                    .resetCheckMatchedEpc()
+                    .setEpcNotAutomatched()
+                    .setAllowCheckMatchedEpcToBeBypassed(shouldBypassCheckMatchedEpc)
             journeyDataService.setJourneyDataInSession(newJourneyData)
             return newJourneyData
         }
@@ -1081,7 +1088,11 @@ class PropertyComplianceJourney(
         when (journeyData.getHasEPC()!!) {
             HasEpc.YES -> {
                 if (journeyData.getEpcDetails() != null) {
-                    Pair(PropertyComplianceStepId.CheckMatchedEpc, null)
+                    if (journeyData.getAllowCheckMatchedEpcToBeBypassed()) {
+                        Pair(PropertyComplianceStepId.EpcLookup, null)
+                    } else {
+                        Pair(PropertyComplianceStepId.CheckMatchedEpc, null)
+                    }
                 } else {
                     Pair(PropertyComplianceStepId.EpcNotAutoMatched, null)
                 }
@@ -1105,13 +1116,13 @@ class PropertyComplianceJourney(
         val certificateNumber = journeyData.getEpcLookupCertificateNumber()!!
         val lookedUpEpc = epcLookupService.getEpcByCertificateNumber(certificateNumber)
 
-        val newJourneyData = updateEpcDetailsAndResetCheckMatchedEpcAnswerInSession(journeyData, lookedUpEpc)
-
         if (lookedUpEpc?.isLatestCertificateForThisProperty() == true) {
+            updateEpcDetailsAndResetCheckMatchedEpcAnswerInSession(journeyData, lookedUpEpc, false)
             // Redirect to CheckMatchedEpc without setting it as the nextAction
             return Step.generateUrl(PropertyComplianceStepId.CheckMatchedEpc, null)
         }
 
+        val newJourneyData = updateEpcDetailsAndResetCheckMatchedEpcAnswerInSession(journeyData, lookedUpEpc, true)
         val epcLookupStep = steps.single { it.id == PropertyComplianceStepId.EpcLookup }
         return getRedirectForNextStep(epcLookupStep, newJourneyData, null)
     }

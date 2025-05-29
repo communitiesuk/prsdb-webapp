@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions
 import kotlinx.datetime.yearsUntil
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import uk.gov.communities.prsdb.webapp.constants.ALLOW_CHECK_MATCHED_EPC_TO_BE_BYPASSED
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -110,12 +111,18 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 CheckMatchedEpcFormModel::matchedEpcIsCorrect.name,
             )
 
-        fun JourneyData.setCheckMatchedEpcToNull() =
-            this +
-                (
-                    PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment to
-                        mapOf(CheckMatchedEpcFormModel::matchedEpcIsCorrect.name to null)
-                )
+        fun JourneyData.resetCheckMatchedEpc() = this - PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment
+
+        fun JourneyData.setAllowCheckMatchedEpcToBeBypassed(allowBypass: Boolean) =
+            this + (ALLOW_CHECK_MATCHED_EPC_TO_BE_BYPASSED to allowBypass)
+
+        fun JourneyData.getAllowCheckMatchedEpcToBeBypassed() =
+            JourneyDataHelper.getStringValueByKey(this, ALLOW_CHECK_MATCHED_EPC_TO_BE_BYPASSED) == "true"
+
+        fun JourneyData.setEpcNotAutomatched() =
+            this + (
+                PropertyComplianceStepId.EpcNotAutoMatched.urlPathSegment to mapOf<String, Any?>()
+            )
 
         fun JourneyData.withEpcDetails(epcDetails: EpcDataModel?): JourneyData =
             if (epcDetails == null) {

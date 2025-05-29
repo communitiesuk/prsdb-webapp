@@ -564,6 +564,11 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withEpcNotAutomatched(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EpcNotAutoMatched.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
     fun withEpcLookupCertificateNumber(certificateNumber: String = "0000-0000-1234-5678-9100"): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EpcLookup.urlPathSegment] =
             mapOf(EpcLookupFormModel::certificateNumber.name to certificateNumber)

@@ -9,9 +9,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.mockConstruction
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.ALLOW_CHECK_MATCHED_EPC_TO_BE_BYPASSED
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -30,7 +32,9 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMatchedEpcIsCorrect
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.setCheckMatchedEpcToNull
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.resetCheckMatchedEpc
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.setAllowCheckMatchedEpcToBeBypassed
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.setEpcNotAutomatched
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
@@ -344,16 +348,43 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
-    fun `setCheckMatchedEpcToNull sets the check-matched-epc value in the JourneyData to null`() {
+    fun `restCheckMatchedEpc removes the check-matched-epc key from the JourneyData`() {
         // Arrange
         val testJourneyData = journeyDataBuilder.withCheckMatchedEpcResult(false).build()
-        val expectedJourneyData = JourneyDataBuilder(mock()).withCheckMatchedEpcResult(null).build()
+        val expectedJourneyData = mutableMapOf<String, Any?>()
 
         // Act
-        val updatedJourneyData = testJourneyData.setCheckMatchedEpcToNull()
+        val updatedJourneyData = testJourneyData.resetCheckMatchedEpc()
 
         // Assert
         assertEquals(expectedJourneyData, updatedJourneyData)
+    }
+
+    @Test
+    fun `setEpcNotAutomatched adds empty epc-not-automatched data to JourneyData`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.withCheckMatchedEpcResult(false).build()
+        val expectedJourneyData = JourneyDataBuilder(mock()).withCheckMatchedEpcResult(false).withEpcNotAutomatched().build()
+
+        // Act
+        val updatedJourneyData = testJourneyData.setEpcNotAutomatched()
+
+        // Assert
+        assertEquals(expectedJourneyData, updatedJourneyData)
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `setAllowCheckMatchedEpcToBeBypassed sets a boolean in JourneyData`(allowBypass: Boolean) {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.build()
+        val expectedUpdatedJourneyData = mutableMapOf(ALLOW_CHECK_MATCHED_EPC_TO_BE_BYPASSED to allowBypass)
+
+        // Act
+        val updatedJourneyData = testJourneyData.setAllowCheckMatchedEpcToBeBypassed(allowBypass)
+
+        // Assert
+        assertEquals(expectedUpdatedJourneyData, updatedJourneyData)
     }
 
     @Test

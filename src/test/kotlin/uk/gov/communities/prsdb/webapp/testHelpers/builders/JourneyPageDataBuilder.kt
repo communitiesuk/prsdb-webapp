@@ -119,7 +119,10 @@ class JourneyPageDataBuilder {
         fun beforePropertyComplianceEpcLookup() = beforePropertyComplianceCheckMatchedEpc().withCheckMatchedEpcResult(false)
 
         fun beforePropertyComplianceEpcNotFound() =
-            beforePropertyComplianceEpcLookup().withNullLookedUpEpcDetails().withEpcLookupCertificateNumber()
+            beforePropertyComplianceEpcLookup()
+                .withEpcLookupCertificateNumber()
+                .withNullLookedUpEpcDetails()
+                .withEpcNotAutomatched()
 
         fun beforePropertyComplianceFireSafetyDeclaration() = beforePropertyComplianceEpc().withMissingEpcExemption()
 
