@@ -962,20 +962,22 @@ class PropertyComplianceJourney(
     private fun epcStepHandleSubmitAndRedirect(journeyData: JourneyData): String {
         val epcStep = steps.single { it.id == PropertyComplianceStepId.EPC }
 
-        val uprn =
-            propertyOwnershipService
-                .getPropertyOwnership(propertyOwnershipId)
-                .property.address.uprn
-                ?: return updateEpcDetailsInSessionAndRedirect(epcStep, journeyData, null)
+        if (journeyData.getHasEPC() == HasEpc.YES) {
+            val uprn =
+                propertyOwnershipService
+                    .getPropertyOwnership(propertyOwnershipId)
+                    .property.address.uprn
+                    ?: return updateEpcDetailsInSessionAndRedirectToNextStep(epcStep, journeyData, null)
 
-        val epcDetails =
-            epcLookupService.getEpcByUprn(uprn)
-                ?: return updateEpcDetailsInSessionAndRedirect(epcStep, journeyData, null)
+            val epcDetails = epcLookupService.getEpcByUprn(uprn)
 
-        return updateEpcDetailsInSessionAndRedirect(epcStep, journeyData, epcDetails)
+            return updateEpcDetailsInSessionAndRedirectToNextStep(epcStep, journeyData, epcDetails)
+        }
+
+        return getRedirectForNextStep(epcStep, journeyData, null)
     }
 
-    private fun updateEpcDetailsInSessionAndRedirect(
+    private fun updateEpcDetailsInSessionAndRedirectToNextStep(
         currentStep: Step<PropertyComplianceStepId>,
         journeyData: JourneyData,
         epcDetails: EpcDataModel?,
@@ -1002,7 +1004,7 @@ class PropertyComplianceJourney(
     private fun epcStepNextAction(journeyData: JourneyData) =
         when (journeyData.getHasEPC()!!) {
             HasEpc.YES -> {
-                if (journeyDataService.getJourneyDataFromSession().getEpcDetails() != null) {
+                if (journeyData.getEpcDetails() != null) {
                     Pair(PropertyComplianceStepId.CheckMatchedEpc, null)
                 } else {
                     Pair(PropertyComplianceStepId.EpcNotAutoMatched, null)
