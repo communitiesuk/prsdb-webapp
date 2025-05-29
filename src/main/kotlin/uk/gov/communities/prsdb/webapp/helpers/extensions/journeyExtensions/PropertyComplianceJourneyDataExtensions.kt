@@ -3,6 +3,8 @@ package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions
 import kotlinx.datetime.yearsUntil
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -35,7 +37,7 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 this.getFieldSetLocalDateValue(PropertyComplianceStepId.GasSafetyIssueDate.urlPathSegment)
                     ?: return null
             val today = DateTimeHelper().getCurrentDateInUK()
-            return issueDate.yearsUntil(today) >= 1
+            return issueDate.yearsUntil(today) >= GAS_SAFETY_CERT_VALIDITY_YEARS
         }
 
         fun JourneyData.getHasGasSafetyCertExemption() =
@@ -65,7 +67,7 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 this.getFieldSetLocalDateValue(PropertyComplianceStepId.EicrIssueDate.urlPathSegment)
                     ?: return null
             val today = DateTimeHelper().getCurrentDateInUK()
-            return issueDate.yearsUntil(today) >= 5
+            return issueDate.yearsUntil(today) >= EICR_VALIDITY_YEARS
         }
 
         fun JourneyData.getHasEicrExemption() =
