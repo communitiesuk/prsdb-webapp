@@ -320,6 +320,10 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         // Fire Safety Risk page
         BaseComponent.assertThat(fireSafetyRiskPage.heading).containsText("Your property is at risk of fire")
         fireSafetyRiskPage.form.submit()
+        val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
+
+        // Keep Property Safe page
+        keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
