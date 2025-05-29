@@ -11,6 +11,8 @@ import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
@@ -65,7 +67,7 @@ class PropertyComplianceJourneyTests {
     @Nested
     inner class EpcLookupTests {
         @Test
-        fun `handleAndSubmit updates journeyData with looked up EPC results if an EPC is found`() {
+        fun `handleAndSubmit updates journeyData with EPC details and resets checkMatchedEpc answer if a new EPC is found`() {
             val expectedEpcDetails =
                 EpcDataModel(
                     certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
@@ -74,19 +76,60 @@ class PropertyComplianceJourneyTests {
                     expiryDate = LocalDate(2027, 1, 5),
                     latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
                 )
-            val expectedUpdatedJourneyData =
+            whenever(mockEpcLookupService.getEpcByCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER))
+                .thenReturn(expectedEpcDetails)
+
+            val originalJourneyData =
                 journeyDataBuilder
+                    .withEpcLookupCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER)
+                    .withCheckMatchedEpcResult(false)
+                    .build()
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
+
+            val expectedUpdatedJourneyData =
+                JourneyDataBuilder(mock())
                     .withEpcLookupCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER)
                     .withLookedUpEpcDetails(expectedEpcDetails)
                     .build()
-            whenever(mockEpcLookupService.getEpcByCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER))
-                .thenReturn(expectedEpcDetails)
 
             // Act
             completeStep(PropertyComplianceStepId.EpcLookup, mapOf("certificateNumber" to CURRENT_EPC_CERTIFICATE_NUMBER))
 
             // Assert
+            // setJourneyDataInSession gets called in Journey.completeStep and also in epcLookupStepHandleSubmitAndRedirect
+            verify(mockJourneyDataService, times(2)).setJourneyDataInSession(anyOrNull())
             verify(mockJourneyDataService).setJourneyDataInSession(expectedUpdatedJourneyData)
+        }
+
+        @Test
+        fun `handleAndSubmit does not update journeyData if it finds an EPC which is already in journeyData`() {
+            // Arrange
+            val epcDetails =
+                EpcDataModel(
+                    certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
+                    singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT",
+                    energyRating = "C",
+                    expiryDate = LocalDate(2027, 1, 5),
+                    latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
+                )
+            whenever(mockEpcLookupService.getEpcByCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER))
+                .thenReturn(epcDetails)
+
+            val originalJourneyData =
+                journeyDataBuilder
+                    .withEpcLookupCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER)
+                    .withCheckMatchedEpcResult(false)
+                    .withLookedUpEpcDetails(epcDetails)
+                    .build()
+
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
+
+            // Act
+            completeStep(PropertyComplianceStepId.EpcLookup, mapOf("certificateNumber" to CURRENT_EPC_CERTIFICATE_NUMBER))
+
+            // Assert
+            // setJourneyDataInSession gets called in Journey.completeStep but not in epcLookupStepHandleSubmitAndRedirect
+            verify(mockJourneyDataService, times(1)).setJourneyDataInSession(anyOrNull())
         }
 
         @Test
@@ -101,6 +144,8 @@ class PropertyComplianceJourneyTests {
             completeStep(PropertyComplianceStepId.EpcLookup, mapOf("certificateNumber" to NONEXISTENT_EPC_CERTIFICATE_NUMBER))
 
             // Assert
+            // setJourneyDataInSession gets called in Journey.completeStep and also in epcLookupStepHandleSubmitAndRedirect
+            verify(mockJourneyDataService, times(2)).setJourneyDataInSession(anyOrNull())
             verify(mockJourneyDataService).setJourneyDataInSession(expectedUpdatedJourneyData)
         }
 
