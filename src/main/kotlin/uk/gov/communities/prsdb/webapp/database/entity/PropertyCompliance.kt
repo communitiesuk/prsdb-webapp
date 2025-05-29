@@ -8,13 +8,16 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
+import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import java.time.LocalDate
 
 @Entity
-class PropertyCompliance : ModifiableAuditableEntity() {
+class PropertyCompliance() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0
@@ -60,9 +63,47 @@ class PropertyCompliance : ModifiableAuditableEntity() {
 
     var epcEnergyRating: String? = null
 
-    var epcExemptionReason: EicrExemptionReason? = null
+    var epcExemptionReason: EpcExemptionReason? = null
 
     var epcMeesExemptionReason: MeesExemptionReason? = null
 
     var hasFireSafetyDeclaration: Boolean = false
+
+    constructor(
+        propertyOwnership: PropertyOwnership,
+        hasFireSafetyDeclaration: Boolean,
+        gasSafetyCertS3Key: String? = null,
+        gasSafetyCertIssueDate: LocalDate? = null,
+        gasSafetyCertEngineerNum: String? = null,
+        gasSafetyCertExemptionReason: GasSafetyExemptionReason? = null,
+        gasSafetyCertExemptionOtherReason: String? = null,
+        eicrS3Key: String? = null,
+        eicrIssueDate: LocalDate? = null,
+        eicrExemptionReason: EicrExemptionReason? = null,
+        eicrExemptionOtherReason: String? = null,
+        epcUrl: String? = null,
+        epcExpiryDate: LocalDate? = null,
+        epcEnergyRating: String? = null,
+        epcExemptionReason: EpcExemptionReason? = null,
+        epcMeesExemptionReason: MeesExemptionReason? = null,
+    ) : this() {
+        this.propertyOwnership = propertyOwnership
+        this.gasSafetyCertS3Key = gasSafetyCertS3Key
+        this.gasSafetyCertIssueDate = gasSafetyCertIssueDate
+        this.gasSafetyCertExpiryDate = gasSafetyCertIssueDate?.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
+        this.gasSafetyCertEngineerNum = gasSafetyCertEngineerNum
+        this.gasSafetyCertExemptionReason = gasSafetyCertExemptionReason
+        this.gasSafetyCertExemptionOtherReason = gasSafetyCertExemptionOtherReason
+        this.eicrS3Key = eicrS3Key
+        this.eicrIssueDate = eicrIssueDate
+        this.eicrExpiryDate = eicrIssueDate?.plusYears(EICR_VALIDITY_YEARS.toLong())
+        this.eicrExemptionReason = eicrExemptionReason
+        this.eicrExemptionOtherReason = eicrExemptionOtherReason
+        this.epcUrl = epcUrl
+        this.epcExpiryDate = epcExpiryDate
+        this.epcEnergyRating = epcEnergyRating
+        this.epcExemptionReason = epcExemptionReason
+        this.epcMeesExemptionReason = epcMeesExemptionReason
+        this.hasFireSafetyDeclaration = hasFireSafetyDeclaration
+    }
 }
