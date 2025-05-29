@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
-import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
@@ -22,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
-import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -93,14 +91,7 @@ class PropertyComplianceJourneyTests {
                     .build()
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
 
-            val expectedEpcDetails =
-                EpcDataModel(
-                    certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
-                    singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT",
-                    energyRating = "C",
-                    expiryDate = LocalDate(2027, 1, 5),
-                    latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
-                )
+            val expectedEpcDetails = MockEpcData.createEpcDataModel()
             whenever(mockEpcLookupService.getEpcByUprn(uprn)).thenReturn(expectedEpcDetails)
 
             val expectedUpdatedJourneyData =
@@ -135,14 +126,7 @@ class PropertyComplianceJourneyTests {
                     )
             whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
 
-            val expectedEpcDetails =
-                EpcDataModel(
-                    certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
-                    singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT",
-                    energyRating = "C",
-                    expiryDate = LocalDate(2027, 1, 5),
-                    latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
-                )
+            val expectedEpcDetails = MockEpcData.createEpcDataModel()
             whenever(mockEpcLookupService.getEpcByUprn(uprn)).thenReturn(expectedEpcDetails)
 
             val originalJourneyData =
@@ -213,13 +197,11 @@ class PropertyComplianceJourneyTests {
         @Test
         fun `handleAndSubmit updates journeyData with EPC details and resets checkMatchedEpc answer if a new EPC is found`() {
             val expectedEpcDetails =
-                EpcDataModel(
+                MockEpcData.createEpcDataModel(
                     certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
-                    singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT",
-                    energyRating = "C",
-                    expiryDate = LocalDate(2027, 1, 5),
                     latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
                 )
+
             whenever(mockEpcLookupService.getEpcByCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER))
                 .thenReturn(expectedEpcDetails)
 
@@ -249,11 +231,8 @@ class PropertyComplianceJourneyTests {
         fun `handleAndSubmit does not update journeyData if it finds an EPC which is already in journeyData`() {
             // Arrange
             val epcDetails =
-                EpcDataModel(
+                MockEpcData.createEpcDataModel(
                     certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
-                    singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT",
-                    energyRating = "C",
-                    expiryDate = LocalDate(2027, 1, 5),
                     latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
                 )
             whenever(mockEpcLookupService.getEpcByCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER))
@@ -304,11 +283,8 @@ class PropertyComplianceJourneyTests {
         fun `handleAndSubmit redirects to checkMatchedEpc if the looked up EPC is found and is the latest available`() {
             // Arrange
             val expectedEpcDetails =
-                EpcDataModel(
+                MockEpcData.createEpcDataModel(
                     certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
-                    singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT",
-                    energyRating = "C",
-                    expiryDate = LocalDate(2027, 1, 5),
                     latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
                 )
 
@@ -327,11 +303,8 @@ class PropertyComplianceJourneyTests {
         fun `nextAction returns null if the looked up EPC is found and is the latest available`() {
             // Arrange
             val epcDetails =
-                EpcDataModel(
+                MockEpcData.createEpcDataModel(
                     certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
-                    singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT",
-                    energyRating = "C",
-                    expiryDate = LocalDate(2027, 1, 5),
                     latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
                 )
             val updatedJourneyData =
@@ -348,11 +321,8 @@ class PropertyComplianceJourneyTests {
         fun `nextAction returns EpcSuperseded if the looked up EPC is not the latest available`() {
             // Arrange
             val epcDetails =
-                EpcDataModel(
+                MockEpcData.createEpcDataModel(
                     certificateNumber = SUPERSEDED_EPC_CERTIFICATE_NUMBER,
-                    singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT",
-                    energyRating = "C",
-                    expiryDate = LocalDate(2027, 1, 5),
                     latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
                 )
             val updatedJourneyData =
