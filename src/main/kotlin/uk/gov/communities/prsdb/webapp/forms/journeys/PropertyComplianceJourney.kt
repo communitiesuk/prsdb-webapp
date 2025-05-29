@@ -1069,7 +1069,7 @@ class PropertyComplianceJourney(
     private fun updateEpcDetailsAndResetCheckMatchedEpcAnswerInSession(
         journeyData: JourneyData,
         epcDetails: EpcDataModel?,
-        shouldBypassCheckMatchedEpc: Boolean,
+        allowCheckMatchedEpcToBeBypassed: Boolean,
     ): JourneyData {
         if (epcDetails == null || (journeyData.getEpcDetails() != epcDetails)) {
             val newJourneyData =
@@ -1077,7 +1077,7 @@ class PropertyComplianceJourney(
                     .withEpcDetails(epcDetails)
                     .resetCheckMatchedEpc()
                     .setEpcNotAutomatched()
-                    .setAllowCheckMatchedEpcToBeBypassed(shouldBypassCheckMatchedEpc)
+                    .setAllowCheckMatchedEpcToBeBypassed(allowCheckMatchedEpcToBeBypassed)
             journeyDataService.setJourneyDataInSession(newJourneyData)
             return newJourneyData
         }

@@ -117,7 +117,8 @@ class PropertyComplianceJourneyTests {
                 JourneyDataBuilder()
                     .withEpcStatus(HasEpc.YES)
                     .withLookedUpEpcDetails(expectedEpcDetails)
-                    .withCheckMatchedEpcResult(null)
+                    .withEpcNotAutomatched()
+                    .withAllowCheckMatchedEpcToBeBypassed(false)
                     .build()
 
             // Act
@@ -245,7 +246,8 @@ class PropertyComplianceJourneyTests {
                 JourneyDataBuilder()
                     .withEpcLookupCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER)
                     .withLookedUpEpcDetails(expectedEpcDetails)
-                    .withCheckMatchedEpcResult(null)
+                    .withAllowCheckMatchedEpcToBeBypassed(false)
+                    .withEpcNotAutomatched()
                     .build()
 
             // Act
@@ -286,7 +288,7 @@ class PropertyComplianceJourneyTests {
         }
 
         @Test
-        fun `handleAndSubmit updates journeyData with looked up EPC results with null if no EPC is found`() {
+        fun `handleAndSubmit updates journeyData with looked up EPC results with null and bypasses checkMatchedEpc if no EPC is found`() {
             val originalJourneyData =
                 JourneyDataBuilder()
                     .withCheckMatchedEpcResult(false)
@@ -298,7 +300,8 @@ class PropertyComplianceJourneyTests {
                 JourneyDataBuilder()
                     .withEpcLookupCertificateNumber(NONEXISTENT_EPC_CERTIFICATE_NUMBER)
                     .withNullLookedUpEpcDetails()
-                    .withCheckMatchedEpcResult(null)
+                    .withEpcNotAutomatched()
+                    .withAllowCheckMatchedEpcToBeBypassed(true)
                     .build()
 
             // Act
