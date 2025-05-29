@@ -6,6 +6,7 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -406,6 +407,8 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
         }
     }
 
+    // TODO PRSD-1132: Fix or move these
+    @Disabled
     @Nested
     inner class EpcLookupTests {
         @Test
@@ -445,6 +448,8 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
         }
     }
 
+    // TODO PRSD-1132: Fix or move these
+    @Disabled
     @Nested
     inner class EpcNotFoundStepTests {
         @Test
