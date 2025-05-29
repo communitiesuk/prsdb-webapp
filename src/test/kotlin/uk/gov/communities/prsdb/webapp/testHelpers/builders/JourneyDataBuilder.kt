@@ -4,6 +4,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.ALLOW_CHECK_MATCHED_EPC_TO_BE_BYPASSED
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
@@ -558,9 +559,19 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withCheckMatchedEpcResult(matchedEpcIsCorrect: Boolean): JourneyDataBuilder {
+    fun withCheckMatchedEpcResult(matchedEpcIsCorrect: Boolean?): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment] =
             mapOf(CheckMatchedEpcFormModel::matchedEpcIsCorrect.name to matchedEpcIsCorrect)
+        return this
+    }
+
+    fun withEpcNotAutomatched(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EpcNotAutoMatched.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withAllowCheckMatchedEpcToBeBypassed(allowBypass: Boolean): JourneyDataBuilder {
+        journeyData[ALLOW_CHECK_MATCHED_EPC_TO_BE_BYPASSED] = allowBypass
         return this
     }
 

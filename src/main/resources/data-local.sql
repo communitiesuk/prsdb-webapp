@@ -40,7 +40,8 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', '09/13/24'),
 INSERT INTO form_context (id, created_date, last_modified_date, journey_type, context, subject_identifier)
 VALUES (1, current_date, current_date, 3, '{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R 1LA"},"looked-up-addresses":"[{\"singleLineAddress\":\"1, SAVOY COURT, LONDON, WC2R 0EX\",\"localAuthorityId\":318,\"uprn\":100023432931,\"buildingNumber\":\"1\",\"streetName\":\"SAVOY COURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R 0EX\"}]","select-address":{"address":"1, SAVOY COURT, LONDON, WC2R 0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}}','urn:fdc:gov.uk:2022:UVWXY'),
        (2, '01/15/25', '01/15/25', 7, '{}','urn:fdc:gov.uk:2022:UVWXY'),
-       (3, '01/15/25', '01/15/25', 7, '{}','urn:fdc:gov.uk:2022:UVWXY');
+       (3, '01/15/25', '01/15/25', 7, '{}','urn:fdc:gov.uk:2022:UVWXY'),
+       (4, '01/15/25', '01/15/25', 7, '{}','urn:fdc:gov.uk:2022:UVWXY');
 
 SELECT setval(pg_get_serial_sequence('form_context', 'id'), (SELECT MAX(id) FROM form_context));
 
@@ -145,7 +146,7 @@ VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 1),
        (6, '12/10/2024', '12/10/2024', 1123456, '1, Example Road, EG', 1),
        (7, '09/13/24', '09/13/24', 6, '2 Fictional Road', 1),
        (8, '09/13/24', '09/13/24', 7, '3 Fake Way', 2),
-       (9, '09/13/24', '09/13/24', 8, '4 Imaginary Street', 1),
+       (9, '09/13/24', '09/13/24', 100090154790, '4 Imaginary Street', 1),
        (10, '09/13/24', '09/13/24', 9, '5 Pretend Crescent', 1),
        (11, '09/13/24', '09/13/24', 10, '6 Mythical Place', 1),
        (12, '09/13/24', '09/13/24', null, '6 Mythical Place', 1),
@@ -279,7 +280,7 @@ VALUES (1, true, 0, 1, 1, 2, 6, 1, 1, '01/15/25', '02/02/25', null, 2),
        (4, true, 0, 1, 1, 2, 36, 1, 4, '01/15/25', '01/15/25', null, 3),
        (5, true, 0, 1, 1, 2, 37, 1, 5, '01/15/25', '01/15/25', null, null),
        (6, false, 0, 1, 1, 2, 38, 1, 6, '01/15/25', '01/15/25', null, null),
-       (7, true, 0, 1, 0, 0, 39, 1, 7, '02/02/25', '02/02/25', 1, null),
+       (7, true, 0, 1, 0, 0, 39, 1, 7, '02/02/25', '02/02/25', 1, 4),
        (8, true, 0, 1, 0, 0, 40, 1, 8, '05/02/25', '01/15/25', null, null),
        (9, true, 0, 1, 0, 0, 41, 1, 9, '05/02/25', '01/15/25', null, null),
        (10, true, 0, 1, 0, 0, 42, 1, 10, '05/02/25', '01/15/25', null, null),

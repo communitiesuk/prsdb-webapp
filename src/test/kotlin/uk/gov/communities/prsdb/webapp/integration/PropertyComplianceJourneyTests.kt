@@ -9,6 +9,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -29,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrUploadPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcExemptionReasonPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcMissingPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyDeclarationPagePropertyCompliance
@@ -51,6 +53,9 @@ import uk.gov.communities.prsdb.webapp.services.FileUploader
 class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql") {
     @MockitoBean
     private lateinit var fileUploader: FileUploader
+
+    @MockitoBean
+    lateinit var epcRegisterClient: EpcRegisterClient
 
     @Test
     fun `User can navigate whole journey if pages are filled in correctly (in-date certs)`(page: Page) {
@@ -126,7 +131,25 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         eicrUploadConfirmationPage.saveAndContinueButton.clickAndWait()
         val epcPage = assertPageIs(page, EpcPagePropertyCompliance::class, urlArguments)
 
-        // EPC page
+        // EPC page, epcRegisterClient finds an EPC when submitting that we have a certificate
+        whenever(epcRegisterClient.getByUprn(1123456L)).thenReturn(
+            """
+            {
+                "data": {
+                    "epcRrn": "$CURRENT_EPC_CERTIFICATE_NUMBER",
+                    "currentEnergyEfficiencyBand": "C",
+                    "expiryDate": "2027-01-05T00:00:00.000Z",
+                    "latestEpcRrnForAddress": "$CURRENT_EPC_CERTIFICATE_NUMBER",
+                    "address": {
+                        "addressLine1": "123 Test Street",
+                        "town": "Test Town",
+                        "postcode": "TT1 1TT",
+                        "addressLine2": "Flat 1"
+                    }
+                }
+            }
+            """.trimIndent(),
+        )
         epcPage.submitHasCert()
         assertPageIs(page, CheckMatchedEpcPagePropertyCompliance::class, urlArguments)
 
@@ -172,7 +195,25 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         eicrOutdatedPage.saveAndContinueToEpcButton.clickAndWait()
         val epcPage = assertPageIs(page, EpcPagePropertyCompliance::class, urlArguments)
 
-        // EPC page
+        // EPC page, epcRegisterClient finds an expired EPC when submitting that we have a certificate
+        whenever(epcRegisterClient.getByUprn(1123456L)).thenReturn(
+            """
+            {
+                "data": {
+                    "epcRrn": "$CURRENT_EPC_CERTIFICATE_NUMBER",
+                    "currentEnergyEfficiencyBand": "C",
+                    "expiryDate": "2023-01-05T00:00:00.000Z",
+                    "latestEpcRrnForAddress": "$CURRENT_EPC_CERTIFICATE_NUMBER",
+                    "address": {
+                        "addressLine1": "123 Test Street",
+                        "town": "Test Town",
+                        "postcode": "TT1 1TT",
+                        "addressLine2": "Flat 1"
+                    }
+                }
+            }
+            """.trimIndent(),
+        )
         epcPage.submitHasCert()
         assertPageIs(page, CheckMatchedEpcPagePropertyCompliance::class, urlArguments)
 

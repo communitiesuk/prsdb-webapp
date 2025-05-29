@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 
 class JourneyPageDataBuilder {
     companion object {
@@ -112,12 +113,16 @@ class JourneyPageDataBuilder {
 
         fun beforePropertyComplianceEpcExemptionReason() = beforePropertyComplianceEpc().withEpcStatus(HasEpc.NOT_REQUIRED)
 
-        fun beforePropertyComplianceCheckMatchedEpc() = beforePropertyComplianceEpc().withEpcStatus(HasEpc.YES)
+        fun beforePropertyComplianceCheckMatchedEpc() =
+            beforePropertyComplianceEpc().withEpcStatus(HasEpc.YES).withLookedUpEpcDetails(MockEpcData.createEpcDataModel())
 
         fun beforePropertyComplianceEpcLookup() = beforePropertyComplianceCheckMatchedEpc().withCheckMatchedEpcResult(false)
 
         fun beforePropertyComplianceEpcNotFound() =
-            beforePropertyComplianceEpcLookup().withNullLookedUpEpcDetails().withEpcLookupCertificateNumber()
+            beforePropertyComplianceEpcLookup()
+                .withEpcLookupCertificateNumber()
+                .withNullLookedUpEpcDetails()
+                .withEpcNotAutomatched()
 
         fun beforePropertyComplianceFireSafetyDeclaration() = beforePropertyComplianceEpc().withMissingEpcExemption()
 
