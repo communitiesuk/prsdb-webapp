@@ -35,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEn
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.KeepPropertySafeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
@@ -589,6 +590,12 @@ class JourneyDataBuilder(
     fun withFireSafetyDeclaration(hasDeclared: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment] =
             mapOf(FireSafetyDeclarationFormModel::hasDeclared.name to hasDeclared)
+        return this
+    }
+
+    fun withKeepPropertySafe(keepPropertySafe: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.KeepPropertySafe.urlPathSegment] =
+            mapOf(KeepPropertySafeFormModel::agreesToResponsibility.name to keepPropertySafe)
         return this
     }
 

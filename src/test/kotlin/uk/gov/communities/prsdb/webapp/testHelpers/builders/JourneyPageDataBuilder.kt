@@ -123,6 +123,8 @@ class JourneyPageDataBuilder {
 
         fun beforePropertyComplianceKeepPropertySafe() = beforePropertyComplianceFireSafetyDeclaration().withFireSafetyDeclaration(true)
 
+        fun beforePropertyComplianceResponsibilityToTenants() = beforePropertyComplianceKeepPropertySafe().withKeepPropertySafe(true)
+
         fun beforeLandlordDetailsUpdateSelectAddress() = JourneyDataBuilder().withLookupAddress()
 
         fun beforePropertyDeregistrationReason() = JourneyDataBuilder().withWantsToProceed()
