@@ -10,11 +10,15 @@ import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENG
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
+import uk.gov.communities.prsdb.webapp.constants.GOVERNMENT_APPROVED_DEPOSIT_PROTECTION_SCHEME_URL
 import uk.gov.communities.prsdb.webapp.constants.HOMES_ACT_2018_URL
 import uk.gov.communities.prsdb.webapp.constants.HOUSES_IN_MULTIPLE_OCCUPATION_URL
 import uk.gov.communities.prsdb.webapp.constants.HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL
+import uk.gov.communities.prsdb.webapp.constants.HOW_TO_RENT_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.PRIVATE_RENTING_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
+import uk.gov.communities.prsdb.webapp.constants.RIGHT_TO_RENT_CHECKS_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -60,6 +64,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.KeepPropertySafeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
@@ -135,11 +140,7 @@ class PropertyComplianceJourney(
                     "propertyCompliance.taskList.landlordResponsibilities.keepPropertySafe",
                 ),
                 JourneyTask.withOneStep(
-                    placeholderStep(
-                        PropertyComplianceStepId.ResponsibilityToTenants,
-                        "TODO PRSD-1153: Compliance (LL resp): Legal Responsibilities Declaration page",
-                        PropertyComplianceStepId.CheckAndSubmit,
-                    ),
+                    responsibilityToTenantsStep,
                     "propertyCompliance.taskList.landlordResponsibilities.tenants",
                 ),
             )
@@ -928,6 +929,35 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.ResponsibilityToTenants, null) },
+            )
+
+    private val responsibilityToTenantsStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.ResponsibilityToTenants,
+                page =
+                    Page(
+                        formModel = ResponsibilityToTenantsFormModel::class,
+                        templateName = "forms/responsibilityToTenantsForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "privateRentingGuideUrl" to
+                                    PRIVATE_RENTING_GUIDE_URL,
+                                "rightToRentChecksUrl" to RIGHT_TO_RENT_CHECKS_URL,
+                                "governmentApprovedDepositProtectionSchemeUrl" to
+                                    GOVERNMENT_APPROVED_DEPOSIT_PROTECTION_SCHEME_URL,
+                                "howToRentGuideUrl" to HOW_TO_RENT_GUIDE_URL,
+                                "options" to
+                                    listOf(
+                                        CheckboxViewModel(
+                                            value = "true",
+                                            labelMsgKey = "forms.landlordResponsibilities.responsibilityToTenants.checkbox.label",
+                                        ),
+                                    ),
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.CheckAndSubmit, null) },
             )
 
     private fun placeholderStep(
