@@ -74,11 +74,11 @@ class MultipartFormDataFilter(
         private val request: HttpServletRequest,
         private val csrfToken: ParameterCsrfTokenDetails,
     ) : HttpServletRequest by request {
-        override fun getParameter(p0: String?): String =
+        override fun getParameter(p0: String?): String? =
             if (p0 == csrfToken.parameterName) {
                 csrfToken.token
             } else {
-                request.getParameter(p0)
+                request?.getParameter(p0)
             }
     }
 

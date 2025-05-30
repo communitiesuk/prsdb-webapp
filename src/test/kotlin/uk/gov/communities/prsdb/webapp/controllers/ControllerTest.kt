@@ -11,12 +11,19 @@ import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.filter.UrlHandlerFilter
+import uk.gov.communities.prsdb.webapp.config.BackLinkInterceptorConfig
 import uk.gov.communities.prsdb.webapp.config.CustomErrorConfig
 import uk.gov.communities.prsdb.webapp.config.CustomSecurityConfig
 import uk.gov.communities.prsdb.webapp.config.filters.TrailingSlashFilterConfiguration
+import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
-@Import(CustomSecurityConfig::class, CustomErrorConfig::class, TrailingSlashFilterConfiguration::class)
+@Import(
+    CustomSecurityConfig::class,
+    CustomErrorConfig::class,
+    TrailingSlashFilterConfiguration::class,
+    BackLinkInterceptorConfig::class,
+)
 abstract class ControllerTest(
     private val context: WebApplicationContext,
 ) {
@@ -34,6 +41,9 @@ abstract class ControllerTest(
                 .apply<DefaultMockMvcBuilder>(springSecurity())
                 .build()
     }
+
+    @MockitoBean
+    lateinit var backLinkStorageService: BackUrlStorageService
 
     @MockitoBean
     lateinit var mockClientRegistrationRepository: ClientRegistrationRepository

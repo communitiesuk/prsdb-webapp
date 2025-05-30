@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels
 
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropertyCount
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
@@ -23,6 +24,7 @@ class LandlordSearchResultsViewModelTests {
                 email = landlord.email,
                 phoneNumber = landlord.phoneNumber,
                 listedPropertyCount = 3,
+                recordLink = "${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/${landlord.id}",
             )
 
         val landlordSearchResultViewModel =

@@ -68,7 +68,6 @@ class SearchRegisterController(
             "paginationViewModel",
             PaginationViewModel(page, pagedLandlordList.totalPages, httpServletRequest),
         )
-        model.addAttribute("baseLandlordDetailsURL", LandlordDetailsController.LANDLORD_DETAILS_ROUTE)
         model.addAttribute("propertySearchURL", SEARCH_PROPERTY_URL)
 
         return "searchLandlord"

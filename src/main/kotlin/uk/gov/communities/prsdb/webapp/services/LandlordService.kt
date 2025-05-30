@@ -25,6 +25,7 @@ class LandlordService(
     private val landlordWithListedPropertyCountRepository: LandlordWithListedPropertyCountRepository,
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
+    private val backLinkService: BackUrlStorageService,
 ) {
     fun retrieveLandlordByRegNum(regNum: RegistrationNumberDataModel): Landlord? {
         if (regNum.type != RegistrationNumberType.LANDLORD) {
@@ -107,7 +108,7 @@ class LandlordService(
         return PageImpl(
             landlordWithListedPropertyCountRepository
                 .findByLandlordIdIn(landlordPage.content.map { it.id })
-                .map { LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(it) },
+                .map { LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(it, backLinkService.rememberCurrentUrl()) },
             pageRequest,
             landlordPage.totalElements,
         )

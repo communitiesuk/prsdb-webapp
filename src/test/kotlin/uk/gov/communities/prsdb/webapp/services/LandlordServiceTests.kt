@@ -57,6 +57,9 @@ class LandlordServiceTests {
     @Mock
     private lateinit var mockRegistrationNumberService: RegistrationNumberService
 
+    @Mock
+    private lateinit var mockBackUrlStorageService: BackUrlStorageService
+
     @InjectMocks
     private lateinit var landlordService: LandlordService
 
@@ -168,6 +171,7 @@ class LandlordServiceTests {
         val requestedPageNumber = 0
         val pageSize = 25
         val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
+        val currentPageKey = 77
 
         val matchingLandlords = mutableListOf<Landlord>()
         val matchingLandlordsWithListedPropertyCount = mutableListOf<LandlordWithListedPropertyCount>()
@@ -181,6 +185,7 @@ class LandlordServiceTests {
             matchingLandlordsWithListedPropertyCount.map {
                 LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(
                     it,
+                    currentPageKey,
                 )
             }
 
@@ -189,6 +194,7 @@ class LandlordServiceTests {
         ).thenReturn(PageImpl(matchingLandlords))
         whenever(mockLandlordWithListedPropertyCountRepository.findByLandlordIdIn(matchingLandlords.map { it.id }))
             .thenReturn(matchingLandlordsWithListedPropertyCount)
+        whenever(mockBackUrlStorageService.rememberCurrentUrl()).thenReturn(currentPageKey)
 
         val searchResults =
             landlordService.searchForLandlords(
@@ -209,6 +215,7 @@ class LandlordServiceTests {
         val laUserBaseId = "laUserBaseId"
         val requestedPageIndex = 0
         val pageSize = 25
+        val pageKey = 79
         val pageRequest = PageRequest.of(requestedPageIndex, pageSize)
         val matchingLandlord = listOf(createLandlord())
         val matchingLandlordWithListedPropertyCount =
@@ -217,6 +224,7 @@ class LandlordServiceTests {
             matchingLandlordWithListedPropertyCount.map {
                 LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(
                     it,
+                    pageKey,
                 )
             }
 
@@ -225,6 +233,7 @@ class LandlordServiceTests {
         ).thenReturn(PageImpl(matchingLandlord))
         whenever(mockLandlordWithListedPropertyCountRepository.findByLandlordIdIn(listOf(matchingLandlord[0].id)))
             .thenReturn(matchingLandlordWithListedPropertyCount)
+        whenever(mockBackUrlStorageService.rememberCurrentUrl()).thenReturn(pageKey)
 
         val searchResults =
             landlordService.searchForLandlords(
@@ -308,6 +317,7 @@ class LandlordServiceTests {
         }
 
         val pageIndex1 = 0
+        val pageKey1 = 77
         val pageRequest1 = PageRequest.of(pageIndex1, pageSize)
         val matchingLandlordsPage1 = matchingLandlords.subList(0, pageSize)
         val matchingLandlordsWithListedPropertiesPage1 = matchingLandlordsWithListedPropertyCount.subList(0, pageSize)
@@ -315,10 +325,12 @@ class LandlordServiceTests {
             matchingLandlordsWithListedPropertiesPage1.map {
                 LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(
                     it,
+                    pageKey1,
                 )
             }
 
         val pageIndex2 = 1
+        val pageKey2 = 202
         val pageRequest2 = PageRequest.of(pageIndex2, pageSize)
         val matchingLandlordsPage2 = matchingLandlords.subList(pageSize, 40)
         val matchingLandlordsWithListedPropertiesPage2 = matchingLandlordsWithListedPropertyCount.subList(pageSize, 40)
@@ -326,6 +338,7 @@ class LandlordServiceTests {
             matchingLandlordsWithListedPropertiesPage2.map {
                 LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(
                     it,
+                    pageKey2,
                 )
             }
 
@@ -338,6 +351,7 @@ class LandlordServiceTests {
         whenever(mockLandlordWithListedPropertyCountRepository.findByLandlordIdIn(matchingLandlordsPage2.map { it.id }))
             .thenReturn(matchingLandlordsWithListedPropertiesPage2)
 
+        whenever(mockBackUrlStorageService.rememberCurrentUrl()).thenReturn(pageKey1)
         val searchResults1 =
             landlordService.searchForLandlords(
                 searchTerm,
@@ -345,6 +359,8 @@ class LandlordServiceTests {
                 requestedPageIndex = pageIndex1,
                 pageSize = pageSize,
             )
+
+        whenever(mockBackUrlStorageService.rememberCurrentUrl()).thenReturn(pageKey2)
         val searchResults2 =
             landlordService.searchForLandlords(
                 searchTerm,

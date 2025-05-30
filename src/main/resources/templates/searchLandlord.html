@@ -32,7 +32,7 @@
                         <tbody class="govuk-table__body">
                         <tr class="govuk_table__row" th:each="landlord: ${searchResults}">
                             <td class="govuk-table__cell govuk-!-width-one-quarter">
-                                <a class="govuk-link" th:href="@{${baseLandlordDetailsURL + '/' + landlord.id}}"
+                                <a class="govuk-link" th:href="@{${landlord.recordLink}}"
                                    th:text="${landlord.name}"></a>
                                 <br>
                                 <span th:remove="tag" th:text="${landlord.registrationNumber}"></span>
