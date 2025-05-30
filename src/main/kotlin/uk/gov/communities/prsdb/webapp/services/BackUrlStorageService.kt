@@ -13,19 +13,19 @@ class BackUrlStorageService(
 ) : BackLinkInterceptor.BackLinkProvider {
     fun rememberCurrentUrl(): Int {
         val currentUrl = getCurrentUrl() ?: throw IllegalStateException("Current URL is null")
-        val backUrlMap = session.getAttribute("backUrlStorage").toBackUrlMapOrNull() ?: mapOf()
+        val backUrlMap = session.getAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE).toBackUrlMapOrNull() ?: mapOf()
         val currentUrlEntry = backUrlMap.entries.firstOrNull { it.value == currentUrl }
         return if (currentUrlEntry != null) {
             currentUrlEntry.key
         } else {
             val nextKey = (backUrlMap.keys.maxOrNull() ?: 0) + 1
-            session.setAttribute("backUrlStorage", backUrlMap + (nextKey to currentUrl))
+            session.setAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE, backUrlMap + (nextKey to currentUrl))
             nextKey
         }
     }
 
     override fun getBackUrl(destination: Int): String? {
-        val backUrlMap = session.getAttribute("backUrlStorage").toBackUrlMapOrNull() ?: mapOf()
+        val backUrlMap = session.getAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE).toBackUrlMapOrNull() ?: mapOf()
         return backUrlMap[destination]
     }
 
@@ -43,5 +43,9 @@ class BackUrlStorageService(
         if (this == null) return null
         val initialMap: Map<*, *> = this as? Map<*, *> ?: return null
         return initialMap.map { (key, value) -> (key as? Int ?: return null) to (value as? String ?: return null) }.associate { it }
+    }
+
+    companion object {
+        const val BACK_URL_STORAGE_SESSION_ATTRIBUTE = "backUrlStorage"
     }
 }

@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels
 
+import uk.gov.communities.prsdb.webapp.constants.WITH_BACK_URL_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropertyCount
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -37,6 +38,6 @@ data class LandlordSearchResultViewModel(
             currentUrlKey: Int?,
         ): String =
             "${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/$landlordId" +
-                (currentUrlKey?.let { "?withBackUrl=$it" } ?: "")
+                (currentUrlKey?.let { "?$WITH_BACK_URL_PARAMETER_NAME=$it" } ?: "")
     }
 }
