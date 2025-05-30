@@ -19,7 +19,7 @@ data class TaskListItemViewModel(
             nameKey,
             TaskStatusViewModel.fromStatus(status),
             hintKey,
-            if (status == TaskStatus.CANNOT_START_YET) {
+            if (status == TaskStatus.CANNOT_START) {
                 null
             } else {
                 initialStepId.urlPathSegment

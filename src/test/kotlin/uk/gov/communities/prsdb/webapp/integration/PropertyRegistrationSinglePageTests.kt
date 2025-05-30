@@ -27,14 +27,14 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
     @Nested
     inner class TaskListStep {
         @Test
-        fun `Completing preceding steps will show a task as not yet started and completed steps as complete`(page: Page) {
+        fun `Completing preceding steps will show a task as not started and completed steps as complete`(page: Page) {
             navigator.skipToPropertyRegistrationOccupancyPage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
             assert(taskListPage.taskHasStatus("Add the property address", "Complete"))
             assert(taskListPage.taskHasStatus("Select the type of property", "Complete"))
             assert(taskListPage.taskHasStatus("Select the ownership type", "Complete"))
             assert(taskListPage.taskHasStatus("Add any property licensing information", "Complete"))
-            assert(taskListPage.taskHasStatus("Add any tenancy and household information", "Not yet started"))
+            assert(taskListPage.taskHasStatus("Add any tenancy and household information", "Not started"))
         }
 
         @Test
@@ -45,7 +45,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
             assert(taskListPage.taskHasStatus("Select the type of property", "Complete"))
             assert(taskListPage.taskHasStatus("Select the ownership type", "Complete"))
             assert(taskListPage.taskHasStatus("Add any property licensing information", "In progress"))
-            assert(taskListPage.taskHasStatus("Add any tenancy and household information", "Cannot start yet"))
+            assert(taskListPage.taskHasStatus("Add any tenancy and household information", "Cannot start"))
         }
     }
 
