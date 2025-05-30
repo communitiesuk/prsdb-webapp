@@ -56,7 +56,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
     fun `User can navigate whole journey if pages are filled in correctly (in-date certs)`(page: Page) {
         // Start page
         val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
-        assertThat(startPage.heading).containsText("Compliance certificates")
+        assertThat(startPage.heading).containsText("Add compliance information")
         startPage.startButton.clickAndWait()
         val taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
 
@@ -137,7 +137,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
     fun `User can navigate whole journey if pages are filled in correctly (outdated certs)`(page: Page) {
         // Start page
         val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
-        assertThat(startPage.heading).containsText("Compliance certificates")
+        assertThat(startPage.heading).containsText("Add compliance information")
         startPage.startButton.clickAndWait()
         val taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
 
@@ -183,7 +183,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
     fun `User can navigate whole journey if pages are filled in correctly (no certs, exemptions, declaration)`(page: Page) {
         // Start page
         val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
-        assertThat(startPage.heading).containsText("Compliance certificates")
+        assertThat(startPage.heading).containsText("Add compliance information")
         startPage.startButton.clickAndWait()
         val taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
 
@@ -262,7 +262,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
     fun `User can navigate whole journey if pages are filled in correctly (no certs, no exemptions, no declaration)`(page: Page) {
         // Start page
         val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
-        assertThat(startPage.heading).containsText("Compliance certificates")
+        assertThat(startPage.heading).containsText("Add compliance information")
         startPage.startButton.clickAndWait()
         val taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, urlArguments)
 

@@ -22,6 +22,7 @@ import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
+import uk.gov.communities.prsdb.webapp.constants.NRLA_UK_REGULATIONS_URL
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_COMPLIANCE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.PROPERTY_COMPLIANCE_ROUTE
@@ -56,6 +57,7 @@ class PropertyComplianceController(
     ): String {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
+        model.addAttribute("nrlaUkRegulationsUrl", NRLA_UK_REGULATIONS_URL)
         model.addAttribute(
             "taskListUrl",
             "${getPropertyCompliancePath(propertyOwnershipId)}/$TASK_LIST_PATH_SEGMENT",
