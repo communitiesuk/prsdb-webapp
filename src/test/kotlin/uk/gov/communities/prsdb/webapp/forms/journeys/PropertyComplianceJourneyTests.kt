@@ -246,8 +246,6 @@ class PropertyComplianceJourneyTests {
                 )
             verify(mockPropertyOwnershipService).deleteIncompleteComplianceForm(propertyOwnershipId)
         }
-
-        // TODO check expected file names and epc details
     }
 
     private fun createPropertyComplianceJourney(propertyOwnershipId: Long = 1L) =
