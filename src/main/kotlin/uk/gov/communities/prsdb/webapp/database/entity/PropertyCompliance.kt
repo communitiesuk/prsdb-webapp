@@ -36,9 +36,6 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     var gasSafetyCertIssueDate: LocalDate? = null
 
-    var gasSafetyCertExpiryDate: LocalDate? = null
-        private set
-
     var gasSafetyCertEngineerNum: String? = null
 
     var gasSafetyCertExemptionReason: GasSafetyExemptionReason? = null
@@ -49,9 +46,6 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     var eicrS3Key: String? = null
 
     var eicrIssueDate: LocalDate? = null
-
-    var eicrExpiryDate: LocalDate? = null
-        private set
 
     var eicrExemptionReason: EicrExemptionReason? = null
 
@@ -68,6 +62,12 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     var epcMeesExemptionReason: MeesExemptionReason? = null
 
     var hasFireSafetyDeclaration: Boolean = false
+
+    val gasSafetyCertExpiryDate: LocalDate?
+        get() = gasSafetyCertIssueDate?.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
+
+    val eicrExpiryDate: LocalDate?
+        get() = eicrIssueDate?.plusYears(EICR_VALIDITY_YEARS.toLong())
 
     constructor(
         propertyOwnership: PropertyOwnership,
@@ -90,13 +90,11 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         this.propertyOwnership = propertyOwnership
         this.gasSafetyCertS3Key = gasSafetyCertS3Key
         this.gasSafetyCertIssueDate = gasSafetyCertIssueDate
-        this.gasSafetyCertExpiryDate = gasSafetyCertIssueDate?.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
         this.gasSafetyCertEngineerNum = gasSafetyCertEngineerNum
         this.gasSafetyCertExemptionReason = gasSafetyCertExemptionReason
         this.gasSafetyCertExemptionOtherReason = gasSafetyCertExemptionOtherReason
         this.eicrS3Key = eicrS3Key
         this.eicrIssueDate = eicrIssueDate
-        this.eicrExpiryDate = eicrIssueDate?.plusYears(EICR_VALIDITY_YEARS.toLong())
         this.eicrExemptionReason = eicrExemptionReason
         this.eicrExemptionOtherReason = eicrExemptionOtherReason
         this.epcUrl = epcUrl
