@@ -7,10 +7,12 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -26,8 +28,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyPageDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertContains
@@ -42,6 +46,9 @@ class PropertyComplianceJourneyTests {
 
     @Mock
     private lateinit var mockEpcLookupService: EpcLookupService
+
+    @Mock
+    private lateinit var mockPropertyComplianceService: PropertyComplianceService
 
     @Nested
     inner class LoadJourneyDataIfNotLoadedTests {
@@ -206,10 +213,37 @@ class PropertyComplianceJourneyTests {
     @Nested
     inner class CheckAndSubmitHandleSubmitAndRedirectTests {
         @Test
-        fun `checkAndSubmitHandleSubmitAndRedirect deletes the corresponding compliance form`() {
+        fun `checkAndSubmitHandleSubmitAndRedirect creates a compliance record and deletes the corresponding form context`() {
             val propertyOwnershipId = 1L
-            completeStep(PropertyComplianceStepId.CheckAndSubmit, propertyOwnershipId = propertyOwnershipId)
+            whenever(mockJourneyDataService.getJourneyDataFromSession())
+                .thenReturn(JourneyPageDataBuilder.beforePropertyComplianceCheckAnswers().build())
 
+            completeStep(
+                PropertyComplianceStepId.CheckAndSubmit,
+                JourneyDataBuilder().withCheckedAnswers().build(),
+                propertyOwnershipId,
+                stubPropertyOwnership = false,
+            )
+
+            verify(mockPropertyComplianceService)
+                .createPropertyCompliance(
+                    eq(propertyOwnershipId),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                )
             verify(mockPropertyOwnershipService).deleteIncompleteComplianceForm(propertyOwnershipId)
         }
     }
@@ -220,6 +254,7 @@ class PropertyComplianceJourneyTests {
             journeyDataService = mockJourneyDataService,
             propertyOwnershipService = mockPropertyOwnershipService,
             epcLookupService = mockEpcLookupService,
+            propertyComplianceService = mockPropertyComplianceService,
             propertyOwnershipId = propertyOwnershipId,
         )
 
@@ -227,9 +262,12 @@ class PropertyComplianceJourneyTests {
         stepId: PropertyComplianceStepId,
         pageData: PageData = mapOf(),
         propertyOwnershipId: Long = 1L,
+        stubPropertyOwnership: Boolean = true,
     ): ModelAndView {
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
-            .thenReturn(MockLandlordData.createPropertyOwnership(id = propertyOwnershipId))
+        if (stubPropertyOwnership) {
+            whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
+                .thenReturn(MockLandlordData.createPropertyOwnership(id = propertyOwnershipId))
+        }
 
         return createPropertyComplianceJourney(propertyOwnershipId).completeStep(
             stepPathSegment = stepId.urlPathSegment,

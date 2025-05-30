@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
+import kotlinx.datetime.toJavaLocalDate
 import org.springframework.http.HttpStatus
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
@@ -29,8 +30,19 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
+import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionOtherReason
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionReason
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrIssueDate
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrOriginalName
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcLookupCertificateNumber
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertEngineerNum
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionOtherReason
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionReason
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertIssueDate
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertOriginalName
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
@@ -66,14 +78,16 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 class PropertyComplianceJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val propertyOwnershipId: Long,
     private val epcLookupService: EpcLookupService,
+    private val propertyComplianceService: PropertyComplianceService,
+    private val propertyOwnershipId: Long,
 ) : JourneyWithTaskList<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE,
         initialStepId = initialStepId,
@@ -1041,7 +1055,46 @@ class PropertyComplianceJourney(
         }
 
     private fun checkAndSubmitHandleSubmitAndRedirect(): String {
-        // TODO PRSD-1202: Save compliance data to the database
+        val filteredJourneyData = last().filteredJourneyData
+
+        val gasSafetyCertFilename =
+            filteredJourneyData.getGasSafetyCertOriginalName()?.let {
+                PropertyComplianceJourneyHelper.getCertFilename(
+                    propertyOwnershipId,
+                    PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
+                    it,
+                )
+            }
+
+        val eicrFilename =
+            filteredJourneyData.getEicrOriginalName()?.let {
+                PropertyComplianceJourneyHelper.getCertFilename(
+                    propertyOwnershipId,
+                    PropertyComplianceStepId.EicrUpload.urlPathSegment,
+                    it,
+                )
+            }
+
+        val epcDetails = journeyDataService.getJourneyDataFromSession().getEpcDetails()
+
+        propertyComplianceService.createPropertyCompliance(
+            propertyOwnershipId = propertyOwnershipId,
+            gasSafetyCertS3Key = gasSafetyCertFilename,
+            gasSafetyCertIssueDate = filteredJourneyData.getGasSafetyCertIssueDate()?.toJavaLocalDate(),
+            gasSafetyCertEngineerNum = filteredJourneyData.getGasSafetyCertEngineerNum(),
+            gasSafetyCertExemptionReason = filteredJourneyData.getGasSafetyCertExemptionReason(),
+            gasSafetyCertExemptionOtherReason = filteredJourneyData.getGasSafetyCertExemptionOtherReason(),
+            eicrS3Key = eicrFilename,
+            eicrIssueDate = filteredJourneyData.getEicrIssueDate()?.toJavaLocalDate(),
+            eicrExemptionReason = filteredJourneyData.getEicrExemptionReason(),
+            eicrExemptionOtherReason = filteredJourneyData.getEicrExemptionOtherReason(),
+            // TODO PRSD-1132: Assign epcUrl
+            epcExpiryDate = epcDetails?.expiryDate?.toJavaLocalDate(),
+            epcEnergyRating = epcDetails?.energyRating,
+            epcExemptionReason = filteredJourneyData.getEpcExemptionReason(),
+            // TODO PRSD-1143: Assign epcMeesExemptionReason
+            hasFireSafetyDeclaration = filteredJourneyData.getHasFireSafetyDeclaration()!!,
+        )
 
         propertyOwnershipService.deleteIncompleteComplianceForm(propertyOwnershipId)
 
