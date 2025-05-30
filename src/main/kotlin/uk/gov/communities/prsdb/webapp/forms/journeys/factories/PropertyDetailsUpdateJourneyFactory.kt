@@ -19,12 +19,14 @@ class PropertyDetailsUpdateJourneyFactory(
     fun create(
         propertyOwnershipId: Long,
         stepName: String,
+        isChangingAnswer: Boolean,
     ) = PropertyDetailsUpdateJourney(
         validator,
         journeyDataServiceFactory.create(getJourneyDataKey(propertyOwnershipId, stepName)),
         propertyOwnershipService,
         propertyOwnershipId,
         stepName,
+        isChangingAnswer,
     )
 
     private fun getJourneyDataKey(

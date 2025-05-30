@@ -1,0 +1,34 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="fieldSetHint" type="java.lang.String"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="findEpcUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="getNewEpcUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="form-content">
+    <th:block id="fieldset-content"
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'lookupEpc',
+                            #{forms.epcLookup.fieldSetHeading}, #{forms.epcLookup.fieldSetHint})}">
+        <div th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{forms.epcLookup.certificateNumber.label}, 'certificateNumber', #{forms.epcLookup.certificateNumber.hint}, 20)}"></div>
+    </th:block>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.epcLookup.searchButton.text})}"></button>
+    <p class="govuk-body">
+        <strong th:text="#{forms.epcLookup.explanation.heading}"></strong>
+    </p>
+    <p class="govuk-body">
+        <span th:remove="tag" th:text="#{forms.epcLookup.explanation.paragraph.one.beforeLink}">forms.epcLookup.explanation.paragraph.one.beforeLink</span>
+        <a class="govuk-link" th:text="#{forms.epcLookup.explanation.paragraph.one.link}" th:href="${findEpcUrl}" rel="noreferrer noopener" target="_blank">
+            forms.epcLookup.explanation.paragraph.one.link
+        </a>
+    </p>
+    <p class="govuk-body">
+        <span th:remove="tag" th:text="#{forms.epcLookup.explanation.paragraph.two.beforeLink}">forms.epcLookup.explanation.paragraph.two.beforeLink</span>
+        <a class="govuk-link" th:text="#{forms.epcLookup.explanation.paragraph.two.link}" th:href="${getNewEpcUrl}" rel="noreferrer noopener" target="_blank">
+            forms.epcLookup.explanation.paragraph.two.link
+        </a>
+    </p>
+</th:block>
+</html>

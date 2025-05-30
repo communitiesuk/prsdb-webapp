@@ -31,6 +31,7 @@ class JourneyDataDeserializer : StdDeserializer<JourneyData>(Map::class.java) {
             }
             this.isNumber -> this.numberValue()
             this.isBoolean -> this.booleanValue()
+            this.isNull -> null
             this.isObject -> deserialize(this.traverse(parser.codec), context)
             else -> this
         }

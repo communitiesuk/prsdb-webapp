@@ -41,5 +41,7 @@ class FormContext() : ModifiableAuditableEntity() {
         this.user = user
     }
 
+    constructor(journeyType: JourneyType, user: OneLoginUser) : this(journeyType, context = "{}", user)
+
     fun toJourneyData(): JourneyData = objectToStringKeyedMap(ObjectMapper().readValue(context, Any::class.java)) ?: emptyMap()
 }

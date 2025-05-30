@@ -112,6 +112,19 @@ class JourneyPageDataBuilder {
 
         fun beforePropertyComplianceEpcExemptionReason() = beforePropertyComplianceEpc().withEpcStatus(HasEpc.NOT_REQUIRED)
 
+        fun beforePropertyComplianceCheckMatchedEpc() = beforePropertyComplianceEpc().withEpcStatus(HasEpc.YES)
+
+        fun beforePropertyComplianceEpcLookup() = beforePropertyComplianceCheckMatchedEpc().withCheckMatchedEpcResult(false)
+
+        fun beforePropertyComplianceEpcNotFound() =
+            beforePropertyComplianceEpcLookup().withNullLookedUpEpcDetails().withEpcLookupCertificateNumber()
+
+        fun beforePropertyComplianceFireSafetyDeclaration() = beforePropertyComplianceEpc().withMissingEpcExemption()
+
+        fun beforePropertyComplianceKeepPropertySafe() = beforePropertyComplianceFireSafetyDeclaration().withFireSafetyDeclaration(true)
+
+        fun beforePropertyComplianceCheckAnswers() = beforePropertyComplianceKeepPropertySafe().withKeepPropertySafeDeclaration()
+
         fun beforeLandlordDetailsUpdateSelectAddress() = JourneyDataBuilder().withLookupAddress()
 
         fun beforePropertyDeregistrationReason() = JourneyDataBuilder().withWantsToProceed()

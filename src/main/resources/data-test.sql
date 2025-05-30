@@ -26,7 +26,11 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao','2024-
        ('urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI', '2025-04-22 10:55:55.704192+00'), -- sandra.lila@communities.gov.uk
        ('urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0', '2025-05-01 10:33:22.395944+00'); -- Team-PRSDB+systemoperator@softwire.com
 
-SELECT setval(pg_get_serial_sequence('local_authority', 'id'), (SELECT MAX(id) FROM local_authority));
+INSERT INTO form_context (id, created_date, last_modified_date, journey_type, context, subject_identifier)
+VALUES (1, current_date, current_date, 3, '{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R 1LA"},"looked-up-addresses":"[{\"singleLineAddress\":\"1, SAVOY COURT, LONDON, WC2R 0EX\",\"localAuthorityId\":318,\"uprn\":100023432931,\"buildingNumber\":\"1\",\"streetName\":\"SAVOY COURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R 0EX\"}]","select-address":{"address":"1, SAVOY COURT, LONDON, WC2R 0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
+       (2, '2024-10-15 00:00:00+00', null, 7, '{}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo');
+
+SELECT setval(pg_get_serial_sequence('form_context', 'id'), (SELECT MAX(id) FROM form_context));
 
 INSERT INTO local_authority_user (id, created_date, last_modified_date, subject_identifier, is_manager, local_authority_id, email, name)
 VALUES (1,'2024-10-15 00:00:00+00','2024-10-15 00:00:00+00','urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao',true,1,'Team-PRSDB+laadmin@softwire.com','PRSDB LA Admin'),
@@ -117,15 +121,10 @@ VALUES (1, 1, true, 1, 1, '2024-10-15 00:00:00+00', null);
 
 SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
 
-INSERT INTO property_ownership (id, is_active, occupancy_type, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, property_id, created_date, last_modified_date)
-VALUES (1, true, 0, 1, 1, 2, 13, 1, 1, '2024-10-15 00:00:00+00', null);
+INSERT INTO property_ownership (id, is_active, occupancy_type, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, property_id, created_date, last_modified_date, incomplete_compliance_form_id)
+VALUES (1, true, 0, 1, 1, 2, 13, 1, 1, '2024-10-15 00:00:00+00', null, 2);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
-
-INSERT INTO form_context (id, created_date, last_modified_date, journey_type, context, subject_identifier)
-VALUES (1, current_date, current_date, 3, '{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R 1LA"},"looked-up-addresses":"[{\"singleLineAddress\":\"1, SAVOY COURT, LONDON, WC2R 0EX\",\"localAuthorityId\":318,\"uprn\":100023432931,\"buildingNumber\":\"1\",\"streetName\":\"SAVOY COURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R 0EX\"}]","select-address":{"address":"1, SAVOY COURT, LONDON, WC2R 0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo');
-
-SELECT setval(pg_get_serial_sequence('form_context', 'id'), (SELECT MAX(id) FROM form_context));
 
 INSERT INTO system_operator (id, created_date, last_modified_date, subject_identifier)
 VALUES (1,'2025-02-19 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk'),

@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 
 open class AreYouSureFormBasePage(
@@ -25,7 +25,7 @@ open class AreYouSureFormBasePage(
 
     class AreYouSureForm(
         page: Page,
-    ) : Form(page) {
+    ) : PostForm(page) {
         val areYouSureRadios = Radios(locator)
     }
 }
