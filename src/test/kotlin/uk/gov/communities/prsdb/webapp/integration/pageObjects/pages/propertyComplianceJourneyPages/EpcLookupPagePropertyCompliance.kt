@@ -37,8 +37,15 @@ class EpcLookupPagePropertyCompliance(
         form.submit()
     }
 
+    fun submitCurrentEpcNumberWhichIsExpired() {
+        form.epcCertificateNumberInput.fill(CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER)
+        form.submit()
+    }
+
     companion object {
         const val CURRENT_EPC_CERTIFICATE_NUMBER = "0000-0000-0000-0554-8410"
+
+        const val CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER = "2758-7001-6218-6661-6024"
 
         const val SUPERSEDED_EPC_CERTIFICATE_NUMBER = "0000-0000-0000-0000-8410"
 

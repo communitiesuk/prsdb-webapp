@@ -6,7 +6,6 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -25,7 +24,6 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.CheckMatchedEpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance
@@ -33,7 +31,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcNotFoundPagePropertyCompliance
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcSupersededPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyDeclarationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionOtherReasonPagePropertyCompliance
@@ -407,8 +404,6 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
         }
     }
 
-    // TODO PRSD-1132: Fix or move these
-    @Disabled
     @Nested
     inner class EpcLookupTests {
         @Test
@@ -425,21 +420,7 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
             assertThat(epcLookupPage.form.getErrorMessage()).containsText("Enter a 20 digit certificate number")
         }
 
-        @Test
-        fun `Submitting a current certificate number redirects to the check matched EPC step`(page: Page) {
-            val epcLookupPage = navigator.skipToPropertyComplianceEpcLookupPage(PROPERTY_OWNERSHIP_ID)
-            epcLookupPage.submitCurrentEpcNumber()
-            assertPageIs(page, CheckMatchedEpcPagePropertyCompliance::class, urlArguments)
-        }
-
-        @Test
-        fun `Submitting a superseded certificate number redirects to the Epc Superseded step`(page: Page) {
-            val epcLookupPage = navigator.skipToPropertyComplianceEpcLookupPage(PROPERTY_OWNERSHIP_ID)
-            epcLookupPage.submitSupersededEpcNumber()
-            assertPageIs(page, EpcSupersededPagePropertyCompliance::class, urlArguments)
-        }
-
-        // TODO PRSD-1132 - consider including this in a new journey test with a manual EPC
+        // TODO: PRSD-1200 - include this is a new journey test which doesn't find epcs
         @Test
         fun `Submitting a non-existent certificate number redirects to the EPC not found`(page: Page) {
             val epcLookupPage = navigator.skipToPropertyComplianceEpcLookupPage(PROPERTY_OWNERSHIP_ID)
@@ -448,8 +429,6 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
         }
     }
 
-    // TODO PRSD-1132: Fix or move these
-    @Disabled
     @Nested
     inner class EpcNotFoundStepTests {
         @Test
