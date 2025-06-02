@@ -16,7 +16,7 @@ class BackLinkInterceptor(
         handler: Any,
         modelAndView: ModelAndView?,
     ) {
-        val backDestination: Int? = getBackUrlParameter(request)
+        val backDestination = getBackUrlParameter(request)
         if (backDestination != null) {
             val backUrl = backProvider.getBackUrl(backDestination)
             modelAndView?.modelMap?.addAttribute(BACK_URL_ATTR_NAME, backUrl)

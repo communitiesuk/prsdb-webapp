@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor
+import kotlin.math.abs
 
 @Service
 class BackUrlStorageService(
@@ -13,14 +14,34 @@ class BackUrlStorageService(
 ) : BackLinkInterceptor.BackLinkProvider {
     fun rememberCurrentUrl(): Int {
         val currentUrl = getCurrentUrl() ?: throw IllegalStateException("Current URL is null")
+        val newUrlHash = abs(currentUrl.hashCode())
         val backUrlMap = session.getAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE).toBackUrlMapOrNull() ?: mapOf()
-        val currentUrlEntry = backUrlMap.entries.firstOrNull { it.value == currentUrl }
-        return if (currentUrlEntry != null) {
-            currentUrlEntry.key
+
+        val storedUrl = backUrlMap[newUrlHash]
+        return when (storedUrl) {
+            currentUrl -> newUrlHash
+            null -> {
+                session.setAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE, backUrlMap + (newUrlHash to currentUrl))
+                newUrlHash
+            }
+            else -> rememberForUrlWithHashCollision(backUrlMap, currentUrl)
+        }
+    }
+
+    private fun rememberForUrlWithHashCollision(
+        backUrlMap: Map<Int, String>,
+        currentUrl: String,
+    ): Int {
+        val existingUrlKey = backUrlMap.entries.firstOrNull { it.value == currentUrl }?.key
+        if (existingUrlKey != null) {
+            return existingUrlKey
         } else {
-            val nextKey = (backUrlMap.keys.maxOrNull() ?: 0) + 1
-            session.setAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE, backUrlMap + (nextKey to currentUrl))
-            nextKey
+            var newKey = 1
+            while (backUrlMap.containsKey(newKey)) {
+                newKey++
+            }
+            session.setAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE, backUrlMap + (newKey to currentUrl))
+            return newKey
         }
     }
 
