@@ -28,6 +28,7 @@ enum class PropertyComplianceStepId(
     EicrExemptionMissing("eicr-exemption-missing"),
     EPC("epc"),
     EpcNotAutoMatched("epc-not-automatched"),
+    CheckAutoMatchedEpc("check-auto-matched-epc"),
     CheckMatchedEpc("check-matched-epc"),
     EpcLookup("epc-lookup"),
     EpcNotFound("epc-not-found"),

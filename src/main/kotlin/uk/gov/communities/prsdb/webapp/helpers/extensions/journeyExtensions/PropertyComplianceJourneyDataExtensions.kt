@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions
 import kotlinx.datetime.yearsUntil
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import uk.gov.communities.prsdb.webapp.constants.AUTO_MATCHED_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -97,19 +98,36 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 EpcLookupFormModel::certificateNumber.name,
             )
 
-        fun JourneyData.getEpcDetails(): EpcDataModel? {
-            val serializedEpcDetails = JourneyDataHelper.getStringValueByKey(this, LOOKED_UP_EPC_JOURNEY_DATA_KEY) ?: return null
+        fun JourneyData.getEpcDetails(autoMatched: Boolean): EpcDataModel? {
+            val journeyDataKey =
+                if (autoMatched) {
+                    LOOKED_UP_EPC_JOURNEY_DATA_KEY
+                } else {
+                    AUTO_MATCHED_EPC_JOURNEY_DATA_KEY
+                }
+            val serializedEpcDetails = JourneyDataHelper.getStringValueByKey(this, journeyDataKey) ?: return null
             return Json.decodeFromString<EpcDataModel>(serializedEpcDetails)
         }
 
-        fun JourneyData.resetCheckMatchedEpc(): JourneyData = this - PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment
+        fun JourneyData.withEpcDetails(
+            epcDetails: EpcDataModel?,
+            autoMatched: Boolean,
+        ): JourneyData {
+            val journeyDataKey =
+                if (autoMatched) {
+                    LOOKED_UP_EPC_JOURNEY_DATA_KEY
+                } else {
+                    AUTO_MATCHED_EPC_JOURNEY_DATA_KEY
+                }
 
-        fun JourneyData.withEpcDetails(epcDetails: EpcDataModel?): JourneyData =
-            if (epcDetails == null) {
-                this + (LOOKED_UP_EPC_JOURNEY_DATA_KEY to null)
+            return if (epcDetails == null) {
+                this + (journeyDataKey to null)
             } else {
-                this + (LOOKED_UP_EPC_JOURNEY_DATA_KEY to Json.encodeToString(epcDetails))
+                this + (journeyDataKey to Json.encodeToString(epcDetails))
             }
+        }
+
+        fun JourneyData.resetCheckMatchedEpc(): JourneyData = this - PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment
 
         fun JourneyData.getHasFireSafetyDeclaration() =
             JourneyDataHelper.getFieldBooleanValue(

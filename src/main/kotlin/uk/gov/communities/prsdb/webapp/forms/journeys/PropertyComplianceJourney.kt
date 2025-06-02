@@ -41,7 +41,6 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.resetCheckMatchedEpc
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
@@ -209,7 +208,7 @@ class PropertyComplianceJourney(
                 setOf(
                     epcStep,
                     placeholderStep(
-                        PropertyComplianceStepId.CheckMatchedEpc,
+                        PropertyComplianceStepId.CheckAutoMatchedEpc,
                         "TODO PRSD-1132: Implement Check Matched EPC step",
                         PropertyComplianceStepId.EpcLookup,
                     ),
@@ -219,6 +218,10 @@ class PropertyComplianceJourney(
                         PropertyComplianceStepId.EpcLookup,
                     ),
                     epcLookupStep,
+                    placeholderStep(
+                        PropertyComplianceStepId.CheckMatchedEpc,
+                        "TODO PRSD-1132: Implement Check Matched EPC step",
+                    ),
                     epcNotFoundStep,
                     placeholderStep(
                         PropertyComplianceStepId.EpcSuperseded,
@@ -1013,11 +1016,11 @@ class PropertyComplianceJourney(
                 propertyOwnershipService
                     .getPropertyOwnership(propertyOwnershipId)
                     .property.address.uprn
-                    ?: return updateEpcDetailsInSessionAndRedirectToNextStep(epcStep, journeyData, null)
+                    ?: return updateEpcDetailsInSessionAndRedirectToNextStep(epcStep, journeyData, null, automatchedEpc = true)
 
             val epcDetails = epcLookupService.getEpcByUprn(uprn)
 
-            return updateEpcDetailsInSessionAndRedirectToNextStep(epcStep, journeyData, epcDetails)
+            return updateEpcDetailsInSessionAndRedirectToNextStep(epcStep, journeyData, epcDetails, automatchedEpc = true)
         }
 
         return getRedirectForNextStep(epcStep, journeyData, null)
@@ -1027,20 +1030,21 @@ class PropertyComplianceJourney(
         currentStep: Step<PropertyComplianceStepId>,
         journeyData: JourneyData,
         epcDetails: EpcDataModel?,
+        automatchedEpc: Boolean,
     ): String {
-        val newJourneyData = updateEpcDetailsAndResetCheckMatchedEpcAnswerInSession(journeyData, epcDetails)
+        val newJourneyData = updateEpcDetailsInSession(journeyData, epcDetails, automatchedEpc)
         return getRedirectForNextStep(currentStep, newJourneyData, null)
     }
 
-    private fun updateEpcDetailsAndResetCheckMatchedEpcAnswerInSession(
+    private fun updateEpcDetailsInSession(
         journeyData: JourneyData,
         epcDetails: EpcDataModel?,
+        automatchedEpc: Boolean,
     ): JourneyData {
-        if (epcDetails == null || (journeyData.getEpcDetails() != epcDetails)) {
+        if (epcDetails == null || (journeyData.getEpcDetails(automatchedEpc) != epcDetails)) {
             val newJourneyData =
                 journeyData
-                    .withEpcDetails(epcDetails)
-                    .resetCheckMatchedEpc()
+                    .withEpcDetails(epcDetails, automatchedEpc)
             journeyDataService.setJourneyDataInSession(newJourneyData)
             return newJourneyData
         }
@@ -1050,8 +1054,8 @@ class PropertyComplianceJourney(
     private fun epcStepNextAction(journeyData: JourneyData) =
         when (journeyData.getHasEPC()!!) {
             HasEpc.YES -> {
-                if (journeyData.getEpcDetails() != null) {
-                    Pair(PropertyComplianceStepId.CheckMatchedEpc, null)
+                if (journeyData.getEpcDetails(autoMatched = true) != null) {
+                    Pair(PropertyComplianceStepId.CheckAutoMatchedEpc, null)
                 } else {
                     Pair(PropertyComplianceStepId.EpcNotAutoMatched, null)
                 }
@@ -1064,12 +1068,7 @@ class PropertyComplianceJourney(
         val certificateNumber = journeyData.getEpcLookupCertificateNumber()!!
         val lookedUpEpc = epcLookupService.getEpcByCertificateNumber(certificateNumber)
 
-        val newJourneyData = updateEpcDetailsAndResetCheckMatchedEpcAnswerInSession(journeyData, lookedUpEpc)
-
-        if (lookedUpEpc?.isLatestCertificateForThisProperty() == true) {
-            // Redirect to CheckMatchedEpc without setting it as the nextAction
-            return Step.generateUrl(PropertyComplianceStepId.CheckMatchedEpc, null)
-        }
+        val newJourneyData = updateEpcDetailsInSession(journeyData, lookedUpEpc, automatchedEpc = false)
 
         val epcLookupStep = steps.single { it.id == PropertyComplianceStepId.EpcLookup }
         return getRedirectForNextStep(epcLookupStep, newJourneyData, null)
@@ -1077,11 +1076,10 @@ class PropertyComplianceJourney(
 
     private fun epcLookupStepNextAction(journeyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> {
         val lookedUpEpcDetails =
-            journeyData.getEpcDetails()
+            journeyData.getEpcDetails(autoMatched = false)
                 ?: return Pair(PropertyComplianceStepId.EpcNotFound, null)
         return if (lookedUpEpcDetails.isLatestCertificateForThisProperty()) {
-            // Set this to null instead of CheckMatchedEpc to avoid an infinite loop where the two steps are each other's nextAction
-            Pair(null, null)
+            Pair(PropertyComplianceStepId.CheckMatchedEpc, null)
         } else {
             Pair(PropertyComplianceStepId.EpcSuperseded, null)
         }
