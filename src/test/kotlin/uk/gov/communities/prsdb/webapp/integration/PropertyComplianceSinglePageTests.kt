@@ -484,6 +484,17 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
         }
     }
 
+    @Nested
+    inner class ResponsibilityToTenantsStepTests {
+        @Test
+        fun `Submitting without the checkbox ticked returns an error`() {
+            val responsibilityToTenantsPage = navigator.skipToPropertyComplianceResponsibilityToTenantsPage(PROPERTY_OWNERSHIP_ID)
+            responsibilityToTenantsPage.form.submit()
+            assertThat(responsibilityToTenantsPage.form.getErrorMessage())
+                .containsText("You must agree to follow these responsibilities to continue")
+        }
+    }
+
     companion object {
         private const val PROPERTY_OWNERSHIP_ID = 1L
         private val urlArguments = mapOf("propertyOwnershipId" to PROPERTY_OWNERSHIP_ID.toString())
