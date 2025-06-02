@@ -18,4 +18,4 @@ const val COOKIE_TOKENS = "cookieTokens"
 
 const val LOOKED_UP_EPC_JOURNEY_DATA_KEY = "looked-up-epc"
 
-const val AUTO_MATCHED_EPC_JOURNEY_DATA_KEY = "looked-up-epc"
+const val AUTO_MATCHED_EPC_JOURNEY_DATA_KEY = "auto-matched-epc"
