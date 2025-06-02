@@ -32,3 +32,5 @@ const val HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL =
 const val HOMES_ACT_2018_URL =
     "https://www.gov.uk/government/publications/homes-fitness-for-human-habitation-act-2018/" +
         "guide-for-landlords-homes-fitness-for-human-habitation-act-2018"
+
+const val NRLA_UK_REGULATIONS_URL = "https://www.nrla.org.uk/news/certified-and-compliant-a-landlords-guide-to-meeting-uk-regulations"

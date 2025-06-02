@@ -111,7 +111,6 @@ class PropertyComplianceJourney(
         }
     }
 
-    // TODO PRSD-1165: Update task list to match new design
     override val sections =
         listOf(
             JourneySection(uploadTasks, "propertyCompliance.taskList.upload.heading", "upload-certificates"),
@@ -120,14 +119,30 @@ class PropertyComplianceJourney(
                 "propertyCompliance.taskList.landlordResponsibilities.heading",
                 "landlord-responsibilities",
             ),
-            JourneySection(checkAndSubmitTasks, "propertyCompliance.taskList.checkAndSubmit.heading", "check-and-submit"),
+            // TODO PRSD-962: Implement check and submit task
+            JourneySection.withOneTask(
+                JourneyTask.withOneStep(
+                    placeholderStep(
+                        PropertyComplianceStepId.CheckAndSubmit,
+                        "TODO PRSD-962: Implement check and submit task",
+                        handleSubmitAndRedirect = { _, _, _ -> checkAndSubmitHandleSubmitAndRedirect() },
+                    ),
+                    "propertyCompliance.taskList.checkAndSubmit.check",
+                ),
+                "propertyCompliance.taskList.checkAndSubmit.heading",
+                "check-and-submit",
+            ),
         )
 
     override val taskListFactory =
         getTaskListViewModelFactory(
             "propertyCompliance.title",
             "propertyCompliance.taskList.heading",
-            listOf("propertyCompliance.taskList.subtitle.one", "propertyCompliance.taskList.subtitle.two"),
+            listOf(
+                "propertyCompliance.taskList.subtitle.one",
+                "propertyCompliance.taskList.subtitle.two",
+                "propertyCompliance.taskList.subtitle.three",
+            ),
             numberSections = false,
             backUrl = LANDLORD_DASHBOARD_URL,
         )
@@ -155,24 +170,6 @@ class PropertyComplianceJourney(
                         PropertyComplianceStepId.CheckAndSubmit,
                     ),
                     "propertyCompliance.taskList.landlordResponsibilities.tenants",
-                ),
-            )
-
-    private val checkAndSubmitTasks
-        get() =
-            listOf(
-                // TODO PRSD-962: Implement check and submit task
-                JourneyTask.withOneStep(
-                    placeholderStep(
-                        PropertyComplianceStepId.CheckAndSubmit,
-                        "TODO PRSD-962: Implement check and submit task",
-                        handleSubmitAndRedirect = { _, _, _ -> checkAndSubmitHandleSubmitAndRedirect() },
-                    ),
-                    "propertyCompliance.taskList.checkAndSubmit.check",
-                ),
-                JourneyTask.withOneStep(
-                    placeholderStep(PropertyComplianceStepId.Declaration, "TODO PRSD-1165: Update task list to match new design"),
-                    "propertyCompliance.taskList.checkAndSubmit.declare",
                 ),
             )
 

@@ -39,5 +39,4 @@ enum class PropertyComplianceStepId(
     KeepPropertySafe("keep-property-safe"),
     ResponsibilityToTenants("responsibility-to-tenants"),
     CheckAndSubmit("check-and-submit"),
-    Declaration("declaration"),
 }

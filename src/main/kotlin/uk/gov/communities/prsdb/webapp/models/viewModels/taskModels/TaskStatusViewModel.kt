@@ -13,13 +13,13 @@ data class TaskStatusViewModel(
     companion object {
         fun fromStatus(status: TaskStatus): TaskStatusViewModel {
             when (status) {
-                TaskStatus.CANNOT_START_YET -> return TaskStatusViewModel(
-                    "taskList.status.cannotStartYet",
+                TaskStatus.CANNOT_START -> return TaskStatusViewModel(
+                    "taskList.status.cannotStart",
                     isCannotStart = true,
                 )
 
-                TaskStatus.NOT_YET_STARTED -> return TaskStatusViewModel(
-                    "taskList.status.notYetStarted",
+                TaskStatus.NOT_STARTED -> return TaskStatusViewModel(
+                    "taskList.status.notStarted",
                     tagClass = "govuk-tag--blue",
                 )
 
