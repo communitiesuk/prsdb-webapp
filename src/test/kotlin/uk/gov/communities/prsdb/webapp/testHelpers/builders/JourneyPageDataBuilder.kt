@@ -113,10 +113,15 @@ class JourneyPageDataBuilder {
 
         fun beforePropertyComplianceEpcExemptionReason() = beforePropertyComplianceEpc().withEpcStatus(HasEpc.NOT_REQUIRED)
 
-        fun beforePropertyComplianceCheckMatchedEpc() =
-            beforePropertyComplianceEpc().withEpcStatus(HasEpc.YES).withLookedUpEpcDetails(MockEpcData.createEpcDataModel())
+        fun beforePropertyComplianceCheckAutoMatchedEpc() =
+            beforePropertyComplianceEpc()
+                .withEpcStatus(HasEpc.YES)
+                .withAutoMatchedEpcDetails(MockEpcData.createEpcDataModel())
 
-        fun beforePropertyComplianceEpcLookup() = beforePropertyComplianceCheckMatchedEpc().withCheckMatchedEpcResult(false)
+        fun beforePropertyComplianceEpcLookup() = beforePropertyComplianceCheckAutoMatchedEpc().withCheckAutoMatchedEpcResult(false)
+
+        fun beforePropertyComplianceCheckMatchedEpc() =
+            beforePropertyComplianceEpcLookup().withEpcLookupCertificateNumber().withLookedUpEpcDetails(MockEpcData.createEpcDataModel())
 
         fun beforePropertyComplianceEpcNotFound() =
             beforePropertyComplianceEpcLookup().withNullLookedUpEpcDetails().withEpcLookupCertificateNumber()

@@ -431,6 +431,7 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
 
     @Nested
     inner class EpcNotFoundStepTests {
+        // TODO: PRSD-1200 - include this is a new journey test which doesn't find epcs
         @Test
         fun `Clicking the Search Again button returns the user to the EPC lookup step`(page: Page) {
             val epcNotFoundPage = navigator.skipToPropertyComplianceEpcNotFoundPage(PROPERTY_OWNERSHIP_ID)
@@ -438,7 +439,7 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
             assertPageIs(page, EpcLookupPagePropertyCompliance::class, urlArguments)
         }
 
-        // TODO PRSD-1132 - consider including this in a new journey test with a manual EPC
+        // TODO: PRSD-1200 - include this is a new journey test which doesn't find epcs
         @Test
         fun `Clicking the Continue button directs the user to the Fire Safety Declaration step`(page: Page) {
             val epcNotFoundPage = navigator.skipToPropertyComplianceEpcNotFoundPage(PROPERTY_OWNERSHIP_ID)
