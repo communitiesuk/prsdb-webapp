@@ -1150,7 +1150,7 @@ class PropertyComplianceJourney(
         }
 
     private fun checkAutoMatchedEpcStepNextAction(journeyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
-        if (journeyData.getMatchedEpcIsCorrect() == true) {
+        if (journeyData.getAutoMatchedEpcIsCorrect() == true) {
             // TODO: PRSD-1132 - add check of expiry date and epc band
             Pair(landlordResponsibilities.first().startingStepId, null)
         } else {
@@ -1158,7 +1158,7 @@ class PropertyComplianceJourney(
         }
 
     private fun checkMatchedEpcStepNextAction(journeyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
-        if (journeyData.getAutoMatchedEpcIsCorrect() == true) {
+        if (journeyData.getMatchedEpcIsCorrect() == true) {
             // TODO: PRSD-1132 - add check of expiry date and epc band
             Pair(landlordResponsibilities.first().startingStepId, null)
         } else {

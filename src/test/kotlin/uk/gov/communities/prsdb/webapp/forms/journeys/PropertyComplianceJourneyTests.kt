@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -334,9 +335,6 @@ class PropertyComplianceJourneyTests {
         @Test
         fun `handleAndSubmit redirects to checkMatchedEpc if the looked up EPC is found and is the latest available`() {
             // Arrange
-            whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
-                .thenReturn(MockLandlordData.createPropertyOwnership(id = propertyOwnershipId))
-
             val expectedEpcDetails =
                 MockEpcData.createEpcDataModel(
                     certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
@@ -351,7 +349,6 @@ class PropertyComplianceJourneyTests {
                 completeStep(
                     PropertyComplianceStepId.EpcLookup,
                     mapOf("certificateNumber" to CURRENT_EPC_CERTIFICATE_NUMBER),
-                    stubPropertyOwnership = false,
                 )
 
             // Assert
@@ -360,10 +357,6 @@ class PropertyComplianceJourneyTests {
 
         @Test
         fun `nextAction returns CheckMatchedEpc if the looked up EPC is found and is the latest available`() {
-            // Arrange
-            whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
-                .thenReturn(MockLandlordData.createPropertyOwnership(id = propertyOwnershipId))
-
             val epcDetails =
                 MockEpcData.createEpcDataModel(
                     certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
@@ -384,10 +377,6 @@ class PropertyComplianceJourneyTests {
 
         @Test
         fun `nextAction returns EpcSuperseded if the looked up EPC is not the latest available`() {
-            // Arrange
-            whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
-                .thenReturn(MockLandlordData.createPropertyOwnership(id = propertyOwnershipId))
-
             val epcDetails =
                 MockEpcData.createEpcDataModel(
                     certificateNumber = SUPERSEDED_EPC_CERTIFICATE_NUMBER,
@@ -408,10 +397,6 @@ class PropertyComplianceJourneyTests {
 
         @Test
         fun `nextAction returns EpcNotFound if the looked up EPC is not found`() {
-            // Arrange
-            whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
-                .thenReturn(MockLandlordData.createPropertyOwnership(id = propertyOwnershipId))
-
             val updatedJourneyData =
                 JourneyDataBuilder()
                     .withEpcLookupCertificateNumber(NONEXISTENT_EPC_CERTIFICATE_NUMBER)
@@ -423,6 +408,90 @@ class PropertyComplianceJourneyTests {
                 PropertyComplianceStepId.EpcNotFound,
                 callNextActionAndReturnNextStepId(PropertyComplianceStepId.EpcLookup, updatedJourneyData),
             )
+        }
+    }
+
+    @Nested
+    inner class CheckAutoMatchedEpcTests {
+        @Test
+        fun `nextAction returns EpcLookup if matchedEpc is not correct`() {
+            val updatedJourneyData = JourneyDataBuilder().withCheckAutoMatchedEpcResult(false).build()
+
+            assertEquals(
+                PropertyComplianceStepId.EpcLookup,
+                callNextActionAndReturnNextStepId(PropertyComplianceStepId.CheckAutoMatchedEpc, updatedJourneyData),
+            )
+        }
+
+        @Test
+        fun `nextAction returns the first Landlord Responsibilities step the accepted EPC is in date with a high enough rating`() {
+            val updatedJourneyData =
+                JourneyDataBuilder()
+                    .withCheckAutoMatchedEpcResult(true)
+                    .withAutoMatchedEpcDetails(MockEpcData.createEpcDataModel())
+                    .build()
+
+            assertEquals(
+                PropertyComplianceStepId.FireSafetyDeclaration,
+                callNextActionAndReturnNextStepId(PropertyComplianceStepId.CheckAutoMatchedEpc, updatedJourneyData),
+            )
+        }
+
+        @Test
+        fun `nextAction returns the EPC Expiry Check the accepted EPC is out of date`() {
+            // TODO: PRSD-1132 PR2
+        }
+
+        @Test
+        fun `nextAction returns the MEES Exemption CHeck the accepted EPC is in date but has a low energy rating`() {
+            // TODO: PRSD-1132 PR2
+        }
+    }
+
+    @Nested
+    inner class CheckMatchedEpcTests {
+        @Test
+        fun `submit redirects to EpcLookup if matchedEpc is not correct`() {
+            // Act
+            val redirectModelAndView =
+                completeStep(
+                    PropertyComplianceStepId.CheckMatchedEpc,
+                    mapOf("matchedEpcIsCorrect" to "false"),
+                )
+
+            // Assert
+            assertEquals("redirect:${PropertyComplianceStepId.EpcLookup.urlPathSegment}", redirectModelAndView.viewName)
+        }
+
+        @Test
+        fun `nextAction returns null if matchedEpc is not correct`() {
+            val updatedJourneyData = JourneyDataBuilder().withCheckMatchedEpcResult(false).build()
+
+            assertNull(callNextActionAndReturnNextStepId(PropertyComplianceStepId.CheckMatchedEpc, updatedJourneyData))
+        }
+
+        @Test
+        fun `nextAction returns the first Landlord Responsibilities step the accepted EPC is in date with a high enough rating`() {
+            val updatedJourneyData =
+                JourneyDataBuilder()
+                    .withCheckMatchedEpcResult(true)
+                    .withLookedUpEpcDetails(MockEpcData.createEpcDataModel())
+                    .build()
+
+            assertEquals(
+                PropertyComplianceStepId.FireSafetyDeclaration,
+                callNextActionAndReturnNextStepId(PropertyComplianceStepId.CheckMatchedEpc, updatedJourneyData),
+            )
+        }
+
+        @Test
+        fun `nextAction returns the EPC Expiry Check the accepted EPC is out of date`() {
+            // TODO: PRSD-1132 PR2
+        }
+
+        @Test
+        fun `nextAction returns the MEES Exemption CHeck the accepted EPC is in date but has a low energy rating`() {
+            // TODO: PRSD-1132 PR2
         }
     }
 
@@ -496,8 +565,15 @@ class PropertyComplianceJourneyTests {
     private fun callNextActionAndReturnNextStepId(
         currentStepId: PropertyComplianceStepId,
         journeyData: JourneyData,
-    ): PropertyComplianceStepId? =
-        createPropertyComplianceJourney(propertyOwnershipId)
+        propertyOwnershipId: Long = 1L,
+        stubPropertyOwnership: Boolean = true,
+    ): PropertyComplianceStepId? {
+        if (stubPropertyOwnership) {
+            whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
+                .thenReturn(MockLandlordData.createPropertyOwnership(id = propertyOwnershipId))
+        }
+
+        return createPropertyComplianceJourney(propertyOwnershipId)
             .sections
             .flatMap { section -> section.tasks }
             .flatMap { task -> task.steps }
@@ -505,4 +581,5 @@ class PropertyComplianceJourneyTests {
             .nextAction
             .invoke(journeyData, null)
             .first
+    }
 }
