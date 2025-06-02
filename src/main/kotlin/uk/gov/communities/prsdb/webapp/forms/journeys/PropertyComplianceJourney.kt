@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
+import kotlinx.datetime.toJavaLocalDate
 import org.springframework.http.HttpStatus
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
@@ -33,8 +34,19 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
+import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionOtherReason
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionReason
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrIssueDate
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrOriginalName
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcLookupCertificateNumber
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertEngineerNum
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionOtherReason
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionReason
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertIssueDate
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertOriginalName
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
@@ -71,14 +83,16 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 class PropertyComplianceJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val propertyOwnershipId: Long,
     private val epcLookupService: EpcLookupService,
+    private val propertyComplianceService: PropertyComplianceService,
+    private val propertyOwnershipId: Long,
 ) : JourneyWithTaskList<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE,
         initialStepId = initialStepId,
@@ -102,7 +116,6 @@ class PropertyComplianceJourney(
         }
     }
 
-    // TODO PRSD-1165: Update task list to match new design
     override val sections =
         listOf(
             JourneySection(uploadTasks, "propertyCompliance.taskList.upload.heading", "upload-certificates"),
@@ -111,14 +124,30 @@ class PropertyComplianceJourney(
                 "propertyCompliance.taskList.landlordResponsibilities.heading",
                 "landlord-responsibilities",
             ),
-            JourneySection(checkAndSubmitTasks, "propertyCompliance.taskList.checkAndSubmit.heading", "check-and-submit"),
+            // TODO PRSD-962: Implement check and submit task
+            JourneySection.withOneTask(
+                JourneyTask.withOneStep(
+                    placeholderStep(
+                        PropertyComplianceStepId.CheckAndSubmit,
+                        "TODO PRSD-962: Implement check and submit task",
+                        handleSubmitAndRedirect = { _, _, _ -> checkAndSubmitHandleSubmitAndRedirect() },
+                    ),
+                    "propertyCompliance.taskList.checkAndSubmit.check",
+                ),
+                "propertyCompliance.taskList.checkAndSubmit.heading",
+                "check-and-submit",
+            ),
         )
 
     override val taskListFactory =
         getTaskListViewModelFactory(
             "propertyCompliance.title",
             "propertyCompliance.taskList.heading",
-            listOf("propertyCompliance.taskList.subtitle.one", "propertyCompliance.taskList.subtitle.two"),
+            listOf(
+                "propertyCompliance.taskList.subtitle.one",
+                "propertyCompliance.taskList.subtitle.two",
+                "propertyCompliance.taskList.subtitle.three",
+            ),
             numberSections = false,
             backUrl = LANDLORD_DASHBOARD_URL,
         )
@@ -142,24 +171,6 @@ class PropertyComplianceJourney(
                 JourneyTask.withOneStep(
                     responsibilityToTenantsStep,
                     "propertyCompliance.taskList.landlordResponsibilities.tenants",
-                ),
-            )
-
-    private val checkAndSubmitTasks
-        get() =
-            listOf(
-                // TODO PRSD-962: Implement check and submit task
-                JourneyTask.withOneStep(
-                    placeholderStep(
-                        PropertyComplianceStepId.CheckAndSubmit,
-                        "TODO PRSD-962: Implement check and submit task",
-                        handleSubmitAndRedirect = { _, _, _ -> checkAndSubmitHandleSubmitAndRedirect() },
-                    ),
-                    "propertyCompliance.taskList.checkAndSubmit.check",
-                ),
-                JourneyTask.withOneStep(
-                    placeholderStep(PropertyComplianceStepId.Declaration, "TODO PRSD-1165: Update task list to match new design"),
-                    "propertyCompliance.taskList.checkAndSubmit.declare",
                 ),
             )
 
@@ -1071,7 +1082,46 @@ class PropertyComplianceJourney(
         }
 
     private fun checkAndSubmitHandleSubmitAndRedirect(): String {
-        // TODO PRSD-1202: Save compliance data to the database
+        val filteredJourneyData = last().filteredJourneyData
+
+        val gasSafetyCertFilename =
+            filteredJourneyData.getGasSafetyCertOriginalName()?.let {
+                PropertyComplianceJourneyHelper.getCertFilename(
+                    propertyOwnershipId,
+                    PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
+                    it,
+                )
+            }
+
+        val eicrFilename =
+            filteredJourneyData.getEicrOriginalName()?.let {
+                PropertyComplianceJourneyHelper.getCertFilename(
+                    propertyOwnershipId,
+                    PropertyComplianceStepId.EicrUpload.urlPathSegment,
+                    it,
+                )
+            }
+
+        val epcDetails = journeyDataService.getJourneyDataFromSession().getEpcDetails()
+
+        propertyComplianceService.createPropertyCompliance(
+            propertyOwnershipId = propertyOwnershipId,
+            gasSafetyCertS3Key = gasSafetyCertFilename,
+            gasSafetyCertIssueDate = filteredJourneyData.getGasSafetyCertIssueDate()?.toJavaLocalDate(),
+            gasSafetyCertEngineerNum = filteredJourneyData.getGasSafetyCertEngineerNum(),
+            gasSafetyCertExemptionReason = filteredJourneyData.getGasSafetyCertExemptionReason(),
+            gasSafetyCertExemptionOtherReason = filteredJourneyData.getGasSafetyCertExemptionOtherReason(),
+            eicrS3Key = eicrFilename,
+            eicrIssueDate = filteredJourneyData.getEicrIssueDate()?.toJavaLocalDate(),
+            eicrExemptionReason = filteredJourneyData.getEicrExemptionReason(),
+            eicrExemptionOtherReason = filteredJourneyData.getEicrExemptionOtherReason(),
+            // TODO PRSD-1132: Assign epcUrl
+            epcExpiryDate = epcDetails?.expiryDate?.toJavaLocalDate(),
+            epcEnergyRating = epcDetails?.energyRating,
+            epcExemptionReason = filteredJourneyData.getEpcExemptionReason(),
+            // TODO PRSD-1143: Assign epcMeesExemptionReason
+            hasFireSafetyDeclaration = filteredJourneyData.getHasFireSafetyDeclaration()!!,
+        )
 
         propertyOwnershipService.deleteIncompleteComplianceForm(propertyOwnershipId)
 

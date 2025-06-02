@@ -40,3 +40,5 @@ const val RIGHT_TO_RENT_CHECKS_URL = "https://www.gov.uk/check-tenant-right-to-r
 const val GOVERNMENT_APPROVED_DEPOSIT_PROTECTION_SCHEME_URL = "https://www.gov.uk/deposit-protection-schemes-and-landlords"
 
 const val HOW_TO_RENT_GUIDE_URL = "https://www.gov.uk/government/publications/how-to-rent"
+
+const val NRLA_UK_REGULATIONS_URL = "https://www.nrla.org.uk/news/certified-and-compliant-a-landlords-guide-to-meeting-uk-regulations"

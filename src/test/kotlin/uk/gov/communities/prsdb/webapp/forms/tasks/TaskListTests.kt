@@ -187,7 +187,7 @@ class TaskListTests {
                     "taskList.status.completed",
                     "taskList.status.completed",
                     "taskList.status.completed",
-                    "taskList.status.notYetStarted",
+                    "taskList.status.notStarted",
                 ),
                 taskList.map { it.status.textKey },
             )
@@ -209,8 +209,8 @@ class TaskListTests {
                 listOf(
                     "taskList.status.completed",
                     "taskList.status.inProgress",
-                    "taskList.status.cannotStartYet",
-                    "taskList.status.cannotStartYet",
+                    "taskList.status.cannotStart",
+                    "taskList.status.cannotStart",
                 ),
                 taskList.map { it.status.textKey },
             )
@@ -256,12 +256,12 @@ class TaskListTests {
         )
 
         @Test
-        fun `when a task is exactly finished, the next task is marked not yet started`() {
+        fun `when a task is exactly finished, the next task is marked not started`() {
             // Arrange
             val testJourney =
                 getLinearTestJourney(
                     simpleTaskOneCompleted = true,
-                    twoStepTaskStatus = TaskStatus.NOT_YET_STARTED,
+                    twoStepTaskStatus = TaskStatus.NOT_STARTED,
                     simpleTaskTwoCompleted = false,
                 )
 
@@ -272,7 +272,7 @@ class TaskListTests {
 
             // Assert
             assertIterableEquals(
-                listOf("taskList.status.completed", "taskList.status.notYetStarted", "taskList.status.cannotStartYet"),
+                listOf("taskList.status.completed", "taskList.status.notStarted", "taskList.status.cannotStart"),
                 taskList.map { it.status.textKey },
             )
         }
@@ -294,7 +294,7 @@ class TaskListTests {
 
             // Assert
             assertIterableEquals(
-                listOf("taskList.status.completed", "taskList.status.inProgress", "taskList.status.cannotStartYet"),
+                listOf("taskList.status.completed", "taskList.status.inProgress", "taskList.status.cannotStart"),
                 taskList.map { it.status.textKey },
             )
         }
