@@ -9,8 +9,10 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
-class CheckOccupancyAnswersPage :
-    AbstractPage(
+class CheckOccupancyAnswersPage(
+    private val numberOfHouseholdsStepId: UpdatePropertyDetailsStepId,
+    private val numberOfPeopleStepId: UpdatePropertyDetailsStepId,
+) : AbstractPage(
         NoInputFormModel::class,
         "forms/checkAnswersForm",
         mapOf(
@@ -47,13 +49,13 @@ class CheckOccupancyAnswersPage :
         listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.numberOfHouseholds.fieldSetHeading",
-                filteredJourneyData.getNumberOfHouseholdsUpdateIfPresent()!!,
-                UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment,
+                filteredJourneyData.getNumberOfHouseholdsUpdateIfPresent(numberOfHouseholdsStepId)!!,
+                numberOfHouseholdsStepId.urlPathSegment,
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.numberOfPeople.fieldSetHeading",
-                filteredJourneyData.getNumberOfPeopleUpdateIfPresent()!!,
-                UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment,
+                filteredJourneyData.getNumberOfPeopleUpdateIfPresent(numberOfPeopleStepId)!!,
+                numberOfPeopleStepId.urlPathSegment,
             ),
         )
 }
