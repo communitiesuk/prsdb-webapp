@@ -4,6 +4,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.AUTO_MATCHED_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
@@ -588,6 +589,17 @@ class JourneyDataBuilder(
     fun withEpcStatus(hasEpc: HasEpc): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EPC.urlPathSegment] =
             mapOf(EpcFormModel::hasCert.name to hasEpc)
+        return this
+    }
+
+    fun withAutoMatchedEpcDetails(epcDetails: EpcDataModel?): JourneyDataBuilder {
+        journeyData[AUTO_MATCHED_EPC_JOURNEY_DATA_KEY] = Json.encodeToString(epcDetails)
+        return this
+    }
+
+    fun withCheckAutoMatchedEpcResult(matchedEpcIsCorrect: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.CheckAutoMatchedEpc.urlPathSegment] =
+            mapOf(CheckMatchedEpcFormModel::matchedEpcIsCorrect.name to matchedEpcIsCorrect)
         return this
     }
 

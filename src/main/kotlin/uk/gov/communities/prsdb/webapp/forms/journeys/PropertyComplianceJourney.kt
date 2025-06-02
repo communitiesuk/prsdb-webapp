@@ -800,7 +800,7 @@ class PropertyComplianceJourney(
                                     ),
                             ),
                     ),
-                nextAction = { journeyData, _ -> checkAutomatchedEpcStepNextAction(journeyData) },
+                nextAction = { journeyData, _ -> checkAutoMatchedEpcStepNextAction(journeyData) },
             )
 
     private val checkMatchedEpcStep
@@ -1092,11 +1092,11 @@ class PropertyComplianceJourney(
                 propertyOwnershipService
                     .getPropertyOwnership(propertyOwnershipId)
                     .property.address.uprn
-                    ?: return updateEpcDetailsInSessionAndRedirectToNextStep(epcStep, journeyData, null, automatchedEpc = true)
+                    ?: return updateEpcDetailsInSessionAndRedirectToNextStep(epcStep, journeyData, null, autoMatchedEpc = true)
 
             val epcDetails = epcLookupService.getEpcByUprn(uprn)
 
-            return updateEpcDetailsInSessionAndRedirectToNextStep(epcStep, journeyData, epcDetails, automatchedEpc = true)
+            return updateEpcDetailsInSessionAndRedirectToNextStep(epcStep, journeyData, epcDetails, autoMatchedEpc = true)
         }
 
         return getRedirectForNextStep(epcStep, journeyData, null)
@@ -1106,20 +1106,20 @@ class PropertyComplianceJourney(
         currentStep: Step<PropertyComplianceStepId>,
         journeyData: JourneyData,
         epcDetails: EpcDataModel?,
-        automatchedEpc: Boolean,
+        autoMatchedEpc: Boolean,
     ): String {
-        val newJourneyData = updateEpcDetailsInSession(journeyData, epcDetails, automatchedEpc)
+        val newJourneyData = updateEpcDetailsInSession(journeyData, epcDetails, autoMatchedEpc)
         return getRedirectForNextStep(currentStep, newJourneyData, null)
     }
 
     private fun updateEpcDetailsInSession(
         journeyData: JourneyData,
         epcDetails: EpcDataModel?,
-        automatchedEpc: Boolean,
+        autoMatchedEpc: Boolean,
     ): JourneyData {
         val newJourneyData =
             journeyData
-                .withEpcDetails(epcDetails, automatchedEpc)
+                .withEpcDetails(epcDetails, autoMatchedEpc)
         journeyDataService.setJourneyDataInSession(newJourneyData)
         return newJourneyData
     }
@@ -1149,7 +1149,7 @@ class PropertyComplianceJourney(
             HasEpc.NOT_REQUIRED -> Pair(PropertyComplianceStepId.EpcExemptionReason, null)
         }
 
-    private fun checkAutomatchedEpcStepNextAction(journeyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
+    private fun checkAutoMatchedEpcStepNextAction(journeyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
         if (journeyData.getMatchedEpcIsCorrect() == true) {
             // TODO: PRSD-1132 - add check of expiry date and epc band
             Pair(landlordResponsibilities.first().startingStepId, null)
@@ -1173,7 +1173,7 @@ class PropertyComplianceJourney(
         val lookedUpEpc = epcLookupService.getEpcByCertificateNumber(certificateNumber)
 
         var newJourneyData = resetCheckMatchedEpcInSession(journeyData, lookedUpEpc)
-        newJourneyData = updateEpcDetailsInSession(newJourneyData, lookedUpEpc, automatchedEpc = false)
+        newJourneyData = updateEpcDetailsInSession(newJourneyData, lookedUpEpc, autoMatchedEpc = false)
 
         val epcLookupStep = steps.single { it.id == PropertyComplianceStepId.EpcLookup }
         return getRedirectForNextStep(epcLookupStep, newJourneyData, null)
