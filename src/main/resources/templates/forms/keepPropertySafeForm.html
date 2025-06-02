@@ -6,8 +6,7 @@
 <!--/*@thymesVar id="homesAct2018Url" type="java.lang.String"*/-->
 <!--/*@thymesVar id="housingHealthAndSafetyRatingSystemUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
-<th:block id="form-content">
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="fieldset-content"
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'agreesToResponsibility', #{forms.landlordResponsibilities.keepPropertySafe.heading}, null)}">
         <p class="govuk-body" th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.one}">forms.landlordResponsibilities.keepPropertySafe.paragraph.one</p>
@@ -53,5 +52,4 @@
                 th:replace="~{fragments/forms/checkboxes :: checkboxes(null,'agreesToResponsibility',null, ${options})}"></th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
-</th:block>
 </html>
