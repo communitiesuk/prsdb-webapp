@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.ADDRESS_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.CONTACT_INFO_COL_INDEX
@@ -188,6 +189,20 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
             searchLandlordRegisterPage.backLink.clickAndWait()
             assertPageIs(page, LocalAuthorityDashboardPage::class)
+        }
+
+        @Test
+        fun `Back link on a landlord returns to the search`(page: Page) {
+            val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
+            searchLandlordRegisterPage.searchBar.search("L-CKSQ-3SX9")
+            val resultTable = searchLandlordRegisterPage.resultTable
+
+            resultTable.getClickableCell(0, LANDLORD_COL_INDEX).link.clickAndWait()
+
+            val landlordPage = assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
+            landlordPage.backLink.clickAndWait()
+
+            assertThat(resultTable.getCell(0, LANDLORD_COL_INDEX)).containsText("Alexander Smith\nL-CKSQ-3SX9")
         }
     }
 
