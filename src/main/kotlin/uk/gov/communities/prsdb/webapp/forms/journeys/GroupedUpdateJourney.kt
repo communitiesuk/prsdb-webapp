@@ -36,8 +36,8 @@ abstract class GroupedUpdateJourney<T : GroupedUpdateStepId<*>>(
         changingAnswersForStep: String? = null,
     ): ModelAndView = completeStep(stepName, formData, null, principal, changingAnswersForStep)
 
-    protected fun Map<String, Any>.withBackUrlIfNotChangingAnswer(backUrl: String) =
-        if (isChangingAnswer) {
+    protected fun Map<String, Any>.withBackUrlIfNotChangingAnswer(backUrl: String?) =
+        if (backUrl == null || isChangingAnswer) {
             this
         } else {
             this + (BACK_URL_ATTR_NAME to backUrl)

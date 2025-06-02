@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationNumberOfPeoplePage
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
+import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsGroupIdentifier
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getIsOccupiedUpdateIfPresent
@@ -73,12 +74,17 @@ class PropertyDetailsUpdateJourney(
         val originalPropertyData =
             mutableMapOf(
                 UpdatePropertyDetailsStepId.UpdateOwnershipType toPageData OwnershipTypeFormModel::fromPropertyOwnership,
-                UpdatePropertyDetailsStepId.UpdateOccupancy toPageData OccupancyFormModel::fromPropertyOwnership,
-                UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds toPageData NumberOfHouseholdsFormModel::fromPropertyOwnership,
-                UpdatePropertyDetailsStepId.UpdateNumberOfPeople toPageData NumberOfPeopleFormModel::fromPropertyOwnership,
-                UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers.urlPathSegment to mapOf<String, Any>() as PageData,
                 UpdatePropertyDetailsStepId.UpdateLicensingType toPageData LicensingTypeFormModel::fromPropertyOwnership,
-                UpdatePropertyDetailsStepId.CheckYourLicensingAnswers.urlPathSegment to mapOf<String, Any>() as PageData,
+                UpdatePropertyDetailsStepId.CheckYourLicensingAnswers.urlPathSegment to emptyMap<String, Any>(),
+                UpdatePropertyDetailsStepId.UpdateOccupancy toPageData OccupancyFormModel::fromPropertyOwnership,
+                UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfHouseholds toPageData NumberOfHouseholdsFormModel::fromPropertyOwnership,
+                UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfPeople toPageData NumberOfPeopleFormModel::fromPropertyOwnership,
+                UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers.urlPathSegment to emptyMap<String, Any>(),
+                UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds toPageData NumberOfHouseholdsFormModel::fromPropertyOwnership,
+                UpdatePropertyDetailsStepId.UpdateHouseholdsNumberOfPeople toPageData NumberOfPeopleFormModel::fromPropertyOwnership,
+                UpdatePropertyDetailsStepId.CheckYourHouseholdsAnswers.urlPathSegment to emptyMap<String, Any>(),
+                UpdatePropertyDetailsStepId.UpdateNumberOfPeople toPageData NumberOfPeopleFormModel::fromPropertyOwnership,
+                UpdatePropertyDetailsStepId.CheckYourPeopleAnswers.urlPathSegment to emptyMap<String, Any>(),
             )
 
         val licenceNumberStepIdAndFormModel = propertyOwnership.getLicenceNumberStepIdAndFormModel()
@@ -271,52 +277,63 @@ class PropertyDetailsUpdateJourney(
             saveAfterSubmit = false,
         )
 
-    private val numberOfHouseholdsStep =
-        Step(
-            id = UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds,
-            page =
-                Page(
-                    formModel = NumberOfHouseholdsFormModel::class,
-                    templateName = "forms/numberOfHouseholdsForm",
-                    content =
-                        mapOf(
-                            "title" to "propertyDetails.update.title",
-                            "fieldSetHeading" to getNumberOfHouseholdsStepFieldSetHeading(),
-                            "label" to "forms.numberOfHouseholds.label",
-                        ).withBackUrlIfNotChangingAnswer(getNumberOfHouseholdsStepBackUrl()),
-                ),
-            nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateNumberOfPeople, null) },
-            saveAfterSubmit = false,
-        )
+    private val numberOfHouseholdsStep
+        get() =
+            when (stepGroupId) {
+                UpdatePropertyDetailsGroupIdentifier.Occupancy ->
+                    createNumberOfHouseholdsStep(
+                        stepId = UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfHouseholds,
+                        fieldSetHeadingKey = "forms.numberOfHouseholds.fieldSetHeading",
+                        nextActionStepId = UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfPeople,
+                    )
+                UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds ->
+                    createNumberOfHouseholdsStep(
+                        stepId = UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds,
+                        fieldSetHeadingKey = "forms.update.numberOfHouseholds.fieldSetHeading",
+                        nextActionStepId = UpdatePropertyDetailsStepId.UpdateHouseholdsNumberOfPeople,
+                        backUrl = RELATIVE_PROPERTY_DETAILS_PATH,
+                    )
+                else ->
+                    createNumberOfHouseholdsStep(
+                        stepId = UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds,
+                        fieldSetHeadingKey = "forms.update.numberOfHouseholds.fieldSetHeading",
+                        nextActionStepId = UpdatePropertyDetailsStepId.UpdateNumberOfPeople,
+                    )
+            }
 
-    private val numberOfPeopleStep =
-        Step(
-            id = UpdatePropertyDetailsStepId.UpdateNumberOfPeople,
-            page =
-                PropertyRegistrationNumberOfPeoplePage(
-                    formModel = NumberOfPeopleFormModel::class,
-                    templateName = "forms/numberOfPeopleForm",
-                    content =
-                        mapOf(
-                            "title" to "propertyDetails.update.title",
-                            "fieldSetHeading" to getNumberOfPeopleStepFieldSetHeading(),
-                            "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
-                            "label" to "forms.numberOfPeople.label",
-                        ).withBackUrlIfNotChangingAnswer(getNumberOfPeopleStepBackUrl()),
-                    latestNumberOfHouseholds =
-                        journeyDataService.getJourneyDataFromSession().getLatestNumberOfHouseholds(originalDataKey),
-                ),
-            nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers, null) },
-            saveAfterSubmit = false,
-        )
+    private val numberOfPeopleStep
+        get() =
+            when (stepGroupId) {
+                UpdatePropertyDetailsGroupIdentifier.Occupancy ->
+                    createNumberOfPeopleStep(
+                        stepId = UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfPeople,
+                        fieldSetHeadingKey = "forms.numberOfPeople.fieldSetHeading",
+                        nextActionStepId = UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers,
+                    )
+                UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds ->
+                    createNumberOfPeopleStep(
+                        stepId = UpdatePropertyDetailsStepId.UpdateHouseholdsNumberOfPeople,
+                        fieldSetHeadingKey = "forms.update.numberOfPeople.fieldSetHeading",
+                        nextActionStepId = UpdatePropertyDetailsStepId.CheckYourHouseholdsAnswers,
+                    )
+                else ->
+                    createNumberOfPeopleStep(
+                        stepId = UpdatePropertyDetailsStepId.UpdateNumberOfPeople,
+                        fieldSetHeadingKey = "forms.update.numberOfPeople.fieldSetHeading",
+                        nextActionStepId = UpdatePropertyDetailsStepId.CheckYourPeopleAnswers,
+                        backUrl = RELATIVE_PROPERTY_DETAILS_PATH,
+                    )
+            }
 
-    private val checkOccupancyAnswers =
-        Step(
-            id = UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers,
-            page = CheckOccupancyAnswersPage(),
-            handleSubmitAndRedirect = { _, _, _ -> updatePropertyAndRedirect() },
-            saveAfterSubmit = false,
-        )
+    private val checkOccupancyAnswers
+        get() =
+            createCheckOccupancyAnswersStep(
+                when (stepGroupId) {
+                    UpdatePropertyDetailsGroupIdentifier.Occupancy -> UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers
+                    UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds -> UpdatePropertyDetailsStepId.CheckYourHouseholdsAnswers
+                    else -> UpdatePropertyDetailsStepId.CheckYourPeopleAnswers
+                },
+            )
 
     override val sections =
         createSingleSectionWithSingleTaskFromSteps(
@@ -335,39 +352,69 @@ class PropertyDetailsUpdateJourney(
             ),
         )
 
+    private val stepGroupId
+        get() = UpdatePropertyDetailsStepId.fromPathSegment(stepName)!!.groupIdentifier
+
+    private fun createNumberOfHouseholdsStep(
+        stepId: UpdatePropertyDetailsStepId,
+        fieldSetHeadingKey: String,
+        nextActionStepId: UpdatePropertyDetailsStepId,
+        backUrl: String? = null,
+    ) = Step(
+        id = stepId,
+        page =
+            Page(
+                formModel = NumberOfHouseholdsFormModel::class,
+                templateName = "forms/numberOfHouseholdsForm",
+                content =
+                    mapOf(
+                        "title" to "propertyDetails.update.title",
+                        "fieldSetHeading" to fieldSetHeadingKey,
+                        "label" to "forms.numberOfHouseholds.label",
+                    ).withBackUrlIfNotChangingAnswer(backUrl),
+            ),
+        nextAction = { _, _ -> Pair(nextActionStepId, null) },
+        saveAfterSubmit = false,
+    )
+
+    private fun createNumberOfPeopleStep(
+        stepId: UpdatePropertyDetailsStepId,
+        fieldSetHeadingKey: String,
+        nextActionStepId: UpdatePropertyDetailsStepId,
+        backUrl: String? = null,
+    ) = Step(
+        id = stepId,
+        page =
+            PropertyRegistrationNumberOfPeoplePage(
+                formModel = NumberOfPeopleFormModel::class,
+                templateName = "forms/numberOfPeopleForm",
+                content =
+                    mapOf(
+                        "title" to "propertyDetails.update.title",
+                        "fieldSetHeading" to fieldSetHeadingKey,
+                        "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
+                        "label" to "forms.numberOfPeople.label",
+                    ).withBackUrlIfNotChangingAnswer(backUrl),
+                latestNumberOfHouseholds =
+                    journeyDataService.getJourneyDataFromSession().getLatestNumberOfHouseholds(numberOfHouseholdsStep.id, originalDataKey),
+            ),
+        nextAction = { _, _ -> Pair(nextActionStepId, null) },
+        saveAfterSubmit = false,
+    )
+
+    private fun createCheckOccupancyAnswersStep(stepId: UpdatePropertyDetailsStepId) =
+        Step(
+            id = stepId,
+            page = CheckOccupancyAnswersPage(numberOfHouseholdsStep.id, numberOfPeopleStep.id),
+            handleSubmitAndRedirect = { _, _, _ -> updatePropertyAndRedirect() },
+            saveAfterSubmit = false,
+        )
+
     private fun getOccupancyStepFieldSetHeading() =
         if (wasPropertyOriginallyOccupied()) {
             "forms.update.occupancy.occupied.fieldSetHeading"
         } else {
             "forms.occupancy.fieldSetHeading"
-        }
-
-    private fun getNumberOfHouseholdsStepFieldSetHeading() =
-        if (wasPropertyOriginallyOccupied()) {
-            "forms.update.numberOfHouseholds.fieldSetHeading"
-        } else {
-            "forms.numberOfHouseholds.fieldSetHeading"
-        }
-
-    private fun getNumberOfPeopleStepFieldSetHeading() =
-        if (wasPropertyOriginallyOccupied()) {
-            "forms.update.numberOfPeople.fieldSetHeading"
-        } else {
-            "forms.numberOfPeople.fieldSetHeading"
-        }
-
-    private fun getNumberOfHouseholdsStepBackUrl() =
-        if (hasPropertyOccupancyBeenUpdated()) {
-            UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment
-        } else {
-            RELATIVE_PROPERTY_DETAILS_PATH
-        }
-
-    private fun getNumberOfPeopleStepBackUrl() =
-        if (hasNumberOfHouseholdsBeenUpdated()) {
-            UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment
-        } else {
-            RELATIVE_PROPERTY_DETAILS_PATH
         }
 
     private fun licensingTypeNextAction(filteredJourneyData: JourneyData): Pair<UpdatePropertyDetailsStepId, Int?> {
@@ -382,9 +429,9 @@ class PropertyDetailsUpdateJourney(
 
     private fun occupancyNextAction(filteredJourneyData: JourneyData) =
         if (filteredJourneyData.getIsOccupiedUpdateIfPresent()!!) {
-            Pair(UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds, null)
+            Pair(numberOfHouseholdsStep.id, null)
         } else {
-            Pair(UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers, null)
+            Pair(checkOccupancyAnswers.id, null)
         }
 
     private fun updatePropertyAndRedirect(): String {
@@ -393,10 +440,10 @@ class PropertyDetailsUpdateJourney(
         val propertyUpdate =
             PropertyOwnershipUpdateModel(
                 ownershipType = journeyData.getOwnershipTypeUpdateIfPresent(),
-                numberOfHouseholds = journeyData.getNumberOfHouseholdsUpdateIfPresent(),
-                numberOfPeople = journeyData.getNumberOfPeopleUpdateIfPresent(),
                 licensingType = journeyData.getLicensingTypeUpdateIfPresent(),
                 licenceNumber = journeyData.getLicenceNumberUpdateIfPresent(),
+                numberOfHouseholds = journeyData.getNumberOfHouseholdsUpdateIfPresent(numberOfHouseholdsStep.id),
+                numberOfPeople = journeyData.getNumberOfPeopleUpdateIfPresent(numberOfPeopleStep.id),
             )
 
         propertyOwnershipService.updatePropertyOwnership(propertyOwnershipId, propertyUpdate)
@@ -407,11 +454,6 @@ class PropertyDetailsUpdateJourney(
     }
 
     private fun wasPropertyOriginallyOccupied() = journeyDataService.getJourneyDataFromSession().getOriginalIsOccupied(originalDataKey)!!
-
-    private fun hasPropertyOccupancyBeenUpdated() = journeyDataService.getJourneyDataFromSession().getIsOccupiedUpdateIfPresent() != null
-
-    private fun hasNumberOfHouseholdsBeenUpdated() =
-        journeyDataService.getJourneyDataFromSession().getNumberOfHouseholdsUpdateIfPresent() != null
 
     companion object {
         // The path for the update journey is "{propertyDetailsPath}/update/{pathSegment}". As there is no trailing slash, any relative path is

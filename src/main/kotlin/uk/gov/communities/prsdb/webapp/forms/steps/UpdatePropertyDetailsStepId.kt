@@ -6,15 +6,20 @@ enum class UpdatePropertyDetailsStepId(
     override val isCheckYourAnswersStepId: Boolean = false,
 ) : GroupedUpdateStepId<UpdatePropertyDetailsGroupIdentifier> {
     UpdateOwnershipType("ownership-type", UpdatePropertyDetailsGroupIdentifier.Ownership),
-    UpdateOccupancy("occupancy", UpdatePropertyDetailsGroupIdentifier.Occupancy),
-    UpdateNumberOfHouseholds("number-of-households", UpdatePropertyDetailsGroupIdentifier.Occupancy),
-    UpdateNumberOfPeople("number-of-people", UpdatePropertyDetailsGroupIdentifier.Occupancy),
-    CheckYourOccupancyAnswers("check-occupancy-answers", UpdatePropertyDetailsGroupIdentifier.Occupancy, true),
     UpdateLicensingType("licensing-type", UpdatePropertyDetailsGroupIdentifier.Licensing),
     UpdateSelectiveLicence("selective-licence", UpdatePropertyDetailsGroupIdentifier.Licensing),
     UpdateHmoMandatoryLicence("hmo-mandatory-licence", UpdatePropertyDetailsGroupIdentifier.Licensing),
     UpdateHmoAdditionalLicence("hmo-additional-licence", UpdatePropertyDetailsGroupIdentifier.Licensing),
     CheckYourLicensingAnswers("check-licensing-answers", UpdatePropertyDetailsGroupIdentifier.Licensing, true),
+    UpdateOccupancy("occupancy", UpdatePropertyDetailsGroupIdentifier.Occupancy),
+    UpdateOccupancyNumberOfHouseholds("occupancy-number-of-households", UpdatePropertyDetailsGroupIdentifier.Occupancy),
+    UpdateOccupancyNumberOfPeople("occupancy-number-of-people", UpdatePropertyDetailsGroupIdentifier.Occupancy),
+    CheckYourOccupancyAnswers("check-occupancy-answers", UpdatePropertyDetailsGroupIdentifier.Occupancy, true),
+    UpdateNumberOfHouseholds("number-of-households", UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds),
+    UpdateHouseholdsNumberOfPeople("households-number-of-people", UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds),
+    CheckYourHouseholdsAnswers("check-households-answers", UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds, true),
+    UpdateNumberOfPeople("number-of-people", UpdatePropertyDetailsGroupIdentifier.NumberOfPeople),
+    CheckYourPeopleAnswers("check-people-answers", UpdatePropertyDetailsGroupIdentifier.NumberOfPeople, true),
     ;
 
     companion object {
@@ -24,6 +29,8 @@ enum class UpdatePropertyDetailsStepId(
 
 enum class UpdatePropertyDetailsGroupIdentifier {
     Ownership,
-    Occupancy,
     Licensing,
+    Occupancy,
+    NumberOfHouseholds,
+    NumberOfPeople,
 }
