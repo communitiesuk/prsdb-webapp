@@ -23,6 +23,8 @@ const val EPC_GUIDE_URL =
 
 const val CONTACT_EPC_ASSESSOR_URL = "https://www.gov.uk/get-new-energy-certificate#find-an-assessor"
 
+const val VIEW_EPC_CERTIFICATE_BASE_URL = "https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate"
+
 const val HOUSES_IN_MULTIPLE_OCCUPATION_URL = "https://www.gov.uk/private-renting/houses-in-multiple-occupation"
 
 const val HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL =
