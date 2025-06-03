@@ -45,14 +45,14 @@ class EpcDataModelTests {
     }
 
     @Test
-    fun `getEpcCertificateLink returns the certificate url`() {
+    fun `getEpcCertificateUrl returns the certificate url`() {
         val epcDataModel =
             MockEpcData.createEpcDataModel(
                 certificateNumber = DEFAULT_EPC_CERTIFICATE_NUMBER,
             )
         val expectedUrl = "${VIEW_EPC_CERTIFICATE_BASE_URL}/${DEFAULT_EPC_CERTIFICATE_NUMBER}"
 
-        assertEquals(expectedUrl, epcDataModel.getEpcCertificateLink())
+        assertEquals(expectedUrl, epcDataModel.getEpcCertificateUrl())
     }
 
     @Test

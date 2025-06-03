@@ -23,7 +23,7 @@ data class EpcDataModel(
 
     fun isLatestCertificateForThisProperty() = certificateNumber == latestCertificateNumberForThisProperty
 
-    fun getEpcCertificateLink() = "${VIEW_EPC_CERTIFICATE_BASE_URL}/${parseCertificateNumberOrNull(certificateNumber)}"
+    fun getEpcCertificateUrl() = "${VIEW_EPC_CERTIFICATE_BASE_URL}/${parseCertificateNumberOrNull(certificateNumber)}"
 
     fun isPastExpiryDate(): Boolean = expiryDate < DateTimeHelper().getCurrentDateInUK()
 

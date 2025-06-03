@@ -1275,7 +1275,7 @@ class PropertyComplianceJourney(
             eicrIssueDate = filteredJourneyData.getEicrIssueDate()?.toJavaLocalDate(),
             eicrExemptionReason = filteredJourneyData.getEicrExemptionReason(),
             eicrExemptionOtherReason = filteredJourneyData.getEicrExemptionOtherReason(),
-            // TODO PRSD-1132: Assign epcUrl
+            epcUrl = epcDetails?.getEpcCertificateUrl(),
             epcExpiryDate = epcDetails?.expiryDate?.toJavaLocalDate(),
             epcEnergyRating = epcDetails?.energyRating,
             epcExemptionReason = filteredJourneyData.getEpcExemptionReason(),
