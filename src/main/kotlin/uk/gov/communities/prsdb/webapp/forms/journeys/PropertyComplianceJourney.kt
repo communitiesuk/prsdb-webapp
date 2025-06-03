@@ -238,9 +238,39 @@ class PropertyComplianceJourney(
                         "TODO PRSD-1140: Implement EPC Superseded step",
                         PropertyComplianceStepId.CheckMatchedEpc,
                     ),
+                    placeholderStep(
+                        PropertyComplianceStepId.EpcExpiryCheck,
+                        "TODO PRSD-1146: Implement EPC Expiry Check step",
+                        PropertyComplianceStepId.EpcExpiryReason,
+                    ),
+                    placeholderStep(
+                        PropertyComplianceStepId.EpcExpiryReason,
+                        "TODO PRSD-1147: Implement EPC Expiry Reason step",
+                        PropertyComplianceStepId.FireSafetyDeclaration,
+                    ),
                     epcMissingStep,
                     epcExemptionReasonStep,
                     epcExemptionConfirmationStep,
+                    placeholderStep(
+                        PropertyComplianceStepId.MeesExemptionCheck,
+                        "TODO PRSD-1141: Implement MEES Exemption Check step",
+                        PropertyComplianceStepId.MeesExemptionReason,
+                    ),
+                    placeholderStep(
+                        PropertyComplianceStepId.MeesExemptionReason,
+                        "TODO PRSD-1143: Implement MEES Exemption Reason step",
+                        PropertyComplianceStepId.MeesExemptionConfirmation,
+                    ),
+                    placeholderStep(
+                        PropertyComplianceStepId.MeesExemptionConfirmation,
+                        "TODO PRSD-1145: Implement MEES Exemption Confirmation step",
+                        PropertyComplianceStepId.FireSafetyDeclaration,
+                    ),
+                    placeholderStep(
+                        PropertyComplianceStepId.LowEnergyRating,
+                        "TODO PRSD-1144: Implement Low Energy Rating step",
+                        PropertyComplianceStepId.FireSafetyDeclaration,
+                    ),
                 ),
                 "propertyCompliance.taskList.upload.epc",
                 "propertyCompliance.taskList.upload.epc.hint",
@@ -1149,19 +1179,31 @@ class PropertyComplianceJourney(
 
     private fun checkAutoMatchedEpcStepNextAction(journeyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
         if (journeyData.getAutoMatchedEpcIsCorrect() == true) {
-            // TODO: PRSD-1132 - add check of expiry date and epc band
-            Pair(landlordResponsibilities.first().startingStepId, null)
+            matchedEpcIsCorrectNextAction(journeyData, autoMatched = true)
         } else {
             Pair(PropertyComplianceStepId.EpcLookup, null)
         }
 
     private fun checkMatchedEpcStepNextAction(journeyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
         if (journeyData.getMatchedEpcIsCorrect() == true) {
-            // TODO: PRSD-1132 - add check of expiry date and epc band
-            Pair(landlordResponsibilities.first().startingStepId, null)
+            matchedEpcIsCorrectNextAction(journeyData, autoMatched = false)
         } else {
             Pair(null, null)
         }
+
+    private fun matchedEpcIsCorrectNextAction(
+        journeyData: JourneyData,
+        autoMatched: Boolean,
+    ): Pair<PropertyComplianceStepId?, Int?> {
+        val epcDetails = journeyData.getEpcDetails(autoMatched)!!
+        if (epcDetails.isPastExpiryDate()) {
+            return Pair(PropertyComplianceStepId.EpcExpiryCheck, null)
+        }
+        if (!epcDetails.isEnergyRatingEOrBetter()) {
+            return Pair(PropertyComplianceStepId.MeesExemptionCheck, null)
+        }
+        return Pair(landlordResponsibilities.first().startingStepId, null)
+    }
 
     private fun checkMatchedEpcStepHandleSubmitAndRedirect(journeyData: JourneyData): String {
         val nextAction = checkMatchedEpcStepNextAction(journeyData)
