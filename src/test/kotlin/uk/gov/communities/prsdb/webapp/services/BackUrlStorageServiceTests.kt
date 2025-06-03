@@ -18,6 +18,7 @@ import org.springframework.web.context.request.ServletRequestAttributes
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 
 @ExtendWith(MockitoExtension::class)
 class BackUrlStorageServiceTests {
@@ -86,6 +87,7 @@ class BackUrlStorageServiceTests {
         val url = urlMapCaptor.firstValue[urlKey]
 
         assertEquals(exampleUrl, url)
+        assertNotEquals(urlKey, exampleUrl.hashCode())
     }
 
     @Suppress("ktlint:standard:max-line-length")
