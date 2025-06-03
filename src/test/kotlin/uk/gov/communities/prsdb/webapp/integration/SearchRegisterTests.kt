@@ -202,6 +202,7 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
             val landlordPage = assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
             landlordPage.backLink.clickAndWait()
 
+            assertPageIs(page, SearchLandlordRegisterPage::class)
             assertThat(resultTable.getCell(0, LANDLORD_COL_INDEX)).containsText("Alexander Smith\nL-CKSQ-3SX9")
         }
     }

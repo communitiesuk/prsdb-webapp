@@ -3,9 +3,10 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
@@ -28,6 +29,7 @@ class BackUrlStorageServiceTests {
     @Mock
     private lateinit var request: HttpServletRequest
 
+    @InjectMocks
     private lateinit var backUrlStorageService: BackUrlStorageService
 
     private val requestUri = "/test"
@@ -36,73 +38,76 @@ class BackUrlStorageServiceTests {
 
     @BeforeEach
     fun setUp() {
-        request = mock()
-        httpSession = mock()
-        backUrlStorageService = BackUrlStorageService(httpSession)
         val servletRequestAttributes = ServletRequestAttributes(request)
         RequestContextHolder.setRequestAttributes(servletRequestAttributes)
     }
 
-    @Test
-    fun `If available as a key, rememberCurrentUrl saves the current URL in the session by hashCode`() {
-        whenever(request.requestURI).thenReturn(requestUri)
-        whenever(request.queryString).thenReturn(queryString)
+    @Nested
+    inner class RememberCurrentUrlTests {
+        @BeforeEach
+        fun setUp() {
+            whenever(request.requestURI).thenReturn(requestUri)
+            whenever(request.queryString).thenReturn(queryString)
+        }
 
-        val urlMapCaptor = argumentCaptor<Map<Int, String>>()
+        @Test
+        fun `If available as a key, rememberCurrentUrl saves the current URL in the session by hashCode`() {
+            val urlMapCaptor = argumentCaptor<Map<Int, String>>()
 
-        val urlKey = backUrlStorageService.rememberCurrentUrl()
-        verify(httpSession).setAttribute(eq(BackUrlStorageService.BACK_URL_STORAGE_SESSION_ATTRIBUTE), urlMapCaptor.capture())
+            val urlKey = backUrlStorageService.rememberCurrentUrl()
+            verify(httpSession).setAttribute(
+                eq(BackUrlStorageService.BACK_URL_STORAGE_SESSION_ATTRIBUTE),
+                urlMapCaptor.capture(),
+            )
 
-        val url = urlMapCaptor.firstValue[urlKey]
+            val url = urlMapCaptor.firstValue[urlKey]
 
-        assertEquals(abs(url.hashCode()), urlKey)
-    }
+            assertEquals(abs(url.hashCode()), urlKey)
+        }
 
-    @Test
-    fun `If current URL is already saved by its hashCode, rememberCurrentUrl returns the current URLs key`() {
-        whenever(request.requestURI).thenReturn(requestUri)
-        whenever(request.queryString).thenReturn(queryString)
-        whenever(httpSession.getAttribute(BackUrlStorageService.BACK_URL_STORAGE_SESSION_ATTRIBUTE))
-            .thenReturn(mapOf(abs(exampleUrl.hashCode()) to exampleUrl))
+        @Test
+        fun `If current URL is already saved by its hashCode, rememberCurrentUrl returns the current URLs key`() {
+            whenever(httpSession.getAttribute(BackUrlStorageService.BACK_URL_STORAGE_SESSION_ATTRIBUTE))
+                .thenReturn(mapOf(abs(exampleUrl.hashCode()) to exampleUrl))
 
-        val urlKey = backUrlStorageService.rememberCurrentUrl()
-        verify(httpSession, never()).setAttribute(anyOrNull(), anyOrNull())
+            val urlKey = backUrlStorageService.rememberCurrentUrl()
+            verify(httpSession, never()).setAttribute(anyOrNull(), anyOrNull())
 
-        assertEquals(abs(exampleUrl.hashCode()), urlKey)
-    }
+            assertEquals(abs(exampleUrl.hashCode()), urlKey)
+        }
 
-    @Suppress("ktlint:standard:max-line-length")
-    @Test
-    fun `If another URL is already saved by the same hashCode, rememberCurrentUrl saves the current URL in the session with a different key`() {
-        whenever(request.requestURI).thenReturn(requestUri)
-        whenever(request.queryString).thenReturn(queryString)
-        whenever(httpSession.getAttribute(BackUrlStorageService.BACK_URL_STORAGE_SESSION_ATTRIBUTE))
-            .thenReturn(mapOf(abs(exampleUrl.hashCode()) to "another url"))
+        @Suppress("ktlint:standard:max-line-length")
+        @Test
+        fun `If another URL is already saved by the same hashCode, rememberCurrentUrl saves the current URL in the session with a different key`() {
+            whenever(httpSession.getAttribute(BackUrlStorageService.BACK_URL_STORAGE_SESSION_ATTRIBUTE))
+                .thenReturn(mapOf(abs(exampleUrl.hashCode()) to "another url"))
 
-        val urlMapCaptor = argumentCaptor<Map<Int, String>>()
+            val urlMapCaptor = argumentCaptor<Map<Int, String>>()
 
-        val urlKey = backUrlStorageService.rememberCurrentUrl()
-        verify(httpSession).setAttribute(eq(BackUrlStorageService.BACK_URL_STORAGE_SESSION_ATTRIBUTE), urlMapCaptor.capture())
+            val urlKey = backUrlStorageService.rememberCurrentUrl()
+            verify(httpSession).setAttribute(
+                eq(BackUrlStorageService.BACK_URL_STORAGE_SESSION_ATTRIBUTE),
+                urlMapCaptor.capture(),
+            )
 
-        val url = urlMapCaptor.firstValue[urlKey]
+            val url = urlMapCaptor.firstValue[urlKey]
 
-        assertEquals(exampleUrl, url)
-        assertNotEquals(urlKey, exampleUrl.hashCode())
-    }
+            assertEquals(exampleUrl, url)
+            assertNotEquals(urlKey, exampleUrl.hashCode())
+        }
 
-    @Suppress("ktlint:standard:max-line-length")
-    @Test
-    fun `If another URL is already saved by the same hashCode and the current URL has already been saved, rememberCurrentUrl returns the current URLs key`() {
-        val usedKey = 12345
-        whenever(request.requestURI).thenReturn(requestUri)
-        whenever(request.queryString).thenReturn(queryString)
-        whenever(httpSession.getAttribute(BackUrlStorageService.BACK_URL_STORAGE_SESSION_ATTRIBUTE))
-            .thenReturn(mapOf(abs(exampleUrl.hashCode()) to "another url", usedKey to exampleUrl))
+        @Suppress("ktlint:standard:max-line-length")
+        @Test
+        fun `If another URL is already saved by the same hashCode and the current URL has already been saved, rememberCurrentUrl returns the current URLs key`() {
+            val usedKey = 12345
+            whenever(httpSession.getAttribute(BackUrlStorageService.BACK_URL_STORAGE_SESSION_ATTRIBUTE))
+                .thenReturn(mapOf(abs(exampleUrl.hashCode()) to "another url", usedKey to exampleUrl))
 
-        val urlKey = backUrlStorageService.rememberCurrentUrl()
-        verify(httpSession, never()).setAttribute(anyOrNull(), anyOrNull())
+            val urlKey = backUrlStorageService.rememberCurrentUrl()
+            verify(httpSession, never()).setAttribute(anyOrNull(), anyOrNull())
 
-        assertEquals(usedKey, urlKey)
+            assertEquals(usedKey, urlKey)
+        }
     }
 
     @Test
