@@ -34,7 +34,7 @@ enum class PropertyComplianceStepId(
     EpcNotFound("epc-not-found"),
     EpcSuperseded("epc-superseded"),
     EpcExpiryCheck("epc-expiry-check"),
-    EpcExpiryReason("epc-expiry-reason"),
+    EpcExpired("epc-expired"),
     EpcMissing("epc-missing"),
     EpcExemptionReason("epc-exemption-reason"),
     EpcExemptionConfirmation("epc-exemption-confirmation"),

@@ -241,10 +241,10 @@ class PropertyComplianceJourney(
                     placeholderStep(
                         PropertyComplianceStepId.EpcExpiryCheck,
                         "TODO PRSD-1146: Implement EPC Expiry Check step",
-                        PropertyComplianceStepId.EpcExpiryReason,
+                        PropertyComplianceStepId.EpcExpired,
                     ),
                     placeholderStep(
-                        PropertyComplianceStepId.EpcExpiryReason,
+                        PropertyComplianceStepId.EpcExpired,
                         "TODO PRSD-1147: Implement EPC Expiry Reason step",
                         PropertyComplianceStepId.FireSafetyDeclaration,
                     ),
@@ -806,7 +806,7 @@ class PropertyComplianceJourney(
         get() =
             Step(
                 id = PropertyComplianceStepId.CheckAutoMatchedEpc,
-                page = checkMatchedEpcPage,
+                page = getCheckMatchedEpcPage(autoMatchedEpc = true),
                 nextAction = { journeyData, _ -> checkAutoMatchedEpcStepNextAction(journeyData) },
             )
 
@@ -814,38 +814,37 @@ class PropertyComplianceJourney(
         get() =
             Step(
                 id = PropertyComplianceStepId.CheckMatchedEpc,
-                page = checkMatchedEpcPage,
+                page = getCheckMatchedEpcPage(autoMatchedEpc = false),
                 nextAction = { journeyData, _ -> checkMatchedEpcStepNextAction(journeyData) },
                 handleSubmitAndRedirect = { journeyData, _, _ ->
                     checkMatchedEpcStepHandleSubmitAndRedirect(journeyData)
                 },
             )
 
-    private val checkMatchedEpcPage
-        get() =
-            Page(
-                formModel = CheckMatchedEpcFormModel::class,
-                templateName = "forms/checkMatchedEpcForm",
-                content =
-                    mapOf(
-                        "title" to "propertyCompliance.title",
-                        "fieldSetHeading" to "forms.checkMatchedEpc.fieldSetHeading",
-                        "epcDetails" to getEpcDetailsFromSession(autoMatched = true),
-                        "radioOptions" to
-                            listOf(
-                                RadiosButtonViewModel(
-                                    value = true,
-                                    valueStr = "yes",
-                                    labelMsgKey = "forms.radios.option.yes.label",
-                                ),
-                                RadiosButtonViewModel(
-                                    value = false,
-                                    valueStr = "no",
-                                    labelMsgKey = "forms.checkMatchedEpc.radios.no.label",
-                                ),
+    private fun getCheckMatchedEpcPage(autoMatchedEpc: Boolean) =
+        Page(
+            formModel = CheckMatchedEpcFormModel::class,
+            templateName = "forms/checkMatchedEpcForm",
+            content =
+                mapOf(
+                    "title" to "propertyCompliance.title",
+                    "fieldSetHeading" to "forms.checkMatchedEpc.fieldSetHeading",
+                    "epcDetails" to getEpcDetailsFromSession(autoMatched = autoMatchedEpc),
+                    "radioOptions" to
+                        listOf(
+                            RadiosButtonViewModel(
+                                value = true,
+                                valueStr = "yes",
+                                labelMsgKey = "forms.radios.option.yes.label",
                             ),
-                    ),
-            )
+                            RadiosButtonViewModel(
+                                value = false,
+                                valueStr = "no",
+                                labelMsgKey = "forms.checkMatchedEpc.radios.no.label",
+                            ),
+                        ),
+                ),
+        )
 
     private val epcExemptionReasonStep
         get() =

@@ -32,6 +32,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrUploadPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcExemptionReasonPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcExpiredPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcExpiryCheckPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER
@@ -163,7 +165,11 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         val checkAutoMatchedEpcPage = assertPageIs(page, CheckAutoMatchedEpcPagePropertyCompliance::class, urlArguments)
 
         // Check Auto Matched EPC page - details correct, certificate not expired and high enough rating
-        // TODO PRSD-1132: check epc details are displayed on the page
+        val singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT"
+        BaseComponent.assertThat(checkAutoMatchedEpcPage.form.fieldsetHeading).containsText(singleLineAddress)
+        assertThat(checkAutoMatchedEpcPage.form.summaryList.addressRow.value).containsText(singleLineAddress)
+        assertThat(checkAutoMatchedEpcPage.form.summaryList.energyRatingRow.value).containsText("C")
+        assertThat(checkAutoMatchedEpcPage.form.summaryList.expiryDateRow.value).containsText("5 January 2027")
         checkAutoMatchedEpcPage.submitMatchedEpcDetailsCorrect()
         val fireSafetyDeclarationPage = assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
 
@@ -276,6 +282,11 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         var checkMatchedEpcPage = assertPageIs(page, CheckMatchedEpcPagePropertyCompliance::class, urlArguments)
 
         // Check Matched EPC page
+        val singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT"
+        BaseComponent.assertThat(checkMatchedEpcPage.form.fieldsetHeading).containsText(singleLineAddress)
+        assertThat(checkMatchedEpcPage.form.summaryList.addressRow.value).containsText(singleLineAddress)
+        assertThat(checkMatchedEpcPage.form.summaryList.energyRatingRow.value).containsText("D")
+        assertThat(checkMatchedEpcPage.form.summaryList.expiryDateRow.value).containsText("5 January 2012")
         checkMatchedEpcPage.submitMatchedEpcDetailsIncorrect()
         epcLookupPage = assertPageIs(page, EpcLookupPagePropertyCompliance::class, urlArguments)
 
@@ -301,8 +312,15 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         epcLookupPage.submitCurrentEpcNumberWhichIsExpired()
         checkMatchedEpcPage = assertPageIs(page, CheckMatchedEpcPagePropertyCompliance::class, urlArguments)
 
-        // TODO PRSD-1132: continue test - should redirect to the Expiry Check PRSD-1146
         checkMatchedEpcPage.submitMatchedEpcDetailsCorrect()
+        val expiryCheckPage = assertPageIs(page, EpcExpiryCheckPagePropertyCompliance::class, urlArguments)
+
+        // TODO PRSD-1146 - update this
+        expiryCheckPage.continueButton.clickAndWait()
+        val epcExpiredPage = assertPageIs(page, EpcExpiredPagePropertyCompliance::class, urlArguments)
+
+        // TODO PRSD-1147 - update this
+        epcExpiredPage.continueButton.clickAndWait()
         assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
     }
 
