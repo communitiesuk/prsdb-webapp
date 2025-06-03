@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels
 
-import uk.gov.communities.prsdb.webapp.constants.WITH_BACK_URL_PARAMETER_NAME
+import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropertyCount
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -30,14 +30,10 @@ data class LandlordSearchResultViewModel(
             email = landlordWithListedPropertyCount.landlord.email,
             phoneNumber = landlordWithListedPropertyCount.landlord.phoneNumber,
             listedPropertyCount = landlordWithListedPropertyCount.listedPropertyCount,
-            recordLink = getRecordLink(landlordWithListedPropertyCount.landlord.id, currentUrlKey),
+            recordLink =
+                LandlordDetailsController
+                    .getLandlordDetailsPath(landlordWithListedPropertyCount.landlord.id)
+                    .overrideBackLinkForUrl(currentUrlKey),
         )
-
-        private fun getRecordLink(
-            landlordId: Long,
-            currentUrlKey: Int?,
-        ): String =
-            "${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/$landlordId" +
-                (currentUrlKey?.let { "?$WITH_BACK_URL_PARAMETER_NAME=$it" } ?: "")
     }
 }

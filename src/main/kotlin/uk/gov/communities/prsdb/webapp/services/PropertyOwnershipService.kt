@@ -31,6 +31,7 @@ class PropertyOwnershipService(
     private val localAuthorityDataService: LocalAuthorityDataService,
     private val licenseService: LicenseService,
     private val formContextService: FormContextService,
+    private val backLinkService: BackUrlStorageService,
 ) {
     @Transactional
     fun createPropertyOwnership(
@@ -155,7 +156,7 @@ class PropertyOwnershipService(
                 )
             }
 
-        return matchingProperties.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
+        return matchingProperties.map { PropertySearchResultViewModel.fromPropertyOwnership(it, backLinkService.rememberCurrentUrl()) }
     }
 
     @Transactional

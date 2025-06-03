@@ -4,8 +4,10 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.ModelAndView
+import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.WITH_BACK_URL_PARAMETER_NAME
+import java.util.Optional
 
 class BackLinkInterceptor(
     private val backProvider: BackLinkProvider,
@@ -29,5 +31,14 @@ class BackLinkInterceptor(
 
     fun interface BackLinkProvider {
         fun getBackUrl(destination: Int): String?
+    }
+
+    companion object {
+        fun String.overrideBackLinkForUrl(backUrlKey: Int?): String =
+            UriComponentsBuilder
+                .fromUriString(this)
+                .queryParamIfPresent(WITH_BACK_URL_PARAMETER_NAME, Optional.ofNullable(backUrlKey))
+                .build(true)
+                .toUriString()
     }
 }
