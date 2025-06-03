@@ -5,10 +5,41 @@
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="fieldSetHint" type="java.lang.String"*/-->
 <!--/*@thymesVar id="address" type="java.lang.String"*/-->
+<!--/*@thymesVar id="epcDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="radioOptions" type="uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel"*/-->
 <!DOCTYPE html>
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-<th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'matchedEpcIsCorrect', #{forms.checkMatchedEpc.fieldSetHeading(${address})}, null)}">
+<th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'matchedEpcIsCorrect', #{forms.checkMatchedEpc.fieldSetHeading(${epcDetails.singleLineAddress})}, null)}">
+    <p class="govuk-inset-text">
+        <span th:remove="tag" class="govuk-body" th:text="#{forms.checkMatchedEpc.insetText.beforeLink}">forms.checkMatchedEpc.insetText.beforeLink</span>
+        <a class="govuk-link" th:text="#{forms.checkMatchedEpc.insetText.link}" th:href="@{${epcDetails.getEpcCertificateLink()}}" rel="noreferrer noopener" target="_blank">
+            forms.checkMatchedEpc.insetText.link
+        </a>
+    </p>
+    <dl class="govuk-summary-list">
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key" th:text="#{forms.checkMatchedEpc.summaryList.address.heading}">
+                forms.checkMatchedEpc.summaryList.address.heading
+            </dt>
+            <dd class="govuk-summary-list__value" th:text="${epcDetails.singleLineAddress}">
+            </dd>
+        </div>
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key" th:text="#{forms.checkMatchedEpc.summaryList.energyRating.heading}">
+                forms.checkMatchedEpc.summaryList.address.heading
+            </dt>
+            <dd class="govuk-summary-list__value" th:text="${epcDetails.energyRatingUppercase}">
+            </dd>
+        </div>
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key" th:text="#{forms.checkMatchedEpc.summaryList.expiryDate.heading}">
+                forms.checkMatchedEpc.summaryList.address.heading
+            </dt>
+            <dd class="govuk-summary-list__value" th:text="${epcDetails.expiryDateAsString}">
+            </dd>
+        </div>
+    </dl>
+    <h2 class="govuk-heading-m" th:text="#{forms.checkMatchedEpc.isThisTheCorrectEpc.heading}">forms.checkMatchedEpc.isThisTheCorrectEpc.heading</h2>
     <th:block th:replace="~{fragments/forms/radios :: radios(null, 'matchedEpcIsCorrect', null, ${radioOptions})}"></th:block>
 </th:block>
 <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>

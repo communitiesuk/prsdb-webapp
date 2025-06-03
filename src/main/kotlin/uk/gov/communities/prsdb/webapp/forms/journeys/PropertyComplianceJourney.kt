@@ -774,69 +774,47 @@ class PropertyComplianceJourney(
 
     private val checkAutoMatchedEpcStep
         get() =
-            // TODO PRSD-1132 - implement this properly
             Step(
                 id = PropertyComplianceStepId.CheckAutoMatchedEpc,
-                page =
-                    Page(
-                        formModel = CheckMatchedEpcFormModel::class,
-                        templateName = "forms/checkMatchedEpcForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "fieldSetHeading" to "forms.checkMatchedEpc.fieldSetHeading",
-                                "address" to "TEMP",
-                                "radioOptions" to
-                                    listOf(
-                                        RadiosButtonViewModel(
-                                            value = true,
-                                            valueStr = "yes",
-                                            labelMsgKey = "forms.radios.option.yes.label",
-                                        ),
-                                        RadiosButtonViewModel(
-                                            value = false,
-                                            valueStr = "no",
-                                            labelMsgKey = "forms.radios.option.no.label",
-                                        ),
-                                    ),
-                            ),
-                    ),
+                page = checkMatchedEpcPage,
                 nextAction = { journeyData, _ -> checkAutoMatchedEpcStepNextAction(journeyData) },
             )
 
     private val checkMatchedEpcStep
         get() =
-            // TODO PRSD-1132 - implement this properly
             Step(
                 id = PropertyComplianceStepId.CheckMatchedEpc,
-                page =
-                    Page(
-                        formModel = CheckMatchedEpcFormModel::class,
-                        templateName = "forms/checkMatchedEpcForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "fieldSetHeading" to "forms.checkMatchedEpc.fieldSetHeading",
-                                "address" to "TEMP",
-                                "radioOptions" to
-                                    listOf(
-                                        RadiosButtonViewModel(
-                                            value = true,
-                                            valueStr = "yes",
-                                            labelMsgKey = "forms.radios.option.yes.label",
-                                        ),
-                                        RadiosButtonViewModel(
-                                            value = false,
-                                            valueStr = "no",
-                                            labelMsgKey = "forms.radios.option.no.label",
-                                        ),
-                                    ),
-                            ),
-                    ),
+                page = checkMatchedEpcPage,
                 nextAction = { journeyData, _ -> checkMatchedEpcStepNextAction(journeyData) },
                 handleSubmitAndRedirect = { journeyData, _, _ ->
                     checkMatchedEpcStepHandleSubmitAndRedirect(journeyData)
                 },
+            )
+
+    private val checkMatchedEpcPage
+        get() =
+            Page(
+                formModel = CheckMatchedEpcFormModel::class,
+                templateName = "forms/checkMatchedEpcForm",
+                content =
+                    mapOf(
+                        "title" to "propertyCompliance.title",
+                        "fieldSetHeading" to "forms.checkMatchedEpc.fieldSetHeading",
+                        "epcDetails" to getEpcDetailsFromSession(autoMatched = true),
+                        "radioOptions" to
+                            listOf(
+                                RadiosButtonViewModel(
+                                    value = true,
+                                    valueStr = "yes",
+                                    labelMsgKey = "forms.radios.option.yes.label",
+                                ),
+                                RadiosButtonViewModel(
+                                    value = false,
+                                    valueStr = "no",
+                                    labelMsgKey = "forms.checkMatchedEpc.radios.no.label",
+                                ),
+                            ),
+                    ),
             )
 
     private val epcExemptionReasonStep
@@ -1277,6 +1255,12 @@ class PropertyComplianceJourney(
                 ?: return ""
         return EpcDataModel.parseCertificateNumberOrNull(submittedCertificateNumber)!! // Only valid EPC numbers will be in journeyData
     }
+
+    private fun getEpcDetailsFromSession(autoMatched: Boolean): EpcDataModel =
+        journeyDataService
+            .getJourneyDataFromSession()
+            .getEpcDetails(autoMatched)
+            ?: EpcDataModel.getEmptyEpcDataModel()
 
     private fun getPropertyAddress() =
         propertyOwnershipService

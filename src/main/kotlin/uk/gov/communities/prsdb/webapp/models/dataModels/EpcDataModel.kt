@@ -15,6 +15,12 @@ data class EpcDataModel(
     val expiryDate: LocalDate,
     val latestCertificateNumberForThisProperty: String? = null,
 ) {
+    val energyRatingUppercase: String
+        get() = energyRating.uppercase(Locale.getDefault())
+
+    val expiryDateAsString: String
+        get() = DateTimeHelper.formatLocalDate(expiryDate)
+
     fun isLatestCertificateForThisProperty() = certificateNumber == latestCertificateNumberForThisProperty
 
     fun getEpcCertificateLink() = "${VIEW_EPC_CERTIFICATE_BASE_URL}/${parseCertificateNumberOrNull(certificateNumber)}"
@@ -22,7 +28,7 @@ data class EpcDataModel(
     fun isPastExpiryDate(): Boolean = expiryDate < DateTimeHelper().getCurrentDateInUK()
 
     fun isEnergyRatingEOrBetter(): Boolean =
-        when (energyRating.uppercase(Locale.getDefault())) {
+        when (energyRatingUppercase) {
             "A", "B", "C", "D", "E" -> true
             else -> false
         }
@@ -59,5 +65,14 @@ data class EpcDataModel(
                 latestCertificateNumberForThisProperty = epcData.getString("latestEpcRrnForAddress"),
             )
         }
+
+        fun getEmptyEpcDataModel(): EpcDataModel =
+            EpcDataModel(
+                certificateNumber = "",
+                singleLineAddress = "",
+                energyRating = "",
+                expiryDate = LocalDate(2025, 1, 1),
+                latestCertificateNumberForThisProperty = null,
+            )
     }
 }
