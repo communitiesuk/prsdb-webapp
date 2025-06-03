@@ -19,6 +19,12 @@ class BackLinkInterceptor(
         modelAndView: ModelAndView?,
     ) {
         val backUrlKey = getBackUrlParameter(request)
+
+        if (modelAndView?.viewName?.let { it.startsWith("redirect:") || it.startsWith("forward:") } == true) {
+            modelAndView.modelMap.addAttribute(WITH_BACK_URL_PARAMETER_NAME, backUrlKey)
+            return
+        }
+
         if (backUrlKey != null) {
             val backUrl = retrieveBackUrl(backUrlKey)
             if (backUrl != null) {
