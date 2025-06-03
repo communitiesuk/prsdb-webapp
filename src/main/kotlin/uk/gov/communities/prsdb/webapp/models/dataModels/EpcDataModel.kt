@@ -30,7 +30,7 @@ data class EpcDataModel(
 
     fun isEnergyRatingEOrBetter(): Boolean = energyRatingUppercase in "A".."E"
 
-    fun getEpcCertificateLink() = "${VIEW_EPC_CERTIFICATE_BASE_URL}/${parseCertificateNumberOrNull(certificateNumber)}"
+    fun getEpcCertificateUrl() = "${VIEW_EPC_CERTIFICATE_BASE_URL}/${parseCertificateNumberOrNull(certificateNumber)}"
 
     fun isPastExpiryDate(): Boolean = expiryDate < DateTimeHelper().getCurrentDateInUK()
 
