@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.CheckAndSubmitPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.CheckAutoMatchedEpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.CheckMatchedEpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionConfirmationPagePropertyCompliance
@@ -376,9 +377,17 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         // Keep Property Safe page
         BaseComponent.assertThat(keepPropertySafePage.heading).containsText("Keeping this property safe")
         keepPropertySafePage.agreeAndSubmit()
-        assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
+        val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
-        // TODO PRSD-1153 - continue test
+        // Responsibility To Tenants page
+        BaseComponent
+            .assertThat(
+                responsibilityToTenantsPage.heading,
+            ).containsText("Make sure you follow your legal responsibilities to your tenants")
+        responsibilityToTenantsPage.agreeAndSubmit()
+        assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
+
+        // TODO PRSD-962 - continue test
     }
 
     @Test
@@ -438,9 +447,13 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
 
         // Keep Property Safe page
         keepPropertySafePage.agreeAndSubmit()
-        assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
+        val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
-        // TODO PRSD-1153 - continue test
+        // Responsibility To Tenants page
+        responsibilityToTenantsPage.agreeAndSubmit()
+        assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
+
+        // TODO PRSD-962 - continue test
     }
 
     companion object {
