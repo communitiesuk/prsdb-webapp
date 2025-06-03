@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcNoAutoMatchedPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcNotFoundPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyDeclarationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
@@ -391,6 +392,18 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
             val epcPage = navigator.skipToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
             epcPage.form.submit()
             assertThat(epcPage.form.getErrorMessage()).containsText("Select whether you have an EPC for this property")
+        }
+
+        @Test
+        fun `Submitting yes for a property with no uprn redirects to the Cannot Automatch page`(page: Page) {
+            val propertyOwnershipIdWithNoUprn = 7L
+            val epcPage = navigator.skipToPropertyComplianceEpcPage(propertyOwnershipIdWithNoUprn)
+            epcPage.submitHasCert()
+            assertPageIs(
+                page,
+                EpcNoAutoMatchedPagePropertyCompliance::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipIdWithNoUprn.toString()),
+            )
         }
     }
 

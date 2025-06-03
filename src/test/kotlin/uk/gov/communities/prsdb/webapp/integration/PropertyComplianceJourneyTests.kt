@@ -35,8 +35,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcMissingPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcNoAutoMatchedPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcNotFoundPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcSupersededPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyDeclarationPagePropertyCompliance
@@ -454,6 +457,59 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
         // TODO PRSD-962 - continue test
+    }
+
+    @Test
+    fun `User can navigate EPC task if pages are filled in correctly (EPC not found)`(page: Page) {
+        // EPC page
+        val epcPage = navigator.skipToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
+        whenever(epcRegisterClient.getByUprn(1123456L)).thenReturn(
+            """
+            {
+                "errors": [
+                    {
+                        "code": "NOT_FOUND",
+                        "title": "Certificate not found"
+                    }
+                ]
+            }
+            """.trimIndent(),
+        )
+        epcPage.submitHasCert()
+        val epcNotAutomatched = assertPageIs(page, EpcNoAutoMatchedPagePropertyCompliance::class, urlArguments)
+
+        // TODO PRSD-1200 - update this if needed
+        // EPC Not Auto Matched page
+        epcNotAutomatched.continueButton.clickAndWait()
+        var epcLookupPage = assertPageIs(page, EpcLookupPagePropertyCompliance::class, urlArguments)
+
+        // EPC Lookup page
+        whenever(epcRegisterClient.getByRrn(NONEXISTENT_EPC_CERTIFICATE_NUMBER)).thenReturn(
+            """
+            {
+                "errors": [
+                    {
+                        "code": "NOT_FOUND",
+                        "title": "Certificate not found"
+                    }
+                ]
+            }
+            """.trimIndent(),
+        )
+        epcLookupPage.submitNonexistentEpcNumber()
+        var epcNotFoundPage = assertPageIs(page, EpcNotFoundPagePropertyCompliance::class, urlArguments)
+
+        // EPC Not Found page - search again
+        epcNotFoundPage.searchAgainButton.clickAndWait()
+        epcLookupPage = assertPageIs(page, EpcLookupPagePropertyCompliance::class, urlArguments)
+
+        // EPC lookup page
+        epcLookupPage.submitNonexistentEpcNumber()
+        epcNotFoundPage = assertPageIs(page, EpcNotFoundPagePropertyCompliance::class, urlArguments)
+
+        // Epc Not Found page - continue
+        epcNotFoundPage.continueButton.clickAndWait()
+        assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
     }
 
     companion object {
