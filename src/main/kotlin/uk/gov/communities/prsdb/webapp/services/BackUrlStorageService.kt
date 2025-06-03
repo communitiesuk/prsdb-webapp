@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor
+import uk.gov.communities.prsdb.webapp.constants.BACK_URL_STORAGE_SESSION_ATTRIBUTE
 import kotlin.math.abs
 
 @Service
@@ -66,9 +67,5 @@ class BackUrlStorageService(
         return initialMap
             .map { (key, value) -> (key as? Int ?: return emptyMap()) to (value as? String ?: return emptyMap()) }
             .associate { it }
-    }
-
-    companion object {
-        const val BACK_URL_STORAGE_SESSION_ATTRIBUTE = "backUrlStorage"
     }
 }
