@@ -5,10 +5,13 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
+import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.yearsUntil
 import java.time.Clock
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class DateTimeHelper(
     private val clock: Clock = Clock.systemDefaultZone(),
@@ -42,5 +45,10 @@ class DateTimeHelper(
         fun getDateInUK(dateString: String): LocalDate = getDateInUK(Instant.parse(dateString))
 
         fun get28DaysFromDate(date: LocalDate): LocalDate = date.plus(DatePeriod(days = 28))
+
+        fun formatLocalDate(date: LocalDate): String {
+            val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
+            return date.toJavaLocalDate().format(formatter)
+        }
     }
 }
