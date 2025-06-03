@@ -194,7 +194,7 @@ class LandlordServiceTests {
         ).thenReturn(PageImpl(matchingLandlords))
         whenever(mockLandlordWithListedPropertyCountRepository.findByLandlordIdIn(matchingLandlords.map { it.id }))
             .thenReturn(matchingLandlordsWithListedPropertyCount)
-        whenever(mockBackUrlStorageService.rememberCurrentUrl()).thenReturn(currentPageKey)
+        whenever(mockBackUrlStorageService.rememberCurrentUrlAndReturnId()).thenReturn(currentPageKey)
 
         val searchResults =
             landlordService.searchForLandlords(
@@ -233,7 +233,7 @@ class LandlordServiceTests {
         ).thenReturn(PageImpl(matchingLandlord))
         whenever(mockLandlordWithListedPropertyCountRepository.findByLandlordIdIn(listOf(matchingLandlord[0].id)))
             .thenReturn(matchingLandlordWithListedPropertyCount)
-        whenever(mockBackUrlStorageService.rememberCurrentUrl()).thenReturn(pageKey)
+        whenever(mockBackUrlStorageService.rememberCurrentUrlAndReturnId()).thenReturn(pageKey)
 
         val searchResults =
             landlordService.searchForLandlords(
@@ -351,7 +351,7 @@ class LandlordServiceTests {
         whenever(mockLandlordWithListedPropertyCountRepository.findByLandlordIdIn(matchingLandlordsPage2.map { it.id }))
             .thenReturn(matchingLandlordsWithListedPropertiesPage2)
 
-        whenever(mockBackUrlStorageService.rememberCurrentUrl()).thenReturn(pageKey1)
+        whenever(mockBackUrlStorageService.rememberCurrentUrlAndReturnId()).thenReturn(pageKey1)
         val searchResults1 =
             landlordService.searchForLandlords(
                 searchTerm,
@@ -360,7 +360,7 @@ class LandlordServiceTests {
                 pageSize = pageSize,
             )
 
-        whenever(mockBackUrlStorageService.rememberCurrentUrl()).thenReturn(pageKey2)
+        whenever(mockBackUrlStorageService.rememberCurrentUrlAndReturnId()).thenReturn(pageKey2)
         val searchResults2 =
             landlordService.searchForLandlords(
                 searchTerm,

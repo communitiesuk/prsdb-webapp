@@ -108,7 +108,12 @@ class LandlordService(
         return PageImpl(
             landlordWithListedPropertyCountRepository
                 .findByLandlordIdIn(landlordPage.content.map { it.id })
-                .map { LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(it, backLinkService.rememberCurrentUrl()) },
+                .map {
+                    LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(
+                        it,
+                        backLinkService.rememberCurrentUrlAndReturnId(),
+                    )
+                },
             pageRequest,
             landlordPage.totalElements,
         )
