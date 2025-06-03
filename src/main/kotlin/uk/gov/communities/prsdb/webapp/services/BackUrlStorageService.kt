@@ -15,7 +15,7 @@ class BackUrlStorageService(
     fun rememberCurrentUrl(): Int {
         val currentUrl = getCurrentUrl() ?: throw IllegalStateException("Current URL is null")
         val newUrlHash = abs(currentUrl.hashCode())
-        val backUrlMap = session.getAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE).toBackUrlMapOrNull() ?: mapOf()
+        val backUrlMap = session.getAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE).toBackUrlMap()
 
         val storedUrl = backUrlMap[newUrlHash]
         return when (storedUrl) {
@@ -46,7 +46,7 @@ class BackUrlStorageService(
     }
 
     override fun getBackUrl(destination: Int): String? {
-        val backUrlMap = session.getAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE).toBackUrlMapOrNull() ?: mapOf()
+        val backUrlMap = session.getAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE).toBackUrlMap()
         return backUrlMap[destination]
     }
 
@@ -60,10 +60,12 @@ class BackUrlStorageService(
         return null
     }
 
-    private fun Any?.toBackUrlMapOrNull(): Map<Int, String>? {
-        if (this == null) return null
-        val initialMap: Map<*, *> = this as? Map<*, *> ?: return null
-        return initialMap.map { (key, value) -> (key as? Int ?: return null) to (value as? String ?: return null) }.associate { it }
+    private fun Any?.toBackUrlMap(): Map<Int, String> {
+        if (this == null) return emptyMap()
+        val initialMap: Map<*, *> = this as? Map<*, *> ?: return emptyMap()
+        return initialMap
+            .map { (key, value) -> (key as? Int ?: return emptyMap()) to (value as? String ?: return emptyMap()) }
+            .associate { it }
     }
 
     companion object {
