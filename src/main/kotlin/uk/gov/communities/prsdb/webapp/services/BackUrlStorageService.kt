@@ -5,14 +5,13 @@ import jakarta.servlet.http.HttpSession
 import org.springframework.stereotype.Service
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
-import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_STORAGE_SESSION_ATTRIBUTE
 import kotlin.math.abs
 
 @Service
 class BackUrlStorageService(
     val session: HttpSession,
-) : BackLinkInterceptor.BackLinkProvider {
+) {
     fun rememberCurrentUrlAndReturnId(): Int {
         val currentUrl = getCurrentUrl() ?: throw IllegalStateException("Current URL is null")
         val currentUrlHash = abs(currentUrl.hashCode())
@@ -46,9 +45,9 @@ class BackUrlStorageService(
         }
     }
 
-    override fun getBackUrl(destination: Int): String? {
+    fun getBackUrl(urlKey: Int): String? {
         val backUrlMap = session.getAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE).toBackUrlMap()
-        return backUrlMap[destination]
+        return backUrlMap[urlKey]
     }
 
     private fun getCurrentUrl(): String? {

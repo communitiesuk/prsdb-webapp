@@ -11,6 +11,6 @@ class BackLinkInterceptorConfig(
     private val backUrlStorageService: BackUrlStorageService,
 ) : WebMvcConfigurer {
     override fun addInterceptors(registry: InterceptorRegistry) {
-        registry.addInterceptor(BackLinkInterceptor(backUrlStorageService))
+        registry.addInterceptor(BackLinkInterceptor { backUrlStorageService.getBackUrl(it) })
     }
 }

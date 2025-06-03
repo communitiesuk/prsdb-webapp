@@ -16,9 +16,9 @@ class BackLinkInterceptor(
         handler: Any,
         modelAndView: ModelAndView?,
     ) {
-        val backDestination = getBackUrlParameter(request)
-        if (backDestination != null) {
-            val backUrl = backProvider.getBackUrl(backDestination)
+        val backUrlKey = getBackUrlParameter(request)
+        if (backUrlKey != null) {
+            val backUrl = backProvider.getBackUrl(backUrlKey)
             if (backUrl != null) {
                 modelAndView?.modelMap?.addAttribute(BACK_URL_ATTR_NAME, backUrl)
             }
@@ -28,6 +28,6 @@ class BackLinkInterceptor(
     private fun getBackUrlParameter(request: HttpServletRequest): Int? = request.getParameter(WITH_BACK_URL_PARAMETER_NAME)?.toIntOrNull()
 
     fun interface BackLinkProvider {
-        fun getBackUrl(destination: Int): String?
+        fun getBackUrl(urlKey: Int): String?
     }
 }
