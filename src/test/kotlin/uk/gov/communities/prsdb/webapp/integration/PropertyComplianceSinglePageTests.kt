@@ -418,6 +418,28 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
     }
 
     @Nested
+    inner class CheckAutoMatchedEpcStepTests {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val checkAutoMatchedEpcPage = navigator.skipToPropertyComplianceCheckAutoMatchedEpcPage(PROPERTY_OWNERSHIP_ID)
+            checkAutoMatchedEpcPage.form.submit()
+            assertThat(checkAutoMatchedEpcPage.form.getErrorMessage())
+                .containsText("Select Yes or No to continue")
+        }
+    }
+
+    @Nested
+    inner class CheckMatchedEpcStepTests {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val checkMatchedEpcPage = navigator.skipToPropertyComplianceCheckMatchedEpcPage(PROPERTY_OWNERSHIP_ID)
+            checkMatchedEpcPage.form.submit()
+            assertThat(checkMatchedEpcPage.form.getErrorMessage())
+                .containsText("Select Yes or No to continue")
+        }
+    }
+
+    @Nested
     inner class EpcLookupTests {
         @Test
         fun `Submitting a blank certificate number returns an error`() {
