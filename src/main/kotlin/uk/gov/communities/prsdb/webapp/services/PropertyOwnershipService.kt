@@ -102,12 +102,16 @@ class PropertyOwnershipService(
 
     fun getRegisteredPropertiesForLandlordUser(baseUserId: String): List<RegisteredPropertyViewModel> =
         retrieveAllActiveRegisteredPropertiesForLandlord(baseUserId).map { propertyOwnership ->
-            RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
+            RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership, currentUrlKey = backLinkService.rememberCurrentUrl())
         }
 
     fun getRegisteredPropertiesForLandlord(landlordId: Long): List<RegisteredPropertyViewModel> =
         retrieveAllActiveRegisteredPropertiesForLandlord(landlordId).map { propertyOwnership ->
-            RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership, isLaView = true)
+            RegisteredPropertyViewModel.fromPropertyOwnership(
+                propertyOwnership,
+                isLaView = true,
+                currentUrlKey = backLinkService.rememberCurrentUrl(),
+            )
         }
 
     fun retrievePropertyOwnership(registrationNumber: Long): PropertyOwnership? =

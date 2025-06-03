@@ -114,6 +114,6 @@ class LandlordDetailsController(
         const val LANDLORD_DETAILS_ROUTE = "/$LANDLORD_DETAILS_PATH_SEGMENT"
         const val UPDATE_ROUTE = "$LANDLORD_DETAILS_ROUTE/$UPDATE_PATH_SEGMENT"
 
-        fun getLandlordDetailsPath(landlordId: Long?): String = LANDLORD_DETAILS_ROUTE + (landlordId?.let { "/$it" } ?: "")
+        fun getLandlordDetailsPath(landlordId: Long? = null): String = LANDLORD_DETAILS_ROUTE + (landlordId?.let { "/$it" } ?: "")
     }
 }
