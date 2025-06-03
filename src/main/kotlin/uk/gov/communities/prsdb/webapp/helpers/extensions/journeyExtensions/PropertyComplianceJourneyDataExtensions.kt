@@ -176,7 +176,7 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
         }
 
         fun JourneyData.getAcceptedEpcDetails(): EpcDataModel? {
-            // Check the automated EPC first, then the looked up EPC
+            // Check the automatched EPC first, then the looked up EPC
             if (this.getAutoMatchedEpcIsCorrect() == true) {
                 return this.getEpcDetails(autoMatched = true)
             }

@@ -303,7 +303,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
 
         // TODO PRSD-1132: continue test - should redirect to the Expiry Check PRSD-1146
         checkMatchedEpcPage.submitMatchedEpcDetailsCorrect()
-        assertPageIs(page, EpcLookupPagePropertyCompliance::class, urlArguments)
+        assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
     }
 
     @Test
