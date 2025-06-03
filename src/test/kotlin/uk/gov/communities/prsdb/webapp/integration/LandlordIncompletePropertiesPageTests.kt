@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.integration.SinglePageTestWithSeedData.Ne
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteIncompletePropertyRegistrationAreYouSurePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
@@ -61,7 +62,10 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
         fun `Clicking on a summary card Continue link redirects to the task list page`(page: Page) {
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
             incompletePropertiesPage.firstSummaryCard.continueLink.clickAndWait()
-            assertPageIs(page, TaskListPagePropertyRegistration::class)
+            val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+            taskListPage.backLink.clickAndWait()
+            assertPageIs(page, LandlordIncompletePropertiesPage::class)
         }
 
         @Test
