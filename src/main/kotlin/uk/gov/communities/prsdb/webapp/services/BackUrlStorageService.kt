@@ -14,15 +14,15 @@ class BackUrlStorageService(
 ) : BackLinkInterceptor.BackLinkProvider {
     fun rememberCurrentUrl(): Int {
         val currentUrl = getCurrentUrl() ?: throw IllegalStateException("Current URL is null")
-        val newUrlHash = abs(currentUrl.hashCode())
+        val currentUrlHash = abs(currentUrl.hashCode())
         val backUrlMap = session.getAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE).toBackUrlMap()
 
-        val storedUrl = backUrlMap[newUrlHash]
+        val storedUrl = backUrlMap[currentUrlHash]
         return when (storedUrl) {
-            currentUrl -> newUrlHash
+            currentUrl -> currentUrlHash
             null -> {
-                session.setAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE, backUrlMap + (newUrlHash to currentUrl))
-                newUrlHash
+                session.setAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE, backUrlMap + (currentUrlHash to currentUrl))
+                currentUrlHash
             }
             else -> rememberForUrlWithHashCollision(backUrlMap, currentUrl)
         }
