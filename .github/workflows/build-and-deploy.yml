@@ -14,6 +14,10 @@ on:
         description: "Developer role used to update the ecs task definition"
         required: true
         type: string
+      migrations-role:
+        description: "Developer role used to run the database migration"
+        required: true
+        type: string
       ecr-repository:
         description: "Name of the ecr repository for the build image"
         required: true
@@ -125,7 +129,6 @@ jobs:
       contents: read
     env:
       AWS_REGION: eu-west-2
-      IAM_ROLE: arn:aws:iam::${{ inputs.account-id }}:role/github-actions-terraform-admin
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -133,7 +136,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ env.IAM_ROLE }}
+          role-to-assume: ${{ inputs.migrations-role }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Start SSM port-forwarding Session
@@ -188,7 +191,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume:  ${{ inputs.update-ecs-role }}
+          role-to-assume: ${{ inputs.update-ecs-role }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Redeploy ECS service
