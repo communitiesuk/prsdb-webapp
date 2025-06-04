@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.WITH_BACK_URL_PARAMETER_NAME
 
 class BackLinkInterceptor(
-    private val backProvider: BackLinkProvider,
+    private val retrieveBackUrl: (Int) -> String?,
 ) : HandlerInterceptor {
     override fun postHandle(
         request: HttpServletRequest,
@@ -18,7 +18,7 @@ class BackLinkInterceptor(
     ) {
         val backUrlKey = getBackUrlParameter(request)
         if (backUrlKey != null) {
-            val backUrl = backProvider.getBackUrl(backUrlKey)
+            val backUrl = retrieveBackUrl(backUrlKey)
             if (backUrl != null) {
                 modelAndView?.modelMap?.addAttribute(BACK_URL_ATTR_NAME, backUrl)
             }
@@ -26,8 +26,4 @@ class BackLinkInterceptor(
     }
 
     private fun getBackUrlParameter(request: HttpServletRequest): Int? = request.getParameter(WITH_BACK_URL_PARAMETER_NAME)?.toIntOrNull()
-
-    fun interface BackLinkProvider {
-        fun getBackUrl(urlKey: Int): String?
-    }
 }

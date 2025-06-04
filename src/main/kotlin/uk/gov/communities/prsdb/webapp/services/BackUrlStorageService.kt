@@ -12,7 +12,7 @@ import kotlin.math.abs
 class BackUrlStorageService(
     val session: HttpSession,
 ) {
-    fun rememberCurrentUrlAndReturnId(): Int {
+    fun storeCurrentUrlReturningKey(): Int {
         val currentUrl = getCurrentUrl() ?: throw IllegalStateException("Current URL is null")
         val currentUrlHash = abs(currentUrl.hashCode())
         val backUrlMap = session.getAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE).toBackUrlMap()
@@ -24,11 +24,11 @@ class BackUrlStorageService(
                 session.setAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE, backUrlMap + (currentUrlHash to currentUrl))
                 currentUrlHash
             }
-            else -> rememberForUrlWithHashCollisionAndReturnId(backUrlMap, currentUrl)
+            else -> storeUrlWithHashCollisionReturningKey(backUrlMap, currentUrl)
         }
     }
 
-    private fun rememberForUrlWithHashCollisionAndReturnId(
+    private fun storeUrlWithHashCollisionReturningKey(
         backUrlMap: Map<Int, String>,
         currentUrl: String,
     ): Int {

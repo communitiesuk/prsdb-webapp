@@ -111,7 +111,7 @@ class LandlordService(
                 .map {
                     LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(
                         it,
-                        backLinkService.rememberCurrentUrlAndReturnId(),
+                        backLinkService.storeCurrentUrlReturningKey(),
                     )
                 },
             pageRequest,

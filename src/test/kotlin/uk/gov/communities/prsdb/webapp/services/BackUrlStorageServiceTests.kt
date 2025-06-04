@@ -55,7 +55,7 @@ class BackUrlStorageServiceTests {
         fun `If available as a key, rememberCurrentUrl saves the current URL in the session by hashCode`() {
             val urlMapCaptor = argumentCaptor<Map<Int, String>>()
 
-            val urlKey = backUrlStorageService.rememberCurrentUrlAndReturnId()
+            val urlKey = backUrlStorageService.storeCurrentUrlReturningKey()
             verify(httpSession).setAttribute(
                 eq(BACK_URL_STORAGE_SESSION_ATTRIBUTE),
                 urlMapCaptor.capture(),
@@ -71,7 +71,7 @@ class BackUrlStorageServiceTests {
             whenever(httpSession.getAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE))
                 .thenReturn(mapOf(abs(exampleUrl.hashCode()) to exampleUrl))
 
-            val urlKey = backUrlStorageService.rememberCurrentUrlAndReturnId()
+            val urlKey = backUrlStorageService.storeCurrentUrlReturningKey()
             verify(httpSession, never()).setAttribute(anyOrNull(), anyOrNull())
 
             assertEquals(abs(exampleUrl.hashCode()), urlKey)
@@ -85,7 +85,7 @@ class BackUrlStorageServiceTests {
 
             val urlMapCaptor = argumentCaptor<Map<Int, String>>()
 
-            val urlKey = backUrlStorageService.rememberCurrentUrlAndReturnId()
+            val urlKey = backUrlStorageService.storeCurrentUrlReturningKey()
             verify(httpSession).setAttribute(
                 eq(BACK_URL_STORAGE_SESSION_ATTRIBUTE),
                 urlMapCaptor.capture(),
@@ -104,7 +104,7 @@ class BackUrlStorageServiceTests {
             whenever(httpSession.getAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE))
                 .thenReturn(mapOf(abs(exampleUrl.hashCode()) to "another url", usedKey to exampleUrl))
 
-            val urlKey = backUrlStorageService.rememberCurrentUrlAndReturnId()
+            val urlKey = backUrlStorageService.storeCurrentUrlReturningKey()
             verify(httpSession, never()).setAttribute(anyOrNull(), anyOrNull())
 
             assertEquals(usedKey, urlKey)
