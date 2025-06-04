@@ -2,9 +2,9 @@
 
 ## Status
 
-Proposed
+Accepted
 
-Date of decision: {yyyy-MM-dd}
+Date of decision: 2025-06-03
 
 ## Context and Problem Statement
 
@@ -30,7 +30,9 @@ an SQS queue which is then processed asynchronously.
 
 ## Decision Outcome
 
-{Title of Option X}, because {summary justification / rationale}.
+EventBridge event -> ephemeral ECS task, because it will not block users, requires less temporary code that will be
+discarded after the pilot, and while it requires additional infrastructure, this is infrastructure we would have needed
+post-pilot in any case.
 
 ## Pros and Cons of the Options
 
