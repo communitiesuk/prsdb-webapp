@@ -132,10 +132,19 @@ abstract class Journey<T : StepId>(
                 Pair(overriddenRedirectStepId, overriddenRedirectSubPageNumber)
             }
 
-        return if (changingAnswersFor == null || stepRouter.isDestinationAllowedWhenChangingAnswerTo(newStepId, changingAnswersFor)) {
-            if (newStepId == null) {
-                throw IllegalStateException("Cannot compute next step from step ${currentStep.id.urlPathSegment}")
-            }
+        if (newStepId == null) {
+            throw IllegalStateException("Cannot compute next step from step ${currentStep.id.urlPathSegment}")
+        }
+
+        return getRedirectForStep(newStepId, newSubPageNumber, changingAnswersFor)
+    }
+
+    protected fun getRedirectForStep(
+        newStepId: T,
+        newSubPageNumber: Int?,
+        changingAnswersFor: T? = null,
+    ): String =
+        if (changingAnswersFor == null || stepRouter.isDestinationAllowedWhenChangingAnswerTo(newStepId, changingAnswersFor)) {
             Step.generateUrl(newStepId, newSubPageNumber, changingAnswersFor)
         } else {
             // Assigning to localCheckYourAnswersStep allows the null check here to smart cast from T? to T
@@ -144,7 +153,6 @@ abstract class Journey<T : StepId>(
                     ?: throw IllegalStateException("No check your answers step defined for journey ${journeyType.name}")
             Step.generateUrl(localCheckYourAnswersStep, null, null)
         }
-    }
 
     override fun iterator(): Iterator<StepDetails<T>> =
         ReachableStepDetailsIterator(journeyDataService.getJourneyDataFromSession(), steps, initialStepId, validator)
