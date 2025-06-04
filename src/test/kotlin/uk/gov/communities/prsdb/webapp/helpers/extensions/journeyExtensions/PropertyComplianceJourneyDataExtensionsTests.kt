@@ -44,13 +44,13 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMatchedEpcIsCorrect
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.resetCheckMatchedEpc
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withResetCheckMatchedEpc
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.time.LocalDate
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -590,6 +590,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
         val testJourneyData = journeyDataBuilder.withCheckAutoMatchedEpcResult(true).build()
 
         // Act, Assert
+        assertNotNull(testJourneyData.getAutoMatchedEpcIsCorrect())
         assertTrue(testJourneyData.getAutoMatchedEpcIsCorrect() ?: false)
     }
 
@@ -599,17 +600,18 @@ class PropertyComplianceJourneyDataExtensionsTests {
         val testJourneyData = journeyDataBuilder.withCheckMatchedEpcResult(true).build()
 
         // Act, Assert
-        assertTrue(testJourneyData.getMatchedEpcIsCorrect() ?: false)
+        assertNotNull(testJourneyData.getAutoMatchedEpcIsCorrect())
+        assertTrue(testJourneyData.getAutoMatchedEpcIsCorrect() ?: false)
     }
 
     @Test
-    fun `resetCheckMatchedEpc removes the check-matched-epc key from the JourneyData`() {
+    fun `withResetCheckMatchedEpc removes the check-matched-epc key from the JourneyData`() {
         // Arrange
         val testJourneyData = journeyDataBuilder.withCheckMatchedEpcResult(false).build()
         val expectedJourneyData = mutableMapOf<String, Any?>()
 
         // Act
-        val updatedJourneyData = testJourneyData.resetCheckMatchedEpc()
+        val updatedJourneyData = testJourneyData.withResetCheckMatchedEpc()
 
         // Assert
         assertEquals(expectedJourneyData, updatedJourneyData)

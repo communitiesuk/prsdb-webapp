@@ -147,12 +147,7 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
             )
 
         fun JourneyData.getEpcDetails(autoMatched: Boolean): EpcDataModel? {
-            val journeyDataKey =
-                if (autoMatched) {
-                    AUTO_MATCHED_EPC_JOURNEY_DATA_KEY
-                } else {
-                    LOOKED_UP_EPC_JOURNEY_DATA_KEY
-                }
+            val journeyDataKey = getEpcDetailsJourneyDataKey(autoMatched)
             val serializedEpcDetails = JourneyDataHelper.getStringValueByKey(this, journeyDataKey) ?: return null
             return Json.decodeFromString<EpcDataModel>(serializedEpcDetails)
         }
@@ -161,12 +156,7 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
             epcDetails: EpcDataModel?,
             autoMatched: Boolean,
         ): JourneyData {
-            val journeyDataKey =
-                if (autoMatched) {
-                    AUTO_MATCHED_EPC_JOURNEY_DATA_KEY
-                } else {
-                    LOOKED_UP_EPC_JOURNEY_DATA_KEY
-                }
+            val journeyDataKey = getEpcDetailsJourneyDataKey(autoMatched)
 
             return if (epcDetails == null) {
                 this + (journeyDataKey to null)
@@ -174,6 +164,13 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 this + (journeyDataKey to Json.encodeToString(epcDetails))
             }
         }
+
+        private fun getEpcDetailsJourneyDataKey(autoMatched: Boolean): String =
+            if (autoMatched) {
+                AUTO_MATCHED_EPC_JOURNEY_DATA_KEY
+            } else {
+                LOOKED_UP_EPC_JOURNEY_DATA_KEY
+            }
 
         fun JourneyData.getAcceptedEpcDetails(): EpcDataModel? {
             // Check the automatched EPC first, then the looked up EPC
@@ -200,7 +197,7 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 CheckMatchedEpcFormModel::matchedEpcIsCorrect.name,
             )
 
-        fun JourneyData.resetCheckMatchedEpc(): JourneyData = this - PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment
+        fun JourneyData.withResetCheckMatchedEpc(): JourneyData = this - PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment
 
         fun JourneyData.getEpcExemptionReason(): EpcExemptionReason? =
             JourneyDataHelper.getFieldEnumValue<EpcExemptionReason>(
