@@ -1,5 +1,11 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toJavaInstant
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -36,6 +42,8 @@ import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.IncompleteComplianceDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
@@ -707,7 +715,7 @@ class PropertyOwnershipServiceTests {
 
     @Test
     fun `deleteIncompleteComplianceForm deletes the corresponding form context and sets its reference to null`() {
-        val incompleteComplianceForm = MockLandlordData.createFormContext()
+        val incompleteComplianceForm = MockLandlordData.createPropertyRegistrationFormContext()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(incompleteComplianceForm = incompleteComplianceForm)
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
 
@@ -715,5 +723,125 @@ class PropertyOwnershipServiceTests {
 
         verify(mockFormContextService).deleteFormContext(incompleteComplianceForm)
         assertNull(propertyOwnership.incompleteComplianceForm)
+    }
+
+    @Nested
+    inner class GetIncompleteCompliancesForLandlord {
+        val principalName = "principalName"
+
+        @Test
+        fun `getIncompleteCompliancesForLandlord returns a list of incomplete compliances`() {
+            val currentDate = DateTimeHelper().getCurrentDateInUK()
+            val currentInstant =
+                LocalDateTime(
+                    currentDate.year,
+                    currentDate.monthNumber,
+                    currentDate.dayOfMonth,
+                    11,
+                    30,
+                ).toInstant(TimeZone.of("Europe/London")).toJavaInstant()
+            val properties =
+                listOf(
+                    MockLandlordData.createPropertyOwnership(
+                        id = 1,
+                        currentNumTenants = 3,
+                        incompleteComplianceForm = MockLandlordData.createPropertyComplianceFormContext(context = "{}"),
+                        createdDate = currentInstant,
+                    ),
+                    MockLandlordData.createPropertyOwnership(
+                        id = 2,
+                        currentNumTenants = 2,
+                        incompleteComplianceForm =
+                            MockLandlordData.createPropertyComplianceFormContext(
+                                context =
+                                    "{\"gas-safety-certificate\":{\"hasCert\":false}," +
+                                        "\"gas-safety-certificate-exemption\":{\"hasExemption\":false}," +
+                                        "\"gas-safety-certificate-exemption-missing\":{},\"eicr\":{\"hasCert\":false}," +
+                                        "\"eicr-exemption\":{\"hasExemption\":false},\"eicr-exemption-missing\":{}," +
+                                        "\"epc\":{\"hasCert\":\"NO\"},\"epc-missing\":{}," +
+                                        "\"fire-safety-declaration\":{\"hasDeclared\":true}," +
+                                        "\"keep-property-safe\":{\"agreesToResponsibility\":true}," +
+                                        "\"responsibility-to-tenants\":{\"agreesToResponsibility\":true}}",
+                            ),
+                        createdDate = currentInstant,
+                    ),
+                )
+            whenever(
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
+                    principalName,
+                    RegistrationStatus.REGISTERED,
+                ),
+            ).thenReturn(properties)
+
+            val expectedIncompleteCompliances =
+                listOf(
+                    IncompleteComplianceDataModel(
+                        propertyOwnershipId = properties[0].id,
+                        singleLineAddress = properties[0].property.address.singleLineAddress,
+                        localAuthorityName =
+                            properties[0]
+                                .property.address.localAuthority!!
+                                .name,
+                        certificatesDueDate = currentDate.plus(DatePeriod(days = 28)),
+                        gasSafety = false,
+                        electricalSafety = false,
+                        energyPerformance = false,
+                        landlordsResponsibilities = false,
+                    ),
+                    IncompleteComplianceDataModel(
+                        propertyOwnershipId = properties[1].id,
+                        singleLineAddress = properties[1].property.address.singleLineAddress,
+                        localAuthorityName =
+                            properties[1]
+                                .property.address.localAuthority!!
+                                .name,
+                        certificatesDueDate = currentDate.plus(DatePeriod(days = 28)),
+                        gasSafety = true,
+                        electricalSafety = true,
+                        energyPerformance = true,
+                        landlordsResponsibilities = true,
+                    ),
+                )
+
+            val incompleteCompliances = propertyOwnershipService.getIncompleteCompliancesForLandlord(principalName)
+
+            assertEquals(expectedIncompleteCompliances, incompleteCompliances)
+        }
+
+        @Test
+        fun `getIncompleteCompliancesForLandlord returns an emptyList if there are no occupied properties with incomplete compliance`() {
+            val properties =
+                listOf(
+                    MockLandlordData.createPropertyOwnership(currentNumTenants = 3, incompleteComplianceForm = null),
+                    MockLandlordData.createPropertyOwnership(
+                        currentNumTenants = 0,
+                        incompleteComplianceForm = MockLandlordData.createPropertyComplianceFormContext(),
+                    ),
+                )
+            whenever(
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
+                    principalName,
+                    RegistrationStatus.REGISTERED,
+                ),
+            ).thenReturn(properties)
+
+            val incompleteCompliances = propertyOwnershipService.getIncompleteCompliancesForLandlord(principalName)
+
+            assertTrue(incompleteCompliances.isEmpty())
+        }
+
+        @Test
+        fun `getIncompleteCompliancesForLandlord returns an emptyList if the landlord has no properties`() {
+            whenever(
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
+                    principalName,
+                    RegistrationStatus.REGISTERED,
+                ),
+            ).thenReturn(emptyList())
+
+            val incompleteCompliances = propertyOwnershipService.getIncompleteCompliancesForLandlord(principalName)
+
+            assertTrue(incompleteCompliances.isEmpty())
+        }
     }
 }

@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 
 class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
     companion object {
@@ -169,5 +170,67 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
                 FireSafetyDeclarationFormModel::hasDeclared.name,
             )
+
+        fun JourneyData.getResponsibilityToTenantsAgreement() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
+                ResponsibilityToTenantsFormModel::agreesToResponsibility.name,
+            )
+
+        fun JourneyData.getHasCompletedGasSafetyTask() =
+            this.getHasCompletedGasSafetyUploadConfirmation() ||
+                this.getHasCompletedGasSafetyExemptionConfirmation() ||
+                this.getHasCompletedGasSafetyExemptionMissing() ||
+                this.getHasCompletedGasSafetyOutdated()
+
+        fun JourneyData.getHasCompletedEicrTask() =
+            this.getHasCompletedEicrUploadConfirmation() ||
+                this.getHasCompletedEicrExemptionConfirmation() ||
+                this.getHasCompletedEicrExemptionMissing() ||
+                this.getHasCompletedEicrOutdated()
+
+        // TODO PRSD-1147 check for expired info page
+        // TODO PRSD-1132 check for auto-matched EPC (conditional on epc not having expired and having a rating of E or better)
+        // TODO PRSD-1132 check for matched EPC (conditional on epc not having expired and having a rating of E or better)
+        // TODO PRSD-1146 check for EPC Expiry Check page (only when tenant was in place before expiry AND energy rating is E or better)
+        // TODO PRSD-1145 check for MEES exemption confirmation
+        // TODO PRSD-1144 add check for if Low Energy Rating Step is completed
+        fun JourneyData.getHasCompletedEpcTask() =
+            this.getHasCompletedEpcExemptionConfirmation() ||
+                this.getHasCompletedEpcMissing() ||
+                this.getHasCompletedEpcNotFound()
+
+        fun JourneyData.getHasCompletedLandlordsResponsibilitiesTask() = this.getResponsibilityToTenantsAgreement() ?: false
+
+        private fun JourneyData.getHasCompletedGasSafetyUploadConfirmation() =
+            this.containsKey(PropertyComplianceStepId.GasSafetyUploadConfirmation.urlPathSegment)
+
+        private fun JourneyData.getHasCompletedGasSafetyExemptionConfirmation() =
+            this.containsKey(PropertyComplianceStepId.GasSafetyExemptionConfirmation.urlPathSegment)
+
+        private fun JourneyData.getHasCompletedGasSafetyExemptionMissing() =
+            this.containsKey(PropertyComplianceStepId.GasSafetyExemptionMissing.urlPathSegment)
+
+        private fun JourneyData.getHasCompletedGasSafetyOutdated() =
+            this.containsKey(PropertyComplianceStepId.GasSafetyOutdated.urlPathSegment)
+
+        private fun JourneyData.getHasCompletedEicrUploadConfirmation() =
+            this.containsKey(PropertyComplianceStepId.EicrUploadConfirmation.urlPathSegment)
+
+        private fun JourneyData.getHasCompletedEicrExemptionConfirmation() =
+            this.containsKey(PropertyComplianceStepId.EicrExemptionConfirmation.urlPathSegment)
+
+        private fun JourneyData.getHasCompletedEicrExemptionMissing() =
+            this.containsKey(PropertyComplianceStepId.EicrExemptionMissing.urlPathSegment)
+
+        private fun JourneyData.getHasCompletedEicrOutdated() = this.containsKey(PropertyComplianceStepId.EicrOutdated.urlPathSegment)
+
+        private fun JourneyData.getHasCompletedEpcExemptionConfirmation() =
+            this.containsKey(PropertyComplianceStepId.EpcExemptionConfirmation.urlPathSegment)
+
+        private fun JourneyData.getHasCompletedEpcMissing() = this.containsKey(PropertyComplianceStepId.EpcMissing.urlPathSegment)
+
+        private fun JourneyData.getHasCompletedEpcNotFound() = this.containsKey(PropertyComplianceStepId.EpcNotFound.urlPathSegment)
     }
 }
