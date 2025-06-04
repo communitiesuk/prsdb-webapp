@@ -1188,7 +1188,7 @@ class PropertyComplianceJourney(
     private fun checkMatchedEpcStepHandleSubmitAndRedirect(journeyData: JourneyData): String {
         val nextAction = checkMatchedEpcStepNextAction(journeyData)
         if (nextAction.first == null) {
-            return Step.generateUrl(PropertyComplianceStepId.EpcLookup, null, null)
+            return getRedirectForStep(PropertyComplianceStepId.EpcLookup, null, null)
         }
         val checkMatchedEpcStep = steps.single { it.id == PropertyComplianceStepId.CheckMatchedEpc }
         return getRedirectForNextStep(checkMatchedEpcStep, journeyData, null)
