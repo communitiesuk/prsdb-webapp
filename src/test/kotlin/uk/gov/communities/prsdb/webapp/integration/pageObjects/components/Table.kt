@@ -16,6 +16,11 @@ class Table(
         colIndex: Int,
     ) = rows.getByIndex(rowIndex).getCell(colIndex)
 
+    fun getClickableCell(
+        rowIndex: Int,
+        colIndex: Int,
+    ) = ClickableTableCell(rows.getByIndex(rowIndex).getCell(colIndex))
+
     class TableRows(
         parentLocator: Locator,
     ) : BaseComponent(parentLocator.locator("tbody tr")) {
@@ -35,5 +40,11 @@ class Table(
         parentLocator: Locator,
     ) : BaseComponent(parentLocator.locator("thead tr")) {
         fun getCell(colIndex: Int): Locator = locator.locator("th").nth(colIndex)
+    }
+
+    class ClickableTableCell(
+        parentLocator: Locator,
+    ) : BaseComponent(parentLocator) {
+        val link: Link = Link.default(locator)
     }
 }
