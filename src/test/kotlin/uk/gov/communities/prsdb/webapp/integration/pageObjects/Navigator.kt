@@ -115,10 +115,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.controllers.SessionController
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyDataRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreInvitationTokenRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyPageDataBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.util.UUID
 import kotlin.test.assertTrue
 
@@ -720,10 +722,13 @@ class Navigator(
         )
     }
 
-    fun skipToPropertyComplianceCheckAutoMatchedEpcPage(propertyOwnershipId: Long): CheckAutoMatchedEpcPagePropertyCompliance {
+    fun skipToPropertyComplianceCheckAutoMatchedEpcPage(
+        propertyOwnershipId: Long,
+        epcDetails: EpcDataModel = MockEpcData.createEpcDataModel(),
+    ): CheckAutoMatchedEpcPagePropertyCompliance {
         setJourneyDataInSession(
             PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceCheckAutoMatchedEpc().build(),
+            JourneyPageDataBuilder.beforePropertyComplianceCheckAutoMatchedEpc(epcDetails).build(),
         )
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
@@ -736,10 +741,13 @@ class Navigator(
         )
     }
 
-    fun skipToPropertyComplianceCheckMatchedEpcPage(propertyOwnershipId: Long): CheckMatchedEpcPagePropertyCompliance {
+    fun skipToPropertyComplianceCheckMatchedEpcPage(
+        propertyOwnershipId: Long,
+        epcDetails: EpcDataModel = MockEpcData.createEpcDataModel(),
+    ): CheckMatchedEpcPagePropertyCompliance {
         setJourneyDataInSession(
             PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceCheckMatchedEpc().build(),
+            JourneyPageDataBuilder.beforePropertyComplianceCheckMatchedEpc(epcDetails).build(),
         )
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +

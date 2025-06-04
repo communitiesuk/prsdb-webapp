@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -26,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionOtherReasonPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcExpiryCheckPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
@@ -35,7 +37,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyDeclarationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionOtherReasonPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionCheckPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.services.FileUploader
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 
 class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
     @MockitoBean
@@ -426,6 +430,28 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
             assertThat(checkAutoMatchedEpcPage.form.getErrorMessage())
                 .containsText("Select Yes or No to continue")
         }
+
+        @Test
+        fun `Accepting an expired EPC redirects to the EPC Expiry check page`(page: Page) {
+            val checkAutoMatchedEpcPage =
+                navigator.skipToPropertyComplianceCheckAutoMatchedEpcPage(
+                    PROPERTY_OWNERSHIP_ID,
+                    MockEpcData.createEpcDataModel(expiryDate = LocalDate(2022, 1, 1)),
+                )
+            checkAutoMatchedEpcPage.submitMatchedEpcDetailsCorrect()
+            assertPageIs(page, EpcExpiryCheckPagePropertyCompliance::class, urlArguments)
+        }
+
+        @Test
+        fun `Accepting an in date EPC with a low energy rating redirects to the MEES exemption check page`(page: Page) {
+            val checkAutoMatchedEpcPage =
+                navigator.skipToPropertyComplianceCheckAutoMatchedEpcPage(
+                    PROPERTY_OWNERSHIP_ID,
+                    MockEpcData.createEpcDataModel(energyRating = "F"),
+                )
+            checkAutoMatchedEpcPage.submitMatchedEpcDetailsCorrect()
+            assertPageIs(page, MeesExemptionCheckPagePropertyCompliance::class, urlArguments)
+        }
     }
 
     @Nested
@@ -436,6 +462,17 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
             checkMatchedEpcPage.form.submit()
             assertThat(checkMatchedEpcPage.form.getErrorMessage())
                 .containsText("Select Yes or No to continue")
+        }
+
+        @Test
+        fun `Accepting an in date EPC with a low energy rating redirects to the MEES exemption check page`(page: Page) {
+            val checkMatchedEpcPage =
+                navigator.skipToPropertyComplianceCheckMatchedEpcPage(
+                    PROPERTY_OWNERSHIP_ID,
+                    MockEpcData.createEpcDataModel(energyRating = "F"),
+                )
+            checkMatchedEpcPage.submitMatchedEpcDetailsCorrect()
+            assertPageIs(page, MeesExemptionCheckPagePropertyCompliance::class, urlArguments)
         }
     }
 
