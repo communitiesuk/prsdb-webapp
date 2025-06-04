@@ -57,7 +57,8 @@ class Table(
     open class TableCell(
         override val locator: Locator,
     ) : BaseComponent(locator) {
-        val text = locator.innerText()
+        val text: String
+            get() = locator.innerText()
 
         companion object {
             fun atColIndex(
