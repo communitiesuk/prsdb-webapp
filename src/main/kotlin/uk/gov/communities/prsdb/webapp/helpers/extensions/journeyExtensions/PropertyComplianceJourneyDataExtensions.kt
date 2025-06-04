@@ -190,12 +190,7 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 this.getHasCompletedEicrExemptionMissing() ||
                 this.getHasCompletedEicrOutdated()
 
-        // TODO PRSD-1147 check for expired info page
-        // TODO PRSD-1132 check for auto-matched EPC (conditional on epc not having expired and having a rating of E or better)
-        // TODO PRSD-1132 check for matched EPC (conditional on epc not having expired and having a rating of E or better)
-        // TODO PRSD-1146 check for EPC Expiry Check page (only when tenant was in place before expiry AND energy rating is E or better)
-        // TODO PRSD-1145 check for MEES exemption confirmation
-        // TODO PRSD-1144 add check for if Low Energy Rating Step is completed
+        // TODO PRSD-1132, PRSD-1144, PRSD-1145, PRSD-1146, PRSD-1147 add 'hasCompleted' check for any new steps that could be the final page in the EPC journey
         fun JourneyData.getHasCompletedEpcTask() =
             this.getHasCompletedEpcExemptionConfirmation() ||
                 this.getHasCompletedEpcMissing() ||
