@@ -3,7 +3,9 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -40,7 +42,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcMissingPagePropertyCompliance
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcNoAutoMatchedPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcNotAutoMatchedPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcNotFoundPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcSupersededPagePropertyCompliance
@@ -60,6 +62,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.ResponsibilityToTenantsPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.services.FileUploader
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 
 class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql") {
     @MockitoBean
@@ -143,24 +146,13 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         val epcPage = assertPageIs(page, EpcPagePropertyCompliance::class, urlArguments)
 
         // EPC page, epcRegisterClient finds an EPC when submitting that we have a certificate
-        whenever(epcRegisterClient.getByUprn(1123456L)).thenReturn(
-            """
-            {
-                "data": {
-                    "epcRrn": "$CURRENT_EPC_CERTIFICATE_NUMBER",
-                    "currentEnergyEfficiencyBand": "C",
-                    "expiryDate": "2027-01-05T00:00:00.000Z",
-                    "latestEpcRrnForAddress": "$CURRENT_EPC_CERTIFICATE_NUMBER",
-                    "address": {
-                        "addressLine1": "123 Test Street",
-                        "town": "Test Town",
-                        "postcode": "TT1 1TT",
-                        "addressLine2": "Flat 1"
-                    }
-                }
-            }
-            """.trimIndent(),
-        )
+        whenever(epcRegisterClient.getByUprn(1123456L))
+            .thenReturn(
+                MockEpcData.createEpcRegisterClientEpcFoundResponse(
+                    expiryDate = currentDate.plus(DatePeriod(years = 5)),
+                ),
+            )
+
         epcPage.submitHasCert()
         val checkAutoMatchedEpcPage = assertPageIs(page, CheckAutoMatchedEpcPagePropertyCompliance::class, urlArguments)
 
@@ -229,24 +221,12 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         val epcPage = assertPageIs(page, EpcPagePropertyCompliance::class, urlArguments)
 
         // EPC page, epcRegisterClient finds an expired EPC when submitting that we have a certificate
-        whenever(epcRegisterClient.getByUprn(1123456L)).thenReturn(
-            """
-            {
-                "data": {
-                    "epcRrn": "$CURRENT_EPC_CERTIFICATE_NUMBER",
-                    "currentEnergyEfficiencyBand": "C",
-                    "expiryDate": "2023-01-05T00:00:00.000Z",
-                    "latestEpcRrnForAddress": "$CURRENT_EPC_CERTIFICATE_NUMBER",
-                    "address": {
-                        "addressLine1": "123 Test Street",
-                        "town": "Test Town",
-                        "postcode": "TT1 1TT",
-                        "addressLine2": "Flat 1"
-                    }
-                }
-            }
-            """.trimIndent(),
-        )
+        whenever(epcRegisterClient.getByUprn(1123456L))
+            .thenReturn(
+                MockEpcData
+                    .createEpcRegisterClientEpcFoundResponse(expiryDate = LocalDate(2022, 1, 5)),
+            )
+
         epcPage.submitHasCert()
         val checkAutoMatchedEpcPage = assertPageIs(page, CheckAutoMatchedEpcPagePropertyCompliance::class, urlArguments)
 
@@ -256,22 +236,11 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
 
         // EPC Lookup page - submit superseded certificate
         whenever(epcRegisterClient.getByRrn(SUPERSEDED_EPC_CERTIFICATE_NUMBER)).thenReturn(
-            """
-            {
-                "data": {
-                    "epcRrn": "$SUPERSEDED_EPC_CERTIFICATE_NUMBER",
-                    "currentEnergyEfficiencyBand": "D",
-                    "expiryDate": "2012-01-05T00:00:00.000Z",
-                    "latestEpcRrnForAddress": "$CURRENT_EPC_CERTIFICATE_NUMBER",
-                    "address": {
-                        "addressLine1": "123 Test Street",
-                        "town": "Test Town",
-                        "postcode": "TT1 1TT",
-                        "addressLine2": "Flat 1"
-                    }
-                }
-            }
-            """.trimIndent(),
+            MockEpcData.createEpcRegisterClientEpcFoundResponse(
+                certificateNumber = SUPERSEDED_EPC_CERTIFICATE_NUMBER,
+                expiryDate = LocalDate(2012, 1, 5),
+                latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
+            ),
         )
         epcLookupPage.submitSupersededEpcNumber()
         val epcSupersededPage = assertPageIs(page, EpcSupersededPagePropertyCompliance::class, urlArguments)
@@ -291,24 +260,8 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         epcLookupPage = assertPageIs(page, EpcLookupPagePropertyCompliance::class, urlArguments)
 
         // EPC Lookup page - submit latest certificate but it is expired
-        whenever(epcRegisterClient.getByRrn(CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER)).thenReturn(
-            """
-            {
-                "data": {
-                    "epcRrn": "$CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER",
-                    "currentEnergyEfficiencyBand": "D",
-                    "expiryDate": "2022-01-05T00:00:00.000Z",
-                    "latestEpcRrnForAddress": "$CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER",
-                    "address": {
-                        "addressLine1": "123 Test Street",
-                        "town": "Test Town",
-                        "postcode": "TT1 1TT",
-                        "addressLine2": "Flat 1"
-                    }
-                }
-            }
-            """.trimIndent(),
-        )
+        whenever(epcRegisterClient.getByRrn(CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER))
+            .thenReturn(MockEpcData.createEpcRegisterClientEpcFoundResponse(expiryDate = LocalDate(2022, 1, 5)))
         epcLookupPage.submitCurrentEpcNumberWhichIsExpired()
         checkMatchedEpcPage = assertPageIs(page, CheckMatchedEpcPagePropertyCompliance::class, urlArguments)
 
@@ -481,20 +434,9 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
     fun `User can navigate EPC task if pages are filled in correctly (EPC not found)`(page: Page) {
         // EPC page
         val epcPage = navigator.skipToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
-        whenever(epcRegisterClient.getByUprn(1123456L)).thenReturn(
-            """
-            {
-                "errors": [
-                    {
-                        "code": "NOT_FOUND",
-                        "title": "Certificate not found"
-                    }
-                ]
-            }
-            """.trimIndent(),
-        )
+        whenever(epcRegisterClient.getByUprn(1123456L)).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
         epcPage.submitHasCert()
-        val epcNotAutomatched = assertPageIs(page, EpcNoAutoMatchedPagePropertyCompliance::class, urlArguments)
+        val epcNotAutomatched = assertPageIs(page, EpcNotAutoMatchedPagePropertyCompliance::class, urlArguments)
 
         // TODO PRSD-1200 - update this if needed
         // EPC Not Auto Matched page
@@ -502,18 +444,9 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         var epcLookupPage = assertPageIs(page, EpcLookupPagePropertyCompliance::class, urlArguments)
 
         // EPC Lookup page
-        whenever(epcRegisterClient.getByRrn(NONEXISTENT_EPC_CERTIFICATE_NUMBER)).thenReturn(
-            """
-            {
-                "errors": [
-                    {
-                        "code": "NOT_FOUND",
-                        "title": "Certificate not found"
-                    }
-                ]
-            }
-            """.trimIndent(),
-        )
+        whenever(
+            epcRegisterClient.getByRrn(NONEXISTENT_EPC_CERTIFICATE_NUMBER),
+        ).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
         epcLookupPage.submitNonexistentEpcNumber()
         var epcNotFoundPage = assertPageIs(page, EpcNotFoundPagePropertyCompliance::class, urlArguments)
 

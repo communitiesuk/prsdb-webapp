@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
-class EpcNoAutoMatchedPagePropertyCompliance(
+class EpcNotAutoMatchedPagePropertyCompliance(
     page: Page,
     urlArguments: Map<String, String>,
 ) : BasePage(

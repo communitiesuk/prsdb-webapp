@@ -9,7 +9,6 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -63,8 +62,7 @@ class PropertyComplianceJourneyTests {
 
             createPropertyComplianceJourney()
 
-            org.mockito.kotlin
-                .verify(mockJourneyDataService, never())
+            verify(mockJourneyDataService, never())
                 .loadJourneyDataIntoSession(any<FormContext>())
         }
 
@@ -76,8 +74,7 @@ class PropertyComplianceJourneyTests {
 
             createPropertyComplianceJourney(propertyOwnership.id)
 
-            org.mockito.kotlin
-                .verify(mockJourneyDataService)
+            verify(mockJourneyDataService)
                 .loadJourneyDataIntoSession(propertyOwnership.incompleteComplianceForm!!)
         }
 
@@ -98,6 +95,7 @@ class PropertyComplianceJourneyTests {
 
         @Test
         fun `submit updates epcDetails in journeyData if getHasEPC value is YES`() {
+            // Arrange
             val propertyOwnership =
                 MockLandlordData
                     .createPropertyOwnership(
@@ -127,11 +125,13 @@ class PropertyComplianceJourneyTests {
 
             // Assert
             // setJourneyDataInSession gets called in Journey.completeStep and also in epcStepHandleSubmitAndRedirect
-            Mockito.verify(mockJourneyDataService).setJourneyDataInSession(expectedUpdatedJourneyData)
+            verify(mockJourneyDataService, times(2)).setJourneyDataInSession(anyOrNull())
+            verify(mockJourneyDataService).setJourneyDataInSession(expectedUpdatedJourneyData)
         }
 
         @Test
-        fun `submit redirects to EpcNotAutomatched (nextAction) if the property does not have a uprn`() {
+        fun `submit redirects to EpcNotAutomatched (nextAction) if getHasEPC is YES the property does not have a uprn`() {
+            // Arrange
             val propertyOwnership =
                 MockLandlordData
                     .createPropertyOwnership(
@@ -214,6 +214,7 @@ class PropertyComplianceJourneyTests {
     inner class EpcLookupTests {
         @Test
         fun `handleAndSubmit updates journeyData with EPC details`() {
+            // Arrange
             val expectedEpcDetails =
                 MockEpcData.createEpcDataModel(
                     certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
@@ -235,11 +236,12 @@ class PropertyComplianceJourneyTests {
             )
 
             // Assert
-            Mockito.verify(mockJourneyDataService).setJourneyDataInSession(expectedUpdatedJourneyData)
+            verify(mockJourneyDataService).setJourneyDataInSession(expectedUpdatedJourneyData)
         }
 
         @Test
         fun `handleAndSubmit resets CheckMatchedEpc if a new EPC is found`() {
+            // Arrange
             val expectedEpcDetails =
                 MockEpcData.createEpcDataModel(
                     certificateNumber = SUPERSEDED_EPC_CERTIFICATE_NUMBER,
@@ -271,8 +273,8 @@ class PropertyComplianceJourneyTests {
 
             // Assert
             // setJourneyDataInSession gets called in Journey.completeStep, when adding the looked up EPC details, and when resetting CheckMatchedEpc
-            Mockito.verify(mockJourneyDataService, times(3)).setJourneyDataInSession(anyOrNull())
-            Mockito.verify(mockJourneyDataService).setJourneyDataInSession(expectedUpdatedJourneyData)
+            verify(mockJourneyDataService, times(3)).setJourneyDataInSession(anyOrNull())
+            verify(mockJourneyDataService).setJourneyDataInSession(expectedUpdatedJourneyData)
         }
 
         @Test
@@ -304,11 +306,12 @@ class PropertyComplianceJourneyTests {
 
             // Assert
             // setJourneyDataInSession gets called to update the lookedUpEpc certificate number and the lookedUpEpc details
-            Mockito.verify(mockJourneyDataService, times(2)).setJourneyDataInSession(originalJourneyData)
+            verify(mockJourneyDataService, times(2)).setJourneyDataInSession(originalJourneyData)
         }
 
         @Test
         fun `handleAndSubmit updates journeyData with looked up EPC results with null if no EPC is found`() {
+            // Arrange
             val originalJourneyData =
                 JourneyDataBuilder()
                     .withCheckMatchedEpcResult(false)
@@ -358,6 +361,7 @@ class PropertyComplianceJourneyTests {
 
         @Test
         fun `nextAction returns CheckMatchedEpc if the looked up EPC is found and is the latest available`() {
+            // Arrange
             val epcDetails =
                 MockEpcData.createEpcDataModel(
                     certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
@@ -378,6 +382,7 @@ class PropertyComplianceJourneyTests {
 
         @Test
         fun `nextAction returns EpcSuperseded if the looked up EPC is not the latest available`() {
+            // Arrange
             val epcDetails =
                 MockEpcData.createEpcDataModel(
                     certificateNumber = SUPERSEDED_EPC_CERTIFICATE_NUMBER,
@@ -398,6 +403,7 @@ class PropertyComplianceJourneyTests {
 
         @Test
         fun `nextAction returns EpcNotFound if the looked up EPC is not found`() {
+            // Arrange
             val updatedJourneyData =
                 JourneyDataBuilder()
                     .withEpcLookupCertificateNumber(NONEXISTENT_EPC_CERTIFICATE_NUMBER)
