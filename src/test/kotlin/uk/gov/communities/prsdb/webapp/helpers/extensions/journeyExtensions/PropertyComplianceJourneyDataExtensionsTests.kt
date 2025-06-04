@@ -591,7 +591,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
 
         // Act, Assert
         assertNotNull(testJourneyData.getAutoMatchedEpcIsCorrect())
-        assertTrue(testJourneyData.getAutoMatchedEpcIsCorrect() ?: false)
+        assertTrue(testJourneyData.getAutoMatchedEpcIsCorrect()!!)
     }
 
     @Test
@@ -601,7 +601,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
 
         // Act, Assert
         assertNotNull(testJourneyData.getAutoMatchedEpcIsCorrect())
-        assertTrue(testJourneyData.getAutoMatchedEpcIsCorrect() ?: false)
+        assertTrue(testJourneyData.getAutoMatchedEpcIsCorrect()!!)
     }
 
     @Test
