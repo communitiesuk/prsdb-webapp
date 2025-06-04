@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.S
 class SearchLandlordRegisterPage(
     page: Page,
 ) : SearchRegisterBasePage(page, "/search/landlord") {
-    fun getLandlordLink(rowIndex: Int) = Link(resultTable.getCell(rowIndex, LANDLORD_COL_INDEX).locator("a"))
+    fun getLandlordLink(rowIndex: Int) = resultTable.getClickableCell(rowIndex, LANDLORD_COL_INDEX).link
 
     fun getPropertySearchLink() = Link(noResultErrorMessage.locator("a"))
 
