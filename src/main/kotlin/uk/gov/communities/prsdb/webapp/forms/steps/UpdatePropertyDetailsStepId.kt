@@ -15,9 +15,12 @@ enum class UpdatePropertyDetailsStepId(
     UpdateOccupancyNumberOfHouseholds("occupancy-number-of-households", UpdatePropertyDetailsGroupIdentifier.Occupancy),
     UpdateOccupancyNumberOfPeople("occupancy-number-of-people", UpdatePropertyDetailsGroupIdentifier.Occupancy),
     CheckYourOccupancyAnswers("check-occupancy-answers", UpdatePropertyDetailsGroupIdentifier.Occupancy, true),
+    UpdateHouseholdsOccupancy("households-occupancy", UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds),
     UpdateNumberOfHouseholds("number-of-households", UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds),
     UpdateHouseholdsNumberOfPeople("households-number-of-people", UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds),
     CheckYourHouseholdsAnswers("check-households-answers", UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds, true),
+    UpdatePeopleOccupancy("people-occupancy", UpdatePropertyDetailsGroupIdentifier.NumberOfPeople),
+    UpdatePeopleNumberOfHouseholds("people-number-of-households", UpdatePropertyDetailsGroupIdentifier.NumberOfPeople),
     UpdateNumberOfPeople("number-of-people", UpdatePropertyDetailsGroupIdentifier.NumberOfPeople),
     CheckYourPeopleAnswers("check-people-answers", UpdatePropertyDetailsGroupIdentifier.NumberOfPeople, true),
     ;

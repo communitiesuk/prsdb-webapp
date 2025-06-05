@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyDetailsUpda
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.GroupedUpdateJourneyExtensions.Companion.withBackUrlIfNotChangingAnswer
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getIsOccupiedUpdateIfPresent
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getLatestNumberOfHouseholds
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getLicenceNumberStepIdAndFormModel
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getLicenceNumberUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getLicensingTypeUpdateIfPresent
@@ -57,15 +56,21 @@ class PropertyDetailsUpdateJourney(
         stepName = stepName,
         isChangingAnswer = isChangingAnswer,
     ) {
-    init {
-        initializeJourneyDataIfNotInitialized()
-    }
-
     override val stepRouter = GroupedUpdateStepRouter(this)
 
     override val unreachableStepRedirect = PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)
 
-    private val stepFactory = PropertyDetailsUpdateJourneyStepFactory(stepName, isChangingAnswer, RELATIVE_PROPERTY_DETAILS_PATH)
+    private val stepFactory =
+        PropertyDetailsUpdateJourneyStepFactory(
+            stepName,
+            isChangingAnswer,
+            RELATIVE_PROPERTY_DETAILS_PATH,
+            journeyDataService,
+        )
+
+    init {
+        initializeJourneyDataIfNotInitialized()
+    }
 
     override fun createOriginalJourneyData(): JourneyData {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
@@ -78,15 +83,10 @@ class PropertyDetailsUpdateJourney(
                 UpdatePropertyDetailsStepId.UpdateOwnershipType toPageData OwnershipTypeFormModel::fromPropertyOwnership,
                 UpdatePropertyDetailsStepId.UpdateLicensingType toPageData LicensingTypeFormModel::fromPropertyOwnership,
                 UpdatePropertyDetailsStepId.CheckYourLicensingAnswers.urlPathSegment to emptyMap<String, Any>(),
-                UpdatePropertyDetailsStepId.UpdateOccupancy toPageData OccupancyFormModel::fromPropertyOwnership,
-                UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfHouseholds toPageData NumberOfHouseholdsFormModel::fromPropertyOwnership,
-                UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfPeople toPageData NumberOfPeopleFormModel::fromPropertyOwnership,
-                UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers.urlPathSegment to emptyMap<String, Any>(),
-                UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds toPageData NumberOfHouseholdsFormModel::fromPropertyOwnership,
-                UpdatePropertyDetailsStepId.UpdateHouseholdsNumberOfPeople toPageData NumberOfPeopleFormModel::fromPropertyOwnership,
-                UpdatePropertyDetailsStepId.CheckYourHouseholdsAnswers.urlPathSegment to emptyMap<String, Any>(),
-                UpdatePropertyDetailsStepId.UpdateNumberOfPeople toPageData NumberOfPeopleFormModel::fromPropertyOwnership,
-                UpdatePropertyDetailsStepId.CheckYourPeopleAnswers.urlPathSegment to emptyMap<String, Any>(),
+                stepFactory.getOccupancyStepId() toPageData OccupancyFormModel::fromPropertyOwnership,
+                stepFactory.getNumberOfHouseholdsStepId() toPageData NumberOfHouseholdsFormModel::fromPropertyOwnership,
+                stepFactory.getNumberOfPeopleStepId() toPageData NumberOfPeopleFormModel::fromPropertyOwnership,
+                stepFactory.getCheckOccupancyAnswersStepId().urlPathSegment to emptyMap<String, Any>(),
             )
 
         val licenceNumberStepIdAndFormModel = propertyOwnership.getLicenceNumberStepIdAndFormModel()
@@ -243,13 +243,13 @@ class PropertyDetailsUpdateJourney(
         Step(
             id = UpdatePropertyDetailsStepId.CheckYourLicensingAnswers,
             page = CheckLicensingAnswersPage(),
-            nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateOccupancy, null) },
+            nextAction = { _, _ -> Pair(stepFactory.getOccupancyStepId(), null) },
             handleSubmitAndRedirect = { _, _, _ -> updatePropertyAndRedirect() },
         )
 
     private val occupancyStep =
         Step(
-            id = UpdatePropertyDetailsStepId.UpdateOccupancy,
+            id = stepFactory.getOccupancyStepId(),
             page =
                 Page(
                     formModel = OccupancyFormModel::class,
@@ -283,16 +283,18 @@ class PropertyDetailsUpdateJourney(
         get() = stepFactory.createNumberOfHouseholdsStep()
 
     private val numberOfPeopleStep
-        get() =
-            stepFactory.createNumberOfPeopleStep(
-                journeyDataService.getJourneyDataFromSession().getLatestNumberOfHouseholds(numberOfHouseholdsStep.id, originalDataKey),
-            )
+        get() = stepFactory.createNumberOfPeopleStep()
 
     private val checkOccupancyAnswers
         get() =
             Step(
                 id = stepFactory.getCheckOccupancyAnswersStepId(),
-                page = CheckOccupancyAnswersPage(numberOfHouseholdsStep.id, numberOfPeopleStep.id),
+                page =
+                    CheckOccupancyAnswersPage(
+                        stepFactory.getOccupancyStepId(),
+                        stepFactory.getNumberOfHouseholdsStepId(),
+                        stepFactory.getNumberOfPeopleStepId(),
+                    ),
                 handleSubmitAndRedirect = { journeyData, _, _ -> updatePropertyAndRedirect(journeyData) },
                 saveAfterSubmit = false,
             )
@@ -390,10 +392,10 @@ class PropertyDetailsUpdateJourney(
     }
 
     private fun occupancyNextAction(filteredJourneyData: JourneyData) =
-        if (filteredJourneyData.getIsOccupiedUpdateIfPresent()!!) {
-            Pair(numberOfHouseholdsStep.id, null)
+        if (filteredJourneyData.getIsOccupiedUpdateIfPresent(stepFactory.getOccupancyStepId())!!) {
+            Pair(stepFactory.getNumberOfHouseholdsStepId(), null)
         } else {
-            Pair(checkOccupancyAnswers.id, null)
+            Pair(stepFactory.getCheckOccupancyAnswersStepId(), null)
         }
 
     private fun updatePropertyAndRedirect(): String {
@@ -404,8 +406,8 @@ class PropertyDetailsUpdateJourney(
                 ownershipType = journeyData.getOwnershipTypeUpdateIfPresent(),
                 licensingType = journeyData.getLicensingTypeUpdateIfPresent(),
                 licenceNumber = journeyData.getLicenceNumberUpdateIfPresent(),
-                numberOfHouseholds = journeyData.getNumberOfHouseholdsUpdateIfPresent(numberOfHouseholdsStep.id),
-                numberOfPeople = journeyData.getNumberOfPeopleUpdateIfPresent(numberOfPeopleStep.id),
+                numberOfHouseholds = journeyData.getNumberOfHouseholdsUpdateIfPresent(stepFactory.getNumberOfHouseholdsStepId()),
+                numberOfPeople = journeyData.getNumberOfPeopleUpdateIfPresent(stepFactory.getNumberOfPeopleStepId()),
             )
 
         propertyOwnershipService.updatePropertyOwnership(propertyOwnershipId, propertyUpdate)
@@ -415,7 +417,8 @@ class PropertyDetailsUpdateJourney(
         return RELATIVE_PROPERTY_DETAILS_PATH
     }
 
-    private fun wasPropertyOriginallyOccupied() = journeyDataService.getJourneyDataFromSession().getOriginalIsOccupied(originalDataKey)!!
+    private fun wasPropertyOriginallyOccupied() =
+        journeyDataService.getJourneyDataFromSession().getOriginalIsOccupied(stepFactory.getOccupancyStepId(), originalDataKey)!!
 
     companion object {
         // The path for the update journey is "{propertyDetailsPath}/update/{pathSegment}". As there is no trailing slash, any relative path is
