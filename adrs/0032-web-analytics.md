@@ -43,7 +43,8 @@ is a complex and highly configurable tool. Further analysis can be performed via
 * Good, because it is free.
 * Neutral, because it requires careful configuration (which requires expertise to set up and maintain).
 * Bad, because it uses non-essential cookies, and therefore requires a cookie consent banner to be shown.
-* Bad, because users frequently reject cookie banners and use ad blockers, reducing the amount of data we collect.
+* Bad, because users frequently reject cookie banners and use ad blockers, reducing the amount of data we collect
+  (Register to Vote measured GA opt-in rates to be around 33%).
 * Neutral, because it is a US-based tool, but can be configured to store and process data in the EU.
 * Neutral, because it requires us to trust a 3rd party script, but from a reputable source.
 
@@ -58,7 +59,7 @@ that group.
   (e.g. Treo, or rely on server-side timings).
 * Bad, because it is costly (£2.5k+ / year for 5M page views per month).
 * Good, because it is (relatively) simple.
-* Good, because it does not use cookies (or fingerprinting, etc).
+* Good, because it does not use cookies (or fingerprinting, etc) - this should mean we can avoid a cookie banner.
 * Good, because data never leaves the EU.
 * Neutral, because it requires us to trust a 3rd party script, but one that is open source and auditable (at least at a
   given point in time).
