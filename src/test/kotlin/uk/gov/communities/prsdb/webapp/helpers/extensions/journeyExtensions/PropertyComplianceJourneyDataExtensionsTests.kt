@@ -44,8 +44,11 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getLatestEpcCertificateNumber
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withResetCheckMatchedEpc
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.time.LocalDate
@@ -634,6 +637,22 @@ class PropertyComplianceJourneyDataExtensionsTests {
         val retrievedReason = testJourneyData.getEpcExemptionReason()
 
         assertNull(retrievedReason)
+    }
+
+    @Test
+    fun `getLatestEpcCertificateNumber returns the latestCertificateNumber from a looked up EPC`() {
+        val testJourneyData =
+            journeyDataBuilder
+                .withLookedUpEpcDetails(
+                    MockEpcData.createEpcDataModel(
+                        certificateNumber = SUPERSEDED_EPC_CERTIFICATE_NUMBER,
+                        latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
+                    ),
+                ).build()
+
+        val retrievedCertificateNumber = testJourneyData.getLatestEpcCertificateNumber()
+
+        assertEquals(CURRENT_EPC_CERTIFICATE_NUMBER, retrievedCertificateNumber)
     }
 
     @Test
