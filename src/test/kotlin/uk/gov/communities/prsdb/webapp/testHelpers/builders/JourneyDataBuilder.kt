@@ -633,6 +633,36 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withEpcExemptionConfirmationStep(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EpcExemptionConfirmation.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withEpcMissingStep(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EpcMissing.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withEpcExpiredStep(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EpcExpired.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withEpcNotFoundStep(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EpcNotFound.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withLowEnergyRatingStep(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.LowEnergyRating.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withMeesExemptionConfirmationStep(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.MeesExemptionConfirmation.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
     fun withMissingEpcExemption(): JourneyDataBuilder {
         withEpcStatus(HasEpc.NO)
         journeyData[PropertyComplianceStepId.EpcMissing.urlPathSegment] = emptyMap<String, Any?>()

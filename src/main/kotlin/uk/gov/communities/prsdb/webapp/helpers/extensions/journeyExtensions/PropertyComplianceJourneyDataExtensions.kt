@@ -279,13 +279,13 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
         private fun JourneyData.getHasCompletedCheckAutoMatchedEpcWhichCompletesEpcTask() =
             this.containsKey(PropertyComplianceStepId.CheckAutoMatchedEpc.urlPathSegment) &&
                 this.getAutoMatchedEpcIsCorrect()!! &&
-                !this.getEpcDetails(autoMatched = true)!!.isExpired() &&
+                !this.getEpcDetails(autoMatched = true)!!.isPastExpiryDate() &&
                 this.getEpcDetails(autoMatched = true)!!.isEnergyRatingEOrBetter()
 
         private fun JourneyData.getHasCompletedCheckMatchedEpcWhichCompletesEpcTask() =
             this.containsKey(PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment) &&
                 this.getMatchedEpcIsCorrect()!! &&
-                !this.getEpcDetails(autoMatched = false)!!.isExpired() &&
+                !this.getEpcDetails(autoMatched = false)!!.isPastExpiryDate() &&
                 this.getEpcDetails(autoMatched = false)!!.isEnergyRatingEOrBetter()
 
         // TODO Prsd-1146 - make this check whether this page was answered with "Yes"

@@ -1195,7 +1195,7 @@ class PropertyComplianceJourney(
         autoMatched: Boolean,
     ): Pair<PropertyComplianceStepId?, Int?> {
         val epcDetails = journeyData.getEpcDetails(autoMatched)!!
-        if (epcDetails.isExpired()) {
+        if (epcDetails.isPastExpiryDate()) {
             return Pair(PropertyComplianceStepId.EpcExpiryCheck, null)
         }
         if (!epcDetails.isEnergyRatingEOrBetter()) {

@@ -62,7 +62,7 @@ class EpcDataModelTests {
                 expiryDate = LocalDate(2020, 1, 1),
             )
 
-        assertTrue(epcDataModel.isExpired())
+        assertTrue(epcDataModel.isPastExpiryDate())
     }
 
     @Test
@@ -80,7 +80,7 @@ class EpcDataModelTests {
                 expiryDate = dateNow.plus(DatePeriod(years = 2)),
             )
 
-        assertFalse(epcDataModel.isExpired())
+        assertFalse(epcDataModel.isPastExpiryDate())
     }
 
     @ParameterizedTest(name = "{1} when the energy rating is {0}")
