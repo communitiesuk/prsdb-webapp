@@ -13,7 +13,9 @@ data class EpcDataModel(
     val expiryDate: LocalDate,
     val latestCertificateNumberForThisProperty: String? = null,
 ) {
-    fun isLatestCertificateForThisProperty() = certificateNumber == latestCertificateNumberForThisProperty
+    fun isLatestCertificateForThisProperty() =
+        certificateNumber == latestCertificateNumberForThisProperty ||
+            latestCertificateNumberForThisProperty == null
 
     companion object {
         fun parseCertificateNumberOrNull(certificateNumber: String): String? {

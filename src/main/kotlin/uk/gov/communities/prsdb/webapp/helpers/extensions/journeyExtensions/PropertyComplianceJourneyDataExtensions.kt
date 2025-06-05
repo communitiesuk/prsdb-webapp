@@ -173,6 +173,12 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 LOOKED_UP_EPC_JOURNEY_DATA_KEY
             }
 
+        fun JourneyData.getLatestEpcCertificateNumber(): String? =
+            this
+                .getEpcDetails(autoMatched = false)
+                ?.latestCertificateNumberForThisProperty
+                ?.let { EpcDataModel.parseCertificateNumberOrNull(it) }
+
         fun JourneyData.getAcceptedEpcDetails(): EpcDataModel? {
             // Check the automatched EPC first, then the looked up EPC
             if (this.getAutoMatchedEpcIsCorrect() == true) {

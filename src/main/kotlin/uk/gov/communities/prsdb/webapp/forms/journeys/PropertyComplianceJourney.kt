@@ -59,6 +59,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getLatestEpcCertificateNumber
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMatchedEpcIsCorrect
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withResetCheckMatchedEpc
@@ -233,11 +234,7 @@ class PropertyComplianceJourney(
                     epcLookupStep,
                     checkMatchedEpcStep,
                     epcNotFoundStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.EpcSuperseded,
-                        "TODO PRSD-1140: Implement EPC Superseded step",
-                        PropertyComplianceStepId.CheckMatchedEpc,
-                    ),
+                    epcSupersededStep,
                     epcMissingStep,
                     epcExemptionReasonStep,
                     epcExemptionConfirmationStep,
@@ -839,6 +836,24 @@ class PropertyComplianceJourney(
                 },
             )
 
+    private val epcSupersededStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EpcSuperseded,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/epcSupersededForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "certificateNumber" to getLatestEpcCertificateNumberFromSession(),
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.CheckMatchedEpc, null) },
+                handleSubmitAndRedirect = { journeyData, _, _ -> epcSupersededHandleSubmitAndRedirect(journeyData) },
+            )
+
     private val epcExemptionReasonStep
         get() =
             Step(
@@ -1216,6 +1231,13 @@ class PropertyComplianceJourney(
         }
     }
 
+    private fun epcSupersededHandleSubmitAndRedirect(journeyData: JourneyData): String {
+        val certificateNumber = journeyData.getLatestEpcCertificateNumber()!!
+        val latestEpc = epcLookupService.getEpcByCertificateNumber(certificateNumber)
+        val newJourneyData = resetCheckMatchedEpcInSession(journeyData, latestEpc)
+        return updateEpcDetailsInSessionAndRedirectToNextStep(epcLookupStep, newJourneyData, latestEpc, autoMatchedEpc = false)
+    }
+
     private fun fireSafetyDeclarationStepNextAction(journeyData: JourneyData) =
         if (journeyData.getHasFireSafetyDeclaration()!!) {
             Pair(PropertyComplianceStepId.KeepPropertySafe, null)
@@ -1278,6 +1300,13 @@ class PropertyComplianceJourney(
                 .getEpcLookupCertificateNumber()
                 ?: return ""
         return EpcDataModel.parseCertificateNumberOrNull(submittedCertificateNumber)!! // Only valid EPC numbers will be in journeyData
+    }
+
+    private fun getLatestEpcCertificateNumberFromSession(): String {
+        val latestCertificateNumber =
+            journeyDataService.getJourneyDataFromSession().getLatestEpcCertificateNumber()
+                ?: return ""
+        return EpcDataModel.parseCertificateNumberOrNull(latestCertificateNumber)!!
     }
 
     private fun getPropertyAddress() =
