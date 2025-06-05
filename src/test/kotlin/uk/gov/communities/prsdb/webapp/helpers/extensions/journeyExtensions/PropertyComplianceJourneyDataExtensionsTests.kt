@@ -13,12 +13,15 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.mockConstruction
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.AUTO_MATCHED_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAutoMatchedEpcIsCorrect
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionOtherReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrIssueDate
@@ -42,11 +45,14 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
-import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withResetCheckMatchedEpc
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.time.LocalDate
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class PropertyComplianceJourneyDataExtensionsTests {
     companion object {
@@ -81,6 +87,13 @@ class PropertyComplianceJourneyDataExtensionsTests {
             arrayOf(
                 Arguments.of(Named.of("other", EicrExemptionReason.OTHER), true),
                 Arguments.of(Named.of("not other", EicrExemptionReason.LIVE_IN_LANDLORD), false),
+            )
+
+        @JvmStatic
+        private fun provideEpcDetailsJourneyDataKey() =
+            arrayOf(
+                Arguments.of(Named.of("for automatched EPC", true), AUTO_MATCHED_EPC_JOURNEY_DATA_KEY),
+                Arguments.of(Named.of("for looked up EPC", false), LOOKED_UP_EPC_JOURNEY_DATA_KEY),
             )
     }
 
@@ -470,58 +483,138 @@ class PropertyComplianceJourneyDataExtensionsTests {
         assertNull(retrievedEpcCertificateNumber)
     }
 
-    @Test
-    fun `withEpcDetails returns a JourneyData with the EPC details set`() {
+    @ParameterizedTest
+    @MethodSource("provideEpcDetailsJourneyDataKey")
+    fun `withEpcDetails returns a JourneyData with the EPC details set`(
+        autoMatched: Boolean,
+        journeyDataKey: String,
+    ) {
         // Arrange
         val testJourneyData = journeyDataBuilder.build()
-        val lookedUpEpcDetails =
-            EpcDataModel(
-                certificateNumber = "0000-0000-0000-1234-5678",
-                singleLineAddress = "1, Example Road, EG",
-                energyRating = "C",
-                expiryDate = LocalDate.of(2027, 1, 1).toKotlinLocalDate(),
-                latestCertificateNumberForThisProperty = "0000-0000-0000-1234-5678",
-            )
-        val expectedJourneyData = mutableMapOf(LOOKED_UP_EPC_JOURNEY_DATA_KEY to Json.encodeToString(lookedUpEpcDetails))
+        val lookedUpEpcDetails = MockEpcData.createEpcDataModel()
+        val expectedJourneyData = mutableMapOf(journeyDataKey to Json.encodeToString(lookedUpEpcDetails))
 
         // Act
-        val updatedJourneyData = testJourneyData.withEpcDetails(lookedUpEpcDetails)
+        val updatedJourneyData = testJourneyData.withEpcDetails(lookedUpEpcDetails, autoMatched)
+
+        // Assert
+        assertEquals(expectedJourneyData, updatedJourneyData)
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideEpcDetailsJourneyDataKey")
+    fun `withEpcDetails returns a JourneyData with the EPC details set to null if epcDetails is null`(
+        autoMatched: Boolean,
+        journeyDataKey: String,
+    ) {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.build()
+        val expectedJourneyData = mutableMapOf(journeyDataKey to null)
+
+        // Act
+        val updatedJourneyData = testJourneyData.withEpcDetails(null, autoMatched)
 
         // Assert
         assertEquals(expectedJourneyData, updatedJourneyData)
     }
 
     @Test
-    fun `withEpcDetails returns a JourneyData with the EPC details set to null if epcDetails is null`() {
+    fun `getEpcDetails returns autoMatched details from the JourneyData if autoMatched is true`() {
         // Arrange
-        val testJourneyData = journeyDataBuilder.build()
-        val expectedJourneyData = mutableMapOf(LOOKED_UP_EPC_JOURNEY_DATA_KEY to null)
+        val storedEpcDetails = MockEpcData.createEpcDataModel()
+        val journeyData = journeyDataBuilder.withAutoMatchedEpcDetails(storedEpcDetails).build()
 
         // Act
-        val updatedJourneyData = testJourneyData.withEpcDetails(null)
-
-        // Assert
-        assertEquals(expectedJourneyData, updatedJourneyData)
-    }
-
-    @Test
-    fun `getEpcDetails returns the EPC details from the JourneyData`() {
-        // Arrange
-        val storedEpcDetails =
-            EpcDataModel(
-                certificateNumber = "0000-0000-0000-1234-5678",
-                singleLineAddress = "1, Example Road, EG",
-                energyRating = "C",
-                expiryDate = LocalDate.of(2027, 1, 1).toKotlinLocalDate(),
-                latestCertificateNumberForThisProperty = "0000-0000-0000-1234-5678",
-            )
-        val journeyData = journeyDataBuilder.build().withEpcDetails(storedEpcDetails)
-
-        // Act
-        val retrievedEpcDetails = journeyData.getEpcDetails()
+        val retrievedEpcDetails = journeyData.getEpcDetails(autoMatched = true)
 
         // Assert
         assertEquals(storedEpcDetails, retrievedEpcDetails)
+    }
+
+    @Test
+    fun `getEpcDetails returns looked up details from the JourneyData if autoMatched is false`() {
+        // Arrange
+        val storedEpcDetails = MockEpcData.createEpcDataModel()
+        val journeyData = journeyDataBuilder.withLookedUpEpcDetails(storedEpcDetails).build()
+
+        // Act
+        val retrievedEpcDetails = journeyData.getEpcDetails(autoMatched = false)
+
+        // Assert
+        assertEquals(storedEpcDetails, retrievedEpcDetails)
+    }
+
+    @Test
+    fun `getAcceptedEpcDetails returns autoMatched epc details if these were accepted by the user`() {
+        // Arrange
+        val autoMatchedEpcDetails = MockEpcData.createEpcDataModel(MockEpcData.DEFAULT_EPC_CERTIFICATE_NUMBER)
+        val lookedUpEpcDetails = MockEpcData.createEpcDataModel(MockEpcData.SECONDARY_EPC_CERTIFICATE_NUMBER)
+        val journeyData =
+            journeyDataBuilder
+                .withAutoMatchedEpcDetails(autoMatchedEpcDetails)
+                .withLookedUpEpcDetails(lookedUpEpcDetails)
+                .withCheckAutoMatchedEpcResult(true)
+                .withCheckMatchedEpcResult(true)
+                .build()
+
+        // Act
+        val retrievedEpcDetails = journeyData.getAcceptedEpcDetails()
+
+        // Assert
+        assertEquals(autoMatchedEpcDetails, retrievedEpcDetails)
+    }
+
+    @Test
+    fun `getAcceptedEpcDetails returns looked up epc details if these were accepted by the user and automatched details were rejected`() {
+        // Arrange
+        val autoMatchedEpcDetails = MockEpcData.createEpcDataModel(MockEpcData.DEFAULT_EPC_CERTIFICATE_NUMBER)
+        val lookedUpEpcDetails = MockEpcData.createEpcDataModel(MockEpcData.SECONDARY_EPC_CERTIFICATE_NUMBER)
+        val journeyData =
+            journeyDataBuilder
+                .withAutoMatchedEpcDetails(autoMatchedEpcDetails)
+                .withLookedUpEpcDetails(lookedUpEpcDetails)
+                .withCheckAutoMatchedEpcResult(false)
+                .withCheckMatchedEpcResult(true)
+                .build()
+
+        // Act
+        val retrievedEpcDetails = journeyData.getAcceptedEpcDetails()
+
+        // Assert
+        assertEquals(lookedUpEpcDetails, retrievedEpcDetails)
+    }
+
+    @Test
+    fun `getAutoMatchedEpcIsCorrect returns the submitted answer for the CheckAutoMatchedEpc step`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.withCheckAutoMatchedEpcResult(true).build()
+
+        // Act, Assert
+        assertNotNull(testJourneyData.getAutoMatchedEpcIsCorrect())
+        assertTrue(testJourneyData.getAutoMatchedEpcIsCorrect()!!)
+    }
+
+    @Test
+    fun `getAutoMatchedEpcIsCorrect returns the submitted answer for the CheckMatchedEpc step`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.withCheckAutoMatchedEpcResult(true).build()
+
+        // Act, Assert
+        assertNotNull(testJourneyData.getAutoMatchedEpcIsCorrect())
+        assertTrue(testJourneyData.getAutoMatchedEpcIsCorrect()!!)
+    }
+
+    @Test
+    fun `withResetCheckMatchedEpc removes the check-matched-epc key from the JourneyData`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.withCheckMatchedEpcResult(false).build()
+        val expectedJourneyData = mutableMapOf<String, Any?>()
+
+        // Act
+        val updatedJourneyData = testJourneyData.withResetCheckMatchedEpc()
+
+        // Assert
+        assertEquals(expectedJourneyData, updatedJourneyData)
     }
 
     @Test

@@ -21,17 +21,35 @@ class EpcLookupService(
         val response = epcRegisterClient.getByRrn(formattedCertificateNumber)
         val jsonResponse = JSONObject(response)
 
+        return if (requestSuccessful(jsonResponse)) {
+            EpcDataModel.fromJsonObject(jsonResponse)
+        } else {
+            null
+        }
+    }
+
+    fun getEpcByUprn(uprn: Long): EpcDataModel? {
+        val response = epcRegisterClient.getByUprn(uprn)
+        val jsonResponse = JSONObject(response)
+
+        return if (requestSuccessful(jsonResponse)) {
+            EpcDataModel.fromJsonObject(jsonResponse)
+        } else {
+            null
+        }
+    }
+
+    private fun requestSuccessful(jsonResponse: JSONObject): Boolean {
         if (jsonResponse.has("errors")) {
             val errorCode = getErrorCode(jsonResponse)
             if (errorCode == "NOT_FOUND") {
-                return null
+                return false
             }
             if (errorCode == "INVALID_REQUEST" || errorCode == "BAD_REQUEST") {
                 throw ResponseStatusException(HttpStatus.BAD_REQUEST, getErrorMessage(jsonResponse))
             }
         }
-
-        return EpcDataModel.fromJsonObject(jsonResponse)
+        return true
     }
 
     companion object {
