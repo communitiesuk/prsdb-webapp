@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
+import com.microsoft.playwright.BrowserContext
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -9,14 +10,19 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckHouseholdsAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckLicensingAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckOccupancyAnswersPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckPeopleAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HmoAdditionalLicenceFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HmoMandatoryLicenceFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HouseholdsNumberOfPeopleFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.LicensingTypeFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfHouseholdsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfPeopleFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyNumberOfHouseholdsFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyNumberOfPeopleFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OwnershipTypeFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.SelectiveLicenceFormPagePropertyDetailsUpdate
 import kotlin.test.assertContains
@@ -197,14 +203,14 @@ class PropertyDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sq
             assertThat(updateOccupancyPage.form.fieldsetHeading).containsText("Is your property occupied by tenants?")
             updateOccupancyPage.submitIsOccupied()
             val updateNumberOfHouseholdsPage =
-                assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
+                assertPageIs(page, OccupancyNumberOfHouseholdsFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 
             // Update number of households
             val newNumberOfHouseholds = 1
             assertThat(updateNumberOfHouseholdsPage.form.fieldsetHeading).containsText("How many households live in your property?")
             updateNumberOfHouseholdsPage.submitNumberOfHouseholds(newNumberOfHouseholds)
             val updateNumberOfPeoplePage =
-                assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
+                assertPageIs(page, OccupancyNumberOfPeopleFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 
             // Update number of people
             val newNumberOfPeople = 3
@@ -241,14 +247,14 @@ class PropertyDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sq
             assertThat(updateNumberOfHouseholdsPage.form.fieldsetHeading).containsText("Update the number of households in the property")
             updateNumberOfHouseholdsPage.submitNumberOfHouseholds(newNumberOfHouseholds)
             val updateNumberOfPeoplePage =
-                assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+                assertPageIs(page, HouseholdsNumberOfPeopleFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
             // Update number of people
             val newNumberOfPeople = 3
             assertThat(updateNumberOfPeoplePage.form.fieldsetHeading).containsText("Update how many people live in your property")
             updateNumberOfPeoplePage.submitNumOfPeople(newNumberOfPeople)
             val checkOccupancyAnswersPage =
-                assertPageIs(page, CheckOccupancyAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+                assertPageIs(page, CheckHouseholdsAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
             // Check occupancy answers
             assertThat(checkOccupancyAnswersPage.form.summaryList.numberOfHouseholdsRow).containsText(newNumberOfHouseholds.toString())
@@ -276,7 +282,7 @@ class PropertyDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sq
             assertThat(updateNumberOfPeoplePage.form.fieldsetHeading).containsText("Update how many people live in your property")
             updateNumberOfPeoplePage.submitNumOfPeople(newNumberOfPeople)
             val checkOccupancyAnswersPage =
-                assertPageIs(page, CheckOccupancyAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+                assertPageIs(page, CheckPeopleAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
             // Check occupancy answers
             assertThat(checkOccupancyAnswersPage.form.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople.toString())
@@ -286,6 +292,44 @@ class PropertyDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sq
             // Check changes have occurred
             assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.value)
                 .containsText(newNumberOfPeople.toString())
+        }
+
+        @Test
+        fun `Simultaneous updates are isolated`(browserContext: BrowserContext) {
+            // Create two pages
+            val (page1, navigator1) = createPageAndNavigator(browserContext)
+            val (page2, navigator2) = createPageAndNavigator(browserContext)
+
+            // Start updating occupancy to vacant on page1
+            val updateOccupancyPage1 = navigator1.goToPropertyDetailsUpdateOccupancy(occupiedPropertyOwnershipId)
+            updateOccupancyPage1.submitIsVacant()
+            val checkOccupancyAnswersPage1 =
+                assertPageIs(page1, CheckOccupancyAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+            // Simultaneously start updating number of people on page2
+            val newNumberOfPeople = "3"
+            val updateNumberOfPeoplePage2 = navigator2.goToPropertyDetailsUpdateNumberOfPeoplePage(occupiedPropertyOwnershipId)
+            updateNumberOfPeoplePage2.submitNumOfPeople(newNumberOfPeople)
+            val checkPeopleAnswersPage2 =
+                assertPageIs(page2, CheckPeopleAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+            // Finish updating occupancy to vacant on page1
+            assertThat(checkOccupancyAnswersPage1.form.summaryList.occupancyRow).containsText("No")
+            checkOccupancyAnswersPage1.confirm()
+            val propertyDetailsPage1 = assertPageIs(page1, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
+
+            // Check changes have occurred on page1
+            assertThat(propertyDetailsPage1.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
+
+            // Finish updating number of people on page2
+            assertThat(checkPeopleAnswersPage2.form.summaryList.occupancyRow).containsText("Yes")
+            assertThat(checkPeopleAnswersPage2.form.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople)
+            checkPeopleAnswersPage2.confirm()
+            val propertyDetailsPage2 = assertPageIs(page2, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
+
+            // Check changes have occurred on page2
+            assertThat(propertyDetailsPage2.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
+            assertThat(propertyDetailsPage2.propertyDetailsSummaryList.numberOfPeopleRow.value).containsText(newNumberOfPeople)
         }
     }
 }

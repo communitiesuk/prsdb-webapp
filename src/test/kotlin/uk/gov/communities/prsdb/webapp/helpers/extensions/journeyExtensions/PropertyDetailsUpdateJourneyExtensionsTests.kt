@@ -74,7 +74,10 @@ class PropertyDetailsUpdateJourneyExtensionsTests {
         val testJourneyData = journeyDataBuilder.build()
 
         val occupancyUpdate =
-            testJourneyData.getOriginalIsOccupied(UpdatePropertyDetailsStepId.UpdateOccupancy, "original-key-not-in-journey-data")
+            testJourneyData.getOriginalIsOccupied(
+                UpdatePropertyDetailsStepId.UpdateOccupancy,
+                "original-key-not-in-journey-data",
+            )
 
         assertNull(occupancyUpdate)
     }
