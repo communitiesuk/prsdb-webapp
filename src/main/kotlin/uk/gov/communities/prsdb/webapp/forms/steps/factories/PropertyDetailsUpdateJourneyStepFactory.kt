@@ -1,84 +1,70 @@
 package uk.gov.communities.prsdb.webapp.forms.steps.factories
 
+import uk.gov.communities.prsdb.webapp.forms.journeys.UpdateJourney
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationNumberOfPeoplePage
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsGroupIdentifier
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.GroupedUpdateJourneyExtensions.Companion.withBackUrlIfNotChangingAnswer
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getLatestNumberOfHouseholds
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class PropertyDetailsUpdateJourneyStepFactory(
-    stepName: String,
+    private val stepName: String,
     private val isChangingAnswer: Boolean,
     private val propertyDetailsPath: String,
+    private val journeyDataService: JourneyDataService,
 ) {
-    private val stepGroupId = UpdatePropertyDetailsStepId.fromPathSegment(stepName)!!.groupIdentifier
+    fun getOccupancyStepId() = getOccupancyStepIdFor(stepName)
+
+    fun getNumberOfHouseholdsStepId() = getNumberOfHouseholdsStepIdFor(stepName)
+
+    fun getNumberOfPeopleStepId() = getNumberOfPeopleStepIdFor(stepName)
+
+    fun getCheckOccupancyAnswersStepId() = getCheckOccupancyAnswersStepIdFor(stepName)
 
     fun createNumberOfHouseholdsStep() =
-        when (stepGroupId) {
+        when (getStepGroupIdFor(stepName)) {
             UpdatePropertyDetailsGroupIdentifier.Occupancy ->
                 createNumberOfHouseholdsStep(
-                    stepId = UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfHouseholds,
                     fieldSetHeadingKey = "forms.numberOfHouseholds.fieldSetHeading",
-                    nextActionStepId = UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfPeople,
                 )
             UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds ->
                 createNumberOfHouseholdsStep(
-                    stepId = UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds,
                     fieldSetHeadingKey = "forms.update.numberOfHouseholds.fieldSetHeading",
-                    nextActionStepId = UpdatePropertyDetailsStepId.UpdateHouseholdsNumberOfPeople,
                     backUrl = propertyDetailsPath,
                 )
             else ->
                 createNumberOfHouseholdsStep(
-                    stepId = UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds,
                     fieldSetHeadingKey = "forms.update.numberOfHouseholds.fieldSetHeading",
-                    nextActionStepId = UpdatePropertyDetailsStepId.UpdateNumberOfPeople,
                 )
         }
 
-    fun createNumberOfPeopleStep(latestNumberOfHouseholds: Int) =
-        when (stepGroupId) {
+    fun createNumberOfPeopleStep() =
+        when (getStepGroupIdFor(stepName)) {
             UpdatePropertyDetailsGroupIdentifier.Occupancy ->
                 createNumberOfPeopleStep(
-                    stepId = UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfPeople,
                     fieldSetHeadingKey = "forms.numberOfPeople.fieldSetHeading",
-                    latestNumberOfHouseholds = latestNumberOfHouseholds,
-                    nextActionStepId = UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers,
                 )
             UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds ->
                 createNumberOfPeopleStep(
-                    stepId = UpdatePropertyDetailsStepId.UpdateHouseholdsNumberOfPeople,
                     fieldSetHeadingKey = "forms.update.numberOfPeople.fieldSetHeading",
-                    latestNumberOfHouseholds = latestNumberOfHouseholds,
-                    nextActionStepId = UpdatePropertyDetailsStepId.CheckYourHouseholdsAnswers,
                 )
             else ->
                 createNumberOfPeopleStep(
-                    stepId = UpdatePropertyDetailsStepId.UpdateNumberOfPeople,
                     fieldSetHeadingKey = "forms.update.numberOfPeople.fieldSetHeading",
-                    latestNumberOfHouseholds = latestNumberOfHouseholds,
-                    nextActionStepId = UpdatePropertyDetailsStepId.CheckYourPeopleAnswers,
                     backUrl = propertyDetailsPath,
                 )
-        }
-
-    fun getCheckOccupancyAnswersStepId() =
-        when (stepGroupId) {
-            UpdatePropertyDetailsGroupIdentifier.Occupancy -> UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers
-            UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds -> UpdatePropertyDetailsStepId.CheckYourHouseholdsAnswers
-            else -> UpdatePropertyDetailsStepId.CheckYourPeopleAnswers
         }
 
     private fun createNumberOfHouseholdsStep(
-        stepId: UpdatePropertyDetailsStepId,
         fieldSetHeadingKey: String,
-        nextActionStepId: UpdatePropertyDetailsStepId,
         backUrl: String? = null,
     ) = Step(
-        id = stepId,
+        id = getNumberOfHouseholdsStepId(),
         page =
             Page(
                 formModel = NumberOfHouseholdsFormModel::class,
@@ -90,18 +76,15 @@ class PropertyDetailsUpdateJourneyStepFactory(
                         "label" to "forms.numberOfHouseholds.label",
                     ).withBackUrlIfNotChangingAnswer(backUrl, isChangingAnswer),
             ),
-        nextAction = { _, _ -> Pair(nextActionStepId, null) },
+        nextAction = { _, _ -> Pair(getNumberOfPeopleStepId(), null) },
         saveAfterSubmit = false,
     )
 
     private fun createNumberOfPeopleStep(
-        stepId: UpdatePropertyDetailsStepId,
         fieldSetHeadingKey: String,
-        latestNumberOfHouseholds: Int,
-        nextActionStepId: UpdatePropertyDetailsStepId,
         backUrl: String? = null,
     ) = Step(
-        id = stepId,
+        id = getNumberOfPeopleStepId(),
         page =
             PropertyRegistrationNumberOfPeoplePage(
                 formModel = NumberOfPeopleFormModel::class,
@@ -113,9 +96,48 @@ class PropertyDetailsUpdateJourneyStepFactory(
                         "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
                         "label" to "forms.numberOfPeople.label",
                     ).withBackUrlIfNotChangingAnswer(backUrl, isChangingAnswer),
-                latestNumberOfHouseholds = latestNumberOfHouseholds,
+                latestNumberOfHouseholds = getLatestNumberOfHouseholds(),
             ),
-        nextAction = { _, _ -> Pair(nextActionStepId, null) },
+        nextAction = { _, _ -> Pair(getCheckOccupancyAnswersStepId(), null) },
         saveAfterSubmit = false,
     )
+
+    private fun getLatestNumberOfHouseholds() =
+        journeyDataService
+            .getJourneyDataFromSession()
+            .getLatestNumberOfHouseholds(getNumberOfHouseholdsStepId(), UpdateJourney.getOriginalJourneyDataKey(journeyDataService))
+
+    companion object {
+        fun getStepGroupIdFor(stepName: String) =
+            UpdatePropertyDetailsStepId.fromPathSegment(stepName)?.groupIdentifier
+                ?: throw IllegalArgumentException("Step: $stepName does not correspond to a UpdatePropertyDetailsStepId group identifier")
+
+        fun getOccupancyStepIdFor(stepName: String) =
+            when (getStepGroupIdFor(stepName)) {
+                UpdatePropertyDetailsGroupIdentifier.Occupancy -> UpdatePropertyDetailsStepId.UpdateOccupancy
+                UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds -> UpdatePropertyDetailsStepId.UpdateHouseholdsOccupancy
+                else -> UpdatePropertyDetailsStepId.UpdatePeopleOccupancy
+            }
+
+        private fun getNumberOfHouseholdsStepIdFor(stepName: String) =
+            when (getStepGroupIdFor(stepName)) {
+                UpdatePropertyDetailsGroupIdentifier.Occupancy -> UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfHouseholds
+                UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds -> UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds
+                else -> UpdatePropertyDetailsStepId.UpdatePeopleNumberOfHouseholds
+            }
+
+        private fun getNumberOfPeopleStepIdFor(stepName: String) =
+            when (getStepGroupIdFor(stepName)) {
+                UpdatePropertyDetailsGroupIdentifier.Occupancy -> UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfPeople
+                UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds -> UpdatePropertyDetailsStepId.UpdateHouseholdsNumberOfPeople
+                else -> UpdatePropertyDetailsStepId.UpdateNumberOfPeople
+            }
+
+        private fun getCheckOccupancyAnswersStepIdFor(stepName: String) =
+            when (getStepGroupIdFor(stepName)) {
+                UpdatePropertyDetailsGroupIdentifier.Occupancy -> UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers
+                UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds -> UpdatePropertyDetailsStepId.CheckYourHouseholdsAnswers
+                else -> UpdatePropertyDetailsStepId.CheckYourPeopleAnswers
+            }
+    }
 }

@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
 class CheckOccupancyAnswersPage(
+    private val occupancyStepId: UpdatePropertyDetailsStepId,
     private val numberOfHouseholdsStepId: UpdatePropertyDetailsStepId,
     private val numberOfPeopleStepId: UpdatePropertyDetailsStepId,
 ) : AbstractPage(
@@ -33,7 +34,7 @@ class CheckOccupancyAnswersPage(
     private fun getFormData(filteredJourneyData: JourneyData) =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
-                val isOccupied = filteredJourneyData.getIsOccupiedUpdateIfPresent()!!
+                val isOccupied = filteredJourneyData.getIsOccupiedUpdateIfPresent(occupancyStepId)!!
                 add(occupancyStatusRow(isOccupied))
                 if (isOccupied) addAll(tenancyRows(filteredJourneyData))
             }.toList()
@@ -42,7 +43,7 @@ class CheckOccupancyAnswersPage(
         SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.occupancy.fieldSetHeading",
             isOccupied,
-            UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment,
+            occupancyStepId.urlPathSegment,
         )
 
     private fun tenancyRows(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> =
