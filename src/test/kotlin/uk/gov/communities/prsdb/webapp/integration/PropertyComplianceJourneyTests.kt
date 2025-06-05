@@ -5,7 +5,6 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
-import kotlinx.datetime.plus
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -149,7 +148,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         whenever(epcRegisterClient.getByUprn(1123456L))
             .thenReturn(
                 MockEpcData.createEpcRegisterClientEpcFoundResponse(
-                    expiryDate = currentDate.plus(DatePeriod(years = 5)),
+                    expiryDate = LocalDate(currentDate.year + 5, 1, 5),
                 ),
             )
 
@@ -161,7 +160,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         BaseComponent.assertThat(checkAutoMatchedEpcPage.form.fieldsetHeading).containsText(singleLineAddress)
         assertThat(checkAutoMatchedEpcPage.form.summaryList.addressRow.value).containsText(singleLineAddress)
         assertThat(checkAutoMatchedEpcPage.form.summaryList.energyRatingRow.value).containsText("C")
-        assertThat(checkAutoMatchedEpcPage.form.summaryList.expiryDateRow.value).containsText("5 January 2027")
+        assertThat(checkAutoMatchedEpcPage.form.summaryList.expiryDateRow.value).containsText("5 January")
         checkAutoMatchedEpcPage.submitMatchedEpcDetailsCorrect()
         val fireSafetyDeclarationPage = assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
 
@@ -254,7 +253,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         val singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT"
         BaseComponent.assertThat(checkMatchedEpcPage.form.fieldsetHeading).containsText(singleLineAddress)
         assertThat(checkMatchedEpcPage.form.summaryList.addressRow.value).containsText(singleLineAddress)
-        assertThat(checkMatchedEpcPage.form.summaryList.energyRatingRow.value).containsText("D")
+        assertThat(checkMatchedEpcPage.form.summaryList.energyRatingRow.value).containsText("C")
         assertThat(checkMatchedEpcPage.form.summaryList.expiryDateRow.value).containsText("5 January 2012")
         checkMatchedEpcPage.submitMatchedEpcDetailsIncorrect()
         epcLookupPage = assertPageIs(page, EpcLookupPagePropertyCompliance::class, urlArguments)

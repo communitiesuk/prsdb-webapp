@@ -597,7 +597,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
     @Test
     fun `getAutoMatchedEpcIsCorrect returns the submitted answer for the CheckMatchedEpc step`() {
         // Arrange
-        val testJourneyData = journeyDataBuilder.withCheckMatchedEpcResult(true).build()
+        val testJourneyData = journeyDataBuilder.withCheckAutoMatchedEpcResult(true).build()
 
         // Act, Assert
         assertNotNull(testJourneyData.getAutoMatchedEpcIsCorrect())
