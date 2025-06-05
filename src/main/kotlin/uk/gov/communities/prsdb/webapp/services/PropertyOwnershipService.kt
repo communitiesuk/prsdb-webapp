@@ -224,14 +224,9 @@ class PropertyOwnershipService(
     fun getIncompleteCompliancesForLandlord(principalName: String): List<IncompleteComplianceDataModel> {
         val propertyOwnerships = retrieveAllActiveRegisteredPropertiesForLandlord(principalName)
 
-        val incompleteCompliances = mutableListOf<IncompleteComplianceDataModel>()
-
-        propertyOwnerships.forEach { propertyOwnership ->
-            if (propertyOwnership.isOccupied && propertyOwnership.isComplianceIncomplete) {
-                incompleteCompliances.add(getIncompleteComplianceDataModel(propertyOwnership))
-            }
-        }
-        return incompleteCompliances
+        return propertyOwnerships
+            .filter { it.isOccupied && it.isComplianceIncomplete }
+            .map { getIncompleteComplianceDataModel(it) }
     }
 
     private fun getIncompleteComplianceDataModel(propertyOwnership: PropertyOwnership): IncompleteComplianceDataModel {

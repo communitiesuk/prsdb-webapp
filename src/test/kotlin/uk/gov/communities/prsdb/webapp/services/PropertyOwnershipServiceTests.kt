@@ -731,6 +731,7 @@ class PropertyOwnershipServiceTests {
 
         @Test
         fun `getIncompleteCompliancesForLandlord returns a list of incomplete compliances`() {
+            // Arrange
             val currentDate = DateTimeHelper().getCurrentDateInUK()
             val currentInstant =
                 LocalDateTime(
@@ -803,13 +804,16 @@ class PropertyOwnershipServiceTests {
                     ),
                 )
 
+            // Act
             val incompleteCompliances = propertyOwnershipService.getIncompleteCompliancesForLandlord(principalName)
 
+            // Assert
             assertEquals(expectedIncompleteCompliances, incompleteCompliances)
         }
 
         @Test
         fun `getIncompleteCompliancesForLandlord returns an emptyList if there are no occupied properties with incomplete compliance`() {
+            // Arrange
             val properties =
                 listOf(
                     MockLandlordData.createPropertyOwnership(currentNumTenants = 3, incompleteComplianceForm = null),
@@ -825,13 +829,16 @@ class PropertyOwnershipServiceTests {
                 ),
             ).thenReturn(properties)
 
+            // Act
             val incompleteCompliances = propertyOwnershipService.getIncompleteCompliancesForLandlord(principalName)
 
+            // Assert
             assertTrue(incompleteCompliances.isEmpty())
         }
 
         @Test
         fun `getIncompleteCompliancesForLandlord returns an emptyList if the landlord has no properties`() {
+            // Arrange
             whenever(
                 mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
                     principalName,
@@ -839,6 +846,7 @@ class PropertyOwnershipServiceTests {
                 ),
             ).thenReturn(emptyList())
 
+            // Act
             val incompleteCompliances = propertyOwnershipService.getIncompleteCompliancesForLandlord(principalName)
 
             assertTrue(incompleteCompliances.isEmpty())
