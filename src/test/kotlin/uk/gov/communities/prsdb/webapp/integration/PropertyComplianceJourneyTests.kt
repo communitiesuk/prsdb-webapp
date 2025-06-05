@@ -147,7 +147,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         whenever(epcRegisterClient.getByUprn(1123456L))
             .thenReturn(
                 MockEpcData.createEpcRegisterClientEpcFoundResponse(
-                    expiryDate = currentDate.plus(DatePeriod(years = 5)),
+                    expiryDate = LocalDate(currentDate.year + 5, 1, 5),
                 ),
             )
 
