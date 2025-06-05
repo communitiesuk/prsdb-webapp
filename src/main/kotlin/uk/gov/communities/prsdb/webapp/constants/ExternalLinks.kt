@@ -20,3 +20,25 @@ const val EPC_GUIDE_URL =
     "https://www.gov.uk/government/publications" +
         "/energy-performance-certificates-for-the-construction-sale-and-let-of-dwellings" +
         "/a-guide-to-energy-performance-certificates-for-the-marketing-sale-and-let-of-dwellings"
+
+const val CONTACT_EPC_ASSESSOR_URL = "https://www.gov.uk/get-new-energy-certificate#find-an-assessor"
+
+const val HOUSES_IN_MULTIPLE_OCCUPATION_URL = "https://www.gov.uk/private-renting/houses-in-multiple-occupation"
+
+const val HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL =
+    "https://www.gov.uk/government/publications/" +
+        "housing-health-and-safety-rating-system-guidance-for-landlords-and-property-related-professionals"
+
+const val HOMES_ACT_2018_URL =
+    "https://www.gov.uk/government/publications/homes-fitness-for-human-habitation-act-2018/" +
+        "guide-for-landlords-homes-fitness-for-human-habitation-act-2018"
+
+const val PRIVATE_RENTING_GUIDE_URL = "https://www.gov.uk/private-renting"
+
+const val RIGHT_TO_RENT_CHECKS_URL = "https://www.gov.uk/check-tenant-right-to-rent-documents"
+
+const val GOVERNMENT_APPROVED_DEPOSIT_PROTECTION_SCHEME_URL = "https://www.gov.uk/deposit-protection-schemes-and-landlords"
+
+const val HOW_TO_RENT_GUIDE_URL = "https://www.gov.uk/government/publications/how-to-rent"
+
+const val NRLA_UK_REGULATIONS_URL = "https://www.nrla.org.uk/news/certified-and-compliant-a-landlords-guide-to-meeting-uk-regulations"

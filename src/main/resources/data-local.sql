@@ -37,6 +37,13 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', '09/13/24'),
        ('urn:fdc:gov.uk:2022:Z', '01/15/25'),
        ('urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0', '05/01/25');
 
+INSERT INTO form_context (id, created_date, last_modified_date, journey_type, context, subject_identifier)
+VALUES (1, current_date, current_date, 3, '{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R 1LA"},"looked-up-addresses":"[{\"singleLineAddress\":\"1, SAVOY COURT, LONDON, WC2R 0EX\",\"localAuthorityId\":318,\"uprn\":100023432931,\"buildingNumber\":\"1\",\"streetName\":\"SAVOY COURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R 0EX\"}]","select-address":{"address":"1, SAVOY COURT, LONDON, WC2R 0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}}','urn:fdc:gov.uk:2022:UVWXY'),
+       (2, '01/15/25', '01/15/25', 7, '{}','urn:fdc:gov.uk:2022:UVWXY'),
+       (3, '01/15/25', '01/15/25', 7, '{}','urn:fdc:gov.uk:2022:UVWXY');
+
+SELECT setval(pg_get_serial_sequence('form_context', 'id'), (SELECT MAX(id) FROM form_context));
+
 INSERT INTO local_authority_user (subject_identifier, is_manager, local_authority_id, created_date, last_modified_date,
                                   name, email)
 VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 1, '10/07/24', '10/07/24', 'Ford Prefect', 'Ford.Prefect@test.com'),
@@ -214,6 +221,7 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:f
        (31, '01/15/25', '01/15/25', 31, 5, '06/13/1989', true, 0, 'urn:fdc:gov.uk:2022:X', 'PRSDB', 'test@example.com', 'England or Wales', true),
        (32, '01/15/25', '01/15/25', 32, 5, '06/13/1989', true, 0, 'urn:fdc:gov.uk:2022:Y', 'PRSDB', 'test@example.com', 'England or Wales', true),
        (33, '01/15/25', '01/15/25', 33, 5, '06/13/1989', true, 0, 'urn:fdc:gov.uk:2022:Z', 'PRSDB', 'test@example.com', 'England or Wales', true);
+
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
 INSERT INTO property (id, status, is_active, property_build_type, address_id)
@@ -264,42 +272,39 @@ VALUES (1, 1, 'L12345678'),
 
 SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
 
-INSERT INTO property_ownership (id, is_active, occupancy_type, ownership_type, current_num_households,
-                                current_num_tenants,
-                                registration_number_id, primary_landlord_id, property_id, created_date,
-                                last_modified_date, license_id)
-VALUES (1, true, 0, 1, 1, 2, 6, 1, 1, '01/15/25', '02/02/25', null),
-       (2, false, 0, 1, 1, 2, 34, 2, 2, '01/15/25', '01/15/25', null),
-       (3, true, 0, 1, 1, 2, 35, 4, 3, '01/15/25', '01/15/25', null),
-       (4, true, 0, 1, 1, 2, 36, 1, 4, '01/15/25', '01/15/25', null),
-       (5, true, 0, 1, 1, 2, 37, 1, 5, '01/15/25', '01/15/25', null),
-       (6, false, 0, 1, 1, 2, 38, 1, 6, '01/15/25', '01/15/25', null),
-       (7, true, 0, 1, 0, 0, 39, 1, 7, '02/02/25', '02/02/25', 1),
-       (8, true, 0, 1, 0, 0, 40, 1, 8, '05/02/25', '01/15/25', null),
-       (9, true, 0, 1, 0, 0, 41, 1, 9, '05/02/25', '01/15/25', null),
-       (10, true, 0, 1, 0, 0, 42, 1, 10, '05/02/25', '01/15/25', null),
-       (11, true, 0, 1, 0, 0, 43, 1, 11, '05/02/25', '01/15/25', null),
-       (12, true, 0, 1, 0, 0, 44, 1, 12, '05/02/25', '01/15/25', null),
-       (13, true, 0, 1, 0, 0, 45, 1, 13, '05/02/25', '01/15/25', null),
-       (14, true, 0, 1, 0, 0, 46, 1, 14, '05/02/25', '01/15/25', null),
-       (15, true, 0, 1, 0, 0, 47, 1, 15, '05/02/25', '01/15/25', null),
-       (16, true, 0, 1, 0, 0, 48, 1, 16, '05/02/25', '01/15/25', null),
-       (17, true, 0, 1, 0, 0, 49, 1, 17, '05/02/25', '01/15/25', null),
-       (18, true, 0, 1, 0, 0, 50, 1, 18, '05/02/25', '01/15/25', null),
-       (19, true, 0, 1, 0, 0, 51, 1, 19, '05/02/25', '01/15/25', null),
-       (20, true, 0, 1, 0, 0, 52, 1, 20, '05/02/25', '01/15/25', null),
-       (21, true, 0, 1, 0, 0, 53, 1, 21, '05/02/25', '01/15/25', null),
-       (22, true, 0, 1, 0, 0, 54, 1, 22, '05/02/25', '01/15/25', null),
-       (23, true, 0, 1, 0, 0, 55, 1, 23, '05/02/25', '01/15/25', null),
-       (24, true, 0, 1, 0, 0, 56, 1, 24, '05/02/25', '01/15/25', null),
-       (25, true, 0, 1, 0, 0, 57, 1, 25, '05/02/25', '01/15/25', null),
-       (26, true, 0, 1, 0, 0, 58, 1, 26, '05/02/25', '01/15/25', 2),
-       (27, true, 0, 1, 0, 0, 59, 1, 27, '05/02/25', '01/15/25', 3),
-       (28, true, 0, 1, 0, 0, 60, 1, 28, '05/02/25', '01/15/25', 4),
-       (29, true, 0, 1, 0, 0, 61, 1, 29, '05/02/25', '01/15/25', 5),
-       (30, true, 0, 1, 0, 0, 62, 1, 30, '05/02/25', '01/15/25', 6),
-       (31, true, 0, 1, 0, 0, 63, 1, 31, '05/02/25', '01/15/25', 7),
-       (32, true, 0, 1, 0, 0, 64, 1, 32, '05/02/25', '01/15/25', 8);
+INSERT INTO property_ownership (id, is_active, occupancy_type, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, property_id, created_date, last_modified_date, license_id, incomplete_compliance_form_id)
+VALUES (1, true, 0, 1, 1, 2, 6, 1, 1, '01/15/25', '02/02/25', null, 2),
+       (2, false, 0, 1, 1, 2, 34, 2, 2, '01/15/25', '01/15/25', null, null),
+       (3, true, 0, 1, 1, 2, 35, 4, 3, '01/15/25', '01/15/25', null, null),
+       (4, true, 0, 1, 1, 2, 36, 1, 4, '01/15/25', '01/15/25', null, 3),
+       (5, true, 0, 1, 1, 2, 37, 1, 5, '01/15/25', '01/15/25', null, null),
+       (6, false, 0, 1, 1, 2, 38, 1, 6, '01/15/25', '01/15/25', null, null),
+       (7, true, 0, 1, 0, 0, 39, 1, 7, '02/02/25', '02/02/25', 1, null),
+       (8, true, 0, 1, 0, 0, 40, 1, 8, '05/02/25', '01/15/25', null, null),
+       (9, true, 0, 1, 0, 0, 41, 1, 9, '05/02/25', '01/15/25', null, null),
+       (10, true, 0, 1, 0, 0, 42, 1, 10, '05/02/25', '01/15/25', null, null),
+       (11, true, 0, 1, 0, 0, 43, 1, 11, '05/02/25', '01/15/25', null, null),
+       (12, true, 0, 1, 0, 0, 44, 1, 12, '05/02/25', '01/15/25', null, null),
+       (13, true, 0, 1, 0, 0, 45, 1, 13, '05/02/25', '01/15/25', null, null),
+       (14, true, 0, 1, 0, 0, 46, 1, 14, '05/02/25', '01/15/25', null, null),
+       (15, true, 0, 1, 0, 0, 47, 1, 15, '05/02/25', '01/15/25', null, null),
+       (16, true, 0, 1, 0, 0, 48, 1, 16, '05/02/25', '01/15/25', null, null),
+       (17, true, 0, 1, 0, 0, 49, 1, 17, '05/02/25', '01/15/25', null, null),
+       (18, true, 0, 1, 0, 0, 50, 1, 18, '05/02/25', '01/15/25', null, null),
+       (19, true, 0, 1, 0, 0, 51, 1, 19, '05/02/25', '01/15/25', null, null),
+       (20, true, 0, 1, 0, 0, 52, 1, 20, '05/02/25', '01/15/25', null, null),
+       (21, true, 0, 1, 0, 0, 53, 1, 21, '05/02/25', '01/15/25', null, null),
+       (22, true, 0, 1, 0, 0, 54, 1, 22, '05/02/25', '01/15/25', null, null),
+       (23, true, 0, 1, 0, 0, 55, 1, 23, '05/02/25', '01/15/25', null, null),
+       (24, true, 0, 1, 0, 0, 56, 1, 24, '05/02/25', '01/15/25', null, null),
+       (25, true, 0, 1, 0, 0, 57, 1, 25, '05/02/25', '01/15/25', null, null),
+       (26, true, 0, 1, 0, 0, 58, 1, 26, '05/02/25', '01/15/25', 2, null),
+       (27, true, 0, 1, 0, 0, 59, 1, 27, '05/02/25', '01/15/25', 3, null),
+       (28, true, 0, 1, 0, 0, 60, 1, 28, '05/02/25', '01/15/25', 4, null),
+       (29, true, 0, 1, 0, 0, 61, 1, 29, '05/02/25', '01/15/25', 5, null),
+       (30, true, 0, 1, 0, 0, 62, 1, 30, '05/02/25', '01/15/25', 6, null),
+       (31, true, 0, 1, 0, 0, 63, 1, 31, '05/02/25', '01/15/25', 7, null),
+       (32, true, 0, 1, 0, 0, 64, 1, 32, '05/02/25', '01/15/25', 8, null);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 

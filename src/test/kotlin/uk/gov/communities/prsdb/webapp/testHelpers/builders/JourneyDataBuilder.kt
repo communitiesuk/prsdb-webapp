@@ -5,8 +5,10 @@ import kotlinx.serialization.json.Json
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
+import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -22,19 +24,30 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionOtherReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FireSafetyDeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionOtherReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.KeepPropertySafeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
@@ -494,6 +507,12 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withOriginalGasSafetyCertName(originalName: String): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.GasSafetyUpload.urlPathSegment] =
+            mapOf(GasSafetyUploadCertificateFormModel::name.name to originalName)
+        return this
+    }
+
     fun withGasSafetyCertExemptionStatus(hasGasSafetyCertExemption: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafetyExemption.urlPathSegment] =
             mapOf(GasSafetyExemptionFormModel::hasExemption.name to hasGasSafetyCertExemption)
@@ -503,6 +522,13 @@ class JourneyDataBuilder(
     fun withGasSafetyCertExemptionReason(gasSafetyCertExemptionReason: GasSafetyExemptionReason): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafetyExemptionReason.urlPathSegment] =
             mapOf(GasSafetyExemptionReasonFormModel::exemptionReason.name to gasSafetyCertExemptionReason)
+        return this
+    }
+
+    fun withGasSafetyCertExemptionOtherReason(otherReason: String): JourneyDataBuilder {
+        withGasSafetyCertExemptionReason(GasSafetyExemptionReason.OTHER)
+        journeyData[PropertyComplianceStepId.GasSafetyExemptionOtherReason.urlPathSegment] =
+            mapOf(GasSafetyExemptionOtherReasonFormModel::otherReason.name to otherReason)
         return this
     }
 
@@ -528,6 +554,12 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withOriginalEicrName(originalName: String): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EicrUpload.urlPathSegment] =
+            mapOf(EicrUploadCertificateFormModel::name.name to originalName)
+        return this
+    }
+
     fun withEicrExemptionStatus(hasEicrExemption: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EicrExemption.urlPathSegment] =
             mapOf(EicrExemptionFormModel::hasExemption.name to hasEicrExemption)
@@ -537,6 +569,13 @@ class JourneyDataBuilder(
     fun withEicrExemptionReason(eicrExemptionReason: EicrExemptionReason): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EicrExemptionReason.urlPathSegment] =
             mapOf(EicrExemptionReasonFormModel::exemptionReason.name to eicrExemptionReason)
+        return this
+    }
+
+    fun withEicrExemptionOtherReason(otherReason: String): JourneyDataBuilder {
+        withEicrExemptionReason(EicrExemptionReason.OTHER)
+        journeyData[PropertyComplianceStepId.EicrExemptionOtherReason.urlPathSegment] =
+            mapOf(EicrExemptionOtherReasonFormModel::otherReason.name to otherReason)
         return this
     }
 
@@ -550,6 +589,58 @@ class JourneyDataBuilder(
     fun withEpcStatus(hasEpc: HasEpc): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EPC.urlPathSegment] =
             mapOf(EpcFormModel::hasCert.name to hasEpc)
+        return this
+    }
+
+    fun withCheckMatchedEpcResult(matchedEpcIsCorrect: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment] =
+            mapOf(CheckMatchedEpcFormModel::matchedEpcIsCorrect.name to matchedEpcIsCorrect)
+        return this
+    }
+
+    fun withEpcLookupCertificateNumber(certificateNumber: String = "0000-0000-1234-5678-9100"): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EpcLookup.urlPathSegment] =
+            mapOf(EpcLookupFormModel::certificateNumber.name to certificateNumber)
+        return this
+    }
+
+    fun withLookedUpEpcDetails(epcDetails: EpcDataModel): JourneyDataBuilder {
+        journeyData[LOOKED_UP_EPC_JOURNEY_DATA_KEY] = Json.encodeToString(epcDetails)
+        return this
+    }
+
+    fun withNullLookedUpEpcDetails(): JourneyDataBuilder {
+        journeyData[LOOKED_UP_EPC_JOURNEY_DATA_KEY] = null
+        return this
+    }
+
+    fun withEpcExemptionReason(epcExemptionReason: EpcExemptionReason): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EpcExemptionReason.urlPathSegment] =
+            mapOf(EpcExemptionReasonFormModel::exemptionReason.name to epcExemptionReason)
+        return this
+    }
+
+    fun withMissingEpcExemption(): JourneyDataBuilder {
+        withEpcStatus(HasEpc.NO)
+        journeyData[PropertyComplianceStepId.EpcMissing.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withFireSafetyDeclaration(hasDeclared: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment] =
+            mapOf(FireSafetyDeclarationFormModel::hasDeclared.name to hasDeclared)
+        return this
+    }
+
+    fun withKeepPropertySafeDeclaration(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.KeepPropertySafe.urlPathSegment] =
+            mapOf(KeepPropertySafeFormModel::agreesToResponsibility.name to true)
+        return this
+    }
+
+    fun withResponsibilityToTenantsDeclaration(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment] =
+            mapOf(ResponsibilityToTenantsFormModel::agreesToResponsibility.name to true)
         return this
     }
 

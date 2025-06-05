@@ -22,6 +22,7 @@ import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
+import uk.gov.communities.prsdb.webapp.constants.NRLA_UK_REGULATIONS_URL
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_COMPLIANCE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.PROPERTY_COMPLIANCE_ROUTE
@@ -56,6 +57,7 @@ class PropertyComplianceController(
     ): String {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
+        model.addAttribute("nrlaUkRegulationsUrl", NRLA_UK_REGULATIONS_URL)
         model.addAttribute(
             "taskListUrl",
             "${getPropertyCompliancePath(propertyOwnershipId)}/$TASK_LIST_PATH_SEGMENT",
@@ -71,7 +73,7 @@ class PropertyComplianceController(
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
         return propertyComplianceJourneyFactory
-            .create(propertyOwnershipId, principal.name)
+            .create(propertyOwnershipId)
             .getModelAndViewForTaskList()
     }
 
@@ -88,7 +90,7 @@ class PropertyComplianceController(
 
         val stepModelAndView =
             propertyComplianceJourneyFactory
-                .create(propertyOwnershipId, principal.name)
+                .create(propertyOwnershipId)
                 .getModelAndViewForStep(stepName, subpage)
 
         if (stepName.contains(FILE_UPLOAD_URL_SUBSTRING)) {
@@ -109,9 +111,13 @@ class PropertyComplianceController(
     ): ModelAndView {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
+        // We must ensure that we can distinguish between a metadata-only file upload and a normal file upload when
+        // postJourneyData() is used for a file upload endpoint.
+        val annotatedFormData = formData + (UploadCertificateFormModel::isMetadataOnly.name to true)
+
         return propertyComplianceJourneyFactory
-            .create(propertyOwnershipId, principal.name)
-            .completeStep(stepName, formData, subpage, principal)
+            .create(propertyOwnershipId)
+            .completeStep(stepName, annotatedFormData, subpage, principal)
     }
 
     @PostMapping("/{stepName}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -164,7 +170,7 @@ class PropertyComplianceController(
                 ).toPageData()
 
         return propertyComplianceJourneyFactory
-            .create(propertyOwnershipId, principal.name)
+            .create(propertyOwnershipId)
             .completeStep(
                 stepName,
                 formData,

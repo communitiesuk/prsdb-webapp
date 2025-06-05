@@ -28,6 +28,9 @@ enum class PropertyComplianceStepId(
     EicrExemptionMissing("eicr-exemption-missing"),
     EPC("epc"),
     CheckMatchedEpc("check-matched-epc"),
+    EpcLookup("epc-lookup"),
+    EpcNotFound("epc-not-found"),
+    EpcSuperseded("epc-superseded"),
     EpcMissing("epc-missing"),
     EpcExemptionReason("epc-exemption-reason"),
     EpcExemptionConfirmation("epc-exemption-confirmation"),
@@ -36,5 +39,4 @@ enum class PropertyComplianceStepId(
     KeepPropertySafe("keep-property-safe"),
     ResponsibilityToTenants("responsibility-to-tenants"),
     CheckAndSubmit("check-and-submit"),
-    Declaration("declaration"),
 }

@@ -20,7 +20,7 @@ import java.security.Principal
 import kotlin.reflect.cast
 
 abstract class Journey<T : StepId>(
-    private val journeyType: JourneyType,
+    protected val journeyType: JourneyType,
     val initialStepId: T,
     protected val validator: Validator,
     protected val journeyDataService: JourneyDataService,
@@ -34,20 +34,6 @@ abstract class Journey<T : StepId>(
 
     protected open val unreachableStepRedirect = initialStepId.urlPathSegment
     protected open val checkYourAnswersStepId: T? = null
-
-    fun loadJourneyDataIfNotLoaded(principalName: String) {
-        val data = journeyDataService.getJourneyDataFromSession()
-        if (data.isEmpty()) {
-            /* TODO PRSD-589 Currently this looks the context up from the database,
-                takes the id, then passes the id to another method which retrieves it
-                from the database. When this is reworked, we should just pass the whole
-                context to an overload of journeyDataService.loadJourneyDataIntoSession().*/
-            val contextId = journeyDataService.getContextId(principalName, journeyType)
-            if (contextId != null) {
-                journeyDataService.loadJourneyDataIntoSession(contextId)
-            }
-        }
-    }
 
     fun getModelAndViewForStep(
         stepPathSegment: String,
@@ -116,11 +102,6 @@ abstract class Journey<T : StepId>(
         return ModelAndView("redirect:$redirectUrl")
     }
 
-    private fun isDestinationAllowedWhenChangingAnswerTo(
-        destinationStep: T?,
-        stepBeingChanged: T?,
-    ): Boolean = stepRouter.isDestinationAllowedWhenChangingAnswerTo(destinationStep, stepBeingChanged)
-
     private fun buildPreviousStepUrl(
         prevStepDetails: StepDetails<T>?,
         changingAnswersFor: T?,
@@ -141,17 +122,16 @@ abstract class Journey<T : StepId>(
     ): String {
         val (newStepId: T?, newSubPageNumber: Int?) = currentStep.nextAction(newJourneyData, subPageNumber)
 
-        return if (changingAnswersFor == null || isDestinationAllowedWhenChangingAnswerTo(newStepId, changingAnswersFor)) {
+        return if (changingAnswersFor == null || stepRouter.isDestinationAllowedWhenChangingAnswerTo(newStepId, changingAnswersFor)) {
             if (newStepId == null) {
                 throw IllegalStateException("Cannot compute next step from step ${currentStep.id.urlPathSegment}")
             }
             Step.generateUrl(newStepId, newSubPageNumber, changingAnswersFor)
         } else {
             // Assigning to localCheckYourAnswersStep allows the null check here to smart cast from T? to T
-            val localCheckYourAnswersStep = checkYourAnswersStepId
-            if (localCheckYourAnswersStep == null) {
-                throw IllegalStateException("No check your answers step defined for journey ${journeyType.name}")
-            }
+            val localCheckYourAnswersStep =
+                checkYourAnswersStepId
+                    ?: throw IllegalStateException("No check your answers step defined for journey ${journeyType.name}")
             Step.generateUrl(localCheckYourAnswersStep, null, null)
         }
     }

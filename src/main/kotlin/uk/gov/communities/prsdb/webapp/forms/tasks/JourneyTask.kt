@@ -18,9 +18,9 @@ class JourneyTask<T : StepId>(
         validator: Validator,
         isTaskReachable: Boolean = true,
     ) = if (!isTaskReachable) {
-        TaskStatus.CANNOT_START_YET
+        TaskStatus.CANNOT_START
     } else if (!isInitialStepComplete(journeyData, validator)) {
-        TaskStatus.NOT_YET_STARTED
+        TaskStatus.NOT_STARTED
     } else if (!areAllStepsWithinTaskComplete(journeyData, validator)) {
         TaskStatus.IN_PROGRESS
     } else {
