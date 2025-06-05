@@ -52,6 +52,7 @@ class LandlordDetailsUpdateJourney(
         stepName,
     ) {
     init {
+        initializeOriginalJourneyDataIfNotInitialized()
         initializeJourneyDataIfNotInitialized()
     }
 
@@ -82,12 +83,12 @@ class LandlordDetailsUpdateJourney(
         return originalLandlordData
     }
 
-    override fun initializeJourneyDataIfNotInitialized() {
-        if (!isJourneyDataInitialised()) {
-            super.initializeJourneyDataIfNotInitialized()
+    private fun initializeJourneyDataIfNotInitialized() {
+        val journeyData = journeyDataService.getJourneyDataFromSession()
+        val originalJourneyData = JourneyDataHelper.getPageData(journeyData, originalDataKey)
 
-            val journeyData = journeyDataService.getJourneyDataFromSession()
-            val lookedUpAddresses = JourneyDataHelper.getPageData(journeyData, originalDataKey)!!.getSerializedLookedUpAddresses()!!
+        if (journeyData.getSerializedLookedUpAddresses() == null && originalJourneyData != null) {
+            val lookedUpAddresses = originalJourneyData.getSerializedLookedUpAddresses()!!
             val journeyDataWithLookedUpAddresses = journeyData.withUpdatedLookedUpAddresses(lookedUpAddresses)
             journeyDataService.setJourneyDataInSession(journeyDataWithLookedUpAddresses)
         }
