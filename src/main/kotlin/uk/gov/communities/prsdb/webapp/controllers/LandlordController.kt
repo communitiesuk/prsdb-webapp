@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.constants.ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
@@ -26,8 +27,10 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeleteIncompletePropertyRegistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompleteCompliancesViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompletePropertiesViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import java.security.Principal
 
@@ -37,6 +40,7 @@ import java.security.Principal
 class LandlordController(
     private val landlordService: LandlordService,
     private val propertyRegistrationService: PropertyRegistrationService,
+    private val propertyOwnershipService: PropertyOwnershipService,
 ) {
     @GetMapping
     fun index(): CharSequence = "redirect:$LANDLORD_DASHBOARD_URL"
@@ -131,6 +135,20 @@ class LandlordController(
         return "redirect:$INCOMPLETE_PROPERTIES_URL"
     }
 
+    @GetMapping("/$ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT")
+    fun addComplianceInformation(
+        model: Model,
+        principal: Principal,
+    ): String {
+        val incompleteCompliances = propertyOwnershipService.getIncompleteCompliancesForLandlord(principal.name)
+
+        val incompleteCompliancesViewModel = IncompleteCompliancesViewModel(incompleteCompliances)
+
+        model.addAttribute("title", "Add compliance information")
+
+        return "placeholder"
+    }
+
     fun populateDeleteIncompletePropertyRegistrationModel(
         model: Model,
         contextId: Long,
@@ -166,6 +184,8 @@ class LandlordController(
         const val LANDLORD_DASHBOARD_URL = "/$LANDLORD_PATH_SEGMENT/$DASHBOARD_PATH_SEGMENT"
         const val LANDLORD_BASE_URL = "/$LANDLORD_PATH_SEGMENT"
         const val INCOMPLETE_PROPERTIES_URL = "/$LANDLORD_PATH_SEGMENT/$INCOMPLETE_PROPERTIES_PATH_SEGMENT"
+        const val INCOMPLETE_COMPLIANCES_URL =
+            "/$LANDLORD_PATH_SEGMENT/$ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT"
 
         const val DELETE_INCOMPLETE_PROPERTY_ROUTE =
             "/$LANDLORD_PATH_SEGMENT/$DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT" +
