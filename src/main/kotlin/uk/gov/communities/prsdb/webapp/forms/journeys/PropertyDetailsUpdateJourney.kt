@@ -13,8 +13,10 @@ import uk.gov.communities.prsdb.webapp.forms.pages.CheckOccupancyAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
+import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsGroupIdentifier
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyDetailsUpdateJourneyStepFactory
+import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.GroupedUpdateJourneyExtensions.Companion.withBackUrlIfNotChangingAnswer
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getIsOccupiedUpdateIfPresent
@@ -69,6 +71,7 @@ class PropertyDetailsUpdateJourney(
         )
 
     init {
+        initializeOriginalJourneyDataIfNotInitialized()
         initializeJourneyDataIfNotInitialized()
     }
 
@@ -96,6 +99,35 @@ class PropertyDetailsUpdateJourney(
         }
 
         return originalPropertyData
+    }
+
+    private fun initializeJourneyDataIfNotInitialized() {
+        val stepsToInitialize =
+            when (PropertyDetailsUpdateJourneyStepFactory.getStepGroupIdFor(stepName)) {
+                UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds ->
+                    listOf(stepFactory.getOccupancyStepId().urlPathSegment)
+                UpdatePropertyDetailsGroupIdentifier.NumberOfPeople ->
+                    listOf(stepFactory.getOccupancyStepId().urlPathSegment, stepFactory.getNumberOfHouseholdsStepId().urlPathSegment)
+                else ->
+                    emptyList()
+            }
+        initializeJourneyDataForStepsIfNotInitialized(stepsToInitialize)
+    }
+
+    private fun initializeJourneyDataForStepsIfNotInitialized(stepNames: List<String>) {
+        val journeyData = journeyDataService.getJourneyDataFromSession()
+        val originalJourneyData = JourneyDataHelper.getPageData(journeyData, originalDataKey) ?: return
+
+        val updatedJourneyData =
+            journeyData +
+                stepNames.mapNotNull { stepName ->
+                    if (!journeyData.containsKey(stepName)) {
+                        (stepName to originalJourneyData[stepName])
+                    } else {
+                        null
+                    }
+                }
+        journeyDataService.setJourneyDataInSession(updatedJourneyData)
     }
 
     private val ownershipTypeStep =
