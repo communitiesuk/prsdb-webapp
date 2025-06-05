@@ -56,17 +56,17 @@ class EpcDataModelTests {
     }
 
     @Test
-    fun `isPastExpiryDate returns true if the expiry date is in the past`() {
+    fun `isExpired returns true if the expiry date is in the past`() {
         val epcDataModel =
             MockEpcData.createEpcDataModel(
                 expiryDate = LocalDate(2020, 1, 1),
             )
 
-        assertTrue(epcDataModel.isPastExpiryDate())
+        assertTrue(epcDataModel.isExpired())
     }
 
     @Test
-    fun `isPastExpiryDate returns false if the expiry date is in the future`() {
+    fun `isExpired returns false if the expiry date is in the future`() {
         val dateNow =
             Clock
                 .systemDefaultZone()
@@ -80,7 +80,7 @@ class EpcDataModelTests {
                 expiryDate = dateNow.plus(DatePeriod(years = 2)),
             )
 
-        assertFalse(epcDataModel.isPastExpiryDate())
+        assertFalse(epcDataModel.isExpired())
     }
 
     @ParameterizedTest(name = "{1} when the energy rating is {0}")
