@@ -47,7 +47,7 @@ class IncompleteCompliancesViewModel(
                     getComplianceTaskStatus(compliance.energyPerformance),
                 )
                 addRow(
-                    "landlord.incompleteCompliances.summaryRow.landlordResponsibilities",
+                    "landlord.incompleteCompliances.SummaryRow.landlordResponsibilities",
                     getComplianceTaskStatus(compliance.landlordsResponsibilities),
                 )
             }.toList()
@@ -63,7 +63,7 @@ class IncompleteCompliancesViewModel(
                 } else {
                     addAction(
                         "landlord.incompleteCompliances.action.start",
-                        PropertyComplianceController.getPropertyComplianceStartPath(compliance.propertyOwnershipId),
+                        PropertyComplianceController.getPropertyCompliancePath(compliance.propertyOwnershipId),
                     )
                 }
             }.toList()

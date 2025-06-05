@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.whenever
@@ -9,10 +10,14 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_COMPLIANCES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.models.dataModels.IncompleteComplianceDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompleteCompliancesViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -155,13 +160,33 @@ class LandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `landlordIncompleteCompliances returns 200 for authorised landlord user`() {
+        val incompleteComplianceDataModel =
+            IncompleteComplianceDataModel(
+                1,
+                "123 Example Street, EX",
+                "Example Local Authority",
+                LocalDate(2025, 6, 7),
+                true,
+                true,
+                true,
+                false,
+            )
+        val incompleteCompliancesViewModel =
+            IncompleteCompliancesViewModel(
+                listOf(incompleteComplianceDataModel),
+            )
         whenever(
             propertyOwnershipService.getIncompleteCompliancesForLandlord("user"),
-        ).thenReturn(emptyList())
+        ).thenReturn(listOf(incompleteComplianceDataModel))
         mvc
             .get(INCOMPLETE_COMPLIANCES_URL)
             .andExpect {
                 status { isOk() }
+                model {
+                    attribute("incompleteCompliances", incompleteCompliancesViewModel.incompleteCompliances)
+                    attribute("viewRegisteredPropertiesUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT#$REGISTERED_PROPERTIES_PATH_SEGMENT")
+                    attribute("backUrl", LANDLORD_DASHBOARD_URL)
+                }
             }
     }
 }

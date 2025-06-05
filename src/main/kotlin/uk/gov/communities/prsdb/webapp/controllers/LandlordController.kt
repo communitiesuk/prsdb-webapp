@@ -144,9 +144,12 @@ class LandlordController(
 
         val incompleteCompliancesViewModel = IncompleteCompliancesViewModel(incompleteCompliances)
 
-        model.addAttribute("title", "Add compliance information")
+        model.addAttribute("incompleteCompliances", incompleteCompliancesViewModel.incompleteCompliances)
+        model.addAttribute("viewRegisteredPropertiesUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT#$REGISTERED_PROPERTIES_PATH_SEGMENT")
 
-        return "placeholder"
+        model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
+
+        return "incompleteCompliancesView"
     }
 
     fun populateDeleteIncompletePropertyRegistrationModel(
