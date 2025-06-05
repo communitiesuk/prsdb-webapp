@@ -717,7 +717,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
             assertTrue(hasCompletedEpcTask)
         }
 
-        // TODO: PRSD-1144 - add check that this page was answered "Yes"
+        // TODO: PRSD-1146 - add check that this page was answered "Yes"
         @Disabled
         @Test
         fun `returns true if EpcExpiryCheck was answered Yes and the energy rating is E or better`() {
@@ -726,7 +726,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
                     .withAutoMatchedEpcDetails(
                         MockEpcData.createEpcDataModel(expiryDate = kotlinx.datetime.LocalDate(2022, 1, 5), energyRating = "A"),
                     ).withCheckAutoMatchedEpcResult(true)
-                    // .withEpcExpiryCheck(true)  TODO: PRSD-1144
+                    // .withEpcExpiryCheck(true)  TODO: PRSD-1146
                     .build()
 
             val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
@@ -734,7 +734,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
             assertTrue(hasCompletedEpcTask)
         }
 
-        // TODO: PRSD-1144 - add check that this page was answered "Yes"
+        // TODO: PRSD-1146 - add check that this page was answered "Yes"
         @Disabled
         @Test
         fun `EpcExpiryCheck does not complete this task if the energy rating is worse than E and MEES steps are not completed`() {
@@ -743,7 +743,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
                     .withAutoMatchedEpcDetails(
                         MockEpcData.createEpcDataModel(expiryDate = kotlinx.datetime.LocalDate(2022, 1, 5), energyRating = "F"),
                     ).withCheckAutoMatchedEpcResult(true)
-                    // .withEpcExpiryCheck(true)  TODO: PRSD-1144
+                    // .withEpcExpiryCheck(true)  TODO: PRSD-1146
                     .build()
 
             val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
@@ -751,13 +751,13 @@ class PropertyComplianceJourneyDataExtensionsTests {
             assertFalse(hasCompletedEpcTask)
         }
 
-        // TODO: PRSD-1144 - add check that this page was answered "No"
+        // TODO: PRSD-1146 - add check that this page was answered "No"
         @Disabled
         @Test
         fun `EpcExpiryCheck does not complete this task if it is answered No`() {
             val testJourneyData =
                 journeyDataBuilder
-                    // .withEpcExpiryCheck(false)  TODO: PRSD-1144
+                    // .withEpcExpiryCheck(false)  TODO: PRSD-1146
                     .build()
 
             val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
