@@ -28,13 +28,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcExpiryCheckPagePropertyCompliance
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcNotAutoMatchedPagePropertyCompliance
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcNotFoundPagePropertyCompliance
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyDeclarationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionCheckPagePropertyCompliance
@@ -490,33 +487,6 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
             val epcLookupPage = navigator.skipToPropertyComplianceEpcLookupPage(PROPERTY_OWNERSHIP_ID)
             epcLookupPage.submitInvalidEpcNumber()
             assertThat(epcLookupPage.form.getErrorMessage()).containsText("Enter a 20 digit certificate number")
-        }
-
-        // TODO: PRSD-1200 - include this is a new journey test which doesn't find epcs
-        @Test
-        fun `Submitting a non-existent certificate number redirects to the EPC not found`(page: Page) {
-            val epcLookupPage = navigator.skipToPropertyComplianceEpcLookupPage(PROPERTY_OWNERSHIP_ID)
-            epcLookupPage.submitNonexistentEpcNumber()
-            assertPageIs(page, EpcNotFoundPagePropertyCompliance::class, urlArguments)
-        }
-    }
-
-    @Nested
-    inner class EpcNotFoundStepTests {
-        // TODO: PRSD-1200 - include this is a new journey test which doesn't find epcs
-        @Test
-        fun `Clicking the Search Again button returns the user to the EPC lookup step`(page: Page) {
-            val epcNotFoundPage = navigator.skipToPropertyComplianceEpcNotFoundPage(PROPERTY_OWNERSHIP_ID)
-            epcNotFoundPage.searchAgainButton.clickAndWait()
-            assertPageIs(page, EpcLookupPagePropertyCompliance::class, urlArguments)
-        }
-
-        // TODO: PRSD-1200 - include this is a new journey test which doesn't find epcs
-        @Test
-        fun `Clicking the Continue button directs the user to the Fire Safety Declaration step`(page: Page) {
-            val epcNotFoundPage = navigator.skipToPropertyComplianceEpcNotFoundPage(PROPERTY_OWNERSHIP_ID)
-            epcNotFoundPage.continueButton.clickAndWait()
-            assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
         }
     }
 
