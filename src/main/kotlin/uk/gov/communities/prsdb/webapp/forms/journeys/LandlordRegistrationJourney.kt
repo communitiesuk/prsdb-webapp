@@ -210,6 +210,7 @@ class LandlordRegistrationJourney(
                             "fieldSetHeading" to "forms.confirmDetails.heading",
                             "fieldSetHint" to "forms.confirmDetails.summary",
                             "submitButtonText" to "forms.buttons.confirmAndContinue",
+                            "backUrl" to "/$REGISTER_LANDLORD_JOURNEY_URL",
                         ),
                     displaySectionHeader = true,
                 ),
