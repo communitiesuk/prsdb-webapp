@@ -348,9 +348,9 @@ class PropertyRegistrationServiceTests {
             val principalName = "principalName"
             val incompleteProperties =
                 listOf(
-                    MockLandlordData.createFormContext(createdDate = createdTodayDate),
-                    MockLandlordData.createFormContext(createdDate = createdYesterdayDate),
-                    MockLandlordData.createFormContext(createdDate = outOfDateCreatedDate),
+                    MockLandlordData.createPropertyRegistrationFormContext(createdDate = createdTodayDate),
+                    MockLandlordData.createPropertyRegistrationFormContext(createdDate = createdYesterdayDate),
+                    MockLandlordData.createPropertyRegistrationFormContext(createdDate = outOfDateCreatedDate),
                 )
 
             val expectedIncompletePropertiesNumber = 2
@@ -384,7 +384,7 @@ class PropertyRegistrationServiceTests {
         fun `getIncompletePropertyFormContextForLandlordIfNotExpired returns the form context for a valid incomplete property`() {
             val createdTodayDate = currentInstant.toJavaInstant()
 
-            val expectedFormContext = MockLandlordData.createFormContext(createdDate = createdTodayDate)
+            val expectedFormContext = MockLandlordData.createPropertyRegistrationFormContext(createdDate = createdTodayDate)
             val principalName = "user"
 
             whenever(
@@ -428,7 +428,7 @@ class PropertyRegistrationServiceTests {
             val outOfDateCreatedDate = currentInstant.minus(29, DateTimeUnit.DAY, TimeZone.of("Europe/London")).toJavaInstant()
 
             val principalName = "user"
-            val formContext = MockLandlordData.createFormContext(createdDate = outOfDateCreatedDate)
+            val formContext = MockLandlordData.createPropertyRegistrationFormContext(createdDate = outOfDateCreatedDate)
 
             val expectedErrorMessage = "404 NOT_FOUND \"Complete by date for form context with ID: ${formContext.id} is in the past\""
 
@@ -460,18 +460,23 @@ class PropertyRegistrationServiceTests {
                     "\\\"postcode\\\":\\\"EG\\\"}]\",\"select-address\":{\"address\":\"$address\"}}"
 
             val createdTodayDate = currentInstant.toJavaInstant()
-            val formContextCreatedToday = MockLandlordData.createFormContext(id = 1, createdDate = createdTodayDate, context = context)
+            val formContextCreatedToday =
+                MockLandlordData.createPropertyRegistrationFormContext(
+                    id = 1,
+                    createdDate = createdTodayDate,
+                    context = context,
+                )
 
             val createdYesterdayDate = currentInstant.minus(1, DateTimeUnit.DAY, TimeZone.of("Europe/London")).toJavaInstant()
             val formContextCreatedYesterday =
-                MockLandlordData.createFormContext(
+                MockLandlordData.createPropertyRegistrationFormContext(
                     id = 2,
                     createdDate = createdYesterdayDate,
                     context = context,
                 )
 
             val outOfDateCreatedDate = currentInstant.minus(29, DateTimeUnit.DAY, TimeZone.of("Europe/London")).toJavaInstant()
-            val formContextCreated29DaysAgo = MockLandlordData.createFormContext(createdDate = outOfDateCreatedDate)
+            val formContextCreated29DaysAgo = MockLandlordData.createPropertyRegistrationFormContext(createdDate = outOfDateCreatedDate)
 
             val principalName = "principalName"
             val incompleteProperties = listOf(formContextCreatedToday, formContextCreatedYesterday, formContextCreated29DaysAgo)
@@ -514,7 +519,7 @@ class PropertyRegistrationServiceTests {
             val principalName = "principalName"
             val outOfDateCreatedDate = currentInstant.minus(29, DateTimeUnit.DAY, TimeZone.of("Europe/London")).toJavaInstant()
 
-            val formContext = MockLandlordData.createFormContext(createdDate = outOfDateCreatedDate)
+            val formContext = MockLandlordData.createPropertyRegistrationFormContext(createdDate = outOfDateCreatedDate)
 
             whenever(
                 mockFormContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION),
@@ -541,7 +546,7 @@ class PropertyRegistrationServiceTests {
         fun `deleteIncompleteProperty deletes the form context for a valid incomplete property`() {
             val createdTodayDate = currentInstant.toJavaInstant()
 
-            val formContext = MockLandlordData.createFormContext(createdDate = createdTodayDate)
+            val formContext = MockLandlordData.createPropertyRegistrationFormContext(createdDate = createdTodayDate)
             val principalName = "user"
 
             whenever(

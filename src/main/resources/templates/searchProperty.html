@@ -33,7 +33,7 @@
                         <tbody class="govuk-table__body">
                         <tr class="govuk_table__row" th:each="property: ${searchResults}">
                             <td class="govuk-table__cell govuk-!-width-one-quarter">
-                                <a class="govuk-link" th:href="@{${basePropertyDetailsURL + '/' + property.id}}"
+                                <a class="govuk-link" th:href="@{${property.recordLink}}"
                                    th:text="${property.address}">
                                 </a>
                             </td>
@@ -45,7 +45,7 @@
                             </td>
                             <td class="govuk-table__cell govuk-!-width-one-quarter">
                                 <a class="govuk-link"
-                                   th:href="@{${baseLandlordDetailsURL + '/' + property.landlord.id}}"
+                                   th:href="@{${property.landlord.recordLink}}"
                                    th:text="${property.landlord.name}">
                                 </a>
                             </td>

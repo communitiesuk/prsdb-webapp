@@ -6,14 +6,14 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
-class EpcSupersededPagePropertyCompliance(
+class EpcNotAutoMatchedPagePropertyCompliance(
     page: Page,
     urlArguments: Map<String, String>,
 ) : BasePage(
         page,
         PropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.EpcSuperseded.urlPathSegment}",
+            "/${PropertyComplianceStepId.EpcNotAutoMatched.urlPathSegment}",
     ) {
-    // TODO: PRSD-1140 - update this
+    // TODO: PRSD-1200 - update this
     val continueButton = Button.byText(page, "Continue")
 }

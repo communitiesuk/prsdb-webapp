@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import jakarta.persistence.EntityExistsException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FIND_LOCAL_AUTHORITY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
@@ -10,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.AlreadyRegisteredPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -162,6 +164,7 @@ class PropertyRegistrationJourney(
                             "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
                             "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
                             "submitButtonText" to "forms.buttons.continue",
+                            BACK_URL_ATTR_NAME to LandlordController.LANDLORD_DASHBOARD_URL,
                         ),
                     shouldDisplaySectionHeader = true,
                 ),

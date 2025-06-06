@@ -10,10 +10,12 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_COMPLIANCES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
@@ -33,6 +35,9 @@ class LandlordControllerTests(
 
     @MockitoBean
     private lateinit var localAuthorityService: LocalAuthorityService
+
+    @MockitoBean
+    private lateinit var propertyOwnershipService: PropertyOwnershipService
 
     @Test
     fun `index returns a redirect for unauthenticated user`() {
@@ -123,6 +128,38 @@ class LandlordControllerTests(
         ).thenReturn(emptyList())
         mvc
             .get(INCOMPLETE_PROPERTIES_URL)
+            .andExpect {
+                status { isOk() }
+            }
+    }
+
+    @Test
+    fun `landlordIncompleteCompliances returns a redirect for unauthenticated user`() {
+        mvc
+            .get(INCOMPLETE_COMPLIANCES_URL)
+            .andExpect {
+                status { is3xxRedirection() }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun `landlordIncompleteCompliances returns 403 for unauthorized user`() {
+        mvc
+            .get(INCOMPLETE_COMPLIANCES_URL)
+            .andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], username = "user")
+    fun `landlordIncompleteCompliances returns 200 for authorised landlord user`() {
+        whenever(
+            propertyOwnershipService.getIncompleteCompliancesForLandlord("user"),
+        ).thenReturn(emptyList())
+        mvc
+            .get(INCOMPLETE_COMPLIANCES_URL)
             .andExpect {
                 status { isOk() }
             }

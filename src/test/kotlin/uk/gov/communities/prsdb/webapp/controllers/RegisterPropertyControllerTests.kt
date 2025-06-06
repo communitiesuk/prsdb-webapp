@@ -29,8 +29,8 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createFormContext
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyRegistrationFormContext
 
 @WebMvcTest(RegisterPropertyController::class)
 class RegisterPropertyControllerTests(
@@ -167,7 +167,7 @@ class RegisterPropertyControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `getResume redirects to task-list after calling load journey data method from propertyRegistrationService`() {
         val contextId = "1"
-        val formContext = createFormContext()
+        val formContext = createPropertyRegistrationFormContext()
         whenever(
             propertyRegistrationService.getIncompletePropertyFormContextForLandlordIfNotExpired(contextId.toLong(), "user"),
         ).thenReturn(formContext)

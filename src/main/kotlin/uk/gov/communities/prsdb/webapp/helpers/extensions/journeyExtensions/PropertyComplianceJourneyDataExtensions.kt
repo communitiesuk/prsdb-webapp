@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions
 import kotlinx.datetime.yearsUntil
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import uk.gov.communities.prsdb.webapp.constants.AUTO_MATCHED_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_EPC_JOURNEY_DATA_KEY
@@ -15,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionOtherReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
@@ -28,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 
 class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
     companion object {
@@ -144,17 +147,58 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 EpcLookupFormModel::certificateNumber.name,
             )
 
-        fun JourneyData.getEpcDetails(): EpcDataModel? {
-            val serializedEpcDetails = JourneyDataHelper.getStringValueByKey(this, LOOKED_UP_EPC_JOURNEY_DATA_KEY) ?: return null
+        fun JourneyData.getEpcDetails(autoMatched: Boolean): EpcDataModel? {
+            val journeyDataKey = getEpcDetailsJourneyDataKey(autoMatched)
+            val serializedEpcDetails = JourneyDataHelper.getStringValueByKey(this, journeyDataKey) ?: return null
             return Json.decodeFromString<EpcDataModel>(serializedEpcDetails)
         }
 
-        fun JourneyData.withEpcDetails(epcDetails: EpcDataModel?): JourneyData =
-            if (epcDetails == null) {
-                this + (LOOKED_UP_EPC_JOURNEY_DATA_KEY to null)
+        fun JourneyData.withEpcDetails(
+            epcDetails: EpcDataModel?,
+            autoMatched: Boolean,
+        ): JourneyData {
+            val journeyDataKey = getEpcDetailsJourneyDataKey(autoMatched)
+
+            return if (epcDetails == null) {
+                this + (journeyDataKey to null)
             } else {
-                this + (LOOKED_UP_EPC_JOURNEY_DATA_KEY to Json.encodeToString(epcDetails))
+                this + (journeyDataKey to Json.encodeToString(epcDetails))
             }
+        }
+
+        private fun getEpcDetailsJourneyDataKey(autoMatched: Boolean): String =
+            if (autoMatched) {
+                AUTO_MATCHED_EPC_JOURNEY_DATA_KEY
+            } else {
+                LOOKED_UP_EPC_JOURNEY_DATA_KEY
+            }
+
+        fun JourneyData.getAcceptedEpcDetails(): EpcDataModel? {
+            // Check the automatched EPC first, then the looked up EPC
+            if (this.getAutoMatchedEpcIsCorrect() == true) {
+                return this.getEpcDetails(autoMatched = true)
+            }
+            if (this.getMatchedEpcIsCorrect() == true) {
+                return this.getEpcDetails(autoMatched = false)
+            }
+            return null
+        }
+
+        fun JourneyData.getAutoMatchedEpcIsCorrect(): Boolean? =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.CheckAutoMatchedEpc.urlPathSegment,
+                CheckMatchedEpcFormModel::matchedEpcIsCorrect.name,
+            )
+
+        fun JourneyData.getMatchedEpcIsCorrect(): Boolean? =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment,
+                CheckMatchedEpcFormModel::matchedEpcIsCorrect.name,
+            )
+
+        fun JourneyData.withResetCheckMatchedEpc(): JourneyData = this - PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment
 
         fun JourneyData.getEpcExemptionReason(): EpcExemptionReason? =
             JourneyDataHelper.getFieldEnumValue<EpcExemptionReason>(
@@ -169,5 +213,62 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
                 FireSafetyDeclarationFormModel::hasDeclared.name,
             )
+
+        fun JourneyData.getResponsibilityToTenantsAgreement() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
+                ResponsibilityToTenantsFormModel::agreesToResponsibility.name,
+            )
+
+        fun JourneyData.getHasCompletedGasSafetyTask() =
+            this.getHasCompletedGasSafetyUploadConfirmation() ||
+                this.getHasCompletedGasSafetyExemptionConfirmation() ||
+                this.getHasCompletedGasSafetyExemptionMissing() ||
+                this.getHasCompletedGasSafetyOutdated()
+
+        fun JourneyData.getHasCompletedEicrTask() =
+            this.getHasCompletedEicrUploadConfirmation() ||
+                this.getHasCompletedEicrExemptionConfirmation() ||
+                this.getHasCompletedEicrExemptionMissing() ||
+                this.getHasCompletedEicrOutdated()
+
+        // TODO PRSD-1132, PRSD-1144, PRSD-1145, PRSD-1146, PRSD-1147 add 'hasCompleted' check for any new steps that could be the final page in the EPC journey
+        fun JourneyData.getHasCompletedEpcTask() =
+            this.getHasCompletedEpcExemptionConfirmation() ||
+                this.getHasCompletedEpcMissing() ||
+                this.getHasCompletedEpcNotFound()
+
+        fun JourneyData.getHasCompletedLandlordsResponsibilitiesTask() = this.getResponsibilityToTenantsAgreement() ?: false
+
+        private fun JourneyData.getHasCompletedGasSafetyUploadConfirmation() =
+            this.containsKey(PropertyComplianceStepId.GasSafetyUploadConfirmation.urlPathSegment)
+
+        private fun JourneyData.getHasCompletedGasSafetyExemptionConfirmation() =
+            this.containsKey(PropertyComplianceStepId.GasSafetyExemptionConfirmation.urlPathSegment)
+
+        private fun JourneyData.getHasCompletedGasSafetyExemptionMissing() =
+            this.containsKey(PropertyComplianceStepId.GasSafetyExemptionMissing.urlPathSegment)
+
+        private fun JourneyData.getHasCompletedGasSafetyOutdated() =
+            this.containsKey(PropertyComplianceStepId.GasSafetyOutdated.urlPathSegment)
+
+        private fun JourneyData.getHasCompletedEicrUploadConfirmation() =
+            this.containsKey(PropertyComplianceStepId.EicrUploadConfirmation.urlPathSegment)
+
+        private fun JourneyData.getHasCompletedEicrExemptionConfirmation() =
+            this.containsKey(PropertyComplianceStepId.EicrExemptionConfirmation.urlPathSegment)
+
+        private fun JourneyData.getHasCompletedEicrExemptionMissing() =
+            this.containsKey(PropertyComplianceStepId.EicrExemptionMissing.urlPathSegment)
+
+        private fun JourneyData.getHasCompletedEicrOutdated() = this.containsKey(PropertyComplianceStepId.EicrOutdated.urlPathSegment)
+
+        private fun JourneyData.getHasCompletedEpcExemptionConfirmation() =
+            this.containsKey(PropertyComplianceStepId.EpcExemptionConfirmation.urlPathSegment)
+
+        private fun JourneyData.getHasCompletedEpcMissing() = this.containsKey(PropertyComplianceStepId.EpcMissing.urlPathSegment)
+
+        private fun JourneyData.getHasCompletedEpcNotFound() = this.containsKey(PropertyComplianceStepId.EpcNotFound.urlPathSegment)
     }
 }

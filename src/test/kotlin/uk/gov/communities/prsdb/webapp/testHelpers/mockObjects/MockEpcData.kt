@@ -1,7 +1,14 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 
+import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.plus
+import kotlinx.datetime.toJavaInstant
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import java.time.format.DateTimeFormatter
 
 class MockEpcData {
     companion object {
@@ -22,5 +29,44 @@ class MockEpcData {
             expiryDate = expiryDate,
             latestCertificateNumberForThisProperty = latestCertificateNumberForThisProperty,
         )
+
+        fun createEpcRegisterClientEpcFoundResponse(
+            certificateNumber: String = DEFAULT_EPC_CERTIFICATE_NUMBER,
+            energyRating: String = "C",
+            expiryDate: LocalDate = DateTimeHelper().getCurrentDateInUK().plus(DatePeriod(years = 5)),
+            latestCertificateNumberForThisProperty: String = DEFAULT_EPC_CERTIFICATE_NUMBER,
+        ) = """
+            {
+                "data": {
+                    "epcRrn": "$certificateNumber",
+                    "currentEnergyEfficiencyBand": "$energyRating",
+                    "expiryDate": "${formatLocalDateToISO(expiryDate)}",
+                    "latestEpcRrnForAddress": "$latestCertificateNumberForThisProperty",
+                    "address": {
+                        "addressLine1": "123 Test Street",
+                        "town": "Test Town",
+                        "postcode": "TT1 1TT",
+                        "addressLine2": "Flat 1"
+                    }
+                }
+            }
+            """.trimIndent()
+
+        val epcRegisterClientEpcNotFoundResponse =
+            """
+            {
+                "errors": [
+                    {
+                        "code": "NOT_FOUND",
+                        "title": "Certificate not found"
+                    }
+                ]
+            }
+            """.trimIndent()
+
+        private fun formatLocalDateToISO(localDate: LocalDate): String {
+            val startOfDayInstant = localDate.atStartOfDayIn(TimeZone.of("Europe/London"))
+            return DateTimeFormatter.ISO_INSTANT.format(startOfDayInstant.toJavaInstant())
+        }
     }
 }

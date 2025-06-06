@@ -119,8 +119,15 @@ abstract class Journey<T : StepId>(
         newJourneyData: JourneyData,
         subPageNumber: Int?,
         changingAnswersFor: T? = null,
+        overriddenRedirectStepId: T? = null,
+        overridenRedirectSubPageNumber: Int? = null,
     ): String {
-        val (newStepId: T?, newSubPageNumber: Int?) = currentStep.nextAction(newJourneyData, subPageNumber)
+        val (newStepId: T?, newSubPageNumber: Int?) =
+            if (overriddenRedirectStepId == null) {
+                currentStep.nextAction(newJourneyData, subPageNumber)
+            } else {
+                Pair(overriddenRedirectStepId, overridenRedirectSubPageNumber)
+            }
 
         return if (changingAnswersFor == null || stepRouter.isDestinationAllowedWhenChangingAnswerTo(newStepId, changingAnswersFor)) {
             if (newStepId == null) {
