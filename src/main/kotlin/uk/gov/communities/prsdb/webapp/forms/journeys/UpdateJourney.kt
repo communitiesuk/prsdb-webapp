@@ -29,9 +29,9 @@ abstract class UpdateJourney<T : StepId>(
 
     protected abstract fun createOriginalJourneyData(): JourneyData
 
-    open fun initializeJourneyDataIfNotInitialized() {
+    fun initializeOriginalJourneyDataIfNotInitialized() {
         val journeyData = journeyDataService.getJourneyDataFromSession()
-        if (!isJourneyDataInitialised(journeyData)) {
+        if (!isOriginalJourneyDataInitialised(journeyData)) {
             val newJourneyData = journeyData + (originalDataKey to createOriginalJourneyData())
             journeyDataService.setJourneyDataInSession(newJourneyData)
         }
@@ -61,10 +61,5 @@ abstract class UpdateJourney<T : StepId>(
         return ReachableStepDetailsIterator(updatedData, steps, initialStepId, validator)
     }
 
-    protected fun isJourneyDataInitialised(): Boolean {
-        val journeyData = journeyDataService.getJourneyDataFromSession()
-        return isJourneyDataInitialised(journeyData)
-    }
-
-    private fun isJourneyDataInitialised(journeyData: JourneyData): Boolean = journeyData.containsKey(originalDataKey)
+    private fun isOriginalJourneyDataInitialised(journeyData: JourneyData): Boolean = journeyData.containsKey(originalDataKey)
 }
