@@ -12,8 +12,8 @@ data class LandlordSearchResultViewModel(
     val contactAddress: String,
     val email: String,
     val phoneNumber: String,
+    val recordLink: String,
     val listedPropertyCount: Int = 0,
-    val recordLink: String? = null,
 ) {
     companion object {
         fun fromLandlordWithListedPropertyCount(

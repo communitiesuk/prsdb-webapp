@@ -420,6 +420,7 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
             val landlordPage = assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
             landlordPage.backLink.clickAndWait()
 
+            assertPageIs(page, SearchPropertyRegisterPage::class)
             assertThat(resultTable.getCell(0, PROPERTY_COL_INDEX)).containsText("11 PRSDB Square, EG1 2AK")
         }
 
@@ -439,6 +440,7 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
                 )
             landlordPage.backLink.clickAndWait()
 
+            assertPageIs(page, SearchPropertyRegisterPage::class)
             assertThat(resultTable.getCell(0, PROPERTY_COL_INDEX)).containsText("11 PRSDB Square, EG1 2AK")
         }
     }
