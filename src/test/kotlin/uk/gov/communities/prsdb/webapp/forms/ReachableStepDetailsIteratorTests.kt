@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyDataKey
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.TestIteratorBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.TestStepModel
@@ -150,14 +151,16 @@ class ReachableStepDetailsIteratorTest {
         }
 
         @Test
-        fun `next adds the next step's data to the filtered journey data of the next step`() {
+        fun `next adds non-step and the next step's data to the filtered journey data of the next step`() {
             // Arrange
             val currentStepModel = TestStepModel("2", isSatisfied = true)
             val builder =
                 TestIteratorBuilder()
                     .onStep(1)
+                    .withNonStepJourneyData(JourneyDataKey.LookedUpAddresses)
                     .withFirstStep(TestStepModel("1", isSatisfied = true))
                     .withNextStep(currentStepModel)
+            val nonPageDataForStep = builder.getDataForKey(JourneyDataKey.LookedUpAddresses)
             val pageDataForStep = builder.getDataForStep(currentStepModel.urlPathSegment)
 
             val testIterator = builder.build()
@@ -166,6 +169,7 @@ class ReachableStepDetailsIteratorTest {
             val nextStepDetails = testIterator.next()
 
             // Assert
+            assertEquals(nonPageDataForStep, nextStepDetails.filteredJourneyData[JourneyDataKey.LookedUpAddresses.key])
             assertEquals(pageDataForStep, nextStepDetails.filteredJourneyData[currentStepModel.urlPathSegment])
         }
 
@@ -175,6 +179,7 @@ class ReachableStepDetailsIteratorTest {
             val builder =
                 TestIteratorBuilder()
                     .onStep(4)
+                    .withNonStepJourneyData(JourneyDataKey.LookedUpAddresses)
                     .withFirstStep(TestStepModel("1", isSatisfied = true))
                     .withNextStep(TestStepModel("2", isSatisfied = true))
                     .withNextStep(TestStepModel("3", isSatisfied = true))
