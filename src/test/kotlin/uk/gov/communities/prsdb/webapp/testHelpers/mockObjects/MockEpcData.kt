@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter
 
 class MockEpcData {
     companion object {
-        const val DEFAULT_EPC_CERTIFICATE_NUMBER = "0000-0000-0000-0554-8410"
+        const val DEFAULT_EPC_CERTIFICATE_NUMBER = "0000-0000-0000-0892-1563"
 
         const val SECONDARY_EPC_CERTIFICATE_NUMBER = "0000-0000-0554-8411-0000"
 

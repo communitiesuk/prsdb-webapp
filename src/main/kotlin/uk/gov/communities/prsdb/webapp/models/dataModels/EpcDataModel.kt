@@ -3,7 +3,9 @@ package uk.gov.communities.prsdb.webapp.models.dataModels
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import org.json.JSONObject
+import uk.gov.communities.prsdb.webapp.constants.VIEW_EPC_CERTIFICATE_BASE_URL
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import java.util.Locale
 
 @Serializable
 data class EpcDataModel(
@@ -13,7 +15,23 @@ data class EpcDataModel(
     val expiryDate: LocalDate,
     val latestCertificateNumberForThisProperty: String? = null,
 ) {
+    val energyRatingUppercase: String
+        get() = energyRating.uppercase(Locale.getDefault())
+
+    val expiryDateAsString: String
+        get() = DateTimeHelper.formatLocalDate(expiryDate)
+
     fun isLatestCertificateForThisProperty() = certificateNumber == latestCertificateNumberForThisProperty
+
+    fun getEpcCertificateUrl() = "${VIEW_EPC_CERTIFICATE_BASE_URL}/${parseCertificateNumberOrNull(certificateNumber)}"
+
+    fun isPastExpiryDate(): Boolean = expiryDate < DateTimeHelper().getCurrentDateInUK()
+
+    fun isEnergyRatingEOrBetter(): Boolean =
+        when (energyRatingUppercase) {
+            "A", "B", "C", "D", "E" -> true
+            else -> false
+        }
 
     companion object {
         fun parseCertificateNumberOrNull(certificateNumber: String): String? {
@@ -47,5 +65,14 @@ data class EpcDataModel(
                 latestCertificateNumberForThisProperty = epcData.getString("latestEpcRrnForAddress"),
             )
         }
+
+        fun getEmptyEpcDataModel(): EpcDataModel =
+            EpcDataModel(
+                certificateNumber = "",
+                singleLineAddress = "",
+                energyRating = "",
+                expiryDate = LocalDate(2025, 1, 1),
+                latestCertificateNumberForThisProperty = null,
+            )
     }
 }

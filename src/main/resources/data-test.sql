@@ -28,7 +28,10 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao','2024-
 
 INSERT INTO form_context (id, created_date, last_modified_date, journey_type, context, subject_identifier)
 VALUES (1, current_date, current_date, 3, '{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R 1LA"},"looked-up-addresses":"[{\"singleLineAddress\":\"1, SAVOY COURT, LONDON, WC2R 0EX\",\"localAuthorityId\":318,\"uprn\":100023432931,\"buildingNumber\":\"1\",\"streetName\":\"SAVOY COURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R 0EX\"}]","select-address":{"address":"1, SAVOY COURT, LONDON, WC2R 0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
-       (2, '2024-10-15 00:00:00+00', null, 7, '{}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo');
+       (2, '2024-10-15 00:00:00+00', null, 7, '{}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
+       (3, '2025-01-15 00:00:00+00', null, 7, '{}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
+       (4, '2025-01-15 00:00:00+00', null, 7, '{}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
+       (5, '2025-01-15 00:00:00+00', null, 7, '{}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo');
 
 SELECT setval(pg_get_serial_sequence('form_context', 'id'), (SELECT MAX(id) FROM form_context));
 
@@ -81,12 +84,18 @@ VALUES (1,'2024-10-15 00:00:00+00',2001001001,1),
        (20,'2025-04-07 14:24:48.883888+00',62926068489,1),
        (21,'2025-04-09 14:17:59.251592+00',2077722218,1),
        (22,'2025-04-10 11:50:09.667043+00',85435018848,1),
-       (23,'2025-04-11 13:24:52.72555+00',9022534873,1);
+       (23,'2025-04-11 13:24:52.72555+00',9022534873,1),
+       (24, '2025-01-15 00:00:00+00', 83811499802, 0),
+       (25, '2025-01-15 00:00:00+00', 40666195053, 0),
+       (26, '2025-01-15 00:00:00+00', 150242309330, 0);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
 INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id)
-VALUES (1, '10/15/24', '10/15/24', 2, '1 Fictional Road', 1);
+VALUES (1, '10/15/24', '10/15/24', 2, '1 Fictional Road', 1),
+       (2, '2025-01-15 00:00:00+00', null, 100090154792, '5, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
+       (3, '2025-01-15 00:00:00+00', null, 100090154788, '1, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
+       (4, '2025-01-15 00:00:00+00', null, null, '2, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21);
 
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
@@ -117,12 +126,18 @@ VALUES(1,1,1,'2024-10-15 00:00:00+00','Team-PRSDB+landlord@softwire.com',null,tr
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
 INSERT INTO property (id, status, is_active, property_build_type, address_id, created_date, last_modified_date)
-VALUES (1, 1, true, 1, 1, '2024-10-15 00:00:00+00', null);
+VALUES (1, 1, true, 1, 1, '2024-10-15 00:00:00+00', null),
+       (2, 1, true, 1, 2, '2025-01-15 00:00:00+00', null),
+       (3, 1, true, 1, 3, '2025-01-15 00:00:00+00', null),
+       (4, 1, true, 1, 4, '2025-01-15 00:00:00+00', null);
 
 SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
 
 INSERT INTO property_ownership (id, is_active, occupancy_type, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, property_id, created_date, last_modified_date, incomplete_compliance_form_id)
-VALUES (1, true, 0, 1, 1, 2, 13, 1, 1, '2024-10-15 00:00:00+00', null, 2);
+VALUES (1, true, 0, 1, 1, 2, 13, 1, 1, '2024-10-15 00:00:00+00', null, 2),
+       (2, true, 0, 0, 0, 0, 24, 1, 2,'2025-01-15 00:00:00+00', null, null, 3),
+       (3, true, 0, 0, 0, 0, 25, 1, 3,'2025-01-15 00:00:00+00', null, null, 4),
+       (4, true, 0, 0, 0, 0, 26, 1, 4,'2025-01-15 00:00:00+00', null, null, 5);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 

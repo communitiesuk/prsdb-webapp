@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 
 class JourneyPageDataBuilder {
@@ -113,15 +114,15 @@ class JourneyPageDataBuilder {
 
         fun beforePropertyComplianceEpcExemptionReason() = beforePropertyComplianceEpc().withEpcStatus(HasEpc.NOT_REQUIRED)
 
-        fun beforePropertyComplianceCheckAutoMatchedEpc() =
+        fun beforePropertyComplianceCheckAutoMatchedEpc(epcDetails: EpcDataModel = MockEpcData.createEpcDataModel()) =
             beforePropertyComplianceEpc()
                 .withEpcStatus(HasEpc.YES)
-                .withAutoMatchedEpcDetails(MockEpcData.createEpcDataModel())
+                .withAutoMatchedEpcDetails(epcDetails)
 
         fun beforePropertyComplianceEpcLookup() = beforePropertyComplianceCheckAutoMatchedEpc().withCheckAutoMatchedEpcResult(false)
 
-        fun beforePropertyComplianceCheckMatchedEpc() =
-            beforePropertyComplianceEpcLookup().withEpcLookupCertificateNumber().withLookedUpEpcDetails(MockEpcData.createEpcDataModel())
+        fun beforePropertyComplianceCheckMatchedEpc(epcDetails: EpcDataModel = MockEpcData.createEpcDataModel()) =
+            beforePropertyComplianceEpcLookup().withEpcLookupCertificateNumber().withLookedUpEpcDetails(epcDetails)
 
         fun beforePropertyComplianceEpcNotFound() =
             beforePropertyComplianceEpcLookup().withNullLookedUpEpcDetails().withEpcLookupCertificateNumber()
