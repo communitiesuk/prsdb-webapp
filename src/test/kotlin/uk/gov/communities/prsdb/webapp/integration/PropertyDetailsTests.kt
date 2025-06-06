@@ -10,6 +10,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDas
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalAuthorityView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
 import java.net.URI
@@ -59,8 +61,10 @@ class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
 
             detailsPage.getLandlordLinkFromLandlordDetails("Alexander Smith").clickAndWait()
 
-            assertPageIs(page, LandlordDetailsPage::class)
-            Assertions.assertEquals(LandlordDetailsController.LANDLORD_DETAILS_ROUTE, URI(page.url()).path)
+            val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
+
+            landlordDetailsPage.backLink.clickAndWait()
+            assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "1"))
         }
 
         @Test
@@ -126,8 +130,14 @@ class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
 
             detailsPage.getLandlordLinkFromLandlordDetails("Alexander Smith").clickAndWait()
 
-            assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
-            Assertions.assertEquals("${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/1", URI(page.url()).path)
+            val landlordDetailsPage = assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
+
+            landlordDetailsPage.backLink.clickAndWait()
+            assertPageIs(
+                page,
+                PropertyDetailsPageLocalAuthorityView::class,
+                mapOf("propertyOwnershipId" to "1"),
+            )
         }
 
         @Test

@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 
 class PropertyDetailsLandlordViewModel(
     private val landlord: Landlord,
-    private val landlordDetailsUrl: String = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
+    landlordDetailsUrl: String = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
 ) {
     private val isEnglandOrWalesResident = landlord.isEnglandOrWalesResident()
 
