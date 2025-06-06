@@ -12,7 +12,8 @@ To support understanding of the use of our service, we would like large scale, a
 behaviour when using the web app - i.e. we need some web analytics.
 
 The exact metrics we will want to track are still TBC, but likely to include:
-- Number of visits / unique visitors to each page
+- Number of visits / unique visitors (to some approximation) to each page
+- Entry and exit pages for each visitor
 - Dwell time per page
 - Response times / a similar performance metric
 
@@ -39,7 +40,9 @@ is a complex and highly configurable tool. Further analysis can be performed via
 
 * Good, because it is widely used - globally, within UK gov (e.g. gov.uk published content), and within MHCLG (e.g.
   elections services, EPB, Funding Service).
+* Good, because it should be simple to get legal / data protection approval (as it is common).
 * Good, because it captures the data we will likely need.
+* Good, because it quite aggressively deduplicates people when calculating 'unique' visitors.
 * Good, because it is free.
 * Neutral, because it requires careful configuration (which requires expertise to set up and maintain).
 * Bad, because it uses non-essential cookies, and therefore requires a cookie consent banner to be shown.
@@ -55,8 +58,10 @@ alternatives (such as Simple Analytics, and Matomo); Plausible has been chosen a
 that group.
 
 * Neutral, because it is not widely used, but has been used in MHCLG before (on CORE).
+* Neutral, because there is a risk of delay as we seek legal / data protection approval.
 * Bad, because it does not capture performance metrics (e.g. response times), so we'd need to source that data elsewhere
   (e.g. Treo, or rely on server-side timings).
+* Neutral, because it's deduplication of 'unique' visitors is weak (based on IP, persisting only for 24 hours).
 * Bad, because it is costly (£2.5k+ / year for 5M page views per month).
 * Good, because it is (relatively) simple.
 * Good, because it does not use cookies (or fingerprinting, etc) - this should mean we can avoid a cookie banner.
@@ -82,4 +87,5 @@ specialist software.
 
 * [Information on GA4 in the EU](https://support.google.com/analytics/answer/12017362?hl=en)
 * [Plausible's privacy focus and EU hosting](https://plausible.io/privacy-focused-web-analytics#hosted-in-the-eu-powered-by-european-owned-cloud-infrastructure)
+* [Plausible's unique visitor counting](https://plausible.io/data-policy#how-we-count-unique-users-without-cookies)
 * [CloudFront logging configuration](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/standard-logging.html)
