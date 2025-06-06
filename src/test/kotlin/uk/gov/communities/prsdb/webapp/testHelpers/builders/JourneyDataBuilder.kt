@@ -4,14 +4,12 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.AUTO_MATCHED_EPC_JOURNEY_DATA_KEY
-import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
-import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyDataKey
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -162,13 +160,13 @@ class JourneyDataBuilder(
     }
 
     fun withEmptyLookedUpAddresses(): JourneyDataBuilder {
-        journeyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY] = "[]"
+        journeyData[JourneyDataKey.LookedUpAddresses.key] = "[]"
         return this
     }
 
     fun withLookedUpAddresses(customLookedUpAddresses: List<AddressDataModel>? = null): JourneyDataBuilder {
         val defaultLookedUpAddresses = listOf(AddressDataModel("1 Street Address, City, AB1 2CD"))
-        journeyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY] = Json.encodeToString(customLookedUpAddresses ?: defaultLookedUpAddresses)
+        journeyData[JourneyDataKey.LookedUpAddresses.key] = Json.encodeToString(customLookedUpAddresses ?: defaultLookedUpAddresses)
         return this
     }
 
@@ -192,7 +190,7 @@ class JourneyDataBuilder(
             withEnglandOrWalesResidence()
         }
 
-        journeyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY] =
+        journeyData[JourneyDataKey.LookedUpAddresses.key] =
             Json.encodeToString(listOf(AddressDataModel(singleLineAddress, localAuthorityId = localAuthority?.id, uprn = uprn)))
 
         val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
@@ -595,7 +593,7 @@ class JourneyDataBuilder(
     }
 
     fun withAutoMatchedEpcDetails(epcDetails: EpcDataModel?): JourneyDataBuilder {
-        journeyData[AUTO_MATCHED_EPC_JOURNEY_DATA_KEY] = Json.encodeToString(epcDetails)
+        journeyData[JourneyDataKey.AutoMatchedEpc.key] = Json.encodeToString(epcDetails)
         return this
     }
 
@@ -618,12 +616,12 @@ class JourneyDataBuilder(
     }
 
     fun withLookedUpEpcDetails(epcDetails: EpcDataModel): JourneyDataBuilder {
-        journeyData[LOOKED_UP_EPC_JOURNEY_DATA_KEY] = Json.encodeToString(epcDetails)
+        journeyData[JourneyDataKey.LookedUpEpc.key] = Json.encodeToString(epcDetails)
         return this
     }
 
     fun withNullLookedUpEpcDetails(): JourneyDataBuilder {
-        journeyData[LOOKED_UP_EPC_JOURNEY_DATA_KEY] = null
+        journeyData[JourneyDataKey.LookedUpEpc.key] = null
         return this
     }
 

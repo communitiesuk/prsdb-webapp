@@ -3,14 +3,13 @@ package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions
 import kotlinx.datetime.yearsUntil
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import uk.gov.communities.prsdb.webapp.constants.AUTO_MATCHED_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
-import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyDataKey
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -168,9 +167,9 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
 
         private fun getEpcDetailsJourneyDataKey(autoMatched: Boolean): String =
             if (autoMatched) {
-                AUTO_MATCHED_EPC_JOURNEY_DATA_KEY
+                JourneyDataKey.AutoMatchedEpc.key
             } else {
-                LOOKED_UP_EPC_JOURNEY_DATA_KEY
+                JourneyDataKey.LookedUpEpc.key
             }
 
         fun JourneyData.getAcceptedEpcDetails(): EpcDataModel? {

@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.helpers.extensions
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyDataKey
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddress
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getSerializedLookedUpAddresses
@@ -24,7 +24,7 @@ class JourneyDataExtensionsTests {
                 AddressDataModel("Main, Example Road, EG", 3, buildingName = "Main", postcode = "EG"),
             )
 
-        val journeyData = mapOf(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to Json.encodeToString(lookedUpAddresses))
+        val journeyData = mapOf(JourneyDataKey.LookedUpAddresses.key to Json.encodeToString(lookedUpAddresses))
 
         val retrievedAddress = journeyData.getLookedUpAddress(requestedAddress.singleLineAddress)
 
@@ -42,7 +42,7 @@ class JourneyDataExtensionsTests {
                 AddressDataModel("Main, Example Road, EG", 3, buildingName = "Main", postcode = "EG"),
             )
 
-        val journeyData = mapOf(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to Json.encodeToString(lookedUpAddresses))
+        val journeyData = mapOf(JourneyDataKey.LookedUpAddresses.key to Json.encodeToString(lookedUpAddresses))
 
         val retrievedAddress = journeyData.getLookedUpAddress(requestedSingleLineAddress)
 
@@ -58,7 +58,7 @@ class JourneyDataExtensionsTests {
                 AddressDataModel("Main, Example Road, EG", 3, buildingName = "Main", postcode = "EG"),
             )
 
-        val journeyData = mapOf(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to Json.encodeToString(lookedUpAddresses))
+        val journeyData = mapOf(JourneyDataKey.LookedUpAddresses.key to Json.encodeToString(lookedUpAddresses))
 
         val retrievedAddresses = journeyData.getLookedUpAddresses()
 
@@ -77,7 +77,7 @@ class JourneyDataExtensionsTests {
     @Test
     fun `getSerializedLookedUpAddresses returns the serialized looked-up addresses in journeyData`() {
         val serializedAddresses = "serialized-looked-up-addresses"
-        val journeyData = mapOf(LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to serializedAddresses)
+        val journeyData = mapOf(JourneyDataKey.LookedUpAddresses.key to serializedAddresses)
 
         val retrievedSerializedAddresses = journeyData.getSerializedLookedUpAddresses()
 
@@ -97,7 +97,7 @@ class JourneyDataExtensionsTests {
     fun `updateLookedUpAddresses returns journeyData updated with the given serialized addresses`() {
         val serializedAddresses = "serialized-looked-up-addresses"
         val journeyData = mapOf("other-key" to "other-value")
-        val expectedUpdatedJourneyData = journeyData + (LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to serializedAddresses)
+        val expectedUpdatedJourneyData = journeyData + (JourneyDataKey.LookedUpAddresses.key to serializedAddresses)
 
         val updatedJourneyData = journeyData.withUpdatedLookedUpAddresses(serializedAddresses)
 
@@ -113,7 +113,7 @@ class JourneyDataExtensionsTests {
                 AddressDataModel("Main, Example Road, EG", 3, buildingName = "Main", postcode = "EG"),
             )
         val journeyData = mapOf("other-key" to "other-value")
-        val expectedUpdatedJourneyData = journeyData + (LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to Json.encodeToString(addresses))
+        val expectedUpdatedJourneyData = journeyData + (JourneyDataKey.LookedUpAddresses.key to Json.encodeToString(addresses))
 
         val updatedJourneyData = journeyData.withUpdatedLookedUpAddresses(addresses)
 

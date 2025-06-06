@@ -5,7 +5,7 @@ import kotlinx.serialization.json.Json
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
-import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyDataKey
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
@@ -66,7 +66,7 @@ class LandlordDetailsUpdateJourney(
         val originalLandlordData =
             mutableMapOf(
                 IS_IDENTITY_VERIFIED_KEY to landlord.isVerified,
-                LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to Json.encodeToString(listOf(AddressDataModel.fromAddress(landlord.address))),
+                JourneyDataKey.LookedUpAddresses.key to Json.encodeToString(listOf(AddressDataModel.fromAddress(landlord.address))),
                 LandlordDetailsUpdateStepId.UpdateEmail toPageData EmailFormModel::fromLandlord,
                 LandlordDetailsUpdateStepId.UpdateName toPageData NameFormModel::fromLandlord,
                 LandlordDetailsUpdateStepId.UpdateDateOfBirth toPageData DateOfBirthFormModel::fromLandlord,
