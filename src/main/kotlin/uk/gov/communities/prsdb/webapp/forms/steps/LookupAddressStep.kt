@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.forms.steps
 
-import org.springframework.validation.BindingResult
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.AbstractPage
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
@@ -12,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 class LookupAddressStep<T : StepId>(
     id: T,
     page: AbstractPage,
-    isSatisfied: (bindingResult: BindingResult) -> Boolean = { bindingResult -> page.isSatisfied(bindingResult) },
     saveAfterSubmit: Boolean = true,
     private val nextStepIfAddressesFound: T,
     private val nextStepIfNoAddressesFound: T,
@@ -21,14 +19,13 @@ class LookupAddressStep<T : StepId>(
 ) : Step<T>(
         id = id,
         page = page,
-        isSatisfied = isSatisfied,
-        nextAction = { journeyData: JourneyData, subPageNumber: Int? ->
-            Pair(getNextStep(journeyData, nextStepIfAddressesFound, nextStepIfNoAddressesFound), subPageNumber)
+        nextAction = { filteredJourneyData: JourneyData, subPageNumber: Int? ->
+            Pair(getNextStep(filteredJourneyData, nextStepIfAddressesFound, nextStepIfNoAddressesFound), subPageNumber)
         },
         saveAfterSubmit = saveAfterSubmit,
-        handleSubmitAndRedirect = { journeyData: JourneyData, subPageNumber: Int?, changingAnswersForStep: T? ->
+        handleSubmitAndRedirect = { filteredJourneyData: JourneyData, subPageNumber: Int?, changingAnswersForStep: T? ->
             performAddressLookupCacheResultsAndGetRedirect(
-                journeyData,
+                filteredJourneyData,
                 subPageNumber,
                 id,
                 changingAnswersForStep,
@@ -41,18 +38,18 @@ class LookupAddressStep<T : StepId>(
     ) {
     companion object {
         fun <T : StepId> getNextStep(
-            journeyData: JourneyData,
+            filteredJourneyData: JourneyData,
             nextStepIfAddressesFound: T,
             nextStepIfNoAddressesFound: T,
         ): T =
-            if (journeyData.getLookedUpAddresses().isEmpty()) {
+            if (filteredJourneyData.getLookedUpAddresses().isEmpty()) {
                 nextStepIfNoAddressesFound
             } else {
                 nextStepIfAddressesFound
             }
 
         fun <T : StepId> performAddressLookupCacheResultsAndGetRedirect(
-            journeyData: JourneyData,
+            filteredJourneyData: JourneyData,
             subPageNumber: Int?,
             id: T,
             changingAnswersForStep: T?,
@@ -63,17 +60,18 @@ class LookupAddressStep<T : StepId>(
         ): String {
             val (houseNameOrNumber, postcode) =
                 JourneyDataHelper.getLookupAddressHouseNameOrNumberAndPostcode(
-                    journeyData,
+                    filteredJourneyData,
                     id.urlPathSegment,
                 )!!
             val addressLookupResults = addressLookupService.search(houseNameOrNumber, postcode)
 
-            val updatedJourneyData = journeyData.withUpdatedLookedUpAddresses(addressLookupResults)
+            val updatedJourneyData = journeyDataService.getJourneyDataFromSession().withUpdatedLookedUpAddresses(addressLookupResults)
             journeyDataService.setJourneyDataInSession(updatedJourneyData)
 
-            val nextStepId = getNextStep(updatedJourneyData, nextStepIfAddressesFound, nextStepIfNoAddressesFound)
+            val updatedFilteredJourneyData = filteredJourneyData.withUpdatedLookedUpAddresses(addressLookupResults)
+            val nextStepId = getNextStep(updatedFilteredJourneyData, nextStepIfAddressesFound, nextStepIfNoAddressesFound)
 
-            return Step.generateUrl(nextStepId, subPageNumber, changingAnswersForStep)
+            return generateUrl(nextStepId, subPageNumber, changingAnswersForStep)
         }
     }
 }

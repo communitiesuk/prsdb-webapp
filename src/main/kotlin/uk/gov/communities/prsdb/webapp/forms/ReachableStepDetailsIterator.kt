@@ -54,7 +54,7 @@ class ReachableStepDetailsIterator<T : StepId>(
     }
 
     private fun subsequentStepDetailsOrNull(currentStep: StepDetails<T>): StepDetails<T>? {
-        val (nextStepId, nextSubPageNumber) = currentStep.step.nextAction(journeyData, currentStep.subPageNumber)
+        val (nextStepId, nextSubPageNumber) = currentStep.step.nextAction(currentFilteredJourneyData, currentStep.subPageNumber)
         val nextStep = steps.singleOrNull { step -> step.id == nextStepId } ?: return null
         val nextFilteredJourneyData = subsequentFilteredJourneyData(currentFilteredJourneyData, nextStep.name)
         return StepDetails(nextStep, nextSubPageNumber, nextFilteredJourneyData)
@@ -71,6 +71,6 @@ class ReachableStepDetailsIterator<T : StepId>(
     private fun isStepSatisfied(step: StepDetails<T>): Boolean {
         val subPageData = JourneyDataHelper.getPageData(journeyData, step.step.name, step.subPageNumber)
         val bindingResult = step.step.page.bindDataToFormModel(validator, subPageData)
-        return subPageData != null && step.step.isSatisfied(bindingResult)
+        return subPageData != null && step.step.isSatisfied(step.filteredJourneyData, bindingResult)
     }
 }

@@ -16,8 +16,11 @@ class FileUploadPage(
         filteredJourneyData: JourneyData?,
     ) {}
 
-    override fun isSatisfied(bindingResult: BindingResult): Boolean {
-        val isMetadataSatisfied = super.isSatisfied(bindingResult)
+    override fun isSatisfied(
+        filteredJourneyData: JourneyData,
+        bindingResult: BindingResult,
+    ): Boolean {
+        val isMetadataSatisfied = super.isSatisfied(filteredJourneyData, bindingResult)
         val uploadFormModel = bindingResult.target as UploadCertificateFormModel
 
         if (isMetadataSatisfied && uploadFormModel.isMetadataOnly) {

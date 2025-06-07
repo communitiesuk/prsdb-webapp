@@ -29,6 +29,8 @@ class PageTests {
     private lateinit var validatorFactory: ValidatorFactory
     private lateinit var validator: Validator
 
+    private val emptyFilteredJourneyData: JourneyData = emptyMap()
+
     @BeforeEach
     fun setup() {
         testPage =
@@ -54,7 +56,7 @@ class PageTests {
         val bindingResult = testPage.bindDataToFormModel(validator, formData)
 
         // Act
-        val result = testPage.isSatisfied(bindingResult)
+        val result = testPage.isSatisfied(emptyFilteredJourneyData, bindingResult)
 
         // Assert
         assertTrue(result)
@@ -67,7 +69,7 @@ class PageTests {
         val bindingResult = testPage.bindDataToFormModel(validator, formData)
 
         // Act
-        val result = testPage.isSatisfied(bindingResult)
+        val result = testPage.isSatisfied(emptyFilteredJourneyData, bindingResult)
 
         // Assert
         assertFalse(result)

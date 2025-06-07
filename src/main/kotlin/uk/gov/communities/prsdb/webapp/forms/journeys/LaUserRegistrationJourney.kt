@@ -127,19 +127,17 @@ class LaUserRegistrationJourney(
                         ),
                     invitationService,
                 ),
-            handleSubmitAndRedirect = { journeyData, _, _ ->
-                checkAnswersHandleSubmitAndRedirect(journeyData)
-            },
+            handleSubmitAndRedirect = { filteredJourneyData, _, _ -> checkAnswersHandleSubmitAndRedirect(filteredJourneyData) },
             saveAfterSubmit = false,
         )
 
-    private fun checkAnswersHandleSubmitAndRedirect(journeyData: JourneyData): String {
+    private fun checkAnswersHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
         val localAuthorityUserID =
             localAuthorityDataService.registerUserAndReturnID(
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
                 localAuthority = invitation.invitingAuthority,
-                name = LaUserRegistrationJourneyDataHelper.getName(journeyData)!!,
-                email = LaUserRegistrationJourneyDataHelper.getEmail(journeyData)!!,
+                name = LaUserRegistrationJourneyDataHelper.getName(filteredJourneyData)!!,
+                email = LaUserRegistrationJourneyDataHelper.getEmail(filteredJourneyData)!!,
                 invitedAsAdmin = invitation.invitedAsAdmin,
             )
 

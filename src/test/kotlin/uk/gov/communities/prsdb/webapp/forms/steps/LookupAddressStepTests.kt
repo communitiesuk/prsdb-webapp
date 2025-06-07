@@ -6,6 +6,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -78,7 +79,6 @@ class LookupAddressStepTests {
     @Test
     fun `handleSubmitAndRedirect looks up addresses, caches the result and redirects`() {
         // Arrange
-
         val houseNumber = "15"
         val postcode = "AB1 2CD"
 
@@ -86,6 +86,7 @@ class LookupAddressStepTests {
             journeyDataBuilder
                 .withLookupAddress(houseNumber, postcode)
                 .build()
+        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
 
         val expectedUpdatedJourneyData =
             journeyDataBuilder

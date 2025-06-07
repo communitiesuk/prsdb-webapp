@@ -104,6 +104,7 @@ class JourneyDataBuilder(
                     mapOf(
                         "licenceNumber" to "test1234",
                     ),
+                RegisterPropertyStepId.CheckAnswers.urlPathSegment to emptyMap(),
             )
 
         fun propertyDefault(localAuthorityService: LocalAuthorityService) =
@@ -128,6 +129,7 @@ class JourneyDataBuilder(
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment to mapOf("livesInEnglandOrWales" to true),
                 LandlordRegistrationStepId.LookupAddress.urlPathSegment to mapOf("houseNameOrNumber" to "44", "postcode" to "EG1 1GE"),
                 LandlordRegistrationStepId.SelectAddress.urlPathSegment to mapOf("address" to DEFAULT_ADDRESS),
+                LandlordRegistrationStepId.CheckAnswers.urlPathSegment to emptyMap(),
             )
 
         fun landlordDefault(localAuthorityService: LocalAuthorityService) =
@@ -137,16 +139,10 @@ class JourneyDataBuilder(
                 createLocalAuthority(),
             )
 
-        fun localAuthorityUser(
+        fun forLaUser(
             name: String,
             email: String,
-        ) = JourneyDataBuilder(
-            mock(),
-            mapOf(
-                RegisterLaUserStepId.Name.urlPathSegment to mapOf("name" to name),
-                RegisterLaUserStepId.Email.urlPathSegment to mapOf("emailAddress" to email),
-            ),
-        )
+        ) = JourneyDataBuilder().withLandingPageReached().withName(name).withEmailAddress(email)
     }
 
     fun withLookupAddress(

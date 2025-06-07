@@ -58,12 +58,14 @@ class SelectAddressPage(
         modelAndView.addObject("options", addressRadiosViewModel)
     }
 
-    override fun isSatisfied(bindingResult: BindingResult): Boolean {
+    override fun isSatisfied(
+        filteredJourneyData: JourneyData,
+        bindingResult: BindingResult,
+    ): Boolean {
         val selectAddressFormModel = bindingResult.target as SelectAddressFormModel
         val selectedAddress = selectAddressFormModel.address
-        val journeyData = journeyDataService.getJourneyDataFromSession()
 
         return selectedAddress == MANUAL_ADDRESS_CHOSEN ||
-            (selectedAddress != null && journeyData.getLookedUpAddress(selectedAddress) != null)
+            (selectedAddress != null && filteredJourneyData.getLookedUpAddress(selectedAddress) != null)
     }
 }

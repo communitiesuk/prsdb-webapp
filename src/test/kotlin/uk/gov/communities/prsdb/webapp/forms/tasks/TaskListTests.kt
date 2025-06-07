@@ -84,13 +84,13 @@ class TaskListTests {
                 Step(
                     TestStepId.TwoStepTaskPartOne,
                     getMockPage(),
-                    isSatisfied = { _ -> status == TaskStatus.IN_PROGRESS || status == TaskStatus.COMPLETED },
+                    isSatisfied = { _, _ -> status == TaskStatus.IN_PROGRESS || status == TaskStatus.COMPLETED },
                     nextAction = { _, _ -> Pair(TestStepId.TwoStepTaskPartTwo, null) },
                 ),
                 Step(
                     TestStepId.TwoStepTaskPartTwo,
                     getMockPage(),
-                    isSatisfied = { _ -> status == TaskStatus.COMPLETED },
+                    isSatisfied = { _, _ -> status == TaskStatus.COMPLETED },
                     nextAction = { _, _ -> Pair(TestStepId.SimpleTaskTwo, null) },
                 ),
             ),
@@ -104,7 +104,7 @@ class TaskListTests {
                 Step(
                     TestStepId.MultiPathTaskStart,
                     getMockPage(),
-                    isSatisfied = { _ -> true },
+                    isSatisfied = { _, _ -> true },
                     nextAction = { _, _ ->
                         Pair(
                             if (useMainline) TestStepId.MultiPathTaskMainline else TestStepId.MultiPathTaskAlternateRoutePartOne,
@@ -115,19 +115,19 @@ class TaskListTests {
                 Step(
                     TestStepId.MultiPathTaskMainline,
                     getMockPage(),
-                    isSatisfied = { _ -> true },
+                    isSatisfied = { _, _ -> true },
                     nextAction = { _, _ -> Pair(TestStepId.TwoStepTaskPartOne, null) },
                 ),
                 Step(
                     TestStepId.MultiPathTaskAlternateRoutePartOne,
                     getMockPage(),
-                    isSatisfied = { _ -> false },
+                    isSatisfied = { _, _ -> false },
                     nextAction = { _, _ -> Pair(TestStepId.MultiPathTaskAlternateRoutePartTwo, null) },
                 ),
                 Step(
                     TestStepId.MultiPathTaskAlternateRoutePartTwo,
                     getMockPage(),
-                    isSatisfied = { _ -> false },
+                    isSatisfied = { _, _ -> false },
                     nextAction = { _, _ -> Pair(TestStepId.TwoStepTaskPartOne, null) },
                 ),
             ),
@@ -148,7 +148,7 @@ class TaskListTests {
                                 Step(
                                     TestStepId.SimpleTaskOne,
                                     getMockPage(),
-                                    isSatisfied = { _ -> true },
+                                    isSatisfied = { _, _ -> true },
                                     nextAction = { _, _ -> Pair(TestStepId.MultiPathTaskStart, null) },
                                 ),
                                 "task 1",
@@ -159,7 +159,7 @@ class TaskListTests {
                                 Step(
                                     TestStepId.SimpleTaskTwo,
                                     getMockPage(),
-                                    isSatisfied = { _ -> false },
+                                    isSatisfied = { _, _ -> false },
                                 ),
                                 "task 4",
                             ),
@@ -234,7 +234,7 @@ class TaskListTests {
                             Step(
                                 TestStepId.SimpleTaskOne,
                                 getMockPage(),
-                                isSatisfied = { _ -> simpleTaskOneCompleted },
+                                isSatisfied = { _, _ -> simpleTaskOneCompleted },
                                 nextAction = { _, _ -> Pair(TestStepId.TwoStepTaskPartOne, null) },
                             ),
                             "task 1",
@@ -244,7 +244,7 @@ class TaskListTests {
                             Step(
                                 TestStepId.SimpleTaskTwo,
                                 getMockPage(),
-                                isSatisfied = { _ -> simpleTaskTwoCompleted },
+                                isSatisfied = { _, _ -> simpleTaskTwoCompleted },
                             ),
                             "task 3",
                         ),
@@ -336,7 +336,7 @@ class TaskListTests {
                                 Step(
                                     TestStepId.SimpleTaskOne,
                                     getMockPage(),
-                                    isSatisfied = { _ -> true },
+                                    isSatisfied = { _, _ -> true },
                                     nextAction = { _, _ -> Pair(TestStepId.TwoStepTaskPartOne, null) },
                                 ),
                                 "task 1",
@@ -350,7 +350,7 @@ class TaskListTests {
                                 Step(
                                     TestStepId.SimpleTaskTwo,
                                     getMockPage(),
-                                    isSatisfied = { _ -> true },
+                                    isSatisfied = { _, _ -> true },
                                 ),
                             ),
                         ),
