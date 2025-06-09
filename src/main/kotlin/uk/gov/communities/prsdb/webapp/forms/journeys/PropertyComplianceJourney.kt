@@ -829,7 +829,7 @@ class PropertyComplianceJourney(
                 mapOf(
                     "title" to "propertyCompliance.title",
                     "fieldSetHeading" to "forms.checkMatchedEpc.fieldSetHeading",
-                    "epcDetails" to getEpcDetailsFromSession(autoMatched = autoMatchedEpc),
+                    "epcDetails" to (getEpcDetailsFromSession(autoMatched = autoMatchedEpc) ?: ""),
                     "radioOptions" to
                         listOf(
                             RadiosButtonViewModel(
@@ -1299,11 +1299,10 @@ class PropertyComplianceJourney(
         return EpcDataModel.parseCertificateNumberOrNull(submittedCertificateNumber)!! // Only valid EPC numbers will be in journeyData
     }
 
-    private fun getEpcDetailsFromSession(autoMatched: Boolean): EpcDataModel =
+    private fun getEpcDetailsFromSession(autoMatched: Boolean): EpcDataModel? =
         journeyDataService
             .getJourneyDataFromSession()
             .getEpcDetails(autoMatched)
-            ?: EpcDataModel.getEmptyEpcDataModel()
 
     private fun getPropertyAddress() =
         propertyOwnershipService

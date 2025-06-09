@@ -61,14 +61,5 @@ data class EpcDataModel(
                 latestCertificateNumberForThisProperty = epcData.getString("latestEpcRrnForAddress"),
             )
         }
-
-        fun getEmptyEpcDataModel(): EpcDataModel =
-            EpcDataModel(
-                certificateNumber = "",
-                singleLineAddress = "",
-                energyRating = "",
-                expiryDate = LocalDate(2025, 1, 1),
-                latestCertificateNumberForThisProperty = null,
-            )
     }
 }
