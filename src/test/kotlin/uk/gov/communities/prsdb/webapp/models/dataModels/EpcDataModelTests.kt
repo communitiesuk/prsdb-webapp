@@ -44,7 +44,7 @@ class EpcDataModelTests {
     }
 
     @Test
-    fun `isExpired returns true if the expiry date is in the past`() {
+    fun `isPastExpiryDate returns true if the expiry date is in the past`() {
         val epcDataModel =
             MockEpcData.createEpcDataModel(
                 expiryDate = LocalDate(2020, 1, 1),
@@ -54,7 +54,25 @@ class EpcDataModelTests {
     }
 
     @Test
-    fun `isExpired returns false if the expiry date is in the future`() {
+    fun `isPastExpiryDate returns false if the expiry date is today`() {
+        val dateNow =
+            Clock
+                .systemDefaultZone()
+                .instant()
+                .toKotlinInstant()
+                .toLocalDateTime(TimeZone.of("Europe/London"))
+                .date
+
+        val epcDataModel =
+            MockEpcData.createEpcDataModel(
+                expiryDate = dateNow,
+            )
+
+        assertFalse(epcDataModel.isPastExpiryDate())
+    }
+
+    @Test
+    fun `isPastExpiryDate returns false if the expiry date is in the future`() {
         val dateNow =
             Clock
                 .systemDefaultZone()
