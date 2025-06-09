@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.dataModels
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import org.json.JSONObject
-import uk.gov.communities.prsdb.webapp.constants.VIEW_EPC_CERTIFICATE_BASE_URL
+import org.springframework.beans.factory.annotation.Value
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import java.util.Locale
 
@@ -15,6 +15,9 @@ data class EpcDataModel(
     val expiryDate: LocalDate,
     val latestCertificateNumberForThisProperty: String? = null,
 ) {
+    @Value("\${epc.certificate-base-url}")
+    var epcCertificateBaseUrl: String = ""
+
     val energyRatingUppercase: String
         get() = energyRating.uppercase(Locale.getDefault())
 
@@ -23,7 +26,7 @@ data class EpcDataModel(
 
     fun isLatestCertificateForThisProperty() = certificateNumber == latestCertificateNumberForThisProperty
 
-    fun getEpcCertificateUrl() = "${VIEW_EPC_CERTIFICATE_BASE_URL}/${parseCertificateNumberOrNull(certificateNumber)}"
+    fun getEpcCertificateUrl() = "$epcCertificateBaseUrl/${parseCertificateNumberOrNull(certificateNumber)}"
 
     fun isPastExpiryDate(): Boolean = expiryDate < DateTimeHelper().getCurrentDateInUK()
 
