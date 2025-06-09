@@ -27,11 +27,7 @@ data class EpcDataModel(
 
     fun isPastExpiryDate(): Boolean = expiryDate < DateTimeHelper().getCurrentDateInUK()
 
-    fun isEnergyRatingEOrBetter(): Boolean =
-        when (energyRatingUppercase) {
-            "A", "B", "C", "D", "E" -> true
-            else -> false
-        }
+    fun isEnergyRatingEOrBetter(): Boolean = energyRatingUppercase in "A".."E"
 
     companion object {
         fun parseCertificateNumberOrNull(certificateNumber: String): String? {
