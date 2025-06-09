@@ -46,7 +46,7 @@ class DateTimeHelper(
 
         fun get28DaysFromDate(date: LocalDate): LocalDate = date.plus(DatePeriod(days = 28))
 
-        fun formatLocalDate(date: LocalDate): String {
+        fun formatKotlinLocalDate(date: LocalDate): String {
             val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
             return date.toJavaLocalDate().format(formatter)
         }

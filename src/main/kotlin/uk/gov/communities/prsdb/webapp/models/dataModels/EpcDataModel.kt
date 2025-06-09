@@ -22,7 +22,7 @@ data class EpcDataModel(
         get() = energyRating.uppercase(Locale.getDefault())
 
     val expiryDateAsString: String
-        get() = DateTimeHelper.formatLocalDate(expiryDate)
+        get() = DateTimeHelper.formatKotlinLocalDate(expiryDate)
 
     fun isLatestCertificateForThisProperty() = certificateNumber == latestCertificateNumberForThisProperty
 
