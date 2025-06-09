@@ -627,6 +627,11 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withEpcSuperseded(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EpcSuperseded.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
     fun withEpcExemptionReason(epcExemptionReason: EpcExemptionReason): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EpcExemptionReason.urlPathSegment] =
             mapOf(EpcExemptionReasonFormModel::exemptionReason.name to epcExemptionReason)
