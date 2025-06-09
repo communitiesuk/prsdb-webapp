@@ -2,15 +2,14 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalAuthorityView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import java.net.URI
 import kotlin.test.assertEquals
 
 class LandlordDetailTests : SinglePageTestWithSeedData("data-local.sql") {
@@ -44,11 +43,15 @@ class LandlordDetailTests : SinglePageTestWithSeedData("data-local.sql") {
 
             detailsPage.getPropertyAddressLink("1, Example Road, EG").clickAndWait()
 
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to propertyOwnershipId.toString()))
-            Assertions.assertEquals(
-                PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId.toLong(), isLaView = false),
-                URI(page.url()).path,
-            )
+            val propertyDetailsView =
+                assertPageIs(
+                    page,
+                    PropertyDetailsPageLandlordView::class,
+                    mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+                )
+
+            propertyDetailsView.backLink.clickAndWait()
+            assertPageIs(page, LandlordDetailsPage::class)
         }
     }
 
@@ -90,15 +93,15 @@ class LandlordDetailTests : SinglePageTestWithSeedData("data-local.sql") {
 
             detailsPage.getPropertyAddressLink("1, Example Road, EG").clickAndWait()
 
-            assertPageIs(
-                page,
-                PropertyDetailsPageLocalAuthorityView::class,
-                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
-            )
-            Assertions.assertEquals(
-                PropertyDetailsController.getPropertyDetailsPath(1, isLaView = true),
-                URI(page.url()).path,
-            )
+            val propertyDetailsView =
+                assertPageIs(
+                    page,
+                    PropertyDetailsPageLocalAuthorityView::class,
+                    mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+                )
+
+            propertyDetailsView.backLink.clickAndWait()
+            assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
         }
     }
 }

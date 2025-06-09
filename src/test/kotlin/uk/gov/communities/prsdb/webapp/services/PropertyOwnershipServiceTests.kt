@@ -28,6 +28,7 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
@@ -175,6 +176,7 @@ class PropertyOwnershipServiceTests {
         private val localAuthority = LocalAuthority(11, "DERBYSHIRE DALES DISTRICT COUNCIL", "1045")
         private val expectedPropertyLicence = "forms.checkPropertyAnswers.propertyDetails.noLicensing"
         private val expectedIsTenantedMessageKey = "commonText.no"
+        private val expectedCurrentUrlKey = 101
 
         private val propertyOwnership1 =
             MockLandlordData.createPropertyOwnership(
@@ -211,6 +213,8 @@ class PropertyOwnershipServiceTests {
                 ),
             ).thenReturn(landlordsProperties)
 
+            whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(expectedCurrentUrlKey)
+
             val expectedResults: List<RegisteredPropertyViewModel> =
                 listOf(
                     RegisteredPropertyViewModel(
@@ -222,7 +226,10 @@ class PropertyOwnershipServiceTests {
                         localAuthorityName = localAuthority.name,
                         licenseTypeMessageKey = expectedPropertyLicence,
                         isTenantedMessageKey = expectedIsTenantedMessageKey,
-                        recordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership1.id),
+                        recordLink =
+                            PropertyDetailsController
+                                .getPropertyDetailsPath(propertyOwnership1.id)
+                                .overrideBackLinkForUrl(expectedCurrentUrlKey),
                     ),
                     RegisteredPropertyViewModel(
                         address = propertyOwnership2.property.address.singleLineAddress,
@@ -233,7 +240,10 @@ class PropertyOwnershipServiceTests {
                         localAuthorityName = localAuthority.name,
                         licenseTypeMessageKey = expectedPropertyLicence,
                         isTenantedMessageKey = expectedIsTenantedMessageKey,
-                        recordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership2.id),
+                        recordLink =
+                            PropertyDetailsController
+                                .getPropertyDetailsPath(propertyOwnership2.id)
+                                .overrideBackLinkForUrl(expectedCurrentUrlKey),
                     ),
                 )
 
@@ -252,6 +262,8 @@ class PropertyOwnershipServiceTests {
                 ),
             ).thenReturn(landlordsProperties)
 
+            whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(expectedCurrentUrlKey)
+
             val expectedResults: List<RegisteredPropertyViewModel> =
                 listOf(
                     RegisteredPropertyViewModel(
@@ -264,10 +276,9 @@ class PropertyOwnershipServiceTests {
                         licenseTypeMessageKey = expectedPropertyLicence,
                         isTenantedMessageKey = expectedIsTenantedMessageKey,
                         recordLink =
-                            PropertyDetailsController.getPropertyDetailsPath(
-                                propertyOwnership1.id,
-                                isLaView = true,
-                            ),
+                            PropertyDetailsController
+                                .getPropertyDetailsPath(propertyOwnership1.id, isLaView = true)
+                                .overrideBackLinkForUrl(expectedCurrentUrlKey),
                     ),
                     RegisteredPropertyViewModel(
                         address = propertyOwnership2.property.address.singleLineAddress,
@@ -279,10 +290,9 @@ class PropertyOwnershipServiceTests {
                         licenseTypeMessageKey = expectedPropertyLicence,
                         isTenantedMessageKey = expectedIsTenantedMessageKey,
                         recordLink =
-                            PropertyDetailsController.getPropertyDetailsPath(
-                                propertyOwnership2.id,
-                                isLaView = true,
-                            ),
+                            PropertyDetailsController
+                                .getPropertyDetailsPath(propertyOwnership2.id, isLaView = true)
+                                .overrideBackLinkForUrl(expectedCurrentUrlKey),
                     ),
                 )
 
