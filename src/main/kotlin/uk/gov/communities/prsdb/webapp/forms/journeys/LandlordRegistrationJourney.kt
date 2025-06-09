@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_PLACE_NAMES
 import uk.gov.communities.prsdb.webapp.constants.NON_ENGLAND_OR_WALES_ADDRESS_MAX_LENGTH
@@ -169,7 +170,7 @@ class LandlordRegistrationJourney(
                             "fieldSetHint" to "forms.name.fieldSetHint",
                             "label" to "forms.name.label",
                             "submitButtonText" to "forms.buttons.continue",
-                            "backUrl" to "/$REGISTER_LANDLORD_JOURNEY_URL",
+                            BACK_URL_ATTR_NAME to "/$REGISTER_LANDLORD_JOURNEY_URL",
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
@@ -210,6 +211,7 @@ class LandlordRegistrationJourney(
                             "fieldSetHeading" to "forms.confirmDetails.heading",
                             "fieldSetHint" to "forms.confirmDetails.summary",
                             "submitButtonText" to "forms.buttons.confirmAndContinue",
+                            BACK_URL_ATTR_NAME to "/$REGISTER_LANDLORD_JOURNEY_URL",
                         ),
                     displaySectionHeader = true,
                 ),
