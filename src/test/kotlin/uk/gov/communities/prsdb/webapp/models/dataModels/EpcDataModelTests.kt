@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import uk.gov.communities.prsdb.webapp.constants.VIEW_EPC_CERTIFICATE_BASE_URL
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData.Companion.DEFAULT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData.Companion.SECONDARY_EPC_CERTIFICATE_NUMBER
@@ -42,17 +41,6 @@ class EpcDataModelTests {
             )
 
         assertFalse(epcDataModel.isLatestCertificateForThisProperty())
-    }
-
-    @Test
-    fun `getEpcCertificateUrl returns the certificate url`() {
-        val epcDataModel =
-            MockEpcData.createEpcDataModel(
-                certificateNumber = DEFAULT_EPC_CERTIFICATE_NUMBER,
-            )
-        val expectedUrl = "${VIEW_EPC_CERTIFICATE_BASE_URL}/${DEFAULT_EPC_CERTIFICATE_NUMBER}"
-
-        assertEquals(expectedUrl, epcDataModel.getEpcCertificateUrl())
     }
 
     @Test

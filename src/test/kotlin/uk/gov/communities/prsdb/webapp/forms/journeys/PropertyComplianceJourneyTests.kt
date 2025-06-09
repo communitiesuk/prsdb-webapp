@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -53,6 +54,9 @@ class PropertyComplianceJourneyTests {
 
     @Mock
     private lateinit var mockPropertyComplianceService: PropertyComplianceService
+
+    @Mock
+    private lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
 
     @Nested
     inner class LoadJourneyDataIfNotLoadedTests {
@@ -584,6 +588,7 @@ class PropertyComplianceJourneyTests {
             epcLookupService = mockEpcLookupService,
             propertyComplianceService = mockPropertyComplianceService,
             propertyOwnershipId = propertyOwnershipId,
+            epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
         )
 
     private fun completeStep(
