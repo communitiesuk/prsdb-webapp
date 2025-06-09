@@ -234,6 +234,12 @@ class PropertyOwnershipService(
         }
     }
 
+    fun getNumberOfIncompleteCompliancesForLandlord(principalName: String): Int {
+        val propertyOwnerships = retrieveAllActiveRegisteredPropertiesForLandlord(principalName)
+
+        return propertyOwnerships.count { it.isOccupied && it.isComplianceIncomplete }
+    }
+
     fun getIncompleteCompliancesForLandlord(principalName: String): List<IncompleteComplianceDataModel> {
         val propertyOwnerships = retrieveAllActiveRegisteredPropertiesForLandlord(principalName)
 

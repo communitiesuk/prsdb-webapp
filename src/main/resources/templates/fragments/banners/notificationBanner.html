@@ -1,4 +1,4 @@
-<div th:fragment="notificationBanner(title, subheadingText, url, linkText)" class="govuk-notification-banner" role="region"
+<div th:fragment="notificationBanner(title, content)" class="govuk-notification-banner" role="region"
      aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
     <div class="govuk-notification-banner__header">
         <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title" th:text="${title}">
@@ -6,9 +6,8 @@
         </h2>
     </div>
     <div class="govuk-notification-banner__content">
-        <p class="govuk-notification-banner__heading">
-            <span th:text="${subheadingText}">Text that goes in the banner</span>
-            <a th:if="${url != null && linkText != null}" class="govuk-notification-banner__link" th:href="@{${url}}" th:text="${linkText}">Text for the link</a>
-        </p>
+        <div th:replace="${content}">
+            content
+        </div>
     </div>
 </div>
