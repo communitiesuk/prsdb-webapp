@@ -65,12 +65,10 @@ class LookupAddressStep<T : StepId>(
                 )!!
             val addressLookupResults = addressLookupService.search(houseNameOrNumber, postcode)
 
-            val updatedJourneyData = journeyDataService.getJourneyDataFromSession().withUpdatedLookedUpAddresses(addressLookupResults)
-            journeyDataService.setJourneyDataInSession(updatedJourneyData)
-
             val updatedFilteredJourneyData = filteredJourneyData.withUpdatedLookedUpAddresses(addressLookupResults)
-            val nextStepId = getNextStep(updatedFilteredJourneyData, nextStepIfAddressesFound, nextStepIfNoAddressesFound)
+            journeyDataService.addToJourneyDataIntoSession(updatedFilteredJourneyData)
 
+            val nextStepId = getNextStep(updatedFilteredJourneyData, nextStepIfAddressesFound, nextStepIfNoAddressesFound)
             return generateUrl(nextStepId, subPageNumber, changingAnswersForStep)
         }
     }

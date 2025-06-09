@@ -6,7 +6,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -83,14 +82,12 @@ class LookupAddressStepTests {
         val postcode = "AB1 2CD"
 
         val originalJourneyData =
-            journeyDataBuilder
+            JourneyDataBuilder()
                 .withLookupAddress(houseNumber, postcode)
                 .build()
-        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
 
         val expectedUpdatedJourneyData =
-            journeyDataBuilder
-                .withLookupAddress(houseNumber, postcode)
+            JourneyDataBuilder(initialJourneyData = originalJourneyData)
                 .withEmptyLookedUpAddresses()
                 .build()
 
@@ -99,7 +96,7 @@ class LookupAddressStepTests {
 
         // Assert
         verify(mockAddressLookupService).search(houseNumber, postcode)
-        verify(mockJourneyDataService).setJourneyDataInSession(expectedUpdatedJourneyData)
+        verify(mockJourneyDataService).addToJourneyDataIntoSession(expectedUpdatedJourneyData)
         assertEquals(LookupStepTestIds.NoAddressFound.urlPathSegment, redirectedUrl)
     }
 }

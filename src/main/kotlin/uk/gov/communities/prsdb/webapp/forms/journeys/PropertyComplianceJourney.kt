@@ -1159,10 +1159,8 @@ class PropertyComplianceJourney(
         epcDetails: EpcDataModel?,
         autoMatchedEpc: Boolean,
     ): String {
-        val newJourneyData = journeyDataService.getJourneyDataFromSession().withEpcDetails(epcDetails, autoMatchedEpc)
-        journeyDataService.setJourneyDataInSession(newJourneyData)
-
         val newFilteredJourneyData = filteredJourneyData.withEpcDetails(epcDetails, autoMatchedEpc)
+        journeyDataService.addToJourneyDataIntoSession(newFilteredJourneyData)
         return getRedirectForNextStep(currentStep, newFilteredJourneyData, null)
     }
 

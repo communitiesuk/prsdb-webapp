@@ -605,6 +605,11 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withResetCheckMatchedEpcResult(): JourneyDataBuilder {
+        journeyData.remove(PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment)
+        return this
+    }
+
     fun withEpcLookupCertificateNumber(certificateNumber: String = CURRENT_EPC_CERTIFICATE_NUMBER): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EpcLookup.urlPathSegment] =
             mapOf(EpcLookupFormModel::certificateNumber.name to certificateNumber)
