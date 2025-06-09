@@ -179,10 +179,10 @@ class DateTimeHelperTests {
     }
 
     @Test
-    fun `formatLocalDate returns the date in the form of 20 January 2024`() {
+    fun `formatKotlinLocalDate returns the date in the form of 20 January 2024`() {
         val date = LocalDate(2024, 1, 20)
         val expectedFormattedDate = "20 January 2024"
 
-        assertEquals(expectedFormattedDate, DateTimeHelper.formatLocalDate(date))
+        assertEquals(expectedFormattedDate, DateTimeHelper.formatKotlinLocalDate(date))
     }
 }
