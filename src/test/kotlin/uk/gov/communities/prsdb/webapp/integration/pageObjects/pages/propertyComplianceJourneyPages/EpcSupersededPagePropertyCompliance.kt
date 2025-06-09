@@ -14,6 +14,5 @@ class EpcSupersededPagePropertyCompliance(
         PropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${PropertyComplianceStepId.EpcSuperseded.urlPathSegment}",
     ) {
-    // TODO: PRSD-1140 - update this
-    val continueButton = Button.byText(page, "Continue")
+    val continueButton = Button.byText(page, "Continue to check EPC")
 }

@@ -61,6 +61,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import kotlin.test.assertTrue
 
 class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql") {
     @MockitoBean
@@ -239,8 +240,10 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         epcLookupPage.submitSupersededEpcNumber()
         val epcSupersededPage = assertPageIs(page, EpcSupersededPagePropertyCompliance::class, urlArguments)
 
-        // TODO: PRSD-1140 - update this
         // EPC Superseded page
+        assertTrue(epcSupersededPage.page.content().contains(CURRENT_EPC_CERTIFICATE_NUMBER))
+        whenever(epcRegisterClient.getByRrn(CURRENT_EPC_CERTIFICATE_NUMBER))
+            .thenReturn(MockEpcData.createEpcRegisterClientEpcFoundResponse())
         epcSupersededPage.continueButton.clickAndWait()
         var checkMatchedEpcPage = assertPageIs(page, CheckMatchedEpcPagePropertyCompliance::class, urlArguments)
 
