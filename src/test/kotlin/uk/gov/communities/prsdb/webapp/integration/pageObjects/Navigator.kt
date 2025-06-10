@@ -97,6 +97,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ReasonPagePropertyDeregistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckHouseholdsAnswersPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckPeopleAnswersPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfPeopleFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.DeclarationFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
@@ -890,17 +894,51 @@ class Navigator(
         )
     }
 
-    fun navigateToPropertyDetailsUpdateNumberOfHouseholdsPage(propertyOwnershipId: Long) {
+    fun goToPropertyDetailsUpdateOccupancy(propertyOwnershipId: Long): OccupancyFormPagePropertyDetailsUpdate {
         navigate(
             PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) +
-                "/${UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment}",
+                "/${UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment}",
+        )
+        return createValidPage(
+            page,
+            OccupancyFormPagePropertyDetailsUpdate::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }
 
-    fun navigateToPropertyDetailsUpdateNumberOfPeoplePage(propertyOwnershipId: Long) {
+    fun goToPropertyDetailsUpdateCheckHouseholdAnswersPage(propertyOwnershipId: Long): CheckHouseholdsAnswersPagePropertyDetailsUpdate {
+        navigate(
+            PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) +
+                "/${UpdatePropertyDetailsStepId.CheckYourHouseholdsAnswers.urlPathSegment}",
+        )
+        return createValidPage(
+            page,
+            CheckHouseholdsAnswersPagePropertyDetailsUpdate::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
+    fun goToPropertyDetailsUpdateCheckPeopleAnswersPage(propertyOwnershipId: Long): CheckPeopleAnswersPagePropertyDetailsUpdate {
+        navigate(
+            PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) +
+                "/${UpdatePropertyDetailsStepId.CheckYourPeopleAnswers.urlPathSegment}",
+        )
+        return createValidPage(
+            page,
+            CheckPeopleAnswersPagePropertyDetailsUpdate::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
+    fun goToPropertyDetailsUpdateNumberOfPeoplePage(propertyOwnershipId: Long): NumberOfPeopleFormPagePropertyDetailsUpdate {
         navigate(
             PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) +
                 "/${UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment}",
+        )
+        return createValidPage(
+            page,
+            NumberOfPeopleFormPagePropertyDetailsUpdate::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }
 
