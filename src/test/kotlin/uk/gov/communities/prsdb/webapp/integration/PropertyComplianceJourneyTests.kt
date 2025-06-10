@@ -440,7 +440,6 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         epcPage.submitHasCert()
         val epcNotAutomatched = assertPageIs(page, EpcNotAutoMatchedPagePropertyCompliance::class, urlArguments)
 
-        // TODO PRSD-1200 - update this if needed
         // EPC Not Auto Matched page
         epcNotAutomatched.continueButton.clickAndWait()
         var epcLookupPage = assertPageIs(page, EpcLookupPagePropertyCompliance::class, urlArguments)

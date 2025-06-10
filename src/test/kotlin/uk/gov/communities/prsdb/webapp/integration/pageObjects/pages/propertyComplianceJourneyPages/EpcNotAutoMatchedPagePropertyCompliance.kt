@@ -14,6 +14,5 @@ class EpcNotAutoMatchedPagePropertyCompliance(
         PropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${PropertyComplianceStepId.EpcNotAutoMatched.urlPathSegment}",
     ) {
-    // TODO: PRSD-1200 - update this
-    val continueButton = Button.byText(page, "Continue")
+    val continueButton = Button.byText(page, "Continue to search")
 }
