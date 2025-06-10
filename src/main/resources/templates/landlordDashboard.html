@@ -10,7 +10,7 @@
                     <span th:text="#{landlord.dashboard.notificationBanner.incompleteProperties.subheadingBeforeNumber} + ' ' + ${numberOfIncompleteProperties} + ' ' + (${numberOfIncompleteProperties != 1} ? #{landlord.dashboard.notificationBanner.incompleteProperties.subheadingAfterNumber} : #{landlord.dashboard.notificationBanner.incompleteProperties.subheadingAfterNumberIsOne})">Text that goes in the banner</span>
                     <a class="govuk-notification-banner__link" th:href="@{${viewIncompletePropertiesUrl}}" th:text="#{landlord.dashboard.notificationBanner.incompleteProperties.linkText}">Text for the link</a>
                 </li>
-                <li th:if="${numberOfIncompleteProperties != 0}">
+                <li th:if="${numberOfIncompleteCompliances != 0}">
                     <span th:text="#{landlord.dashboard.notificationBanner.incompleteCompliances.subheadingBeforeNumber} + ' ' + ${numberOfIncompleteCompliances} + ' ' + (${numberOfIncompleteCompliances != 1} ? #{landlord.dashboard.notificationBanner.incompleteCompliances.subheadingAfterNumber} : #{landlord.dashboard.notificationBanner.incompleteCompliances.subheadingAfterNumberIsOne})">Text that goes in the banner</span>
                     <a class="govuk-notification-banner__link" th:href="@{${viewIncompleteCompliancesUrl}}" th:text="#{landlord.dashboard.notificationBanner.incompleteCompliances.linkText}">Text for the link</a>
                 </li>

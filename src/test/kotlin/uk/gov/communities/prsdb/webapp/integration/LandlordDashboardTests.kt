@@ -114,7 +114,7 @@ class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
         inner class IncompleteCompliances {
             @Nested
             inner class WithOne :
-                NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-one-incomplete-property.sql") {
+                NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-one-incomplete-compliance.sql") {
                 @Test
                 fun `the notification banner loads with correct message for one incomplete compliance`(page: Page) {
                     val dashboard = navigator.goToLandlordDashboard()
@@ -124,7 +124,7 @@ class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
             }
 
             @Nested
-            inner class WithMultiple : NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-incomplete-properties.sql") {
+            inner class WithMultiple : NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-incomplete-compliances.sql") {
                 @Test
                 fun `the notification banner loads with correct message for multiple incomplete compliances`(page: Page) {
                     val dashboard = navigator.goToLandlordDashboard()
