@@ -5,8 +5,8 @@ import kotlinx.serialization.json.Json
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
-import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -66,7 +66,7 @@ class LandlordDetailsUpdateJourney(
         val originalLandlordData =
             mutableMapOf(
                 IS_IDENTITY_VERIFIED_KEY to landlord.isVerified,
-                LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to Json.encodeToString(listOf(AddressDataModel.fromAddress(landlord.address))),
+                NonStepJourneyDataKey.LookedUpAddresses.key to Json.encodeToString(listOf(AddressDataModel.fromAddress(landlord.address))),
                 LandlordDetailsUpdateStepId.UpdateEmail toPageData EmailFormModel::fromLandlord,
                 LandlordDetailsUpdateStepId.UpdateName toPageData NameFormModel::fromLandlord,
                 LandlordDetailsUpdateStepId.UpdateDateOfBirth toPageData DateOfBirthFormModel::fromLandlord,
@@ -111,8 +111,8 @@ class LandlordDetailsUpdateJourney(
                             BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
-            handleSubmitAndRedirect = { journeyData, _, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
-            nextAction = { journeyData, _ -> emailNextAction(journeyData) },
+            handleSubmitAndRedirect = { _, _, _ -> updateLandlordWithChangesAndRedirect() },
+            nextAction = { filteredJourneyData, _ -> emailNextAction(filteredJourneyData) },
             saveAfterSubmit = false,
         )
 
@@ -134,7 +134,7 @@ class LandlordDetailsUpdateJourney(
                             BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
-            handleSubmitAndRedirect = { journeyData, _, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { _, _, _ -> updateLandlordWithChangesAndRedirect() },
             nextAction = { _, _ -> Pair(LandlordDetailsUpdateStepId.UpdateDateOfBirth, null) },
             saveAfterSubmit = false,
         )
@@ -156,7 +156,7 @@ class LandlordDetailsUpdateJourney(
                             BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
-            handleSubmitAndRedirect = { journeyData, _, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { _, _, _ -> updateLandlordWithChangesAndRedirect() },
             nextAction = { _, _ -> Pair(LandlordDetailsUpdateStepId.UpdatePhoneNumber, null) },
             saveAfterSubmit = false,
         )
@@ -180,7 +180,7 @@ class LandlordDetailsUpdateJourney(
                             BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
                         ),
                 ),
-            handleSubmitAndRedirect = { journeyData, _, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { _, _, _ -> updateLandlordWithChangesAndRedirect() },
             nextAction = { _, _ -> Pair(LandlordDetailsUpdateStepId.LookupEnglandAndWalesAddress, null) },
             saveAfterSubmit = false,
         )
@@ -233,8 +233,8 @@ class LandlordDetailsUpdateJourney(
                     journeyDataService = journeyDataService,
                     displaySectionHeader = false,
                 ),
-            handleSubmitAndRedirect = { journeyData, _, _ -> selectAddressHandleSubmitAndRedirect(journeyData) },
-            nextAction = { journeyData, _ -> selectAddressNextAction(journeyData) },
+            handleSubmitAndRedirect = { filteredJourneyData, _, _ -> selectAddressHandleSubmitAndRedirect(filteredJourneyData) },
+            nextAction = { filteredJourneyData, _ -> selectAddressNextAction(filteredJourneyData) },
             saveAfterSubmit = false,
         )
 
@@ -279,7 +279,7 @@ class LandlordDetailsUpdateJourney(
                         ),
                     shouldDisplaySectionHeader = false,
                 ),
-            handleSubmitAndRedirect = { journeyData, _, _ -> updateLandlordWithChangesAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { _, _, _ -> updateLandlordWithChangesAndRedirect() },
             saveAfterSubmit = false,
         )
 
@@ -298,28 +298,30 @@ class LandlordDetailsUpdateJourney(
             ),
         )
 
-    private fun emailNextAction(journeyData: JourneyData) =
-        if (LandlordDetailsUpdateJourneyDataHelper.getIsIdentityVerified(journeyData)) {
+    private fun emailNextAction(filteredJourneyData: JourneyData) =
+        if (LandlordDetailsUpdateJourneyDataHelper.getIsIdentityVerified(filteredJourneyData)) {
             Pair(LandlordDetailsUpdateStepId.UpdatePhoneNumber, null)
         } else {
             Pair(LandlordDetailsUpdateStepId.UpdateName, null)
         }
 
-    private fun selectAddressNextAction(journeyData: JourneyData): Pair<LandlordDetailsUpdateStepId?, Int?> =
-        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
+    private fun selectAddressNextAction(filteredJourneyData: JourneyData): Pair<LandlordDetailsUpdateStepId?, Int?> =
+        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(filteredJourneyData)) {
             Pair(LandlordDetailsUpdateStepId.ManualEnglandAndWalesAddress, null)
         } else {
             Pair(null, null)
         }
 
-    private fun selectAddressHandleSubmitAndRedirect(journeyData: JourneyData): String =
-        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
+    private fun selectAddressHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String =
+        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(filteredJourneyData)) {
             LandlordDetailsUpdateStepId.ManualEnglandAndWalesAddress.urlPathSegment
         } else {
-            updateLandlordWithChangesAndRedirect(journeyData)
+            updateLandlordWithChangesAndRedirect()
         }
 
-    private fun updateLandlordWithChangesAndRedirect(journeyData: JourneyData): String {
+    private fun updateLandlordWithChangesAndRedirect(): String {
+        val journeyData = journeyDataService.getJourneyDataFromSession()
+
         val landlordUpdate =
             LandlordUpdateModel(
                 email = LandlordDetailsUpdateJourneyDataHelper.getEmailUpdateIfPresent(journeyData),

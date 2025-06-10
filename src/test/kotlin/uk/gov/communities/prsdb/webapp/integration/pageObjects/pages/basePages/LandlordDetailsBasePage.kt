@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Table
@@ -11,6 +12,7 @@ abstract class LandlordDetailsBasePage(
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
     val tabs = LandlordDetailsTabs(page)
+    val backLink = BackLink.default(page)
     val personalDetailsSummaryList = LandlordPersonalDetailsSummaryList(page)
     val registeredPropertiesTable = Table(page)
 

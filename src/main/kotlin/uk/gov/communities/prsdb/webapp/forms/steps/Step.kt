@@ -13,14 +13,9 @@ import java.util.Optional
 open class Step<T : StepId>(
     val id: T,
     val page: AbstractPage,
-    val handleSubmitAndRedirect: ((journeyData: JourneyData, subPageNumber: Int?, changingAnswersForStep: T?) -> String)? = null,
+    val handleSubmitAndRedirect: ((filteredJourneyData: JourneyData, subPageNumber: Int?, changingAnswersForStep: T?) -> String)? = null,
     val isSatisfied: (bindingResult: BindingResult) -> Boolean = { bindingResult -> page.isSatisfied(bindingResult) },
-    val nextAction: (journeyData: JourneyData, subPageNumber: Int?) -> Pair<T?, Int?> = { _, _ ->
-        Pair(
-            null,
-            null,
-        )
-    },
+    val nextAction: (filteredJourneyData: JourneyData, subPageNumber: Int?) -> Pair<T?, Int?> = { _, _ -> Pair(null, null) },
     val saveAfterSubmit: Boolean = true,
 ) {
     val name: String = id.urlPathSegment

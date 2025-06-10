@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
+import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -18,6 +19,7 @@ data class RegisteredPropertyViewModel(
         fun fromPropertyOwnership(
             propertyOwnership: PropertyOwnership,
             isLaView: Boolean = false,
+            currentUrlKey: Int? = null,
         ): RegisteredPropertyViewModel =
             RegisteredPropertyViewModel(
                 address = propertyOwnership.property.address.singleLineAddress,
@@ -34,7 +36,10 @@ data class RegisteredPropertyViewModel(
                         propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING,
                     ),
                 isTenantedMessageKey = MessageKeyConverter.convert(propertyOwnership.isOccupied),
-                recordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLaView),
+                recordLink =
+                    PropertyDetailsController
+                        .getPropertyDetailsPath(propertyOwnership.id, isLaView)
+                        .overrideBackLinkForUrl(currentUrlKey),
             )
     }
 }

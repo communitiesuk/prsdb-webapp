@@ -50,7 +50,7 @@ class LaUserRegistrationJourneyTests {
         val invitedAsAdmin = true
         val baseUserId = "test-base-user-id"
 
-        val expectedLaUser = setupInvitationAndLAUSerMocks(name, email, localAuthority, invitedAsAdmin, baseUserId)
+        val expectedLaUser = setupInvitationAndLAUserMocks(name, email, localAuthority, invitedAsAdmin, baseUserId)
 
         // Act
         completeHandleSubmitAndRedirect()
@@ -62,7 +62,7 @@ class LaUserRegistrationJourneyTests {
 
     @Test
     fun `handleSubmitAndRedirect deletes the invitation from the database`() {
-        setupInvitationAndLAUSerMocks()
+        setupInvitationAndLAUserMocks()
 
         // Act
         completeHandleSubmitAndRedirect()
@@ -73,7 +73,7 @@ class LaUserRegistrationJourneyTests {
 
     @Test
     fun `handleSubmitAndRedirect updates user roles`() {
-        setupInvitationAndLAUSerMocks()
+        setupInvitationAndLAUserMocks()
 
         // Act
         completeHandleSubmitAndRedirect()
@@ -84,7 +84,7 @@ class LaUserRegistrationJourneyTests {
 
     @Test
     fun `handleSubmitAndRedirect clears data from the session`() {
-        setupInvitationAndLAUSerMocks()
+        setupInvitationAndLAUserMocks()
 
         // Act
         completeHandleSubmitAndRedirect()
@@ -113,7 +113,7 @@ class LaUserRegistrationJourneyTests {
         )
     }
 
-    private fun setupInvitationAndLAUSerMocks(
+    private fun setupInvitationAndLAUserMocks(
         name: String = "Test user",
         email: String = "test.user@example.com",
         localAuthority: LocalAuthority = createLocalAuthority(),
@@ -122,7 +122,7 @@ class LaUserRegistrationJourneyTests {
     ): LocalAuthorityUser {
         createLocalAuthority()
 
-        val journeyData = JourneyDataBuilder.localAuthorityUser(name, email).build()
+        val journeyData = JourneyDataBuilder.forLaUser(name, email).build()
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
         invitation =

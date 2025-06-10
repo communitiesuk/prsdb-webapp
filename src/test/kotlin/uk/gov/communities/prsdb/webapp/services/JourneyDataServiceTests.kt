@@ -74,6 +74,18 @@ class JourneyDataServiceTests {
 
             verify(mockHttpSession).setAttribute(journeyDataKey, journeyData)
         }
+
+        @Test
+        fun `addToJourneyDataIntoSession adds new journey data to existing session data`() {
+            val existingJourneyData = mapOf("existingKey1" to "existingValue1", "existingKey2" to "existingValue2")
+            val newJourneyData = mapOf("existingKey1" to "newValue1", "newKey2" to "newValue2")
+            whenever(mockHttpSession.getAttribute(journeyDataKey)).thenReturn(existingJourneyData)
+
+            journeyDataService.addToJourneyDataIntoSession(newJourneyData)
+
+            val expectedJourneyData = existingJourneyData + newJourneyData
+            verify(mockHttpSession).setAttribute(journeyDataKey, expectedJourneyData)
+        }
     }
 
     @Nested
