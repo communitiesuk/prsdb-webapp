@@ -9,7 +9,7 @@
 <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'hasExemption', #{${fieldSetHeading}}, null)}">
     <p class="govuk-body" th:text="#{forms.epcExpiryCheck.paragraph.one}">forms.epcExpiryCheck.paragraph.one</p>
     <p class="govuk-body" th:text="#{forms.epcExpiryCheck.paragraph.two}">forms.epcExpiryCheck.paragraph.two</p>
-    <p class="govuk-body"><strong  th:text="#{forms.epcExpiryCheck.paragraph.three(${expiryDate})}">forms.epcExpiryCheck.paragraph.three</strong></p>
+    <p class="govuk-body"><strong  th:text="#{forms.epcExpiryCheck.paragraph.three(${{expiryDate}})}">forms.epcExpiryCheck.paragraph.three</strong></p>
     <th:block th:replace="~{fragments/forms/radios :: radios(null, 'tenancyStartedBeforeExpiry', null, ${radioOptions})}"></th:block>
 </th:block>
 <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
