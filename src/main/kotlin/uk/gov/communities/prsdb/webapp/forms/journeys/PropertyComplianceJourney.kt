@@ -226,12 +226,8 @@ class PropertyComplianceJourney(
                 PropertyComplianceStepId.EPC,
                 setOf(
                     epcStep,
+                    epcNotAutomatchedStep,
                     checkAutoMatchedEpcStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.EpcNotAutoMatched,
-                        "TODO PRSD-1200: Implement EPC not automatched step",
-                        PropertyComplianceStepId.EpcLookup,
-                    ),
                     epcLookupStep,
                     checkMatchedEpcStep,
                     epcNotFoundStep,
@@ -802,6 +798,22 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
+            )
+
+    private val epcNotAutomatchedStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EpcNotAutoMatched,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/epcNotAutoMatchedForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.EpcLookup, null) },
             )
 
     private val checkAutoMatchedEpcStep

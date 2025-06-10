@@ -1,0 +1,15 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!DOCTYPE html>
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+<header>
+    <h1 class="govuk-heading-l" th:text="#{forms.epcNotAutoMatched.heading}">forms.epcNotAutoMatched.heading</h1>
+</header>
+<section>
+    <p class="govuk-body" th:text="#{forms.epcNotAutoMatched.paragraph.one}">forms.epcNotAutoMatched.paragraph.one</p>
+    <p class="govuk-body" th:text="#{forms.epcNotAutoMatched.paragraph.two}">forms.epcNotAutoMatched.paragraph.two</p>
+</section>
+<button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continueToSearch})}"></button>
+</html>
