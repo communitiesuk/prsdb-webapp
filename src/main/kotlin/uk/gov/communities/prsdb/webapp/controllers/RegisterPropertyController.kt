@@ -57,7 +57,7 @@ class RegisterPropertyController(
     @GetMapping("/$RESUME_PAGE_PATH_SEGMENT")
     fun getResume(
         principal: Principal,
-        @RequestParam(value = "contextId", required = true) contextId: String,
+        @RequestParam(value = CONTEXT_ID_URL_PARAMETER, required = true) contextId: String,
     ): String {
         val formContext =
             propertyRegistrationService.getIncompletePropertyFormContextForLandlordIfNotExpired(
