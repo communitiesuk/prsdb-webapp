@@ -4,7 +4,7 @@ import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 
 class GroupedUpdateJourneyExtensions {
     companion object {
-        fun Map<String, Any>.withBackUrlIfNotChangingAnswer(
+        fun Map<String, Any>.withBackUrlIfNotNullAndNotChangingAnswer(
             backUrl: String?,
             isChangingAnswer: Boolean,
         ) = if (backUrl == null || isChangingAnswer) {

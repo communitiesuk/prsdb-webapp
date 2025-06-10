@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
-import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsGroupIdentifier
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getIsOccupiedUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getLatestNumberOfHouseholds
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getLicenceNumberUpdateIfPresent
@@ -53,7 +53,7 @@ class PropertyDetailsUpdateJourneyExtensionsTests {
         val originalJourneyData = journeyDataBuilder.withIsOccupiedUpdate(false).build()
         val testJourneyData = mapOf(originalJourneyKey to originalJourneyData)
 
-        val originalOccupancy = testJourneyData.getOriginalIsOccupied(UpdatePropertyDetailsStepId.UpdateOccupancy, originalJourneyKey)!!
+        val originalOccupancy = testJourneyData.getOriginalIsOccupied(UpdatePropertyDetailsGroupIdentifier.Occupancy, originalJourneyKey)!!
 
         assertFalse(originalOccupancy)
     }
@@ -64,7 +64,7 @@ class PropertyDetailsUpdateJourneyExtensionsTests {
         val originalJourneyData = journeyDataBuilder.build()
         val testJourneyData = mapOf(originalJourneyKey to originalJourneyData)
 
-        val originalOccupancy = testJourneyData.getOriginalIsOccupied(UpdatePropertyDetailsStepId.UpdateOccupancy, originalJourneyKey)
+        val originalOccupancy = testJourneyData.getOriginalIsOccupied(UpdatePropertyDetailsGroupIdentifier.Occupancy, originalJourneyKey)
 
         assertNull(originalOccupancy)
     }
@@ -74,10 +74,7 @@ class PropertyDetailsUpdateJourneyExtensionsTests {
         val testJourneyData = journeyDataBuilder.build()
 
         val occupancyUpdate =
-            testJourneyData.getOriginalIsOccupied(
-                UpdatePropertyDetailsStepId.UpdateOccupancy,
-                "original-key-not-in-journey-data",
-            )
+            testJourneyData.getOriginalIsOccupied(UpdatePropertyDetailsGroupIdentifier.Occupancy, "original-key-not-in-journey-data")
 
         assertNull(occupancyUpdate)
     }
@@ -86,7 +83,7 @@ class PropertyDetailsUpdateJourneyExtensionsTests {
     fun `getIsOccupiedUpdateIfPresent returns a boolean if the corresponding page is in journeyData`() {
         val testJourneyData = journeyDataBuilder.withIsOccupiedUpdate(true).build()
 
-        val occupancyUpdate = testJourneyData.getIsOccupiedUpdateIfPresent(UpdatePropertyDetailsStepId.UpdateOccupancy)!!
+        val occupancyUpdate = testJourneyData.getIsOccupiedUpdateIfPresent(UpdatePropertyDetailsGroupIdentifier.Occupancy)!!
 
         assertTrue(occupancyUpdate)
     }
@@ -95,7 +92,7 @@ class PropertyDetailsUpdateJourneyExtensionsTests {
     fun `getIsOccupiedUpdateIfPresent returns null if the corresponding page is in not journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
-        val occupancyUpdate = testJourneyData.getIsOccupiedUpdateIfPresent(UpdatePropertyDetailsStepId.UpdateOccupancy)
+        val occupancyUpdate = testJourneyData.getIsOccupiedUpdateIfPresent(UpdatePropertyDetailsGroupIdentifier.Occupancy)
 
         assertNull(occupancyUpdate)
     }
@@ -105,7 +102,7 @@ class PropertyDetailsUpdateJourneyExtensionsTests {
         val testJourneyData = journeyDataBuilder.withIsOccupiedUpdate(false).build()
 
         val numberOfHouseholdsUpdate =
-            testJourneyData.getNumberOfHouseholdsUpdateIfPresent(UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfHouseholds)
+            testJourneyData.getNumberOfHouseholdsUpdateIfPresent(UpdatePropertyDetailsGroupIdentifier.Occupancy)
 
         assertEquals(0, numberOfHouseholdsUpdate)
     }
@@ -116,7 +113,7 @@ class PropertyDetailsUpdateJourneyExtensionsTests {
         val testJourneyData = journeyDataBuilder.withIsOccupiedUpdate(true).withNumberOfHouseholdsUpdate(newNumberOfHouseholds).build()
 
         val numberOfHouseholdsUpdate =
-            testJourneyData.getNumberOfHouseholdsUpdateIfPresent(UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds)
+            testJourneyData.getNumberOfHouseholdsUpdateIfPresent(UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds)
 
         assertEquals(newNumberOfHouseholds, numberOfHouseholdsUpdate)
     }
@@ -127,7 +124,7 @@ class PropertyDetailsUpdateJourneyExtensionsTests {
         val testJourneyData = journeyDataBuilder.withNumberOfHouseholdsUpdate(newNumberOfHouseholds).build()
 
         val numberOfHouseholdsUpdate =
-            testJourneyData.getNumberOfHouseholdsUpdateIfPresent(UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds)
+            testJourneyData.getNumberOfHouseholdsUpdateIfPresent(UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds)
 
         assertEquals(newNumberOfHouseholds, numberOfHouseholdsUpdate)
     }
@@ -137,9 +134,51 @@ class PropertyDetailsUpdateJourneyExtensionsTests {
         val testJourneyData = journeyDataBuilder.build()
 
         val numberOfHouseholdsUpdate =
-            testJourneyData.getNumberOfHouseholdsUpdateIfPresent(UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds)
+            testJourneyData.getNumberOfHouseholdsUpdateIfPresent(UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds)
 
         assertNull(numberOfHouseholdsUpdate)
+    }
+
+    @Test
+    fun `getNumberOfPeopleUpdateIfPresent returns 0 if the occupancy has been updated to false`() {
+        val testJourneyData = journeyDataBuilder.withIsOccupiedUpdate(false).build()
+
+        val numberOfPeopleUpdate =
+            testJourneyData.getNumberOfPeopleUpdateIfPresent(UpdatePropertyDetailsGroupIdentifier.Occupancy)
+
+        assertEquals(0, numberOfPeopleUpdate)
+    }
+
+    @Test
+    fun `getNumberOfPeopleUpdateIfPresent returns an integer if the occupancy has been updated to true`() {
+        val newNumberOfPeople = 10
+        val testJourneyData = journeyDataBuilder.withIsOccupiedUpdate(true).withNumberOfPeopleUpdate(newNumberOfPeople).build()
+
+        val numberOfPeopleUpdate =
+            testJourneyData.getNumberOfPeopleUpdateIfPresent(UpdatePropertyDetailsGroupIdentifier.NumberOfPeople)
+
+        assertEquals(newNumberOfPeople, numberOfPeopleUpdate)
+    }
+
+    @Test
+    fun `getNumberOfPeopleUpdateIfPresent returns an integer if the corresponding page is in journeyData`() {
+        val newNumberOfPeople = 10
+        val testJourneyData = journeyDataBuilder.withNumberOfPeopleUpdate(newNumberOfPeople).build()
+
+        val numberOfPeopleUpdate =
+            testJourneyData.getNumberOfPeopleUpdateIfPresent(UpdatePropertyDetailsGroupIdentifier.NumberOfPeople)
+
+        assertEquals(newNumberOfPeople, numberOfPeopleUpdate)
+    }
+
+    @Test
+    fun `getNumberOfPeopleUpdateIfPresent returns null if the corresponding page is in not journeyData`() {
+        val testJourneyData = journeyDataBuilder.build()
+
+        val numberOfPeopleUpdate =
+            testJourneyData.getNumberOfPeopleUpdateIfPresent(UpdatePropertyDetailsGroupIdentifier.NumberOfPeople)
+
+        assertNull(numberOfPeopleUpdate)
     }
 
     @Test
@@ -155,7 +194,7 @@ class PropertyDetailsUpdateJourneyExtensionsTests {
                 .build()
 
         val latestNumberOfHouseholds =
-            testJourneyData.getLatestNumberOfHouseholds(UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds, originalDataKey)
+            testJourneyData.getLatestNumberOfHouseholds(UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds, originalDataKey)
 
         assertEquals(expectedNumberOfHouseholds, latestNumberOfHouseholds)
     }
@@ -171,7 +210,7 @@ class PropertyDetailsUpdateJourneyExtensionsTests {
                 .build()
 
         val latestNumberOfHouseholds =
-            testJourneyData.getLatestNumberOfHouseholds(UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds, originalDataKey)
+            testJourneyData.getLatestNumberOfHouseholds(UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds, originalDataKey)
 
         assertEquals(expectedNumberOfHouseholds, latestNumberOfHouseholds)
     }
@@ -189,51 +228,9 @@ class PropertyDetailsUpdateJourneyExtensionsTests {
                 .build()
 
         val latestNumberOfHouseholds =
-            testJourneyData.getLatestNumberOfHouseholds(UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfHouseholds, originalDataKey)
+            testJourneyData.getLatestNumberOfHouseholds(UpdatePropertyDetailsGroupIdentifier.Occupancy, originalDataKey)
 
         assertEquals(expectedNumberOfHouseholds, latestNumberOfHouseholds)
-    }
-
-    @Test
-    fun `getNumberOfPeopleUpdateIfPresent returns 0 if the occupancy has been updated to false`() {
-        val testJourneyData = journeyDataBuilder.withIsOccupiedUpdate(false).build()
-
-        val numberOfPeopleUpdate =
-            testJourneyData.getNumberOfPeopleUpdateIfPresent(UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfPeople)
-
-        assertEquals(0, numberOfPeopleUpdate)
-    }
-
-    @Test
-    fun `getNumberOfPeopleUpdateIfPresent returns an integer if the occupancy has been updated to true`() {
-        val newNumberOfPeople = 10
-        val testJourneyData = journeyDataBuilder.withIsOccupiedUpdate(true).withNumberOfPeopleUpdate(newNumberOfPeople).build()
-
-        val numberOfPeopleUpdate =
-            testJourneyData.getNumberOfPeopleUpdateIfPresent(UpdatePropertyDetailsStepId.UpdateNumberOfPeople)
-
-        assertEquals(newNumberOfPeople, numberOfPeopleUpdate)
-    }
-
-    @Test
-    fun `getNumberOfPeopleUpdateIfPresent returns an integer if the corresponding page is in journeyData`() {
-        val newNumberOfPeople = 10
-        val testJourneyData = journeyDataBuilder.withNumberOfPeopleUpdate(newNumberOfPeople).build()
-
-        val numberOfPeopleUpdate =
-            testJourneyData.getNumberOfPeopleUpdateIfPresent(UpdatePropertyDetailsStepId.UpdateNumberOfPeople)
-
-        assertEquals(newNumberOfPeople, numberOfPeopleUpdate)
-    }
-
-    @Test
-    fun `getNumberOfPeopleUpdateIfPresent returns null if the corresponding page is in not journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val numberOfPeopleUpdate =
-            testJourneyData.getNumberOfPeopleUpdateIfPresent(UpdatePropertyDetailsStepId.UpdateNumberOfPeople)
-
-        assertNull(numberOfPeopleUpdate)
     }
 
     @Test

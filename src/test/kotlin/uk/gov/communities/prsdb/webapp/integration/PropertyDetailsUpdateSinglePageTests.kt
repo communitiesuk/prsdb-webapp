@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HouseholdsOccupancyFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfHouseholdsFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfPeopleFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.PeopleNumberOfHouseholdsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.PeopleOccupancyFormPagePropertyDetailsUpdate
 import kotlin.test.assertEquals
@@ -14,13 +16,18 @@ class PropertyDetailsUpdateSinglePageTests : SinglePageTestWithSeedData("data-lo
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
 
     @Test
-    fun `Skipped occupancy update sub-journey steps can be accessed via CYA page links`(page: Page) {
+    fun `Skipped occupancy update sub-journey steps can be accessed via CYA page links, and back links when changing answers`(page: Page) {
         // Household occupancy update page
         val checkHouseholdsAnswersPage = navigator.goToPropertyDetailsUpdateCheckHouseholdAnswersPage(propertyOwnershipId)
         checkHouseholdsAnswersPage.form.summaryList.occupancyRow
             .clickActionLinkAndWait()
         val householdOccupancyUpdatePage = assertPageIs(page, HouseholdsOccupancyFormPagePropertyDetailsUpdate::class, urlArguments)
         assertEquals("true", householdOccupancyUpdatePage.form.occupancyRadios.selectedValue)
+
+        householdOccupancyUpdatePage.form.submit()
+        val numberOfHouseholdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, urlArguments)
+        numberOfHouseholdsPage.backLink.clickAndWait()
+        assertPageIs(page, HouseholdsOccupancyFormPagePropertyDetailsUpdate::class, urlArguments)
 
         // People occupancy update page
         var checkPeopleAnswersPage = navigator.goToPropertyDetailsUpdateCheckPeopleAnswersPage(propertyOwnershipId)
@@ -29,6 +36,11 @@ class PropertyDetailsUpdateSinglePageTests : SinglePageTestWithSeedData("data-lo
         val peopleOccupancyUpdatePage = assertPageIs(page, PeopleOccupancyFormPagePropertyDetailsUpdate::class, urlArguments)
         assertEquals("true", peopleOccupancyUpdatePage.form.occupancyRadios.selectedValue)
 
+        peopleOccupancyUpdatePage.form.submit()
+        val peopleNumberOfHouseholdsPage = assertPageIs(page, PeopleNumberOfHouseholdsFormPagePropertyDetailsUpdate::class, urlArguments)
+        peopleNumberOfHouseholdsPage.backLink.clickAndWait()
+        assertPageIs(page, PeopleOccupancyFormPagePropertyDetailsUpdate::class, urlArguments)
+
         // People number of households update page
         checkPeopleAnswersPage = navigator.goToPropertyDetailsUpdateCheckPeopleAnswersPage(propertyOwnershipId)
         checkPeopleAnswersPage.form.summaryList.numberOfHouseholdsRow
@@ -36,5 +48,10 @@ class PropertyDetailsUpdateSinglePageTests : SinglePageTestWithSeedData("data-lo
         val peopleNumberOfHouseholdsUpdatePage =
             assertPageIs(page, PeopleNumberOfHouseholdsFormPagePropertyDetailsUpdate::class, urlArguments)
         assertThat(peopleNumberOfHouseholdsUpdatePage.form.householdsInput).hasValue("1")
+
+        peopleNumberOfHouseholdsUpdatePage.form.submit()
+        val numberOfPeoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, urlArguments)
+        numberOfPeoplePage.backLink.clickAndWait()
+        assertPageIs(page, PeopleNumberOfHouseholdsFormPagePropertyDetailsUpdate::class, urlArguments)
     }
 }

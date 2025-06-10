@@ -53,7 +53,7 @@ class LandlordDetailsUpdateJourney(
     ) {
     init {
         initializeOriginalJourneyDataIfNotInitialized()
-        initializeJourneyDataIfNotInitialized()
+        initializeLookedUpAddressesIfNotInitialized()
     }
 
     override val unreachableStepRedirect = LandlordDetailsController.LANDLORD_DETAILS_ROUTE
@@ -83,7 +83,7 @@ class LandlordDetailsUpdateJourney(
         return originalLandlordData
     }
 
-    private fun initializeJourneyDataIfNotInitialized() {
+    private fun initializeLookedUpAddressesIfNotInitialized() {
         val journeyData = journeyDataService.getJourneyDataFromSession()
         val originalJourneyData = JourneyDataHelper.getPageData(journeyData, originalDataKey)
 
