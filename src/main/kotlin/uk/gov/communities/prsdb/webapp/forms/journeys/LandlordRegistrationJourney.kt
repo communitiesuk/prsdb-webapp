@@ -22,7 +22,6 @@ import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOfResidenceFormModel
@@ -79,6 +78,7 @@ class LandlordRegistrationJourney(
     override val stepRouter = LandlordRegistrationStepRouter(this)
 
     override val checkYourAnswersStepId = LandlordRegistrationStepId.CheckAnswers
+
     override val sections =
         listOf(
             JourneySection(
@@ -98,7 +98,7 @@ class LandlordRegistrationJourney(
             ),
         )
 
-    fun privacyNoticeTasks(): List<JourneyTask<LandlordRegistrationStepId>> = emptyList()
+    private fun privacyNoticeTasks(): List<JourneyTask<LandlordRegistrationStepId>> = emptyList()
 
     private fun registerDetailsTasks(): List<JourneyTask<LandlordRegistrationStepId>> =
         listOf(
@@ -146,13 +146,7 @@ class LandlordRegistrationJourney(
         Step(
             id = LandlordRegistrationStepId.VerifyIdentity,
             page = VerifyIdentityPage(),
-            nextAction = { journeyData, _ ->
-                if (LandlordRegistrationJourneyDataHelper.isIdentityVerified(journeyData)) {
-                    Pair(LandlordRegistrationStepId.ConfirmIdentity, null)
-                } else {
-                    Pair(LandlordRegistrationStepId.Name, null)
-                }
-            },
+            nextAction = { filteredJourneyData, _ -> verifyIdentityNextAction(filteredJourneyData) },
             saveAfterSubmit = false,
         )
 
@@ -291,7 +285,7 @@ class LandlordRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
-            nextAction = { journeyData, _ -> countryOfResidenceNextAction(journeyData) },
+            nextAction = { filteredJourneyData, _ -> countryOfResidenceNextAction(filteredJourneyData) },
             saveAfterSubmit = false,
         )
 
@@ -369,7 +363,7 @@ class LandlordRegistrationJourney(
                     journeyDataService = journeyDataService,
                     displaySectionHeader = true,
                 ),
-            nextAction = { journeyData, _ -> selectAddressNextAction(journeyData) },
+            nextAction = { filteredJourneyData, _ -> selectAddressNextAction(filteredJourneyData) },
             saveAfterSubmit = false,
         )
 
@@ -486,11 +480,7 @@ class LandlordRegistrationJourney(
                     journeyDataService = journeyDataService,
                     displaySectionHeader = true,
                 ),
-            nextAction = { journeyData, _ ->
-                selectContactAddressNextAction(
-                    journeyData,
-                )
-            },
+            nextAction = { filteredJourneyData, _ -> selectContactAddressNextAction(filteredJourneyData) },
             saveAfterSubmit = false,
         )
 
@@ -521,7 +511,7 @@ class LandlordRegistrationJourney(
     private fun checkAnswersStep() =
         Step(
             id = LandlordRegistrationStepId.CheckAnswers,
-            page = LandlordRegistrationCheckAnswersPage(journeyDataService, displaySectionHeader = true),
+            page = LandlordRegistrationCheckAnswersPage(),
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Declaration, null) },
             saveAfterSubmit = false,
         )
@@ -549,43 +539,46 @@ class LandlordRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
-            handleSubmitAndRedirect = { _, _, _ -> declarationHandleSubmitAndRedirect() },
+            handleSubmitAndRedirect = { filteredJourneyData, _, _ -> declarationHandleSubmitAndRedirect(filteredJourneyData) },
             saveAfterSubmit = false,
         )
 
-    private fun countryOfResidenceNextAction(journeyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
-        if (LandlordRegistrationJourneyDataHelper.getLivesInEnglandOrWales(journeyData)!!) {
+    private fun verifyIdentityNextAction(filteredJourneyData: JourneyData) =
+        if (LandlordRegistrationJourneyDataHelper.isIdentityVerified(filteredJourneyData)) {
+            Pair(LandlordRegistrationStepId.ConfirmIdentity, null)
+        } else {
+            Pair(LandlordRegistrationStepId.Name, null)
+        }
+
+    private fun countryOfResidenceNextAction(filteredJourneyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
+        if (LandlordRegistrationJourneyDataHelper.getLivesInEnglandOrWales(filteredJourneyData)!!) {
             Pair(LandlordRegistrationStepId.LookupAddress, null)
         } else {
             Pair(LandlordRegistrationStepId.NonEnglandOrWalesAddress, null)
         }
 
-    private fun selectAddressNextAction(journeyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
-        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
+    private fun selectAddressNextAction(filteredJourneyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
+        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(filteredJourneyData)) {
             Pair(LandlordRegistrationStepId.ManualAddress, null)
         } else {
             Pair(LandlordRegistrationStepId.CheckAnswers, null)
         }
 
-    private fun selectContactAddressNextAction(journeyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
-        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData, isContactAddress = true)
-        ) {
+    private fun selectContactAddressNextAction(filteredJourneyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
+        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(filteredJourneyData, isContactAddress = true)) {
             Pair(LandlordRegistrationStepId.ManualContactAddress, null)
         } else {
             Pair(LandlordRegistrationStepId.CheckAnswers, null)
         }
 
-    private fun declarationHandleSubmitAndRedirect(): String {
-        val filteredJourneyData = last().filteredJourneyData
-        val lookedUpAddresses = journeyDataService.getJourneyDataFromSession().getLookedUpAddresses()
-
+    private fun declarationHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
         val landlord =
             landlordService.createLandlord(
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
                 name = LandlordRegistrationJourneyDataHelper.getName(filteredJourneyData)!!,
                 email = LandlordRegistrationJourneyDataHelper.getEmail(filteredJourneyData)!!,
                 phoneNumber = LandlordRegistrationJourneyDataHelper.getPhoneNumber(filteredJourneyData)!!,
-                addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(filteredJourneyData, lookedUpAddresses)!!,
+                addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(filteredJourneyData)!!,
                 countryOfResidence = LandlordRegistrationJourneyDataHelper.getCountryOfResidence(filteredJourneyData),
                 isVerified = LandlordRegistrationJourneyDataHelper.isIdentityVerified(filteredJourneyData),
                 nonEnglandOrWalesAddress = LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesAddress(filteredJourneyData),

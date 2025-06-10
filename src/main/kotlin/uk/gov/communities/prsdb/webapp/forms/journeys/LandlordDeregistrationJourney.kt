@@ -83,7 +83,7 @@ class LandlordDeregistrationJourney(
                     journeyDataService = journeyDataService,
                 ),
             // handleSubmitAndRedirect will execute. It does not have to redirect to the step specified in nextAction.
-            handleSubmitAndRedirect = { journeyData, subPage, _ -> areYouSureContinueOrExitJourney(journeyData, subPage) },
+            handleSubmitAndRedirect = { filteredJourneyData, subPage, _ -> areYouSureContinueOrExitJourney(filteredJourneyData, subPage) },
             // This gets checked when determining whether the next step is reachable
             nextAction = { _, _ -> Pair(DeregisterLandlordStepId.Reason, null) },
             saveAfterSubmit = false,
@@ -109,17 +109,17 @@ class LandlordDeregistrationJourney(
         )
 
     private fun areYouSureContinueOrExitJourney(
-        journeyData: JourneyData,
+        filteredJourneyData: JourneyData,
         subPageNumber: Int?,
     ): String {
-        if (journeyData.getWantsToProceed()!!) {
-            if (!journeyData.getLandlordUserHasRegisteredProperties()!!) {
+        if (filteredJourneyData.getWantsToProceed()!!) {
+            if (!filteredJourneyData.getLandlordUserHasRegisteredProperties()!!) {
                 // journeyData.getLandlordUserHasRegisteredProperties() only checked for active, registered properties.
                 // To delete the landlord, we must first delete all their properties including inactive ones.
                 return deregisterLandlordAndProperties(userHadActiveProperties = false)
             }
             val areYouSureStep = steps.single { it.id == DeregisterLandlordStepId.AreYouSure }
-            return getRedirectForNextStep(areYouSureStep, journeyData, subPageNumber)
+            return getRedirectForNextStep(areYouSureStep, filteredJourneyData, subPageNumber)
         }
         return "/$LANDLORD_DETAILS_PATH_SEGMENT"
     }

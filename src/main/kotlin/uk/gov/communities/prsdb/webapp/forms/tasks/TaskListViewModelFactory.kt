@@ -14,9 +14,9 @@ class TaskListViewModelFactory<T : StepId>(
     private val sections: List<JourneySection<T>>,
     private val numberSections: Boolean = true,
     private val backUrl: String? = null,
-    val getTaskStatus: (task: JourneyTask<T>, journeyData: JourneyData) -> TaskStatus,
+    val getTaskStatus: (task: JourneyTask<T>, filteredJourneyData: JourneyData) -> TaskStatus,
 ) {
-    fun getTaskListViewModel(journeyData: JourneyData): TaskListViewModel {
+    fun getTaskListViewModel(filteredJourneyData: JourneyData): TaskListViewModel {
         val sectionViewModels =
             sections.mapNotNull { section ->
                 if (section.headingKey == null || section.sectionId == null) {
@@ -29,7 +29,7 @@ class TaskListViewModelFactory<T : StepId>(
                             task.nameKey?.let { nameKey ->
                                 TaskListItemViewModel.fromTaskDetails(
                                     nameKey,
-                                    getTaskStatus(task, journeyData),
+                                    getTaskStatus(task, filteredJourneyData),
                                     task.hintKey,
                                     task.startingStepId,
                                 )

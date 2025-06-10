@@ -35,7 +35,7 @@ class SelectAddressPage(
                 lookupAddressPathSegment,
             )!!
 
-        val addressLookupResults = journeyDataService.getJourneyDataFromSession().getLookedUpAddresses()
+        val addressLookupResults = filteredJourneyData.getLookedUpAddresses()
 
         var addressRadiosViewModel: List<RadiosViewModel> =
             addressLookupResults.mapIndexed { index, address ->

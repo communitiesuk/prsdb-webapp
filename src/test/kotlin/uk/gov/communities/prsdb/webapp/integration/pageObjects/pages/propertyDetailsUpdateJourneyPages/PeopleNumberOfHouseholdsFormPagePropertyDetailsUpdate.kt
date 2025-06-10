@@ -3,13 +3,13 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDe
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.CheckOccupancyAnswersFormPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.NumberOfHouseholdsFormBasePage
 
-class CheckOccupancyAnswersPagePropertyDetailsUpdate(
+class PeopleNumberOfHouseholdsFormPagePropertyDetailsUpdate(
     page: Page,
     urlArguments: Map<String, String>,
-) : CheckOccupancyAnswersFormPage(
+) : NumberOfHouseholdsFormBasePage(
         page,
         PropertyDetailsController.getUpdatePropertyDetailsPath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers.urlPathSegment}",
+            "/${UpdatePropertyDetailsStepId.UpdatePeopleNumberOfHouseholds.urlPathSegment}",
     )

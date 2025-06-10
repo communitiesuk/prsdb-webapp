@@ -4,15 +4,13 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.AUTO_MATCHED_EPC_JOURNEY_DATA_KEY
-import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
-import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
@@ -106,6 +104,7 @@ class JourneyDataBuilder(
                     mapOf(
                         "licenceNumber" to "test1234",
                     ),
+                RegisterPropertyStepId.CheckAnswers.urlPathSegment to emptyMap(),
             )
 
         fun propertyDefault(localAuthorityService: LocalAuthorityService) =
@@ -130,6 +129,7 @@ class JourneyDataBuilder(
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment to mapOf("livesInEnglandOrWales" to true),
                 LandlordRegistrationStepId.LookupAddress.urlPathSegment to mapOf("houseNameOrNumber" to "44", "postcode" to "EG1 1GE"),
                 LandlordRegistrationStepId.SelectAddress.urlPathSegment to mapOf("address" to DEFAULT_ADDRESS),
+                LandlordRegistrationStepId.CheckAnswers.urlPathSegment to emptyMap(),
             )
 
         fun landlordDefault(localAuthorityService: LocalAuthorityService) =
@@ -139,16 +139,10 @@ class JourneyDataBuilder(
                 createLocalAuthority(),
             )
 
-        fun localAuthorityUser(
+        fun forLaUser(
             name: String,
             email: String,
-        ) = JourneyDataBuilder(
-            mock(),
-            mapOf(
-                RegisterLaUserStepId.Name.urlPathSegment to mapOf("name" to name),
-                RegisterLaUserStepId.Email.urlPathSegment to mapOf("emailAddress" to email),
-            ),
-        )
+        ) = JourneyDataBuilder().withLandingPageReached().withName(name).withEmailAddress(email)
     }
 
     fun withLookupAddress(
@@ -162,13 +156,13 @@ class JourneyDataBuilder(
     }
 
     fun withEmptyLookedUpAddresses(): JourneyDataBuilder {
-        journeyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY] = "[]"
+        journeyData[NonStepJourneyDataKey.LookedUpAddresses.key] = "[]"
         return this
     }
 
     fun withLookedUpAddresses(customLookedUpAddresses: List<AddressDataModel>? = null): JourneyDataBuilder {
         val defaultLookedUpAddresses = listOf(AddressDataModel("1 Street Address, City, AB1 2CD"))
-        journeyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY] = Json.encodeToString(customLookedUpAddresses ?: defaultLookedUpAddresses)
+        journeyData[NonStepJourneyDataKey.LookedUpAddresses.key] = Json.encodeToString(customLookedUpAddresses ?: defaultLookedUpAddresses)
         return this
     }
 
@@ -192,7 +186,7 @@ class JourneyDataBuilder(
             withEnglandOrWalesResidence()
         }
 
-        journeyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY] =
+        journeyData[NonStepJourneyDataKey.LookedUpAddresses.key] =
             Json.encodeToString(listOf(AddressDataModel(singleLineAddress, localAuthorityId = localAuthority?.id, uprn = uprn)))
 
         val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
@@ -595,7 +589,7 @@ class JourneyDataBuilder(
     }
 
     fun withAutoMatchedEpcDetails(epcDetails: EpcDataModel?): JourneyDataBuilder {
-        journeyData[AUTO_MATCHED_EPC_JOURNEY_DATA_KEY] = Json.encodeToString(epcDetails)
+        journeyData[NonStepJourneyDataKey.AutoMatchedEpc.key] = Json.encodeToString(epcDetails)
         return this
     }
 
@@ -611,6 +605,11 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withResetCheckMatchedEpcResult(): JourneyDataBuilder {
+        journeyData.remove(PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment)
+        return this
+    }
+
     fun withEpcLookupCertificateNumber(certificateNumber: String = CURRENT_EPC_CERTIFICATE_NUMBER): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EpcLookup.urlPathSegment] =
             mapOf(EpcLookupFormModel::certificateNumber.name to certificateNumber)
@@ -618,12 +617,12 @@ class JourneyDataBuilder(
     }
 
     fun withLookedUpEpcDetails(epcDetails: EpcDataModel): JourneyDataBuilder {
-        journeyData[LOOKED_UP_EPC_JOURNEY_DATA_KEY] = Json.encodeToString(epcDetails)
+        journeyData[NonStepJourneyDataKey.LookedUpEpc.key] = Json.encodeToString(epcDetails)
         return this
     }
 
     fun withNullLookedUpEpcDetails(): JourneyDataBuilder {
-        journeyData[LOOKED_UP_EPC_JOURNEY_DATA_KEY] = null
+        journeyData[NonStepJourneyDataKey.LookedUpEpc.key] = null
         return this
     }
 

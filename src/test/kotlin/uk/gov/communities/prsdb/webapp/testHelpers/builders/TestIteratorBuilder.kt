@@ -4,6 +4,7 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.whenever
 import org.springframework.validation.BindingResult
+import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.ReachableStepDetailsIterator
@@ -20,7 +21,7 @@ data class TestStepModel(
 class TestIteratorBuilder {
     private var initialised = false
     private val steps: MutableList<TestStepModel> = mutableListOf()
-    private var journeyData: JourneyData = mapOf()
+    private var journeyData: JourneyData = emptyMap()
     private var initialStepModel: TestStepModel? = null
     private var onStep: Int? = null
 
@@ -31,6 +32,11 @@ class TestIteratorBuilder {
 
     fun onStep(step: Int): TestIteratorBuilder {
         onStep = step
+        return this
+    }
+
+    fun withNonStepJourneyData(nonStepJourneyDataKey: NonStepJourneyDataKey): TestIteratorBuilder {
+        journeyData = journeyData + (nonStepJourneyDataKey.key to nonStepJourneyDataKey.key)
         return this
     }
 
@@ -60,10 +66,7 @@ class TestIteratorBuilder {
     fun build(): ReachableStepDetailsIterator<TestStepId> {
         val linkedSteps =
             (
-                steps.zipWithNext {
-                        stepModel,
-                        nextStepModel,
-                    ->
+                steps.zipWithNext { stepModel, nextStepModel ->
                     testStep(
                         stepModel.urlPathSegment,
                         nextStepModel.urlPathSegment,
@@ -122,4 +125,6 @@ class TestIteratorBuilder {
     }
 
     fun getDataForStep(urlPathSegment: String): Any? = journeyData[urlPathSegment]
+
+    fun getDataForKey(key: NonStepJourneyDataKey): Any? = journeyData[key.key]
 }

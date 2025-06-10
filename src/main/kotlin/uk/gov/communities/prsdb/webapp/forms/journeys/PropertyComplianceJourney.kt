@@ -138,7 +138,9 @@ class PropertyComplianceJourney(
                     placeholderStep(
                         PropertyComplianceStepId.CheckAndSubmit,
                         "TODO PRSD-962: Implement check and submit task",
-                        handleSubmitAndRedirect = { _, _, _ -> checkAndSubmitHandleSubmitAndRedirect() },
+                        handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
+                            checkAndSubmitHandleSubmitAndRedirect(filteredJourneyData)
+                        },
                     ),
                     "propertyCompliance.taskList.checkAndSubmit.check",
                 ),
@@ -311,7 +313,7 @@ class PropertyComplianceJourney(
                                 BACK_URL_ATTR_NAME to taskListUrlSegment,
                             ),
                     ) { mapOf("address" to getPropertyAddress()) },
-                nextAction = { journeyData, _ -> gasSafetyStepNextAction(journeyData) },
+                nextAction = { filteredJourneyData, _ -> gasSafetyStepNextAction(filteredJourneyData) },
             )
 
     private val gasSafetyIssueDateStep
@@ -330,7 +332,7 @@ class PropertyComplianceJourney(
                                 "submitButtonText" to "forms.buttons.saveAndContinue",
                             ),
                     ),
-                nextAction = { journeyData, _ -> gasSafetyIssueDateStepNextAction(journeyData) },
+                nextAction = { filteredJourneyData, _ -> gasSafetyIssueDateStepNextAction(filteredJourneyData) },
             )
 
     private val gasSafetyEngineerNumStep
@@ -429,7 +431,7 @@ class PropertyComplianceJourney(
                                     ),
                             ),
                     ),
-                nextAction = { journeyData, _ -> gasSafetyExemptionStepNextAction(journeyData) },
+                nextAction = { filteredJourneyData, _ -> gasSafetyExemptionStepNextAction(filteredJourneyData) },
             )
 
     private val gasSafetyExemptionReasonStep
@@ -463,7 +465,7 @@ class PropertyComplianceJourney(
                                     ),
                             ),
                     ),
-                nextAction = { journeyData, _ -> gasSafetyExemptionReasonStepNextAction(journeyData) },
+                nextAction = { filteredJourneyData, _ -> gasSafetyExemptionReasonStepNextAction(filteredJourneyData) },
             )
 
     private val gasSafetyExemptionOtherReasonStep
@@ -546,7 +548,7 @@ class PropertyComplianceJourney(
                                 BACK_URL_ATTR_NAME to taskListUrlSegment,
                             ),
                     ) { mapOf("address" to getPropertyAddress()) },
-                nextAction = { journeyData, _ -> eicrStepNextAction(journeyData) },
+                nextAction = { filteredJourneyData, _ -> eicrStepNextAction(filteredJourneyData) },
             )
 
     private val eicrIssueDateStep
@@ -565,7 +567,7 @@ class PropertyComplianceJourney(
                                 "submitButtonText" to "forms.buttons.saveAndContinue",
                             ),
                     ),
-                nextAction = { journeyData, _ -> eicrIssueDateStepNextAction(journeyData) },
+                nextAction = { filteredJourneyData, _ -> eicrIssueDateStepNextAction(filteredJourneyData) },
             )
 
     private val eicrUploadStep
@@ -647,7 +649,7 @@ class PropertyComplianceJourney(
                                     ),
                             ),
                     ),
-                nextAction = { journeyData, _ -> eicrExemptionStepNextAction(journeyData) },
+                nextAction = { filteredJourneyData, _ -> eicrExemptionStepNextAction(filteredJourneyData) },
             )
 
     private val eicrExemptionReasonStep
@@ -685,7 +687,7 @@ class PropertyComplianceJourney(
                                     ),
                             ),
                     ),
-                nextAction = { journeyData, _ -> eicrExemptionReasonStepNextAction(journeyData) },
+                nextAction = { filteredJourneyData, _ -> eicrExemptionReasonStepNextAction(filteredJourneyData) },
             )
 
     private val eicrExemptionOtherReasonStep
@@ -775,8 +777,8 @@ class PropertyComplianceJourney(
                                 BACK_URL_ATTR_NAME to taskListUrlSegment,
                             ),
                     ) { mapOf("address" to getPropertyAddress()) },
-                handleSubmitAndRedirect = { journeyData, _, _ -> epcStepHandleSubmitAndRedirect(journeyData) },
-                nextAction = { journeyData, _ -> epcStepNextAction(journeyData) },
+                handleSubmitAndRedirect = { filteredJourneyData, _, _ -> epcStepHandleSubmitAndRedirect(filteredJourneyData) },
+                nextAction = { filteredJourneyData, _ -> epcStepNextAction(filteredJourneyData) },
             )
 
     private val epcMissingStep
@@ -818,7 +820,7 @@ class PropertyComplianceJourney(
             Step(
                 id = PropertyComplianceStepId.CheckAutoMatchedEpc,
                 page = getCheckMatchedEpcPage(autoMatchedEpc = true),
-                nextAction = { journeyData, _ -> checkAutoMatchedEpcStepNextAction(journeyData) },
+                nextAction = { filteredJourneyData, _ -> checkAutoMatchedEpcStepNextAction(filteredJourneyData) },
             )
 
     private val checkMatchedEpcStep
@@ -826,9 +828,9 @@ class PropertyComplianceJourney(
             Step(
                 id = PropertyComplianceStepId.CheckMatchedEpc,
                 page = getCheckMatchedEpcPage(autoMatchedEpc = false),
-                nextAction = { journeyData, _ -> checkMatchedEpcStepNextAction(journeyData) },
-                handleSubmitAndRedirect = { journeyData, _, _ ->
-                    checkMatchedEpcStepHandleSubmitAndRedirect(journeyData)
+                nextAction = { filteredJourneyData, _ -> checkMatchedEpcStepNextAction(filteredJourneyData) },
+                handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
+                    checkMatchedEpcStepHandleSubmitAndRedirect(filteredJourneyData)
                 },
             )
 
@@ -875,7 +877,7 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.CheckMatchedEpc, null) },
-                handleSubmitAndRedirect = { journeyData, _, _ -> epcSupersededHandleSubmitAndRedirect(journeyData) },
+                handleSubmitAndRedirect = { filteredJourneyData, _, _ -> epcSupersededHandleSubmitAndRedirect(filteredJourneyData) },
             )
 
     private val epcExemptionReasonStep
@@ -957,10 +959,8 @@ class PropertyComplianceJourney(
                                 "getNewEpcUrl" to GET_NEW_EPC_URL,
                             ),
                     ),
-                nextAction = { journeyData, _ -> epcLookupStepNextAction(journeyData) },
-                handleSubmitAndRedirect = { journeyData, _, _ ->
-                    epcLookupStepHandleSubmitAndRedirect(journeyData)
-                },
+                nextAction = { filteredJourneyData, _ -> epcLookupStepNextAction(filteredJourneyData) },
+                handleSubmitAndRedirect = { filteredJourneyData, _, _ -> epcLookupStepHandleSubmitAndRedirect(filteredJourneyData) },
             )
 
     private val epcNotFoundStep
@@ -1011,7 +1011,7 @@ class PropertyComplianceJourney(
                                 BACK_URL_ATTR_NAME to taskListUrlSegment,
                             ),
                     ),
-                nextAction = { journeyData, _ -> fireSafetyDeclarationStepNextAction(journeyData) },
+                nextAction = { filteredJourneyData, _ -> fireSafetyDeclarationStepNextAction(filteredJourneyData) },
             )
 
     private val fireSafetyRiskStep
@@ -1097,64 +1097,64 @@ class PropertyComplianceJourney(
         handleSubmitAndRedirect = handleSubmitAndRedirect,
     )
 
-    private fun gasSafetyStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getHasGasSafetyCert()!!) {
+    private fun gasSafetyStepNextAction(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getHasGasSafetyCert()!!) {
             Pair(PropertyComplianceStepId.GasSafetyIssueDate, null)
         } else {
             Pair(PropertyComplianceStepId.GasSafetyExemption, null)
         }
 
-    private fun gasSafetyIssueDateStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getIsGasSafetyCertOutdated()!!) {
+    private fun gasSafetyIssueDateStepNextAction(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getIsGasSafetyCertOutdated()!!) {
             Pair(PropertyComplianceStepId.GasSafetyOutdated, null)
         } else {
             Pair(PropertyComplianceStepId.GasSafetyEngineerNum, null)
         }
 
-    private fun gasSafetyExemptionStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getHasGasSafetyCertExemption()!!) {
+    private fun gasSafetyExemptionStepNextAction(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getHasGasSafetyCertExemption()!!) {
             Pair(PropertyComplianceStepId.GasSafetyExemptionReason, null)
         } else {
             Pair(PropertyComplianceStepId.GasSafetyExemptionMissing, null)
         }
 
-    private fun gasSafetyExemptionReasonStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getIsGasSafetyExemptionReasonOther()!!) {
+    private fun gasSafetyExemptionReasonStepNextAction(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getIsGasSafetyExemptionReasonOther()!!) {
             Pair(PropertyComplianceStepId.GasSafetyExemptionOtherReason, null)
         } else {
             Pair(PropertyComplianceStepId.GasSafetyExemptionConfirmation, null)
         }
 
-    private fun eicrStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getHasEICR()!!) {
+    private fun eicrStepNextAction(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getHasEICR()!!) {
             Pair(PropertyComplianceStepId.EicrIssueDate, null)
         } else {
             Pair(PropertyComplianceStepId.EicrExemption, null)
         }
 
-    private fun eicrIssueDateStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getIsEicrOutdated()!!) {
+    private fun eicrIssueDateStepNextAction(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getIsEicrOutdated()!!) {
             Pair(PropertyComplianceStepId.EicrOutdated, null)
         } else {
             Pair(PropertyComplianceStepId.EicrUpload, null)
         }
 
-    private fun eicrExemptionStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getHasEicrExemption()!!) {
+    private fun eicrExemptionStepNextAction(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getHasEicrExemption()!!) {
             Pair(PropertyComplianceStepId.EicrExemptionReason, null)
         } else {
             Pair(PropertyComplianceStepId.EicrExemptionMissing, null)
         }
 
-    private fun eicrExemptionReasonStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getIsEicrExemptionReasonOther()!!) {
+    private fun eicrExemptionReasonStepNextAction(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getIsEicrExemptionReasonOther()!!) {
             Pair(PropertyComplianceStepId.EicrExemptionOtherReason, null)
         } else {
             Pair(PropertyComplianceStepId.EicrExemptionConfirmation, null)
         }
 
-    private fun epcStepHandleSubmitAndRedirect(journeyData: JourneyData): String {
-        if (journeyData.getHasEPC() == HasEpc.YES) {
+    private fun epcStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
+        if (filteredJourneyData.getHasEPC() == HasEpc.YES) {
             val uprn =
                 propertyOwnershipService
                     .getPropertyOwnership(propertyOwnershipId)
@@ -1162,40 +1162,42 @@ class PropertyComplianceJourney(
 
             val epcDetails = uprn?.let { epcLookupService.getEpcByUprn(it) }
 
-            return updateEpcDetailsInSessionAndRedirectToNextStep(epcStep, journeyData, epcDetails, autoMatchedEpc = true)
+            return updateEpcDetailsInSessionAndRedirectToNextStep(epcStep, filteredJourneyData, epcDetails, autoMatchedEpc = true)
         }
 
-        return getRedirectForNextStep(epcStep, journeyData, null)
+        return getRedirectForNextStep(epcStep, filteredJourneyData, null)
     }
 
     private fun updateEpcDetailsInSessionAndRedirectToNextStep(
         currentStep: Step<PropertyComplianceStepId>,
-        journeyData: JourneyData,
+        filteredJourneyData: JourneyData,
         epcDetails: EpcDataModel?,
         autoMatchedEpc: Boolean,
     ): String {
-        val newJourneyData = journeyData.withEpcDetails(epcDetails, autoMatchedEpc)
-        journeyDataService.setJourneyDataInSession(newJourneyData)
-        return getRedirectForNextStep(currentStep, newJourneyData, null)
+        val newFilteredJourneyData = filteredJourneyData.withEpcDetails(epcDetails, autoMatchedEpc)
+        journeyDataService.addToJourneyDataIntoSession(newFilteredJourneyData)
+        return getRedirectForNextStep(currentStep, newFilteredJourneyData, null)
     }
 
     private fun resetCheckMatchedEpcInSession(
-        journeyData: JourneyData,
+        filteredJourneyData: JourneyData,
         epcDetails: EpcDataModel?,
     ): JourneyData {
         // Removes the answer to checkMatchedEpc if the EPC details have changed
-        if (epcDetails != journeyData.getEpcDetails(autoMatched = false)) {
-            val newJourneyData = journeyData.withResetCheckMatchedEpc()
+        if (epcDetails != filteredJourneyData.getEpcDetails(autoMatched = false)) {
+            val newJourneyData = journeyDataService.getJourneyDataFromSession().withResetCheckMatchedEpc()
             journeyDataService.setJourneyDataInSession(newJourneyData)
-            return newJourneyData
+
+            val newFilteredJourneyData = filteredJourneyData.withResetCheckMatchedEpc()
+            return newFilteredJourneyData
         }
-        return journeyData
+        return filteredJourneyData
     }
 
-    private fun epcStepNextAction(journeyData: JourneyData) =
-        when (journeyData.getHasEPC()!!) {
+    private fun epcStepNextAction(filteredJourneyData: JourneyData) =
+        when (filteredJourneyData.getHasEPC()!!) {
             HasEpc.YES -> {
-                if (journeyData.getEpcDetails(autoMatched = true) != null) {
+                if (filteredJourneyData.getEpcDetails(autoMatched = true) != null) {
                     Pair(PropertyComplianceStepId.CheckAutoMatchedEpc, null)
                 } else {
                     Pair(PropertyComplianceStepId.EpcNotAutoMatched, null)
@@ -1205,16 +1207,16 @@ class PropertyComplianceJourney(
             HasEpc.NOT_REQUIRED -> Pair(PropertyComplianceStepId.EpcExemptionReason, null)
         }
 
-    private fun checkAutoMatchedEpcStepNextAction(journeyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
-        if (journeyData.getAutoMatchedEpcIsCorrect()!!) {
-            matchedEpcIsCorrectNextAction(journeyData, autoMatched = true)
+    private fun checkAutoMatchedEpcStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
+        if (filteredJourneyData.getAutoMatchedEpcIsCorrect()!!) {
+            matchedEpcIsCorrectNextAction(filteredJourneyData, autoMatched = true)
         } else {
             Pair(PropertyComplianceStepId.EpcLookup, null)
         }
 
-    private fun checkMatchedEpcStepNextAction(journeyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
-        if (journeyData.getMatchedEpcIsCorrect()!!) {
-            matchedEpcIsCorrectNextAction(journeyData, autoMatched = false)
+    private fun checkMatchedEpcStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
+        if (filteredJourneyData.getMatchedEpcIsCorrect()!!) {
+            matchedEpcIsCorrectNextAction(filteredJourneyData, autoMatched = false)
         } else {
             // The user will be redirected to the lookup step in handleSubmitAndRedirect
             // When they are redirected, the nextAction of lookupStep is this step (checkMatchedEpc)
@@ -1223,10 +1225,10 @@ class PropertyComplianceJourney(
         }
 
     private fun matchedEpcIsCorrectNextAction(
-        journeyData: JourneyData,
+        filteredJourneyData: JourneyData,
         autoMatched: Boolean,
     ): Pair<PropertyComplianceStepId?, Int?> {
-        val epcDetails = journeyData.getEpcDetails(autoMatched)!!
+        val epcDetails = filteredJourneyData.getEpcDetails(autoMatched)!!
         if (epcDetails.isPastExpiryDate()) {
             return Pair(PropertyComplianceStepId.EpcExpiryCheck, null)
         }
@@ -1236,29 +1238,29 @@ class PropertyComplianceJourney(
         return Pair(landlordResponsibilities.first().startingStepId, null)
     }
 
-    private fun checkMatchedEpcStepHandleSubmitAndRedirect(journeyData: JourneyData): String {
-        val nextAction = checkMatchedEpcStepNextAction(journeyData)
+    private fun checkMatchedEpcStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
+        val nextAction = checkMatchedEpcStepNextAction(filteredJourneyData)
         if (nextAction.first == null) {
             return getRedirectForNextStep(
                 checkMatchedEpcStep,
-                journeyData,
+                filteredJourneyData,
                 null,
                 overriddenRedirectStepId = PropertyComplianceStepId.EpcLookup,
             )
         }
-        return getRedirectForNextStep(checkMatchedEpcStep, journeyData, null)
+        return getRedirectForNextStep(checkMatchedEpcStep, filteredJourneyData, null)
     }
 
-    private fun epcLookupStepHandleSubmitAndRedirect(journeyData: JourneyData): String {
-        val certificateNumber = journeyData.getEpcLookupCertificateNumber()!!
+    private fun epcLookupStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
+        val certificateNumber = filteredJourneyData.getEpcLookupCertificateNumber()!!
         val lookedUpEpc = epcLookupService.getEpcByCertificateNumber(certificateNumber)
-        val newJourneyData = resetCheckMatchedEpcInSession(journeyData, lookedUpEpc)
-        return updateEpcDetailsInSessionAndRedirectToNextStep(epcLookupStep, newJourneyData, lookedUpEpc, autoMatchedEpc = false)
+        val newFilteredJourneyData = resetCheckMatchedEpcInSession(filteredJourneyData, lookedUpEpc)
+        return updateEpcDetailsInSessionAndRedirectToNextStep(epcLookupStep, newFilteredJourneyData, lookedUpEpc, autoMatchedEpc = false)
     }
 
-    private fun epcLookupStepNextAction(journeyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> {
+    private fun epcLookupStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> {
         val lookedUpEpcDetails =
-            journeyData.getEpcDetails(autoMatched = false)
+            filteredJourneyData.getEpcDetails(autoMatched = false)
                 ?: return Pair(PropertyComplianceStepId.EpcNotFound, null)
         return if (lookedUpEpcDetails.isLatestCertificateForThisProperty()) {
             Pair(PropertyComplianceStepId.CheckMatchedEpc, null)
@@ -1267,23 +1269,21 @@ class PropertyComplianceJourney(
         }
     }
 
-    private fun epcSupersededHandleSubmitAndRedirect(journeyData: JourneyData): String {
-        val certificateNumber = journeyData.getLatestEpcCertificateNumber()!!
+    private fun epcSupersededHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
+        val certificateNumber = filteredJourneyData.getLatestEpcCertificateNumber()!!
         val latestEpc = epcLookupService.getEpcByCertificateNumber(certificateNumber)
-        val newJourneyData = resetCheckMatchedEpcInSession(journeyData, latestEpc)
+        val newJourneyData = resetCheckMatchedEpcInSession(filteredJourneyData, latestEpc)
         return updateEpcDetailsInSessionAndRedirectToNextStep(epcLookupStep, newJourneyData, latestEpc, autoMatchedEpc = false)
     }
 
-    private fun fireSafetyDeclarationStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getHasFireSafetyDeclaration()!!) {
+    private fun fireSafetyDeclarationStepNextAction(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getHasFireSafetyDeclaration()!!) {
             Pair(PropertyComplianceStepId.KeepPropertySafe, null)
         } else {
             Pair(PropertyComplianceStepId.FireSafetyRisk, null)
         }
 
-    private fun checkAndSubmitHandleSubmitAndRedirect(): String {
-        val filteredJourneyData = last().filteredJourneyData
-
+    private fun checkAndSubmitHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
         val gasSafetyCertFilename =
             filteredJourneyData.getGasSafetyCertOriginalName()?.let {
                 PropertyComplianceJourneyHelper.getCertFilename(
