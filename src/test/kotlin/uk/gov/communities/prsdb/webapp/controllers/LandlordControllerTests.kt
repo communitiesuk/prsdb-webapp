@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.models.dataModels.IncompleteComplianceDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompleteCompliancesViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompleteComplianceViewModelBuilder
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -172,9 +172,13 @@ class LandlordControllerTests(
                 false,
             )
         val incompleteCompliancesViewModel =
-            IncompleteCompliancesViewModel(
-                listOf(incompleteComplianceDataModel),
+            listOf(
+                IncompleteComplianceViewModelBuilder.fromDataModel(
+                    0,
+                    incompleteComplianceDataModel,
+                ),
             )
+
         whenever(
             propertyOwnershipService.getIncompleteCompliancesForLandlord("user"),
         ).thenReturn(listOf(incompleteComplianceDataModel))
@@ -183,7 +187,7 @@ class LandlordControllerTests(
             .andExpect {
                 status { isOk() }
                 model {
-                    attribute("incompleteCompliances", incompleteCompliancesViewModel.incompleteCompliances)
+                    attribute("incompleteCompliances", incompleteCompliancesViewModel)
                     attribute("viewRegisteredPropertiesUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT#$REGISTERED_PROPERTIES_PATH_SEGMENT")
                     attribute("backUrl", LANDLORD_DASHBOARD_URL)
                 }
