@@ -877,4 +877,53 @@ class PropertyOwnershipServiceTests {
             assertTrue(incompleteCompliances.isEmpty())
         }
     }
+
+    @Nested
+    inner class GetNumberOfIncompleteCompliancesForLandlord {
+        val principalName = "principalName"
+
+        @Test
+        fun `returns the number of incomplete compliances for a landlord`() {
+            // Arrange
+            val expectedNumberOfIncompleteCompliances = 1
+            val properties =
+                listOf(
+                    MockLandlordData.createPropertyOwnership(currentNumTenants = 3, incompleteComplianceForm = null),
+                    MockLandlordData.createPropertyOwnership(
+                        currentNumTenants = 2,
+                        incompleteComplianceForm = MockLandlordData.createPropertyComplianceFormContext(),
+                    ),
+                )
+            whenever(
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
+                    principalName,
+                    RegistrationStatus.REGISTERED,
+                ),
+            ).thenReturn(properties)
+
+            // Act
+            val numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principalName)
+
+            // Assert
+            assertEquals(expectedNumberOfIncompleteCompliances, numberOfIncompleteCompliances)
+        }
+
+        @Test
+        fun `returns 0 if there are no incomplete compliances for a landlord`() {
+            // Arrange
+            val expectedNumberOfIncompleteCompliances = 0
+            whenever(
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
+                    principalName,
+                    RegistrationStatus.REGISTERED,
+                ),
+            ).thenReturn(emptyList())
+
+            // Act
+            val numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principalName)
+
+            // Assert
+            assertEquals(expectedNumberOfIncompleteCompliances, numberOfIncompleteCompliances)
+        }
+    }
 }
