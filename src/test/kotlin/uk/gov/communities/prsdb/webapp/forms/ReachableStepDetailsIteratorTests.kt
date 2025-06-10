@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import uk.gov.communities.prsdb.webapp.constants.enums.JourneyDataKey
+import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.TestIteratorBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.TestStepModel
@@ -157,10 +157,10 @@ class ReachableStepDetailsIteratorTest {
             val builder =
                 TestIteratorBuilder()
                     .onStep(1)
-                    .withNonStepJourneyData(JourneyDataKey.LookedUpAddresses)
+                    .withNonStepJourneyData(NonStepJourneyDataKey.LookedUpAddresses)
                     .withFirstStep(TestStepModel("1", isSatisfied = true))
                     .withNextStep(currentStepModel)
-            val nonPageDataForStep = builder.getDataForKey(JourneyDataKey.LookedUpAddresses)
+            val nonPageDataForStep = builder.getDataForKey(NonStepJourneyDataKey.LookedUpAddresses)
             val pageDataForStep = builder.getDataForStep(currentStepModel.urlPathSegment)
 
             val testIterator = builder.build()
@@ -169,7 +169,7 @@ class ReachableStepDetailsIteratorTest {
             val nextStepDetails = testIterator.next()
 
             // Assert
-            assertEquals(nonPageDataForStep, nextStepDetails.filteredJourneyData[JourneyDataKey.LookedUpAddresses.key])
+            assertEquals(nonPageDataForStep, nextStepDetails.filteredJourneyData[NonStepJourneyDataKey.LookedUpAddresses.key])
             assertEquals(pageDataForStep, nextStepDetails.filteredJourneyData[currentStepModel.urlPathSegment])
         }
 
@@ -179,7 +179,7 @@ class ReachableStepDetailsIteratorTest {
             val builder =
                 TestIteratorBuilder()
                     .onStep(4)
-                    .withNonStepJourneyData(JourneyDataKey.LookedUpAddresses)
+                    .withNonStepJourneyData(NonStepJourneyDataKey.LookedUpAddresses)
                     .withFirstStep(TestStepModel("1", isSatisfied = true))
                     .withNextStep(TestStepModel("2", isSatisfied = true))
                     .withNextStep(TestStepModel("3", isSatisfied = true))

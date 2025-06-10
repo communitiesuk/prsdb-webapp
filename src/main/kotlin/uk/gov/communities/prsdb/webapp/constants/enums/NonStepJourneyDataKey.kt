@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.constants.enums
 
-enum class JourneyDataKey(
+enum class NonStepJourneyDataKey(
     val key: String,
 ) {
     LookedUpAddresses("looked-up-addresses"),

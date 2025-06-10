@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
-import uk.gov.communities.prsdb.webapp.constants.enums.JourneyDataKey
+import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -167,9 +167,9 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
 
         private fun getEpcDetailsJourneyDataKey(autoMatched: Boolean): String =
             if (autoMatched) {
-                JourneyDataKey.AutoMatchedEpc.key
+                NonStepJourneyDataKey.AutoMatchedEpc.key
             } else {
-                JourneyDataKey.LookedUpEpc.key
+                NonStepJourneyDataKey.LookedUpEpc.key
             }
 
         fun JourneyData.getAcceptedEpcDetails(): EpcDataModel? {

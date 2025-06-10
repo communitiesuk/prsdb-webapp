@@ -14,8 +14,7 @@ open class Step<T : StepId>(
     val id: T,
     val page: AbstractPage,
     val handleSubmitAndRedirect: ((filteredJourneyData: JourneyData, subPageNumber: Int?, changingAnswersForStep: T?) -> String)? = null,
-    val isSatisfied: (filteredJourneyData: JourneyData, bindingResult: BindingResult) -> Boolean =
-        { filteredJourneyData, bindingResult -> page.isSatisfied(filteredJourneyData, bindingResult) },
+    val isSatisfied: (bindingResult: BindingResult) -> Boolean = { bindingResult -> page.isSatisfied(bindingResult) },
     val nextAction: (filteredJourneyData: JourneyData, subPageNumber: Int?) -> Pair<T?, Int?> = { _, _ -> Pair(null, null) },
     val saveAfterSubmit: Boolean = true,
 ) {

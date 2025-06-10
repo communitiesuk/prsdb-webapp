@@ -35,7 +35,7 @@ class SelectAddressPage(
                 lookupAddressPathSegment,
             )!!
 
-        val addressLookupResults = journeyDataService.getJourneyDataFromSession().getLookedUpAddresses()
+        val addressLookupResults = filteredJourneyData.getLookedUpAddresses()
 
         var addressRadiosViewModel: List<RadiosViewModel> =
             addressLookupResults.mapIndexed { index, address ->
@@ -58,14 +58,12 @@ class SelectAddressPage(
         modelAndView.addObject("options", addressRadiosViewModel)
     }
 
-    override fun isSatisfied(
-        filteredJourneyData: JourneyData,
-        bindingResult: BindingResult,
-    ): Boolean {
+    override fun isSatisfied(bindingResult: BindingResult): Boolean {
         val selectAddressFormModel = bindingResult.target as SelectAddressFormModel
         val selectedAddress = selectAddressFormModel.address
+        val journeyData = journeyDataService.getJourneyDataFromSession()
 
         return selectedAddress == MANUAL_ADDRESS_CHOSEN ||
-            (selectedAddress != null && filteredJourneyData.getLookedUpAddress(selectedAddress) != null)
+            (selectedAddress != null && journeyData.getLookedUpAddress(selectedAddress) != null)
     }
 }

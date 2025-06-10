@@ -9,8 +9,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
-import uk.gov.communities.prsdb.webapp.constants.enums.JourneyDataKey
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
@@ -156,13 +156,13 @@ class JourneyDataBuilder(
     }
 
     fun withEmptyLookedUpAddresses(): JourneyDataBuilder {
-        journeyData[JourneyDataKey.LookedUpAddresses.key] = "[]"
+        journeyData[NonStepJourneyDataKey.LookedUpAddresses.key] = "[]"
         return this
     }
 
     fun withLookedUpAddresses(customLookedUpAddresses: List<AddressDataModel>? = null): JourneyDataBuilder {
         val defaultLookedUpAddresses = listOf(AddressDataModel("1 Street Address, City, AB1 2CD"))
-        journeyData[JourneyDataKey.LookedUpAddresses.key] = Json.encodeToString(customLookedUpAddresses ?: defaultLookedUpAddresses)
+        journeyData[NonStepJourneyDataKey.LookedUpAddresses.key] = Json.encodeToString(customLookedUpAddresses ?: defaultLookedUpAddresses)
         return this
     }
 
@@ -186,7 +186,7 @@ class JourneyDataBuilder(
             withEnglandOrWalesResidence()
         }
 
-        journeyData[JourneyDataKey.LookedUpAddresses.key] =
+        journeyData[NonStepJourneyDataKey.LookedUpAddresses.key] =
             Json.encodeToString(listOf(AddressDataModel(singleLineAddress, localAuthorityId = localAuthority?.id, uprn = uprn)))
 
         val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
@@ -589,7 +589,7 @@ class JourneyDataBuilder(
     }
 
     fun withAutoMatchedEpcDetails(epcDetails: EpcDataModel?): JourneyDataBuilder {
-        journeyData[JourneyDataKey.AutoMatchedEpc.key] = Json.encodeToString(epcDetails)
+        journeyData[NonStepJourneyDataKey.AutoMatchedEpc.key] = Json.encodeToString(epcDetails)
         return this
     }
 
@@ -617,12 +617,12 @@ class JourneyDataBuilder(
     }
 
     fun withLookedUpEpcDetails(epcDetails: EpcDataModel): JourneyDataBuilder {
-        journeyData[JourneyDataKey.LookedUpEpc.key] = Json.encodeToString(epcDetails)
+        journeyData[NonStepJourneyDataKey.LookedUpEpc.key] = Json.encodeToString(epcDetails)
         return this
     }
 
     fun withNullLookedUpEpcDetails(): JourneyDataBuilder {
-        journeyData[JourneyDataKey.LookedUpEpc.key] = null
+        journeyData[NonStepJourneyDataKey.LookedUpEpc.key] = null
         return this
     }
 

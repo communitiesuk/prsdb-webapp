@@ -22,18 +22,17 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Selective
 
 class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
     companion object {
-        fun getAddress(journeyData: JourneyData): AddressDataModel? {
-            return if (isManualAddressChosen(journeyData)) {
+        fun getAddress(journeyData: JourneyData): AddressDataModel? =
+            if (isManualAddressChosen(journeyData)) {
                 getManualAddress(
                     journeyData,
                     RegisterPropertyStepId.ManualAddress.urlPathSegment,
                     RegisterPropertyStepId.LocalAuthority.urlPathSegment,
                 )
             } else {
-                val selectedAddress = getSelectedAddress(journeyData) ?: return null
-                journeyData.getLookedUpAddress(selectedAddress)
+                val selectedAddress = getSelectedAddress(journeyData)
+                selectedAddress?.let { journeyData.getLookedUpAddress(it) }
             }
-        }
 
         fun getPropertyType(journeyData: JourneyData): PropertyType? =
             getFieldEnumValue<PropertyType>(

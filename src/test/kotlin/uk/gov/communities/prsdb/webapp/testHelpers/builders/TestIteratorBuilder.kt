@@ -4,7 +4,7 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.whenever
 import org.springframework.validation.BindingResult
-import uk.gov.communities.prsdb.webapp.constants.enums.JourneyDataKey
+import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.ReachableStepDetailsIterator
@@ -35,8 +35,8 @@ class TestIteratorBuilder {
         return this
     }
 
-    fun withNonStepJourneyData(journeyDataKey: JourneyDataKey): TestIteratorBuilder {
-        journeyData = journeyData + (journeyDataKey.key to journeyDataKey.key)
+    fun withNonStepJourneyData(nonStepJourneyDataKey: NonStepJourneyDataKey): TestIteratorBuilder {
+        journeyData = journeyData + (nonStepJourneyDataKey.key to nonStepJourneyDataKey.key)
         return this
     }
 
@@ -116,7 +116,7 @@ class TestIteratorBuilder {
             TestStepId(urlPathSegment),
             mockPage,
             handleSubmitAndRedirect = null,
-            isSatisfied = { _, _ -> isSatisfied },
+            isSatisfied = { _ -> isSatisfied },
             nextAction = { journeyData, _ ->
                 customNextActionAddition?.invoke(journeyData)
                 Pair(nextSegment?.let { TestStepId(it) }, null)
@@ -126,5 +126,5 @@ class TestIteratorBuilder {
 
     fun getDataForStep(urlPathSegment: String): Any? = journeyData[urlPathSegment]
 
-    fun getDataForKey(key: JourneyDataKey): Any? = journeyData[key.key]
+    fun getDataForKey(key: NonStepJourneyDataKey): Any? = journeyData[key.key]
 }

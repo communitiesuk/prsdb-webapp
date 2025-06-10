@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms
 
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.constants.enums.JourneyDataKey
+import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
@@ -14,7 +14,7 @@ class ReachableStepDetailsIterator<T : StepId>(
     private val validator: Validator,
 ) : Iterator<StepDetails<T>> {
     private val nonStepJourneyData =
-        JourneyDataKey.entries
+        NonStepJourneyDataKey.entries
             .filter { journeyData.containsKey(it.key) }
             .associate { (it.key to journeyData[it.key]) }
 
@@ -71,6 +71,6 @@ class ReachableStepDetailsIterator<T : StepId>(
     private fun isStepSatisfied(step: StepDetails<T>): Boolean {
         val subPageData = JourneyDataHelper.getPageData(journeyData, step.step.name, step.subPageNumber)
         val bindingResult = step.step.page.bindDataToFormModel(validator, subPageData)
-        return subPageData != null && step.step.isSatisfied(step.filteredJourneyData, bindingResult)
+        return subPageData != null && step.step.isSatisfied(bindingResult)
     }
 }
