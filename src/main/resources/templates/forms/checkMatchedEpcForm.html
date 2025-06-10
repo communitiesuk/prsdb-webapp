@@ -34,7 +34,7 @@
             <dt class="govuk-summary-list__key" th:text="#{forms.checkMatchedEpc.summaryList.expiryDate.heading}">
                 forms.checkMatchedEpc.summaryList.address.heading
             </dt>
-            <dd class="govuk-summary-list__value" th:text="${epcDetails.expiryDateAsString}">
+            <dd class="govuk-summary-list__value" th:text="${{epcDetails.expiryDateAsJavaLocalDate}}">
             </dd>
         </div>
     </dl>
