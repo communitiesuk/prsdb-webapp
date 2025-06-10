@@ -14,37 +14,37 @@ class JourneyTask<T : StepId>(
     val hintKey: String? = null,
 ) {
     fun getTaskStatus(
-        journeyData: JourneyData,
+        filteredJourneyData: JourneyData,
         validator: Validator,
         isTaskReachable: Boolean = true,
     ) = if (!isTaskReachable) {
         TaskStatus.CANNOT_START
-    } else if (!isInitialStepComplete(journeyData, validator)) {
+    } else if (!isInitialStepComplete(filteredJourneyData, validator)) {
         TaskStatus.NOT_STARTED
-    } else if (!areAllStepsWithinTaskComplete(journeyData, validator)) {
+    } else if (!areAllStepsWithinTaskComplete(filteredJourneyData, validator)) {
         TaskStatus.IN_PROGRESS
     } else {
         TaskStatus.COMPLETED
     }
 
     private fun isInitialStepComplete(
-        journeyData: JourneyData,
+        filteredJourneyData: JourneyData,
         validator: Validator,
     ): Boolean =
         isStepComplete(
-            journeyData,
+            filteredJourneyData,
             steps.single { it.id == startingStepId },
             validator,
         )
 
     private fun areAllStepsWithinTaskComplete(
-        journeyData: JourneyData,
+        filteredJourneyData: JourneyData,
         validator: Validator,
     ): Boolean {
         var currentStep: Step<T>? = steps.single { it.id == startingStepId }
         while (currentStep != null && currentStep in steps) {
-            if (isStepComplete(journeyData, currentStep, validator)) {
-                val nextStepId = currentStep.nextAction(journeyData, null).first
+            if (isStepComplete(filteredJourneyData, currentStep, validator)) {
+                val nextStepId = currentStep.nextAction(filteredJourneyData, null).first
                 currentStep = steps.singleOrNull { it.id == nextStepId }
             } else {
                 return false
@@ -54,11 +54,11 @@ class JourneyTask<T : StepId>(
     }
 
     private fun isStepComplete(
-        journeyData: JourneyData,
+        filteredJourneyData: JourneyData,
         step: Step<T>,
         validator: Validator,
     ): Boolean {
-        val pageData = JourneyDataHelper.getPageData(journeyData, step.name)
+        val pageData = JourneyDataHelper.getPageData(filteredJourneyData, step.name)
         val bindingResult = step.page.bindDataToFormModel(validator, pageData)
         return pageData != null && step.isSatisfied(bindingResult)
     }

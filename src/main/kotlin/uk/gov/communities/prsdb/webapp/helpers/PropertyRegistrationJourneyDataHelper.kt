@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddress
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoAdditionalLicenceFormModel
@@ -21,11 +22,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Selective
 
 class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
     companion object {
-        fun getAddress(
-            journeyData: JourneyData,
-            lookedUpAddresses: List<AddressDataModel>,
-        ): AddressDataModel? =
-            if (isManualAddressChosen(journeyData, lookedUpAddresses)) {
+        fun getAddress(journeyData: JourneyData): AddressDataModel? =
+            if (isManualAddressChosen(journeyData)) {
                 getManualAddress(
                     journeyData,
                     RegisterPropertyStepId.ManualAddress.urlPathSegment,
@@ -33,7 +31,7 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
                 )
             } else {
                 val selectedAddress = getSelectedAddress(journeyData)
-                lookedUpAddresses.singleOrNull { it.singleLineAddress == selectedAddress }
+                selectedAddress?.let { journeyData.getLookedUpAddress(it) }
             }
 
         fun getPropertyType(journeyData: JourneyData): PropertyType? =
@@ -107,9 +105,7 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
                 SelectAddressFormModel::address.name,
             )
 
-        fun isManualAddressChosen(
-            journeyData: JourneyData,
-            lookedUpAddresses: List<AddressDataModel> = journeyData.getLookedUpAddresses(),
-        ): Boolean = lookedUpAddresses.isEmpty() || getSelectedAddress(journeyData) == MANUAL_ADDRESS_CHOSEN
+        fun isManualAddressChosen(journeyData: JourneyData): Boolean =
+            journeyData.getLookedUpAddresses().isEmpty() || getSelectedAddress(journeyData) == MANUAL_ADDRESS_CHOSEN
     }
 }

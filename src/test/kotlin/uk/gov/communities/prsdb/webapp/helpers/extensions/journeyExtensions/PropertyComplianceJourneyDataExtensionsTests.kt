@@ -18,12 +18,11 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.mockConstruction
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.AUTO_MATCHED_EPC_JOURNEY_DATA_KEY
-import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
+import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAutoMatchedEpcIsCorrect
@@ -98,8 +97,8 @@ class PropertyComplianceJourneyDataExtensionsTests {
         @JvmStatic
         private fun provideEpcDetailsJourneyDataKey() =
             arrayOf(
-                Arguments.of(Named.of("for automatched EPC", true), AUTO_MATCHED_EPC_JOURNEY_DATA_KEY),
-                Arguments.of(Named.of("for looked up EPC", false), LOOKED_UP_EPC_JOURNEY_DATA_KEY),
+                Arguments.of(Named.of("for automatched EPC", true), NonStepJourneyDataKey.AutoMatchedEpc.key),
+                Arguments.of(Named.of("for looked up EPC", false), NonStepJourneyDataKey.LookedUpEpc.key),
             )
     }
 

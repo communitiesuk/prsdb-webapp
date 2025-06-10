@@ -33,6 +33,7 @@ abstract class Journey<T : StepId>(
         get() = sections.flatMap { section -> section.tasks }.flatMap { task -> task.steps }.toSet()
 
     protected open val unreachableStepRedirect = initialStepId.urlPathSegment
+
     protected open val checkYourAnswersStepId: T? = null
 
     fun getModelAndViewForStep(
@@ -71,6 +72,7 @@ abstract class Journey<T : StepId>(
     ): ModelAndView {
         val currentStep = getStep(stepPathSegment)
 
+        val filteredJourneyData = getPrevStep(currentStep, subPageNumber)?.filteredJourneyData ?: emptyMap()
         val bindingResult = currentStep.page.bindDataToFormModel(validator, formData)
 
         if (!currentStep.isSatisfied(bindingResult)) {
@@ -83,22 +85,23 @@ abstract class Journey<T : StepId>(
 
         val formModel = currentStep.page.formModel.cast(bindingResult.target)
 
-        val newJourneyData = currentStep.updatedJourneyData(journeyDataService.getJourneyDataFromSession(), formModel, subPageNumber)
-        journeyDataService.setJourneyDataInSession(newJourneyData)
+        val newFilteredJourneyData = currentStep.updatedJourneyData(filteredJourneyData, formModel, subPageNumber)
+        journeyDataService.addToJourneyDataIntoSession(newFilteredJourneyData)
 
         if (currentStep.saveAfterSubmit) {
             val journeyDataContextId = journeyDataService.getContextId()
-            journeyDataService.saveJourneyData(journeyDataContextId, newJourneyData, journeyType, principal)
+            val journeyData = journeyDataService.getJourneyDataFromSession()
+            journeyDataService.saveJourneyData(journeyDataContextId, journeyData, journeyType, principal)
         }
 
         val changingAnswersForId = changingAnswersForStep?.let { getStep(it).id }
         if (currentStep.handleSubmitAndRedirect != null) {
             return ModelAndView(
-                "redirect:${currentStep.handleSubmitAndRedirect.invoke(newJourneyData, subPageNumber, changingAnswersForId)}",
+                "redirect:${currentStep.handleSubmitAndRedirect.invoke(newFilteredJourneyData, subPageNumber, changingAnswersForId)}",
             )
         }
 
-        val redirectUrl = getRedirectForNextStep(currentStep, newJourneyData, subPageNumber, changingAnswersForId)
+        val redirectUrl = getRedirectForNextStep(currentStep, newFilteredJourneyData, subPageNumber, changingAnswersForId)
         return ModelAndView("redirect:$redirectUrl")
     }
 
@@ -116,17 +119,17 @@ abstract class Journey<T : StepId>(
 
     protected fun getRedirectForNextStep(
         currentStep: Step<T>,
-        newJourneyData: JourneyData,
+        filteredJourneyData: JourneyData,
         subPageNumber: Int?,
         changingAnswersFor: T? = null,
         overriddenRedirectStepId: T? = null,
-        overridenRedirectSubPageNumber: Int? = null,
+        overriddenRedirectSubPageNumber: Int? = null,
     ): String {
         val (newStepId: T?, newSubPageNumber: Int?) =
             if (overriddenRedirectStepId == null) {
-                currentStep.nextAction(newJourneyData, subPageNumber)
+                currentStep.nextAction(filteredJourneyData, subPageNumber)
             } else {
-                Pair(overriddenRedirectStepId, overridenRedirectSubPageNumber)
+                Pair(overriddenRedirectStepId, overriddenRedirectSubPageNumber)
             }
 
         return if (changingAnswersFor == null || stepRouter.isDestinationAllowedWhenChangingAnswerTo(newStepId, changingAnswersFor)) {

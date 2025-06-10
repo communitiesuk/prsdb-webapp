@@ -22,7 +22,6 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesDataModel
 import java.time.Instant
@@ -160,8 +159,7 @@ class PropertyRegistrationService(
 
     fun getAddressData(formContext: FormContext): AddressDataModel {
         val formContextJourneyData = formContext.toJourneyData()
-        val lookedUpAddresses = formContextJourneyData.getLookedUpAddresses()
-        return PropertyRegistrationJourneyDataHelper.getAddress(formContextJourneyData, lookedUpAddresses)!!
+        return PropertyRegistrationJourneyDataHelper.getAddress(formContextJourneyData)!!
     }
 
     fun getIncompletePropertyFormContextForLandlordIfNotExpired(

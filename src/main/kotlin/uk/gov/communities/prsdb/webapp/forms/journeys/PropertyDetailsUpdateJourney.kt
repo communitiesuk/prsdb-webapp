@@ -119,7 +119,7 @@ class PropertyDetailsUpdateJourney(
                             BACK_URL_ATTR_NAME to RELATIVE_PROPERTY_DETAILS_PATH,
                         ),
                 ),
-            handleSubmitAndRedirect = { journeyData, _, _ -> updatePropertyAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { _, _, _ -> updatePropertyAndRedirect() },
             nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateLicensingType, null) },
             saveAfterSubmit = false,
         )
@@ -161,7 +161,7 @@ class PropertyDetailsUpdateJourney(
                                 ),
                         ).withBackUrlIfNotChangingAnswer(RELATIVE_PROPERTY_DETAILS_PATH),
                 ),
-            nextAction = { journeyData, _ -> licensingTypeNextAction(journeyData) },
+            nextAction = { filteredJourneyData, _ -> licensingTypeNextAction(filteredJourneyData) },
             saveAfterSubmit = false,
         )
 
@@ -236,7 +236,7 @@ class PropertyDetailsUpdateJourney(
             id = UpdatePropertyDetailsStepId.CheckYourLicensingAnswers,
             page = CheckLicensingAnswersPage(),
             nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.UpdateOccupancy, null) },
-            handleSubmitAndRedirect = { journeyData, _, _ -> updatePropertyAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { _, _, _ -> updatePropertyAndRedirect() },
         )
 
     private val occupancyStep =
@@ -267,7 +267,7 @@ class PropertyDetailsUpdateJourney(
                                 ),
                         ).withBackUrlIfNotChangingAnswer(RELATIVE_PROPERTY_DETAILS_PATH),
                 ),
-            nextAction = { journeyData, _ -> occupancyNextAction(journeyData) },
+            nextAction = { filteredJourneyData, _ -> occupancyNextAction(filteredJourneyData) },
             saveAfterSubmit = false,
         )
 
@@ -314,7 +314,7 @@ class PropertyDetailsUpdateJourney(
         Step(
             id = UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers,
             page = CheckOccupancyAnswersPage(),
-            handleSubmitAndRedirect = { journeyData, _, _ -> updatePropertyAndRedirect(journeyData) },
+            handleSubmitAndRedirect = { _, _, _ -> updatePropertyAndRedirect() },
             saveAfterSubmit = false,
         )
 
@@ -370,8 +370,8 @@ class PropertyDetailsUpdateJourney(
             RELATIVE_PROPERTY_DETAILS_PATH
         }
 
-    private fun licensingTypeNextAction(journeyData: JourneyData): Pair<UpdatePropertyDetailsStepId, Int?> {
-        val licensingType = journeyData.getLicensingTypeUpdateIfPresent()!!
+    private fun licensingTypeNextAction(filteredJourneyData: JourneyData): Pair<UpdatePropertyDetailsStepId, Int?> {
+        val licensingType = filteredJourneyData.getLicensingTypeUpdateIfPresent()!!
 
         val nextActionStepId =
             PropertyDetailsUpdateJourneyExtensions.getLicenceNumberUpdateStepId(licensingType)
@@ -380,14 +380,16 @@ class PropertyDetailsUpdateJourney(
         return Pair(nextActionStepId, null)
     }
 
-    private fun occupancyNextAction(journeyData: JourneyData) =
-        if (journeyData.getIsOccupiedUpdateIfPresent()!!) {
+    private fun occupancyNextAction(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getIsOccupiedUpdateIfPresent()!!) {
             Pair(UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds, null)
         } else {
             Pair(UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers, null)
         }
 
-    private fun updatePropertyAndRedirect(journeyData: JourneyData): String {
+    private fun updatePropertyAndRedirect(): String {
+        val journeyData = journeyDataService.getJourneyDataFromSession()
+
         val propertyUpdate =
             PropertyOwnershipUpdateModel(
                 ownershipType = journeyData.getOwnershipTypeUpdateIfPresent(),
