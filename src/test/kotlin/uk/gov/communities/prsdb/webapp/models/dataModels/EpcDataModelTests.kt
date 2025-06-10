@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import uk.gov.communities.prsdb.webapp.constants.VIEW_EPC_CERTIFICATE_BASE_URL
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData.Companion.DEFAULT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData.Companion.SECONDARY_EPC_CERTIFICATE_NUMBER
@@ -45,18 +44,7 @@ class EpcDataModelTests {
     }
 
     @Test
-    fun `getEpcCertificateUrl returns the certificate url`() {
-        val epcDataModel =
-            MockEpcData.createEpcDataModel(
-                certificateNumber = DEFAULT_EPC_CERTIFICATE_NUMBER,
-            )
-        val expectedUrl = "${VIEW_EPC_CERTIFICATE_BASE_URL}/${DEFAULT_EPC_CERTIFICATE_NUMBER}"
-
-        assertEquals(expectedUrl, epcDataModel.getEpcCertificateUrl())
-    }
-
-    @Test
-    fun `isExpired returns true if the expiry date is in the past`() {
+    fun `isPastExpiryDate returns true if the expiry date is in the past`() {
         val epcDataModel =
             MockEpcData.createEpcDataModel(
                 expiryDate = LocalDate(2020, 1, 1),
@@ -66,7 +54,25 @@ class EpcDataModelTests {
     }
 
     @Test
-    fun `isExpired returns false if the expiry date is in the future`() {
+    fun `isPastExpiryDate returns false if the expiry date is today`() {
+        val dateNow =
+            Clock
+                .systemDefaultZone()
+                .instant()
+                .toKotlinInstant()
+                .toLocalDateTime(TimeZone.of("Europe/London"))
+                .date
+
+        val epcDataModel =
+            MockEpcData.createEpcDataModel(
+                expiryDate = dateNow,
+            )
+
+        assertFalse(epcDataModel.isPastExpiryDate())
+    }
+
+    @Test
+    fun `isPastExpiryDate returns false if the expiry date is in the future`() {
         val dateNow =
             Clock
                 .systemDefaultZone()

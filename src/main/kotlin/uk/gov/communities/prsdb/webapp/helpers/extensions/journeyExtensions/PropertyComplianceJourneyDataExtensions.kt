@@ -237,9 +237,9 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
             this.getHasCompletedEpcExemptionConfirmation() ||
                 this.getHasCompletedEpcMissing() ||
                 this.getHasCompletedEpcNotFound() ||
-                this.getHasCompletedCheckAutoMatchedEpcWhichCompletesEpcTask() ||
-                this.getHasCompletedCheckMatchedEpcWhichCompletesEpcTask() ||
-                this.getHasCompletedEpcExpiryCheckWhichCompletesEpcTask() ||
+                this.getHasCompletedEpcTaskWithCheckAutoMatchedEpc() ||
+                this.getHasCompletedEpcTaskWithCheckMatchedEpc() ||
+                this.getHasCompletedEpcTaskWithEpcExpiryCheck() ||
                 this.getHasCompletedEpcExpired() ||
                 this.getHasCompletedMeesExemptionConfirmation() ||
                 this.getHasCompletedEpcLowEnergyRating()
@@ -276,20 +276,20 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
 
         private fun JourneyData.getHasCompletedEpcNotFound() = this.containsKey(PropertyComplianceStepId.EpcNotFound.urlPathSegment)
 
-        private fun JourneyData.getHasCompletedCheckAutoMatchedEpcWhichCompletesEpcTask() =
+        private fun JourneyData.getHasCompletedEpcTaskWithCheckAutoMatchedEpc() =
             this.containsKey(PropertyComplianceStepId.CheckAutoMatchedEpc.urlPathSegment) &&
                 this.getAutoMatchedEpcIsCorrect()!! &&
                 !this.getEpcDetails(autoMatched = true)!!.isPastExpiryDate() &&
                 this.getEpcDetails(autoMatched = true)!!.isEnergyRatingEOrBetter()
 
-        private fun JourneyData.getHasCompletedCheckMatchedEpcWhichCompletesEpcTask() =
+        private fun JourneyData.getHasCompletedEpcTaskWithCheckMatchedEpc() =
             this.containsKey(PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment) &&
                 this.getMatchedEpcIsCorrect()!! &&
                 !this.getEpcDetails(autoMatched = false)!!.isPastExpiryDate() &&
                 this.getEpcDetails(autoMatched = false)!!.isEnergyRatingEOrBetter()
 
         // TODO Prsd-1146 - make this check whether this page was answered with "Yes"
-        private fun JourneyData.getHasCompletedEpcExpiryCheckWhichCompletesEpcTask() =
+        private fun JourneyData.getHasCompletedEpcTaskWithEpcExpiryCheck() =
             this.containsKey(PropertyComplianceStepId.EpcExpiryCheck.urlPathSegment) &&
                 this.getAcceptedEpcDetails()!!.isEnergyRatingEOrBetter()
 

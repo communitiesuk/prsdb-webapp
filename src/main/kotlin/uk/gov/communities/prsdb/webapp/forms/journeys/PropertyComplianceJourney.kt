@@ -86,6 +86,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPa
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
+import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -98,6 +99,7 @@ class PropertyComplianceJourney(
     private val epcLookupService: EpcLookupService,
     private val propertyComplianceService: PropertyComplianceService,
     private val propertyOwnershipId: Long,
+    private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
 ) : JourneyWithTaskList<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE,
         initialStepId = initialStepId,
@@ -833,15 +835,17 @@ class PropertyComplianceJourney(
                 },
             )
 
-    private fun getCheckMatchedEpcPage(autoMatchedEpc: Boolean) =
-        Page(
+    private fun getCheckMatchedEpcPage(autoMatchedEpc: Boolean): Page {
+        val epcDetails = getEpcDetailsFromSession(autoMatched = autoMatchedEpc)
+        return Page(
             formModel = CheckMatchedEpcFormModel::class,
             templateName = "forms/checkMatchedEpcForm",
             content =
                 mapOf(
                     "title" to "propertyCompliance.title",
                     "fieldSetHeading" to "forms.checkMatchedEpc.fieldSetHeading",
-                    "epcDetails" to getEpcDetailsFromSession(autoMatched = autoMatchedEpc),
+                    "epcDetails" to (epcDetails ?: ""),
+                    "epcCertificateUrl" to epcCertificateUrlProvider.getEpcCertificateUrl(epcDetails?.certificateNumber ?: ""),
                     "radioOptions" to
                         listOf(
                             RadiosButtonViewModel(
@@ -857,6 +861,7 @@ class PropertyComplianceJourney(
                         ),
                 ),
         )
+    }
 
     private val epcExemptionReasonStep
         get() =
@@ -1288,7 +1293,7 @@ class PropertyComplianceJourney(
             eicrIssueDate = filteredJourneyData.getEicrIssueDate()?.toJavaLocalDate(),
             eicrExemptionReason = filteredJourneyData.getEicrExemptionReason(),
             eicrExemptionOtherReason = filteredJourneyData.getEicrExemptionOtherReason(),
-            epcUrl = epcDetails?.getEpcCertificateUrl(),
+            epcUrl = epcCertificateUrlProvider.getEpcCertificateUrl(epcDetails?.certificateNumber ?: ""),
             epcExpiryDate = epcDetails?.expiryDate?.toJavaLocalDate(),
             epcEnergyRating = epcDetails?.energyRating,
             epcExemptionReason = filteredJourneyData.getEpcExemptionReason(),
@@ -1311,11 +1316,10 @@ class PropertyComplianceJourney(
         return EpcDataModel.parseCertificateNumberOrNull(submittedCertificateNumber)!! // Only valid EPC numbers will be in journeyData
     }
 
-    private fun getEpcDetailsFromSession(autoMatched: Boolean): EpcDataModel =
+    private fun getEpcDetailsFromSession(autoMatched: Boolean): EpcDataModel? =
         journeyDataService
             .getJourneyDataFromSession()
             .getEpcDetails(autoMatched)
-            ?: EpcDataModel.getEmptyEpcDataModel()
 
     private fun getPropertyAddress() =
         propertyOwnershipService

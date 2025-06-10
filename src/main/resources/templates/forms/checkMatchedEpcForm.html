@@ -3,6 +3,7 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="epcCertificateUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="epcDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="radioOptions" type="uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel"*/-->
 <!DOCTYPE html>
@@ -10,7 +11,7 @@
 <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'matchedEpcIsCorrect', #{forms.checkMatchedEpc.fieldSetHeading(${epcDetails.singleLineAddress})}, null)}">
     <p class="govuk-inset-text">
         <span th:remove="tag" class="govuk-body" th:text="#{forms.checkMatchedEpc.insetText.beforeLink}">forms.checkMatchedEpc.insetText.beforeLink</span>
-        <a class="govuk-link" th:text="#{forms.checkMatchedEpc.insetText.link}" th:href="@{${epcDetails.getEpcCertificateUrl()}}" rel="noreferrer noopener" target="_blank">
+        <a class="govuk-link" th:text="#{forms.checkMatchedEpc.insetText.link}" th:href="@{${epcCertificateUrl}}" rel="noreferrer noopener" target="_blank">
             forms.checkMatchedEpc.insetText.link
         </a>
     </p>
@@ -33,7 +34,7 @@
             <dt class="govuk-summary-list__key" th:text="#{forms.checkMatchedEpc.summaryList.expiryDate.heading}">
                 forms.checkMatchedEpc.summaryList.address.heading
             </dt>
-            <dd class="govuk-summary-list__value" th:text="${epcDetails.expiryDateAsString}">
+            <dd class="govuk-summary-list__value" th:text="${{epcDetails.expiryDateAsJavaLocalDate}}">
             </dd>
         </div>
     </dl>
