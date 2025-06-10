@@ -257,7 +257,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         BaseComponent.assertThat(checkMatchedEpcPage.form.fieldsetHeading).containsText(singleLineAddress)
         assertThat(checkMatchedEpcPage.form.summaryList.addressRow.value).containsText(singleLineAddress)
         assertThat(checkMatchedEpcPage.form.summaryList.energyRatingRow.value).containsText("C")
-        assertThat(checkMatchedEpcPage.form.summaryList.expiryDateRow.value).containsText("5 January 2012")
+        assertThat(checkMatchedEpcPage.form.summaryList.expiryDateRow.value).containsText("10 June 2030")
         checkMatchedEpcPage.submitMatchedEpcDetailsIncorrect()
         epcLookupPage = assertPageIs(page, EpcLookupPagePropertyCompliance::class, urlArguments)
 
