@@ -60,6 +60,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyUploadConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyUploadPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.KeepPropertySafePagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionCheckPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.ResponsibilityToTenantsPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.services.FileUploader
@@ -241,7 +242,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         whenever(epcRegisterClient.getByRrn(SUPERSEDED_EPC_CERTIFICATE_NUMBER)).thenReturn(
             MockEpcData.createEpcRegisterClientEpcFoundResponse(
                 certificateNumber = SUPERSEDED_EPC_CERTIFICATE_NUMBER,
-                expiryDate = LocalDate(2012, 1, 5),
+                expiryDate = MockEpcData.expiryDateInThePast,
                 latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
             ),
         )
@@ -272,15 +273,15 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
 
         // EPC Lookup page - submit latest certificate but it is expired
         whenever(epcRegisterClient.getByRrn(CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER))
-            .thenReturn(MockEpcData.createEpcRegisterClientEpcFoundResponse(expiryDate = LocalDate(2022, 1, 5)))
+            .thenReturn(MockEpcData.createEpcRegisterClientEpcFoundResponse(expiryDate = MockEpcData.expiryDateInThePast))
         epcLookupPage.submitCurrentEpcNumberWhichIsExpired()
         checkMatchedEpcPage = assertPageIs(page, CheckMatchedEpcPagePropertyCompliance::class, urlArguments)
 
         checkMatchedEpcPage.submitMatchedEpcDetailsCorrect()
         val expiryCheckPage = assertPageIs(page, EpcExpiryCheckPagePropertyCompliance::class, urlArguments)
 
-        // TODO PRSD-1146 - update this
-        expiryCheckPage.continueButton.clickAndWait()
+        assertTrue(expiryCheckPage.page.content().contains("5 January 2022"))
+        expiryCheckPage.submitTenancyStartedAfterExpiry()
         val epcExpiredPage = assertPageIs(page, EpcExpiredPagePropertyCompliance::class, urlArguments)
 
         // TODO PRSD-1147 - update this
@@ -471,6 +472,34 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         // Epc Not Found page - continue
         epcNotFoundPage.continueButton.clickAndWait()
         assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
+    }
+
+    @Test
+    fun `User can navigate EPC task if pages are filled in correctly (MEES exemption)`(page: Page) {
+        // EPC page
+        val epcPage = navigator.skipToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
+        whenever(epcRegisterClient.getByUprn(1123456L)).thenReturn(
+            MockEpcData.createEpcRegisterClientEpcFoundResponse(
+                energyRating = "G",
+                expiryDate = MockEpcData.expiryDateInThePast,
+            ),
+        )
+        epcPage.submitHasCert()
+        val checkAutoMatchedEpcPage = assertPageIs(page, CheckAutoMatchedEpcPagePropertyCompliance::class, urlArguments)
+
+        // Check Auto Matched EPC page (past expiry date and low rating)
+        checkAutoMatchedEpcPage.submitMatchedEpcDetailsCorrect()
+        val expiryCheckPage = assertPageIs(page, EpcExpiryCheckPagePropertyCompliance::class, urlArguments)
+
+        // Epc Expiry Check page - tenancy started before expiry
+        expiryCheckPage.submitTenancyStartedBeforeExpiry()
+        assertPageIs(page, MeesExemptionCheckPagePropertyCompliance::class, urlArguments)
+
+        // TODO: PRSD-1141 - MEES exemption check, submit "yes"
+
+        // TODO: PRSD-1143 = MEES exemption reason
+
+        // TODO: PRSD-1145 - MEES exemption confirmation -> Fire Safety Declaration page
     }
 
     companion object {
