@@ -1270,10 +1270,11 @@ class PropertyComplianceJourney(
     }
 
     private fun epcSupersededHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
-        val certificateNumber = filteredJourneyData.getLatestEpcCertificateNumber()!!
+        val sessionJourneyData = journeyDataService.getJourneyDataFromSession()
+        val certificateNumber = sessionJourneyData.getLatestEpcCertificateNumber()!!
         val latestEpc = epcLookupService.getEpcByCertificateNumber(certificateNumber)
-        val newJourneyData = resetCheckMatchedEpcInSession(filteredJourneyData, latestEpc)
-        return updateEpcDetailsInSessionAndRedirectToNextStep(epcLookupStep, newJourneyData, latestEpc, autoMatchedEpc = false)
+        resetCheckMatchedEpcInSession(sessionJourneyData, latestEpc)
+        return updateEpcDetailsInSessionAndRedirectToNextStep(epcLookupStep, filteredJourneyData, latestEpc, autoMatchedEpc = false)
     }
 
     private fun fireSafetyDeclarationStepNextAction(filteredJourneyData: JourneyData) =

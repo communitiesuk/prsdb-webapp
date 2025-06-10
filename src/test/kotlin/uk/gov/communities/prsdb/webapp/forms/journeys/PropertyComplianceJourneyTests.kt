@@ -584,12 +584,39 @@ class PropertyComplianceJourneyTests {
         }
 
         @Test
-        fun `handleSubmitAndRedirect resets the CheckMatchedEpc answer and updates the looked up EPC details in the session`() {
+        fun `handleSubmitAndRedirect resets the CheckMatchedEpc in the session`() {
             // Arrange
+            val supersededEPC =
+                MockEpcData.createEpcDataModel(
+                    certificateNumber = SUPERSEDED_EPC_CERTIFICATE_NUMBER,
+                    latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
+                )
             val originalJourneyData =
                 JourneyDataBuilder()
                     .withCheckMatchedEpcResult(false)
                     .withEpcLookupCertificateNumber(SUPERSEDED_EPC_CERTIFICATE_NUMBER)
+                    .withLookedUpEpcDetails(supersededEPC)
+                    .build()
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
+
+            val updatedJourneyData =
+                JourneyDataBuilder()
+                    .withEpcLookupCertificateNumber(SUPERSEDED_EPC_CERTIFICATE_NUMBER)
+                    .withLookedUpEpcDetails(supersededEPC)
+                    .build()
+
+            // Act
+            completeStep(PropertyComplianceStepId.EpcSuperseded, emptyMap(), stubPropertyOwnership = false)
+
+            // Assert
+            verify(mockJourneyDataService).setJourneyDataInSession(updatedJourneyData)
+        }
+
+        @Test
+        fun `handleSubmitAndRedirect updates the the looked up EPC details in the session`() {
+            // Arrange
+            val originalJourneyData =
+                JourneyDataBuilder()
                     .withLookedUpEpcDetails(
                         MockEpcData.createEpcDataModel(
                             certificateNumber = SUPERSEDED_EPC_CERTIFICATE_NUMBER,
@@ -605,16 +632,15 @@ class PropertyComplianceJourneyTests {
 
             val updatedJourneyData =
                 JourneyDataBuilder()
-                    .withEpcLookupCertificateNumber(SUPERSEDED_EPC_CERTIFICATE_NUMBER)
-                    .withLookedUpEpcDetails(latestEpc)
                     .withEpcSuperseded()
+                    .withLookedUpEpcDetails(latestEpc)
                     .build()
 
             // Act
             completeStep(PropertyComplianceStepId.EpcSuperseded, emptyMap(), stubPropertyOwnership = false)
 
             // Assert
-            verify(mockJourneyDataService).setJourneyDataInSession(updatedJourneyData)
+            verify(mockJourneyDataService).addToJourneyDataIntoSession(updatedJourneyData)
         }
 
         @Test
