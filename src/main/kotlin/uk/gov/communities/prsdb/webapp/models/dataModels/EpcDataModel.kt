@@ -21,7 +21,9 @@ data class EpcDataModel(
     val expiryDateAsJavaLocalDate: java.time.LocalDate
         get() = expiryDate.toJavaLocalDate()
 
-    fun isLatestCertificateForThisProperty() = certificateNumber == latestCertificateNumberForThisProperty
+    fun isLatestCertificateForThisProperty() =
+        certificateNumber == latestCertificateNumberForThisProperty ||
+            latestCertificateNumberForThisProperty == null
 
     fun isPastExpiryDate(): Boolean = expiryDate < DateTimeHelper().getCurrentDateInUK()
 

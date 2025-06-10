@@ -59,6 +59,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getLatestEpcCertificateNumber
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMatchedEpcIsCorrect
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withResetCheckMatchedEpc
@@ -233,11 +234,7 @@ class PropertyComplianceJourney(
                     epcLookupStep,
                     checkMatchedEpcStep,
                     epcNotFoundStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.EpcSuperseded,
-                        "TODO PRSD-1140: Implement EPC Superseded step",
-                        PropertyComplianceStepId.CheckMatchedEpc,
-                    ),
+                    epcSupersededStep,
                     placeholderStep(
                         PropertyComplianceStepId.EpcExpiryCheck,
                         "TODO PRSD-1146: Implement EPC Expiry Check step",
@@ -865,6 +862,24 @@ class PropertyComplianceJourney(
         )
     }
 
+    private val epcSupersededStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EpcSuperseded,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/epcSupersededForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "certificateNumber" to getLatestEpcCertificateNumberFromSession(),
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.CheckMatchedEpc, null) },
+                handleSubmitAndRedirect = { filteredJourneyData, _, _ -> epcSupersededHandleSubmitAndRedirect(filteredJourneyData) },
+            )
+
     private val epcExemptionReasonStep
         get() =
             Step(
@@ -1254,6 +1269,14 @@ class PropertyComplianceJourney(
         }
     }
 
+    private fun epcSupersededHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
+        val sessionJourneyData = journeyDataService.getJourneyDataFromSession()
+        val certificateNumber = sessionJourneyData.getLatestEpcCertificateNumber()!!
+        val latestEpc = epcLookupService.getEpcByCertificateNumber(certificateNumber)
+        resetCheckMatchedEpcInSession(sessionJourneyData, latestEpc)
+        return updateEpcDetailsInSessionAndRedirectToNextStep(epcLookupStep, filteredJourneyData, latestEpc, autoMatchedEpc = false)
+    }
+
     private fun fireSafetyDeclarationStepNextAction(filteredJourneyData: JourneyData) =
         if (filteredJourneyData.getHasFireSafetyDeclaration()!!) {
             Pair(PropertyComplianceStepId.KeepPropertySafe, null)
@@ -1320,6 +1343,11 @@ class PropertyComplianceJourney(
         journeyDataService
             .getJourneyDataFromSession()
             .getEpcDetails(autoMatched)
+
+    private fun getLatestEpcCertificateNumberFromSession(): String {
+        return journeyDataService.getJourneyDataFromSession().getLatestEpcCertificateNumber()
+            ?: return ""
+    }
 
     private fun getPropertyAddress() =
         propertyOwnershipService

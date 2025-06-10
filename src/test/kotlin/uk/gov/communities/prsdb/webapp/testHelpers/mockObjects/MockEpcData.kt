@@ -21,7 +21,7 @@ class MockEpcData {
             singleLineAddress: String = "1 Example Street, Example Town, EX1 1EX",
             energyRating: String = "C",
             expiryDate: LocalDate = LocalDate(2027, 1, 1),
-            latestCertificateNumberForThisProperty: String = DEFAULT_EPC_CERTIFICATE_NUMBER,
+            latestCertificateNumberForThisProperty: String? = DEFAULT_EPC_CERTIFICATE_NUMBER,
         ) = EpcDataModel(
             certificateNumber = certificateNumber,
             singleLineAddress = singleLineAddress,

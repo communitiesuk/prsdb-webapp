@@ -559,6 +559,111 @@ class PropertyComplianceJourneyTests {
     }
 
     @Nested
+    inner class EpcSupersededTests {
+        @Test
+        fun `handleSubmitAndRedirect looks up the latest certificate by certificate number`() {
+            // Arrange
+            val originalJourneyData =
+                JourneyDataBuilder()
+                    .withEpcLookupCertificateNumber(SUPERSEDED_EPC_CERTIFICATE_NUMBER)
+                    .withLookedUpEpcDetails(
+                        MockEpcData.createEpcDataModel(
+                            certificateNumber = SUPERSEDED_EPC_CERTIFICATE_NUMBER,
+                            latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
+                        ),
+                    ).build()
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
+            whenever(mockEpcLookupService.getEpcByCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER))
+                .thenReturn(MockEpcData.createEpcDataModel(certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER))
+
+            // Act
+            completeStep(PropertyComplianceStepId.EpcSuperseded, emptyMap(), stubPropertyOwnership = false)
+
+            // Assert
+            verify(mockEpcLookupService).getEpcByCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER)
+        }
+
+        @Test
+        fun `handleSubmitAndRedirect resets the CheckMatchedEpc in the session`() {
+            // Arrange
+            val supersededEPC =
+                MockEpcData.createEpcDataModel(
+                    certificateNumber = SUPERSEDED_EPC_CERTIFICATE_NUMBER,
+                    latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
+                )
+            val originalJourneyData =
+                JourneyDataBuilder()
+                    .withCheckMatchedEpcResult(false)
+                    .withEpcLookupCertificateNumber(SUPERSEDED_EPC_CERTIFICATE_NUMBER)
+                    .withLookedUpEpcDetails(supersededEPC)
+                    .build()
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
+
+            val updatedJourneyData =
+                JourneyDataBuilder()
+                    .withEpcLookupCertificateNumber(SUPERSEDED_EPC_CERTIFICATE_NUMBER)
+                    .withLookedUpEpcDetails(supersededEPC)
+                    .build()
+
+            // Act
+            completeStep(PropertyComplianceStepId.EpcSuperseded, emptyMap(), stubPropertyOwnership = false)
+
+            // Assert
+            verify(mockJourneyDataService).setJourneyDataInSession(updatedJourneyData)
+        }
+
+        @Test
+        fun `handleSubmitAndRedirect updates the the looked up EPC details in the session`() {
+            // Arrange
+            val originalJourneyData =
+                JourneyDataBuilder()
+                    .withLookedUpEpcDetails(
+                        MockEpcData.createEpcDataModel(
+                            certificateNumber = SUPERSEDED_EPC_CERTIFICATE_NUMBER,
+                            latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
+                        ),
+                    ).build()
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
+
+            val latestEpc = MockEpcData.createEpcDataModel(certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER)
+
+            whenever(mockEpcLookupService.getEpcByCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER))
+                .thenReturn(latestEpc)
+
+            val updatedJourneyData =
+                JourneyDataBuilder()
+                    .withEpcSuperseded()
+                    .withLookedUpEpcDetails(latestEpc)
+                    .build()
+
+            // Act
+            completeStep(PropertyComplianceStepId.EpcSuperseded, emptyMap(), stubPropertyOwnership = false)
+
+            // Assert
+            verify(mockJourneyDataService).addToJourneyDataIntoSession(updatedJourneyData)
+        }
+
+        @Test
+        fun `handleSubmitAndRedirect redirects to CheckMatchedEpc`() {
+            // Arrange
+            val originalJourneyData =
+                JourneyDataBuilder()
+                    .withLookedUpEpcDetails(
+                        MockEpcData.createEpcDataModel(SUPERSEDED_EPC_CERTIFICATE_NUMBER),
+                    ).build()
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
+            whenever(mockEpcLookupService.getEpcByCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER))
+                .thenReturn(MockEpcData.createEpcDataModel(certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER))
+
+            // Act
+            val redirectModelAndView = completeStep(PropertyComplianceStepId.EpcSuperseded, emptyMap(), stubPropertyOwnership = false)
+
+            // Assert
+            assertEquals("redirect:${PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment}", redirectModelAndView.viewName)
+        }
+    }
+
+    @Nested
     inner class CheckAndSubmitHandleSubmitAndRedirectTests {
         @Test
         fun `checkAndSubmitHandleSubmitAndRedirect creates a compliance record and deletes the corresponding form context`() {

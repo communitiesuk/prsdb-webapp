@@ -5,6 +5,8 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
+import kotlinx.datetime.plus
+import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -62,6 +64,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import java.time.format.DateTimeFormatter
+import kotlin.test.assertTrue
 
 class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql") {
     @MockitoBean
@@ -244,17 +248,25 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         epcLookupPage.submitSupersededEpcNumber()
         val epcSupersededPage = assertPageIs(page, EpcSupersededPagePropertyCompliance::class, urlArguments)
 
-        // TODO: PRSD-1140 - update this
         // EPC Superseded page
+        assertTrue(epcSupersededPage.page.content().contains(CURRENT_EPC_CERTIFICATE_NUMBER))
+        whenever(epcRegisterClient.getByRrn(CURRENT_EPC_CERTIFICATE_NUMBER))
+            .thenReturn(MockEpcData.createEpcRegisterClientEpcFoundResponse())
         epcSupersededPage.continueButton.clickAndWait()
         var checkMatchedEpcPage = assertPageIs(page, CheckMatchedEpcPagePropertyCompliance::class, urlArguments)
 
         // Check Matched EPC page
         val singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT"
+        val expectedExpiryDate =
+            DateTimeHelper()
+                .getCurrentDateInUK()
+                .plus(DatePeriod(years = 5))
+                .toJavaLocalDate()
+                .format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
         BaseComponent.assertThat(checkMatchedEpcPage.form.fieldsetHeading).containsText(singleLineAddress)
         assertThat(checkMatchedEpcPage.form.summaryList.addressRow.value).containsText(singleLineAddress)
         assertThat(checkMatchedEpcPage.form.summaryList.energyRatingRow.value).containsText("C")
-        assertThat(checkMatchedEpcPage.form.summaryList.expiryDateRow.value).containsText("5 January 2012")
+        assertThat(checkMatchedEpcPage.form.summaryList.expiryDateRow.value).containsText(expectedExpiryDate)
         checkMatchedEpcPage.submitMatchedEpcDetailsIncorrect()
         epcLookupPage = assertPageIs(page, EpcLookupPagePropertyCompliance::class, urlArguments)
 
