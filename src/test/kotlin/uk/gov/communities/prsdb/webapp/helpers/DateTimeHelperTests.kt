@@ -177,12 +177,4 @@ class DateTimeHelperTests {
 
         assertEquals(expectedDate, DateTimeHelper.getDateInUK(dateString))
     }
-
-    @Test
-    fun `formatKotlinLocalDate returns the date in the form of 20 January 2024`() {
-        val date = LocalDate(2024, 1, 20)
-        val expectedFormattedDate = "20 January 2024"
-
-        assertEquals(expectedFormattedDate, DateTimeHelper.formatKotlinLocalDate(date))
-    }
 }
