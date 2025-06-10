@@ -1344,10 +1344,8 @@ class PropertyComplianceJourney(
             .getEpcDetails(autoMatched)
 
     private fun getLatestEpcCertificateNumberFromSession(): String {
-        val latestCertificateNumber =
-            journeyDataService.getJourneyDataFromSession().getLatestEpcCertificateNumber()
-                ?: return ""
-        return EpcDataModel.parseCertificateNumberOrNull(latestCertificateNumber)!!
+        return journeyDataService.getJourneyDataFromSession().getLatestEpcCertificateNumber()
+            ?: return ""
     }
 
     private fun getPropertyAddress() =
