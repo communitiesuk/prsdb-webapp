@@ -86,6 +86,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPa
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
+import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -98,6 +99,7 @@ class PropertyComplianceJourney(
     private val epcLookupService: EpcLookupService,
     private val propertyComplianceService: PropertyComplianceService,
     private val propertyOwnershipId: Long,
+    private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
 ) : JourneyWithTaskList<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE,
         initialStepId = initialStepId,
@@ -238,9 +240,39 @@ class PropertyComplianceJourney(
                         "TODO PRSD-1140: Implement EPC Superseded step",
                         PropertyComplianceStepId.CheckMatchedEpc,
                     ),
+                    placeholderStep(
+                        PropertyComplianceStepId.EpcExpiryCheck,
+                        "TODO PRSD-1146: Implement EPC Expiry Check step",
+                        PropertyComplianceStepId.EpcExpired,
+                    ),
+                    placeholderStep(
+                        PropertyComplianceStepId.EpcExpired,
+                        "TODO PRSD-1147: Implement EPC Expiry Reason step",
+                        PropertyComplianceStepId.FireSafetyDeclaration,
+                    ),
                     epcMissingStep,
                     epcExemptionReasonStep,
                     epcExemptionConfirmationStep,
+                    placeholderStep(
+                        PropertyComplianceStepId.MeesExemptionCheck,
+                        "TODO PRSD-1141: Implement MEES Exemption Check step",
+                        PropertyComplianceStepId.MeesExemptionReason,
+                    ),
+                    placeholderStep(
+                        PropertyComplianceStepId.MeesExemptionReason,
+                        "TODO PRSD-1143: Implement MEES Exemption Reason step",
+                        PropertyComplianceStepId.MeesExemptionConfirmation,
+                    ),
+                    placeholderStep(
+                        PropertyComplianceStepId.MeesExemptionConfirmation,
+                        "TODO PRSD-1145: Implement MEES Exemption Confirmation step",
+                        PropertyComplianceStepId.FireSafetyDeclaration,
+                    ),
+                    placeholderStep(
+                        PropertyComplianceStepId.LowEnergyRating,
+                        "TODO PRSD-1144: Implement Low Energy Rating step",
+                        PropertyComplianceStepId.FireSafetyDeclaration,
+                    ),
                 ),
                 "propertyCompliance.taskList.upload.epc",
                 "propertyCompliance.taskList.upload.epc.hint",
@@ -774,70 +806,50 @@ class PropertyComplianceJourney(
 
     private val checkAutoMatchedEpcStep
         get() =
-            // TODO PRSD-1132 - implement this properly
             Step(
                 id = PropertyComplianceStepId.CheckAutoMatchedEpc,
-                page =
-                    Page(
-                        formModel = CheckMatchedEpcFormModel::class,
-                        templateName = "forms/checkMatchedEpcForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "fieldSetHeading" to "forms.checkMatchedEpc.fieldSetHeading",
-                                "address" to "TEMP",
-                                "radioOptions" to
-                                    listOf(
-                                        RadiosButtonViewModel(
-                                            value = true,
-                                            valueStr = "yes",
-                                            labelMsgKey = "forms.radios.option.yes.label",
-                                        ),
-                                        RadiosButtonViewModel(
-                                            value = false,
-                                            valueStr = "no",
-                                            labelMsgKey = "forms.radios.option.no.label",
-                                        ),
-                                    ),
-                            ),
-                    ),
+                page = getCheckMatchedEpcPage(autoMatchedEpc = true),
                 nextAction = { journeyData, _ -> checkAutoMatchedEpcStepNextAction(journeyData) },
             )
 
     private val checkMatchedEpcStep
         get() =
-            // TODO PRSD-1132 - implement this properly
             Step(
                 id = PropertyComplianceStepId.CheckMatchedEpc,
-                page =
-                    Page(
-                        formModel = CheckMatchedEpcFormModel::class,
-                        templateName = "forms/checkMatchedEpcForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "fieldSetHeading" to "forms.checkMatchedEpc.fieldSetHeading",
-                                "address" to "TEMP",
-                                "radioOptions" to
-                                    listOf(
-                                        RadiosButtonViewModel(
-                                            value = true,
-                                            valueStr = "yes",
-                                            labelMsgKey = "forms.radios.option.yes.label",
-                                        ),
-                                        RadiosButtonViewModel(
-                                            value = false,
-                                            valueStr = "no",
-                                            labelMsgKey = "forms.radios.option.no.label",
-                                        ),
-                                    ),
-                            ),
-                    ),
+                page = getCheckMatchedEpcPage(autoMatchedEpc = false),
                 nextAction = { journeyData, _ -> checkMatchedEpcStepNextAction(journeyData) },
                 handleSubmitAndRedirect = { journeyData, _, _ ->
                     checkMatchedEpcStepHandleSubmitAndRedirect(journeyData)
                 },
             )
+
+    private fun getCheckMatchedEpcPage(autoMatchedEpc: Boolean): Page {
+        val epcDetails = getEpcDetailsFromSession(autoMatched = autoMatchedEpc)
+        return Page(
+            formModel = CheckMatchedEpcFormModel::class,
+            templateName = "forms/checkMatchedEpcForm",
+            content =
+                mapOf(
+                    "title" to "propertyCompliance.title",
+                    "fieldSetHeading" to "forms.checkMatchedEpc.fieldSetHeading",
+                    "epcDetails" to (epcDetails ?: ""),
+                    "epcCertificateUrl" to epcCertificateUrlProvider.getEpcCertificateUrl(epcDetails?.certificateNumber ?: ""),
+                    "radioOptions" to
+                        listOf(
+                            RadiosButtonViewModel(
+                                value = true,
+                                valueStr = "yes",
+                                labelMsgKey = "forms.radios.option.yes.label",
+                            ),
+                            RadiosButtonViewModel(
+                                value = false,
+                                valueStr = "no",
+                                labelMsgKey = "forms.checkMatchedEpc.radios.no.label",
+                            ),
+                        ),
+                ),
+        )
+    }
 
     private val epcExemptionReasonStep
         get() =
@@ -1168,22 +1180,34 @@ class PropertyComplianceJourney(
 
     private fun checkAutoMatchedEpcStepNextAction(journeyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
         if (journeyData.getAutoMatchedEpcIsCorrect()!!) {
-            // TODO: PRSD-1132 - add check of expiry date and epc band
-            Pair(landlordResponsibilities.first().startingStepId, null)
+            matchedEpcIsCorrectNextAction(journeyData, autoMatched = true)
         } else {
             Pair(PropertyComplianceStepId.EpcLookup, null)
         }
 
     private fun checkMatchedEpcStepNextAction(journeyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
         if (journeyData.getMatchedEpcIsCorrect()!!) {
-            // TODO: PRSD-1132 - add check of expiry date and epc band
-            Pair(landlordResponsibilities.first().startingStepId, null)
+            matchedEpcIsCorrectNextAction(journeyData, autoMatched = false)
         } else {
             // The user will be redirected to the lookup step in handleSubmitAndRedirect
             // When they are redirected, the nextAction of lookupStep is this step (checkMatchedEpc)
             // Here we set checkMatchedEpc's nextAction to null to avoid an infinite loop of previous steps when checking if a step is reachable
             Pair(null, null)
         }
+
+    private fun matchedEpcIsCorrectNextAction(
+        journeyData: JourneyData,
+        autoMatched: Boolean,
+    ): Pair<PropertyComplianceStepId?, Int?> {
+        val epcDetails = journeyData.getEpcDetails(autoMatched)!!
+        if (epcDetails.isPastExpiryDate()) {
+            return Pair(PropertyComplianceStepId.EpcExpiryCheck, null)
+        }
+        if (!epcDetails.isEnergyRatingEOrBetter()) {
+            return Pair(PropertyComplianceStepId.MeesExemptionCheck, null)
+        }
+        return Pair(landlordResponsibilities.first().startingStepId, null)
+    }
 
     private fun checkMatchedEpcStepHandleSubmitAndRedirect(journeyData: JourneyData): String {
         val nextAction = checkMatchedEpcStepNextAction(journeyData)
@@ -1257,7 +1281,7 @@ class PropertyComplianceJourney(
             eicrIssueDate = filteredJourneyData.getEicrIssueDate()?.toJavaLocalDate(),
             eicrExemptionReason = filteredJourneyData.getEicrExemptionReason(),
             eicrExemptionOtherReason = filteredJourneyData.getEicrExemptionOtherReason(),
-            // TODO PRSD-1132: Assign epcUrl
+            epcUrl = epcCertificateUrlProvider.getEpcCertificateUrl(epcDetails?.certificateNumber ?: ""),
             epcExpiryDate = epcDetails?.expiryDate?.toJavaLocalDate(),
             epcEnergyRating = epcDetails?.energyRating,
             epcExemptionReason = filteredJourneyData.getEpcExemptionReason(),
@@ -1279,6 +1303,11 @@ class PropertyComplianceJourney(
                 ?: return ""
         return EpcDataModel.parseCertificateNumberOrNull(submittedCertificateNumber)!! // Only valid EPC numbers will be in journeyData
     }
+
+    private fun getEpcDetailsFromSession(autoMatched: Boolean): EpcDataModel? =
+        journeyDataService
+            .getJourneyDataFromSession()
+            .getEpcDetails(autoMatched)
 
     private fun getPropertyAddress() =
         propertyOwnershipService

@@ -59,6 +59,7 @@ os-places:
 
 epc:
   base-url: ${EPC_REGISTER_BASE_URL}
+  certificate-base-url: ${EPC_CERTIFICATE_BASE_URL}
 
 server:
   error:

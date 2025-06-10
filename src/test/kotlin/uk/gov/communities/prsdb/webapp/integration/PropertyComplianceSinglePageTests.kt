@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -26,16 +27,16 @@ import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionOtherReasonPagePropertyCompliance
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcExpiryCheckPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcNotAutoMatchedPagePropertyCompliance
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcNotFoundPagePropertyCompliance
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyDeclarationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionOtherReasonPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionCheckPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.services.FileUploader
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 
 class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
     @MockitoBean
@@ -418,6 +419,61 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
     }
 
     @Nested
+    inner class CheckAutoMatchedEpcStepTests {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val checkAutoMatchedEpcPage = navigator.skipToPropertyComplianceCheckAutoMatchedEpcPage(PROPERTY_OWNERSHIP_ID)
+            checkAutoMatchedEpcPage.form.submit()
+            assertThat(checkAutoMatchedEpcPage.form.getErrorMessage())
+                .containsText("Select Yes or No to continue")
+        }
+
+        @Test
+        fun `Accepting an expired EPC redirects to the EPC Expiry check page`(page: Page) {
+            val checkAutoMatchedEpcPage =
+                navigator.skipToPropertyComplianceCheckAutoMatchedEpcPage(
+                    PROPERTY_OWNERSHIP_ID,
+                    MockEpcData.createEpcDataModel(expiryDate = LocalDate(2022, 1, 1)),
+                )
+            checkAutoMatchedEpcPage.submitMatchedEpcDetailsCorrect()
+            assertPageIs(page, EpcExpiryCheckPagePropertyCompliance::class, urlArguments)
+        }
+
+        @Test
+        fun `Accepting an in date EPC with a low energy rating redirects to the MEES exemption check page`(page: Page) {
+            val checkAutoMatchedEpcPage =
+                navigator.skipToPropertyComplianceCheckAutoMatchedEpcPage(
+                    PROPERTY_OWNERSHIP_ID,
+                    MockEpcData.createEpcDataModel(energyRating = "F"),
+                )
+            checkAutoMatchedEpcPage.submitMatchedEpcDetailsCorrect()
+            assertPageIs(page, MeesExemptionCheckPagePropertyCompliance::class, urlArguments)
+        }
+    }
+
+    @Nested
+    inner class CheckMatchedEpcStepTests {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val checkMatchedEpcPage = navigator.skipToPropertyComplianceCheckMatchedEpcPage(PROPERTY_OWNERSHIP_ID)
+            checkMatchedEpcPage.form.submit()
+            assertThat(checkMatchedEpcPage.form.getErrorMessage())
+                .containsText("Select Yes or No to continue")
+        }
+
+        @Test
+        fun `Accepting an in date EPC with a low energy rating redirects to the MEES exemption check page`(page: Page) {
+            val checkMatchedEpcPage =
+                navigator.skipToPropertyComplianceCheckMatchedEpcPage(
+                    PROPERTY_OWNERSHIP_ID,
+                    MockEpcData.createEpcDataModel(energyRating = "F"),
+                )
+            checkMatchedEpcPage.submitMatchedEpcDetailsCorrect()
+            assertPageIs(page, MeesExemptionCheckPagePropertyCompliance::class, urlArguments)
+        }
+    }
+
+    @Nested
     inner class EpcLookupTests {
         @Test
         fun `Submitting a blank certificate number returns an error`() {
@@ -431,33 +487,6 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
             val epcLookupPage = navigator.skipToPropertyComplianceEpcLookupPage(PROPERTY_OWNERSHIP_ID)
             epcLookupPage.submitInvalidEpcNumber()
             assertThat(epcLookupPage.form.getErrorMessage()).containsText("Enter a 20 digit certificate number")
-        }
-
-        // TODO: PRSD-1200 - include this is a new journey test which doesn't find epcs
-        @Test
-        fun `Submitting a non-existent certificate number redirects to the EPC not found`(page: Page) {
-            val epcLookupPage = navigator.skipToPropertyComplianceEpcLookupPage(PROPERTY_OWNERSHIP_ID)
-            epcLookupPage.submitNonexistentEpcNumber()
-            assertPageIs(page, EpcNotFoundPagePropertyCompliance::class, urlArguments)
-        }
-    }
-
-    @Nested
-    inner class EpcNotFoundStepTests {
-        // TODO: PRSD-1200 - include this is a new journey test which doesn't find epcs
-        @Test
-        fun `Clicking the Search Again button returns the user to the EPC lookup step`(page: Page) {
-            val epcNotFoundPage = navigator.skipToPropertyComplianceEpcNotFoundPage(PROPERTY_OWNERSHIP_ID)
-            epcNotFoundPage.searchAgainButton.clickAndWait()
-            assertPageIs(page, EpcLookupPagePropertyCompliance::class, urlArguments)
-        }
-
-        // TODO: PRSD-1200 - include this is a new journey test which doesn't find epcs
-        @Test
-        fun `Clicking the Continue button directs the user to the Fire Safety Declaration step`(page: Page) {
-            val epcNotFoundPage = navigator.skipToPropertyComplianceEpcNotFoundPage(PROPERTY_OWNERSHIP_ID)
-            epcNotFoundPage.continueButton.clickAndWait()
-            assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
         }
     }
 
