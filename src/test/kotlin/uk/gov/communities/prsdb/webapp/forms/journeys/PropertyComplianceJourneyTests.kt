@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
+import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Nested
@@ -26,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -52,6 +54,9 @@ class PropertyComplianceJourneyTests {
 
     @Mock
     private lateinit var mockPropertyComplianceService: PropertyComplianceService
+
+    @Mock
+    private lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
 
     @Nested
     inner class LoadJourneyDataIfNotLoadedTests {
@@ -444,13 +449,31 @@ class PropertyComplianceJourneyTests {
         }
 
         @Test
-        fun `nextAction returns the EPC Expiry Check the accepted EPC is out of date`() {
-            // TODO: PRSD-1132 PR2
+        fun `nextAction returns the EPC Expiry Check if the accepted EPC is out of date`() {
+            val updatedJourneyData =
+                JourneyDataBuilder()
+                    .withCheckAutoMatchedEpcResult(true)
+                    .withAutoMatchedEpcDetails(MockEpcData.createEpcDataModel(expiryDate = LocalDate(2020, 1, 1)))
+                    .build()
+
+            assertEquals(
+                PropertyComplianceStepId.EpcExpiryCheck,
+                callNextActionAndReturnNextStepId(PropertyComplianceStepId.CheckAutoMatchedEpc, updatedJourneyData),
+            )
         }
 
         @Test
         fun `nextAction returns the MEES Exemption CHeck the accepted EPC is in date but has a low energy rating`() {
-            // TODO: PRSD-1132 PR2
+            val updatedJourneyData =
+                JourneyDataBuilder()
+                    .withCheckAutoMatchedEpcResult(true)
+                    .withAutoMatchedEpcDetails(MockEpcData.createEpcDataModel(energyRating = "F"))
+                    .build()
+
+            assertEquals(
+                PropertyComplianceStepId.MeesExemptionCheck,
+                callNextActionAndReturnNextStepId(PropertyComplianceStepId.CheckAutoMatchedEpc, updatedJourneyData),
+            )
         }
     }
 
@@ -491,13 +514,31 @@ class PropertyComplianceJourneyTests {
         }
 
         @Test
-        fun `nextAction returns the EPC Expiry Check the accepted EPC is out of date`() {
-            // TODO: PRSD-1132 PR2
+        fun `nextAction returns the EPC Expiry Check if the accepted EPC is out of date`() {
+            val updatedJourneyData =
+                JourneyDataBuilder()
+                    .withCheckMatchedEpcResult(true)
+                    .withLookedUpEpcDetails(MockEpcData.createEpcDataModel(expiryDate = LocalDate(2020, 1, 1)))
+                    .build()
+
+            assertEquals(
+                PropertyComplianceStepId.EpcExpiryCheck,
+                callNextActionAndReturnNextStepId(PropertyComplianceStepId.CheckMatchedEpc, updatedJourneyData),
+            )
         }
 
         @Test
         fun `nextAction returns the MEES Exemption CHeck the accepted EPC is in date but has a low energy rating`() {
-            // TODO: PRSD-1132 PR2
+            val updatedJourneyData =
+                JourneyDataBuilder()
+                    .withCheckMatchedEpcResult(true)
+                    .withLookedUpEpcDetails(MockEpcData.createEpcDataModel(energyRating = "F"))
+                    .build()
+
+            assertEquals(
+                PropertyComplianceStepId.MeesExemptionCheck,
+                callNextActionAndReturnNextStepId(PropertyComplianceStepId.CheckMatchedEpc, updatedJourneyData),
+            )
         }
     }
 
@@ -626,6 +667,7 @@ class PropertyComplianceJourneyTests {
             epcLookupService = mockEpcLookupService,
             propertyComplianceService = mockPropertyComplianceService,
             propertyOwnershipId = propertyOwnershipId,
+            epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
         )
 
     private fun completeStep(

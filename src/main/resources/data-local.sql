@@ -41,7 +41,10 @@ INSERT INTO form_context (id, created_date, last_modified_date, journey_type, co
 VALUES (1, current_date, current_date, 3, '{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R 1LA"},"looked-up-addresses":"[{\"singleLineAddress\":\"1, SAVOY COURT, LONDON, WC2R 0EX\",\"localAuthorityId\":318,\"uprn\":100023432931,\"buildingNumber\":\"1\",\"streetName\":\"SAVOY COURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R 0EX\"}]","select-address":{"address":"1, SAVOY COURT, LONDON, WC2R 0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}}','urn:fdc:gov.uk:2022:UVWXY'),
        (2, '01/15/25', '01/15/25', 7, '{}','urn:fdc:gov.uk:2022:UVWXY'),
        (3, '01/15/25', '01/15/25', 7, '{}','urn:fdc:gov.uk:2022:UVWXY'),
-       (4, '01/15/25', '01/15/25', 7, '{}','urn:fdc:gov.uk:2022:UVWXY');
+       (4, '01/15/25', '01/15/25', 7, '{}','urn:fdc:gov.uk:2022:UVWXY'),
+       (5, '2025-01-15 00:00:00+00', null, 7, '{}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
+       (6, '2025-01-15 00:00:00+00', null, 7, '{}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
+       (7, '2025-01-15 00:00:00+00', null, 7, '{}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo');
 
 SELECT setval(pg_get_serial_sequence('form_context', 'id'), (SELECT MAX(id) FROM form_context));
 
@@ -133,7 +136,10 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (61, '12/10/24', 0006001029, 0),
        (62, '12/10/24', 0006001030, 0),
        (63, '12/10/24', 0006001031, 0),
-       (64, '12/10/24', 0006001032, 0);
+       (64, '12/10/24', 0006001032, 0),
+       (65, '2025-01-15 00:00:00+00', 83811499802, 0),
+       (66, '2025-01-15 00:00:00+00', 40666195053, 0),
+       (67, '2025-01-15 00:00:00+00', 150242309330, 0);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -174,7 +180,10 @@ VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 1),
        (34, '05/02/25', '05/02/25', 1034, '22 PRSDB Square, EG1 2AV', 1),
        (35, '05/02/25', '05/02/25', 1035, '23 PRSDB Square, EG1 2AW', 2),
        (36, '05/02/25', '05/02/25', 1036, '24 PRSDB Square, EG1 2AX', 2),
-       (37, '05/02/25', '05/02/25', 1037, '25 PRSDB Square, EG1 2AY', 2);
+       (37, '05/02/25', '05/02/25', 1037, '25 PRSDB Square, EG1 2AY', 2),
+       (38, '2025-01-15 00:00:00+00', null, 100090154792, '5, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
+       (39, '2025-01-15 00:00:00+00', null, 100090154788, '1, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
+       (40, '2025-01-15 00:00:00+00', null, null, '2, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21);
 
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
@@ -257,7 +266,10 @@ VALUES (1, 1, true, 1, 6),
        (29, 1, true, 1, 34),
        (30, 1, true, 1, 35),
        (31, 1, true, 1, 36),
-       (32, 1, true, 1, 37);
+       (32, 1, true, 1, 37),
+       (33, 1, true, 1, 38),
+       (34, 1, true, 1, 39),
+       (35, 1, true, 1, 40);
 
 SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
 
@@ -305,7 +317,10 @@ VALUES (1, true, 0, 1, 1, 2, 6, 1, 1, '01/15/25', '02/02/25', null, 2),
        (29, true, 0, 1, 0, 0, 61, 1, 29, '05/02/25', '01/15/25', 5, null),
        (30, true, 0, 1, 0, 0, 62, 1, 30, '05/02/25', '01/15/25', 6, null),
        (31, true, 0, 1, 0, 0, 63, 1, 31, '05/02/25', '01/15/25', 7, null),
-       (32, true, 0, 1, 0, 0, 64, 1, 32, '05/02/25', '01/15/25', 8, null);
+       (32, true, 0, 1, 0, 0, 64, 1, 32, '05/02/25', '01/15/25', 8, null),
+       (33, true, 0, 0, 0, 0, 65, 1, 33,'2025-01-15 00:00:00+00', null, null, 5),
+       (34, true, 0, 0, 0, 0, 66, 1, 34,'2025-01-15 00:00:00+00', null, null, 6),
+       (35, true, 0, 0, 0, 0, 67, 1, 35,'2025-01-15 00:00:00+00', null, null, 7);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
