@@ -102,7 +102,7 @@ class LandlordController(
     fun deleteIncompletePropertyAreYouSure(
         model: Model,
         principal: Principal,
-        @RequestParam(value = "contextId", required = true) contextId: Long,
+        @RequestParam(value = CONTEXT_ID_URL_PARAMETER, required = true) contextId: Long,
     ): String {
         populateDeleteIncompletePropertyRegistrationModel(model, contextId, principal.name)
         model.addAttribute(
@@ -117,7 +117,7 @@ class LandlordController(
     fun deleteIncompletePropertyAreYouSure(
         model: Model,
         principal: Principal,
-        @RequestParam(value = "contextId", required = true) contextId: Long,
+        @RequestParam(value = CONTEXT_ID_URL_PARAMETER, required = true) contextId: Long,
         @Valid
         @ModelAttribute
         formModel: DeleteIncompletePropertyRegistrationAreYouSureFormModel,
@@ -129,7 +129,7 @@ class LandlordController(
         }
 
         if (formModel.wantsToProceed == true) {
-            propertyRegistrationService.deleteIncompleteProperty(contextId.toLong(), principal.name)
+            propertyRegistrationService.deleteIncompleteProperty(contextId, principal.name)
         }
 
         return "redirect:$INCOMPLETE_PROPERTIES_URL"
