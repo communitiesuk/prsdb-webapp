@@ -93,6 +93,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyUploadPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.KeepPropertySafePagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionCheckPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.ResponsibilityToTenantsPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
@@ -795,6 +796,22 @@ class Navigator(
         return createValidPage(
             page,
             EpcExpiryCheckPagePropertyCompliance::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
+    fun skipToPropertyComplianceMeesExemptionCheckPage(propertyOwnershipId: Long): MeesExemptionCheckPagePropertyCompliance {
+        setJourneyDataInSession(
+            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
+            JourneyPageDataBuilder.beforePropertyComplianceMeesExemptionCheck().build(),
+        )
+        navigate(
+            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+                "/${PropertyComplianceStepId.MeesExemptionCheck.urlPathSegment}",
+        )
+        return createValidPage(
+            page,
+            MeesExemptionCheckPagePropertyCompliance::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }

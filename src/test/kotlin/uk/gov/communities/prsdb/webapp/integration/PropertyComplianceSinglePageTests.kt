@@ -35,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyDeclarationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionOtherReasonPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.LowEnergyRatingPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionCheckPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
@@ -506,6 +507,24 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
             val epcExpiryCheckPage = navigator.skipToPropertyComplianceEpcExpiryCheckPage(PROPERTY_OWNERSHIP_ID, epcRating = "C")
             epcExpiryCheckPage.submitTenancyStartedBeforeExpiry()
             assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
+        }
+    }
+
+    @Nested
+    inner class MeesExemptionCheckStepTests {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val meesExemptionCheckPage = navigator.skipToPropertyComplianceMeesExemptionCheckPage(PROPERTY_OWNERSHIP_ID)
+            meesExemptionCheckPage.form.submit()
+            assertThat(meesExemptionCheckPage.form.getErrorMessage())
+                .containsText("Select Yes or No to continue")
+        }
+
+        @Test
+        fun `Submitting with 'No' redirects to the Low Energy Rating page`(page: Page) {
+            val meesExemptionCheckPage = navigator.skipToPropertyComplianceMeesExemptionCheckPage(PROPERTY_OWNERSHIP_ID)
+            meesExemptionCheckPage.submitDoesNotHaveExemption()
+            assertPageIs(page, LowEnergyRatingPagePropertyCompliance::class, urlArguments)
         }
     }
 

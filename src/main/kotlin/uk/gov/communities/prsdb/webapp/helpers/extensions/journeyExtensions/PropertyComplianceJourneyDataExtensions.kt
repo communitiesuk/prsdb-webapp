@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemp
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExpiryCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FireSafetyDeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
