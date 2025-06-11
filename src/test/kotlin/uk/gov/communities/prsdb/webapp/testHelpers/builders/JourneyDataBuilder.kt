@@ -647,6 +647,12 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withEpcExpiryCheckStep(tenancyStartedBeforeExpiry: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EpcExpiryCheck.urlPathSegment] =
+            mapOf("tenancyStartedBeforeExpiry" to tenancyStartedBeforeExpiry)
+        return this
+    }
+
     fun withEpcExpiredStep(): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EpcExpired.urlPathSegment] = emptyMap<String, Any?>()
         return this

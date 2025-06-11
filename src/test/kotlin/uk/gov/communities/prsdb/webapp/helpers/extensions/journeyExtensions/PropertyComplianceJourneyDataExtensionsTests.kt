@@ -8,7 +8,6 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -32,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrOriginalName
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcExemptionReason
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcExpiryCheckTenancyStartedBeforeExpiry
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcLookupCertificateNumber
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertEngineerNum
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionOtherReason
@@ -661,6 +661,15 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
+    fun `getEpcExpiryCheckTenancyStartedBeforeExpiry returns the submitted answer for the EpcExpiryCheck step`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.withEpcExpiryCheckStep(true).build()
+
+        // Act, Assert
+        assertTrue(testJourneyData.getEpcExpiryCheckTenancyStartedBeforeExpiry()!!)
+    }
+
+    @Test
     fun `getHasFireSafetyDeclaration returns a boolean if the corresponding page is in journeyData`() {
         val hasFireSafetyDeclaration = true
         val testJourneyData = journeyDataBuilder.withFireSafetyDeclaration(hasFireSafetyDeclaration).build()
@@ -735,8 +744,6 @@ class PropertyComplianceJourneyDataExtensionsTests {
             assertTrue(hasCompletedEpcTask)
         }
 
-        // TODO: PRSD-1146 - add check that this page was answered "Yes"
-        @Disabled
         @Test
         fun `returns true if EpcExpiryCheck was answered Yes and the energy rating is E or better`() {
             val testJourneyData =
@@ -744,7 +751,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
                     .withAutoMatchedEpcDetails(
                         MockEpcData.createEpcDataModel(expiryDate = kotlinx.datetime.LocalDate(2022, 1, 5), energyRating = "A"),
                     ).withCheckAutoMatchedEpcResult(true)
-                    // .withEpcExpiryCheck(true)  TODO: PRSD-1146
+                    .withEpcExpiryCheckStep(true)
                     .build()
 
             val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
@@ -752,8 +759,6 @@ class PropertyComplianceJourneyDataExtensionsTests {
             assertTrue(hasCompletedEpcTask)
         }
 
-        // TODO: PRSD-1146 - add check that this page was answered "Yes"
-        @Disabled
         @Test
         fun `EpcExpiryCheck does not complete this task if the energy rating is worse than E and MEES steps are not completed`() {
             val testJourneyData =
@@ -761,7 +766,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
                     .withAutoMatchedEpcDetails(
                         MockEpcData.createEpcDataModel(expiryDate = kotlinx.datetime.LocalDate(2022, 1, 5), energyRating = "F"),
                     ).withCheckAutoMatchedEpcResult(true)
-                    // .withEpcExpiryCheck(true)  TODO: PRSD-1146
+                    .withEpcExpiryCheckStep(true)
                     .build()
 
             val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
@@ -769,13 +774,11 @@ class PropertyComplianceJourneyDataExtensionsTests {
             assertFalse(hasCompletedEpcTask)
         }
 
-        // TODO: PRSD-1146 - add check that this page was answered "No"
-        @Disabled
         @Test
         fun `EpcExpiryCheck does not complete this task if it is answered No`() {
             val testJourneyData =
                 journeyDataBuilder
-                    // .withEpcExpiryCheck(false)  TODO: PRSD-1146
+                    .withEpcExpiryCheckStep(false)
                     .build()
 
             val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()

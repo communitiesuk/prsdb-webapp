@@ -301,9 +301,9 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 !this.getEpcDetails(autoMatched = false)!!.isPastExpiryDate() &&
                 this.getEpcDetails(autoMatched = false)!!.isEnergyRatingEOrBetter()
 
-        // TODO Prsd-1146 - make this check whether this page was answered with "Yes"
         private fun JourneyData.getHasCompletedEpcTaskWithEpcExpiryCheck() =
             this.containsKey(PropertyComplianceStepId.EpcExpiryCheck.urlPathSegment) &&
+                this.getEpcExpiryCheckTenancyStartedBeforeExpiry() == true &&
                 this.getAcceptedEpcDetails()!!.isEnergyRatingEOrBetter()
 
         private fun JourneyData.getHasCompletedEpcExpired() = this.containsKey(PropertyComplianceStepId.EpcExpired.urlPathSegment)
