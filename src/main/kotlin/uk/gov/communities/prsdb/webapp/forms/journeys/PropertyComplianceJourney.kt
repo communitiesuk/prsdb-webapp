@@ -1056,6 +1056,36 @@ class PropertyComplianceJourney(
                 nextAction = { filteredJourneyData, _ -> meesExemptionCheckStepNextAction(filteredJourneyData) },
             )
 
+    private val meesExemptionCheckStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.MeesExemptionCheck,
+                page =
+                    Page(
+                        formModel = MeesExemptionCheckFormModel::class,
+                        templateName = "forms/meesExemptionCheckForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = true,
+                                            valueStr = "yes",
+                                            labelMsgKey = "forms.radios.option.yes.label",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = false,
+                                            valueStr = "no",
+                                            labelMsgKey = "forms.radios.option.no.label",
+                                        ),
+                                    ),
+                                "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
+                            ),
+                    ),
+                nextAction = { filteredJourneyData, _ -> meesExemptionCheckStepNextAction(filteredJourneyData) },
+            )
+
     private val fireSafetyDeclarationStep
         get() =
             Step(
@@ -1359,6 +1389,13 @@ class PropertyComplianceJourney(
             }
         } else {
             Pair(PropertyComplianceStepId.EpcExpired, null)
+        }
+
+    private fun meesExemptionCheckStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
+        if (filteredJourneyData.getPropertyHasMeesExemption()!!) {
+            Pair(PropertyComplianceStepId.MeesExemptionReason, null)
+        } else {
+            Pair(PropertyComplianceStepId.LowEnergyRating, null)
         }
 
     private fun meesExemptionCheckStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
