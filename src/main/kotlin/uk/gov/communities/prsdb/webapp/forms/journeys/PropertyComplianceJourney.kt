@@ -37,6 +37,7 @@ import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAutoMatchedEpcIsCorrect
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getDidTenancyStartBeforeEpcExpiry
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionOtherReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrIssueDate
@@ -71,6 +72,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemp
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionReasonFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExpiryCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FireSafetyDeclarationFormModel
@@ -235,11 +237,7 @@ class PropertyComplianceJourney(
                     checkMatchedEpcStep,
                     epcNotFoundStep,
                     epcSupersededStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.EpcExpiryCheck,
-                        "TODO PRSD-1146: Implement EPC Expiry Check step",
-                        PropertyComplianceStepId.EpcExpired,
-                    ),
+                    epcExpiryCheckStep,
                     epcExpiredStep,
                     epcMissingStep,
                     epcExemptionReasonStep,
@@ -997,6 +995,37 @@ class PropertyComplianceJourney(
                 nextAction = { _, _ -> Pair(fireSafetyDeclarationStep.id, null) },
             )
 
+    private val epcExpiryCheckStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EpcExpiryCheck,
+                page =
+                    Page(
+                        formModel = EpcExpiryCheckFormModel::class,
+                        templateName = "forms/epcExpiryCheckForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.epcExpiryCheck.fieldSetHeading",
+                                "expiryDate" to (getAcceptedEpcDetailsFromSession()?.expiryDateAsJavaLocalDate ?: ""),
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = true,
+                                            valueStr = "yes",
+                                            labelMsgKey = "forms.radios.option.yes.label",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = false,
+                                            valueStr = "no",
+                                            labelMsgKey = "forms.radios.option.no.label",
+                                        ),
+                                    ),
+                            ),
+                    ),
+                nextAction = { filteredJourneyData, _ -> epcExpiryCheckStepNextAction(filteredJourneyData) },
+            )
+
     private val fireSafetyDeclarationStep
         get() =
             Step(
@@ -1290,6 +1319,17 @@ class PropertyComplianceJourney(
         resetCheckMatchedEpcInSession(sessionJourneyData, latestEpc)
         return updateEpcDetailsInSessionAndRedirectToNextStep(epcLookupStep, filteredJourneyData, latestEpc, autoMatchedEpc = false)
     }
+
+    private fun epcExpiryCheckStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
+        if (filteredJourneyData.getDidTenancyStartBeforeEpcExpiry() == true) {
+            if (filteredJourneyData.getAcceptedEpcDetails()?.isEnergyRatingEOrBetter() == true) {
+                Pair(landlordResponsibilities.first().startingStepId, null)
+            } else {
+                Pair(PropertyComplianceStepId.MeesExemptionCheck, null)
+            }
+        } else {
+            Pair(PropertyComplianceStepId.EpcExpired, null)
+        }
 
     private fun fireSafetyDeclarationStepNextAction(filteredJourneyData: JourneyData) =
         if (filteredJourneyData.getHasFireSafetyDeclaration()!!) {
