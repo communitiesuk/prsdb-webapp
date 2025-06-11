@@ -133,7 +133,7 @@ class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
                 }
 
                 @Test
-                fun `the add compliance information link redirects to the add compliance information page`(page: Page) {
+                fun `the add compliance information link redirects to the incomplete compliances page`(page: Page) {
                     val dashboard = navigator.goToLandlordDashboard()
                     dashboard.notificationBanner.addComplianmceInformationLink.clickAndWait()
                     assertPageIs(page, LandlordIncompleteCompiancesPage::class)

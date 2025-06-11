@@ -895,11 +895,14 @@ class PropertyOwnershipServiceTests {
                     ),
                 )
             whenever(
-                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
-                    principalName,
-                    RegistrationStatus.REGISTERED,
-                ),
-            ).thenReturn(properties)
+                @Suppress("ktlint:standard:max-line-length")
+                mockPropertyOwnershipRepository
+                    .countByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_StatusAndCurrentNumTenantsIsGreaterThanAndIncompleteComplianceFormNotNull(
+                        principalName,
+                        RegistrationStatus.REGISTERED,
+                        0,
+                    ),
+            ).thenReturn(1L)
 
             // Act
             val numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principalName)
@@ -913,11 +916,14 @@ class PropertyOwnershipServiceTests {
             // Arrange
             val expectedNumberOfIncompleteCompliances = 0
             whenever(
-                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
-                    principalName,
-                    RegistrationStatus.REGISTERED,
-                ),
-            ).thenReturn(emptyList())
+                @Suppress("ktlint:standard:max-line-length")
+                mockPropertyOwnershipRepository
+                    .countByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_StatusAndCurrentNumTenantsIsGreaterThanAndIncompleteComplianceFormNotNull(
+                        principalName,
+                        RegistrationStatus.REGISTERED,
+                        0,
+                    ),
+            ).thenReturn(0L)
 
             // Act
             val numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principalName)
