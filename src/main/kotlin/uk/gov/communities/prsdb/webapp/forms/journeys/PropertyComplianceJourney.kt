@@ -1322,8 +1322,7 @@ class PropertyComplianceJourney(
 
     private fun epcExpiryCheckStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
         if (filteredJourneyData.getEpcExpiryCheckTenancyStartedBeforeExpiry() == true) {
-            val sessionJourneyData = journeyDataService.getJourneyDataFromSession()
-            if (sessionJourneyData.getAcceptedEpcDetails()?.isEnergyRatingEOrBetter() == true) {
+            if (filteredJourneyData.getAcceptedEpcDetails()?.isEnergyRatingEOrBetter() == true) {
                 Pair(landlordResponsibilities.first().startingStepId, null)
             } else {
                 Pair(PropertyComplianceStepId.MeesExemptionCheck, null)

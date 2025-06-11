@@ -685,15 +685,10 @@ class PropertyComplianceJourneyTests {
             // Arrange
             val filteredJourneyData =
                 JourneyDataBuilder()
-                    .withEpcExpiryCheckStep(true)
-                    .build()
-
-            val sessionJourneyData =
-                JourneyDataBuilder()
                     .withCheckAutoMatchedEpcResult(true)
                     .withAutoMatchedEpcDetails(MockEpcData.createEpcDataModel(energyRating = "C"))
+                    .withEpcExpiryCheckStep(true)
                     .build()
-            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(sessionJourneyData)
 
             // Act, Assert
             assertEquals(
@@ -701,7 +696,6 @@ class PropertyComplianceJourneyTests {
                 callNextActionAndReturnNextStepId(
                     PropertyComplianceStepId.EpcExpiryCheck,
                     filteredJourneyData,
-                    stubPropertyOwnership = false,
                 ),
             )
         }
