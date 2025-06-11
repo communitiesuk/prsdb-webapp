@@ -32,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemp
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionReasonFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExpiryCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FireSafetyDeclarationFormModel
@@ -644,6 +645,12 @@ class JourneyDataBuilder(
 
     fun withEpcMissingStep(): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EpcMissing.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withEpcExpiryCheckStep(tenancyStartedBeforeExpiry: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EpcExpiryCheck.urlPathSegment] =
+            mapOf(EpcExpiryCheckFormModel::tenancyStartedBeforeExpiry.name to tenancyStartedBeforeExpiry)
         return this
     }
 

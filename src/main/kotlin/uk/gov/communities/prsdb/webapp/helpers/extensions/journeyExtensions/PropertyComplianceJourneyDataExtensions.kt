@@ -213,6 +213,13 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 EicrExemptionReasonFormModel::exemptionReason.name,
             )
 
+        fun JourneyData.getDidTenancyStartBeforeEpcExpiry(): Boolean? =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.EpcExpiryCheck.urlPathSegment,
+                EpcExpiryCheckFormModel::tenancyStartedBeforeExpiry.name,
+            )
+
         fun JourneyData.getPropertyHasMeesExemption(): Boolean? =
             JourneyDataHelper.getFieldBooleanValue(
                 this,
@@ -301,9 +308,9 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 !this.getEpcDetails(autoMatched = false)!!.isPastExpiryDate() &&
                 this.getEpcDetails(autoMatched = false)!!.isEnergyRatingEOrBetter()
 
-        // TODO Prsd-1146 - make this check whether this page was answered with "Yes"
         private fun JourneyData.getHasCompletedEpcTaskWithEpcExpiryCheck() =
             this.containsKey(PropertyComplianceStepId.EpcExpiryCheck.urlPathSegment) &&
+                this.getDidTenancyStartBeforeEpcExpiry() == true &&
                 this.getAcceptedEpcDetails()!!.isEnergyRatingEOrBetter()
 
         private fun JourneyData.getHasCompletedEpcExpired() = this.containsKey(PropertyComplianceStepId.EpcExpired.urlPathSegment)
