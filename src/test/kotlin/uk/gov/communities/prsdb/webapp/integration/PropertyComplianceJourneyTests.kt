@@ -284,7 +284,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         expiryCheckPage.submitTenancyStartedAfterExpiry()
         val epcExpiredPage = assertPageIs(page, EpcExpiredPagePropertyCompliance::class, urlArguments)
 
-        // TODO PRSD-1147 - update this
+        assertTrue(epcExpiredPage.page.content().contains("5 January 2022"))
         epcExpiredPage.continueButton.clickAndWait()
         assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
     }

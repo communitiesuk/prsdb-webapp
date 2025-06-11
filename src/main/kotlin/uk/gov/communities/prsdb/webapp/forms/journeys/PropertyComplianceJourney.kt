@@ -238,11 +238,7 @@ class PropertyComplianceJourney(
                     epcNotFoundStep,
                     epcSupersededStep,
                     epcExpiryCheckStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.EpcExpired,
-                        "TODO PRSD-1147: Implement EPC Expiry Reason step",
-                        PropertyComplianceStepId.FireSafetyDeclaration,
-                    ),
+                    epcExpiredStep,
                     epcMissingStep,
                     epcExemptionReasonStep,
                     epcExemptionConfirmationStep,
@@ -959,6 +955,24 @@ class PropertyComplianceJourney(
                     ),
                 nextAction = { filteredJourneyData, _ -> epcLookupStepNextAction(filteredJourneyData) },
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ -> epcLookupStepHandleSubmitAndRedirect(filteredJourneyData) },
+            )
+
+    private val epcExpiredStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EpcExpired,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/epcExpiredForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "getNewEpcUrl" to GET_NEW_EPC_URL,
+                                "expiryDateAsJavaLocalDate" to (getAcceptedEpcDetailsFromSession()?.expiryDateAsJavaLocalDate ?: ""),
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
             )
 
     private val epcNotFoundStep
