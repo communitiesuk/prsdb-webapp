@@ -14,7 +14,9 @@ fs.createReadStream(inputFilePath)
             return;
         }
 
-        const values = results.map(row => {
+        const values = results
+            .filter(row => row['ACCOUNT_TYPE_NAME'].startsWith('English'))
+            .map(row => {
             // SQL escape any single quotes
             const custodianCode = row['AUTH_CODE'].replace(/'/g, "''");
             const name = row['ACCOUNT_NAME'].replace(/'/g, "''");
