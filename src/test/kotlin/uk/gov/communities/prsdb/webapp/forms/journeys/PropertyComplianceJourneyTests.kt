@@ -664,6 +664,76 @@ class PropertyComplianceJourneyTests {
     }
 
     @Nested
+    inner class EpcExpiryCheckTests {
+        @Test
+        fun `nextAction returns EpcExpired if tenancyStartedBeforeExpiry is false`() {
+            // Arrange
+            val filteredJourneyData =
+                JourneyDataBuilder()
+                    .withEpcExpiryCheckStep(false)
+                    .build()
+
+            // Act, Assert
+            assertEquals(
+                PropertyComplianceStepId.EpcExpired,
+                callNextActionAndReturnNextStepId(PropertyComplianceStepId.EpcExpiryCheck, filteredJourneyData),
+            )
+        }
+
+        @Test
+        fun `nextAction returns FireSafetyDeclaration if tenancyStartedBeforeExpiry is true and the energy rating is good`() {
+            // Arrange
+            val filteredJourneyData =
+                JourneyDataBuilder()
+                    .withEpcExpiryCheckStep(true)
+                    .build()
+
+            val sessionJourneyData =
+                JourneyDataBuilder()
+                    .withCheckAutoMatchedEpcResult(true)
+                    .withAutoMatchedEpcDetails(MockEpcData.createEpcDataModel(energyRating = "C"))
+                    .build()
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(sessionJourneyData)
+
+            // Act, Assert
+            assertEquals(
+                PropertyComplianceStepId.FireSafetyDeclaration,
+                callNextActionAndReturnNextStepId(
+                    PropertyComplianceStepId.EpcExpiryCheck,
+                    filteredJourneyData,
+                    stubPropertyOwnership = false,
+                ),
+            )
+        }
+
+        @Test
+        fun `nextAction returns MeesExemptionCheck if tenancyStartedBeforeExpiry is true and the energy rating is poor`() {
+            // Arrange
+            val filteredJourneyData =
+                JourneyDataBuilder()
+                    .withEpcExpiryCheckStep(true)
+                    .build()
+
+            val sessionJourneyData =
+                JourneyDataBuilder()
+                    .withCheckAutoMatchedEpcResult(true)
+                    .withAutoMatchedEpcDetails(MockEpcData.createEpcDataModel(energyRating = "F"))
+                    .build()
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(sessionJourneyData)
+
+            // Act, Assert
+            assertEquals(
+                PropertyComplianceStepId.MeesExemptionCheck,
+                callNextActionAndReturnNextStepId(
+                    PropertyComplianceStepId.EpcExpiryCheck,
+                    filteredJourneyData,
+                    stubPropertyOwnership = false,
+                ),
+            )
+        }
+    }
+
+    @Nested
     inner class CheckAndSubmitHandleSubmitAndRedirectTests {
         @Test
         fun `checkAndSubmitHandleSubmitAndRedirect creates a compliance record and deletes the corresponding form context`() {
