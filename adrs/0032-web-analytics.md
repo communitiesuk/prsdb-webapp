@@ -58,7 +58,8 @@ alternatives (such as Simple Analytics, and Matomo); Plausible has been chosen a
 that group.
 
 * Neutral, because it is not widely used, but has been used in MHCLG before (on CORE).
-* Neutral, because there is a risk of delay as we seek legal / data protection approval.
+* Neutral, because there is a _risk_ of delay (e.g. if we need legal / data protection approval) - although it is
+  already on the Cyber assured list, and does not require TDA sign-off.
 * Bad, because it does not capture performance metrics (e.g. response times), so we'd need to source that data elsewhere
   (e.g. Treo, or rely on server-side timings).
 * Neutral, because it's deduplication of 'unique' visitors is weak (based on IP, persisting only for 24 hours).
