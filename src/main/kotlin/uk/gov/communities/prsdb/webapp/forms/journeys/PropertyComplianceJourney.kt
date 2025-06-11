@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.constants.HOMES_ACT_2018_URL
 import uk.gov.communities.prsdb.webapp.constants.HOUSES_IN_MULTIPLE_OCCUPATION_URL
 import uk.gov.communities.prsdb.webapp.constants.HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL
 import uk.gov.communities.prsdb.webapp.constants.HOW_TO_RENT_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.PRIVATE_RENTING_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
@@ -61,6 +62,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getLatestEpcCertificateNumber
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMatchedEpcIsCorrect
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getPropertyHasMeesExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withResetCheckMatchedEpc
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
@@ -81,6 +83,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.KeepPropertySafeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
@@ -248,11 +251,7 @@ class PropertyComplianceJourney(
                     epcMissingStep,
                     epcExemptionReasonStep,
                     epcExemptionConfirmationStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.MeesExemptionCheck,
-                        "TODO PRSD-1141: Implement MEES Exemption Check step",
-                        PropertyComplianceStepId.MeesExemptionReason,
-                    ),
+                    meesExemptionCheckStep,
                     placeholderStep(
                         PropertyComplianceStepId.MeesExemptionReason,
                         "TODO PRSD-1143: Implement MEES Exemption Reason step",
@@ -983,6 +982,36 @@ class PropertyComplianceJourney(
                 nextAction = { _, _ -> Pair(fireSafetyDeclarationStep.id, null) },
             )
 
+    private val meesExemptionCheckStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.MeesExemptionCheck,
+                page =
+                    Page(
+                        formModel = MeesExemptionCheckFormModel::class,
+                        templateName = "forms/meesExemptionCheckForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = true,
+                                            valueStr = "yes",
+                                            labelMsgKey = "forms.radios.option.yes.label",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = false,
+                                            valueStr = "no",
+                                            labelMsgKey = "forms.radios.option.no.label",
+                                        ),
+                                    ),
+                                "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
+                            ),
+                    ),
+                nextAction = { filteredJourneyData, _ -> meesExemptionCheckStepNextAction(filteredJourneyData) },
+            )
+
     private val fireSafetyDeclarationStep
         get() =
             Step(
@@ -1276,6 +1305,13 @@ class PropertyComplianceJourney(
         resetCheckMatchedEpcInSession(sessionJourneyData, latestEpc)
         return updateEpcDetailsInSessionAndRedirectToNextStep(epcLookupStep, filteredJourneyData, latestEpc, autoMatchedEpc = false)
     }
+
+    private fun meesExemptionCheckStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
+        if (filteredJourneyData.getPropertyHasMeesExemption()!!) {
+            Pair(PropertyComplianceStepId.MeesExemptionReason, null)
+        } else {
+            Pair(PropertyComplianceStepId.LowEnergyRating, null)
+        }
 
     private fun fireSafetyDeclarationStepNextAction(filteredJourneyData: JourneyData) =
         if (filteredJourneyData.getHasFireSafetyDeclaration()!!) {
