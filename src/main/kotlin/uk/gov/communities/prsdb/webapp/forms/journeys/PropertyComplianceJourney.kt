@@ -1081,6 +1081,7 @@ class PropertyComplianceJourney(
                                         ),
                                     ),
                                 "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
+                                "singleLineAddress" to (getAcceptedEpcDetailsFromSession()?.singleLineAddress ?: ""),
                             ),
                     ),
                 nextAction = { filteredJourneyData, _ -> meesExemptionCheckStepNextAction(filteredJourneyData) },
