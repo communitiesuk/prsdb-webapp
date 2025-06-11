@@ -237,11 +237,7 @@ class PropertyComplianceJourney(
                     checkMatchedEpcStep,
                     epcNotFoundStep,
                     epcSupersededStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.EpcExpiryCheck,
-                        "TODO PRSD-1146: Implement EPC Expiry Check step",
-                        PropertyComplianceStepId.EpcExpired,
-                    ),
+                    epcExpiryCheckStep,
                     placeholderStep(
                         PropertyComplianceStepId.EpcExpired,
                         "TODO PRSD-1147: Implement EPC Expiry Reason step",
@@ -1310,6 +1306,18 @@ class PropertyComplianceJourney(
         return updateEpcDetailsInSessionAndRedirectToNextStep(epcLookupStep, filteredJourneyData, latestEpc, autoMatchedEpc = false)
     }
 
+    private fun epcExpiryCheckStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
+        if (filteredJourneyData.getEpcExpiryCheckTenancyStartedBeforeExpiry() == true) {
+            val sessionJourneyData = journeyDataService.getJourneyDataFromSession()
+            if (sessionJourneyData.getAcceptedEpcDetails()?.isEnergyRatingEOrBetter() == true) {
+                Pair(landlordResponsibilities.first().startingStepId, null)
+            } else {
+                Pair(PropertyComplianceStepId.MeesExemptionCheck, null)
+            }
+        } else {
+            Pair(PropertyComplianceStepId.EpcExpired, null)
+        }
+
     private fun fireSafetyDeclarationStepNextAction(filteredJourneyData: JourneyData) =
         if (filteredJourneyData.getHasFireSafetyDeclaration()!!) {
             Pair(PropertyComplianceStepId.KeepPropertySafe, null)
@@ -1381,6 +1389,11 @@ class PropertyComplianceJourney(
         return journeyDataService.getJourneyDataFromSession().getLatestEpcCertificateNumber()
             ?: return ""
     }
+
+    private fun getAcceptedEpcDetailsFromSession(): EpcDataModel? =
+        journeyDataService
+            .getJourneyDataFromSession()
+            .getAcceptedEpcDetails()
 
     private fun getPropertyAddress() =
         propertyOwnershipService

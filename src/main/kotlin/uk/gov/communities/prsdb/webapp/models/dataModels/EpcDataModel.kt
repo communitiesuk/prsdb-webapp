@@ -29,14 +29,6 @@ data class EpcDataModel(
 
     fun isEnergyRatingEOrBetter(): Boolean = energyRatingUppercase in "A".."E"
 
-    fun isPastExpiryDate(): Boolean = expiryDate < DateTimeHelper().getCurrentDateInUK()
-
-    fun isEnergyRatingEOrBetter(): Boolean =
-        when (energyRating.uppercase(Locale.getDefault())) {
-            "A", "B", "C", "D", "E" -> true
-            else -> false
-        }
-
     companion object {
         fun parseCertificateNumberOrNull(certificateNumber: String): String? {
             val certNumberNoHyphens = certificateNumber.replace("-", "")
