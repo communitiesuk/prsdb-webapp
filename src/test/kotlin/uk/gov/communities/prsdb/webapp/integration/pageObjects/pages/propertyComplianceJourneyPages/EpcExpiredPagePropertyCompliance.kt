@@ -14,6 +14,5 @@ class EpcExpiredPagePropertyCompliance(
         PropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${PropertyComplianceStepId.EpcExpired.urlPathSegment}",
     ) {
-    // TODO: PRSD-1147 - update this
-    val continueButton = Button.byText(page, "Continue")
+    val continueButton = Button.byText(page, "Save and continue to landlord responsibilities")
 }

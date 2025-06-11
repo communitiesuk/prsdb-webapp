@@ -272,7 +272,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
 
         // EPC Lookup page - submit latest certificate but it is expired
         whenever(epcRegisterClient.getByRrn(CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER))
-            .thenReturn(MockEpcData.createEpcRegisterClientEpcFoundResponse(expiryDate = LocalDate(2022, 1, 5)))
+            .thenReturn(MockEpcData.createEpcRegisterClientEpcFoundResponse(expiryDate = MockEpcData.expiryDateInThePast))
         epcLookupPage.submitCurrentEpcNumberWhichIsExpired()
         checkMatchedEpcPage = assertPageIs(page, CheckMatchedEpcPagePropertyCompliance::class, urlArguments)
 
@@ -283,7 +283,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         expiryCheckPage.continueButton.clickAndWait()
         val epcExpiredPage = assertPageIs(page, EpcExpiredPagePropertyCompliance::class, urlArguments)
 
-        // TODO PRSD-1147 - update this
+        assertTrue(epcExpiredPage.page.content().contains("5 January 2022"))
         epcExpiredPage.continueButton.clickAndWait()
         assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
     }
