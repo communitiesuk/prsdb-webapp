@@ -45,7 +45,9 @@ class LandlordIncompleteCompliancesPageTests : IntegrationTest() {
             val incompleteCompliancesPage = navigator.goToLandlordIncompleteCompliances()
 
             assertThat(incompleteCompliancesPage.firstSummaryCard.summaryCardList.propertyAddressRow).containsText("2 Fake Way")
-            assertThat(incompleteCompliancesPage.firstSummaryCard.summaryCardList.localAuthorityRow).containsText("ISLE OF MAN")
+            assertThat(
+                incompleteCompliancesPage.firstSummaryCard.summaryCardList.localAuthorityRow,
+            ).containsText("BATH AND NORTH EAST SOMERSET COUNCIL")
             assertThat(
                 incompleteCompliancesPage.firstSummaryCard.summaryCardList.certificatesDueRow,
             ).containsText(formattedCertificatesDueDate, LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
@@ -57,7 +59,7 @@ class LandlordIncompleteCompliancesPageTests : IntegrationTest() {
             assertThat(incompleteCompliancesPage.secondSummaryCard.summaryCardList.propertyAddressRow).containsText("3 Imaginary Street")
             assertThat(
                 incompleteCompliancesPage.secondSummaryCard.summaryCardList.localAuthorityRow,
-            ).containsText("ISLE OF MAN")
+            ).containsText("BATH AND NORTH EAST SOMERSET COUNCIL")
             assertThat(
                 incompleteCompliancesPage.secondSummaryCard.summaryCardList.certificatesDueRow,
             ).containsText(formattedCertificatesDueDate, LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
