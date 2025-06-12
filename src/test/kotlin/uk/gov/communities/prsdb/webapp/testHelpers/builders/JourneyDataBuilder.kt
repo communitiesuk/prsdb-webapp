@@ -43,6 +43,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.KeepPropertySafeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
@@ -666,6 +667,12 @@ class JourneyDataBuilder(
 
     fun withLowEnergyRatingStep(): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.LowEnergyRating.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withMeesExemptionCheckStep(hasExemption: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.MeesExemptionCheck.urlPathSegment] =
+            mapOf(MeesExemptionCheckFormModel::propertyHasExemption.name to hasExemption)
         return this
     }
 
