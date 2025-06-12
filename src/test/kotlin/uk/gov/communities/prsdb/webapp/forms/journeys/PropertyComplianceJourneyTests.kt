@@ -592,6 +592,7 @@ class PropertyComplianceJourneyTests {
                     certificateNumber = SUPERSEDED_EPC_CERTIFICATE_NUMBER,
                     latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
                 )
+
             val originalJourneyData =
                 JourneyPageDataBuilder
                     .beforePropertyComplianceEpcLookup()
@@ -603,8 +604,6 @@ class PropertyComplianceJourneyTests {
 
             val updatedJourneyData =
                 JourneyDataBuilder(initialJourneyData = originalJourneyData)
-                    .withEpcLookupCertificateNumber(SUPERSEDED_EPC_CERTIFICATE_NUMBER)
-                    .withLookedUpEpcDetails(supersededEPC)
                     .withResetCheckMatchedEpcResult()
                     .build()
 
