@@ -503,10 +503,13 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         meesExemptionCheckPage.submitHasExemption()
         val meesExemptionReasonPage = assertPageIs(page, MeesExemptionReasonPagePropertyCompliance::class, urlArguments)
 
+        // MEES exemption reason page
         meesExemptionReasonPage.submitExemptionReason(MeesExemptionReason.LISTED_BUILDING)
-        assertPageIs(page, MeesExemptionConfirmationPagePropertyCompliance::class, urlArguments)
+        val meesExemptionConfirmationPage = assertPageIs(page, MeesExemptionConfirmationPagePropertyCompliance::class, urlArguments)
 
-        // TODO: PRSD-1145 - MEES exemption confirmation -> Fire Safety Declaration page
+        // MEES exemption confirmation page
+        meesExemptionConfirmationPage.saveAndContinueToLandlordResponsibilitiesButton.clickAndWait()
+        assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
     }
 
     companion object {
