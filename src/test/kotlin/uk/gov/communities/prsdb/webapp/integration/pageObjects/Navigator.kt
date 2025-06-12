@@ -83,8 +83,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrUploadPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcExemptionReasonPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcExpiryCheckPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcNotFoundPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyDeclarationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
@@ -782,18 +782,21 @@ class Navigator(
         )
     }
 
-    fun skipToPropertyComplianceEpcNotFoundPage(propertyOwnershipId: Long): EpcNotFoundPagePropertyCompliance {
+    fun skipToPropertyComplianceEpcExpiryCheckPage(
+        propertyOwnershipId: Long,
+        epcRating: String = "C",
+    ): EpcExpiryCheckPagePropertyCompliance {
         setJourneyDataInSession(
             PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceEpcNotFound().build(),
+            JourneyPageDataBuilder.beforePropertyComplianceEpcExpiryCheck(epcRating).build(),
         )
         navigate(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.EpcNotFound.urlPathSegment}",
+                "/${PropertyComplianceStepId.EpcExpiryCheck.urlPathSegment}",
         )
         return createValidPage(
             page,
-            EpcNotFoundPagePropertyCompliance::class,
+            EpcExpiryCheckPagePropertyCompliance::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }

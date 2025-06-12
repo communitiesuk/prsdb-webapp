@@ -32,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcNotAutoMatchedPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyDeclarationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionCheckPagePropertyCompliance
@@ -487,6 +488,24 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
             val epcLookupPage = navigator.skipToPropertyComplianceEpcLookupPage(PROPERTY_OWNERSHIP_ID)
             epcLookupPage.submitInvalidEpcNumber()
             assertThat(epcLookupPage.form.getErrorMessage()).containsText("Enter a 20 digit certificate number")
+        }
+    }
+
+    @Nested
+    inner class EpcExpiryCheckTests {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val epcExpiryCheckPage = navigator.skipToPropertyComplianceEpcExpiryCheckPage(PROPERTY_OWNERSHIP_ID)
+            epcExpiryCheckPage.form.submit()
+            assertThat(epcExpiryCheckPage.form.getErrorMessage())
+                .containsText("Select Yes or No to continue")
+        }
+
+        @Test
+        fun `Submitting with tenancy started before expiry with a good energy rating redirects to landlord responsibilities`(page: Page) {
+            val epcExpiryCheckPage = navigator.skipToPropertyComplianceEpcExpiryCheckPage(PROPERTY_OWNERSHIP_ID, epcRating = "C")
+            epcExpiryCheckPage.submitTenancyStartedBeforeExpiry()
+            assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
         }
     }
 

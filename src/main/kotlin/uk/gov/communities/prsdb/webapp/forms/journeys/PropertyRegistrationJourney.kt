@@ -81,6 +81,7 @@ class PropertyRegistrationJourney(
             "registerProperty.title",
             "registerProperty.taskList.heading",
             listOf("registerProperty.taskList.subtitle"),
+            backUrl = "/$REGISTER_PROPERTY_JOURNEY_URL",
         )
 
     private fun registerPropertyTasks(): List<JourneyTask<RegisterPropertyStepId>> =

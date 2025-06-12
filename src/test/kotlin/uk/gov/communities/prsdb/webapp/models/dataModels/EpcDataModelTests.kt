@@ -33,6 +33,17 @@ class EpcDataModelTests {
     }
 
     @Test
+    fun `isLatestCertificateForThisProperty returns true latestCertificateNumberForThisProperty is null`() {
+        val epcDataModel =
+            MockEpcData.createEpcDataModel(
+                certificateNumber = DEFAULT_EPC_CERTIFICATE_NUMBER,
+                latestCertificateNumberForThisProperty = null,
+            )
+
+        assertTrue(epcDataModel.isLatestCertificateForThisProperty())
+    }
+
+    @Test
     fun `isLatestCertificateForThisProperty returns false if the certificateNumber is not the latestCertificateNumberForThisProperty`() {
         val epcDataModel =
             MockEpcData.createEpcDataModel(

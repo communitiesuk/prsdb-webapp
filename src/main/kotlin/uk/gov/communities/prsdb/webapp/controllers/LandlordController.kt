@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeleteInc
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompleteComplianceViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompletePropertiesViewModel
+import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
@@ -41,6 +42,7 @@ class LandlordController(
     private val landlordService: LandlordService,
     private val propertyRegistrationService: PropertyRegistrationService,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val backUrlStorageService: BackUrlStorageService,
 ) {
     @GetMapping
     fun index(): CharSequence = "redirect:$LANDLORD_DASHBOARD_URL"
@@ -91,7 +93,8 @@ class LandlordController(
         val incompleteProperties =
             propertyRegistrationService.getIncompletePropertiesForLandlord(principal.name)
 
-        val incompletePropertiesViewModel = IncompletePropertiesViewModel(incompleteProperties)
+        val incompletePropertiesViewModel =
+            IncompletePropertiesViewModel(incompleteProperties, backUrlStorageService.storeCurrentUrlReturningKey())
 
         model.addAttribute("incompleteProperties", incompletePropertiesViewModel.incompleteProperties)
         model.addAttribute("registerPropertyUrl", "/$REGISTER_PROPERTY_JOURNEY_URL")
@@ -106,7 +109,7 @@ class LandlordController(
     fun deleteIncompletePropertyAreYouSure(
         model: Model,
         principal: Principal,
-        @RequestParam(value = "contextId", required = true) contextId: Long,
+        @RequestParam(value = CONTEXT_ID_URL_PARAMETER, required = true) contextId: Long,
     ): String {
         populateDeleteIncompletePropertyRegistrationModel(model, contextId, principal.name)
         model.addAttribute(
@@ -121,7 +124,7 @@ class LandlordController(
     fun deleteIncompletePropertyAreYouSure(
         model: Model,
         principal: Principal,
-        @RequestParam(value = "contextId", required = true) contextId: Long,
+        @RequestParam(value = CONTEXT_ID_URL_PARAMETER, required = true) contextId: Long,
         @Valid
         @ModelAttribute
         formModel: DeleteIncompletePropertyRegistrationAreYouSureFormModel,
@@ -133,7 +136,7 @@ class LandlordController(
         }
 
         if (formModel.wantsToProceed == true) {
-            propertyRegistrationService.deleteIncompleteProperty(contextId.toLong(), principal.name)
+            propertyRegistrationService.deleteIncompleteProperty(contextId, principal.name)
         }
 
         return "redirect:$INCOMPLETE_PROPERTIES_URL"

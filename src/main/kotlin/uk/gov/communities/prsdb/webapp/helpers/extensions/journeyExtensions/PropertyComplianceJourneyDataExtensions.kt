@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemp
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExpiryCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FireSafetyDeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
@@ -172,6 +173,12 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 NonStepJourneyDataKey.LookedUpEpc.key
             }
 
+        fun JourneyData.getLatestEpcCertificateNumber(): String? =
+            this
+                .getEpcDetails(autoMatched = false)
+                ?.latestCertificateNumberForThisProperty
+                ?.let { EpcDataModel.parseCertificateNumberOrNull(it) }
+
         fun JourneyData.getAcceptedEpcDetails(): EpcDataModel? {
             // Check the automatched EPC first, then the looked up EPC
             if (this.getAutoMatchedEpcIsCorrect() == true) {
@@ -204,6 +211,13 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 this,
                 PropertyComplianceStepId.EpcExemptionReason.urlPathSegment,
                 EicrExemptionReasonFormModel::exemptionReason.name,
+            )
+
+        fun JourneyData.getDidTenancyStartBeforeEpcExpiry(): Boolean? =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.EpcExpiryCheck.urlPathSegment,
+                EpcExpiryCheckFormModel::tenancyStartedBeforeExpiry.name,
             )
 
         fun JourneyData.getHasFireSafetyDeclaration() =
@@ -287,9 +301,9 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 !this.getEpcDetails(autoMatched = false)!!.isPastExpiryDate() &&
                 this.getEpcDetails(autoMatched = false)!!.isEnergyRatingEOrBetter()
 
-        // TODO Prsd-1146 - make this check whether this page was answered with "Yes"
         private fun JourneyData.getHasCompletedEpcTaskWithEpcExpiryCheck() =
             this.containsKey(PropertyComplianceStepId.EpcExpiryCheck.urlPathSegment) &&
+                this.getDidTenancyStartBeforeEpcExpiry() == true &&
                 this.getAcceptedEpcDetails()!!.isEnergyRatingEOrBetter()
 
         private fun JourneyData.getHasCompletedEpcExpired() = this.containsKey(PropertyComplianceStepId.EpcExpired.urlPathSegment)
