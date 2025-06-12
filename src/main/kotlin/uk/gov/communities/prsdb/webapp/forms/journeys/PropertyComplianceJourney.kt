@@ -7,6 +7,7 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONTACT_EPC_ASSESSOR_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.EPC_IMPROVEMENT_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
@@ -20,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.PRIVATE_RENTING_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.constants.RIGHT_TO_RENT_CHECKS_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -951,24 +953,6 @@ class PropertyComplianceJourney(
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ -> epcLookupStepHandleSubmitAndRedirect(filteredJourneyData) },
             )
 
-    private val epcExpiredStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.EpcExpired,
-                page =
-                    Page(
-                        formModel = NoInputFormModel::class,
-                        templateName = "forms/epcExpiredForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "getNewEpcUrl" to GET_NEW_EPC_URL,
-                                "expiryDateAsJavaLocalDate" to (getAcceptedEpcDetailsFromSession()?.expiryDateAsJavaLocalDate ?: ""),
-                            ),
-                    ),
-                nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
-            )
-
     private val epcNotFoundStep
         get() =
             Step(
@@ -1018,6 +1002,27 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { filteredJourneyData, _ -> epcExpiryCheckStepNextAction(filteredJourneyData) },
+            )
+
+    private val epcExpiredStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EpcExpired,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = getEpcExpiredTemplate(),
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "getNewEpcUrl" to GET_NEW_EPC_URL,
+                                "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
+                                "registerMeesExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
+                                "epcImprovementGuideUrl" to EPC_IMPROVEMENT_GUIDE_URL,
+                                "expiryDateAsJavaLocalDate" to (getAcceptedEpcDetailsFromSession()?.expiryDateAsJavaLocalDate ?: ""),
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
             )
 
     private val meesExemptionCheckStep
@@ -1430,6 +1435,15 @@ class PropertyComplianceJourney(
         } else {
             Pair(PropertyComplianceStepId.LowEnergyRating, null)
         }
+
+    private fun getEpcExpiredTemplate(): String {
+        val epcDetails = getAcceptedEpcDetailsFromSession() ?: return ""
+        return if (epcDetails.isEnergyRatingEOrBetter()) {
+            "forms/epcExpiredForm"
+        } else {
+            "forms/epcExpiredLowRatingForm"
+        }
+    }
 
     private fun fireSafetyDeclarationStepNextAction(filteredJourneyData: JourneyData) =
         if (filteredJourneyData.getHasFireSafetyDeclaration()!!) {
