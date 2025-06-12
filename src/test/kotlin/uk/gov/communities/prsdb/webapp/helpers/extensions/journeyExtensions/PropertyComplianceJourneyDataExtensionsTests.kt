@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
+import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
@@ -50,6 +51,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getLatestEpcCertificateNumber
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMeesExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getPropertyHasMeesExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withResetCheckMatchedEpc
@@ -695,6 +697,27 @@ class PropertyComplianceJourneyDataExtensionsTests {
 
         // Act, Assert
         assertNull(testJourneyData.getPropertyHasMeesExemption())
+    }
+
+    @Test
+    fun `getMeesExemptionReason returns the submitted answer for the MeesExemptionReason step`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.withMeesExemptionReasonStep(MeesExemptionReason.LISTED_BUILDING).build()
+
+        // Act
+        val retrievedExemptionReason = testJourneyData.getMeesExemptionReason()!!
+
+        // Act, Assert
+        assertEquals(MeesExemptionReason.LISTED_BUILDING, retrievedExemptionReason)
+    }
+
+    @Test
+    fun `getMeesExemptionReason returns null is MeesExemptionReason is not in JourneyData`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.build()
+
+        // Act, Assert
+        assertNull(testJourneyData.getMeesExemptionReason())
     }
 
     @Test
