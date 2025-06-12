@@ -1,5 +1,8 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.servlet.http.HttpSession
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor.captor
@@ -9,9 +12,11 @@ import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @ExtendWith(MockitoExtension::class)
@@ -21,6 +26,9 @@ class PropertyComplianceServiceTests {
 
     @Mock
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
+
+    @Mock
+    private lateinit var mockSession: HttpSession
 
     @InjectMocks
     private lateinit var propertyComplianceService: PropertyComplianceService
@@ -55,5 +63,56 @@ class PropertyComplianceServiceTests {
         val propertyComplianceCaptor = captor<PropertyCompliance>()
         verify(mockPropertyComplianceRepository).save(propertyComplianceCaptor.capture())
         assertTrue(ReflectionEquals(expectedPropertyCompliance, "id").matches(propertyComplianceCaptor.value))
+    }
+
+    @Test
+    fun `getComplianceForProperty retrieves the compliance record for the given property ownership ID`() {
+        val expectedPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+        whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(expectedPropertyCompliance.propertyOwnership.id))
+            .thenReturn(expectedPropertyCompliance)
+
+        val returnedPropertyCompliance = propertyComplianceService.getComplianceForProperty(expectedPropertyCompliance.propertyOwnership.id)
+
+        assertEquals(returnedPropertyCompliance, returnedPropertyCompliance)
+    }
+
+    @Test
+    fun `getComplianceForProperty returns null when no compliance record exists for the given property ownership ID`() {
+        val propertyOwnershipId = 123L
+        whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)).thenReturn(null)
+
+        val returnedPropertyCompliance = propertyComplianceService.getComplianceForProperty(propertyOwnershipId)
+
+        assertNull(returnedPropertyCompliance)
+    }
+
+    @Test
+    fun `addToPropertiesWithComplianceAddedThisSession adds the given property ownership ID to the session list`() {
+        val propertyOwnershipId = 123L
+        val initialList = listOf(456L, 789L)
+        whenever(mockSession.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION)).thenReturn(initialList)
+
+        propertyComplianceService.addToPropertiesWithComplianceAddedThisSession(propertyOwnershipId)
+
+        val expectedUpdatedList = initialList + propertyOwnershipId
+        verify(mockSession).setAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION, expectedUpdatedList)
+    }
+
+    @Test
+    fun `wasPropertyComplianceAddedThisSession returns true if the property ownership ID is in the session list`() {
+        val propertyOwnershipId = 123L
+        val sessionList = listOf(456L, 789L, propertyOwnershipId)
+        whenever(mockSession.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION)).thenReturn(sessionList)
+
+        assertTrue(propertyComplianceService.wasPropertyComplianceAddedThisSession(propertyOwnershipId))
+    }
+
+    @Test
+    fun `wasPropertyComplianceAddedThisSession returns false if the property ownership ID is not in the session list`() {
+        val propertyOwnershipId = 123L
+        val sessionList = listOf(456L, 789L)
+        whenever(mockSession.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION)).thenReturn(sessionList)
+
+        assertFalse(propertyComplianceService.wasPropertyComplianceAddedThisSession(propertyOwnershipId))
     }
 }
