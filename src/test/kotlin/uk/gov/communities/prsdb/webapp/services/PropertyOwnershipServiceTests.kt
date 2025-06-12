@@ -877,4 +877,59 @@ class PropertyOwnershipServiceTests {
             assertTrue(incompleteCompliances.isEmpty())
         }
     }
+
+    @Nested
+    inner class GetNumberOfIncompleteCompliancesForLandlord {
+        val principalName = "principalName"
+
+        @Test
+        fun `returns the number of incomplete compliances for a landlord`() {
+            // Arrange
+            val expectedNumberOfIncompleteCompliances = 1
+            val properties =
+                listOf(
+                    MockLandlordData.createPropertyOwnership(currentNumTenants = 3, incompleteComplianceForm = null),
+                    MockLandlordData.createPropertyOwnership(
+                        currentNumTenants = 2,
+                        incompleteComplianceForm = MockLandlordData.createPropertyComplianceFormContext(),
+                    ),
+                )
+            whenever(
+                @Suppress("ktlint:standard:max-line-length")
+                mockPropertyOwnershipRepository
+                    .countByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_StatusAndCurrentNumTenantsIsGreaterThanAndIncompleteComplianceFormNotNull(
+                        principalName,
+                        RegistrationStatus.REGISTERED,
+                        0,
+                    ),
+            ).thenReturn(1L)
+
+            // Act
+            val numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principalName)
+
+            // Assert
+            assertEquals(expectedNumberOfIncompleteCompliances, numberOfIncompleteCompliances)
+        }
+
+        @Test
+        fun `returns 0 if there are no incomplete compliances for a landlord`() {
+            // Arrange
+            val expectedNumberOfIncompleteCompliances = 0
+            whenever(
+                @Suppress("ktlint:standard:max-line-length")
+                mockPropertyOwnershipRepository
+                    .countByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_StatusAndCurrentNumTenantsIsGreaterThanAndIncompleteComplianceFormNotNull(
+                        principalName,
+                        RegistrationStatus.REGISTERED,
+                        0,
+                    ),
+            ).thenReturn(0L)
+
+            // Act
+            val numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principalName)
+
+            // Assert
+            assertEquals(expectedNumberOfIncompleteCompliances, numberOfIncompleteCompliances)
+        }
+    }
 }

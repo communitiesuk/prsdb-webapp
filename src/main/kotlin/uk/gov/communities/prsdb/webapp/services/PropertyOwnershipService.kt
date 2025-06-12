@@ -234,6 +234,15 @@ class PropertyOwnershipService(
         }
     }
 
+    fun getNumberOfIncompleteCompliancesForLandlord(principalName: String): Int =
+        @Suppress("ktlint:standard:max-line-length")
+        propertyOwnershipRepository
+            .countByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_StatusAndCurrentNumTenantsIsGreaterThanAndIncompleteComplianceFormNotNull(
+                principalName,
+                RegistrationStatus.REGISTERED,
+                0,
+            ).toInt()
+
     fun getIncompleteCompliancesForLandlord(principalName: String): List<IncompleteComplianceDataModel> {
         val propertyOwnerships = retrieveAllActiveRegisteredPropertiesForLandlord(principalName)
 

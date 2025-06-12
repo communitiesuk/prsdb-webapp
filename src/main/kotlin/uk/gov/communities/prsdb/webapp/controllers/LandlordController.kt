@@ -55,8 +55,11 @@ class LandlordController(
                 ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
 
         val numberOfIncompleteProperties = propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(principal.name)
+        val numberOfIncompleteCompliances =
+            propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name)
 
         model.addAttribute("numberOfIncompleteProperties", numberOfIncompleteProperties)
+        model.addAttribute("numberOfIncompleteCompliances", numberOfIncompleteCompliances)
 
         model.addAttribute("landlordName", landlord.name)
         model.addAttribute("lrn", RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber))
@@ -65,6 +68,7 @@ class LandlordController(
         model.addAttribute("viewIncompletePropertiesUrl", INCOMPLETE_PROPERTIES_URL)
         model.addAttribute("viewPropertiesUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT#$REGISTERED_PROPERTIES_PATH_SEGMENT")
         model.addAttribute("viewLandlordRecordUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT")
+        model.addAttribute("viewIncompleteCompliancesUrl", INCOMPLETE_COMPLIANCES_URL)
 
         model.addAttribute("updatesToPilotUrl", "#")
         model.addAttribute("policyUpdatesUrl", "#")

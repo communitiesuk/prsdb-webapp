@@ -18,7 +18,7 @@ import kotlin.test.assertEquals
 class LandlordIncompleteCompliancesPageTests : IntegrationTest() {
     @Nested
     inner class LandlordsWithIncompleteCompliances :
-        NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-incomplete-compliance.sql") {
+        NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-incomplete-compliances.sql") {
         @Test
         fun `the page loads with heading and subheading`() {
             val incompleteCompliancesPage = navigator.goToLandlordIncompleteCompliances()
