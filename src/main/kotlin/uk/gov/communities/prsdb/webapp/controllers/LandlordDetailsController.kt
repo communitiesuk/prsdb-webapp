@@ -104,7 +104,6 @@ class LandlordDetailsController(
 
         model.addAttribute("registeredPropertiesList", registeredPropertiesList)
 
-        // TODO PRSD-805: Replace with previous url for back link
         model.addAttribute("backUrl", "/")
 
         return "localAuthorityLandlordDetailsView"
