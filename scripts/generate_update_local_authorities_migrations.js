@@ -3,8 +3,9 @@ const csv = require('csv-parser');
 
 const results = [];
 const inputFilePath = '../src/main/resources/data/local_authorities/local_authorities.csv';
-const outputUpsertFilePath = './output/draft_upsert_local_authorities.sql';
-const outputDeleteFilePath = './output/draft_delete_local_authorities.sql';
+const outputUpsertMigrationFilePath = './output/draft_upsert_local_authorities_migration.sql';
+const outputSelectLAsToBeDeletedFilePath = './output/select_all_local_authorities_to_be_deleted.sql';
+const outputDeleteMigrationFilePath = './output/draft_delete_local_authorities_migration.sql';
 
 fs.createReadStream(inputFilePath)
     .pipe(csv())
@@ -29,6 +30,7 @@ fs.createReadStream(inputFilePath)
             .map(row => {
                 // SQL escape any single quotes
                 const custodianCode = row['AUTH_CODE'].replace(/'/g, "''");
+
                 return `'${custodianCode}'`;
             });
 
@@ -36,21 +38,32 @@ fs.createReadStream(inputFilePath)
             + `VALUES ${insertValues.join(',\n       ')}\n` // Indent the resulting file nicely
             + "ON CONFLICT (custodian_code) DO UPDATE SET name = EXCLUDED.name;";
 
+        const selectStatement = `SELECT * FROM local_authority WHERE custodian_code NOT IN (${retainValues.join(', ')});`;
+
         const deleteStatement = `DELETE FROM local_authority WHERE custodian_code NOT IN (${retainValues.join(', ')});`;
 
-        fs.writeFile(outputUpsertFilePath, insertStatement, (err) => {
+        fs.writeFile(outputUpsertMigrationFilePath, insertStatement, (err) => {
             if (err) {
                 console.error('Error writing to SQL file:', err);
             } else {
-                console.log(`SQL insert statements written to ${outputUpsertFilePath}`);
+                console.log(`SQL insert statements written to ${outputUpsertMigrationFilePath}`);
             }
         });
 
-        fs.writeFile(outputDeleteFilePath, deleteStatement, (err) => {
+        fs.writeFile(outputSelectLAsToBeDeletedFilePath, selectStatement, (err) => {
             if (err) {
                 console.error('Error writing to SQL file:', err);
             } else {
-                console.log(`SQL delete statement written to ${outputDeleteFilePath}`);
+                console.log(`SQL select statement written to ${outputSelectLAsToBeDeletedFilePath
+                }`);
+            }
+        });
+
+        fs.writeFile(outputDeleteMigrationFilePath, deleteStatement, (err) => {
+            if (err) {
+                console.error('Error writing to SQL file:', err);
+            } else {
+                console.log(`SQL delete statement written to ${outputDeleteMigrationFilePath}`);
             }
         });
     });
