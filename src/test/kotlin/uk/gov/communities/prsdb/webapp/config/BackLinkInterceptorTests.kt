@@ -7,6 +7,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import org.springframework.ui.ModelMap
 import org.springframework.web.servlet.ModelAndView
+import org.springframework.web.servlet.view.RedirectView
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor
 import uk.gov.communities.prsdb.webapp.constants.WITH_BACK_URL_PARAMETER_NAME
 import kotlin.test.Test
@@ -139,5 +140,71 @@ class BackLinkInterceptorTests {
         )
 
         assertNull(modelAndView.modelMap["backUrl"])
+    }
+
+    @Test
+    fun `postHandle forwards the withBackUrl urlParameter to view name redirects`() {
+        val request: HttpServletRequest = mock()
+        whenever(request.getParameter("withBackUrl")).thenReturn("123")
+
+        val modelAndView: ModelAndView = mock()
+        val modelMap = ModelMap()
+        whenever(modelAndView.modelMap).thenReturn(modelMap)
+        whenever(modelAndView.viewName).thenReturn("redirect:modelMap")
+
+        val backLinkInterceptor = BackLinkInterceptor { _ -> null }
+
+        backLinkInterceptor.postHandle(
+            request,
+            mock(),
+            mock(),
+            modelAndView,
+        )
+
+        assertEquals(modelAndView.modelMap["withBackUrl"], 123)
+    }
+
+    @Test
+    fun `postHandle forwards the withBackUrl urlParameter to view name forwards`() {
+        val request: HttpServletRequest = mock()
+        whenever(request.getParameter("withBackUrl")).thenReturn("123")
+
+        val modelAndView: ModelAndView = mock()
+        val modelMap = ModelMap()
+        whenever(modelAndView.modelMap).thenReturn(modelMap)
+        whenever(modelAndView.viewName).thenReturn("forward:modelMap")
+
+        val backLinkInterceptor = BackLinkInterceptor { _ -> null }
+
+        backLinkInterceptor.postHandle(
+            request,
+            mock(),
+            mock(),
+            modelAndView,
+        )
+
+        assertEquals(modelAndView.modelMap["withBackUrl"], 123)
+    }
+
+    @Test
+    fun `postHandle forwards the withBackUrl urlParameter to RedirectView redirects`() {
+        val request: HttpServletRequest = mock()
+        whenever(request.getParameter("withBackUrl")).thenReturn("123")
+
+        val modelAndView: ModelAndView = mock()
+        val modelMap = ModelMap()
+        whenever(modelAndView.modelMap).thenReturn(modelMap)
+        whenever(modelAndView.view).thenReturn(RedirectView("modelMap"))
+
+        val backLinkInterceptor = BackLinkInterceptor { _ -> null }
+
+        backLinkInterceptor.postHandle(
+            request,
+            mock(),
+            mock(),
+            modelAndView,
+        )
+
+        assertEquals(modelAndView.modelMap["withBackUrl"], 123)
     }
 }

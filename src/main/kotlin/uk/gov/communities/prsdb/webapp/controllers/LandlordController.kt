@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeleteInc
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompleteCompliancesViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompletePropertiesViewModel
+import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
@@ -41,6 +42,7 @@ class LandlordController(
     private val landlordService: LandlordService,
     private val propertyRegistrationService: PropertyRegistrationService,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val backUrlStorageService: BackUrlStorageService,
 ) {
     @GetMapping
     fun index(): CharSequence = "redirect:$LANDLORD_DASHBOARD_URL"
@@ -87,7 +89,8 @@ class LandlordController(
         val incompleteProperties =
             propertyRegistrationService.getIncompletePropertiesForLandlord(principal.name)
 
-        val incompletePropertiesViewModel = IncompletePropertiesViewModel(incompleteProperties)
+        val incompletePropertiesViewModel =
+            IncompletePropertiesViewModel(incompleteProperties, backUrlStorageService.storeCurrentUrlReturningKey())
 
         model.addAttribute("incompleteProperties", incompletePropertiesViewModel.incompleteProperties)
         model.addAttribute("registerPropertyUrl", "/$REGISTER_PROPERTY_JOURNEY_URL")
