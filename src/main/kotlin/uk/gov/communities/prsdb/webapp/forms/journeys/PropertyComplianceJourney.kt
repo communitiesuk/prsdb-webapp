@@ -253,11 +253,7 @@ class PropertyComplianceJourney(
                     meesExemptionCheckStep,
                     meesExemptionReasonStep,
                     meesExemptionConfirmationStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.LowEnergyRating,
-                        "TODO PRSD-1144: Implement Low Energy Rating step",
-                        PropertyComplianceStepId.FireSafetyDeclaration,
-                    ),
+                    lowEnergyRatingStep,
                 ),
                 "propertyCompliance.taskList.upload.epc",
                 "propertyCompliance.taskList.upload.epc.hint",
@@ -1127,6 +1123,24 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
+            )
+
+    private val lowEnergyRatingStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.LowEnergyRating,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/lowEnergyRatingForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "epcImprovementGuideUrl" to EPC_IMPROVEMENT_GUIDE_URL,
+                                "registerPrsExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
                             ),
                     ),
                 nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },

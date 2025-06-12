@@ -141,6 +141,8 @@ class JourneyPageDataBuilder {
             beforePropertyComplianceMeesExemptionCheck()
                 .withMeesExemptionCheckStep(true)
 
+        fun beforePropertyComplianceLowEnergyRating() = beforePropertyComplianceMeesExemptionCheck().withMeesExemptionCheckStep(false)
+
         fun beforePropertyComplianceFireSafetyDeclaration() = beforePropertyComplianceEpc().withMissingEpcExemption()
 
         fun beforePropertyComplianceKeepPropertySafe() = beforePropertyComplianceFireSafetyDeclaration().withFireSafetyDeclaration(true)

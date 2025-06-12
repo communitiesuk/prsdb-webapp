@@ -541,6 +541,16 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
     }
 
     @Nested
+    inner class LowEnergyRatingStepTests {
+        @Test
+        fun `Submitting the page redirects to Landlord Responsibilities`(page: Page) {
+            val lowEnergyRatingPage = navigator.skipToPropertyComplianceLowEnergyRatingPage(PROPERTY_OWNERSHIP_ID)
+            lowEnergyRatingPage.saveAndContinueToLandlordResponsibilitiesButton.clickAndWait()
+            assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
+        }
+    }
+
+    @Nested
     inner class MeesExemptionReasonTests {
         @Test
         fun `Submitting with no option selected returns an error`() {
