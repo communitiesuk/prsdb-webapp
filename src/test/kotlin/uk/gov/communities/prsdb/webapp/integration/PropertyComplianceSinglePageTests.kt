@@ -529,6 +529,17 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
     }
 
     @Nested
+    inner class MeesExemptionReasonTests {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val meesExemptionReasonPage = navigator.skipToPropertyComplianceMeesExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
+            meesExemptionReasonPage.form.submit()
+            assertThat(meesExemptionReasonPage.form.getErrorMessage())
+                .containsText("Select which exemption applies to this property")
+        }
+    }
+
+    @Nested
     inner class FireSafetyDeclarationStepTests {
         @Test
         fun `Submitting with no option selected returns an error`() {
