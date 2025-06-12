@@ -89,6 +89,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         eicrExemptionOtherReason: String? = null,
         epcUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
+        tenancyStartedBeforeEpcExpiry: Boolean? = null,
         epcEnergyRating: String? = null,
         epcExemptionReason: EpcExemptionReason? = null,
         epcMeesExemptionReason: MeesExemptionReason? = null,
@@ -105,6 +106,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         this.eicrExemptionOtherReason = eicrExemptionOtherReason
         this.epcUrl = epcUrl
         this.epcExpiryDate = epcExpiryDate
+        this.tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry
         this.epcEnergyRating = epcEnergyRating
         this.epcExemptionReason = epcExemptionReason
         this.epcMeesExemptionReason = epcMeesExemptionReason
