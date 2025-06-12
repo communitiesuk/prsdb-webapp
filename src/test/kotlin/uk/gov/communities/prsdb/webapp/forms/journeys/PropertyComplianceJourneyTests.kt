@@ -766,6 +766,7 @@ class PropertyComplianceJourneyTests {
                     anyOrNull(),
                     anyOrNull(),
                     anyOrNull(),
+                    anyOrNull(),
                 )
             verify(mockPropertyOwnershipService).deleteIncompleteComplianceForm(propertyOwnershipId)
         }
