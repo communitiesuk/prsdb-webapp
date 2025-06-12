@@ -7,6 +7,7 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONTACT_EPC_ASSESSOR_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.EPC_IMPROVEMENT_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
@@ -20,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.PRIVATE_RENTING_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.constants.RIGHT_TO_RENT_CHECKS_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -251,11 +253,7 @@ class PropertyComplianceJourney(
                     meesExemptionCheckStep,
                     meesExemptionReasonStep,
                     meesExemptionConfirmationStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.LowEnergyRating,
-                        "TODO PRSD-1144: Implement Low Energy Rating step",
-                        PropertyComplianceStepId.FireSafetyDeclaration,
-                    ),
+                    lowEnergyRatingStep,
                 ),
                 "propertyCompliance.taskList.upload.epc",
                 "propertyCompliance.taskList.upload.epc.hint",
@@ -1122,6 +1120,24 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
+            )
+
+    private val lowEnergyRatingStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.LowEnergyRating,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/lowEnergyRatingForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "epcImprovementGuideUrl" to EPC_IMPROVEMENT_GUIDE_URL,
+                                "registerPrsExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
                             ),
                     ),
                 nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
