@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.FileUploadPage
@@ -86,6 +87,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.KeepPropertySafeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
@@ -246,11 +248,7 @@ class PropertyComplianceJourney(
                     epcExemptionReasonStep,
                     epcExemptionConfirmationStep,
                     meesExemptionCheckStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.MeesExemptionReason,
-                        "TODO PRSD-1143: Implement MEES Exemption Reason step",
-                        PropertyComplianceStepId.MeesExemptionConfirmation,
-                    ),
+                    meesExemptionReasonStep,
                     placeholderStep(
                         PropertyComplianceStepId.MeesExemptionConfirmation,
                         "TODO PRSD-1145: Implement MEES Exemption Confirmation step",
@@ -1056,35 +1054,64 @@ class PropertyComplianceJourney(
                 nextAction = { filteredJourneyData, _ -> meesExemptionCheckStepNextAction(filteredJourneyData) },
             )
 
-    private val meesExemptionCheckStep
+    private val meesExemptionReasonStep
         get() =
             Step(
-                id = PropertyComplianceStepId.MeesExemptionCheck,
+                id = PropertyComplianceStepId.MeesExemptionReason,
                 page =
                     Page(
-                        formModel = MeesExemptionCheckFormModel::class,
-                        templateName = "forms/meesExemptionCheckForm",
+                        formModel = MeesExemptionReasonFormModel::class,
+                        templateName = "forms/exemptionReasonForm",
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.meesExemptionReason.fieldSetHeading",
                                 "radioOptions" to
                                     listOf(
                                         RadiosButtonViewModel(
-                                            value = true,
-                                            valueStr = "yes",
-                                            labelMsgKey = "forms.radios.option.yes.label",
+                                            value = MeesExemptionReason.LISTED_BUILDING,
+                                            labelMsgKey = "forms.meesExemptionReason.radios.listedBuilding.label",
+                                            hintMsgKey = "forms.meesExemptionReason.radios.listedBuilding.hint",
                                         ),
                                         RadiosButtonViewModel(
-                                            value = false,
-                                            valueStr = "no",
-                                            labelMsgKey = "forms.radios.option.no.label",
+                                            value = MeesExemptionReason.SMALL_DETACHED_BUILDING,
+                                            labelMsgKey = "forms.meesExemptionReason.radios.smallDetachedBuilding.label",
+                                            hintMsgKey = "forms.meesExemptionReason.radios.smallDetachedBuilding.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = MeesExemptionReason.HIGH_COST,
+                                            labelMsgKey = "forms.meesExemptionReason.radios.highCost.label",
+                                            hintMsgKey = "forms.meesExemptionReason.radios.highCost.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = MeesExemptionReason.ALL_IMPROVEMENTS_MADE,
+                                            labelMsgKey = "forms.meesExemptionReason.radios.allImprovementsMade.label",
+                                            hintMsgKey = "forms.meesExemptionReason.radios.allImprovementsMade.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = MeesExemptionReason.WALL_INSULATION,
+                                            labelMsgKey = "forms.meesExemptionReason.radios.wallInsulation.label",
+                                            hintMsgKey = "forms.meesExemptionReason.radios.wallInsulation.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = MeesExemptionReason.THIRD_PARTY_CONSENT,
+                                            labelMsgKey = "forms.meesExemptionReason.radios.thirdPartyConsent.label",
+                                            hintMsgKey = "forms.meesExemptionReason.radios.thirdPartyConsent.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = MeesExemptionReason.PROPERTY_DEVALUATION,
+                                            labelMsgKey = "forms.meesExemptionReason.radios.propertyDevaluation.label",
+                                            hintMsgKey = "forms.meesExemptionReason.radios.propertyDevaluation.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = MeesExemptionReason.NEW_LANDLORD,
+                                            labelMsgKey = "forms.meesExemptionReason.radios.newLandlord.label",
+                                            hintMsgKey = "forms.meesExemptionReason.radios.newLandlord.hint",
                                         ),
                                     ),
-                                "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
-                                "singleLineAddress" to (getAcceptedEpcDetailsFromSession()?.singleLineAddress ?: ""),
                             ),
                     ),
-                nextAction = { filteredJourneyData, _ -> meesExemptionCheckStepNextAction(filteredJourneyData) },
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.MeesExemptionConfirmation, null) },
             )
 
     private val fireSafetyDeclarationStep
