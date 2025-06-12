@@ -16,7 +16,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ManageLAUsersTests : SinglePageTestWithSeedData("data-local.sql") {
-    val localAuthorityId = 1
+    val localAuthorityId = 2
 
     @Test
     fun `invite button goes to invite new user page`(page: Page) {

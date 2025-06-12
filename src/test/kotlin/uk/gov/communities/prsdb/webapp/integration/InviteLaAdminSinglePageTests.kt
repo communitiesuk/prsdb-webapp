@@ -8,7 +8,7 @@ class InviteLaAdminSinglePageTests : SinglePageTestWithSeedData("data-local.sql"
     @Test
     fun `inviting a new LA admin shows validation errors if the email is invalid or the email addresses don't match`(page: Page) {
         val invitePage = navigator.goToInviteLaAdmin()
-        invitePage.fillInFormAndSubmit("ISLE OF", "ISLE OF MAN", "not-an-email", "different@example.com")
+        invitePage.fillInFormAndSubmit("BATH AND", "BATH AND NORTH EAST SOMERSET COUNCIL", "not-an-email", "different@example.com")
         assertThat(invitePage.form.getErrorMessage("email")).containsText("Enter an email address in the correct format")
         assertThat(invitePage.form.getErrorMessage("confirmEmail")).containsText("Both email addresses should match")
     }
