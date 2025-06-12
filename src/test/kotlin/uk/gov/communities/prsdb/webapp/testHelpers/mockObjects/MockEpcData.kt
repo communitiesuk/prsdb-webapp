@@ -6,6 +6,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaInstant
+import org.json.JSONObject
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import java.time.format.DateTimeFormatter
@@ -65,6 +66,11 @@ class MockEpcData {
                 ]
             }
             """.trimIndent()
+
+        val defaultSingleLineAddress =
+            EpcDataModel
+                .fromJsonObject(JSONObject(createEpcRegisterClientEpcFoundResponse()))
+                .singleLineAddress
 
         private fun formatLocalDateToISO(localDate: LocalDate): String {
             val startOfDayInstant = localDate.atStartOfDayIn(TimeZone.of("Europe/London"))

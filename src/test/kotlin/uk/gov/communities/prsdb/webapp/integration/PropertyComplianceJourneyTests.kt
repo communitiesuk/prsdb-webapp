@@ -61,6 +61,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyUploadPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.KeepPropertySafePagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionCheckPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.ResponsibilityToTenantsPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.services.FileUploader
@@ -493,9 +494,12 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
 
         // Epc Expiry Check page - tenancy started before expiry
         expiryCheckPage.submitTenancyStartedBeforeExpiry()
-        assertPageIs(page, MeesExemptionCheckPagePropertyCompliance::class, urlArguments)
+        val meesExemptionCheckPage = assertPageIs(page, MeesExemptionCheckPagePropertyCompliance::class, urlArguments)
 
-        // TODO: PRSD-1141 - MEES exemption check, submit "yes"
+        // MEES exemption check page (has exemption)
+        assertTrue(meesExemptionCheckPage.page.content().contains(MockEpcData.defaultSingleLineAddress))
+        meesExemptionCheckPage.submitHasExemption()
+        assertPageIs(page, MeesExemptionReasonPagePropertyCompliance::class, urlArguments)
 
         // TODO: PRSD-1143 = MEES exemption reason
 

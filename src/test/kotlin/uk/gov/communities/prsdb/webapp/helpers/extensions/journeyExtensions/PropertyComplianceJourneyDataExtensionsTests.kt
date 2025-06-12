@@ -50,6 +50,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getLatestEpcCertificateNumber
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getPropertyHasMeesExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withResetCheckMatchedEpc
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
@@ -670,12 +671,30 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
-    fun `getDidTenancyStartBeforeEpcExpiry returns null for the EpcExpiryCheck step`() {
+    fun `getDidTenancyStartBeforeEpcExpiry returns null if EpcExpiryCheck is not in JourneyData`() {
         // Arrange
         val testJourneyData = journeyDataBuilder.build()
 
         // Act, Assert
         assertNull(testJourneyData.getDidTenancyStartBeforeEpcExpiry())
+    }
+
+    @Test
+    fun `getPropertyHasMeesExemption returns the submitted answer for the MeesExemptionCheck step`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.withMeesExemptionCheckStep(true).build()
+
+        // Act, Assert
+        assertTrue(testJourneyData.getPropertyHasMeesExemption()!!)
+    }
+
+    @Test
+    fun `getPropertyHasMeesExemption returns null if MeesExemptionCheck is not in JourneyData`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.build()
+
+        // Act, Assert
+        assertNull(testJourneyData.getPropertyHasMeesExemption())
     }
 
     @Test

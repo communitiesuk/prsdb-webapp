@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 
 class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
@@ -218,6 +219,13 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 this,
                 PropertyComplianceStepId.EpcExpiryCheck.urlPathSegment,
                 EpcExpiryCheckFormModel::tenancyStartedBeforeExpiry.name,
+            )
+
+        fun JourneyData.getPropertyHasMeesExemption(): Boolean? =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.MeesExemptionCheck.urlPathSegment,
+                MeesExemptionCheckFormModel::propertyHasExemption.name,
             )
 
         fun JourneyData.getHasFireSafetyDeclaration() =
