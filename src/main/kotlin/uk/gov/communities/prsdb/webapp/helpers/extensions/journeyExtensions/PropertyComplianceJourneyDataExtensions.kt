@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
+import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
@@ -31,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 
 class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
@@ -226,6 +228,13 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 this,
                 PropertyComplianceStepId.MeesExemptionCheck.urlPathSegment,
                 MeesExemptionCheckFormModel::propertyHasExemption.name,
+            )
+
+        fun JourneyData.getMeesExemptionReason() =
+            JourneyDataHelper.getFieldEnumValue<MeesExemptionReason>(
+                this,
+                PropertyComplianceStepId.MeesExemptionReason.urlPathSegment,
+                MeesExemptionReasonFormModel::exemptionReason.name,
             )
 
         fun JourneyData.getHasFireSafetyDeclaration() =

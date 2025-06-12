@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -44,6 +45,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.KeepPropertySafeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
@@ -673,6 +675,12 @@ class JourneyDataBuilder(
     fun withMeesExemptionCheckStep(hasExemption: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.MeesExemptionCheck.urlPathSegment] =
             mapOf(MeesExemptionCheckFormModel::propertyHasExemption.name to hasExemption)
+        return this
+    }
+
+    fun withMeesExemptionReasonStep(exemptionReason: MeesExemptionReason): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.MeesExemptionReason.urlPathSegment] =
+            mapOf(MeesExemptionReasonFormModel::exemptionReason.name to exemptionReason)
         return this
     }
 

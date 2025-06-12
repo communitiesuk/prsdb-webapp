@@ -133,6 +133,10 @@ class JourneyPageDataBuilder {
             beforePropertyComplianceCheckAutoMatchedEpc(MockEpcData.createEpcDataModel(energyRating = "G"))
                 .withCheckAutoMatchedEpcResult(true)
 
+        fun beforePropertyComplianceMeesExemptionReason() =
+            beforePropertyComplianceMeesExemptionCheck()
+                .withMeesExemptionCheckStep(true)
+
         fun beforePropertyComplianceFireSafetyDeclaration() = beforePropertyComplianceEpc().withMissingEpcExemption()
 
         fun beforePropertyComplianceKeepPropertySafe() = beforePropertyComplianceFireSafetyDeclaration().withFireSafetyDeclaration(true)

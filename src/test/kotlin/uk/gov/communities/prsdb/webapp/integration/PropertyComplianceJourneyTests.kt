@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
@@ -61,6 +62,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyUploadPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.KeepPropertySafePagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionCheckPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.ResponsibilityToTenantsPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
@@ -499,11 +501,15 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         // MEES exemption check page (has exemption)
         assertTrue(meesExemptionCheckPage.page.content().contains(MockEpcData.defaultSingleLineAddress))
         meesExemptionCheckPage.submitHasExemption()
-        assertPageIs(page, MeesExemptionReasonPagePropertyCompliance::class, urlArguments)
+        val meesExemptionReasonPage = assertPageIs(page, MeesExemptionReasonPagePropertyCompliance::class, urlArguments)
 
-        // TODO: PRSD-1143 = MEES exemption reason
+        // MEES exemption reason page
+        meesExemptionReasonPage.submitExemptionReason(MeesExemptionReason.LISTED_BUILDING)
+        val meesExemptionConfirmationPage = assertPageIs(page, MeesExemptionConfirmationPagePropertyCompliance::class, urlArguments)
 
-        // TODO: PRSD-1145 - MEES exemption confirmation -> Fire Safety Declaration page
+        // MEES exemption confirmation page
+        meesExemptionConfirmationPage.saveAndContinueToLandlordResponsibilitiesButton.clickAndWait()
+        assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
     }
 
     companion object {
