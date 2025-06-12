@@ -250,11 +250,7 @@ class PropertyComplianceJourney(
                     epcExemptionConfirmationStep,
                     meesExemptionCheckStep,
                     meesExemptionReasonStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.MeesExemptionConfirmation,
-                        "TODO PRSD-1145: Implement MEES Exemption Confirmation step",
-                        PropertyComplianceStepId.FireSafetyDeclaration,
-                    ),
+                    meesExemptionConfirmationStep,
                     placeholderStep(
                         PropertyComplianceStepId.LowEnergyRating,
                         "TODO PRSD-1144: Implement Low Energy Rating step",
@@ -1113,6 +1109,22 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.MeesExemptionConfirmation, null) },
+            )
+
+    private val meesExemptionConfirmationStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.MeesExemptionConfirmation,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/meesExemptionConfirmationForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
             )
 
     private val fireSafetyDeclarationStep
