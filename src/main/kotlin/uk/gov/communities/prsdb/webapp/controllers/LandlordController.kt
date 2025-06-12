@@ -27,7 +27,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeleteIncompletePropertyRegistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompleteCompliancesViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompleteComplianceViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompletePropertiesViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -57,8 +57,11 @@ class LandlordController(
                 ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
 
         val numberOfIncompleteProperties = propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(principal.name)
+        val numberOfIncompleteCompliances =
+            propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name)
 
         model.addAttribute("numberOfIncompleteProperties", numberOfIncompleteProperties)
+        model.addAttribute("numberOfIncompleteCompliances", numberOfIncompleteCompliances)
 
         model.addAttribute("landlordName", landlord.name)
         model.addAttribute("lrn", RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber))
@@ -67,6 +70,7 @@ class LandlordController(
         model.addAttribute("viewIncompletePropertiesUrl", INCOMPLETE_PROPERTIES_URL)
         model.addAttribute("viewPropertiesUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT#$REGISTERED_PROPERTIES_PATH_SEGMENT")
         model.addAttribute("viewLandlordRecordUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT")
+        model.addAttribute("viewIncompleteCompliancesUrl", INCOMPLETE_COMPLIANCES_URL)
 
         model.addAttribute("updatesToPilotUrl", "#")
         model.addAttribute("policyUpdatesUrl", "#")
@@ -145,11 +149,15 @@ class LandlordController(
     ): String {
         val incompleteCompliances = propertyOwnershipService.getIncompleteCompliancesForLandlord(principal.name)
 
-        val incompleteCompliancesViewModel = IncompleteCompliancesViewModel(incompleteCompliances)
+        val incompleteComplianceViewModels =
+            incompleteCompliances.mapIndexed(IncompleteComplianceViewModelBuilder::fromDataModel)
 
-        model.addAttribute("title", "Add compliance information")
+        model.addAttribute("incompleteCompliances", incompleteComplianceViewModels)
+        model.addAttribute("viewRegisteredPropertiesUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT#$REGISTERED_PROPERTIES_PATH_SEGMENT")
 
-        return "placeholder"
+        model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
+
+        return "incompleteCompliancesView"
     }
 
     fun populateDeleteIncompletePropertyRegistrationModel(
