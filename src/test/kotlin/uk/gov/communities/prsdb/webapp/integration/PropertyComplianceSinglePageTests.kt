@@ -39,6 +39,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionCheckPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import kotlin.test.assertTrue
 
 class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
     @MockitoBean
@@ -506,6 +507,17 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
         fun `Submitting with tenancy started before expiry with a good energy rating redirects to landlord responsibilities`(page: Page) {
             val epcExpiryCheckPage = navigator.skipToPropertyComplianceEpcExpiryCheckPage(PROPERTY_OWNERSHIP_ID, epcRating = "C")
             epcExpiryCheckPage.submitTenancyStartedBeforeExpiry()
+            assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
+        }
+    }
+
+    @Nested
+    inner class EpcExpiredTests {
+        @Test
+        fun `Show the low energy version of the epcExpired page when the energy rating is below E`(page: Page) {
+            val epcExpiredPage = navigator.skipToPropertyComplianceEpcExpiredPage(PROPERTY_OWNERSHIP_ID, epcRating = "F")
+            assertTrue(epcExpiredPage.page.content().contains("The expired certificate shows an energy rating below E"))
+            epcExpiredPage.continueButton.clickAndWait()
             assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
         }
     }
