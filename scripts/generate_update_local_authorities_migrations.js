@@ -1,11 +1,12 @@
 const fs = require('fs');
 const csv = require('csv-parser');
 
+const outputDirectory = './output';
 const results = [];
 const inputFilePath = '../src/main/resources/data/local_authorities/local_authorities.csv';
-const outputUpsertMigrationFilePath = './output/draft_upsert_local_authorities_migration.sql';
-const outputSelectLAsToBeDeletedFilePath = './output/select_all_local_authorities_to_be_deleted.sql';
-const outputDeleteMigrationFilePath = './output/draft_delete_local_authorities_migration.sql';
+const outputUpsertMigrationFilePath = `${outputDirectory}/draft_upsert_local_authorities_migration.sql`;
+const outputSelectLAsToBeDeletedFilePath = `${outputDirectory}/select_all_local_authorities_to_be_deleted.sql`;
+const outputDeleteMigrationFilePath = `${outputDirectory}/draft_delete_local_authorities_migration.sql`;
 
 fs.createReadStream(inputFilePath)
     .pipe(csv())
@@ -41,6 +42,10 @@ fs.createReadStream(inputFilePath)
         const selectStatement = `SELECT * FROM local_authority WHERE custodian_code NOT IN (${retainValues.join(', ')});`;
 
         const deleteStatement = `DELETE FROM local_authority WHERE custodian_code NOT IN (${retainValues.join(', ')});`;
+
+        if (!fs.existsSync(outputDirectory)) {
+            fs.mkdirSync(outputDirectory);
+        }
 
         fs.writeFile(outputUpsertMigrationFilePath, insertStatement, (err) => {
             if (err) {
