@@ -1,8 +1,10 @@
 package uk.gov.communities.prsdb.webapp.integration
 
+import com.microsoft.playwright.BrowserContext
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HouseholdsOccupancyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfHouseholdsFormPagePropertyDetailsUpdate
@@ -53,5 +55,26 @@ class PropertyDetailsUpdateSinglePageTests : SinglePageTestWithSeedData("data-lo
         val numberOfPeoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, urlArguments)
         numberOfPeoplePage.backLink.clickAndWait()
         assertPageIs(page, PeopleNumberOfHouseholdsFormPagePropertyDetailsUpdate::class, urlArguments)
+    }
+
+    @Test
+    fun `Submitting a CYA page with stale data redirects to an error page`(browserContext: BrowserContext) {
+        // Create two pages
+        val (page1, navigator1) = createPageAndNavigator(browserContext)
+        val (_, navigator2) = createPageAndNavigator(browserContext)
+
+        // Navigate to the occupancy check answers page on page1
+        val checkOccupancyAnswersPage = navigator1.goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId)
+
+        // Update occupancy to vacant on page2
+        val occupancyUpdatePage = navigator2.goToPropertyDetailsUpdateOccupancy(propertyOwnershipId)
+        occupancyUpdatePage.submitIsVacant()
+
+        // Submit the occupancy check answers page on page1
+        checkOccupancyAnswersPage.form.submit()
+
+        // Assert that the page1 is redirected to an error page
+        val errorPage = assertPageIs(page1, ErrorPage::class)
+        assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
     }
 }
