@@ -150,7 +150,13 @@ class LandlordController(
         val incompleteCompliances = propertyOwnershipService.getIncompleteCompliancesForLandlord(principal.name)
 
         val incompleteComplianceViewModels =
-            incompleteCompliances.mapIndexed(IncompleteComplianceViewModelBuilder::fromDataModel)
+            incompleteCompliances.mapIndexed { index, dataModel ->
+                IncompleteComplianceViewModelBuilder.fromDataModel(
+                    index,
+                    dataModel,
+                    backUrlStorageService.storeCurrentUrlReturningKey(),
+                )
+            }
 
         model.addAttribute("incompleteCompliances", incompleteComplianceViewModels)
         model.addAttribute("viewRegisteredPropertiesUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT#$REGISTERED_PROPERTIES_PATH_SEGMENT")

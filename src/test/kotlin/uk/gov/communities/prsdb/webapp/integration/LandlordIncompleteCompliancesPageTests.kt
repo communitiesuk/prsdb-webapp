@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.SinglePageTestWithSeedData.NestedSinglePageTestWithSeedData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompleteCompiancesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
@@ -70,10 +71,15 @@ class LandlordIncompleteCompliancesPageTests : IntegrationTest() {
         }
 
         @Test
-        fun `Clicking on a summary card Continue link redirects to the task list page`(page: Page) {
+        fun `Clicking on a summary card Continue link redirects to the task list page with custom backlink`(page: Page) {
+            // Continue link
             val incompleteCompliancesPage = navigator.goToLandlordIncompleteCompliances()
             incompleteCompliancesPage.firstSummaryCard.continueLink.clickAndWait()
-            assertPageIs(page, TaskListPagePropertyCompliance::class, mapOf("propertyOwnershipId" to "1"))
+            val taskListPage = assertPageIs(page, TaskListPagePropertyCompliance::class, mapOf("propertyOwnershipId" to "1"))
+
+            // Back link
+            taskListPage.backLink.clickAndWait()
+            assertPageIs(page, LandlordIncompleteCompiancesPage::class)
         }
 
         @Test
