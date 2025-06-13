@@ -23,12 +23,13 @@ abstract class CheckAnswersPage(
         filteredJourneyData: JourneyData?,
     ) {
         filteredJourneyData!!
-        modelAndView.addObject("formData", getFormData(filteredJourneyData))
+        // TODO PRSD-1219: Rename "formData" to "summaryList" for all CYA pages/templates
+        modelAndView.addObject("formData", getSummaryList(filteredJourneyData))
         modelAndView.addObject("submittedFilteredJourneyData", serializeJourneyData(filteredJourneyData))
         furtherEnrichModel(modelAndView, filteredJourneyData)
     }
 
-    protected abstract fun getFormData(filteredJourneyData: JourneyData): List<SummaryListRowViewModel>
+    protected abstract fun getSummaryList(filteredJourneyData: JourneyData): List<SummaryListRowViewModel>
 
     protected open fun furtherEnrichModel(
         modelAndView: ModelAndView,

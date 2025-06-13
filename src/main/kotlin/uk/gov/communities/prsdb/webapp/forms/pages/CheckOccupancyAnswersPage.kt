@@ -22,7 +22,7 @@ class CheckOccupancyAnswersPage(
             ),
         journeyDataService = journeyDataService,
     ) {
-    override fun getFormData(filteredJourneyData: JourneyData) =
+    override fun getSummaryList(filteredJourneyData: JourneyData) =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
                 val isOccupied = filteredJourneyData.getIsOccupiedUpdateIfPresent(stepGroupId)!!

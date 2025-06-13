@@ -34,13 +34,13 @@ class CheckAnswersPageTests {
     private lateinit var mockBindingResult: BindingResult
 
     @Test
-    fun `enrichModel adds formData and filteredJourneyData to the model, then calls furtherEnrichModel`() {
+    fun `enrichModel adds summaryList and filteredJourneyData to the model, then calls furtherEnrichModel`() {
         val modelAndView = ModelAndView()
-        val filteredJourneyData = mapOf(FORM_DATA_ROW_KEY to "formDataRowValue", "furtherEnrichModelKey" to "furtherEnrichModelValue")
+        val filteredJourneyData = mapOf(SUMMARY_ROW_KEY to "summaryRowValue", "furtherEnrichModelKey" to "furtherEnrichModelValue")
 
         checkAnswersPage.enrichModel(modelAndView, filteredJourneyData)
 
-        assertEquals(modelAndView.modelMap["formData"], createFormData(filteredJourneyData))
+        assertEquals(modelAndView.modelMap["formData"], createSummaryList(filteredJourneyData))
         assertEquals(modelAndView.modelMap["submittedFilteredJourneyData"], Json.encodeToString(filteredJourneyData))
         assertEquals(modelAndView.modelMap["furtherEnrichModelKey"], "furtherEnrichModelValue")
     }
@@ -91,7 +91,7 @@ class CheckAnswersPageTests {
         val modelAndView = ModelAndView()
         val filteredJourneyData =
             mapOf(
-                FORM_DATA_ROW_KEY to "anyValue",
+                SUMMARY_ROW_KEY to "summaryRowValue",
                 "stringKey" to "stringValue",
                 "numberKey" to 123,
                 "booleanKey" to true,
@@ -117,14 +117,14 @@ class CheckAnswersPageTests {
     class TestCheckAnswersPage(
         journeyDataService: JourneyDataService,
     ) : CheckAnswersPage(content = emptyMap(), journeyDataService) {
-        override fun getFormData(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> = createFormData(filteredJourneyData)
+        override fun getSummaryList(filteredJourneyData: JourneyData) = createSummaryList(filteredJourneyData)
 
         override fun furtherEnrichModel(
             modelAndView: ModelAndView,
             filteredJourneyData: JourneyData?,
         ) {
             filteredJourneyData?.entries?.forEach { (key, value) ->
-                if (key != FORM_DATA_ROW_KEY) {
+                if (key != SUMMARY_ROW_KEY) {
                     modelAndView.addObject(key, value)
                 }
             }
@@ -132,10 +132,10 @@ class CheckAnswersPageTests {
     }
 
     companion object {
-        const val FORM_DATA_ROW_KEY = "formDataRowKey"
+        const val SUMMARY_ROW_KEY = "formDataRowKey"
 
-        private fun createFormData(journeyData: JourneyData) =
-            listOf(SummaryListRowViewModel(FORM_DATA_ROW_KEY, journeyData[FORM_DATA_ROW_KEY]!!, changeUrl = null))
+        private fun createSummaryList(journeyData: JourneyData) =
+            listOf(SummaryListRowViewModel(SUMMARY_ROW_KEY, journeyData[SUMMARY_ROW_KEY]!!, changeUrl = null))
 
         private fun createCheckAnswersFormModel(submittedFilteredJourneyData: Map<String, String>): CheckAnswersFormModel =
             CheckAnswersFormModel().apply {
