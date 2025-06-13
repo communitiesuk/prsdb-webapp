@@ -1,36 +1,28 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
-import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsGroupIdentifier
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyDetailsUpdateJourneyStepFactory
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getIsOccupiedUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getNumberOfHouseholdsUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getNumberOfPeopleUpdateIfPresent
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class CheckOccupancyAnswersPage(
     private val stepGroupId: UpdatePropertyDetailsGroupIdentifier,
-) : AbstractPage(
-        NoInputFormModel::class,
-        "forms/checkAnswersForm",
-        mapOf(
-            "title" to "propertyDetails.update.title",
-            "summaryName" to "forms.update.checkOccupancy.summaryName",
-            "showWarning" to true,
-            "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
-        ),
+    journeyDataService: JourneyDataService,
+) : CheckAnswersPage(
+        content =
+            mapOf(
+                "title" to "propertyDetails.update.title",
+                "summaryName" to "forms.update.checkOccupancy.summaryName",
+                "showWarning" to true,
+                "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+            ),
+        journeyDataService = journeyDataService,
     ) {
-    override fun enrichModel(
-        modelAndView: ModelAndView,
-        filteredJourneyData: JourneyData?,
-    ) {
-        filteredJourneyData!!
-        modelAndView.addObject("formData", getFormData(filteredJourneyData))
-    }
-
-    private fun getFormData(filteredJourneyData: JourneyData) =
+    override fun getSummaryList(filteredJourneyData: JourneyData) =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
                 val isOccupied = filteredJourneyData.getIsOccupiedUpdateIfPresent(stepGroupId)!!

@@ -86,6 +86,13 @@ class JourneyDataServiceTests {
             val expectedJourneyData = existingJourneyData + newJourneyData
             verify(mockHttpSession).setAttribute(journeyDataKey, expectedJourneyData)
         }
+
+        @Test
+        fun `removeJourneyDataFromSession removes journey data from session`() {
+            journeyDataService.removeJourneyDataFromSession()
+
+            verify(mockHttpSession).removeAttribute(journeyDataKey)
+        }
     }
 
     @Nested
