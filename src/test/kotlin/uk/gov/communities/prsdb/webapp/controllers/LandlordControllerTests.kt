@@ -176,6 +176,7 @@ class LandlordControllerTests(
                 IncompleteComplianceViewModelBuilder.fromDataModel(
                     0,
                     incompleteComplianceDataModel,
+                    0,
                 ),
             )
 

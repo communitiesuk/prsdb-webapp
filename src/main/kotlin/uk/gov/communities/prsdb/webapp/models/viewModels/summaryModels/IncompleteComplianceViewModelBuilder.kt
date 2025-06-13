@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
+import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addAction
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
@@ -10,12 +11,13 @@ class IncompleteComplianceViewModelBuilder {
         fun fromDataModel(
             index: Int,
             dataModel: IncompleteComplianceDataModel,
+            currentUrlKey: Int? = null,
         ): SummaryCardViewModel =
             SummaryCardViewModel(
                 cardNumber = (index + 1).toString(),
                 title = "landlord.incompleteCompliances.summaryCardTitlePrefix",
                 summaryList = getSummaryList(dataModel),
-                actions = getActions(dataModel),
+                actions = getActions(dataModel, currentUrlKey),
             )
 
         private fun getSummaryList(dataModel: IncompleteComplianceDataModel): List<SummaryListRowViewModel> =
@@ -51,13 +53,19 @@ class IncompleteComplianceViewModelBuilder {
                     )
                 }.toList()
 
-        private fun getActions(dataModel: IncompleteComplianceDataModel): List<SummaryCardActionViewModel> =
+        private fun getActions(
+            dataModel: IncompleteComplianceDataModel,
+            currentUrlKey: Int?,
+        ): List<SummaryCardActionViewModel> =
             mutableListOf<SummaryCardActionViewModel>()
                 .apply {
                     if (dataModel.isComplianceInProgress()) {
                         addAction(
                             "landlord.incompleteCompliances.action.continue",
-                            PropertyComplianceController.getPropertyComplianceTaskListPath(dataModel.propertyOwnershipId),
+                            PropertyComplianceController
+                                .getPropertyComplianceTaskListPath(
+                                    dataModel.propertyOwnershipId,
+                                ).overrideBackLinkForUrl(currentUrlKey),
                         )
                     } else {
                         addAction(
