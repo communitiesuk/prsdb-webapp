@@ -1488,6 +1488,7 @@ class PropertyComplianceJourney(
             eicrExemptionOtherReason = filteredJourneyData.getEicrExemptionOtherReason(),
             epcUrl = epcCertificateUrlProvider.getEpcCertificateUrl(epcDetails?.certificateNumber ?: ""),
             epcExpiryDate = epcDetails?.expiryDate?.toJavaLocalDate(),
+            tenancyStartedBeforeEpcExpiry = filteredJourneyData.getDidTenancyStartBeforeEpcExpiry(),
             epcEnergyRating = epcDetails?.energyRating,
             epcExemptionReason = filteredJourneyData.getEpcExemptionReason(),
             epcMeesExemptionReason = filteredJourneyData.getMeesExemptionReason(),
