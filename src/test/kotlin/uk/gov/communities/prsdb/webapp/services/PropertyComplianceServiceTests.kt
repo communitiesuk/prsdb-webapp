@@ -45,6 +45,7 @@ class PropertyComplianceServiceTests {
             eicrExemptionOtherReason = expectedPropertyCompliance.eicrExemptionOtherReason,
             epcUrl = expectedPropertyCompliance.epcUrl,
             epcExpiryDate = expectedPropertyCompliance.epcExpiryDate,
+            tenancyStartedBeforeEpcExpiry = expectedPropertyCompliance.tenancyStartedBeforeEpcExpiry,
             epcEnergyRating = expectedPropertyCompliance.epcEnergyRating,
             epcExemptionReason = expectedPropertyCompliance.epcExemptionReason,
             epcMeesExemptionReason = expectedPropertyCompliance.epcMeesExemptionReason,

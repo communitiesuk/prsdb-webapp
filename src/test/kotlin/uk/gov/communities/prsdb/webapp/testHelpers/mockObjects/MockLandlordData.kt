@@ -118,13 +118,31 @@ class MockLandlordData {
             return propertyOwnership
         }
 
-        fun createFormContext(
+        fun createPropertyRegistrationFormContext(
             journeyType: JourneyType = JourneyType.PROPERTY_REGISTRATION,
             context: String =
                 "{\"lookup-address\":{\"houseNameOrNumber\":\"73\",\"postcode\":\"WC2R 1LA\"}," +
                     "\"looked-up-addresses\":\"[{\\\"singleLineAddress\\\":\\\"2, Example Road, EG\\\"," +
                     "\\\"localAuthorityId\\\":241,\\\"uprn\\\":2123456,\\\"buildingNumber\\\":\\\"2\\\"," +
                     "\\\"postcode\\\":\\\"EG\\\"}]\",\"select-address\":{\"address\":\"2, Example Road, EG\"}}",
+            user: OneLoginUser = createOneLoginUser(),
+            createdDate: Instant = Instant.now(),
+            id: Long = 0,
+        ): FormContext {
+            val formContext = FormContext(journeyType, context, user)
+
+            ReflectionTestUtils.setField(formContext, "createdDate", createdDate)
+            ReflectionTestUtils.setField(formContext, "id", id)
+            return formContext
+        }
+
+        fun createPropertyComplianceFormContext(
+            journeyType: JourneyType = JourneyType.PROPERTY_COMPLIANCE,
+            context: String =
+                "{\"gas-safety-certificate\":{\"hasCert\":true}," +
+                    "\"gas-safety-certificate-issue-date\":{\"day\":\"28\",\"month\":\"2\",\"year\":\"1990\"}," +
+                    "\"gas-safety-certificate-outdated\":{},\"eicr\":{\"hasCert\":false}," +
+                    "\"eicr-exemption\":{\"hasExemption\":false},\"eicr-exemption-missing\":{}}",
             user: OneLoginUser = createOneLoginUser(),
             createdDate: Instant = Instant.now(),
             id: Long = 0,

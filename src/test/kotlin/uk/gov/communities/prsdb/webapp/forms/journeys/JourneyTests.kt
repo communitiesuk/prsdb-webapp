@@ -48,7 +48,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import kotlin.text.get
 
 class JourneyTests {
     private lateinit var validatorFactory: ValidatorFactory
@@ -633,7 +632,7 @@ class JourneyTests {
                     principal,
                 )
             val journeyDataCaptor = argumentCaptor<JourneyData>()
-            verify(mockJourneyDataService).setJourneyDataInSession(journeyDataCaptor.capture())
+            verify(mockJourneyDataService).addToJourneyDataIntoSession(journeyDataCaptor.capture())
 
             // Assert
             assertEquals("redirect:${TestStepId.StepTwo.urlPathSegment}", result.viewName)
@@ -679,7 +678,9 @@ class JourneyTests {
             val pageData: PageData = mapOf("testProperty" to "testPropertyValue")
             val journeyData: JourneyData = mapOf()
 
-            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
+            whenever(mockJourneyDataService.getJourneyDataFromSession())
+                .thenReturn(journeyData)
+                .thenReturn(journeyData + (TestStepId.StepOne.urlPathSegment to pageData))
 
             // Act
             val result =

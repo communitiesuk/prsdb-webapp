@@ -18,7 +18,7 @@ class EditLAUserTests : JourneyTestWithSeedData("data-local.sql") {
     @Test
     fun `a user's access level can be updated`(page: Page) {
         // There is a basic user called Arthur Dent
-        var manageUsersPage = navigator.goToManageLaUsers(1)
+        var manageUsersPage = navigator.goToManageLaUsers(2)
         assertThat(manageUsersPage.table.getCell(0, USERNAME_COL_INDEX)).containsText("Arthur Dent")
         assertThat(manageUsersPage.table.getCell(0, ACCESS_LEVEL_COL_INDEX)).containsText("Basic")
 
@@ -47,7 +47,7 @@ class EditLAUserTests : JourneyTestWithSeedData("data-local.sql") {
     @Test
     fun `a user can be deleted`(page: Page) {
         // Edit Arthur Dent
-        var manageUsersPage = navigator.goToManageLaUsers(1)
+        var manageUsersPage = navigator.goToManageLaUsers(2)
         assertThat(manageUsersPage.table.getCell(0, USERNAME_COL_INDEX)).containsText("Arthur Dent")
         manageUsersPage.getChangeLink(rowIndex = 0).clickAndWait()
         val editUserPage = assertPageIs(page, EditLaUserPage::class)
@@ -61,7 +61,9 @@ class EditLAUserTests : JourneyTestWithSeedData("data-local.sql") {
         val successPage = assertPageIs(page, DeleteLaUserSuccessPage::class)
 
         // The success page confirms the user is deleted
-        assertThat(successPage.confirmationBanner).containsText("You've removed Arthur Dent's account from ISLE OF MAN")
+        assertThat(
+            successPage.confirmationBanner,
+        ).containsText("You've removed Arthur Dent's account from BATH AND NORTH EAST SOMERSET COUNCIL")
         successPage.returnButton.clickAndWait()
         manageUsersPage = assertPageIs(page, ManageLaUsersPage::class)
 

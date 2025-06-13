@@ -17,12 +17,12 @@ class InviteLaAdminTests : JourneyTestWithSeedData("data-local.sql") {
             .thenReturn(URI("www.prsd.gov.uk/register-la-user/test-token"))
 
         val invitePage = navigator.goToInviteLaAdmin()
-        invitePage.fillInFormAndSubmit("ISLE OF ", "ISLE OF MAN", "admin@example.com", "admin@example.com")
+        invitePage.fillInFormAndSubmit("BATH AND ", "BATH AND NORTH EAST SOMERSET COUNCIL", "admin@example.com", "admin@example.com")
 
         // Confirmation page
         val confirmationPage = assertPageIs(page, InviteLaAdminConfirmationPage::class)
         assertThat(confirmationPage.confirmationBanner).containsText("admin@example.com")
-        assertThat(confirmationPage.confirmationBanner).containsText("ISLE OF MAN")
+        assertThat(confirmationPage.confirmationBanner).containsText("BATH AND NORTH EAST SOMERSET COUNCIL")
 
         // Invite another user
         confirmationPage.inviteAnotherUserButton.clickAndWait()

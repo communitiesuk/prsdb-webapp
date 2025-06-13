@@ -10,15 +10,13 @@ open class NotificationBanner(
 
     val title = Title(locator)
 
-    val subheading = Subheading(locator)
-
-    val link = Link(locator)
+    val content = Content(locator)
 
     class Title(
         parentLocator: Locator,
     ) : BaseComponent(parentLocator.locator(".govuk-notification-banner__title"))
 
-    class Subheading(
+    class Content(
         parentLocator: Locator,
-    ) : BaseComponent(parentLocator.locator(".govuk-notification-banner__heading"))
+    ) : BaseComponent(parentLocator.locator(".govuk-notification-banner__content"))
 }

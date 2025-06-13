@@ -44,7 +44,7 @@ class BackUrlStorageServiceTests {
     }
 
     @Nested
-    inner class RememberCurrentUrlTests {
+    inner class StoreCurrentUrlReturningKeyTests {
         @BeforeEach
         fun setUp() {
             whenever(request.requestURI).thenReturn(requestUri)
@@ -52,7 +52,7 @@ class BackUrlStorageServiceTests {
         }
 
         @Test
-        fun `If available as a key, rememberCurrentUrl saves the current URL in the session by hashCode`() {
+        fun `If available as a key, storeCurrentUrlReturningKey saves the current URL in the session by hashCode`() {
             val urlMapCaptor = argumentCaptor<Map<Int, String>>()
 
             val urlKey = backUrlStorageService.storeCurrentUrlReturningKey()
@@ -67,7 +67,7 @@ class BackUrlStorageServiceTests {
         }
 
         @Test
-        fun `If current URL is already saved by its hashCode, rememberCurrentUrl returns the current URLs key`() {
+        fun `If current URL is already saved by its hashCode, storeCurrentUrlReturningKey returns the current URLs key`() {
             whenever(httpSession.getAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE))
                 .thenReturn(mapOf(abs(exampleUrl.hashCode()) to exampleUrl))
 
@@ -79,7 +79,7 @@ class BackUrlStorageServiceTests {
 
         @Suppress("ktlint:standard:max-line-length")
         @Test
-        fun `If another URL is already saved by the same hashCode, rememberCurrentUrl saves the current URL in the session with a different key`() {
+        fun `If another URL is already saved by the same hashCode, storeCurrentUrlReturningKey saves the current URL in the session with a different key`() {
             whenever(httpSession.getAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE))
                 .thenReturn(mapOf(abs(exampleUrl.hashCode()) to "another url"))
 
@@ -99,7 +99,7 @@ class BackUrlStorageServiceTests {
 
         @Suppress("ktlint:standard:max-line-length")
         @Test
-        fun `If another URL is already saved by the same hashCode and the current URL has already been saved, rememberCurrentUrl returns the current URLs key`() {
+        fun `If another URL is already saved by the same hashCode and the current URL has already been saved, storeCurrentUrlReturningKey returns the current URLs key`() {
             val usedKey = 12345
             whenever(httpSession.getAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE))
                 .thenReturn(mapOf(abs(exampleUrl.hashCode()) to "another url", usedKey to exampleUrl))

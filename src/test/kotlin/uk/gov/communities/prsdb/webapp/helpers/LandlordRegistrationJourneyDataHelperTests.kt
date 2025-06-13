@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mockito.mock
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
@@ -109,7 +108,7 @@ class LandlordRegistrationJourneyDataHelperTests {
                 ).build()
         val expectedAddressDataModel = AddressDataModel(selectedAddress)
 
-        val addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(mockJourneyData, mockJourneyData.getLookedUpAddresses())
+        val addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(mockJourneyData)
 
         assertEquals(expectedAddressDataModel, addressDataModel)
     }
@@ -131,7 +130,7 @@ class LandlordRegistrationJourneyDataHelperTests {
                 ).build()
         val expectedAddressDataModel = AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode)
 
-        val addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(mockJourneyData, mockJourneyData.getLookedUpAddresses())
+        val addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(mockJourneyData)
 
         assertEquals(expectedAddressDataModel, addressDataModel)
     }
@@ -148,28 +147,23 @@ class LandlordRegistrationJourneyDataHelperTests {
     }
 
     @Test
-    fun `isManualAddressChosen returns true if passed an empty list of lookedUpAddresses`() {
+    fun `isManualAddressChosen returns true if there are no lookedUpAddresses`() {
         val journeyData =
             journeyDataBuilder
-                .withLookedUpAddresses()
+                .withLookedUpAddresses(emptyList())
                 .build()
-        val lookedUpAddresses = listOf<AddressDataModel>()
 
-        assertTrue(LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData, lookedUpAddresses = lookedUpAddresses))
+        assertTrue(LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData))
     }
 
     @Test
-    fun `isManualAddressChosen returns false if passed a populated list of lookedUpAddresses and manual address was not selected`() {
+    fun `isManualAddressChosen returns false if there are lookedUpAddresses and manual address was not selected`() {
         val journeyData =
             journeyDataBuilder
                 .withSelectedAddress("1 Street Address")
                 .build()
-        val lookedUpAddresses =
-            listOf(
-                AddressDataModel("1 Street Address"),
-            )
 
-        assertFalse(LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData, lookedUpAddresses = lookedUpAddresses))
+        assertFalse(LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData))
     }
 
     @Test

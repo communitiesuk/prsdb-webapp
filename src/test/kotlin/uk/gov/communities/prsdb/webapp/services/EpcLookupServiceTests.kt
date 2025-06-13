@@ -121,6 +121,91 @@ class EpcLookupServiceTests {
     }
 
     @Test
+    fun `getEpcByUprn returns EpcDataModel when valid response`() {
+        // Arrange
+        val uprn = 123456789012L
+        val mockResponse =
+            """
+            {
+                "data": {
+                    "epcRrn": "1234-5678-9012-3456-7890",
+                    "currentEnergyEfficiencyBand": "C",
+                    "expiryDate": "2027-01-05T00:00:00.000Z",
+                    "latestEpcRrnForAddress": "1234-5678-9012-3456-7890",
+                    "address": {
+                        "addressLine1": "123 Test Street",
+                        "town": "Test Town",
+                        "postcode": "TT1 1TT",
+                        "addressLine2": "Flat 1"
+                    }
+                }
+            }
+            """.trimIndent()
+        val expectedDataModel =
+            EpcDataModel(
+                certificateNumber = "1234-5678-9012-3456-7890",
+                singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT",
+                energyRating = "C",
+                expiryDate = LocalDate(2027, 1, 5),
+                latestCertificateNumberForThisProperty = "1234-5678-9012-3456-7890",
+            )
+
+        whenever(mockEpcRegisterClient.getByUprn(uprn)).thenReturn(mockResponse)
+
+        // Act
+        val result = epcLookupService.getEpcByUprn(uprn)
+
+        assertEquals(expectedDataModel, result)
+    }
+
+    @Test
+    fun `getEpcByUprn returns null when NOT_FOUND error is returned by the client`() {
+        val uprn = 123456789012L
+        val mockResponse =
+            """
+            {
+                "errors": [
+                    {
+                        "code": "NOT_FOUND",
+                        "title": "No assessment details could be found for that query"
+                    }
+                ]
+            }
+            """.trimIndent()
+
+        whenever(mockEpcRegisterClient.getByUprn(uprn)).thenReturn(mockResponse)
+
+        val result = epcLookupService.getEpcByUprn(uprn)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `getEpcByUprn throws BAD_REQUEST error if this is returned by the client`() {
+        val uprn = 123456789012L
+        val mockResponse =
+            """
+            {
+                "errors": [
+                    {
+                        "code": "INVALID_REQUEST",
+                        "title": "The value provided for the uprn parameter in the search query was not valid"
+                    }
+                ]
+            }
+            """.trimIndent()
+
+        whenever(mockEpcRegisterClient.getByUprn(uprn)).thenReturn(mockResponse)
+
+        val exception =
+            assertThrows(ResponseStatusException::class.java) {
+                epcLookupService.getEpcByUprn(uprn)
+            }
+
+        assertEquals("400 BAD_REQUEST \"The value provided for the uprn parameter in the search query was not valid\"", exception.message)
+    }
+
+    @Test
     fun `getErrorCode returns the error code from a jsonObject with exactly one error`() {
         val jsonObject =
             JSONObject(

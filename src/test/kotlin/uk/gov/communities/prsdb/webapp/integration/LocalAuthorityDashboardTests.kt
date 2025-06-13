@@ -13,7 +13,7 @@ class LocalAuthorityDashboardTests : SinglePageTestWithSeedData("data-local.sql"
     fun `the dashboard loads displaying the user's name and local authority`(page: Page) {
         val dashboard = navigator.goToLocalAuthorityDashboard()
         assertThat(dashboard.bannerHeading).containsText("Mock User")
-        assertThat(dashboard.bannerSubHeading).containsText("ISLE OF MAN")
+        assertThat(dashboard.bannerSubHeading).containsText("BATH AND NORTH EAST SOMERSET COUNCIL")
     }
 
     @Test

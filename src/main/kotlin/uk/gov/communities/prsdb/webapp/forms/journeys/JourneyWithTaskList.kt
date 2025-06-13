@@ -23,8 +23,7 @@ abstract class JourneyWithTaskList<T : StepId>(
     override val unreachableStepRedirect = taskListUrlSegment
 
     fun getModelAndViewForTaskList(): ModelAndView {
-        val journeyData = journeyDataService.getJourneyDataFromSession()
-        val model = mapOf("taskListViewModel" to taskListFactory.getTaskListViewModel(journeyData))
+        val model = mapOf("taskListViewModel" to taskListFactory.getTaskListViewModel(last().filteredJourneyData))
         return ModelAndView("taskList", model)
     }
 
@@ -41,13 +40,13 @@ abstract class JourneyWithTaskList<T : StepId>(
         sections,
         numberSections,
         backUrl,
-    ) { task, journeyData -> getTaskStatus(task, journeyData) }
+    ) { task, filteredJourneyData -> getTaskStatus(task, filteredJourneyData) }
 
     private fun getTaskStatus(
         task: JourneyTask<T>,
-        journeyData: JourneyData,
+        filteredJourneyData: JourneyData,
     ): TaskStatus {
         val canTaskBeStarted = isStepReachable(task.steps.single { it.id == task.startingStepId })
-        return task.getTaskStatus(journeyData, validator, canTaskBeStarted)
+        return task.getTaskStatus(filteredJourneyData, validator, canTaskBeStarted)
     }
 }

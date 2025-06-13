@@ -4,9 +4,10 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsGroupIdentifier
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyDetailsUpdateJourneyStepFactory
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.UpdateJourneyDataExtensions.Companion.getOriginalJourneyDataIfPresent
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoAdditionalLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoMandatoryLicenceFormModel
@@ -26,29 +27,39 @@ class PropertyDetailsUpdateJourneyExtensions {
                 OwnershipTypeFormModel::ownershipType.name,
             )
 
-        fun JourneyData.getOriginalIsOccupied(originalJourneyKey: String) =
-            JourneyDataHelper.getPageData(this, originalJourneyKey)?.getIsOccupied()
+        fun JourneyData.getOriginalIsOccupied(
+            stepGroupId: UpdatePropertyDetailsGroupIdentifier,
+            originalJourneyKey: String,
+        ): Boolean? {
+            val occupancyStepId = PropertyDetailsUpdateJourneyStepFactory.getOccupancyStepIdFor(stepGroupId)
+            return JourneyDataHelper.getPageData(this, originalJourneyKey)?.getIsOccupied(occupancyStepId)
+        }
 
-        fun JourneyData.getIsOccupiedUpdateIfPresent() = this.getIsOccupied()
+        fun JourneyData.getIsOccupiedUpdateIfPresent(stepGroupId: UpdatePropertyDetailsGroupIdentifier): Boolean? {
+            val occupancyStepId = PropertyDetailsUpdateJourneyStepFactory.getOccupancyStepIdFor(stepGroupId)
+            return this.getIsOccupied(occupancyStepId)
+        }
 
-        fun JourneyData.getNumberOfHouseholdsUpdateIfPresent() =
-            if (this.getIsOccupiedUpdateIfPresent() == false) {
+        fun JourneyData.getNumberOfHouseholdsUpdateIfPresent(stepGroupId: UpdatePropertyDetailsGroupIdentifier): Int? =
+            if (this.getIsOccupiedUpdateIfPresent(stepGroupId) == false) {
                 0
             } else {
+                val numberOfHouseholdsStepId = PropertyDetailsUpdateJourneyStepFactory.getNumberOfHouseholdsStepIdFor(stepGroupId)
                 JourneyDataHelper.getFieldIntegerValue(
                     this,
-                    UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment,
+                    numberOfHouseholdsStepId.urlPathSegment,
                     NumberOfHouseholdsFormModel::numberOfHouseholds.name,
                 )
             }
 
-        fun JourneyData.getNumberOfPeopleUpdateIfPresent() =
-            if (this.getIsOccupiedUpdateIfPresent() == false) {
+        fun JourneyData.getNumberOfPeopleUpdateIfPresent(stepGroupId: UpdatePropertyDetailsGroupIdentifier): Int? =
+            if (this.getIsOccupiedUpdateIfPresent(stepGroupId) == false) {
                 0
             } else {
+                val numberOfPeopleStepId = PropertyDetailsUpdateJourneyStepFactory.getNumberOfPeopleStepIdFor(stepGroupId)
                 JourneyDataHelper.getFieldIntegerValue(
                     this,
-                    UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment,
+                    numberOfPeopleStepId.urlPathSegment,
                     NumberOfPeopleFormModel::numberOfPeople.name,
                 )
             }
@@ -78,23 +89,23 @@ class PropertyDetailsUpdateJourneyExtensions {
                 else -> null
             }
 
-        private fun JourneyData.getIsOccupied() =
+        private fun JourneyData.getIsOccupied(occupancyStepId: UpdatePropertyDetailsStepId) =
             JourneyDataHelper.getFieldBooleanValue(
                 this,
-                UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment,
+                occupancyStepId.urlPathSegment,
                 OccupancyFormModel::occupied.name,
             )
 
-        fun JourneyData.getLatestNumberOfHouseholds(originalJourneyDataKey: String?): Int {
-            val journeyDataValue = this.getNumberOfHouseholdsUpdateIfPresent()
-            val originalJourneyData = this.getOriginalJourneyDataIfPresent(originalJourneyDataKey)!!
-            val originalJourneyDataValue = originalJourneyData.getNumberOfHouseholdsUpdateIfPresent()
+        fun JourneyData.getLatestNumberOfHouseholds(
+            stepGroupId: UpdatePropertyDetailsGroupIdentifier,
+            originalJourneyKey: String,
+        ): Int {
+            val journeyDataValue = this.getNumberOfHouseholdsUpdateIfPresent(stepGroupId)
+            if (journeyDataValue != null) return journeyDataValue
 
-            if (journeyDataValue == null) {
-                return originalJourneyDataValue ?: 0
-            } else {
-                return journeyDataValue
-            }
+            val originalJourneyDataValue =
+                JourneyDataHelper.getPageData(this, originalJourneyKey)?.getNumberOfHouseholdsUpdateIfPresent(stepGroupId)
+            return originalJourneyDataValue ?: 0
         }
 
         fun PropertyOwnership.getLicenceNumberStepIdAndFormModel(): Pair<UpdatePropertyDetailsStepId, FormModel>? =

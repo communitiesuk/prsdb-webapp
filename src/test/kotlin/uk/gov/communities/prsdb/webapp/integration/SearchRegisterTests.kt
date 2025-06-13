@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalAuthorityView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.ADDRESS_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.CONTACT_INFO_COL_INDEX
@@ -21,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPrope
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.PROPERTY_LANDLORD_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.REG_NUM_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import kotlin.collections.mapOf
 import kotlin.test.assertContains
 import kotlin.test.assertTrue
 
@@ -237,7 +239,7 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
             assertThat(resultTable.getCell(0, ADDRESS_COL_INDEX)).containsText("P-CCCT-GRKQ")
 
             assertThat(resultTable.headerRow.getCell(LA_COL_INDEX)).containsText("Local authority")
-            assertThat(resultTable.getCell(0, LA_COL_INDEX)).containsText("ISLE OF MAN")
+            assertThat(resultTable.getCell(0, LA_COL_INDEX)).containsText("BATH AND NORTH EAST SOMERSET COUNCIL")
 
             assertThat(resultTable.headerRow.getCell(PROPERTY_LANDLORD_COL_INDEX)).containsText("Registered landlord")
             assertThat(resultTable.getCell(0, PROPERTY_LANDLORD_COL_INDEX)).containsText("Alexander Smith")
@@ -405,6 +407,41 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
             val searchPropertyRegisterPage = navigator.goToLandlordSearchPage()
             searchPropertyRegisterPage.backLink.clickAndWait()
             assertPageIs(page, LocalAuthorityDashboardPage::class)
+        }
+
+        @Test
+        fun `Back link on a landlord returns to the search`(page: Page) {
+            val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
+            searchPropertyRegisterPage.searchBar.search("P-CCCT-GRKQ")
+            val resultTable = searchPropertyRegisterPage.resultTable
+
+            resultTable.getClickableCell(0, PROPERTY_LANDLORD_COL_INDEX).link.clickAndWait()
+
+            val landlordPage = assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
+            landlordPage.backLink.clickAndWait()
+
+            assertPageIs(page, SearchPropertyRegisterPage::class)
+            assertThat(resultTable.getCell(0, PROPERTY_COL_INDEX)).containsText("11 PRSDB Square, EG1 2AK")
+        }
+
+        @Test
+        fun `Back link on a property returns to the search`(page: Page) {
+            val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
+            searchPropertyRegisterPage.searchBar.search("P-CCCT-GRKQ")
+            val resultTable = searchPropertyRegisterPage.resultTable
+
+            resultTable.getClickableCell(0, PROPERTY_COL_INDEX).link.clickAndWait()
+
+            val landlordPage =
+                assertPageIs(
+                    page,
+                    PropertyDetailsPageLocalAuthorityView::class,
+                    mapOf("propertyOwnershipId" to "18"),
+                )
+            landlordPage.backLink.clickAndWait()
+
+            assertPageIs(page, SearchPropertyRegisterPage::class)
+            assertThat(resultTable.getCell(0, PROPERTY_COL_INDEX)).containsText("11 PRSDB Square, EG1 2AK")
         }
     }
 }

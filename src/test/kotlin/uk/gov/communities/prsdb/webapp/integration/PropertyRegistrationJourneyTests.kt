@@ -62,7 +62,7 @@ class PropertyRegistrationJourneyTests : JourneyTestWithSeedData("data-local.sql
                 {
                   "DPA": {
                     "ADDRESS": "1, Example Road, EG1 2AB",
-                    "LOCAL_CUSTODIAN_CODE": 28,
+                    "LOCAL_CUSTODIAN_CODE": 114,
                     "UPRN": "1",
                     "BUILDING_NUMBER": 1,
                     "POSTCODE": "EG1 2AB"
@@ -71,7 +71,7 @@ class PropertyRegistrationJourneyTests : JourneyTestWithSeedData("data-local.sql
                 {
                   "DPA": {
                     "ADDRESS": "already registered address",
-                    "LOCAL_CUSTODIAN_CODE": 28,
+                    "LOCAL_CUSTODIAN_CODE": 114,
                     "UPRN": "1123456",
                     "BUILDING_NUMBER": 1,
                     "POSTCODE": "EG1 3CD"
@@ -240,7 +240,7 @@ class PropertyRegistrationJourneyTests : JourneyTestWithSeedData("data-local.sql
         assertThat(selectLocalAuthorityPage.form.fieldsetHeading).containsText("What local authority area is your property in?")
         assertThat(selectLocalAuthorityPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
-        selectLocalAuthorityPage.submitLocalAuthority("ISLE OF MAN", "ISLE OF MAN")
+        selectLocalAuthorityPage.submitLocalAuthority("BATH AND NORTH EAST SOMERSET COUNCIL", "BATH AND NORTH EAST SOMERSET COUNCIL")
         val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
 
         // Property type selection - render page

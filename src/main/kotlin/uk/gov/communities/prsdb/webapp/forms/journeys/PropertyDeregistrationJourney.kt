@@ -74,8 +74,8 @@ class PropertyDeregistrationJourney(
                         ),
                 ) { mapOf("optionalFieldSetHeadingParam" to getPropertySingleLineAddress()) },
             // handleSubmitAndRedirect will execute. It does not have to redirect to the step specified in nextAction.
-            handleSubmitAndRedirect = { newJourneyData, subPage, _ ->
-                areYouSureContinueToNextActionOrExitJourney(newJourneyData, subPage)
+            handleSubmitAndRedirect = { filteredJourneyData, subPage, _ ->
+                areYouSureContinueToNextActionOrExitJourney(filteredJourneyData, subPage)
             },
             // This gets checked when determining whether the next step is reachable
             nextAction = { _, _ -> Pair(DeregisterPropertyStepId.Reason, null) },
@@ -103,13 +103,13 @@ class PropertyDeregistrationJourney(
         )
 
     private fun areYouSureContinueToNextActionOrExitJourney(
-        journeyData: JourneyData,
+        filteredJourneyData: JourneyData,
         subPageNumber: Int?,
     ): String {
         val areYouSureStep = steps.single { it.id == DeregisterPropertyStepId.AreYouSure }
 
-        if (journeyData.getWantsToProceed()!!) {
-            return getRedirectForNextStep(areYouSureStep, journeyData, subPageNumber)
+        if (filteredJourneyData.getWantsToProceed()!!) {
+            return getRedirectForNextStep(areYouSureStep, filteredJourneyData, subPageNumber)
         }
 
         return PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)

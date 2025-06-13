@@ -14,6 +14,13 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
     @Suppress("ktlint:standard:function-naming")
     fun existsByIsActiveTrueAndProperty_Id(id: Long): Boolean
 
+    @Suppress("ktlint:standard:function-naming", "ktlint:standard:max-line-length")
+    fun countByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_StatusAndCurrentNumTenantsIsGreaterThanAndIncompleteComplianceFormNotNull(
+        userId: String,
+        status: RegistrationStatus,
+        currentNumTenantsIsGreaterThan: Int,
+    ): Long
+
     // This returns all active PropertyOwnerships for a given landlord from their baseUser_Id with a particular RegistrationStatus
     @Suppress("ktlint:standard:function-naming")
     fun findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(

@@ -104,7 +104,6 @@ class LandlordDetailsController(
 
         model.addAttribute("registeredPropertiesList", registeredPropertiesList)
 
-        // TODO PRSD-805: Replace with previous url for back link
         model.addAttribute("backUrl", "/")
 
         return "localAuthorityLandlordDetailsView"
@@ -113,5 +112,7 @@ class LandlordDetailsController(
     companion object {
         const val LANDLORD_DETAILS_ROUTE = "/$LANDLORD_DETAILS_PATH_SEGMENT"
         const val UPDATE_ROUTE = "$LANDLORD_DETAILS_ROUTE/$UPDATE_PATH_SEGMENT"
+
+        fun getLandlordDetailsPath(landlordId: Long? = null): String = LANDLORD_DETAILS_ROUTE + (landlordId?.let { "/$it" } ?: "")
     }
 }

@@ -51,6 +51,7 @@ notify:
 
 epc:
   base-url: https://api.epb-staging.digital.communities.gov.uk
+  certificate-base-url: https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate
 
 server:
   error:

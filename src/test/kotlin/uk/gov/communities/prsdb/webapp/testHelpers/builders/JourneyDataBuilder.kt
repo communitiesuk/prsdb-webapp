@@ -4,14 +4,14 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
-import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
@@ -32,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemp
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionReasonFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExpiryCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FireSafetyDeclarationFormModel
@@ -42,6 +44,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.KeepPropertySafeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
@@ -104,6 +108,7 @@ class JourneyDataBuilder(
                     mapOf(
                         "licenceNumber" to "test1234",
                     ),
+                RegisterPropertyStepId.CheckAnswers.urlPathSegment to emptyMap(),
             )
 
         fun propertyDefault(localAuthorityService: LocalAuthorityService) =
@@ -128,6 +133,7 @@ class JourneyDataBuilder(
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment to mapOf("livesInEnglandOrWales" to true),
                 LandlordRegistrationStepId.LookupAddress.urlPathSegment to mapOf("houseNameOrNumber" to "44", "postcode" to "EG1 1GE"),
                 LandlordRegistrationStepId.SelectAddress.urlPathSegment to mapOf("address" to DEFAULT_ADDRESS),
+                LandlordRegistrationStepId.CheckAnswers.urlPathSegment to emptyMap(),
             )
 
         fun landlordDefault(localAuthorityService: LocalAuthorityService) =
@@ -137,16 +143,10 @@ class JourneyDataBuilder(
                 createLocalAuthority(),
             )
 
-        fun localAuthorityUser(
+        fun forLaUser(
             name: String,
             email: String,
-        ) = JourneyDataBuilder(
-            mock(),
-            mapOf(
-                RegisterLaUserStepId.Name.urlPathSegment to mapOf("name" to name),
-                RegisterLaUserStepId.Email.urlPathSegment to mapOf("emailAddress" to email),
-            ),
-        )
+        ) = JourneyDataBuilder().withLandingPageReached().withName(name).withEmailAddress(email)
     }
 
     fun withLookupAddress(
@@ -160,13 +160,13 @@ class JourneyDataBuilder(
     }
 
     fun withEmptyLookedUpAddresses(): JourneyDataBuilder {
-        journeyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY] = "[]"
+        journeyData[NonStepJourneyDataKey.LookedUpAddresses.key] = "[]"
         return this
     }
 
     fun withLookedUpAddresses(customLookedUpAddresses: List<AddressDataModel>? = null): JourneyDataBuilder {
         val defaultLookedUpAddresses = listOf(AddressDataModel("1 Street Address, City, AB1 2CD"))
-        journeyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY] = Json.encodeToString(customLookedUpAddresses ?: defaultLookedUpAddresses)
+        journeyData[NonStepJourneyDataKey.LookedUpAddresses.key] = Json.encodeToString(customLookedUpAddresses ?: defaultLookedUpAddresses)
         return this
     }
 
@@ -190,7 +190,7 @@ class JourneyDataBuilder(
             withEnglandOrWalesResidence()
         }
 
-        journeyData[LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY] =
+        journeyData[NonStepJourneyDataKey.LookedUpAddresses.key] =
             Json.encodeToString(listOf(AddressDataModel(singleLineAddress, localAuthorityId = localAuthority?.id, uprn = uprn)))
 
         val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
@@ -592,31 +592,100 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withAutoMatchedEpcDetails(epcDetails: EpcDataModel?): JourneyDataBuilder {
+        journeyData[NonStepJourneyDataKey.AutoMatchedEpc.key] = Json.encodeToString(epcDetails)
+        return this
+    }
+
+    fun withCheckAutoMatchedEpcResult(matchedEpcIsCorrect: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.CheckAutoMatchedEpc.urlPathSegment] =
+            mapOf(CheckMatchedEpcFormModel::matchedEpcIsCorrect.name to matchedEpcIsCorrect)
+        return this
+    }
+
     fun withCheckMatchedEpcResult(matchedEpcIsCorrect: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment] =
             mapOf(CheckMatchedEpcFormModel::matchedEpcIsCorrect.name to matchedEpcIsCorrect)
         return this
     }
 
-    fun withEpcLookupCertificateNumber(certificateNumber: String = "0000-0000-1234-5678-9100"): JourneyDataBuilder {
+    fun withResetCheckMatchedEpcResult(): JourneyDataBuilder {
+        journeyData.remove(PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment)
+        return this
+    }
+
+    fun withEpcLookupCertificateNumber(certificateNumber: String = CURRENT_EPC_CERTIFICATE_NUMBER): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EpcLookup.urlPathSegment] =
             mapOf(EpcLookupFormModel::certificateNumber.name to certificateNumber)
         return this
     }
 
     fun withLookedUpEpcDetails(epcDetails: EpcDataModel): JourneyDataBuilder {
-        journeyData[LOOKED_UP_EPC_JOURNEY_DATA_KEY] = Json.encodeToString(epcDetails)
+        journeyData[NonStepJourneyDataKey.LookedUpEpc.key] = Json.encodeToString(epcDetails)
         return this
     }
 
     fun withNullLookedUpEpcDetails(): JourneyDataBuilder {
-        journeyData[LOOKED_UP_EPC_JOURNEY_DATA_KEY] = null
+        journeyData[NonStepJourneyDataKey.LookedUpEpc.key] = null
+        return this
+    }
+
+    fun withEpcSuperseded(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EpcSuperseded.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 
     fun withEpcExemptionReason(epcExemptionReason: EpcExemptionReason): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EpcExemptionReason.urlPathSegment] =
             mapOf(EpcExemptionReasonFormModel::exemptionReason.name to epcExemptionReason)
+        return this
+    }
+
+    fun withEpcExemptionConfirmationStep(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EpcExemptionConfirmation.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withEpcMissingStep(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EpcMissing.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withEpcExpiryCheckStep(tenancyStartedBeforeExpiry: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EpcExpiryCheck.urlPathSegment] =
+            mapOf(EpcExpiryCheckFormModel::tenancyStartedBeforeExpiry.name to tenancyStartedBeforeExpiry)
+        return this
+    }
+
+    fun withEpcExpiredStep(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EpcExpired.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withEpcNotFoundStep(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EpcNotFound.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withLowEnergyRatingStep(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.LowEnergyRating.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withMeesExemptionCheckStep(hasExemption: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.MeesExemptionCheck.urlPathSegment] =
+            mapOf(MeesExemptionCheckFormModel::propertyHasExemption.name to hasExemption)
+        return this
+    }
+
+    fun withMeesExemptionReasonStep(exemptionReason: MeesExemptionReason): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.MeesExemptionReason.urlPathSegment] =
+            mapOf(MeesExemptionReasonFormModel::exemptionReason.name to exemptionReason)
+        return this
+    }
+
+    fun withMeesExemptionConfirmationStep(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.MeesExemptionConfirmation.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 

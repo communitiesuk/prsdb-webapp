@@ -55,6 +55,8 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     var epcExpiryDate: LocalDate? = null
 
+    var tenancyStartedBeforeEpcExpiry: Boolean? = null
+
     var epcEnergyRating: String? = null
 
     var epcExemptionReason: EpcExemptionReason? = null
@@ -62,6 +64,10 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     var epcMeesExemptionReason: MeesExemptionReason? = null
 
     var hasFireSafetyDeclaration: Boolean = false
+
+    val hasKeepPropertySafeDeclaration: Boolean = true
+
+    val hasResponsibilityToTenantsDeclaration: Boolean = true
 
     val gasSafetyCertExpiryDate: LocalDate?
         get() = gasSafetyCertIssueDate?.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
@@ -83,6 +89,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         eicrExemptionOtherReason: String? = null,
         epcUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
+        tenancyStartedBeforeEpcExpiry: Boolean? = null,
         epcEnergyRating: String? = null,
         epcExemptionReason: EpcExemptionReason? = null,
         epcMeesExemptionReason: MeesExemptionReason? = null,
@@ -99,6 +106,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         this.eicrExemptionOtherReason = eicrExemptionOtherReason
         this.epcUrl = epcUrl
         this.epcExpiryDate = epcExpiryDate
+        this.tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry
         this.epcEnergyRating = epcEnergyRating
         this.epcExemptionReason = epcExemptionReason
         this.epcMeesExemptionReason = epcMeesExemptionReason

@@ -78,18 +78,16 @@ class LookupAddressStepTests {
     @Test
     fun `handleSubmitAndRedirect looks up addresses, caches the result and redirects`() {
         // Arrange
-
         val houseNumber = "15"
         val postcode = "AB1 2CD"
 
         val originalJourneyData =
-            journeyDataBuilder
+            JourneyDataBuilder()
                 .withLookupAddress(houseNumber, postcode)
                 .build()
 
         val expectedUpdatedJourneyData =
-            journeyDataBuilder
-                .withLookupAddress(houseNumber, postcode)
+            JourneyDataBuilder(initialJourneyData = originalJourneyData)
                 .withEmptyLookedUpAddresses()
                 .build()
 
@@ -98,7 +96,7 @@ class LookupAddressStepTests {
 
         // Assert
         verify(mockAddressLookupService).search(houseNumber, postcode)
-        verify(mockJourneyDataService).setJourneyDataInSession(expectedUpdatedJourneyData)
+        verify(mockJourneyDataService).addToJourneyDataIntoSession(expectedUpdatedJourneyData)
         assertEquals(LookupStepTestIds.NoAddressFound.urlPathSegment, redirectedUrl)
     }
 }

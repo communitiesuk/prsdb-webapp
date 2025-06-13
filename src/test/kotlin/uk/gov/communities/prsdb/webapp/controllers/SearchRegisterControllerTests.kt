@@ -69,6 +69,7 @@ class SearchRegisterControllerTests(
                             "1 Street Address",
                             "test@example.com",
                             "01223 123456",
+                            "/landlord/123/details",
                         ),
                     ),
                     PageRequest.of(

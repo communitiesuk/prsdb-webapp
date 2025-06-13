@@ -1,5 +1,11 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toJavaInstant
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -22,6 +28,7 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
@@ -36,6 +43,8 @@ import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.IncompleteComplianceDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
@@ -60,6 +69,9 @@ class PropertyOwnershipServiceTests {
 
     @Mock
     private lateinit var mockFormContextService: FormContextService
+
+    @Mock
+    private lateinit var mockBackUrlStorageService: BackUrlStorageService
 
     @InjectMocks
     private lateinit var propertyOwnershipService: PropertyOwnershipService
@@ -164,6 +176,7 @@ class PropertyOwnershipServiceTests {
         private val localAuthority = LocalAuthority(11, "DERBYSHIRE DALES DISTRICT COUNCIL", "1045")
         private val expectedPropertyLicence = "forms.checkPropertyAnswers.propertyDetails.noLicensing"
         private val expectedIsTenantedMessageKey = "commonText.no"
+        private val expectedCurrentUrlKey = 101
 
         private val propertyOwnership1 =
             MockLandlordData.createPropertyOwnership(
@@ -200,6 +213,8 @@ class PropertyOwnershipServiceTests {
                 ),
             ).thenReturn(landlordsProperties)
 
+            whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(expectedCurrentUrlKey)
+
             val expectedResults: List<RegisteredPropertyViewModel> =
                 listOf(
                     RegisteredPropertyViewModel(
@@ -211,7 +226,10 @@ class PropertyOwnershipServiceTests {
                         localAuthorityName = localAuthority.name,
                         licenseTypeMessageKey = expectedPropertyLicence,
                         isTenantedMessageKey = expectedIsTenantedMessageKey,
-                        recordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership1.id),
+                        recordLink =
+                            PropertyDetailsController
+                                .getPropertyDetailsPath(propertyOwnership1.id)
+                                .overrideBackLinkForUrl(expectedCurrentUrlKey),
                     ),
                     RegisteredPropertyViewModel(
                         address = propertyOwnership2.property.address.singleLineAddress,
@@ -222,7 +240,10 @@ class PropertyOwnershipServiceTests {
                         localAuthorityName = localAuthority.name,
                         licenseTypeMessageKey = expectedPropertyLicence,
                         isTenantedMessageKey = expectedIsTenantedMessageKey,
-                        recordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership2.id),
+                        recordLink =
+                            PropertyDetailsController
+                                .getPropertyDetailsPath(propertyOwnership2.id)
+                                .overrideBackLinkForUrl(expectedCurrentUrlKey),
                     ),
                 )
 
@@ -241,6 +262,8 @@ class PropertyOwnershipServiceTests {
                 ),
             ).thenReturn(landlordsProperties)
 
+            whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(expectedCurrentUrlKey)
+
             val expectedResults: List<RegisteredPropertyViewModel> =
                 listOf(
                     RegisteredPropertyViewModel(
@@ -253,10 +276,9 @@ class PropertyOwnershipServiceTests {
                         licenseTypeMessageKey = expectedPropertyLicence,
                         isTenantedMessageKey = expectedIsTenantedMessageKey,
                         recordLink =
-                            PropertyDetailsController.getPropertyDetailsPath(
-                                propertyOwnership1.id,
-                                isLaView = true,
-                            ),
+                            PropertyDetailsController
+                                .getPropertyDetailsPath(propertyOwnership1.id, isLaView = true)
+                                .overrideBackLinkForUrl(expectedCurrentUrlKey),
                     ),
                     RegisteredPropertyViewModel(
                         address = propertyOwnership2.property.address.singleLineAddress,
@@ -268,10 +290,9 @@ class PropertyOwnershipServiceTests {
                         licenseTypeMessageKey = expectedPropertyLicence,
                         isTenantedMessageKey = expectedIsTenantedMessageKey,
                         recordLink =
-                            PropertyDetailsController.getPropertyDetailsPath(
-                                propertyOwnership2.id,
-                                isLaView = true,
-                            ),
+                            PropertyDetailsController
+                                .getPropertyDetailsPath(propertyOwnership2.id, isLaView = true)
+                                .overrideBackLinkForUrl(expectedCurrentUrlKey),
                     ),
                 )
 
@@ -409,14 +430,17 @@ class PropertyOwnershipServiceTests {
         val laBaseUserId = "id"
         val pageRequest = PageRequest.of(1, 10)
         val prnMatchingPropertyOwnership = listOf(MockLandlordData.createPropertyOwnership())
+        val currentUrlKey = 13
         val expectedSearchResults =
-            prnMatchingPropertyOwnership.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
+            prnMatchingPropertyOwnership.map { PropertySearchResultViewModel.fromPropertyOwnership(it, currentUrlKey) }
 
         whenever(
             mockPropertyOwnershipRepository.searchMatchingPRN(searchPRN.number, laBaseUserId, pageable = pageRequest),
         ).thenReturn(
             PageImpl(prnMatchingPropertyOwnership),
         )
+
+        whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(currentUrlKey)
 
         val searchResults =
             propertyOwnershipService.searchForProperties(
@@ -466,6 +490,7 @@ class PropertyOwnershipServiceTests {
         val searchUPRN = "123"
         val laBaseUserId = "id"
         val pageRequest = PageRequest.of(1, 10)
+        val currentUrlKey = 23
 
         val uprnMatchingPropertyOwnership =
             listOf(
@@ -480,7 +505,7 @@ class PropertyOwnershipServiceTests {
                 ),
             )
         val expectedSearchResults =
-            uprnMatchingPropertyOwnership.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
+            uprnMatchingPropertyOwnership.map { PropertySearchResultViewModel.fromPropertyOwnership(it, currentUrlKey) }
 
         whenever(
             mockPropertyOwnershipRepository.searchMatchingUPRN(
@@ -491,6 +516,7 @@ class PropertyOwnershipServiceTests {
         ).thenReturn(
             PageImpl(uprnMatchingPropertyOwnership),
         )
+        whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(currentUrlKey)
 
         val searchResults =
             propertyOwnershipService.searchForProperties(
@@ -507,18 +533,20 @@ class PropertyOwnershipServiceTests {
     fun `searchForProperties returns a collection of fuzzy matches when the search term is not a PRN or UPRN`() {
         val searchTerm = "EG1 2AB"
         val laBaseUserId = "id"
+        val urlKey = 7
         val pageRequest = PageRequest.of(1, 10)
 
         val fuzzyMatchingPropertyOwnerships =
             listOf(MockLandlordData.createPropertyOwnership(), MockLandlordData.createPropertyOwnership())
         val expectedSearchResults =
-            fuzzyMatchingPropertyOwnerships.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
+            fuzzyMatchingPropertyOwnerships.map { PropertySearchResultViewModel.fromPropertyOwnership(it, 7) }
 
         whenever(
             mockPropertyOwnershipRepository.searchMatching(searchTerm, laBaseUserId, pageable = pageRequest),
         ).thenReturn(
             PageImpl(fuzzyMatchingPropertyOwnerships),
         )
+        whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(urlKey)
 
         val searchResults =
             propertyOwnershipService.searchForProperties(
@@ -539,24 +567,29 @@ class PropertyOwnershipServiceTests {
         val matchingProperties = (1..40).map { MockLandlordData.createPropertyOwnership() }
 
         val pageIndex1 = 0
+        val urlKey1 = 37
         val pageRequest1 = PageRequest.of(pageIndex1, pageSize)
         val matchingPropertiesPage1 = matchingProperties.subList(0, pageSize)
         val expectedPage1SearchResults =
-            matchingPropertiesPage1.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
+            matchingPropertiesPage1.map { PropertySearchResultViewModel.fromPropertyOwnership(it, urlKey1) }
 
         val pageIndex2 = 1
+        val urlKey2 = 41
         val pageRequest2 = PageRequest.of(pageIndex2, pageSize)
         val matchingPropertiesPage2 = matchingProperties.subList(pageSize, matchingProperties.size)
         val expectedPage2SearchResults =
-            matchingPropertiesPage2.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
+            matchingPropertiesPage2.map { PropertySearchResultViewModel.fromPropertyOwnership(it, urlKey2) }
 
         whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm, laBaseUserId, pageable = pageRequest1))
             .thenReturn(PageImpl(matchingPropertiesPage1))
         whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm, laBaseUserId, pageable = pageRequest2))
             .thenReturn(PageImpl(matchingPropertiesPage2))
 
+        whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(urlKey1)
         val searchResults1 =
             propertyOwnershipService.searchForProperties(searchTerm, laBaseUserId, requestedPageIndex = pageIndex1)
+
+        whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(urlKey2)
         val searchResults2 =
             propertyOwnershipService.searchForProperties(searchTerm, laBaseUserId, requestedPageIndex = pageIndex2)
 
@@ -707,7 +740,7 @@ class PropertyOwnershipServiceTests {
 
     @Test
     fun `deleteIncompleteComplianceForm deletes the corresponding form context and sets its reference to null`() {
-        val incompleteComplianceForm = MockLandlordData.createFormContext()
+        val incompleteComplianceForm = MockLandlordData.createPropertyRegistrationFormContext()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(incompleteComplianceForm = incompleteComplianceForm)
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
 
@@ -715,5 +748,188 @@ class PropertyOwnershipServiceTests {
 
         verify(mockFormContextService).deleteFormContext(incompleteComplianceForm)
         assertNull(propertyOwnership.incompleteComplianceForm)
+    }
+
+    @Nested
+    inner class GetIncompleteCompliancesForLandlord {
+        val principalName = "principalName"
+
+        @Test
+        fun `getIncompleteCompliancesForLandlord returns a list of incomplete compliances`() {
+            // Arrange
+            val currentDate = DateTimeHelper().getCurrentDateInUK()
+            val currentInstant =
+                LocalDateTime(
+                    currentDate.year,
+                    currentDate.monthNumber,
+                    currentDate.dayOfMonth,
+                    11,
+                    30,
+                ).toInstant(TimeZone.of("Europe/London")).toJavaInstant()
+            val properties =
+                listOf(
+                    MockLandlordData.createPropertyOwnership(
+                        id = 1,
+                        currentNumTenants = 3,
+                        incompleteComplianceForm = MockLandlordData.createPropertyComplianceFormContext(context = "{}"),
+                        createdDate = currentInstant,
+                    ),
+                    MockLandlordData.createPropertyOwnership(
+                        id = 2,
+                        currentNumTenants = 2,
+                        incompleteComplianceForm =
+                            MockLandlordData.createPropertyComplianceFormContext(
+                                context =
+                                    "{\"gas-safety-certificate\":{\"hasCert\":false}," +
+                                        "\"gas-safety-certificate-exemption\":{\"hasExemption\":false}," +
+                                        "\"gas-safety-certificate-exemption-missing\":{},\"eicr\":{\"hasCert\":false}," +
+                                        "\"eicr-exemption\":{\"hasExemption\":false},\"eicr-exemption-missing\":{}," +
+                                        "\"epc\":{\"hasCert\":\"NO\"},\"epc-missing\":{}," +
+                                        "\"fire-safety-declaration\":{\"hasDeclared\":true}," +
+                                        "\"keep-property-safe\":{\"agreesToResponsibility\":true}," +
+                                        "\"responsibility-to-tenants\":{\"agreesToResponsibility\":true}}",
+                            ),
+                        createdDate = currentInstant,
+                    ),
+                )
+            whenever(
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
+                    principalName,
+                    RegistrationStatus.REGISTERED,
+                ),
+            ).thenReturn(properties)
+
+            val expectedIncompleteCompliances =
+                listOf(
+                    IncompleteComplianceDataModel(
+                        propertyOwnershipId = properties[0].id,
+                        singleLineAddress = properties[0].property.address.singleLineAddress,
+                        localAuthorityName =
+                            properties[0]
+                                .property.address.localAuthority!!
+                                .name,
+                        certificatesDueDate = currentDate.plus(DatePeriod(days = 28)),
+                        gasSafety = false,
+                        electricalSafety = false,
+                        energyPerformance = false,
+                        landlordsResponsibilities = false,
+                    ),
+                    IncompleteComplianceDataModel(
+                        propertyOwnershipId = properties[1].id,
+                        singleLineAddress = properties[1].property.address.singleLineAddress,
+                        localAuthorityName =
+                            properties[1]
+                                .property.address.localAuthority!!
+                                .name,
+                        certificatesDueDate = currentDate.plus(DatePeriod(days = 28)),
+                        gasSafety = true,
+                        electricalSafety = true,
+                        energyPerformance = true,
+                        landlordsResponsibilities = true,
+                    ),
+                )
+
+            // Act
+            val incompleteCompliances = propertyOwnershipService.getIncompleteCompliancesForLandlord(principalName)
+
+            // Assert
+            assertEquals(expectedIncompleteCompliances, incompleteCompliances)
+        }
+
+        @Test
+        fun `getIncompleteCompliancesForLandlord returns an emptyList if there are no occupied properties with incomplete compliance`() {
+            // Arrange
+            val properties =
+                listOf(
+                    MockLandlordData.createPropertyOwnership(currentNumTenants = 3, incompleteComplianceForm = null),
+                    MockLandlordData.createPropertyOwnership(
+                        currentNumTenants = 0,
+                        incompleteComplianceForm = MockLandlordData.createPropertyComplianceFormContext(),
+                    ),
+                )
+            whenever(
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
+                    principalName,
+                    RegistrationStatus.REGISTERED,
+                ),
+            ).thenReturn(properties)
+
+            // Act
+            val incompleteCompliances = propertyOwnershipService.getIncompleteCompliancesForLandlord(principalName)
+
+            // Assert
+            assertTrue(incompleteCompliances.isEmpty())
+        }
+
+        @Test
+        fun `getIncompleteCompliancesForLandlord returns an emptyList if the landlord has no properties`() {
+            // Arrange
+            whenever(
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
+                    principalName,
+                    RegistrationStatus.REGISTERED,
+                ),
+            ).thenReturn(emptyList())
+
+            // Act
+            val incompleteCompliances = propertyOwnershipService.getIncompleteCompliancesForLandlord(principalName)
+
+            assertTrue(incompleteCompliances.isEmpty())
+        }
+    }
+
+    @Nested
+    inner class GetNumberOfIncompleteCompliancesForLandlord {
+        val principalName = "principalName"
+
+        @Test
+        fun `returns the number of incomplete compliances for a landlord`() {
+            // Arrange
+            val expectedNumberOfIncompleteCompliances = 1
+            val properties =
+                listOf(
+                    MockLandlordData.createPropertyOwnership(currentNumTenants = 3, incompleteComplianceForm = null),
+                    MockLandlordData.createPropertyOwnership(
+                        currentNumTenants = 2,
+                        incompleteComplianceForm = MockLandlordData.createPropertyComplianceFormContext(),
+                    ),
+                )
+            whenever(
+                @Suppress("ktlint:standard:max-line-length")
+                mockPropertyOwnershipRepository
+                    .countByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_StatusAndCurrentNumTenantsIsGreaterThanAndIncompleteComplianceFormNotNull(
+                        principalName,
+                        RegistrationStatus.REGISTERED,
+                        0,
+                    ),
+            ).thenReturn(1L)
+
+            // Act
+            val numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principalName)
+
+            // Assert
+            assertEquals(expectedNumberOfIncompleteCompliances, numberOfIncompleteCompliances)
+        }
+
+        @Test
+        fun `returns 0 if there are no incomplete compliances for a landlord`() {
+            // Arrange
+            val expectedNumberOfIncompleteCompliances = 0
+            whenever(
+                @Suppress("ktlint:standard:max-line-length")
+                mockPropertyOwnershipRepository
+                    .countByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_StatusAndCurrentNumTenantsIsGreaterThanAndIncompleteComplianceFormNotNull(
+                        principalName,
+                        RegistrationStatus.REGISTERED,
+                        0,
+                    ),
+            ).thenReturn(0L)
+
+            // Act
+            val numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principalName)
+
+            // Assert
+            assertEquals(expectedNumberOfIncompleteCompliances, numberOfIncompleteCompliances)
+        }
     }
 }

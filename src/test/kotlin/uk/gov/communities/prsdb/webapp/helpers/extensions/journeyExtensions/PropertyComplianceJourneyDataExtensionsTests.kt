@@ -1,11 +1,15 @@
 package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions
 
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinLocalDate
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Named
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -13,12 +17,16 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.mockConstruction
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_EPC_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
+import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAutoMatchedEpcIsCorrect
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getDidTenancyStartBeforeEpcExpiry
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionOtherReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrIssueDate
@@ -31,6 +39,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertIssueDate
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertOriginalName
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEpcTask
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
@@ -41,12 +50,20 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getLatestEpcCertificateNumber
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMeesExemptionReason
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getPropertyHasMeesExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
-import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withResetCheckMatchedEpc
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.time.LocalDate
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class PropertyComplianceJourneyDataExtensionsTests {
     companion object {
@@ -81,6 +98,13 @@ class PropertyComplianceJourneyDataExtensionsTests {
             arrayOf(
                 Arguments.of(Named.of("other", EicrExemptionReason.OTHER), true),
                 Arguments.of(Named.of("not other", EicrExemptionReason.LIVE_IN_LANDLORD), false),
+            )
+
+        @JvmStatic
+        private fun provideEpcDetailsJourneyDataKey() =
+            arrayOf(
+                Arguments.of(Named.of("for automatched EPC", true), NonStepJourneyDataKey.AutoMatchedEpc.key),
+                Arguments.of(Named.of("for looked up EPC", false), NonStepJourneyDataKey.LookedUpEpc.key),
             )
     }
 
@@ -470,58 +494,138 @@ class PropertyComplianceJourneyDataExtensionsTests {
         assertNull(retrievedEpcCertificateNumber)
     }
 
-    @Test
-    fun `withEpcDetails returns a JourneyData with the EPC details set`() {
+    @ParameterizedTest
+    @MethodSource("provideEpcDetailsJourneyDataKey")
+    fun `withEpcDetails returns a JourneyData with the EPC details set`(
+        autoMatched: Boolean,
+        journeyDataKey: String,
+    ) {
         // Arrange
         val testJourneyData = journeyDataBuilder.build()
-        val lookedUpEpcDetails =
-            EpcDataModel(
-                certificateNumber = "0000-0000-0000-1234-5678",
-                singleLineAddress = "1, Example Road, EG",
-                energyRating = "C",
-                expiryDate = LocalDate.of(2027, 1, 1).toKotlinLocalDate(),
-                latestCertificateNumberForThisProperty = "0000-0000-0000-1234-5678",
-            )
-        val expectedJourneyData = mutableMapOf(LOOKED_UP_EPC_JOURNEY_DATA_KEY to Json.encodeToString(lookedUpEpcDetails))
+        val lookedUpEpcDetails = MockEpcData.createEpcDataModel()
+        val expectedJourneyData = mutableMapOf(journeyDataKey to Json.encodeToString(lookedUpEpcDetails))
 
         // Act
-        val updatedJourneyData = testJourneyData.withEpcDetails(lookedUpEpcDetails)
+        val updatedJourneyData = testJourneyData.withEpcDetails(lookedUpEpcDetails, autoMatched)
+
+        // Assert
+        assertEquals(expectedJourneyData, updatedJourneyData)
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideEpcDetailsJourneyDataKey")
+    fun `withEpcDetails returns a JourneyData with the EPC details set to null if epcDetails is null`(
+        autoMatched: Boolean,
+        journeyDataKey: String,
+    ) {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.build()
+        val expectedJourneyData = mutableMapOf(journeyDataKey to null)
+
+        // Act
+        val updatedJourneyData = testJourneyData.withEpcDetails(null, autoMatched)
 
         // Assert
         assertEquals(expectedJourneyData, updatedJourneyData)
     }
 
     @Test
-    fun `withEpcDetails returns a JourneyData with the EPC details set to null if epcDetails is null`() {
+    fun `getEpcDetails returns autoMatched details from the JourneyData if autoMatched is true`() {
         // Arrange
-        val testJourneyData = journeyDataBuilder.build()
-        val expectedJourneyData = mutableMapOf(LOOKED_UP_EPC_JOURNEY_DATA_KEY to null)
+        val storedEpcDetails = MockEpcData.createEpcDataModel()
+        val journeyData = journeyDataBuilder.withAutoMatchedEpcDetails(storedEpcDetails).build()
 
         // Act
-        val updatedJourneyData = testJourneyData.withEpcDetails(null)
-
-        // Assert
-        assertEquals(expectedJourneyData, updatedJourneyData)
-    }
-
-    @Test
-    fun `getEpcDetails returns the EPC details from the JourneyData`() {
-        // Arrange
-        val storedEpcDetails =
-            EpcDataModel(
-                certificateNumber = "0000-0000-0000-1234-5678",
-                singleLineAddress = "1, Example Road, EG",
-                energyRating = "C",
-                expiryDate = LocalDate.of(2027, 1, 1).toKotlinLocalDate(),
-                latestCertificateNumberForThisProperty = "0000-0000-0000-1234-5678",
-            )
-        val journeyData = journeyDataBuilder.build().withEpcDetails(storedEpcDetails)
-
-        // Act
-        val retrievedEpcDetails = journeyData.getEpcDetails()
+        val retrievedEpcDetails = journeyData.getEpcDetails(autoMatched = true)
 
         // Assert
         assertEquals(storedEpcDetails, retrievedEpcDetails)
+    }
+
+    @Test
+    fun `getEpcDetails returns looked up details from the JourneyData if autoMatched is false`() {
+        // Arrange
+        val storedEpcDetails = MockEpcData.createEpcDataModel()
+        val journeyData = journeyDataBuilder.withLookedUpEpcDetails(storedEpcDetails).build()
+
+        // Act
+        val retrievedEpcDetails = journeyData.getEpcDetails(autoMatched = false)
+
+        // Assert
+        assertEquals(storedEpcDetails, retrievedEpcDetails)
+    }
+
+    @Test
+    fun `getAcceptedEpcDetails returns autoMatched epc details if these were accepted by the user`() {
+        // Arrange
+        val autoMatchedEpcDetails = MockEpcData.createEpcDataModel(MockEpcData.DEFAULT_EPC_CERTIFICATE_NUMBER)
+        val lookedUpEpcDetails = MockEpcData.createEpcDataModel(MockEpcData.SECONDARY_EPC_CERTIFICATE_NUMBER)
+        val journeyData =
+            journeyDataBuilder
+                .withAutoMatchedEpcDetails(autoMatchedEpcDetails)
+                .withLookedUpEpcDetails(lookedUpEpcDetails)
+                .withCheckAutoMatchedEpcResult(true)
+                .withCheckMatchedEpcResult(true)
+                .build()
+
+        // Act
+        val retrievedEpcDetails = journeyData.getAcceptedEpcDetails()
+
+        // Assert
+        assertEquals(autoMatchedEpcDetails, retrievedEpcDetails)
+    }
+
+    @Test
+    fun `getAcceptedEpcDetails returns looked up epc details if these were accepted by the user and automatched details were rejected`() {
+        // Arrange
+        val autoMatchedEpcDetails = MockEpcData.createEpcDataModel(MockEpcData.DEFAULT_EPC_CERTIFICATE_NUMBER)
+        val lookedUpEpcDetails = MockEpcData.createEpcDataModel(MockEpcData.SECONDARY_EPC_CERTIFICATE_NUMBER)
+        val journeyData =
+            journeyDataBuilder
+                .withAutoMatchedEpcDetails(autoMatchedEpcDetails)
+                .withLookedUpEpcDetails(lookedUpEpcDetails)
+                .withCheckAutoMatchedEpcResult(false)
+                .withCheckMatchedEpcResult(true)
+                .build()
+
+        // Act
+        val retrievedEpcDetails = journeyData.getAcceptedEpcDetails()
+
+        // Assert
+        assertEquals(lookedUpEpcDetails, retrievedEpcDetails)
+    }
+
+    @Test
+    fun `getAutoMatchedEpcIsCorrect returns the submitted answer for the CheckAutoMatchedEpc step`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.withCheckAutoMatchedEpcResult(true).build()
+
+        // Act, Assert
+        assertNotNull(testJourneyData.getAutoMatchedEpcIsCorrect())
+        assertTrue(testJourneyData.getAutoMatchedEpcIsCorrect()!!)
+    }
+
+    @Test
+    fun `getAutoMatchedEpcIsCorrect returns the submitted answer for the CheckMatchedEpc step`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.withCheckAutoMatchedEpcResult(true).build()
+
+        // Act, Assert
+        assertNotNull(testJourneyData.getAutoMatchedEpcIsCorrect())
+        assertTrue(testJourneyData.getAutoMatchedEpcIsCorrect()!!)
+    }
+
+    @Test
+    fun `withResetCheckMatchedEpc removes the check-matched-epc key from the JourneyData`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.withCheckMatchedEpcResult(false).build()
+        val expectedJourneyData = mutableMapOf<String, Any?>()
+
+        // Act
+        val updatedJourneyData = testJourneyData.withResetCheckMatchedEpc()
+
+        // Assert
+        assertEquals(expectedJourneyData, updatedJourneyData)
     }
 
     @Test
@@ -544,6 +648,79 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
+    fun `getLatestEpcCertificateNumber returns the latestCertificateNumber from a looked up EPC`() {
+        val testJourneyData =
+            journeyDataBuilder
+                .withLookedUpEpcDetails(
+                    MockEpcData.createEpcDataModel(
+                        certificateNumber = SUPERSEDED_EPC_CERTIFICATE_NUMBER,
+                        latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
+                    ),
+                ).build()
+
+        val retrievedCertificateNumber = testJourneyData.getLatestEpcCertificateNumber()
+
+        assertEquals(CURRENT_EPC_CERTIFICATE_NUMBER, retrievedCertificateNumber)
+    }
+
+    @Test
+    fun `getDidTenancyStartBeforeEpcExpiry returns the submitted answer for the EpcExpiryCheck step`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.withEpcExpiryCheckStep(true).build()
+
+        // Act, Assert
+        assertTrue(testJourneyData.getDidTenancyStartBeforeEpcExpiry()!!)
+    }
+
+    @Test
+    fun `getDidTenancyStartBeforeEpcExpiry returns null if EpcExpiryCheck is not in JourneyData`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.build()
+
+        // Act, Assert
+        assertNull(testJourneyData.getDidTenancyStartBeforeEpcExpiry())
+    }
+
+    @Test
+    fun `getPropertyHasMeesExemption returns the submitted answer for the MeesExemptionCheck step`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.withMeesExemptionCheckStep(true).build()
+
+        // Act, Assert
+        assertTrue(testJourneyData.getPropertyHasMeesExemption()!!)
+    }
+
+    @Test
+    fun `getPropertyHasMeesExemption returns null if MeesExemptionCheck is not in JourneyData`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.build()
+
+        // Act, Assert
+        assertNull(testJourneyData.getPropertyHasMeesExemption())
+    }
+
+    @Test
+    fun `getMeesExemptionReason returns the submitted answer for the MeesExemptionReason step`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.withMeesExemptionReasonStep(MeesExemptionReason.LISTED_BUILDING).build()
+
+        // Act
+        val retrievedExemptionReason = testJourneyData.getMeesExemptionReason()!!
+
+        // Act, Assert
+        assertEquals(MeesExemptionReason.LISTED_BUILDING, retrievedExemptionReason)
+    }
+
+    @Test
+    fun `getMeesExemptionReason returns null is MeesExemptionReason is not in JourneyData`() {
+        // Arrange
+        val testJourneyData = journeyDataBuilder.build()
+
+        // Act, Assert
+        assertNull(testJourneyData.getMeesExemptionReason())
+    }
+
+    @Test
     fun `getHasFireSafetyDeclaration returns a boolean if the corresponding page is in journeyData`() {
         val hasFireSafetyDeclaration = true
         val testJourneyData = journeyDataBuilder.withFireSafetyDeclaration(hasFireSafetyDeclaration).build()
@@ -560,5 +737,232 @@ class PropertyComplianceJourneyDataExtensionsTests {
         val retrievedHasFireSafetyDeclaration = testJourneyData.getHasFireSafetyDeclaration()
 
         assertNull(retrievedHasFireSafetyDeclaration)
+    }
+
+    @Nested
+    inner class GetHasCompletedEpcTask {
+        @Test
+        fun `getHasCompletedEpcTask returns true if the EpcExemptionConfirmation step has been completed`() {
+            val testJourneyData = journeyDataBuilder.withEpcExemptionConfirmationStep().build()
+
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+
+            assertTrue(hasCompletedEpcTask)
+        }
+
+        @Test
+        fun `getHasCompletedEpcTask returns true if the EpcMissing step has been completed`() {
+            val testJourneyData = journeyDataBuilder.withEpcMissingStep().build()
+
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+
+            assertTrue(hasCompletedEpcTask)
+        }
+
+        @Test
+        fun `getHasCompletedEpcTask returns true if the EpcExpired step has been completed`() {
+            val testJourneyData = journeyDataBuilder.withEpcExpiredStep().build()
+
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+
+            assertTrue(hasCompletedEpcTask)
+        }
+
+        @Test
+        fun `getHasCompletedEpcTask returns true if the EpcNotFound step has been completed`() {
+            val testJourneyData = journeyDataBuilder.withEpcNotFoundStep().build()
+
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+
+            assertTrue(hasCompletedEpcTask)
+        }
+
+        @Test
+        fun `getHasCompletedEpcTask returns true if the LowEnergyRating step has been completed`() {
+            val testJourneyData = journeyDataBuilder.withLowEnergyRatingStep().build()
+
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+
+            assertTrue(hasCompletedEpcTask)
+        }
+
+        @Test
+        fun `getHasCompletedEpcTask returns true if the MeesExemption step has been completed`() {
+            val testJourneyData = journeyDataBuilder.withMeesExemptionConfirmationStep().build()
+
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+
+            assertTrue(hasCompletedEpcTask)
+        }
+
+        @Test
+        fun `getHasCompletedEpcTask returns true if EpcExpiryCheck was answered Yes and the energy rating is E or better`() {
+            val testJourneyData =
+                journeyDataBuilder
+                    .withAutoMatchedEpcDetails(
+                        MockEpcData.createEpcDataModel(expiryDate = kotlinx.datetime.LocalDate(2022, 1, 5), energyRating = "A"),
+                    ).withCheckAutoMatchedEpcResult(true)
+                    .withEpcExpiryCheckStep(true)
+                    .build()
+
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+
+            assertTrue(hasCompletedEpcTask)
+        }
+
+        @Test
+        fun `EpcExpiryCheck does not complete the EPC task if the energy rating is worse than E and MEES steps are not completed`() {
+            val testJourneyData =
+                journeyDataBuilder
+                    .withAutoMatchedEpcDetails(
+                        MockEpcData.createEpcDataModel(expiryDate = kotlinx.datetime.LocalDate(2022, 1, 5), energyRating = "F"),
+                    ).withCheckAutoMatchedEpcResult(true)
+                    .withEpcExpiryCheckStep(true)
+                    .build()
+
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+
+            assertFalse(hasCompletedEpcTask)
+        }
+
+        @Test
+        fun `EpcExpiryCheck does not complete the EPC task if it is answered No`() {
+            val testJourneyData =
+                journeyDataBuilder
+                    .withEpcExpiryCheckStep(false)
+                    .build()
+
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+
+            assertFalse(hasCompletedEpcTask)
+        }
+
+        @Test
+        fun `getHasCompletedEpcTask returns true if CheckAutoMatchedEpc is answered Yes for an in date EPC with a good energy rating`() {
+            val testJourneyData =
+                journeyDataBuilder
+                    .withAutoMatchedEpcDetails(
+                        MockEpcData.createEpcDataModel(
+                            expiryDate =
+                                DateTimeHelper().getCurrentDateInUK().plus(
+                                    DatePeriod(years = 5),
+                                ),
+                            energyRating = "A",
+                        ),
+                    ).withCheckAutoMatchedEpcResult(true)
+                    .build()
+
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+
+            assertTrue(hasCompletedEpcTask)
+        }
+
+        @Test
+        fun `CheckAutoMatchedEpc does not complete the EPC task if it is answered No`() {
+            val testJourneyData =
+                journeyDataBuilder
+                    .withCheckAutoMatchedEpcResult(false)
+                    .build()
+
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+
+            assertFalse(hasCompletedEpcTask)
+        }
+
+        @Test
+        fun `CheckAutoMatchedEpc does not complete the EPC task if the accepted EPC has expired`() {
+            val testJourneyData =
+                journeyDataBuilder
+                    .withAutoMatchedEpcDetails(
+                        MockEpcData.createEpcDataModel(
+                            expiryDate = kotlinx.datetime.LocalDate(2022, 1, 5),
+                        ),
+                    ).withCheckAutoMatchedEpcResult(true)
+                    .build()
+
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+
+            assertFalse(hasCompletedEpcTask)
+        }
+
+        @Test
+        fun `CheckAutoMatchedEpc does not complete the EPC task if the accepted EPC has a low energy rating`() {
+            val testJourneyData =
+                journeyDataBuilder
+                    .withAutoMatchedEpcDetails(
+                        MockEpcData.createEpcDataModel(
+                            energyRating = "F",
+                        ),
+                    ).withCheckAutoMatchedEpcResult(true)
+                    .build()
+
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+
+            assertFalse(hasCompletedEpcTask)
+        }
+
+        @Test
+        fun `getHasCompletedEpcTask returns true if CheckMatchedEpc is answered Yes for an in date EPC with a good energy rating`() {
+            val testJourneyData =
+                journeyDataBuilder
+                    .withLookedUpEpcDetails(
+                        MockEpcData.createEpcDataModel(
+                            expiryDate =
+                                DateTimeHelper().getCurrentDateInUK().plus(
+                                    DatePeriod(years = 5),
+                                ),
+                            energyRating = "A",
+                        ),
+                    ).withCheckMatchedEpcResult(true)
+                    .build()
+
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+
+            assertTrue(hasCompletedEpcTask)
+        }
+
+        @Test
+        fun `CheckMatchedEpc does not complete the EPC task if it is answered No`() {
+            val testJourneyData =
+                journeyDataBuilder
+                    .withCheckMatchedEpcResult(false)
+                    .build()
+
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+
+            assertFalse(hasCompletedEpcTask)
+        }
+
+        @Test
+        fun `CheckMatchedEpc does not complete the EPC task if the accepted EPC has expired`() {
+            val testJourneyData =
+                journeyDataBuilder
+                    .withLookedUpEpcDetails(
+                        MockEpcData.createEpcDataModel(
+                            expiryDate = kotlinx.datetime.LocalDate(2022, 1, 5),
+                        ),
+                    ).withCheckMatchedEpcResult(true)
+                    .build()
+
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+
+            assertFalse(hasCompletedEpcTask)
+        }
+
+        @Test
+        fun `CheckMatchedEpc does not complete the EPC task if the accepted EPC has a low energy rating`() {
+            val testJourneyData =
+                journeyDataBuilder
+                    .withLookedUpEpcDetails(
+                        MockEpcData.createEpcDataModel(
+                            energyRating = "F",
+                        ),
+                    ).withCheckMatchedEpcResult(true)
+                    .build()
+
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+
+            assertFalse(hasCompletedEpcTask)
+        }
     }
 }

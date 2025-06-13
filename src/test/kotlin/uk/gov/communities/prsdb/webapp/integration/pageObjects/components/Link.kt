@@ -15,12 +15,14 @@ class Link(
             parentLocator: Locator,
             text: String,
             index: Int = 0,
-        ): Link = Link(parentLocator.locator(".govuk-link", LocatorOptions().setHasText(text)).nth(index))
+            selectorOrLocator: String = ".govuk-link",
+        ): Link = Link(parentLocator.locator(selectorOrLocator, LocatorOptions().setHasText(text)).nth(index))
 
         fun byText(
             page: Page,
             text: String,
             index: Int = 0,
-        ): Link = byText(page.locator("html"), text, index)
+            selectorOrLocator: String = ".govuk-link",
+        ): Link = byText(page.locator("html"), text, index, selectorOrLocator)
     }
 }
