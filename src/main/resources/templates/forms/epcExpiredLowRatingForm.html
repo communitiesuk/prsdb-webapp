@@ -1,0 +1,51 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="getNewEpcUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="meesExemptionGuideUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="registerMeesExemptionUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="epcImprovementGuideUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="expiryDateAsJavaLocalDate" type="java.lang.Object"*/-->
+<!DOCTYPE html>
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+<header>
+    <h1 class="govuk-heading-l" th:text="#{forms.epcExpiredLowRating.heading}">forms.epcExpired.heading</h1>
+</header>
+<section>
+    <p class="govuk-body" th:text="#{forms.epcExpiredLowRating.paragraph.one(${{expiryDateAsJavaLocalDate}})}">forms.epcExpiredLowRating.paragraph.one</p>
+    <p class="govuk-body" th:text="#{forms.epcExpiredLowRating.paragraph.two(${{expiryDateAsJavaLocalDate}})}">forms.epcExpiredLowRating.paragraph.two</p>
+    <p class="govuk-body">
+        <span th:remove="tag" th:text="#{forms.epcExpiredLowRating.paragraph.three.beforeLink}">forms.epcExpiredLowRating.paragraph.three.beforeLink</span>
+        <a class="govuk-link" th:text="#{forms.epcExpiredLowRating.paragraph.three.link}" th:href="${getNewEpcUrl}" rel="noreferrer noopener" target="_blank">
+            forms.epcExpiredLowRating.paragraph.three.link
+        </a>
+    </p>
+</section>
+<section>
+    <h2 class="govuk-heading-s" th:text="#{forms.epcExpiredLowRating.beforeYouGetNewEpc.heading}">forms.epcExpiredLowRating.beforeYouGetNewEpc.heading</h2>
+    <p class="govuk-body">
+        <span th:remove="tag" th:text="#{forms.epcExpiredLowRating.beforeYouGetNewEpc.paragraph.one.beforeLink}">forms.epcExpiredLowRating.beforeYouGetNewEpc.paragraph.one.beforeLink</span>
+        <a class="govuk-link" th:text="#{forms.epcExpiredLowRating.beforeYouGetNewEpc.paragraph.one.link}" th:href="${meesExemptionGuideUrl}" rel="noreferrer noopener" target="_blank">
+            forms.epcExpiredLowRating.beforeYouGetNewEpc.paragraph.one.link
+        </a>
+        <span th:remove="tag" th:text="#{forms.epcExpiredLowRating.beforeYouGetNewEpc.paragraph.one.afterLink}">forms.epcExpiredLowRating.beforeYouGetNewEpc.paragraph.one.afterLink</span>
+    </p>
+    <p class="govuk-body" th:text="#{forms.epcExpiredLowRating.beforeYouGetNewEpc.paragraph.two}">forms.epcExpiredLowRating.beforeYouGetNewEpc.paragraph.two</p>
+    <p class="govuk-body" th:text="#{forms.epcExpiredLowRating.beforeYouGetNewEpc.paragraph.three}">forms.epcExpiredLowRating.beforeYouGetNewEpc.paragraph.three</p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li th:text="#{forms.epcExpiredLowRating.beforeYouGetNewEpc.bullet.one}">forms.epcExpiredLowRating.beforeYouGetNewEpc.bullet.one</li>
+        <li><a class="govuk-link" th:text="#{forms.epcExpiredLowRating.beforeYouGetNewEpc.bullet.two.link}" th:href="${registerMeesExemptionUrl}" rel="noreferrer noopener" target="_blank">
+            forms.epcExpiredLowRating.beforeYouGetNewEpc.bullet.two.link
+        </a></li>
+    </ul>
+    <p class="govuk-body">
+        <span th:remove="tag" th:text="#{forms.epcExpiredLowRating.beforeYouGetNewEpc.paragraph.four.beforeLink}">forms.epcExpiredLowRating.beforeYouGetNewEpc.paragraph.four.beforeLink</span>
+        <a class="govuk-link" th:text="#{forms.epcExpiredLowRating.beforeYouGetNewEpc.paragraph.four.link}" th:href="${epcImprovementGuideUrl}" rel="noreferrer noopener" target="_blank">
+            forms.epcExpiredLowRating.beforeYouGetNewEpc.paragraph.four.link
+        </a>
+    </p>
+    <p class="govuk-body" th:text="#{forms.epcExpiredLowRating.beforeYouGetNewEpc.paragraph.five}">forms.epcExpiredLowRating.beforeYouGetNewEpc.paragraph.five</p>
+</section>
+<button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinueToLandlordResponsibilities})}"></button>
+</html>

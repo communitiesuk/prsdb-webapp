@@ -69,6 +69,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.time.format.DateTimeFormatter
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql") {
@@ -276,18 +277,27 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
 
         // EPC Lookup page - submit latest certificate but it is expired
         whenever(epcRegisterClient.getByRrn(CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER))
-            .thenReturn(MockEpcData.createEpcRegisterClientEpcFoundResponse(expiryDate = MockEpcData.expiryDateInThePast))
+            .thenReturn(
+                MockEpcData.createEpcRegisterClientEpcFoundResponse(
+                    expiryDate = MockEpcData.expiryDateInThePast,
+                    energyRating = "C",
+                ),
+            )
         epcLookupPage.submitCurrentEpcNumberWhichIsExpired()
         checkMatchedEpcPage = assertPageIs(page, CheckMatchedEpcPagePropertyCompliance::class, urlArguments)
 
+        // Check Matched EPC page
         checkMatchedEpcPage.submitMatchedEpcDetailsCorrect()
         val expiryCheckPage = assertPageIs(page, EpcExpiryCheckPagePropertyCompliance::class, urlArguments)
 
+        // Expiry Check page
         assertTrue(expiryCheckPage.page.content().contains("5 January 2022"))
         expiryCheckPage.submitTenancyStartedAfterExpiry()
         val epcExpiredPage = assertPageIs(page, EpcExpiredPagePropertyCompliance::class, urlArguments)
 
+        // EPC Expired page (good energy rating)
         assertTrue(epcExpiredPage.page.content().contains("5 January 2022"))
+        assertFalse(epcExpiredPage.page.content().contains("The expired certificate shows an energy rating below E"))
         epcExpiredPage.continueButton.clickAndWait()
         assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
     }
