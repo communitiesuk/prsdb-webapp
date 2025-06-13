@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getNumberOfPeopleUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getOwnershipTypeUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoAdditionalLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoMandatoryLicenceFormModel
@@ -86,7 +87,7 @@ class PropertyDetailsUpdateJourney(
                 stepFactory.occupancyStepId toPageData OccupancyFormModel::fromPropertyOwnership,
                 stepFactory.numberOfHouseholdsStepId toPageData NumberOfHouseholdsFormModel::fromPropertyOwnership,
                 stepFactory.numberOfPeopleStepId toPageData NumberOfPeopleFormModel::fromPropertyOwnership,
-                stepFactory.checkOccupancyAnswersStepId.urlPathSegment to emptyMap<String, Any>(),
+                stepFactory.checkOccupancyAnswersStepId.urlPathSegment to CheckAnswersFormModel().toPageData(),
             )
 
         val licenceNumberStepIdAndFormModel = propertyOwnership.getLicenceNumberStepIdAndFormModel()
@@ -279,7 +280,7 @@ class PropertyDetailsUpdateJourney(
     private val checkOccupancyAnswers =
         Step(
             id = stepFactory.checkOccupancyAnswersStepId,
-            page = CheckOccupancyAnswersPage(stepFactory.stepGroupId),
+            page = CheckOccupancyAnswersPage(stepFactory.stepGroupId, journeyDataService),
             handleSubmitAndRedirect = { _, _, _ -> updatePropertyAndRedirect() },
             saveAfterSubmit = false,
         )
