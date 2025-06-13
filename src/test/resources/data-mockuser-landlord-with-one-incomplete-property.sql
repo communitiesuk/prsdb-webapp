@@ -5,7 +5,7 @@ INSERT INTO registration_number (id, created_date, number, type)
 VALUES (1, '09/13/24', 2001001001, 1);
 
 INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id)
-VALUES  (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 1);
+VALUES  (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 2);
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
                       is_active, phone_number, subject_identifier, name, email, country_of_residence, is_verified)

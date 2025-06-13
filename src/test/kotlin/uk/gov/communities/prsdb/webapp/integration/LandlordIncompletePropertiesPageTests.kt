@@ -46,13 +46,15 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
 
             assertThat(incompletePropertiesPage.firstSummaryCard.summaryCardList.propertyAddressRow).containsText("4, Example Road, EG")
-            assertThat(incompletePropertiesPage.firstSummaryCard.summaryCardList.localAuthorityRow).containsText("ANGUS COUNCIL")
+            assertThat(
+                incompletePropertiesPage.firstSummaryCard.summaryCardList.localAuthorityRow,
+            ).containsText("SOUTH GLOUCESTERSHIRE COUNCIL")
             assertThat(
                 incompletePropertiesPage.firstSummaryCard.summaryCardList.completeByRow,
             ).containsText(formattedCompleteByDate, LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
 
             assertThat(incompletePropertiesPage.secondSummaryCard.summaryCardList.propertyAddressRow).containsText("5, Example Road, EG")
-            assertThat(incompletePropertiesPage.secondSummaryCard.summaryCardList.localAuthorityRow).containsText("ANTRIM AND NEWTOWNABBEY")
+            assertThat(incompletePropertiesPage.secondSummaryCard.summaryCardList.localAuthorityRow).containsText("NORTH SOMERSET COUNCIL")
             assertThat(
                 incompletePropertiesPage.secondSummaryCard.summaryCardList.completeByRow,
             ).containsText(formattedCompleteByDate, LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))

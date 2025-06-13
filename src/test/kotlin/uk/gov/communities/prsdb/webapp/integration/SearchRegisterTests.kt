@@ -239,7 +239,7 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
             assertThat(resultTable.getCell(0, ADDRESS_COL_INDEX)).containsText("P-CCCT-GRKQ")
 
             assertThat(resultTable.headerRow.getCell(LA_COL_INDEX)).containsText("Local authority")
-            assertThat(resultTable.getCell(0, LA_COL_INDEX)).containsText("ISLE OF MAN")
+            assertThat(resultTable.getCell(0, LA_COL_INDEX)).containsText("BATH AND NORTH EAST SOMERSET COUNCIL")
 
             assertThat(resultTable.headerRow.getCell(PROPERTY_LANDLORD_COL_INDEX)).containsText("Registered landlord")
             assertThat(resultTable.getCell(0, PROPERTY_LANDLORD_COL_INDEX)).containsText("Alexander Smith")
