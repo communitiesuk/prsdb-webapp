@@ -1,12 +1,12 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.WebService
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 
-@Service
+@WebService
 class FormContextService(
     private val formContextRepository: FormContextRepository,
 ) {

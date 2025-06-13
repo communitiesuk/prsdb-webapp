@@ -1,8 +1,8 @@
 package uk.gov.communities.prsdb.webapp.config
 
-import org.springframework.context.annotation.Configuration
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing
+import uk.gov.communities.prsdb.webapp.annotations.WebConfiguration
 
-@Configuration
+@WebConfiguration
 @EnableJpaAuditing
 class AuditingConfig

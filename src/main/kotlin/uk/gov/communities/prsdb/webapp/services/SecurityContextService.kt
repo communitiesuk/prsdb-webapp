@@ -2,11 +2,11 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.context.SecurityContextRepository
-import org.springframework.stereotype.Service
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
+import uk.gov.communities.prsdb.webapp.annotations.WebService
 
-@Service
+@WebService
 class SecurityContextService(
     private val securityContextRepository: SecurityContextRepository,
 ) {

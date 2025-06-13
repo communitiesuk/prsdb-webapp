@@ -1,14 +1,14 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.WebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.MIN_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.RegistrationNumberRepository
 
-@Service
+@WebService
 class RegistrationNumberService(
     private val regNumRepository: RegistrationNumberRepository,
 ) {

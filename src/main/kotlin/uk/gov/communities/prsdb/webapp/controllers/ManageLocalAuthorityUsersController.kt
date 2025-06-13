@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Min
 import org.springframework.http.MediaType
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.GetMapping
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
+import uk.gov.communities.prsdb.webapp.annotations.WebController
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
@@ -39,7 +39,7 @@ import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LA_ADMIN', 'SYSTEM_OPERATOR')")
-@Controller
+@WebController
 @RequestMapping("/$LOCAL_AUTHORITY_PATH_SEGMENT/{localAuthorityId}")
 class ManageLocalAuthorityUsersController(
     var invitationEmailSender: EmailNotificationService<LocalAuthorityInvitationEmail>,

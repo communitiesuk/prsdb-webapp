@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.validation.Valid
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.GetMapping
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.annotations.WebController
 import uk.gov.communities.prsdb.webapp.constants.ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
@@ -36,7 +36,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LANDLORD')")
-@Controller
+@WebController
 @RequestMapping(LANDLORD_BASE_URL, "/")
 class LandlordController(
     private val landlordService: LandlordService,

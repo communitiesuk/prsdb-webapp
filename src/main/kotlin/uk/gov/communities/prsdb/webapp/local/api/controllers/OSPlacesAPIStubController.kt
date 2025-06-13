@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.MAX_ADDRESSES
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import kotlin.math.min
 
-@Profile("local-mock-os-places")
+@Profile("local-mock-os-places, !web-server-deactivated")
 @RestController
 @RequestMapping("/local/os-places")
 class OSPlacesAPIStubController(

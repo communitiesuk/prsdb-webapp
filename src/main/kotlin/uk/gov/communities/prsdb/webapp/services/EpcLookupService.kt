@@ -2,12 +2,12 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.json.JSONObject
 import org.springframework.http.HttpStatus
-import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.annotations.WebService
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
-@Service
+@WebService
 class EpcLookupService(
     private val epcRegisterClient: EpcRegisterClient,
 ) {

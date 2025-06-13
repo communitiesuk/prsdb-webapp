@@ -2,11 +2,11 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpSession
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.WebService
 import uk.gov.communities.prsdb.webapp.constants.COOKIE_TOKENS
 import java.util.UUID
 
-@Service
+@WebService
 class TokenCookieService(
     private val session: HttpSession,
 ) {

@@ -12,7 +12,6 @@ import com.nimbusds.jwt.proc.DefaultJWTProcessor
 import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.security.oauth2.client.endpoint.NimbusJwtClientAuthenticationParametersConverter
 import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient
 import org.springframework.security.oauth2.client.oidc.authentication.OidcIdTokenDecoderFactory
@@ -22,11 +21,12 @@ import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm
 import org.springframework.security.oauth2.jwt.JwtDecoderFactory
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.web.client.RestClient
+import uk.gov.communities.prsdb.webapp.annotations.WebConfiguration
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 import java.util.UUID
 
-@Configuration
+@WebConfiguration
 class OneLoginConfig {
     @Value("\${one-login.jwt.public.key}")
     lateinit var publicKey: RSAPublicKey

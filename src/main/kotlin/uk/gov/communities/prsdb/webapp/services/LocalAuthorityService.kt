@@ -1,10 +1,10 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.WebService
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityRepository
 
-@Service
+@WebService
 class LocalAuthorityService(
     private val localAuthorityRepository: LocalAuthorityRepository,
 ) {
