@@ -94,3 +94,13 @@ spring:
             issuer-uri: ${ONE_LOGIN_ISSUER_URL}
           epc-register:
             token-uri: ${EPC_REGISTER_TOKEN_URI}
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: web-server-deactivated
+
+  main:
+    web-application-type: none
