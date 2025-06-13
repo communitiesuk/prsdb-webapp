@@ -30,6 +30,10 @@ class JourneyDataService(
         setJourneyDataInSession(updatedData)
     }
 
+    fun removeJourneyDataFromSession() {
+        session.removeAttribute(journeyDataKey)
+    }
+
     fun removeJourneyDataAndContextIdFromSession() {
         session.removeAttribute(CONTEXT_ID)
         session.removeAttribute(journeyDataKey)
