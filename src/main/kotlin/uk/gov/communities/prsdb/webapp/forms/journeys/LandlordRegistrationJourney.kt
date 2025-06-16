@@ -23,7 +23,6 @@ import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOfResidenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DateOfBirthFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeclarationFormModel
@@ -197,7 +196,7 @@ class LandlordRegistrationJourney(
             id = LandlordRegistrationStepId.ConfirmIdentity,
             page =
                 ConfirmIdentityPage(
-                    formModel = CheckAnswersFormModel::class,
+                    formModel = NoInputFormModel::class,
                     templateName = "forms/confirmIdentityForm",
                     content =
                         mapOf(
