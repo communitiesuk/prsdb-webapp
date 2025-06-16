@@ -43,4 +43,9 @@ class UserRolesService(
         val roles = getRolesForSubjectId(subjectId)
         return roles.contains(ROLE_LANDLORD)
     }
+
+    fun getHasLocalAuthorityUserRole(subjectId: String): Boolean {
+        val roles = getRolesForSubjectId(subjectId)
+        return roles.contains(ROLE_LA_USER)
+    }
 }

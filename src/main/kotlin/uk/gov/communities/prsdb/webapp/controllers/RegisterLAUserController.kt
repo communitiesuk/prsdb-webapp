@@ -18,14 +18,16 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrati
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
+import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import java.security.Principal
 
 @PrsdbController
 @RequestMapping("/${REGISTER_LA_USER_JOURNEY_URL}")
 class RegisterLAUserController(
-    val laUserRegistrationJourneyFactory: LaUserRegistrationJourneyFactory,
-    val invitationService: LocalAuthorityInvitationService,
-    val localAuthorityDataService: LocalAuthorityDataService,
+    private val laUserRegistrationJourneyFactory: LaUserRegistrationJourneyFactory,
+    private val invitationService: LocalAuthorityInvitationService,
+    private val localAuthorityDataService: LocalAuthorityDataService,
+    private val userRolesService: UserRolesService,
 ) {
     @GetMapping
     fun acceptInvitation(
@@ -42,11 +44,39 @@ class RegisterLAUserController(
         return "redirect:$INVALID_LINK_PAGE_PATH_SEGMENT"
     }
 
+    @GetMapping("/$LANDING_PAGE_PATH_SEGMENT")
+    fun getLandingPage(
+        model: Model,
+        principal: Principal,
+    ): ModelAndView {
+        val token = getValidTokenFromSessionOrNull()
+        if (token == null) {
+            invitationService.clearTokenFromSession()
+            return ModelAndView("redirect:$INVALID_LINK_PAGE_PATH_SEGMENT")
+        }
+
+        val invitation = invitationService.getInvitationFromToken(token)
+
+        if (userRolesService.getHasLocalAuthorityUserRole(principal.name)) {
+            invitationService.deleteInvitation(invitation)
+            invitationService.clearTokenFromSession()
+            return ModelAndView("redirect:$LOCAL_AUTHORITY_DASHBOARD_URL")
+        }
+
+        return laUserRegistrationJourneyFactory
+            .create(invitation)
+            .getModelAndViewForStep(
+                LANDING_PAGE_PATH_SEGMENT,
+                subPageNumber = null,
+            )
+    }
+
     @GetMapping("/{stepName}")
     fun getJourneyStep(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
         model: Model,
+        principal: Principal,
     ): ModelAndView {
         val token = getValidTokenFromSessionOrNull()
         if (token == null) {
@@ -125,5 +155,6 @@ class RegisterLAUserController(
 
     companion object {
         const val INVALID_LINK_PAGE_PATH_SEGMENT = "invalid-link"
+        const val LANDING_PAGE_PATH_SEGMENT = "landing-page"
     }
 }
