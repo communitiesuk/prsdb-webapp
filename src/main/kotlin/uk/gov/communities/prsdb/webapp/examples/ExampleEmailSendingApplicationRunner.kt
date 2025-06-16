@@ -4,11 +4,13 @@ import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.context.ApplicationContext
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ExampleEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 
 @Component
+@Profile("web-server-deactivated")
 class ExampleEmailSendingApplicationRunner(
     private val emailSender: EmailNotificationService<ExampleEmail>,
     private val context: ApplicationContext,
