@@ -49,8 +49,7 @@ notify-template-tests.run.xml
 
 ### Built assets ###
 /dist
-/scripts/output/**
-!/scripts/output/.gitkeep
+/scripts/output
 
 ### Local ###
 .local-uploads
