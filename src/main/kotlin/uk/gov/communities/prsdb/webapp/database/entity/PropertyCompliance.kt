@@ -9,6 +9,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
 import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.EPC_HIGH_RATING_RANGE
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -74,6 +75,41 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     val eicrExpiryDate: LocalDate?
         get() = eicrIssueDate?.plusYears(EICR_VALIDITY_YEARS.toLong())
+
+    val isGasSafetyCertExpired: Boolean?
+        get() = gasSafetyCertExpiryDate?.let { !it.isAfter(LocalDate.now()) }
+
+    val isGasSafetyCertMissing: Boolean
+        get() = gasSafetyCertIssueDate == null && gasSafetyCertExemptionReason == null
+
+    val isEicrExpired: Boolean?
+        get() = eicrExpiryDate?.let { !it.isAfter(LocalDate.now()) }
+
+    val isEicrMissing: Boolean
+        get() = eicrIssueDate == null && eicrExemptionReason == null
+
+    val isEpcExpired: Boolean?
+        get() {
+            val isPastExpiryDate = epcExpiryDate?.let { !it.isAfter(LocalDate.now()) } ?: return null
+            return if (!isPastExpiryDate) {
+                false
+            } else {
+                tenancyStartedBeforeEpcExpiry?.not()
+            }
+        }
+
+    val isEpcRatingLow: Boolean?
+        get() {
+            val rating = epcEnergyRating?.uppercase() ?: return null
+            return if (rating in EPC_HIGH_RATING_RANGE) {
+                false
+            } else {
+                epcMeesExemptionReason == null
+            }
+        }
+
+    val isEpcMissing: Boolean
+        get() = epcUrl == null && epcExemptionReason == null
 
     constructor(
         propertyOwnership: PropertyOwnership,
