@@ -13,7 +13,6 @@ class LandlordIncompleteCompiancesPage(
     page: Page,
 ) : BasePage(page, INCOMPLETE_COMPLIANCES_URL) {
     val heading = Heading(page.locator("h1.govuk-heading-l"))
-    val subHeading = Heading(page.locator("p.govuk-body-l"))
     val hintText = Heading(page.locator("p.govuk-hint"))
     val viewRegisteredPropertiesLink = Link.byText(page, "View your property records")
 
