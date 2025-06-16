@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.ephemeral
+package uk.gov.communities.prsdb.webapp.examples
 
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
