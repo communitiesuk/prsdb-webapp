@@ -1,13 +1,12 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.validation.BindingResult
@@ -18,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnsw
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
-import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -41,77 +39,37 @@ class CheckAnswersPageTests {
         checkAnswersPage.enrichModel(modelAndView, filteredJourneyData)
 
         assertEquals(modelAndView.modelMap["formData"], createSummaryList(filteredJourneyData))
-        assertEquals(modelAndView.modelMap["submittedFilteredJourneyData"], Json.encodeToString(filteredJourneyData))
+        assertEquals(modelAndView.modelMap["submittedFilteredJourneyData"], CheckAnswersFormModel.serializeJourneyData(filteredJourneyData))
         assertEquals(modelAndView.modelMap["furtherEnrichModelKey"], "furtherEnrichModelValue")
+    }
+
+    @Test
+    fun `bindDataToFormModel adds journeyData to the formModel`() {
+        val formData = mapOf(CheckAnswersFormModel::submittedFilteredJourneyData.name to "{}")
+        val journeyData = mapOf("key1" to "value1")
+        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
+
+        val bindingResult = checkAnswersPage.bindDataToFormModel(AlwaysTrueValidator(), formData)
+
+        val formModel = bindingResult.target as CheckAnswersFormModel
+        assertEquals(journeyData, formModel.storedJourneyData)
     }
 
     // TODO PRSD-1298: Update 'isSatisfied' tests to match implementation
     @Test
-    fun `isSatisfied returns true if the submittedFilteredJourneyData values match the current journeyData`() {
-        val submittedFilteredJourneyData = mapOf("key1" to "value1", "key2" to "value2")
-        val formModel = createCheckAnswersFormModel(submittedFilteredJourneyData)
-        whenever(mockBindingResult.target).thenReturn(formModel)
-
-        val journeyData = submittedFilteredJourneyData + ("otherKey" to "otherValue")
-        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
+    fun `isSatisfied returns true if the bindingResult doesn't contain errors`() {
+        whenever(mockBindingResult.hasErrors()).thenReturn(false)
 
         assertTrue(checkAnswersPage.isSatisfied(mockBindingResult))
+        verify(mockJourneyDataService, never()).removeJourneyDataAndContextIdFromSession()
     }
 
-    @Suppress("ktlint:standard:max-line-length")
     @Test
-    fun `isSatisfied removes journeyData from session and throws an error if the submittedFilteredJourneyData values don't match the current journeyData`() {
-        val submittedFilteredJourneyData = mapOf("key1" to "value1", "key2" to "value2")
-        val formModel = createCheckAnswersFormModel(submittedFilteredJourneyData)
-        whenever(mockBindingResult.target).thenReturn(formModel)
-
-        val journeyData = submittedFilteredJourneyData + ("key1" to "differentValue")
-        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
+    fun `isSatisfied removes journey context from session and throws an error if the binding result contains errors`() {
+        whenever(mockBindingResult.hasErrors()).thenReturn(true)
 
         assertThrows<PrsdbWebException> { checkAnswersPage.isSatisfied(mockBindingResult) }
-        verify(mockJourneyDataService).removeJourneyDataFromSession()
-    }
-
-    @Suppress("ktlint:standard:max-line-length")
-    @Test
-    fun `isSatisfied removes journeyData from session and throws an error if the submittedFilteredJourneyData values don't exist in the current journeyData`() {
-        val submittedFilteredJourneyData = mapOf("key1" to "value1", "key2" to "value2")
-        val formModel = createCheckAnswersFormModel(submittedFilteredJourneyData)
-        whenever(mockBindingResult.target).thenReturn(formModel)
-
-        val journeyData = submittedFilteredJourneyData - "key1"
-        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
-
-        assertThrows<PrsdbWebException> { checkAnswersPage.isSatisfied(mockBindingResult) }
-        verify(mockJourneyDataService).removeJourneyDataFromSession()
-    }
-
-    @Test
-    fun `CheckAnswersPage can handle validation for answers with different types`() {
-        val modelAndView = ModelAndView()
-        val filteredJourneyData =
-            mapOf(
-                SUMMARY_ROW_KEY to "summaryRowValue",
-                "stringKey" to "stringValue",
-                "numberKey" to 123,
-                "booleanKey" to true,
-                "dateKey" to LocalDate.of(2021, 1, 1),
-                "mapKey" to
-                    mapOf(
-                        "stringKey" to "stringValue",
-                        "numberKey" to 123,
-                        "booleanKey" to true,
-                        "dateKey" to LocalDate.of(2021, 1, 1),
-                    ),
-            )
-        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(filteredJourneyData)
-
-        checkAnswersPage.enrichModel(modelAndView, filteredJourneyData)
-        val submittedFilteredJourneyData = modelAndView.modelMap["submittedFilteredJourneyData"]
-        val formData = mapOf("submittedFilteredJourneyData" to submittedFilteredJourneyData)
-        val bindingResult = checkAnswersPage.bindDataToFormModel(AlwaysTrueValidator(), formData)
-
-        assertTrue(checkAnswersPage.isSatisfied(bindingResult))
+        verify(mockJourneyDataService).removeJourneyDataAndContextIdFromSession()
     }
 
     class TestCheckAnswersPage(
@@ -136,10 +94,5 @@ class CheckAnswersPageTests {
 
         private fun createSummaryList(journeyData: JourneyData) =
             listOf(SummaryListRowViewModel(SUMMARY_ROW_KEY, journeyData[SUMMARY_ROW_KEY]!!, changeUrl = null))
-
-        private fun createCheckAnswersFormModel(submittedFilteredJourneyData: Map<String, String>): CheckAnswersFormModel =
-            CheckAnswersFormModel().apply {
-                this.submittedFilteredJourneyData = Json.encodeToString(submittedFilteredJourneyData)
-            }
     }
 }

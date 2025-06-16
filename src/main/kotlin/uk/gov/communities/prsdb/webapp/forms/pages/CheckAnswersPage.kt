@@ -1,11 +1,10 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.springframework.validation.BindingResult
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -25,7 +24,7 @@ abstract class CheckAnswersPage(
         filteredJourneyData!!
         // TODO PRSD-1219: Rename "formData" to "summaryList" for all CYA pages/templates
         modelAndView.addObject("formData", getSummaryList(filteredJourneyData))
-        modelAndView.addObject("submittedFilteredJourneyData", serializeJourneyData(filteredJourneyData))
+        modelAndView.addObject("submittedFilteredJourneyData", CheckAnswersFormModel.serializeJourneyData(filteredJourneyData))
         furtherEnrichModel(modelAndView, filteredJourneyData)
     }
 
@@ -36,28 +35,18 @@ abstract class CheckAnswersPage(
         filteredJourneyData: JourneyData?,
     ) {}
 
-    override fun isSatisfied(bindingResult: BindingResult): Boolean {
-        val formModel = bindingResult.target as CheckAnswersFormModel
-        val submittedFilteredJourneyDataWithStringValues = deserializeJourneyData(formModel.submittedFilteredJourneyData)
+    override fun enrichFormData(formData: PageData?): PageData? {
+        if (formData == null) return null
         val journeyData = journeyDataService.getJourneyDataFromSession()
+        return formData + (CheckAnswersFormModel::storedJourneyData.name to journeyData)
+    }
 
-        val hasFilteredJourneyDataChanged = submittedFilteredJourneyDataWithStringValues.any { it.value != journeyData[it.key].toString() }
-        return if (hasFilteredJourneyDataChanged) {
-            journeyDataService.removeJourneyDataFromSession()
-            // TODO PRSD-1298: Show custom error page
-            throw PrsdbWebException("Filtered journey data has changed since the page loaded.")
-        } else {
+    override fun isSatisfied(bindingResult: BindingResult) =
+        if (super.isSatisfied(bindingResult)) {
             true
+        } else {
+            // TODO PRSD-1298: Show custom error page
+            journeyDataService.removeJourneyDataAndContextIdFromSession()
+            throw PrsdbWebException("Filtered journey data has changed since the page loaded.")
         }
-    }
-
-    companion object {
-        private fun serializeJourneyData(journeyData: JourneyData): String {
-            val journeyDataWithStringValues = journeyData.mapValues { (_, value) -> value.toString() }
-            return Json.encodeToString(journeyDataWithStringValues)
-        }
-
-        private fun deserializeJourneyData(serializedJourneyData: String): Map<String, String> =
-            Json.decodeFromString(serializedJourneyData)
-    }
 }
