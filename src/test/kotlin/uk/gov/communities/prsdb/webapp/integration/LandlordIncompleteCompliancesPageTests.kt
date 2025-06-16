@@ -25,7 +25,7 @@ class LandlordIncompleteCompliancesPageTests : IntegrationTest() {
             val incompleteCompliancesPage = navigator.goToLandlordIncompleteCompliances()
             assertThat(incompleteCompliancesPage.heading).containsText("Properties without compliance information")
             assertThat(
-                incompleteCompliancesPage.subHeading,
+                incompleteCompliancesPage.hintText,
             ).containsText("You must add compliance certificates for each property and confirm your landlord responsibilities")
         }
 

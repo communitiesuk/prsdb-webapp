@@ -6,7 +6,7 @@
         <h1 class="govuk-heading-l" th:text="#{landlord.incompleteCompliances.heading}">landlord.incompleteCompliances.heading</h1>
 
         <th:block th:unless="${#lists.isEmpty(incompleteCompliances)}">
-            <p class="govuk-body-l" th:text="#{landlord.incompleteCompliances.text}">landlord.incompleteCompliances.text</p>
+            <p class="govuk-body-l govuk-hint" th:text="#{landlord.incompleteCompliances.hintText}">landlord.incompleteCompliances.hintText</p>
             <th:block th:each="property: ${incompleteCompliances}">
                 <div th:replace="~{fragments/summaryCard :: summaryCard(${property.title}, ${property.cardNumber}, ${property.actions}, ${property.summaryList})}" ></div>
             </th:block>
