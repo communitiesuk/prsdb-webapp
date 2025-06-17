@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbService
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUp
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import java.time.LocalDate
 
-@PrsdbService
+@PrsdbWebService
 class LandlordService(
     private val landlordRepository: LandlordRepository,
     private val oneLoginUserService: OneLoginUserService,

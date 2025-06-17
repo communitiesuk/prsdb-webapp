@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbService
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SystemOperatorRepository
 
-@PrsdbService
+@PrsdbWebService
 class UserRolesService(
     val landlordRepository: LandlordRepository,
     val localAuthorityUserRepository: LocalAuthorityUserRepository,
