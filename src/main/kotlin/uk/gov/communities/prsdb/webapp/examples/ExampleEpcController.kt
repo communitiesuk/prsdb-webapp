@@ -1,13 +1,13 @@
 package uk.gov.communities.prsdb.webapp.examples
 
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 
-@Controller
+@PrsdbController
 @RequestMapping("example/epc")
 class ExampleEpcController(
     private val client: EpcRegisterClient,

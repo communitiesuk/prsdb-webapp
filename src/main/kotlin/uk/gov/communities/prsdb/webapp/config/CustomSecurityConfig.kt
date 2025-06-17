@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.config
 
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.security.config.Customizer
@@ -23,10 +22,11 @@ import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.security.web.csrf.CsrfFilter
 import org.springframework.security.web.csrf.CsrfTokenRepository
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebConfiguration
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
-@Configuration
+@PrsdbWebConfiguration
 @EnableMethodSecurity
 class CustomSecurityConfig(
     val clientRegistrationRepository: ClientRegistrationRepository,

@@ -1,12 +1,12 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbService
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.repository.AddressRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
-@Service
+@PrsdbService
 class AddressService(
     private val addressRepository: AddressRepository,
     private val localAuthorityService: LocalAuthorityService,

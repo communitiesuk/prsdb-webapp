@@ -3,15 +3,15 @@ package uk.gov.communities.prsdb.webapp.clients
 import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
-import org.springframework.stereotype.Service
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbService
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import java.net.URLEncoder
 
-@Service
+@PrsdbService
 class EpcRegisterClient(
     @Qualifier("epc-client") private val client: RestClient,
 ) {

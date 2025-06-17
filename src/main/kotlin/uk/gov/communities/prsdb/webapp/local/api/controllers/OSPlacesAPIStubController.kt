@@ -4,13 +4,13 @@ import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbRestController
 import uk.gov.communities.prsdb.webapp.constants.MAX_ADDRESSES
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import kotlin.math.min
 
-@Profile("local-mock-os-places")
-@RestController
+@Profile("local-mock-os-places, !web-server-deactivated")
+@PrsdbRestController
 @RequestMapping("/local/os-places")
 class OSPlacesAPIStubController(
     private val localAuthorityService: LocalAuthorityService,

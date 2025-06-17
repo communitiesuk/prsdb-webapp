@@ -7,8 +7,8 @@ import jakarta.transaction.Transactional
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toKotlinInstant
 import org.springframework.http.HttpStatus
-import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbService
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -26,7 +26,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesDataModel
 import java.time.Instant
 
-@Service
+@PrsdbService
 class PropertyRegistrationService(
     private val propertyRepository: PropertyRepository,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,

@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbService
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import java.time.LocalDate
 
-@Service
+@PrsdbService
 class PropertyComplianceService(
     private val propertyComplianceRepository: PropertyComplianceRepository,
     private val propertyOwnershipService: PropertyOwnershipService,

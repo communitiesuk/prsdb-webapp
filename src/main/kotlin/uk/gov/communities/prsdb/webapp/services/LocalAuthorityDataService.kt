@@ -8,8 +8,8 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.AccessDeniedException
-import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbService
 import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LA_USERS_TABLE_PAGE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataM
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserOrInvitationDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
 
-@Service
+@PrsdbService
 class LocalAuthorityDataService(
     private val localAuthorityUserRepository: LocalAuthorityUserRepository,
     private val localAuthorityUserOrInvitationRepository: LocalAuthorityUserOrInvitationRepository,

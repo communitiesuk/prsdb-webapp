@@ -2,13 +2,13 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbService
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_HAD_ACTIVE_PROPERTIES
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 
-@Service
+@PrsdbService
 class LandlordDeregistrationService(
     private val landlordRepository: LandlordRepository,
     private val oneLoginUserRepository: OneLoginUserRepository,

@@ -7,7 +7,6 @@ import org.apache.commons.fileupload2.core.FileItemInputIterator
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import org.springframework.web.bind.annotation.CookieValue
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.constants.NRLA_UK_REGULATIONS_URL
@@ -39,7 +39,7 @@ import uk.gov.communities.prsdb.webapp.services.TokenCookieService
 import java.security.Principal
 import kotlin.reflect.KClass
 
-@Controller
+@PrsdbController
 @PreAuthorize("hasRole('LANDLORD')")
 @RequestMapping(PROPERTY_COMPLIANCE_ROUTE)
 class PropertyComplianceController(
