@@ -96,15 +96,27 @@ populate the database with seed data.
 ### Updating Local Authority Data
 
 The project uses migrations to populate the `local_authority` table with data from
-`src/main/resources/data/local_authorities/local_authorities.csv`. If the CSV file is updated, create a
-copy of
-it and call it `local_authorities_V<version number>.csv`, where `version number` is one more than the latest version in
-`src/main/resources/db/migrations/data/local_authorities`. Then run the utility script to generate the sql for a new
-migration by:
+`src/main/resources/data/local_authorities/local_authorities.csv`.
+
+If the CSV file is updated, create a copy of it and call it `local_authorities_V<version number>.csv`, 
+where `version number` is one more than the latest version in`src/main/resources/db/migrations/data/local_authorities`.
+
+Then run the utility script to generate the sql for some new migrations by:
 
 - `cd`ing into the `/scripts` folder
-- running `node run generate_la_migration.js`
-- using the output in `/scripts/output/draft_upsert_local_authorities.sql` to create your new migration
+- running `node generate_update_local_authorities_migrations.js`
+- this will output some draft migrations in `/scripts/output/`
+
+#### Migration process for updating Local Authority Data
+
+- create a migration using `/scripts/output/draft_upsert_local_authorities_migration.sql` to upsert and new/changed local authorities
+- run the sql statement in `/scripts/output/select_all_local_authorities_to_be_deleted.sql` on your local copy of the database to 
+  get a list of the local authorities that will be removed by the delete migration
+- write a custom migration to handle any changes that will need to be made before the delete migration can be run
+  - check for local authority users/admins that will need to be deleted/assigned to another local authority
+  - check for addresses that will now belong to a different local authority
+- create a migration using `/scripts/output/draft_delete_local_authorities_migration.sql` to delete any removed local authorities
+
 
 ### Mock One Login Oauth2
 
