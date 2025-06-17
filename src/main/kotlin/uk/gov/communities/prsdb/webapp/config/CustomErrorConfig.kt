@@ -9,15 +9,15 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.HandlerExceptionResolver
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver
-import uk.gov.communities.prsdb.webapp.annotations.WebComponent
-import uk.gov.communities.prsdb.webapp.annotations.WebConfiguration
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebConfiguration
 
-@WebConfiguration
+@PrsdbWebConfiguration
 class CustomErrorConfig {
     // This only needs to have a higher @Order precedence (lower number) than the default handler (0)
     // Other handlers e.g. controller specific handlers should take precedence over this
     @Order(-1)
-    @WebComponent
+    @PrsdbWebComponent
     class MalformedGETRequestExceptionResolver : HandlerExceptionResolver {
         private val defaultHandlerExceptionResolver: DefaultHandlerExceptionResolver = DefaultHandlerExceptionResolver()
 

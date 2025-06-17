@@ -8,7 +8,7 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import uk.gov.communities.prsdb.webapp.annotations.WebController
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SEARCH_PATH_SEGMENT
@@ -24,7 +24,7 @@ import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
-@WebController
+@PrsdbController
 @RequestMapping("/$SEARCH_PATH_SEGMENT")
 @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
 class SearchRegisterController(

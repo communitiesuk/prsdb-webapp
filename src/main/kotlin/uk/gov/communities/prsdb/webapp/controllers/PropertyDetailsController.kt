@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
-import uk.gov.communities.prsdb.webapp.annotations.WebController
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
@@ -29,7 +29,7 @@ import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
-@WebController
+@PrsdbController
 @RequestMapping
 class PropertyDetailsController(
     private val propertyOwnershipService: PropertyOwnershipService,

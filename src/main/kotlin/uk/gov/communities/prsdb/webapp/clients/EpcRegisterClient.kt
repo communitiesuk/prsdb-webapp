@@ -6,12 +6,12 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
-import uk.gov.communities.prsdb.webapp.annotations.WebService
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbService
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import java.net.URLEncoder
 
-@WebService
+@PrsdbService
 class EpcRegisterClient(
     @Qualifier("epc-client") private val client: RestClient,
 ) {

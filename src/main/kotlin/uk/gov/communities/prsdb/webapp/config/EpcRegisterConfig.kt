@@ -5,9 +5,9 @@ import org.springframework.context.annotation.Bean
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.web.client.RestClient
-import uk.gov.communities.prsdb.webapp.annotations.WebConfiguration
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebConfiguration
 
-@WebConfiguration
+@PrsdbWebConfiguration
 class EpcRegisterConfig(
     private val authorizedClientManager: OAuth2AuthorizedClientManager,
 ) {

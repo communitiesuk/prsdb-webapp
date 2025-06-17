@@ -2,9 +2,9 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
-import uk.gov.communities.prsdb.webapp.annotations.WebController
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 
-@WebController
+@PrsdbController
 class SignOutController {
     @GetMapping("/confirm-sign-out")
     fun confirmSignOut(model: Model): String = "exampleConfirmSignOut"

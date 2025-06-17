@@ -5,14 +5,14 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.JwtDecoderFactory
 import org.springframework.security.oauth2.jwt.JwtException
-import uk.gov.communities.prsdb.webapp.annotations.WebService
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbService
 import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys
 import uk.gov.communities.prsdb.webapp.exceptions.InvalidCoreIdentityException
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedCredentialModel
 
 private const val VERIFIED_IDENTITY_CACHE_KEY = "verified-identity-cache"
 
-@WebService
+@PrsdbService
 class OneLoginIdentityService(
     private val decoderFactory: JwtDecoderFactory<Unit>,
     private val session: HttpSession,

@@ -21,12 +21,12 @@ import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm
 import org.springframework.security.oauth2.jwt.JwtDecoderFactory
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.web.client.RestClient
-import uk.gov.communities.prsdb.webapp.annotations.WebConfiguration
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebConfiguration
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 import java.util.UUID
 
-@WebConfiguration
+@PrsdbWebConfiguration
 class OneLoginConfig {
     @Value("\${one-login.jwt.public.key}")
     lateinit var publicKey: RSAPublicKey

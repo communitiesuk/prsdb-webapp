@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
-import uk.gov.communities.prsdb.webapp.annotations.WebController
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
@@ -29,7 +29,7 @@ import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFact
 import java.security.Principal
 
 @PreAuthorize("hasRole('LANDLORD')")
-@WebController
+@PrsdbController
 @RequestMapping("/$REGISTER_PROPERTY_JOURNEY_URL")
 class RegisterPropertyController(
     private val propertyRegistrationJourneyFactory: PropertyRegistrationJourneyFactory,

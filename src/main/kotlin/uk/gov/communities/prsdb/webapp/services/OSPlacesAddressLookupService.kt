@@ -1,11 +1,11 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.json.JSONObject
-import uk.gov.communities.prsdb.webapp.annotations.WebService
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbService
 import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
-@WebService
+@PrsdbService
 class OSPlacesAddressLookupService(
     private val osPlacesClient: OSPlacesClient,
     private val localAuthorityService: LocalAuthorityService,

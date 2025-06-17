@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.annotations.WebController
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.security.Principal
 
-@WebController
+@PrsdbController
 @RequestMapping("/$DEREGISTER_LANDLORD_JOURNEY_URL")
 class DeregisterLandlordController(
     private val landlordDeregistrationJourneyFactory: LandlordDeregistrationJourneyFactory,

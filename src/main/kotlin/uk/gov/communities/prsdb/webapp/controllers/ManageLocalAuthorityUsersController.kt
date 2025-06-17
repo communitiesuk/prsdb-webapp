@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
-import uk.gov.communities.prsdb.webapp.annotations.WebController
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
@@ -39,7 +39,7 @@ import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LA_ADMIN', 'SYSTEM_OPERATOR')")
-@WebController
+@PrsdbController
 @RequestMapping("/$LOCAL_AUTHORITY_PATH_SEGMENT/{localAuthorityId}")
 class ManageLocalAuthorityUsersController(
     var invitationEmailSender: EmailNotificationService<LocalAuthorityInvitationEmail>,

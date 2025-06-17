@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.annotations.WebController
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
@@ -24,7 +24,7 @@ import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import java.security.Principal
 
-@WebController
+@PrsdbController
 @RequestMapping("/${REGISTER_LANDLORD_JOURNEY_URL}")
 class RegisterLandlordController(
     private val landlordRegistrationJourneyFactory: LandlordRegistrationJourneyFactory,

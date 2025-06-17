@@ -1,13 +1,13 @@
 package uk.gov.communities.prsdb.webapp.annotations
 
-import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.core.annotation.AliasFor
+import org.springframework.stereotype.Component
 
 @Profile("!web-server-deactivated")
-@Configuration
+@Component
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
-annotation class WebConfiguration(
-    @get:AliasFor(annotation = Configuration::class) val value: String = "",
+annotation class PrsdbWebComponent(
+    @get:AliasFor(annotation = Component::class) val value: String = "",
 )

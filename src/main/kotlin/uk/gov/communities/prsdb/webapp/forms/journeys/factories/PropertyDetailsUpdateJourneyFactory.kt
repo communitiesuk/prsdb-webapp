@@ -3,14 +3,14 @@ package uk.gov.communities.prsdb.webapp.forms.journeys.factories
 import org.springframework.http.HttpStatus
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.annotations.WebComponent
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDetailsUpdateJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
-@WebComponent
+@PrsdbWebComponent
 class PropertyDetailsUpdateJourneyFactory(
     private val validator: Validator,
     private val journeyDataServiceFactory: JourneyDataServiceFactory,

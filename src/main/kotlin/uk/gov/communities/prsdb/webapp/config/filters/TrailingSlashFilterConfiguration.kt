@@ -5,9 +5,9 @@ import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.web.filter.UrlHandlerFilter
-import uk.gov.communities.prsdb.webapp.annotations.WebConfiguration
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebConfiguration
 
-@WebConfiguration
+@PrsdbWebConfiguration
 class TrailingSlashFilterConfiguration {
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)

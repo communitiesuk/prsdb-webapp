@@ -8,6 +8,6 @@ import org.springframework.stereotype.Service
 @Service
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
-annotation class WebService(
+annotation class PrsdbService(
     @get:AliasFor(annotation = Service::class) val value: String = "",
 )
