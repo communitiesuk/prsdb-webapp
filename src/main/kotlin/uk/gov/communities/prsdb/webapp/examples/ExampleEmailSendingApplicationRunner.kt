@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ExampleEmai
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 
 @Component
-@Profile("web-server-deactivated")
+@Profile("web-server-deactivated & example-email-sender")
 class ExampleEmailSendingApplicationRunner(
     private val emailSender: EmailNotificationService<ExampleEmail>,
     private val context: ApplicationContext,
