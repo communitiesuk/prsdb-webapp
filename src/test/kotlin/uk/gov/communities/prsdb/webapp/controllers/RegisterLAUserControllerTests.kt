@@ -4,10 +4,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
@@ -112,5 +114,18 @@ class RegisterLAUserControllerTests(
                     .get("/$REGISTER_LA_USER_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
                     .sessionAttr(LA_USER_ID, laUserId),
             ).andExpect(MockMvcResultMatchers.status().isBadRequest)
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_USER"])
+    fun `getLandingPage returns 302 for authenticated user with Local Authority role`() {
+        whenever(userRolesService.getHasLocalAuthorityUserRole(any())).thenReturn(true)
+        mvc
+            .get("/register-local-authority-user/landing-page") {
+                with(oidcLogin())
+            }.andExpectAll {
+                status { is3xxRedirection() }
+                redirectedUrl("/local-authority/dashboard")
+            }
     }
 }

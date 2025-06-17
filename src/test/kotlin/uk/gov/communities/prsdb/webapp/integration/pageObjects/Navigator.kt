@@ -307,6 +307,11 @@ class Navigator(
         navigate("/$REGISTER_LANDLORD_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
     }
 
+    fun navigateToLaUserRegistrationLandingPage(token: UUID) {
+        storeInvitationTokenInSession(token)
+        navigate("/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.LandingPage.urlPathSegment}")
+    }
+
     fun skipToLaUserRegistrationLandingPage(token: UUID): LandingPageLaUserRegistration {
         storeInvitationTokenInSession(token)
         navigate("/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.LandingPage.urlPathSegment}")
