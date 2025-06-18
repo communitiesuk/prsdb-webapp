@@ -6,12 +6,12 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FIND_LOCAL_AUTHORITY_URL
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
+import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.AlreadyRegisteredPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -81,7 +81,7 @@ class PropertyRegistrationJourney(
             "registerProperty.title",
             "registerProperty.taskList.heading",
             listOf("registerProperty.taskList.subtitle"),
-            backUrl = "/$REGISTER_PROPERTY_JOURNEY_URL",
+            backUrl = RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE,
         )
 
     private fun registerPropertyTasks(): List<JourneyTask<RegisterPropertyStepId>> =
@@ -187,9 +187,7 @@ class PropertyRegistrationJourney(
                             "title" to "registerProperty.title",
                             "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
                             "submitButtonText" to "forms.buttons.useThisAddress",
-                            "searchAgainUrl" to
-                                "/$REGISTER_PROPERTY_JOURNEY_URL/" +
-                                RegisterPropertyStepId.LookupAddress.urlPathSegment,
+                            "searchAgainUrl" to lookupAddressRoute,
                         ),
                     lookupAddressPathSegment = RegisterPropertyStepId.LookupAddress.urlPathSegment,
                     journeyDataService = journeyDataService,
@@ -209,9 +207,7 @@ class PropertyRegistrationJourney(
                     content =
                         mapOf(
                             "title" to "registerProperty.title",
-                            "searchAgainUrl" to
-                                "/$REGISTER_PROPERTY_JOURNEY_URL/" +
-                                RegisterPropertyStepId.LookupAddress.urlPathSegment,
+                            "searchAgainUrl" to lookupAddressRoute,
                         ),
                     selectedAddressPathSegment = RegisterPropertyStepId.SelectAddress.urlPathSegment,
                 ),
@@ -230,9 +226,7 @@ class PropertyRegistrationJourney(
                             "title" to "registerProperty.title",
                             "postcode" to getHouseNameOrNumberAndPostcode().second,
                             "houseNameOrNumber" to getHouseNameOrNumberAndPostcode().first,
-                            "searchAgainUrl" to
-                                "/$REGISTER_PROPERTY_JOURNEY_URL/" +
-                                RegisterPropertyStepId.LookupAddress.urlPathSegment,
+                            "searchAgainUrl" to lookupAddressRoute,
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
@@ -644,4 +638,8 @@ class PropertyRegistrationJourney(
             return RegisterPropertyStepId.AlreadyRegistered.urlPathSegment
         }
     }
+
+    private val lookupAddressRoute =
+        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/" +
+            RegisterPropertyStepId.LookupAddress.urlPathSegment
 }

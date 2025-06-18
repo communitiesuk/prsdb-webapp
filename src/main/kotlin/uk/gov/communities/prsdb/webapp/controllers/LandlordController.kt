@@ -20,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTIES_PATH_SEGM
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_BASE_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
@@ -66,7 +65,7 @@ class LandlordController(
         model.addAttribute("landlordName", landlord.name)
         model.addAttribute("lrn", RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber))
 
-        model.addAttribute("registerPropertyUrl", "/$REGISTER_PROPERTY_JOURNEY_URL")
+        model.addAttribute("registerPropertyUrl", RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
         model.addAttribute("viewIncompletePropertiesUrl", INCOMPLETE_PROPERTIES_URL)
         model.addAttribute("viewPropertiesUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT#$REGISTERED_PROPERTIES_PATH_SEGMENT")
         model.addAttribute("viewLandlordRecordUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT")
@@ -99,7 +98,7 @@ class LandlordController(
             }
 
         model.addAttribute("incompleteProperties", incompletePropertyViewModels)
-        model.addAttribute("registerPropertyUrl", "/$REGISTER_PROPERTY_JOURNEY_URL")
+        model.addAttribute("registerPropertyUrl", RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
         model.addAttribute("viewRegisteredPropertiesUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT#$REGISTERED_PROPERTIES_PATH_SEGMENT")
 
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)

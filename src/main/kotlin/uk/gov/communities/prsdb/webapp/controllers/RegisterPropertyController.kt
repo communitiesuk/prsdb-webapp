@@ -15,11 +15,13 @@ import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -30,7 +32,7 @@ import java.security.Principal
 
 @PreAuthorize("hasRole('LANDLORD')")
 @PrsdbController
-@RequestMapping("/$REGISTER_PROPERTY_JOURNEY_URL")
+@RequestMapping(PROPERTY_REGISTRATION_ROUTE)
 class RegisterPropertyController(
     private val propertyRegistrationJourneyFactory: PropertyRegistrationJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
@@ -50,7 +52,7 @@ class RegisterPropertyController(
 
     @GetMapping("/$START_PAGE_PATH_SEGMENT")
     fun getStart(): String {
-        journeyDataServiceFactory.create(REGISTER_PROPERTY_JOURNEY_URL).removeJourneyDataAndContextIdFromSession()
+        journeyDataServiceFactory.create(PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY).removeJourneyDataAndContextIdFromSession()
         return "redirect:$TASK_LIST_PATH_SEGMENT"
     }
 
@@ -66,7 +68,7 @@ class RegisterPropertyController(
             )
         journeyDataServiceFactory
             .create(
-                REGISTER_PROPERTY_JOURNEY_URL,
+                PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             ).loadJourneyDataIntoSession(formContext)
         return "redirect:$TASK_LIST_PATH_SEGMENT"
     }
@@ -143,8 +145,10 @@ class RegisterPropertyController(
     }
 
     companion object {
+        const val PROPERTY_REGISTRATION_ROUTE = "/$LANDLORD_PATH_SEGMENT/$REGISTER_PROPERTY_JOURNEY_URL"
+
         const val RESUME_PROPERTY_REGISTRATION_JOURNEY_ROUTE =
-            "/$REGISTER_PROPERTY_JOURNEY_URL/$RESUME_PAGE_PATH_SEGMENT" +
+            "$PROPERTY_REGISTRATION_ROUTE/$RESUME_PAGE_PATH_SEGMENT" +
                 "?$CONTEXT_ID_URL_PARAMETER={contextId}"
 
         fun getResumePropertyRegistrationPath(contextId: Long): String =
