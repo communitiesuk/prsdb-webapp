@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
@@ -33,6 +34,17 @@ class LaUserRegistrationSinglePageTests : SinglePageTestWithSeedData("data-mocku
             )
 
         invitation = invitationService.getInvitationFromToken(token)
+    }
+
+    @Nested
+    inner class LaUserRegistrationStepLandingPage : NestedSinglePageTestWithSeedData("data-local.sql") {
+        @Test
+        fun `Navigating here as a registered local authority user redirects to the LA dashboard page`(page: Page) {
+            navigator.navigateToLaUserRegistrationLandingPage(invitation.token)
+            val dashboardPage = BasePage.assertPageIs(page, LocalAuthorityDashboardPage::class)
+            BaseComponent.assertThat(dashboardPage.bannerHeading).containsText("Mock User")
+            BaseComponent.assertThat(dashboardPage.bannerSubHeading).containsText("BATH AND NORTH EAST SOMERSET COUNCIL")
+        }
     }
 
     @Nested
