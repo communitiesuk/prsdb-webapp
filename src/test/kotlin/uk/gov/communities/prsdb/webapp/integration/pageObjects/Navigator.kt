@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
@@ -20,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
@@ -169,12 +169,12 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationConfirmIdentity().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.ConfirmIdentity.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.ConfirmIdentity.urlPathSegment}")
         return createValidPage(page, ConfirmIdentityFormPageLandlordRegistration::class)
     }
 
     fun navigateToLandlordRegistrationVerifyIdentityPage() {
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.VerifyIdentity.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.VerifyIdentity.urlPathSegment}")
     }
 
     fun skipToLandlordRegistrationNamePage(): NameFormPageLandlordRegistration {
@@ -182,7 +182,7 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationName().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.Name.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.Name.urlPathSegment}")
         return createValidPage(page, NameFormPageLandlordRegistration::class)
     }
 
@@ -191,7 +191,7 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationDob().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.DateOfBirth.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.DateOfBirth.urlPathSegment}")
         return createValidPage(page, DateOfBirthFormPageLandlordRegistration::class)
     }
 
@@ -200,7 +200,7 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationEmail().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.Email.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.Email.urlPathSegment}")
         return createValidPage(page, EmailFormPageLandlordRegistration::class)
     }
 
@@ -209,7 +209,7 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationPhoneNumber().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.PhoneNumber.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.PhoneNumber.urlPathSegment}")
         return createValidPage(page, PhoneNumberFormPageLandlordRegistration::class)
     }
 
@@ -218,7 +218,9 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationCountryOfResidence().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}")
+        navigate(
+            "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}",
+        )
         return createValidPage(page, CountryOfResidenceFormPageLandlordRegistration::class)
     }
 
@@ -227,7 +229,7 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationLookupAddress().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.LookupAddress.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.LookupAddress.urlPathSegment}")
         return createValidPage(page, LookupAddressFormPageLandlordRegistration::class)
     }
 
@@ -236,7 +238,7 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationSelectAddress().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.SelectAddress.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.SelectAddress.urlPathSegment}")
         return createValidPage(page, SelectAddressFormPageLandlordRegistration::class)
     }
 
@@ -245,7 +247,7 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationManualAddress().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.ManualAddress.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.ManualAddress.urlPathSegment}")
         return createValidPage(page, ManualAddressFormPageLandlordRegistration::class)
     }
 
@@ -254,7 +256,10 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationNonEnglandOrWalesAddress().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment}")
+        navigate(
+            "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/" +
+                LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment,
+        )
         return createValidPage(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
     }
 
@@ -263,7 +268,9 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationLookupContactAddress().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.LookupContactAddress.urlPathSegment}")
+        navigate(
+            "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.LookupContactAddress.urlPathSegment}",
+        )
         return createValidPage(page, LookupContactAddressFormPageLandlordRegistration::class)
     }
 
@@ -272,7 +279,9 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationSelectContactAddress().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.SelectContactAddress.urlPathSegment}")
+        navigate(
+            "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.SelectContactAddress.urlPathSegment}",
+        )
         return createValidPage(page, SelectContactAddressFormPageLandlordRegistration::class)
     }
 
@@ -281,7 +290,9 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationManualContactAddress().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.ManualContactAddress.urlPathSegment}")
+        navigate(
+            "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.ManualContactAddress.urlPathSegment}",
+        )
         return createValidPage(page, ManualContactAddressFormPageLandlordRegistration::class)
     }
 
@@ -290,7 +301,7 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationCheckAnswers().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.CheckAnswers.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.CheckAnswers.urlPathSegment}")
         return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
     }
 
@@ -299,12 +310,12 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationDeclaration().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.Declaration.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.Declaration.urlPathSegment}")
         return createValidPage(page, DeclarationFormPageLandlordRegistration::class)
     }
 
     fun navigateToLandlordRegistrationConfirmationPage() {
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
     }
 
     fun navigateToLaUserRegistrationLandingPage(token: UUID) {
