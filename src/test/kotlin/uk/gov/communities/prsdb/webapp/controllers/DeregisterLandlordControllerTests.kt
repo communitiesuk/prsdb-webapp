@@ -14,7 +14,6 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
@@ -91,7 +90,7 @@ class DeregisterLandlordControllerTests(
         whenever(landlordDeregistrationService.getLandlordHadActivePropertiesFromSession()).thenReturn(false)
 
         mvc
-            .get("/$DEREGISTER_LANDLORD_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
+            .get("${DeregisterLandlordController.LANDLORD_DEREGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
             .andExpect { status { isOk() } }
     }
 
@@ -102,7 +101,7 @@ class DeregisterLandlordControllerTests(
             .thenReturn(MockLandlordData.createLandlord())
 
         mvc
-            .get("/$DEREGISTER_LANDLORD_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
+            .get("${DeregisterLandlordController.LANDLORD_DEREGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
             .andExpect { status { is5xxServerError() } }
     }
 }

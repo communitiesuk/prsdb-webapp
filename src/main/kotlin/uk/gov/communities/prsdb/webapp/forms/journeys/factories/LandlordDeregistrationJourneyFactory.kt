@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys.factories
 
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebComponent
-import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordNoPropertiesDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordWithPropertiesDeregistrationConfirmationEmail
@@ -25,11 +25,15 @@ class LandlordDeregistrationJourneyFactory(
     fun create() =
         LandlordDeregistrationJourney(
             validator,
-            journeyDataServiceFactory.create(DEREGISTER_LANDLORD_JOURNEY_URL),
+            journeyDataServiceFactory.create(JOURNEY_DATA_KEY),
             landlordDeregistrationService,
             landlordService,
             securityContextService,
             confirmationWithNoPropertiesEmailSender,
             confirmationWithPropertiesEmailSender,
         )
+
+    companion object {
+        const val JOURNEY_DATA_KEY = DeregisterLandlordController.LANDLORD_DEREGISTRATION_ROUTE
+    }
 }
