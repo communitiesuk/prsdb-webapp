@@ -58,7 +58,7 @@ class PrsdbProcessApplicationTests {
                 |This could be because some beans have been renamed, or there may be multiple problems that need addressing:
                 """.trimMargin()
             } else {
-                ""
+                null
             }
         val missingBeansMessage =
             if (expectedBeansMissing.isNotEmpty()) {
@@ -66,7 +66,7 @@ class PrsdbProcessApplicationTests {
                 |$expectedBeansMissing
                 """.trimMargin()
             } else {
-                ""
+                null
             }
         val unexpectedBeansMessage =
             if (unexpectedBeans.isNotEmpty()) {
@@ -79,7 +79,7 @@ class PrsdbProcessApplicationTests {
                 |You may need to escape special characters like $.
                 """.trimMargin()
             } else {
-                ""
+                null
             }
         return listOfNotNull(
             combinedMessage,
