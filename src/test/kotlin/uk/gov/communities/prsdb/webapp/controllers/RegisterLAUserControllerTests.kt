@@ -119,7 +119,7 @@ class RegisterLAUserControllerTests(
     @Test
     @WithMockUser(roles = ["LA_USER"])
     fun `getLandingPage returns 302 for authenticated user with Local Authority role`() {
-        whenever(userRolesService.getHasLocalAuthorityUserRole(any())).thenReturn(true)
+        whenever(userRolesService.getHasLocalAuthorityRole(any())).thenReturn(true)
         mvc
             .get("/register-local-authority-user/landing-page") {
                 with(oidcLogin())

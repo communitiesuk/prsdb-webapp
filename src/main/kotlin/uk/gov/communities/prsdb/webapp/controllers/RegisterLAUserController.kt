@@ -57,7 +57,7 @@ class RegisterLAUserController(
 
         val invitation = invitationService.getInvitationFromToken(token)
 
-        if (userRolesService.getHasLocalAuthorityUserRole(principal.name)) {
+        if (userRolesService.getHasLocalAuthorityRole(principal.name)) {
             invitationService.deleteInvitation(invitation)
             invitationService.clearTokenFromSession()
             return ModelAndView("redirect:$LOCAL_AUTHORITY_DASHBOARD_URL")
