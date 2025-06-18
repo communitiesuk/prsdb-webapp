@@ -20,5 +20,7 @@ class Radios(
         getRadio(value).check()
     }
 
+    fun getRadios(): List<Locator> = locator.locator("input").all()
+
     private fun getRadio(value: String) = locator.locator("input[value='$value']")
 }
