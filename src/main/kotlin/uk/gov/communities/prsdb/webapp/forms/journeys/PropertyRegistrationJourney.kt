@@ -187,7 +187,9 @@ class PropertyRegistrationJourney(
                             "title" to "registerProperty.title",
                             "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
                             "submitButtonText" to "forms.buttons.useThisAddress",
-                            "searchAgainUrl" to lookupAddressRoute,
+                            "searchAgainUrl" to
+                                "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/" +
+                                RegisterPropertyStepId.LookupAddress.urlPathSegment,
                         ),
                     lookupAddressPathSegment = RegisterPropertyStepId.LookupAddress.urlPathSegment,
                     journeyDataService = journeyDataService,
@@ -207,7 +209,9 @@ class PropertyRegistrationJourney(
                     content =
                         mapOf(
                             "title" to "registerProperty.title",
-                            "searchAgainUrl" to lookupAddressRoute,
+                            "searchAgainUrl" to
+                                "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/" +
+                                RegisterPropertyStepId.LookupAddress.urlPathSegment,
                         ),
                     selectedAddressPathSegment = RegisterPropertyStepId.SelectAddress.urlPathSegment,
                 ),
@@ -226,7 +230,9 @@ class PropertyRegistrationJourney(
                             "title" to "registerProperty.title",
                             "postcode" to getHouseNameOrNumberAndPostcode().second,
                             "houseNameOrNumber" to getHouseNameOrNumberAndPostcode().first,
-                            "searchAgainUrl" to lookupAddressRoute,
+                            "searchAgainUrl" to
+                                "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/" +
+                                RegisterPropertyStepId.LookupAddress.urlPathSegment,
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
@@ -638,8 +644,4 @@ class PropertyRegistrationJourney(
             return RegisterPropertyStepId.AlreadyRegistered.urlPathSegment
         }
     }
-
-    private val lookupAddressRoute =
-        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/" +
-            RegisterPropertyStepId.LookupAddress.urlPathSegment
 }

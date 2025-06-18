@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
@@ -59,7 +58,7 @@ class RegisterPropertyControllerTests(
         whenever(propertyRegistrationJourneyFactory.create(any())).thenReturn(propertyRegistrationJourney)
         whenever(propertyRegistrationJourney.initialStepId).thenReturn(RegisterPropertyStepId.PlaceholderPage)
         whenever(journeyDataServiceFactory.create(any())).thenReturn(journeyDataService)
-        whenever(journeyDataService.journeyDataKey).thenReturn(REGISTER_PROPERTY_JOURNEY_URL)
+        whenever(journeyDataService.journeyDataKey).thenReturn(PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY)
     }
 
     @Test

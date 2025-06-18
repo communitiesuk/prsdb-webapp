@@ -43,7 +43,7 @@ class RegisterPropertyController(
     fun index(model: Model): String {
         model.addAttribute(
             "registerPropertyInitialStep",
-            "/$REGISTER_PROPERTY_JOURNEY_URL/$START_PAGE_PATH_SEGMENT",
+            "$PROPERTY_REGISTRATION_ROUTE/$START_PAGE_PATH_SEGMENT",
         )
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
