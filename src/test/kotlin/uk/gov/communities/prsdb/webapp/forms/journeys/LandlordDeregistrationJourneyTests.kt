@@ -9,7 +9,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
-import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
@@ -179,7 +179,9 @@ class LandlordDeregistrationJourneyTests {
             ) as JourneyData
 
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
-        whenever(mockJourneyDataServiceFactory.create(DEREGISTER_LANDLORD_JOURNEY_URL)).thenReturn(mockJourneyDataService)
+        whenever(
+            mockJourneyDataServiceFactory.create(DeregisterLandlordController.LANDLORD_DEREGISTRATION_ROUTE),
+        ).thenReturn(mockJourneyDataService)
         whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId))
             .thenReturn(MockLandlordData.createLandlord(email = "example@email.com"))
 
