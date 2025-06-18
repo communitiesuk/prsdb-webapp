@@ -29,14 +29,16 @@ class PropertyDetailsUpdateJourneyFactory(
         isChangingAnswer,
     )
 
-    private fun getJourneyDataKey(
-        propertyOwnershipId: Long,
-        stepName: String,
-    ): String {
-        val step = UpdatePropertyDetailsStepId.fromPathSegment(stepName) ?: throwInvalidStepNameException(stepName)
-        return PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) + step.groupIdentifier
-    }
+    companion object {
+        fun getJourneyDataKey(
+            propertyOwnershipId: Long,
+            stepName: String,
+        ): String {
+            val step = UpdatePropertyDetailsStepId.fromPathSegment(stepName) ?: throwInvalidStepNameException(stepName)
+            return PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) + step.groupIdentifier
+        }
 
-    private fun throwInvalidStepNameException(stepName: String): Nothing =
-        throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid PropertyDetailsUpdateJourney step name: $stepName")
+        private fun throwInvalidStepNameException(stepName: String): Nothing =
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid PropertyDetailsUpdateJourney step name: $stepName")
+    }
 }

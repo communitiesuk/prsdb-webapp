@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.C
 import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.STARTING_UPDATE_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
@@ -27,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyD
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import java.security.Principal
 
 @PrsdbController
@@ -35,6 +37,7 @@ class PropertyDetailsController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyDetailsUpdateJourneyFactory: PropertyDetailsUpdateJourneyFactory,
     private val backLinkStorageService: BackUrlStorageService,
+    private val journeyDataServiceFactory: JourneyDataServiceFactory,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(PROPERTY_DETAILS_ROUTE)
@@ -81,17 +84,25 @@ class PropertyDetailsController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
         @RequestParam(CHANGE_ANSWER_FOR_PARAMETER_NAME, required = false) changingAnswerForStep: String?,
-    ): ModelAndView =
-        if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
-            propertyDetailsUpdateJourneyFactory
-                .create(propertyOwnershipId, stepName, isChangingAnswer = changingAnswerForStep != null)
-                .getModelAndViewForStep(changingAnswersForStep = changingAnswerForStep)
-        } else {
+        @RequestParam(STARTING_UPDATE_PARAMETER_NAME, required = false) startingUpdate: Boolean?,
+    ): ModelAndView {
+        if (!propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Base user ${principal.name} is not the primary landlord of property ownership $propertyOwnershipId",
             )
         }
+
+        if (startingUpdate == true) {
+            journeyDataServiceFactory
+                .create(PropertyDetailsUpdateJourneyFactory.getJourneyDataKey(propertyOwnershipId, stepName))
+                .removeJourneyDataAndContextIdFromSession()
+        }
+
+        return propertyDetailsUpdateJourneyFactory
+            .create(propertyOwnershipId, stepName, isChangingAnswer = changingAnswerForStep != null)
+            .getModelAndViewForStep(changingAnswersForStep = changingAnswerForStep)
+    }
 
     @PreAuthorize("hasRole('LANDLORD')")
     @PostMapping("$UPDATE_PROPERTY_DETAILS_ROUTE/{stepName}")
