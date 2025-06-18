@@ -9,17 +9,17 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
 
-class PropertyDetailsLandlordViewModelTests {
+class PropertyDetailsLandlordViewModelBuilderTests {
     @Test
     fun `England or Wales resident landlord details are present and in the correct order`() {
         // Arrange
         val testLandlord = MockLandlordData.createLandlord(nonEnglandOrWalesAddress = null)
 
         // Act
-        val viewModel = PropertyDetailsLandlordViewModel(testLandlord)
+        val viewModel = PropertyDetailsLandlordViewModelBuilder.fromEntity(testLandlord)
 
         // Assert
-        val landlordDetailsHeaderList = viewModel.landlordsDetails.map { it.fieldHeading }
+        val landlordDetailsHeaderList = viewModel.map { it.fieldHeading }
 
         val expectedLandlordDetailsHeaderList =
             listOf(
@@ -44,10 +44,10 @@ class PropertyDetailsLandlordViewModelTests {
             )
 
         // Act
-        val viewModel = PropertyDetailsLandlordViewModel(testLandlord)
+        val viewModel = PropertyDetailsLandlordViewModelBuilder.fromEntity(testLandlord)
 
         // Assert
-        val landlordDetailsHeaderList = viewModel.landlordsDetails.map { it.fieldHeading }
+        val landlordDetailsHeaderList = viewModel.map { it.fieldHeading }
 
         val expectedLandlordDetailsHeaderList =
             listOf(
@@ -70,11 +70,11 @@ class PropertyDetailsLandlordViewModelTests {
         val testLandlord = MockLandlordData.createLandlord(name = landlordName)
 
         // Act
-        val viewModel = PropertyDetailsLandlordViewModel(testLandlord)
+        val viewModel = PropertyDetailsLandlordViewModelBuilder.fromEntity(testLandlord)
 
         // Assert
         val name =
-            viewModel.landlordsDetails
+            viewModel
                 .single { it.fieldHeading == "landlordDetails.personalDetails.name" }
                 .getConvertedFieldValue()
 
@@ -88,11 +88,11 @@ class PropertyDetailsLandlordViewModelTests {
         val testLandlord = MockLandlordData.createLandlord(dateOfBirth = landlordDateOfBirth)
 
         // Act
-        val viewModel = PropertyDetailsLandlordViewModel(testLandlord)
+        val viewModel = PropertyDetailsLandlordViewModelBuilder.fromEntity(testLandlord)
 
         // Assert
         val dateOfBirth =
-            viewModel.landlordsDetails
+            viewModel
                 .single { it.fieldHeading == "landlordDetails.personalDetails.dateOfBirth" }
                 .getConvertedFieldValue()
 
@@ -106,11 +106,11 @@ class PropertyDetailsLandlordViewModelTests {
         val testLandlord = MockLandlordData.createLandlord(email = landlordEmail)
 
         // Act
-        val viewModel = PropertyDetailsLandlordViewModel(testLandlord)
+        val viewModel = PropertyDetailsLandlordViewModelBuilder.fromEntity(testLandlord)
 
         // Assert
         val email =
-            viewModel.landlordsDetails
+            viewModel
                 .single { it.fieldHeading == "landlordDetails.personalDetails.emailAddress" }
                 .getConvertedFieldValue()
         assertEquals(email, landlordEmail)
@@ -123,11 +123,11 @@ class PropertyDetailsLandlordViewModelTests {
         val testLandlord = MockLandlordData.createLandlord(phoneNumber = landlordPhoneNumber)
 
         // Act
-        val viewModel = PropertyDetailsLandlordViewModel(testLandlord)
+        val viewModel = PropertyDetailsLandlordViewModelBuilder.fromEntity(testLandlord)
 
         // Assert
         val phoneNumber =
-            viewModel.landlordsDetails
+            viewModel
                 .single { it.fieldHeading == "propertyDetails.landlordDetails.contactNumber" }
                 .getConvertedFieldValue()
         assertEquals(phoneNumber, landlordPhoneNumber)
@@ -140,11 +140,11 @@ class PropertyDetailsLandlordViewModelTests {
         val testLandlord = MockLandlordData.createLandlord(address = Address(AddressDataModel(oneLineAddress)))
 
         // Act
-        val viewModel = PropertyDetailsLandlordViewModel(testLandlord)
+        val viewModel = PropertyDetailsLandlordViewModelBuilder.fromEntity(testLandlord)
 
         // Assert
         val addressString =
-            viewModel.landlordsDetails
+            viewModel
                 .single { it.fieldHeading == "landlordDetails.personalDetails.contactAddress" }
                 .getConvertedFieldValue()
         assertEquals(addressString, oneLineAddress)
@@ -158,11 +158,11 @@ class PropertyDetailsLandlordViewModelTests {
             MockLandlordData.createLandlord(nonEnglandOrWalesAddress = oneLineAddress, countryOfResidence = "USA")
 
         // Act
-        val viewModel = PropertyDetailsLandlordViewModel(testLandlord)
+        val viewModel = PropertyDetailsLandlordViewModelBuilder.fromEntity(testLandlord)
 
         // Assert
         val addressString =
-            viewModel.landlordsDetails
+            viewModel
                 .single { it.fieldHeading == "propertyDetails.landlordDetails.addressNonEnglandOrWales" }
                 .getConvertedFieldValue()
         assertEquals(addressString, oneLineAddress)
@@ -180,11 +180,11 @@ class PropertyDetailsLandlordViewModelTests {
             )
 
         // Act
-        val viewModel = PropertyDetailsLandlordViewModel(testLandlord)
+        val viewModel = PropertyDetailsLandlordViewModelBuilder.fromEntity(testLandlord)
 
         // Assert
         val addressString =
-            viewModel.landlordsDetails
+            viewModel
                 .single { it.fieldHeading == "propertyDetails.landlordDetails.contactAddressInEnglandOrWales" }
                 .getConvertedFieldValue()
         assertEquals(addressString, oneLineAddress)
@@ -196,10 +196,10 @@ class PropertyDetailsLandlordViewModelTests {
         val testLandlord = MockLandlordData.createLandlord()
 
         // Act
-        val viewModel = PropertyDetailsLandlordViewModel(testLandlord)
+        val viewModel = PropertyDetailsLandlordViewModelBuilder.fromEntity(testLandlord)
 
         // Assert
-        viewModel.landlordsDetails.forEach { personalDetails -> assertNull(personalDetails.changeUrl) }
+        viewModel.forEach { personalDetails -> assertNull(personalDetails.changeUrl) }
     }
 
     @Test
@@ -209,11 +209,11 @@ class PropertyDetailsLandlordViewModelTests {
         val testLandlord = MockLandlordData.createLandlord()
 
         // Act
-        val viewModel = PropertyDetailsLandlordViewModel(testLandlord, landlordDetailsUrl = landlordDetailsUrl)
+        val viewModel = PropertyDetailsLandlordViewModelBuilder.fromEntity(testLandlord, landlordDetailsUrl = landlordDetailsUrl)
 
         // Assert
         val returnedLandlordDetailsUrl =
-            viewModel.landlordsDetails
+            viewModel
                 .single { it.fieldHeading == "landlordDetails.personalDetails.name" }
                 .valueUrl
 

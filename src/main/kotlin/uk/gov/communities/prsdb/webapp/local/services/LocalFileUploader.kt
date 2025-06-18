@@ -2,12 +2,12 @@ package uk.gov.communities.prsdb.webapp.local.services
 
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbService
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import java.io.File
 import java.io.InputStream
 
-@PrsdbService
+@PrsdbWebService
 @Primary
 @Profile("local")
 class LocalFileUploader : FileUploader {
