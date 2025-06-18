@@ -6,8 +6,8 @@ import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_PLACE_NAMES
 import uk.gov.communities.prsdb.webapp.constants.NON_ENGLAND_OR_WALES_ADDRESS_MAX_LENGTH
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.ConfirmIdentityPage
 import uk.gov.communities.prsdb.webapp.forms.pages.LandlordRegistrationCheckAnswersPage
@@ -163,7 +163,7 @@ class LandlordRegistrationJourney(
                             "fieldSetHint" to "forms.name.fieldSetHint",
                             "label" to "forms.name.label",
                             "submitButtonText" to "forms.buttons.continue",
-                            BACK_URL_ATTR_NAME to "/$REGISTER_LANDLORD_JOURNEY_URL",
+                            BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE,
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
@@ -204,7 +204,7 @@ class LandlordRegistrationJourney(
                             "fieldSetHeading" to "forms.confirmDetails.heading",
                             "fieldSetHint" to "forms.confirmDetails.summary",
                             "submitButtonText" to "forms.buttons.confirmAndContinue",
-                            BACK_URL_ATTR_NAME to "/$REGISTER_LANDLORD_JOURNEY_URL",
+                            BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE,
                         ),
                     displaySectionHeader = true,
                 ),
@@ -328,7 +328,8 @@ class LandlordRegistrationJourney(
                             "postcode" to getHouseNameOrNumberAndPostcode(LandlordRegistrationStepId.LookupAddress).second,
                             "houseNameOrNumber" to getHouseNameOrNumberAndPostcode(LandlordRegistrationStepId.LookupAddress).first,
                             "searchAgainUrl" to
-                                "/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.LookupAddress.urlPathSegment}",
+                                "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/" +
+                                "${LandlordRegistrationStepId.LookupAddress.urlPathSegment}",
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
@@ -355,7 +356,7 @@ class LandlordRegistrationJourney(
                             "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
                             "submitButtonText" to "forms.buttons.useThisAddress",
                             "searchAgainUrl" to
-                                "/${REGISTER_LANDLORD_JOURNEY_URL}/" +
+                                "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/" +
                                 LandlordRegistrationStepId.LookupAddress.urlPathSegment,
                         ),
                     lookupAddressPathSegment = LandlordRegistrationStepId.LookupAddress.urlPathSegment,
@@ -452,7 +453,8 @@ class LandlordRegistrationJourney(
                             "postcode" to getHouseNameOrNumberAndPostcode(LandlordRegistrationStepId.LookupContactAddress).second,
                             "houseNameOrNumber" to getHouseNameOrNumberAndPostcode(LandlordRegistrationStepId.LookupContactAddress).first,
                             "searchAgainUrl" to
-                                "/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.LookupContactAddress.urlPathSegment}",
+                                "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/" +
+                                LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
@@ -472,7 +474,7 @@ class LandlordRegistrationJourney(
                             "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
                             "submitButtonText" to "forms.buttons.continue",
                             "searchAgainUrl" to
-                                "/${REGISTER_LANDLORD_JOURNEY_URL}/" +
+                                "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/" +
                                 LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
                         ),
                     lookupAddressPathSegment = LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
