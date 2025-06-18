@@ -19,6 +19,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
@@ -735,18 +736,20 @@ class PropertyComplianceJourneyTests {
 
     @Nested
     inner class CheckAndSubmitHandleSubmitAndRedirectTests {
+        @Suppress("ktlint:standard:max-line-length")
         @Test
-        fun `checkAndSubmitHandleSubmitAndRedirect creates a compliance record and deletes the corresponding form context`() {
+        fun `checkAndSubmitHandleSubmitAndRedirect creates a compliance record, deletes the corresponding form context and redirects to the confirmation page`() {
             val propertyOwnershipId = 1L
             whenever(mockJourneyDataService.getJourneyDataFromSession())
                 .thenReturn(JourneyPageDataBuilder.beforePropertyComplianceCheckAnswers().build())
 
-            completeStep(
-                PropertyComplianceStepId.CheckAndSubmit,
-                JourneyDataBuilder().withCheckedAnswers().build(),
-                propertyOwnershipId,
-                stubPropertyOwnership = false,
-            )
+            val returnedModelAndView =
+                completeStep(
+                    PropertyComplianceStepId.CheckAndSubmit,
+                    JourneyDataBuilder().withCheckedAnswers().build(),
+                    propertyOwnershipId,
+                    stubPropertyOwnership = false,
+                )
 
             verify(mockPropertyComplianceService)
                 .createPropertyCompliance(
@@ -768,7 +771,9 @@ class PropertyComplianceJourneyTests {
                     anyOrNull(),
                     anyOrNull(),
                 )
+            verify(mockPropertyComplianceService).addToPropertiesWithComplianceAddedThisSession(propertyOwnershipId)
             verify(mockPropertyOwnershipService).deleteIncompleteComplianceForm(propertyOwnershipId)
+            assertEquals("redirect:$CONFIRMATION_PATH_SEGMENT", returnedModelAndView.viewName)
         }
     }
 
