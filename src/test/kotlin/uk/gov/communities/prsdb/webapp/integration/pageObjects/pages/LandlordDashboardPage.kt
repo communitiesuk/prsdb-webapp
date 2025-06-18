@@ -31,7 +31,7 @@ class LandlordDashboardPage(
                 "View incomplete properties",
                 selectorOrLocator = ".govuk-notification-banner__link",
             )
-        val addComplianmceInformationLink =
+        val addComplianceInformationLink =
             Link.byText(
                 page,
                 "Add compliance information",
