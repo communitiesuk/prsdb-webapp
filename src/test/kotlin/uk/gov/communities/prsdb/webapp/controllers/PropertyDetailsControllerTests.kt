@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDetailsUpdateJourn
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import kotlin.test.Test
 
@@ -33,6 +34,9 @@ class PropertyDetailsControllerTests(
 
     @MockitoBean
     private lateinit var propertyDetailsUpdateJourneyFactory: PropertyDetailsUpdateJourneyFactory
+
+    @MockitoBean
+    private lateinit var journeyDataServiceFactory: JourneyDataServiceFactory
 
     @Mock
     private lateinit var propertyDetailsUpdateJourney: PropertyDetailsUpdateJourney
