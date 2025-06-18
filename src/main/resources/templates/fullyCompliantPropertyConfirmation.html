@@ -11,7 +11,7 @@
             <p class="govuk-body" th:text="#{propertyCompliance.fullyCompliantConfirmation.paragraph.one}">propertyCompliance.fullyCompliantConfirmation.paragraph.one</p>
             <p class="govuk-inset-text" th:text="${propertyAddress}">propertyAddress</p>
             <p class="govuk-body" th:text="#{propertyCompliance.confirmation.compliant.bullet.heading}">propertyCompliance.confirmation.compliant.bullet.heading</p>
-            <ul class="govuk-list govuk-list--bullet">
+            <ul class="govuk-list govuk-list--bullet" data-testid="compliant-messages">
                 <li th:each="compliantMsg : ${viewModel.compliantMsgs}" th:text="#{${compliantMsg}}"></li>
             </ul>
             <p class="govuk-body" th:text="#{propertyCompliance.fullyCompliantConfirmation.paragraph.two}">propertyCompliance.fullyCompliantConfirmation.paragraph.two</p>

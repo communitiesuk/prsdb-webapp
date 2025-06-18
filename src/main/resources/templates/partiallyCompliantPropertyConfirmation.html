@@ -20,14 +20,14 @@
         <section>
             <h2 class="govuk-heading-s" th:text="#{propertyCompliance.partiallyCompliantConfirmation.compliant.heading}">propertyCompliance.partiallyCompliantConfirmation.compliant.heading</h2>
             <p class="govuk-body" th:text="#{propertyCompliance.confirmation.compliant.bullet.heading}">propertyCompliance.confirmation.compliant.bullet.heading</p>
-            <ul class="govuk-list govuk-list--bullet">
+            <ul class="govuk-list govuk-list--bullet" data-testid="compliant-messages">
                 <li th:each="compliantMsg : ${viewModel.compliantMsgs}" th:text="#{${compliantMsg}}"></li>
             </ul>
         </section>
         <section>
             <h2 class="govuk-heading-s" th:text="#{propertyCompliance.partiallyCompliantConfirmation.nonCompliant.heading}">propertyCompliance.partiallyCompliantConfirmation.nonCompliant.heading</h2>
             <p class="govuk-body" th:text="#{propertyCompliance.confirmation.nonCompliant.bullet.heading}">propertyCompliance.confirmation.nonCompliant.bullet.heading</p>
-            <ul class="govuk-list govuk-list--bullet">
+            <ul class="govuk-list govuk-list--bullet" data-testid="non-compliant-messages">
                 <li th:each="nonCompliantMsg : ${viewModel.nonCompliantMsgs}" th:text="#{${nonCompliantMsg}}"></li>
             </ul>
             <p class="govuk-body" th:text="#{propertyCompliance.partiallyCompliantConfirmation.paragraph.two}">propertyCompliance.partiallyCompliantConfirmation.paragraph.two</p>
