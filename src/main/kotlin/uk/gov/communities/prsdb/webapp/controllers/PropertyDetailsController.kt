@@ -23,7 +23,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardContro
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -60,13 +60,13 @@ class PropertyDetailsController(
             )
 
         val landlordViewModel =
-            PropertyDetailsLandlordViewModel(
-                landlord = propertyOwnership.primaryLandlord,
-                landlordDetailsUrl = landlordDetailsUrl,
+            PropertyDetailsLandlordViewModelBuilder.fromEntity(
+                propertyOwnership.primaryLandlord,
+                landlordDetailsUrl,
             )
 
         model.addAttribute("propertyDetails", propertyDetails)
-        model.addAttribute("landlordDetails", landlordViewModel.landlordsDetails)
+        model.addAttribute("landlordDetails", landlordViewModel)
         model.addAttribute("deleteRecordLink", DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
@@ -140,7 +140,7 @@ class PropertyDetailsController(
             )
 
         val landlordViewModel =
-            PropertyDetailsLandlordViewModel(
+            PropertyDetailsLandlordViewModelBuilder.fromEntity(
                 propertyOwnership.primaryLandlord,
                 primaryLandlordDetailsUrl,
             )
@@ -148,7 +148,7 @@ class PropertyDetailsController(
         model.addAttribute("propertyDetails", propertyDetails)
         model.addAttribute("lastModifiedDate", lastModifiedDate)
         model.addAttribute("lastModifiedBy", lastModifiedBy)
-        model.addAttribute("landlordDetails", landlordViewModel.landlordsDetails)
+        model.addAttribute("landlordDetails", landlordViewModel)
         model.addAttribute("backUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
 
         return "propertyDetailsView"

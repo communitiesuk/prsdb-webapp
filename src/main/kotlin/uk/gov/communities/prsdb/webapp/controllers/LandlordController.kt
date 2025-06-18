@@ -28,7 +28,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeleteIncompletePropertyRegistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompleteComplianceViewModelBuilder
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompletePropertiesViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompletePropertyViewModelBuilder
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -93,10 +93,12 @@ class LandlordController(
         val incompleteProperties =
             propertyRegistrationService.getIncompletePropertiesForLandlord(principal.name)
 
-        val incompletePropertiesViewModel =
-            IncompletePropertiesViewModel(incompleteProperties, backUrlStorageService.storeCurrentUrlReturningKey())
+        val incompletePropertyViewModels =
+            incompleteProperties.mapIndexed { index, dataModel ->
+                IncompletePropertyViewModelBuilder.fromDataModel(index, dataModel, backUrlStorageService.storeCurrentUrlReturningKey())
+            }
 
-        model.addAttribute("incompleteProperties", incompletePropertiesViewModel.incompleteProperties)
+        model.addAttribute("incompleteProperties", incompletePropertyViewModels)
         model.addAttribute("registerPropertyUrl", "/$REGISTER_PROPERTY_JOURNEY_URL")
         model.addAttribute("viewRegisteredPropertiesUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT#$REGISTERED_PROPERTIES_PATH_SEGMENT")
 
