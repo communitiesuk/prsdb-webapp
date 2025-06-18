@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.validation.Valid
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.GetMapping
@@ -11,6 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.constants.ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
@@ -26,17 +27,22 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeleteIncompletePropertyRegistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompleteComplianceViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompletePropertiesViewModel
+import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LANDLORD')")
-@Controller
+@PrsdbController
 @RequestMapping(LANDLORD_BASE_URL, "/")
 class LandlordController(
     private val landlordService: LandlordService,
     private val propertyRegistrationService: PropertyRegistrationService,
+    private val propertyOwnershipService: PropertyOwnershipService,
+    private val backUrlStorageService: BackUrlStorageService,
 ) {
     @GetMapping
     fun index(): CharSequence = "redirect:$LANDLORD_DASHBOARD_URL"
@@ -51,8 +57,11 @@ class LandlordController(
                 ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
 
         val numberOfIncompleteProperties = propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(principal.name)
+        val numberOfIncompleteCompliances =
+            propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name)
 
         model.addAttribute("numberOfIncompleteProperties", numberOfIncompleteProperties)
+        model.addAttribute("numberOfIncompleteCompliances", numberOfIncompleteCompliances)
 
         model.addAttribute("landlordName", landlord.name)
         model.addAttribute("lrn", RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber))
@@ -61,6 +70,7 @@ class LandlordController(
         model.addAttribute("viewIncompletePropertiesUrl", INCOMPLETE_PROPERTIES_URL)
         model.addAttribute("viewPropertiesUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT#$REGISTERED_PROPERTIES_PATH_SEGMENT")
         model.addAttribute("viewLandlordRecordUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT")
+        model.addAttribute("viewIncompleteCompliancesUrl", INCOMPLETE_COMPLIANCES_URL)
 
         model.addAttribute("updatesToPilotUrl", "#")
         model.addAttribute("policyUpdatesUrl", "#")
@@ -83,7 +93,8 @@ class LandlordController(
         val incompleteProperties =
             propertyRegistrationService.getIncompletePropertiesForLandlord(principal.name)
 
-        val incompletePropertiesViewModel = IncompletePropertiesViewModel(incompleteProperties)
+        val incompletePropertiesViewModel =
+            IncompletePropertiesViewModel(incompleteProperties, backUrlStorageService.storeCurrentUrlReturningKey())
 
         model.addAttribute("incompleteProperties", incompletePropertiesViewModel.incompleteProperties)
         model.addAttribute("registerPropertyUrl", "/$REGISTER_PROPERTY_JOURNEY_URL")
@@ -98,7 +109,7 @@ class LandlordController(
     fun deleteIncompletePropertyAreYouSure(
         model: Model,
         principal: Principal,
-        @RequestParam(value = "contextId", required = true) contextId: Long,
+        @RequestParam(value = CONTEXT_ID_URL_PARAMETER, required = true) contextId: Long,
     ): String {
         populateDeleteIncompletePropertyRegistrationModel(model, contextId, principal.name)
         model.addAttribute(
@@ -113,7 +124,7 @@ class LandlordController(
     fun deleteIncompletePropertyAreYouSure(
         model: Model,
         principal: Principal,
-        @RequestParam(value = "contextId", required = true) contextId: Long,
+        @RequestParam(value = CONTEXT_ID_URL_PARAMETER, required = true) contextId: Long,
         @Valid
         @ModelAttribute
         formModel: DeleteIncompletePropertyRegistrationAreYouSureFormModel,
@@ -125,10 +136,34 @@ class LandlordController(
         }
 
         if (formModel.wantsToProceed == true) {
-            propertyRegistrationService.deleteIncompleteProperty(contextId.toLong(), principal.name)
+            propertyRegistrationService.deleteIncompleteProperty(contextId, principal.name)
         }
 
         return "redirect:$INCOMPLETE_PROPERTIES_URL"
+    }
+
+    @GetMapping("/$ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT")
+    fun addComplianceInformation(
+        model: Model,
+        principal: Principal,
+    ): String {
+        val incompleteCompliances = propertyOwnershipService.getIncompleteCompliancesForLandlord(principal.name)
+
+        val incompleteComplianceViewModels =
+            incompleteCompliances.mapIndexed { index, dataModel ->
+                IncompleteComplianceViewModelBuilder.fromDataModel(
+                    index,
+                    dataModel,
+                    backUrlStorageService.storeCurrentUrlReturningKey(),
+                )
+            }
+
+        model.addAttribute("incompleteCompliances", incompleteComplianceViewModels)
+        model.addAttribute("viewRegisteredPropertiesUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT#$REGISTERED_PROPERTIES_PATH_SEGMENT")
+
+        model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
+
+        return "incompleteCompliancesView"
     }
 
     fun populateDeleteIncompletePropertyRegistrationModel(
@@ -166,6 +201,8 @@ class LandlordController(
         const val LANDLORD_DASHBOARD_URL = "/$LANDLORD_PATH_SEGMENT/$DASHBOARD_PATH_SEGMENT"
         const val LANDLORD_BASE_URL = "/$LANDLORD_PATH_SEGMENT"
         const val INCOMPLETE_PROPERTIES_URL = "/$LANDLORD_PATH_SEGMENT/$INCOMPLETE_PROPERTIES_PATH_SEGMENT"
+        const val INCOMPLETE_COMPLIANCES_URL =
+            "/$LANDLORD_PATH_SEGMENT/$ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT"
 
         const val DELETE_INCOMPLETE_PROPERTY_ROUTE =
             "/$LANDLORD_PATH_SEGMENT/$DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT" +

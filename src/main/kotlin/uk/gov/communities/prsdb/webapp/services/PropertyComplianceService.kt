@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import java.time.LocalDate
 
-@Service
+@PrsdbWebService
 class PropertyComplianceService(
     private val propertyComplianceRepository: PropertyComplianceRepository,
     private val propertyOwnershipService: PropertyOwnershipService,
@@ -27,6 +27,7 @@ class PropertyComplianceService(
         eicrExemptionOtherReason: String? = null,
         epcUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
+        tenancyStartedBeforeEpcExpiry: Boolean? = null,
         epcEnergyRating: String? = null,
         epcExemptionReason: EpcExemptionReason? = null,
         epcMeesExemptionReason: MeesExemptionReason? = null,
@@ -48,6 +49,7 @@ class PropertyComplianceService(
                 eicrExemptionOtherReason = eicrExemptionOtherReason,
                 epcUrl = epcUrl,
                 epcExpiryDate = epcExpiryDate,
+                tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry,
                 epcEnergyRating = epcEnergyRating,
                 epcExemptionReason = epcExemptionReason,
                 epcMeesExemptionReason = epcMeesExemptionReason,

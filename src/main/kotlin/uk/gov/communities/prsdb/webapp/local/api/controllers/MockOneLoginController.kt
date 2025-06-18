@@ -21,8 +21,8 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.util.UriComponentsBuilder
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbRestController
 import java.io.File
 import java.net.URI
 import java.time.Instant
@@ -30,7 +30,7 @@ import java.util.Date
 import java.util.UUID
 
 @Profile("local")
-@RestController
+@PrsdbRestController
 @RequestMapping("/local/one-login")
 class MockOneLoginController {
     companion object {

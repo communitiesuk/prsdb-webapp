@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.helpers.LaUserRegistrationJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
@@ -117,7 +116,7 @@ class LaUserRegistrationJourney(
             id = RegisterLaUserStepId.CheckAnswers,
             page =
                 LaUserRegistrationCheckAnswersPage(
-                    formModel = CheckAnswersFormModel::class,
+                    formModel = NoInputFormModel::class,
                     templateName = "forms/checkAnswersForm",
                     content =
                         mapOf(
@@ -127,19 +126,17 @@ class LaUserRegistrationJourney(
                         ),
                     invitationService,
                 ),
-            handleSubmitAndRedirect = { journeyData, _, _ ->
-                checkAnswersHandleSubmitAndRedirect(journeyData)
-            },
+            handleSubmitAndRedirect = { filteredJourneyData, _, _ -> checkAnswersHandleSubmitAndRedirect(filteredJourneyData) },
             saveAfterSubmit = false,
         )
 
-    private fun checkAnswersHandleSubmitAndRedirect(journeyData: JourneyData): String {
+    private fun checkAnswersHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
         val localAuthorityUserID =
             localAuthorityDataService.registerUserAndReturnID(
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
                 localAuthority = invitation.invitingAuthority,
-                name = LaUserRegistrationJourneyDataHelper.getName(journeyData)!!,
-                email = LaUserRegistrationJourneyDataHelper.getEmail(journeyData)!!,
+                name = LaUserRegistrationJourneyDataHelper.getName(filteredJourneyData)!!,
+                email = LaUserRegistrationJourneyDataHelper.getEmail(filteredJourneyData)!!,
                 invitedAsAdmin = invitation.invitedAsAdmin,
             )
 

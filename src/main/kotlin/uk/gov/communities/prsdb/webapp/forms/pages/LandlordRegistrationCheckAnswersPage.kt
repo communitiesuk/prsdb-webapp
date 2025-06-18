@@ -4,17 +4,12 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
-import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
-class LandlordRegistrationCheckAnswersPage(
-    private val journeyDataService: JourneyDataService,
-    displaySectionHeader: Boolean = false,
-) : AbstractPage(
-        formModel = CheckAnswersFormModel::class,
+class LandlordRegistrationCheckAnswersPage :
+    AbstractPage(
+        formModel = NoInputFormModel::class,
         templateName = "forms/checkAnswersForm",
         content =
             mapOf(
@@ -22,19 +17,18 @@ class LandlordRegistrationCheckAnswersPage(
                 "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
                 "submitButtonText" to "forms.buttons.confirmAndContinue",
             ),
-        shouldDisplaySectionHeader = displaySectionHeader,
+        shouldDisplaySectionHeader = true,
     ) {
     override fun enrichModel(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData?,
     ) {
         filteredJourneyData!!
-        val lookedUpAddresses = journeyDataService.getJourneyDataFromSession().getLookedUpAddresses()
 
         val formData =
             getIdentityFormData(filteredJourneyData) +
                 getEmailAndPhoneFormData(filteredJourneyData) +
-                getAddressFormData(filteredJourneyData, lookedUpAddresses)
+                getAddressFormData(filteredJourneyData)
 
         modelAndView.addObject("formData", formData)
     }
@@ -70,15 +64,12 @@ class LandlordRegistrationCheckAnswersPage(
             ),
         )
 
-    private fun getAddressFormData(
-        journeyData: JourneyData,
-        lookedUpAddresses: List<AddressDataModel>,
-    ): List<SummaryListRowViewModel> {
+    private fun getAddressFormData(journeyData: JourneyData): List<SummaryListRowViewModel> {
         val livesInEnglandOrWales = LandlordRegistrationJourneyDataHelper.getLivesInEnglandOrWales(journeyData)!!
 
         return getLivesInEnglandOrWalesFormData(livesInEnglandOrWales) +
             (if (!livesInEnglandOrWales) getNonEnglandOrWalesAddressFormData(journeyData) else emptyList()) +
-            getContactAddressFormData(journeyData, lookedUpAddresses, livesInEnglandOrWales)
+            getContactAddressFormData(journeyData, livesInEnglandOrWales)
     }
 
     private fun getLivesInEnglandOrWalesFormData(livesInEnglandOrWales: Boolean): List<SummaryListRowViewModel> =
@@ -106,7 +97,6 @@ class LandlordRegistrationCheckAnswersPage(
 
     private fun getContactAddressFormData(
         journeyData: JourneyData,
-        lookedUpAddresses: List<AddressDataModel>,
         livesInEnglandOrWales: Boolean,
     ): SummaryListRowViewModel =
         SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -115,25 +105,23 @@ class LandlordRegistrationCheckAnswersPage(
             } else {
                 "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress"
             },
-            LandlordRegistrationJourneyDataHelper.getAddress(journeyData, lookedUpAddresses)!!.singleLineAddress,
-            getContactAddressChangeURLPathSegment(journeyData, livesInEnglandOrWales, lookedUpAddresses),
+            LandlordRegistrationJourneyDataHelper.getAddress(journeyData)!!.singleLineAddress,
+            getContactAddressChangeURLPathSegment(journeyData, livesInEnglandOrWales),
         )
 
     private fun getContactAddressChangeURLPathSegment(
         journeyData: JourneyData,
         livesInEnglandOrWales: Boolean,
-        lookedUpAddresses: List<AddressDataModel>,
     ): String =
         if (livesInEnglandOrWales) {
-            if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData, lookedUpAddresses = lookedUpAddresses)) {
+            if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
                 LandlordRegistrationStepId.ManualAddress.urlPathSegment
             } else {
                 LandlordRegistrationStepId.LookupAddress.urlPathSegment
             }
         } else {
             val isContactAddress = true
-            if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData, isContactAddress, lookedUpAddresses)
-            ) {
+            if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData, isContactAddress)) {
                 LandlordRegistrationStepId.ManualContactAddress.urlPathSegment
             } else {
                 LandlordRegistrationStepId.LookupContactAddress.urlPathSegment

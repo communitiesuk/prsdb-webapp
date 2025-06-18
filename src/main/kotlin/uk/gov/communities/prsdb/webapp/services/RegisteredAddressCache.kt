@@ -1,10 +1,10 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 
-@Service
+@PrsdbWebService
 class RegisteredAddressCache(
     private val session: HttpSession,
 ) {

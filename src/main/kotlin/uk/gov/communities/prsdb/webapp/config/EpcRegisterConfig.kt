@@ -2,12 +2,12 @@ package uk.gov.communities.prsdb.webapp.config
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.web.client.RestClient
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebConfiguration
 
-@Configuration
+@PrsdbWebConfiguration
 class EpcRegisterConfig(
     private val authorizedClientManager: OAuth2AuthorizedClientManager,
 ) {

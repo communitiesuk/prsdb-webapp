@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.integration.SinglePageTestWithSeedData.Ne
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteIncompletePropertyRegistrationAreYouSurePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
@@ -45,13 +46,15 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
 
             assertThat(incompletePropertiesPage.firstSummaryCard.summaryCardList.propertyAddressRow).containsText("4, Example Road, EG")
-            assertThat(incompletePropertiesPage.firstSummaryCard.summaryCardList.localAuthorityRow).containsText("ANGUS COUNCIL")
+            assertThat(
+                incompletePropertiesPage.firstSummaryCard.summaryCardList.localAuthorityRow,
+            ).containsText("SOUTH GLOUCESTERSHIRE COUNCIL")
             assertThat(
                 incompletePropertiesPage.firstSummaryCard.summaryCardList.completeByRow,
             ).containsText(formattedCompleteByDate, LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
 
             assertThat(incompletePropertiesPage.secondSummaryCard.summaryCardList.propertyAddressRow).containsText("5, Example Road, EG")
-            assertThat(incompletePropertiesPage.secondSummaryCard.summaryCardList.localAuthorityRow).containsText("ANTRIM AND NEWTOWNABBEY")
+            assertThat(incompletePropertiesPage.secondSummaryCard.summaryCardList.localAuthorityRow).containsText("NORTH SOMERSET COUNCIL")
             assertThat(
                 incompletePropertiesPage.secondSummaryCard.summaryCardList.completeByRow,
             ).containsText(formattedCompleteByDate, LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
@@ -61,7 +64,10 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
         fun `Clicking on a summary card Continue link redirects to the task list page`(page: Page) {
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
             incompletePropertiesPage.firstSummaryCard.continueLink.clickAndWait()
-            assertPageIs(page, TaskListPagePropertyRegistration::class)
+            val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+            taskListPage.backLink.clickAndWait()
+            assertPageIs(page, LandlordIncompletePropertiesPage::class)
         }
 
         @Test

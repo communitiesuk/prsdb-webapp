@@ -24,6 +24,12 @@ class JourneyDataService(
         session.setAttribute(journeyDataKey, journeyData)
     }
 
+    fun addToJourneyDataIntoSession(newJourneyData: JourneyData) {
+        val existingData = getJourneyDataFromSession()
+        val updatedData = existingData + newJourneyData
+        setJourneyDataInSession(updatedData)
+    }
+
     fun removeJourneyDataAndContextIdFromSession() {
         session.removeAttribute(CONTEXT_ID)
         session.removeAttribute(journeyDataKey)

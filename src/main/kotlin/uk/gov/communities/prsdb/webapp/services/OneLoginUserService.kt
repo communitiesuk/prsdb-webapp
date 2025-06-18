@@ -2,11 +2,11 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 
-@Service
+@PrsdbWebService
 class OneLoginUserService(
     private val oneLoginUserRepository: OneLoginUserRepository,
 ) {

@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import uk.gov.communities.prsdb.webapp.constants.LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY
+import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
@@ -21,10 +21,10 @@ open class JourneyDataExtensions {
         }
 
         fun JourneyData.getSerializedLookedUpAddresses(): String? =
-            JourneyDataHelper.getStringValueByKey(this, LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY)
+            JourneyDataHelper.getStringValueByKey(this, NonStepJourneyDataKey.LookedUpAddresses.key)
 
         fun JourneyData.withUpdatedLookedUpAddresses(lookedUpAddresses: String): JourneyData {
-            val updatedJourneyData = this + (LOOKED_UP_ADDRESSES_JOURNEY_DATA_KEY to lookedUpAddresses)
+            val updatedJourneyData = this + (NonStepJourneyDataKey.LookedUpAddresses.key to lookedUpAddresses)
             return updatedJourneyData
         }
 

@@ -3,10 +3,18 @@
 <main class="govuk-main-wrapper">
     <div id="page-content">
         <div id="notification-banner"
-             th:replace="${numberOfIncompleteProperties != 0} ? ~{fragments/banners/notificationBanner :: notificationBanner(#{landlord.dashboard.notification.banner.title},
-             #{landlord.dashboard.notification.banner.subheadingBeforeNumber} + ' ' + ${numberOfIncompleteProperties} + ' ' + (${numberOfIncompleteProperties != 1} ? #{landlord.dashboard.notification.banner.subheadingAfterNumber} : #{landlord.dashboard.notification.banner.subheadingAfterNumberIsOne}) + ' ',
-             ${viewIncompletePropertiesUrl}, #{landlord.dashboard.notification.banner.linkText})} : ~{}">
-            Incomplete properties notification banner
+             th:replace="${numberOfIncompleteProperties != 0 || numberOfIncompleteCompliances != 0} ? ~{fragments/banners/notificationBanner ::
+                notificationBanner(#{landlord.dashboard.notificationBanner.title}, ~{::#notification-banner/content()})} : ~{}">
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:if="${numberOfIncompleteProperties != 0}">
+                    <span th:text="#{landlord.dashboard.notificationBanner.incompleteProperties.subheadingBeforeNumber} + ' ' + ${numberOfIncompleteProperties} + ' ' + (${numberOfIncompleteProperties != 1} ? #{landlord.dashboard.notificationBanner.incompleteProperties.subheadingAfterNumber} : #{landlord.dashboard.notificationBanner.incompleteProperties.subheadingAfterNumberIsOne})">Text that goes in the banner</span>
+                    <a class="govuk-notification-banner__link" th:href="@{${viewIncompletePropertiesUrl}}" th:text="#{landlord.dashboard.notificationBanner.incompleteProperties.linkText}">Text for the link</a>
+                </li>
+                <li th:if="${numberOfIncompleteCompliances != 0}">
+                    <span th:text="#{landlord.dashboard.notificationBanner.incompleteCompliances.subheadingBeforeNumber} + ' ' + ${numberOfIncompleteCompliances} + ' ' + (${numberOfIncompleteCompliances != 1} ? #{landlord.dashboard.notificationBanner.incompleteCompliances.subheadingAfterNumber} : #{landlord.dashboard.notificationBanner.incompleteCompliances.subheadingAfterNumberIsOne})">Text that goes in the banner</span>
+                    <a class="govuk-notification-banner__link" th:href="@{${viewIncompleteCompliancesUrl}}" th:text="#{landlord.dashboard.notificationBanner.incompleteCompliances.linkText}">Text for the link</a>
+                </li>
+            </ul>
         </div>
         <div id="dashboard-banner"
              th:replace="~{fragments/banners/dashboardBanner :: dashboardBanner(${landlordName}, ~{::#dashboard-banner/content()})}">
@@ -24,6 +32,16 @@
                 <div class="govuk-grid-column-one-third prsd-dashboard__stretched-button-container">
                     <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${viewIncompletePropertiesUrl}, #{landlord.dashboard.viewIncompleteProperties.button})}">
                         landlord.dashboard.viewIncompleteProperties.button
+                    </a>
+                </div>
+            </div>
+        </section>
+        <section class="prsd-dashboard__section">
+            <h2 class="govuk-heading-l" th:text="#{landlord.dashboard.complianceInformation.heading}">landlord.dashboard.complianceInformation.heading</h2>
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-one-third prsd-dashboard__stretched-button-container">
+                    <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${viewIncompleteCompliancesUrl}, #{landlord.dashboard.addComplianceInformation.button})}">
+                        landlord.dashboard.addComplianceInformation.button
                     </a>
                 </div>
             </div>

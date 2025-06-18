@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import jakarta.persistence.EntityExistsException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FIND_LOCAL_AUTHORITY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
@@ -10,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.AlreadyRegisteredPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -24,7 +26,6 @@ import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoAdditionalLicenceFormModel
@@ -80,6 +81,7 @@ class PropertyRegistrationJourney(
             "registerProperty.title",
             "registerProperty.taskList.heading",
             listOf("registerProperty.taskList.subtitle"),
+            backUrl = "/$REGISTER_PROPERTY_JOURNEY_URL",
         )
 
     private fun registerPropertyTasks(): List<JourneyTask<RegisterPropertyStepId>> =
@@ -162,6 +164,7 @@ class PropertyRegistrationJourney(
                             "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
                             "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
                             "submitButtonText" to "forms.buttons.continue",
+                            BACK_URL_ATTR_NAME to LandlordController.LANDLORD_DASHBOARD_URL,
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
@@ -192,12 +195,7 @@ class PropertyRegistrationJourney(
                     journeyDataService = journeyDataService,
                     displaySectionHeader = true,
                 ),
-            nextAction = { journeyData, _ ->
-                selectAddressNextAction(
-                    journeyData,
-                    propertyRegistrationService,
-                )
-            },
+            nextAction = { filteredJourneyData, _ -> selectAddressNextAction(filteredJourneyData, propertyRegistrationService) },
             saveAfterSubmit = false,
         )
 
@@ -409,7 +407,7 @@ class PropertyRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
-            nextAction = { journeyData, _ -> licensingTypeNextAction(journeyData) },
+            nextAction = { filteredJourneyData, _ -> licensingTypeNextAction(filteredJourneyData) },
         )
 
     private fun selectiveLicenceStep() =
@@ -505,7 +503,7 @@ class PropertyRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
-            nextAction = { journeyData, _ -> occupancyNextAction(journeyData) },
+            nextAction = { filteredJourneyData, _ -> occupancyNextAction(filteredJourneyData) },
         )
 
     private fun numberOfHouseholdsStep() =
@@ -552,7 +550,7 @@ class PropertyRegistrationJourney(
     private fun checkAnswersStep() =
         Step(
             id = RegisterPropertyStepId.CheckAnswers,
-            page = PropertyRegistrationCheckAnswersPage(localAuthorityService, journeyDataService, displaySectionHeader = true),
+            page = PropertyRegistrationCheckAnswersPage(localAuthorityService),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.Declaration, null) },
         )
 
@@ -579,46 +577,42 @@ class PropertyRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
-            handleSubmitAndRedirect = { _, _, _ -> checkAnswersSubmitAndRedirect() },
+            handleSubmitAndRedirect = { filteredJourneyData, _, _ -> checkAnswersSubmitAndRedirect(filteredJourneyData) },
         )
 
-    private fun occupancyNextAction(journeyData: JourneyData): Pair<RegisterPropertyStepId, Int?> =
-        if (PropertyRegistrationJourneyDataHelper.getIsOccupied(journeyData)!!) {
+    private fun occupancyNextAction(filteredJourneyData: JourneyData): Pair<RegisterPropertyStepId, Int?> =
+        if (PropertyRegistrationJourneyDataHelper.getIsOccupied(filteredJourneyData)!!) {
             Pair(RegisterPropertyStepId.NumberOfHouseholds, null)
         } else {
             Pair(RegisterPropertyStepId.CheckAnswers, null)
         }
 
     private fun selectAddressNextAction(
-        journeyData: JourneyData,
+        filteredJourneyData: JourneyData,
         propertyRegistrationService: PropertyRegistrationService,
     ): Pair<RegisterPropertyStepId, Int?> =
-        if (PropertyRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
+        if (PropertyRegistrationJourneyDataHelper.isManualAddressChosen(filteredJourneyData)) {
             Pair(RegisterPropertyStepId.ManualAddress, null)
         } else {
-            val selectedAddress = PropertyRegistrationJourneyDataHelper.getAddress(journeyData, journeyData.getLookedUpAddresses())!!
-            if (selectedAddress.uprn != null && propertyRegistrationService.getIsAddressRegistered(selectedAddress.uprn)
-            ) {
+            val selectedAddress = PropertyRegistrationJourneyDataHelper.getAddress(filteredJourneyData)!!
+            if (selectedAddress.uprn != null && propertyRegistrationService.getIsAddressRegistered(selectedAddress.uprn)) {
                 Pair(RegisterPropertyStepId.AlreadyRegistered, null)
             } else {
                 Pair(RegisterPropertyStepId.PropertyType, null)
             }
         }
 
-    private fun licensingTypeNextAction(journeyData: JourneyData): Pair<RegisterPropertyStepId, Int?> =
-        when (PropertyRegistrationJourneyDataHelper.getLicensingType(journeyData)!!) {
+    private fun licensingTypeNextAction(filteredJourneyData: JourneyData): Pair<RegisterPropertyStepId, Int?> =
+        when (PropertyRegistrationJourneyDataHelper.getLicensingType(filteredJourneyData)!!) {
             LicensingType.SELECTIVE_LICENCE -> Pair(RegisterPropertyStepId.SelectiveLicence, null)
             LicensingType.HMO_MANDATORY_LICENCE -> Pair(RegisterPropertyStepId.HmoMandatoryLicence, null)
             LicensingType.HMO_ADDITIONAL_LICENCE -> Pair(RegisterPropertyStepId.HmoAdditionalLicence, null)
             LicensingType.NO_LICENSING -> Pair(RegisterPropertyStepId.Occupancy, null)
         }
 
-    private fun checkAnswersSubmitAndRedirect(): String {
+    private fun checkAnswersSubmitAndRedirect(filteredJourneyData: JourneyData): String {
         try {
-            val filteredJourneyData = last().filteredJourneyData
-            val lookedUpAddresses = journeyDataService.getJourneyDataFromSession().getLookedUpAddresses()
-
-            val address = PropertyRegistrationJourneyDataHelper.getAddress(filteredJourneyData, lookedUpAddresses)!!
+            val address = PropertyRegistrationJourneyDataHelper.getAddress(filteredJourneyData)!!
             val baseUserId = SecurityContextHolder.getContext().authentication.name
             val propertyRegistrationNumber =
                 propertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(

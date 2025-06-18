@@ -1,12 +1,12 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.repository.LicenseRepository
 
-@Service
+@PrsdbWebService
 class LicenseService(
     private val licenseRepository: LicenseRepository,
 ) {

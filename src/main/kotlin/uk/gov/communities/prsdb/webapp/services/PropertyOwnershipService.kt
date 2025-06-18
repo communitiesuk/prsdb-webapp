@@ -1,11 +1,13 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.toKotlinInstant
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
-import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -19,18 +21,26 @@ import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrTask
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEpcTask
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedGasSafetyTask
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedLandlordsResponsibilitiesTask
+import uk.gov.communities.prsdb.webapp.models.dataModels.IncompleteComplianceDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyViewModel
+import java.time.Instant
 
-@Service
+@PrsdbWebService
 class PropertyOwnershipService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val registrationNumberService: RegistrationNumberService,
     private val localAuthorityDataService: LocalAuthorityDataService,
     private val licenseService: LicenseService,
     private val formContextService: FormContextService,
+    private val backLinkService: BackUrlStorageService,
 ) {
     @Transactional
     fun createPropertyOwnership(
@@ -101,12 +111,19 @@ class PropertyOwnershipService(
 
     fun getRegisteredPropertiesForLandlordUser(baseUserId: String): List<RegisteredPropertyViewModel> =
         retrieveAllActiveRegisteredPropertiesForLandlord(baseUserId).map { propertyOwnership ->
-            RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
+            RegisteredPropertyViewModel.fromPropertyOwnership(
+                propertyOwnership,
+                currentUrlKey = backLinkService.storeCurrentUrlReturningKey(),
+            )
         }
 
     fun getRegisteredPropertiesForLandlord(landlordId: Long): List<RegisteredPropertyViewModel> =
         retrieveAllActiveRegisteredPropertiesForLandlord(landlordId).map { propertyOwnership ->
-            RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership, isLaView = true)
+            RegisteredPropertyViewModel.fromPropertyOwnership(
+                propertyOwnership,
+                isLaView = true,
+                currentUrlKey = backLinkService.storeCurrentUrlReturningKey(),
+            )
         }
 
     fun retrievePropertyOwnership(registrationNumber: Long): PropertyOwnership? =
@@ -155,7 +172,12 @@ class PropertyOwnershipService(
                 )
             }
 
-        return matchingProperties.map { PropertySearchResultViewModel.fromPropertyOwnership(it) }
+        return matchingProperties.map {
+            PropertySearchResultViewModel.fromPropertyOwnership(
+                it,
+                backLinkService.storeCurrentUrlReturningKey(),
+            )
+        }
     }
 
     @Transactional
@@ -210,5 +232,45 @@ class PropertyOwnershipService(
             formContextService.deleteFormContext(it)
             propertyOwnership.incompleteComplianceForm = null
         }
+    }
+
+    fun getNumberOfIncompleteCompliancesForLandlord(principalName: String): Int =
+        @Suppress("ktlint:standard:max-line-length")
+        propertyOwnershipRepository
+            .countByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_StatusAndCurrentNumTenantsIsGreaterThanAndIncompleteComplianceFormNotNull(
+                principalName,
+                RegistrationStatus.REGISTERED,
+                0,
+            ).toInt()
+
+    fun getIncompleteCompliancesForLandlord(principalName: String): List<IncompleteComplianceDataModel> {
+        val propertyOwnerships = retrieveAllActiveRegisteredPropertiesForLandlord(principalName)
+
+        return propertyOwnerships
+            .filter { it.isOccupied && it.isComplianceIncomplete }
+            .map { getIncompleteComplianceDataModel(it) }
+    }
+
+    private fun getIncompleteComplianceDataModel(propertyOwnership: PropertyOwnership): IncompleteComplianceDataModel {
+        val certificatesDueDate = getIncompleteComplianceCertificatesDueDate(propertyOwnership.createdDate)
+        val incompleteComplianceJourneyData = propertyOwnership.incompleteComplianceForm!!.toJourneyData()
+
+        return IncompleteComplianceDataModel(
+            propertyOwnershipId = propertyOwnership.id,
+            singleLineAddress = propertyOwnership.property.address.singleLineAddress,
+            localAuthorityName =
+                propertyOwnership.property.address.localAuthority!!
+                    .name,
+            certificatesDueDate = certificatesDueDate,
+            gasSafety = incompleteComplianceJourneyData.getHasCompletedGasSafetyTask(),
+            electricalSafety = incompleteComplianceJourneyData.getHasCompletedEicrTask(),
+            energyPerformance = incompleteComplianceJourneyData.getHasCompletedEpcTask(),
+            landlordsResponsibilities = incompleteComplianceJourneyData.getHasCompletedLandlordsResponsibilitiesTask(),
+        )
+    }
+
+    private fun getIncompleteComplianceCertificatesDueDate(createdDate: Instant): LocalDate {
+        val createdDateInUk = DateTimeHelper.getDateInUK(createdDate.toKotlinInstant())
+        return DateTimeHelper.get28DaysFromDate(createdDateInUk)
     }
 }

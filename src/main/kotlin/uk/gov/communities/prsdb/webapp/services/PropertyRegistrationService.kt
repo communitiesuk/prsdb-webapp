@@ -7,8 +7,8 @@ import jakarta.transaction.Transactional
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toKotlinInstant
 import org.springframework.http.HttpStatus
-import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -22,12 +22,11 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesDataModel
 import java.time.Instant
 
-@Service
+@PrsdbWebService
 class PropertyRegistrationService(
     private val propertyRepository: PropertyRepository,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
@@ -160,8 +159,7 @@ class PropertyRegistrationService(
 
     fun getAddressData(formContext: FormContext): AddressDataModel {
         val formContextJourneyData = formContext.toJourneyData()
-        val lookedUpAddresses = formContextJourneyData.getLookedUpAddresses()
-        return PropertyRegistrationJourneyDataHelper.getAddress(formContextJourneyData, lookedUpAddresses)!!
+        return PropertyRegistrationJourneyDataHelper.getAddress(formContextJourneyData)!!
     }
 
     fun getIncompletePropertyFormContextForLandlordIfNotExpired(

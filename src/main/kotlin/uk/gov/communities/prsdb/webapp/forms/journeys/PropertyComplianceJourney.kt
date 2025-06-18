@@ -7,6 +7,7 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONTACT_EPC_ASSESSOR_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.EPC_IMPROVEMENT_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
@@ -16,15 +17,18 @@ import uk.gov.communities.prsdb.webapp.constants.HOMES_ACT_2018_URL
 import uk.gov.communities.prsdb.webapp.constants.HOUSES_IN_MULTIPLE_OCCUPATION_URL
 import uk.gov.communities.prsdb.webapp.constants.HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL
 import uk.gov.communities.prsdb.webapp.constants.HOW_TO_RENT_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.PRIVATE_RENTING_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.constants.RIGHT_TO_RENT_CHECKS_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.FileUploadPage
@@ -35,6 +39,9 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAutoMatchedEpcIsCorrect
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getDidTenancyStartBeforeEpcExpiry
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionOtherReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrIssueDate
@@ -57,14 +64,21 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getLatestEpcCertificateNumber
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMatchedEpcIsCorrect
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMeesExemptionReason
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getPropertyHasMeesExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withResetCheckMatchedEpc
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionOtherReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionReasonFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExpiryCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FireSafetyDeclarationFormModel
@@ -75,12 +89,15 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.KeepPropertySafeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
+import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -93,6 +110,7 @@ class PropertyComplianceJourney(
     private val epcLookupService: EpcLookupService,
     private val propertyComplianceService: PropertyComplianceService,
     private val propertyOwnershipId: Long,
+    private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
 ) : JourneyWithTaskList<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE,
         initialStepId = initialStepId,
@@ -130,7 +148,9 @@ class PropertyComplianceJourney(
                     placeholderStep(
                         PropertyComplianceStepId.CheckAndSubmit,
                         "TODO PRSD-962: Implement check and submit task",
-                        handleSubmitAndRedirect = { _, _, _ -> checkAndSubmitHandleSubmitAndRedirect() },
+                        handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
+                            checkAndSubmitHandleSubmitAndRedirect(filteredJourneyData)
+                        },
                     ),
                     "propertyCompliance.taskList.checkAndSubmit.check",
                 ),
@@ -219,21 +239,21 @@ class PropertyComplianceJourney(
                 PropertyComplianceStepId.EPC,
                 setOf(
                     epcStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.CheckMatchedEpc,
-                        "TODO PRSD-1132: Implement Check Matched EPC step",
-                        PropertyComplianceStepId.EpcLookup,
-                    ),
+                    epcNotAutomatchedStep,
+                    checkAutoMatchedEpcStep,
                     epcLookupStep,
+                    checkMatchedEpcStep,
                     epcNotFoundStep,
-                    placeholderStep(
-                        PropertyComplianceStepId.EpcSuperseded,
-                        "TODO PRSD-1140: Implement EPC Superseded step",
-                        PropertyComplianceStepId.FireSafetyDeclaration,
-                    ),
+                    epcSupersededStep,
+                    epcExpiryCheckStep,
+                    epcExpiredStep,
                     epcMissingStep,
                     epcExemptionReasonStep,
                     epcExemptionConfirmationStep,
+                    meesExemptionCheckStep,
+                    meesExemptionReasonStep,
+                    meesExemptionConfirmationStep,
+                    lowEnergyRatingStep,
                 ),
                 "propertyCompliance.taskList.upload.epc",
                 "propertyCompliance.taskList.upload.epc.hint",
@@ -279,7 +299,7 @@ class PropertyComplianceJourney(
                                 BACK_URL_ATTR_NAME to taskListUrlSegment,
                             ),
                     ) { mapOf("address" to getPropertyAddress()) },
-                nextAction = { journeyData, _ -> gasSafetyStepNextAction(journeyData) },
+                nextAction = { filteredJourneyData, _ -> gasSafetyStepNextAction(filteredJourneyData) },
             )
 
     private val gasSafetyIssueDateStep
@@ -298,7 +318,7 @@ class PropertyComplianceJourney(
                                 "submitButtonText" to "forms.buttons.saveAndContinue",
                             ),
                     ),
-                nextAction = { journeyData, _ -> gasSafetyIssueDateStepNextAction(journeyData) },
+                nextAction = { filteredJourneyData, _ -> gasSafetyIssueDateStepNextAction(filteredJourneyData) },
             )
 
     private val gasSafetyEngineerNumStep
@@ -397,7 +417,7 @@ class PropertyComplianceJourney(
                                     ),
                             ),
                     ),
-                nextAction = { journeyData, _ -> gasSafetyExemptionStepNextAction(journeyData) },
+                nextAction = { filteredJourneyData, _ -> gasSafetyExemptionStepNextAction(filteredJourneyData) },
             )
 
     private val gasSafetyExemptionReasonStep
@@ -431,7 +451,7 @@ class PropertyComplianceJourney(
                                     ),
                             ),
                     ),
-                nextAction = { journeyData, _ -> gasSafetyExemptionReasonStepNextAction(journeyData) },
+                nextAction = { filteredJourneyData, _ -> gasSafetyExemptionReasonStepNextAction(filteredJourneyData) },
             )
 
     private val gasSafetyExemptionOtherReasonStep
@@ -514,7 +534,7 @@ class PropertyComplianceJourney(
                                 BACK_URL_ATTR_NAME to taskListUrlSegment,
                             ),
                     ) { mapOf("address" to getPropertyAddress()) },
-                nextAction = { journeyData, _ -> eicrStepNextAction(journeyData) },
+                nextAction = { filteredJourneyData, _ -> eicrStepNextAction(filteredJourneyData) },
             )
 
     private val eicrIssueDateStep
@@ -533,7 +553,7 @@ class PropertyComplianceJourney(
                                 "submitButtonText" to "forms.buttons.saveAndContinue",
                             ),
                     ),
-                nextAction = { journeyData, _ -> eicrIssueDateStepNextAction(journeyData) },
+                nextAction = { filteredJourneyData, _ -> eicrIssueDateStepNextAction(filteredJourneyData) },
             )
 
     private val eicrUploadStep
@@ -615,7 +635,7 @@ class PropertyComplianceJourney(
                                     ),
                             ),
                     ),
-                nextAction = { journeyData, _ -> eicrExemptionStepNextAction(journeyData) },
+                nextAction = { filteredJourneyData, _ -> eicrExemptionStepNextAction(filteredJourneyData) },
             )
 
     private val eicrExemptionReasonStep
@@ -653,7 +673,7 @@ class PropertyComplianceJourney(
                                     ),
                             ),
                     ),
-                nextAction = { journeyData, _ -> eicrExemptionReasonStepNextAction(journeyData) },
+                nextAction = { filteredJourneyData, _ -> eicrExemptionReasonStepNextAction(filteredJourneyData) },
             )
 
     private val eicrExemptionOtherReasonStep
@@ -743,7 +763,8 @@ class PropertyComplianceJourney(
                                 BACK_URL_ATTR_NAME to taskListUrlSegment,
                             ),
                     ) { mapOf("address" to getPropertyAddress()) },
-                nextAction = { journeyData, _ -> epcStepNextAction(journeyData) },
+                handleSubmitAndRedirect = { filteredJourneyData, _, _ -> epcStepHandleSubmitAndRedirect(filteredJourneyData) },
+                nextAction = { filteredJourneyData, _ -> epcStepNextAction(filteredJourneyData) },
             )
 
     private val epcMissingStep
@@ -762,6 +783,87 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
+            )
+
+    private val epcNotAutomatchedStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EpcNotAutoMatched,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/epcNotAutoMatchedForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.EpcLookup, null) },
+            )
+
+    private val checkAutoMatchedEpcStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.CheckAutoMatchedEpc,
+                page = getCheckMatchedEpcPage(autoMatchedEpc = true),
+                nextAction = { filteredJourneyData, _ -> checkAutoMatchedEpcStepNextAction(filteredJourneyData) },
+            )
+
+    private val checkMatchedEpcStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.CheckMatchedEpc,
+                page = getCheckMatchedEpcPage(autoMatchedEpc = false),
+                nextAction = { filteredJourneyData, _ -> checkMatchedEpcStepNextAction(filteredJourneyData) },
+                handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
+                    checkMatchedEpcStepHandleSubmitAndRedirect(filteredJourneyData)
+                },
+            )
+
+    private fun getCheckMatchedEpcPage(autoMatchedEpc: Boolean): Page {
+        val epcDetails = getEpcDetailsFromSession(autoMatched = autoMatchedEpc)
+        return Page(
+            formModel = CheckMatchedEpcFormModel::class,
+            templateName = "forms/checkMatchedEpcForm",
+            content =
+                mapOf(
+                    "title" to "propertyCompliance.title",
+                    "fieldSetHeading" to "forms.checkMatchedEpc.fieldSetHeading",
+                    "epcDetails" to (epcDetails ?: ""),
+                    "epcCertificateUrl" to epcCertificateUrlProvider.getEpcCertificateUrl(epcDetails?.certificateNumber ?: ""),
+                    "radioOptions" to
+                        listOf(
+                            RadiosButtonViewModel(
+                                value = true,
+                                valueStr = "yes",
+                                labelMsgKey = "forms.radios.option.yes.label",
+                            ),
+                            RadiosButtonViewModel(
+                                value = false,
+                                valueStr = "no",
+                                labelMsgKey = "forms.checkMatchedEpc.radios.no.label",
+                            ),
+                        ),
+                ),
+        )
+    }
+
+    private val epcSupersededStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EpcSuperseded,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/epcSupersededForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "certificateNumber" to getLatestEpcCertificateNumberFromSession(),
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.CheckMatchedEpc, null) },
+                handleSubmitAndRedirect = { filteredJourneyData, _, _ -> epcSupersededHandleSubmitAndRedirect(filteredJourneyData) },
             )
 
     private val epcExemptionReasonStep
@@ -843,10 +945,8 @@ class PropertyComplianceJourney(
                                 "getNewEpcUrl" to GET_NEW_EPC_URL,
                             ),
                     ),
-                nextAction = { journeyData, _ -> epcLookupStepNextAction(journeyData) },
-                handleSubmitAndRedirect = { journeyData, _, _ ->
-                    epcLookupStepHandleSubmitAndRedirect(journeyData)
-                },
+                nextAction = { filteredJourneyData, _ -> epcLookupStepNextAction(filteredJourneyData) },
+                handleSubmitAndRedirect = { filteredJourneyData, _, _ -> epcLookupStepHandleSubmitAndRedirect(filteredJourneyData) },
             )
 
     private val epcNotFoundStep
@@ -867,6 +967,183 @@ class PropertyComplianceJourney(
                             ),
                     ),
                 nextAction = { _, _ -> Pair(fireSafetyDeclarationStep.id, null) },
+            )
+
+    private val epcExpiryCheckStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EpcExpiryCheck,
+                page =
+                    Page(
+                        formModel = EpcExpiryCheckFormModel::class,
+                        templateName = "forms/epcExpiryCheckForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.epcExpiryCheck.fieldSetHeading",
+                                "expiryDate" to (getAcceptedEpcDetailsFromSession()?.expiryDateAsJavaLocalDate ?: ""),
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = true,
+                                            valueStr = "yes",
+                                            labelMsgKey = "forms.radios.option.yes.label",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = false,
+                                            valueStr = "no",
+                                            labelMsgKey = "forms.radios.option.no.label",
+                                        ),
+                                    ),
+                            ),
+                    ),
+                nextAction = { filteredJourneyData, _ -> epcExpiryCheckStepNextAction(filteredJourneyData) },
+            )
+
+    private val epcExpiredStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.EpcExpired,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = getEpcExpiredTemplate(),
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "getNewEpcUrl" to GET_NEW_EPC_URL,
+                                "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
+                                "registerMeesExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
+                                "epcImprovementGuideUrl" to EPC_IMPROVEMENT_GUIDE_URL,
+                                "expiryDateAsJavaLocalDate" to (getAcceptedEpcDetailsFromSession()?.expiryDateAsJavaLocalDate ?: ""),
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
+            )
+
+    private val meesExemptionCheckStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.MeesExemptionCheck,
+                page =
+                    Page(
+                        formModel = MeesExemptionCheckFormModel::class,
+                        templateName = "forms/meesExemptionCheckForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = true,
+                                            valueStr = "yes",
+                                            labelMsgKey = "forms.radios.option.yes.label",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = false,
+                                            valueStr = "no",
+                                            labelMsgKey = "forms.radios.option.no.label",
+                                        ),
+                                    ),
+                                "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
+                                "singleLineAddress" to (getAcceptedEpcDetailsFromSession()?.singleLineAddress ?: ""),
+                            ),
+                    ),
+                nextAction = { filteredJourneyData, _ -> meesExemptionCheckStepNextAction(filteredJourneyData) },
+            )
+
+    private val meesExemptionReasonStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.MeesExemptionReason,
+                page =
+                    Page(
+                        formModel = MeesExemptionReasonFormModel::class,
+                        templateName = "forms/exemptionReasonForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.meesExemptionReason.fieldSetHeading",
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = MeesExemptionReason.LISTED_BUILDING,
+                                            labelMsgKey = "forms.meesExemptionReason.radios.listedBuilding.label",
+                                            hintMsgKey = "forms.meesExemptionReason.radios.listedBuilding.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = MeesExemptionReason.SMALL_DETACHED_BUILDING,
+                                            labelMsgKey = "forms.meesExemptionReason.radios.smallDetachedBuilding.label",
+                                            hintMsgKey = "forms.meesExemptionReason.radios.smallDetachedBuilding.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = MeesExemptionReason.HIGH_COST,
+                                            labelMsgKey = "forms.meesExemptionReason.radios.highCost.label",
+                                            hintMsgKey = "forms.meesExemptionReason.radios.highCost.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = MeesExemptionReason.ALL_IMPROVEMENTS_MADE,
+                                            labelMsgKey = "forms.meesExemptionReason.radios.allImprovementsMade.label",
+                                            hintMsgKey = "forms.meesExemptionReason.radios.allImprovementsMade.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = MeesExemptionReason.WALL_INSULATION,
+                                            labelMsgKey = "forms.meesExemptionReason.radios.wallInsulation.label",
+                                            hintMsgKey = "forms.meesExemptionReason.radios.wallInsulation.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = MeesExemptionReason.THIRD_PARTY_CONSENT,
+                                            labelMsgKey = "forms.meesExemptionReason.radios.thirdPartyConsent.label",
+                                            hintMsgKey = "forms.meesExemptionReason.radios.thirdPartyConsent.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = MeesExemptionReason.PROPERTY_DEVALUATION,
+                                            labelMsgKey = "forms.meesExemptionReason.radios.propertyDevaluation.label",
+                                            hintMsgKey = "forms.meesExemptionReason.radios.propertyDevaluation.hint",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = MeesExemptionReason.NEW_LANDLORD,
+                                            labelMsgKey = "forms.meesExemptionReason.radios.newLandlord.label",
+                                            hintMsgKey = "forms.meesExemptionReason.radios.newLandlord.hint",
+                                        ),
+                                    ),
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.MeesExemptionConfirmation, null) },
+            )
+
+    private val meesExemptionConfirmationStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.MeesExemptionConfirmation,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/meesExemptionConfirmationForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
+            )
+
+    private val lowEnergyRatingStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.LowEnergyRating,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/lowEnergyRatingForm",
+                        content =
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "epcImprovementGuideUrl" to EPC_IMPROVEMENT_GUIDE_URL,
+                                "registerPrsExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
+                            ),
+                    ),
+                nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
             )
 
     private val fireSafetyDeclarationStep
@@ -897,7 +1174,7 @@ class PropertyComplianceJourney(
                                 BACK_URL_ATTR_NAME to taskListUrlSegment,
                             ),
                     ),
-                nextAction = { journeyData, _ -> fireSafetyDeclarationStepNextAction(journeyData) },
+                nextAction = { filteredJourneyData, _ -> fireSafetyDeclarationStepNextAction(filteredJourneyData) },
             )
 
     private val fireSafetyRiskStep
@@ -983,107 +1260,213 @@ class PropertyComplianceJourney(
         handleSubmitAndRedirect = handleSubmitAndRedirect,
     )
 
-    private fun gasSafetyStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getHasGasSafetyCert()!!) {
+    private fun gasSafetyStepNextAction(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getHasGasSafetyCert()!!) {
             Pair(PropertyComplianceStepId.GasSafetyIssueDate, null)
         } else {
             Pair(PropertyComplianceStepId.GasSafetyExemption, null)
         }
 
-    private fun gasSafetyIssueDateStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getIsGasSafetyCertOutdated()!!) {
+    private fun gasSafetyIssueDateStepNextAction(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getIsGasSafetyCertOutdated()!!) {
             Pair(PropertyComplianceStepId.GasSafetyOutdated, null)
         } else {
             Pair(PropertyComplianceStepId.GasSafetyEngineerNum, null)
         }
 
-    private fun gasSafetyExemptionStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getHasGasSafetyCertExemption()!!) {
+    private fun gasSafetyExemptionStepNextAction(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getHasGasSafetyCertExemption()!!) {
             Pair(PropertyComplianceStepId.GasSafetyExemptionReason, null)
         } else {
             Pair(PropertyComplianceStepId.GasSafetyExemptionMissing, null)
         }
 
-    private fun gasSafetyExemptionReasonStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getIsGasSafetyExemptionReasonOther()!!) {
+    private fun gasSafetyExemptionReasonStepNextAction(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getIsGasSafetyExemptionReasonOther()!!) {
             Pair(PropertyComplianceStepId.GasSafetyExemptionOtherReason, null)
         } else {
             Pair(PropertyComplianceStepId.GasSafetyExemptionConfirmation, null)
         }
 
-    private fun eicrStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getHasEICR()!!) {
+    private fun eicrStepNextAction(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getHasEICR()!!) {
             Pair(PropertyComplianceStepId.EicrIssueDate, null)
         } else {
             Pair(PropertyComplianceStepId.EicrExemption, null)
         }
 
-    private fun eicrIssueDateStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getIsEicrOutdated()!!) {
+    private fun eicrIssueDateStepNextAction(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getIsEicrOutdated()!!) {
             Pair(PropertyComplianceStepId.EicrOutdated, null)
         } else {
             Pair(PropertyComplianceStepId.EicrUpload, null)
         }
 
-    private fun eicrExemptionStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getHasEicrExemption()!!) {
+    private fun eicrExemptionStepNextAction(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getHasEicrExemption()!!) {
             Pair(PropertyComplianceStepId.EicrExemptionReason, null)
         } else {
             Pair(PropertyComplianceStepId.EicrExemptionMissing, null)
         }
 
-    private fun eicrExemptionReasonStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getIsEicrExemptionReasonOther()!!) {
+    private fun eicrExemptionReasonStepNextAction(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getIsEicrExemptionReasonOther()!!) {
             Pair(PropertyComplianceStepId.EicrExemptionOtherReason, null)
         } else {
             Pair(PropertyComplianceStepId.EicrExemptionConfirmation, null)
         }
 
-    private fun epcStepNextAction(journeyData: JourneyData) =
-        when (journeyData.getHasEPC()!!) {
-            HasEpc.YES -> Pair(PropertyComplianceStepId.CheckMatchedEpc, null)
+    private fun epcStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
+        if (filteredJourneyData.getHasEPC() == HasEpc.YES) {
+            val uprn =
+                propertyOwnershipService
+                    .getPropertyOwnership(propertyOwnershipId)
+                    .property.address.uprn
+
+            val epcDetails = uprn?.let { epcLookupService.getEpcByUprn(it) }
+
+            return updateEpcDetailsInSessionAndRedirectToNextStep(epcStep, filteredJourneyData, epcDetails, autoMatchedEpc = true)
+        }
+
+        return getRedirectForNextStep(epcStep, filteredJourneyData, null)
+    }
+
+    private fun updateEpcDetailsInSessionAndRedirectToNextStep(
+        currentStep: Step<PropertyComplianceStepId>,
+        filteredJourneyData: JourneyData,
+        epcDetails: EpcDataModel?,
+        autoMatchedEpc: Boolean,
+    ): String {
+        val newFilteredJourneyData = filteredJourneyData.withEpcDetails(epcDetails, autoMatchedEpc)
+        journeyDataService.addToJourneyDataIntoSession(newFilteredJourneyData)
+        return getRedirectForNextStep(currentStep, newFilteredJourneyData, null)
+    }
+
+    private fun resetCheckMatchedEpcInSessionIfChangedEpcDetails(newEpcDetails: EpcDataModel?) {
+        val journeyData = journeyDataService.getJourneyDataFromSession()
+        if (newEpcDetails != journeyData.getEpcDetails(autoMatched = false)) {
+            val newJourneyData = journeyData.withResetCheckMatchedEpc()
+            journeyDataService.setJourneyDataInSession(newJourneyData)
+        }
+    }
+
+    private fun epcStepNextAction(filteredJourneyData: JourneyData) =
+        when (filteredJourneyData.getHasEPC()!!) {
+            HasEpc.YES -> {
+                if (filteredJourneyData.getEpcDetails(autoMatched = true) != null) {
+                    Pair(PropertyComplianceStepId.CheckAutoMatchedEpc, null)
+                } else {
+                    Pair(PropertyComplianceStepId.EpcNotAutoMatched, null)
+                }
+            }
             HasEpc.NO -> Pair(PropertyComplianceStepId.EpcMissing, null)
             HasEpc.NOT_REQUIRED -> Pair(PropertyComplianceStepId.EpcExemptionReason, null)
         }
 
-    private fun epcLookupStepHandleSubmitAndRedirect(journeyData: JourneyData): String {
-        val certificateNumber = journeyData.getEpcLookupCertificateNumber()!!
-        val lookedUpEpc = epcLookupService.getEpcByCertificateNumber(certificateNumber)
-
-        val newJourneyData = journeyData.withEpcDetails(lookedUpEpc)
-        journeyDataService.setJourneyDataInSession(newJourneyData)
-
-        if (lookedUpEpc?.isLatestCertificateForThisProperty() == true) {
-            // Redirect to CheckMatchedEpc without setting it as the nextAction
-            return Step.generateUrl(PropertyComplianceStepId.CheckMatchedEpc, null)
+    private fun checkAutoMatchedEpcStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
+        if (filteredJourneyData.getAutoMatchedEpcIsCorrect()!!) {
+            matchedEpcIsCorrectNextAction(filteredJourneyData, autoMatched = true)
+        } else {
+            Pair(PropertyComplianceStepId.EpcLookup, null)
         }
 
-        val epcLookupStep = steps.single { it.id == PropertyComplianceStepId.EpcLookup }
-        return getRedirectForNextStep(epcLookupStep, newJourneyData, null)
+    private fun checkMatchedEpcStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
+        if (filteredJourneyData.getMatchedEpcIsCorrect()!!) {
+            matchedEpcIsCorrectNextAction(filteredJourneyData, autoMatched = false)
+        } else {
+            // The user will be redirected to the lookup step in handleSubmitAndRedirect
+            // When they are redirected, the nextAction of lookupStep is this step (checkMatchedEpc)
+            // Here we set checkMatchedEpc's nextAction to null to avoid an infinite loop of previous steps when checking if a step is reachable
+            Pair(null, null)
+        }
+
+    private fun matchedEpcIsCorrectNextAction(
+        filteredJourneyData: JourneyData,
+        autoMatched: Boolean,
+    ): Pair<PropertyComplianceStepId?, Int?> {
+        val epcDetails = filteredJourneyData.getEpcDetails(autoMatched)!!
+        if (epcDetails.isPastExpiryDate()) {
+            return Pair(PropertyComplianceStepId.EpcExpiryCheck, null)
+        }
+        if (!epcDetails.isEnergyRatingEOrBetter()) {
+            return Pair(PropertyComplianceStepId.MeesExemptionCheck, null)
+        }
+        return Pair(landlordResponsibilities.first().startingStepId, null)
     }
 
-    private fun epcLookupStepNextAction(journeyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> {
+    private fun checkMatchedEpcStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
+        val nextAction = checkMatchedEpcStepNextAction(filteredJourneyData)
+        if (nextAction.first == null) {
+            return getRedirectForNextStep(
+                checkMatchedEpcStep,
+                filteredJourneyData,
+                null,
+                overriddenRedirectStepId = PropertyComplianceStepId.EpcLookup,
+            )
+        }
+        return getRedirectForNextStep(checkMatchedEpcStep, filteredJourneyData, null)
+    }
+
+    private fun epcLookupStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
+        val certificateNumber = filteredJourneyData.getEpcLookupCertificateNumber()!!
+        val lookedUpEpc = epcLookupService.getEpcByCertificateNumber(certificateNumber)
+        resetCheckMatchedEpcInSessionIfChangedEpcDetails(lookedUpEpc)
+        return updateEpcDetailsInSessionAndRedirectToNextStep(epcLookupStep, filteredJourneyData, lookedUpEpc, autoMatchedEpc = false)
+    }
+
+    private fun epcLookupStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> {
         val lookedUpEpcDetails =
-            journeyData.getEpcDetails()
+            filteredJourneyData.getEpcDetails(autoMatched = false)
                 ?: return Pair(PropertyComplianceStepId.EpcNotFound, null)
         return if (lookedUpEpcDetails.isLatestCertificateForThisProperty()) {
-            // Set this to null instead of CheckMatchedEpc to avoid an infinite loop where the two steps are each other's nextAction
-            Pair(null, null)
+            Pair(PropertyComplianceStepId.CheckMatchedEpc, null)
         } else {
             Pair(PropertyComplianceStepId.EpcSuperseded, null)
         }
     }
 
-    private fun fireSafetyDeclarationStepNextAction(journeyData: JourneyData) =
-        if (journeyData.getHasFireSafetyDeclaration()!!) {
+    private fun epcSupersededHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
+        val certificateNumber = filteredJourneyData.getLatestEpcCertificateNumber()!!
+        val latestEpc = epcLookupService.getEpcByCertificateNumber(certificateNumber)
+        resetCheckMatchedEpcInSessionIfChangedEpcDetails(latestEpc)
+        return updateEpcDetailsInSessionAndRedirectToNextStep(epcLookupStep, filteredJourneyData, latestEpc, autoMatchedEpc = false)
+    }
+
+    private fun epcExpiryCheckStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
+        if (filteredJourneyData.getDidTenancyStartBeforeEpcExpiry() == true) {
+            if (filteredJourneyData.getAcceptedEpcDetails()?.isEnergyRatingEOrBetter() == true) {
+                Pair(landlordResponsibilities.first().startingStepId, null)
+            } else {
+                Pair(PropertyComplianceStepId.MeesExemptionCheck, null)
+            }
+        } else {
+            Pair(PropertyComplianceStepId.EpcExpired, null)
+        }
+
+    private fun meesExemptionCheckStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
+        if (filteredJourneyData.getPropertyHasMeesExemption()!!) {
+            Pair(PropertyComplianceStepId.MeesExemptionReason, null)
+        } else {
+            Pair(PropertyComplianceStepId.LowEnergyRating, null)
+        }
+
+    private fun getEpcExpiredTemplate(): String {
+        val epcDetails = getAcceptedEpcDetailsFromSession() ?: return ""
+        return if (epcDetails.isEnergyRatingEOrBetter()) {
+            "forms/epcExpiredForm"
+        } else {
+            "forms/epcExpiredLowRatingForm"
+        }
+    }
+
+    private fun fireSafetyDeclarationStepNextAction(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getHasFireSafetyDeclaration()!!) {
             Pair(PropertyComplianceStepId.KeepPropertySafe, null)
         } else {
             Pair(PropertyComplianceStepId.FireSafetyRisk, null)
         }
 
-    private fun checkAndSubmitHandleSubmitAndRedirect(): String {
-        val filteredJourneyData = last().filteredJourneyData
-
+    private fun checkAndSubmitHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
         val gasSafetyCertFilename =
             filteredJourneyData.getGasSafetyCertOriginalName()?.let {
                 PropertyComplianceJourneyHelper.getCertFilename(
@@ -1102,7 +1485,7 @@ class PropertyComplianceJourney(
                 )
             }
 
-        val epcDetails = journeyDataService.getJourneyDataFromSession().getEpcDetails()
+        val epcDetails = filteredJourneyData.getAcceptedEpcDetails()
 
         propertyComplianceService.createPropertyCompliance(
             propertyOwnershipId = propertyOwnershipId,
@@ -1115,11 +1498,12 @@ class PropertyComplianceJourney(
             eicrIssueDate = filteredJourneyData.getEicrIssueDate()?.toJavaLocalDate(),
             eicrExemptionReason = filteredJourneyData.getEicrExemptionReason(),
             eicrExemptionOtherReason = filteredJourneyData.getEicrExemptionOtherReason(),
-            // TODO PRSD-1132: Assign epcUrl
+            epcUrl = epcCertificateUrlProvider.getEpcCertificateUrl(epcDetails?.certificateNumber ?: ""),
             epcExpiryDate = epcDetails?.expiryDate?.toJavaLocalDate(),
+            tenancyStartedBeforeEpcExpiry = filteredJourneyData.getDidTenancyStartBeforeEpcExpiry(),
             epcEnergyRating = epcDetails?.energyRating,
             epcExemptionReason = filteredJourneyData.getEpcExemptionReason(),
-            // TODO PRSD-1143: Assign epcMeesExemptionReason
+            epcMeesExemptionReason = filteredJourneyData.getMeesExemptionReason(),
             hasFireSafetyDeclaration = filteredJourneyData.getHasFireSafetyDeclaration()!!,
         )
 
@@ -1137,6 +1521,21 @@ class PropertyComplianceJourney(
                 ?: return ""
         return EpcDataModel.parseCertificateNumberOrNull(submittedCertificateNumber)!! // Only valid EPC numbers will be in journeyData
     }
+
+    private fun getEpcDetailsFromSession(autoMatched: Boolean): EpcDataModel? =
+        journeyDataService
+            .getJourneyDataFromSession()
+            .getEpcDetails(autoMatched)
+
+    private fun getLatestEpcCertificateNumberFromSession(): String {
+        return journeyDataService.getJourneyDataFromSession().getLatestEpcCertificateNumber()
+            ?: return ""
+    }
+
+    private fun getAcceptedEpcDetailsFromSession(): EpcDataModel? =
+        journeyDataService
+            .getJourneyDataFromSession()
+            .getAcceptedEpcDetails()
 
     private fun getPropertyAddress() =
         propertyOwnershipService

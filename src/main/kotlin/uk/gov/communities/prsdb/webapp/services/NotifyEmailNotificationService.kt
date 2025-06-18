@@ -3,14 +3,14 @@ package uk.gov.communities.prsdb.webapp.services
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.service.notify.NotificationClient
 import uk.gov.service.notify.NotificationClientException
 
-@Service
+@PrsdbWebService
 class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
     var notificationClient: NotificationClient,
 ) : EmailNotificationService<EmailModel> {

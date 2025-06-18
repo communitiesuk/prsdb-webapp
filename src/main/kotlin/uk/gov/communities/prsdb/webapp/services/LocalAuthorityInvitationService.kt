@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.LA_USER_INVITATION_TOKEN
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitat
 import uk.gov.communities.prsdb.webapp.exceptions.InvalidTokenException
 import java.util.UUID
 
-@Service
+@PrsdbWebService
 class LocalAuthorityInvitationService(
     val invitationRepository: LocalAuthorityInvitationRepository,
     private val session: HttpSession,

@@ -1,9 +1,9 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys.factories
 
 import org.springframework.http.HttpStatus
-import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_LANDLORD_DETAILS_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDetailsUpdateJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
-@Component
+@PrsdbWebComponent
 class LandlordDetailsUpdateJourneyFactory(
     private val validator: Validator,
     private val journeyDataServiceFactory: JourneyDataServiceFactory,

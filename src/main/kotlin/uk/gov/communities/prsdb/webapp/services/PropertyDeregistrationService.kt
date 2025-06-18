@@ -2,11 +2,11 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DEREGISTRATION_ENTITY_IDS
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 
-@Service
+@PrsdbWebService
 class PropertyDeregistrationService(
     private val propertyService: PropertyService,
     private val licenseService: LicenseService,

@@ -47,7 +47,7 @@ class FormContextServiceTests {
 
     @Test
     fun `deleteFormContext deletes the given FormContext`() {
-        val formContext = MockLandlordData.createFormContext()
+        val formContext = MockLandlordData.createPropertyRegistrationFormContext()
 
         formContextService.deleteFormContext(formContext)
 

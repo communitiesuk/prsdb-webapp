@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
+import com.microsoft.playwright.BrowserContext
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.junit.UsePlaywright
 import org.junit.jupiter.api.BeforeEach
@@ -103,4 +104,10 @@ abstract class IntegrationTest {
 
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     abstract class NestedIntegrationTest
+
+    fun createPageAndNavigator(browserContext: BrowserContext): Pair<Page, Navigator> {
+        val page = browserContext.newPage()
+        val navigator = Navigator(page, port)
+        return Pair(page, navigator)
+    }
 }

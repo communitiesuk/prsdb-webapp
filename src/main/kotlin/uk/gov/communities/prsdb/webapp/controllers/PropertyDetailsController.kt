@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 import kotlinx.datetime.toKotlinInstant
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -13,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
@@ -24,14 +25,16 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsU
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
+import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
-@Controller
+@PrsdbController
 @RequestMapping
 class PropertyDetailsController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyDetailsUpdateJourneyFactory: PropertyDetailsUpdateJourneyFactory,
+    private val backLinkStorageService: BackUrlStorageService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(PROPERTY_DETAILS_ROUTE)
@@ -43,18 +46,23 @@ class PropertyDetailsController(
         val propertyOwnership =
             propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, principal.name)
 
+        val landlordDetailsUrl =
+            LandlordDetailsController
+                .getLandlordDetailsPath()
+                .overrideBackLinkForUrl(backLinkStorageService.storeCurrentUrlReturningKey())
+
         val propertyDetails =
             PropertyDetailsViewModel(
                 propertyOwnership = propertyOwnership,
                 withChangeLinks = true,
                 hideNullUprn = true,
-                landlordDetailsUrl = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
+                landlordDetailsUrl = landlordDetailsUrl,
             )
 
         val landlordViewModel =
             PropertyDetailsLandlordViewModel(
                 landlord = propertyOwnership.primaryLandlord,
-                landlordDetailsUrl = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
+                landlordDetailsUrl = landlordDetailsUrl,
             )
 
         model.addAttribute("propertyDetails", propertyDetails)
@@ -118,19 +126,23 @@ class PropertyDetailsController(
 
         val lastModifiedDate = DateTimeHelper.getDateInUK(propertyOwnership.getMostRecentlyUpdated().toKotlinInstant())
         val lastModifiedBy = propertyOwnership.primaryLandlord.name
+        val primaryLandlordDetailsUrl =
+            LandlordDetailsController
+                .getLandlordDetailsPath(propertyOwnership.primaryLandlord.id)
+                .overrideBackLinkForUrl(backLinkStorageService.storeCurrentUrlReturningKey())
 
         val propertyDetails =
             PropertyDetailsViewModel(
                 propertyOwnership = propertyOwnership,
                 withChangeLinks = false,
                 hideNullUprn = false,
-                landlordDetailsUrl = "${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/${propertyOwnership.primaryLandlord.id}",
+                landlordDetailsUrl = primaryLandlordDetailsUrl,
             )
 
         val landlordViewModel =
             PropertyDetailsLandlordViewModel(
                 propertyOwnership.primaryLandlord,
-                "${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/${propertyOwnership.primaryLandlord.id}",
+                primaryLandlordDetailsUrl,
             )
 
         model.addAttribute("propertyDetails", propertyDetails)

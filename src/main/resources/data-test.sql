@@ -28,33 +28,36 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao','2024-
 
 INSERT INTO form_context (id, created_date, last_modified_date, journey_type, context, subject_identifier)
 VALUES (1, current_date, current_date, 3, '{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R 1LA"},"looked-up-addresses":"[{\"singleLineAddress\":\"1, SAVOY COURT, LONDON, WC2R 0EX\",\"localAuthorityId\":318,\"uprn\":100023432931,\"buildingNumber\":\"1\",\"streetName\":\"SAVOY COURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R 0EX\"}]","select-address":{"address":"1, SAVOY COURT, LONDON, WC2R 0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
-       (2, '2024-10-15 00:00:00+00', null, 7, '{}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo');
+       (2, '2024-10-15 00:00:00+00', null, 7, '{}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
+       (3, '2025-01-15 00:00:00+00', null, 7, '{}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
+       (4, '2025-01-15 00:00:00+00', null, 7, '{}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
+       (5, '2025-01-15 00:00:00+00', null, 7, '{}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo');
 
 SELECT setval(pg_get_serial_sequence('form_context', 'id'), (SELECT MAX(id) FROM form_context));
 
 INSERT INTO local_authority_user (id, created_date, last_modified_date, subject_identifier, is_manager, local_authority_id, email, name)
-VALUES (1,'2024-10-15 00:00:00+00','2024-10-15 00:00:00+00','urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao',true,1,'Team-PRSDB+laadmin@softwire.com','PRSDB LA Admin'),
-       (2,'2024-10-15 00:00:00+00','2025-02-21 16:12:51.530782+00','urn:fdc:gov.uk:2022:cgVX2oJWKHMwzm8Gzx25CSoVXixVS0rw32Sar4Om8vQ',false,1,'Team-PRSDB+lauser@softwire.com','PRSDB La User'),
-       (3,'2025-02-19 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk',true,1,'travis.woodward@communities.gov.uk','Travis Woodward'),
-       (4,'2025-02-26 17:02:19.625996+00',null,'urn:fdc:gov.uk:2022:DySqeEXIC4G2xauOirtTDcezwCPLZgQPUQZmQ-aIIMk',true,1,'travis.woodward@softwire.com','Travis Woodward (Softwire)'),
-       (5,'2025-02-27 14:13:11.876928+00',null,'urn:fdc:gov.uk:2022:e4eN4Mujv2NMVut4mIPzRlwpyBL3sBE304GgGlxgd-Q',true,1,'simon.greensmith@communities.gov.uk','Simon Greensmith'),
-       (6,'2025-03-06 15:32:59.529898+00',null,'urn:fdc:gov.uk:2022:A9B5GpzhlOrNoGQM65oUESHL5i3O9fp0wjizEFVcCrU',true,1,'alexander.read@softwire.com','Alexander Read'),
-       (7,'2025-03-11 11:28:52.837278+00','2025-03-11 11:31:28.061279+00','urn:fdc:gov.uk:2022:RR3fauA1ZgHYuLjW9824VtLzegGG9NXfdHJrtg2hIAE',true,1,'niamh.rafferty@communities.gov.uk','Niamh Rafferty'),
-       (8,'2025-03-12 17:12:19.833105+00','2025-03-12 17:13:10.020624+00','urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI',true,1,'jasmin.conterio@softwire.com','Jasmin Conterio'),
-       (9,'2025-03-17 10:13:36.388805+00',null,'urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU',true,1,'kiran.randhawakukar@softwire.com','Kiran Fake Name'),
-       (10,'2025-03-18 10:13:36.388805+00',null,'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', true, 1, 'isobel.ibironke@softwire.com','Isobel Ibironke'),
-       (11,'2025-04-01 10:47:41.04984+00','2025-04-01 10:48:09.549697+00','urn:fdc:gov.uk:2022:Fv4k6DizfhFmrw4d17Virjsy3A-XCm_WxR2knMUQ394',true,1,'Jonathan.Gibbs@communities.gov.uk','Jonathan Gibbs'),
-       (12,'2025-04-01 10:53:06.710827+00','2025-04-01 10:53:55.690934+00','urn:fdc:gov.uk:2022:cF64cXNtN55uqmwjwSXv5SIT6jI0bpJ12gO1L3c0uAA',true,1,'Samuel.Hinkinson@communities.gov.uk','Colonel Mustard'),
-       (13,'2025-04-01 11:15:40.136113+00','2025-04-01 11:16:14.219671+00','urn:fdc:gov.uk:2022:DXI5RSmCmbPQQhBAPCbw1nkL-Dauufg6VOWdR9TuYlk',true,1,'norris.orighoye@communities.gov.uk','Norris Orighoye'),
-       (14,'2025-04-02 12:52:16.995889+00','2025-04-02 12:52:31.405327+00','urn:fdc:gov.uk:2022:vgKfvjYRO1LnJkmBr7CkEV62g9WoDeD-sZZNt9GCiVU',true,1,'sharan.flora@communities.gov.uk','Sharan Flora'),
-       (15,'2025-04-02 13:01:55.29454+00','2025-04-02 13:02:44.768007+00','urn:fdc:gov.uk:2022:pciqch9dYbtBx2rAhxvaCIEu00cQv3NFeIk5f4BesLo',true,1,'rowan.hill@softwire.com','Rowan Hill'),
-       (16,'2025-04-03 13:22:09.925662+00','2025-04-03 13:22:21.753423+00','urn:fdc:gov.uk:2022:TSEDw_HXmsLDuNj2bLV5fOLuAvooeSYlupbEykMhWj8',true,1,'mayur.shah@communities.gov.uk','John Smith'),
-       (17,'2025-04-03 13:38:10.243392+00','2025-04-03 13:38:48.638471+00','urn:fdc:gov.uk:2022:aDESlOYLkXmBVUJXUGd5PAGx55uR068Fe16lRN7VzyY',true,1,'nicola.halliday@communities.gov.uk','Professor Plum'),
-       (18,'2025-04-09 14:23:39.070368+00','2025-04-09 14:24:40.831782+00','urn:fdc:gov.uk:2022:EeoMrsw0n0qpf_djwIRYUQ7vXLm1z1v62psIb53RiVE',true,1,'paul.denman@communities.gov.uk','Danny Welbeck'),
-       (19,'2025-04-17 09:49:19.826514+00','2025-04-17 09:49:48.968326+00','urn:fdc:gov.uk:2022:L7hY9vy-Lo9uLDUUqYGK7o0ruguFKG2V17iOKIGpspY',true,1,'andrea.dunne@communities.gov.uk','Andrea Dunne'),
-       (20,'2025-04-22 10:55:55.704192+00','2025-04-22 10:56:23.318524+00','urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI',true,1,'sandra.lila@communities.gov.uk','Sandra Lila'),
-       (21,'2025-04-22 10:55:55.704192+00','2025-04-22 10:56:23.318524+00','urn:fdc:gov.uk:2022:ea8XwChQkjezm4MgGJIzI_HRm7l8IPPTIMT705UQXjI',true,1,'geetika.kejriwal@communities.gov.uk','Geetika Kejriwal'),
-       (22,'2025-04-22 10:55:55.704192+00','2025-04-22 10:56:23.318524+00','urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA',true,1,'catherine.graham2@communities.gov.uk','Catherine Graham');
+VALUES (1,'2024-10-15 00:00:00+00','2024-10-15 00:00:00+00','urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao',true,2,'Team-PRSDB+laadmin@softwire.com','PRSDB LA Admin'),
+       (2,'2024-10-15 00:00:00+00','2025-02-21 16:12:51.530782+00','urn:fdc:gov.uk:2022:cgVX2oJWKHMwzm8Gzx25CSoVXixVS0rw32Sar4Om8vQ',false,2,'Team-PRSDB+lauser@softwire.com','PRSDB La User'),
+       (3,'2025-02-19 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk',true,2,'travis.woodward@communities.gov.uk','Travis Woodward'),
+       (4,'2025-02-26 17:02:19.625996+00',null,'urn:fdc:gov.uk:2022:DySqeEXIC4G2xauOirtTDcezwCPLZgQPUQZmQ-aIIMk',true,2,'travis.woodward@softwire.com','Travis Woodward (Softwire)'),
+       (5,'2025-02-27 14:13:11.876928+00',null,'urn:fdc:gov.uk:2022:e4eN4Mujv2NMVut4mIPzRlwpyBL3sBE304GgGlxgd-Q',true,2,'simon.greensmith@communities.gov.uk','Simon Greensmith'),
+       (6,'2025-03-06 15:32:59.529898+00',null,'urn:fdc:gov.uk:2022:A9B5GpzhlOrNoGQM65oUESHL5i3O9fp0wjizEFVcCrU',true,2,'alexander.read@softwire.com','Alexander Read'),
+       (7,'2025-03-11 11:28:52.837278+00','2025-03-11 11:31:28.061279+00','urn:fdc:gov.uk:2022:RR3fauA1ZgHYuLjW9824VtLzegGG9NXfdHJrtg2hIAE',true,2,'niamh.rafferty@communities.gov.uk','Niamh Rafferty'),
+       (8,'2025-03-12 17:12:19.833105+00','2025-03-12 17:13:10.020624+00','urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI',true,2,'jasmin.conterio@softwire.com','Jasmin Conterio'),
+       (9,'2025-03-17 10:13:36.388805+00',null,'urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU',true,2,'kiran.randhawakukar@softwire.com','Kiran Fake Name'),
+       (10,'2025-03-18 10:13:36.388805+00',null,'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', true, 2, 'isobel.ibironke@softwire.com','Isobel Ibironke'),
+       (11,'2025-04-01 10:47:41.04984+00','2025-04-01 10:48:09.549697+00','urn:fdc:gov.uk:2022:Fv4k6DizfhFmrw4d17Virjsy3A-XCm_WxR2knMUQ394',true,2,'Jonathan.Gibbs@communities.gov.uk','Jonathan Gibbs'),
+       (12,'2025-04-01 10:53:06.710827+00','2025-04-01 10:53:55.690934+00','urn:fdc:gov.uk:2022:cF64cXNtN55uqmwjwSXv5SIT6jI0bpJ12gO1L3c0uAA',true,2,'Samuel.Hinkinson@communities.gov.uk','Colonel Mustard'),
+       (13,'2025-04-01 11:15:40.136113+00','2025-04-01 11:16:14.219671+00','urn:fdc:gov.uk:2022:DXI5RSmCmbPQQhBAPCbw1nkL-Dauufg6VOWdR9TuYlk',true,2,'norris.orighoye@communities.gov.uk','Norris Orighoye'),
+       (14,'2025-04-02 12:52:16.995889+00','2025-04-02 12:52:31.405327+00','urn:fdc:gov.uk:2022:vgKfvjYRO1LnJkmBr7CkEV62g9WoDeD-sZZNt9GCiVU',true,2,'sharan.flora@communities.gov.uk','Sharan Flora'),
+       (15,'2025-04-02 13:01:55.29454+00','2025-04-02 13:02:44.768007+00','urn:fdc:gov.uk:2022:pciqch9dYbtBx2rAhxvaCIEu00cQv3NFeIk5f4BesLo',true,2,'rowan.hill@softwire.com','Rowan Hill'),
+       (16,'2025-04-03 13:22:09.925662+00','2025-04-03 13:22:21.753423+00','urn:fdc:gov.uk:2022:TSEDw_HXmsLDuNj2bLV5fOLuAvooeSYlupbEykMhWj8',true,2,'mayur.shah@communities.gov.uk','John Smith'),
+       (17,'2025-04-03 13:38:10.243392+00','2025-04-03 13:38:48.638471+00','urn:fdc:gov.uk:2022:aDESlOYLkXmBVUJXUGd5PAGx55uR068Fe16lRN7VzyY',true,2,'nicola.halliday@communities.gov.uk','Professor Plum'),
+       (18,'2025-04-09 14:23:39.070368+00','2025-04-09 14:24:40.831782+00','urn:fdc:gov.uk:2022:EeoMrsw0n0qpf_djwIRYUQ7vXLm1z1v62psIb53RiVE',true,2,'paul.denman@communities.gov.uk','Danny Welbeck'),
+       (19,'2025-04-17 09:49:19.826514+00','2025-04-17 09:49:48.968326+00','urn:fdc:gov.uk:2022:L7hY9vy-Lo9uLDUUqYGK7o0ruguFKG2V17iOKIGpspY',true,2,'andrea.dunne@communities.gov.uk','Andrea Dunne'),
+       (20,'2025-04-22 10:55:55.704192+00','2025-04-22 10:56:23.318524+00','urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI',true,2,'sandra.lila@communities.gov.uk','Sandra Lila'),
+       (21,'2025-04-22 10:55:55.704192+00','2025-04-22 10:56:23.318524+00','urn:fdc:gov.uk:2022:ea8XwChQkjezm4MgGJIzI_HRm7l8IPPTIMT705UQXjI',true,2,'geetika.kejriwal@communities.gov.uk','Geetika Kejriwal'),
+       (22,'2025-04-22 10:55:55.704192+00','2025-04-22 10:56:23.318524+00','urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA',true,2,'catherine.graham2@communities.gov.uk','Catherine Graham');
 
 SELECT setval(pg_get_serial_sequence('local_authority_user', 'id'), (SELECT MAX(id) FROM local_authority_user));
 
@@ -81,12 +84,18 @@ VALUES (1,'2024-10-15 00:00:00+00',2001001001,1),
        (20,'2025-04-07 14:24:48.883888+00',62926068489,1),
        (21,'2025-04-09 14:17:59.251592+00',2077722218,1),
        (22,'2025-04-10 11:50:09.667043+00',85435018848,1),
-       (23,'2025-04-11 13:24:52.72555+00',9022534873,1);
+       (23,'2025-04-11 13:24:52.72555+00',9022534873,1),
+       (24, '2025-01-15 00:00:00+00', 83811499802, 0),
+       (25, '2025-01-15 00:00:00+00', 40666195053, 0),
+       (26, '2025-01-15 00:00:00+00', 150242309330, 0);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
 INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id)
-VALUES (1, '10/15/24', '10/15/24', 2, '1 Fictional Road', 1);
+VALUES (1, '10/15/24', '10/15/24', 2, '1 Fictional Road', 2),
+       (2, '2025-01-15 00:00:00+00', null, 100090154792, '5, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
+       (3, '2025-01-15 00:00:00+00', null, 100090154788, '1, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
+       (4, '2025-01-15 00:00:00+00', null, null, '2, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21);
 
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
@@ -117,12 +126,18 @@ VALUES(1,1,1,'2024-10-15 00:00:00+00','Team-PRSDB+landlord@softwire.com',null,tr
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
 INSERT INTO property (id, status, is_active, property_build_type, address_id, created_date, last_modified_date)
-VALUES (1, 1, true, 1, 1, '2024-10-15 00:00:00+00', null);
+VALUES (1, 1, true, 1, 1, '2024-10-15 00:00:00+00', null),
+       (2, 1, true, 1, 2, '2025-01-15 00:00:00+00', null),
+       (3, 1, true, 1, 3, '2025-01-15 00:00:00+00', null),
+       (4, 1, true, 1, 4, '2025-01-15 00:00:00+00', null);
 
 SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
 
 INSERT INTO property_ownership (id, is_active, occupancy_type, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, property_id, created_date, last_modified_date, incomplete_compliance_form_id)
-VALUES (1, true, 0, 1, 1, 2, 13, 1, 1, '2024-10-15 00:00:00+00', null, 2);
+VALUES (1, true, 0, 1, 1, 2, 13, 1, 1, '2024-10-15 00:00:00+00', null, 2),
+       (2, true, 0, 0, 0, 0, 24, 1, 2,'2025-01-15 00:00:00+00', null, 3),
+       (3, true, 0, 0, 0, 0, 25, 1, 3,'2025-01-15 00:00:00+00', null, 4),
+       (4, true, 0, 0, 0, 0, 26, 1, 4,'2025-01-15 00:00:00+00', null, 5);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 

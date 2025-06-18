@@ -43,7 +43,7 @@ class LaUserRegistrationJourneyTests : JourneyTestWithSeedData("data-mockuser-no
         val token =
             invitationService.createInvitationToken(
                 email = "anyEmail@test.com",
-                authority = localAuthorityService.retrieveLocalAuthorityById(1),
+                authority = localAuthorityService.retrieveLocalAuthorityById(2),
             )
 
         invitation = invitationService.getInvitationFromToken(token)

@@ -5,6 +5,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 
 class JourneyPageDataBuilder {
     companion object {
@@ -112,12 +114,34 @@ class JourneyPageDataBuilder {
 
         fun beforePropertyComplianceEpcExemptionReason() = beforePropertyComplianceEpc().withEpcStatus(HasEpc.NOT_REQUIRED)
 
-        fun beforePropertyComplianceCheckMatchedEpc() = beforePropertyComplianceEpc().withEpcStatus(HasEpc.YES)
+        fun beforePropertyComplianceCheckAutoMatchedEpc(epcDetails: EpcDataModel = MockEpcData.createEpcDataModel()) =
+            beforePropertyComplianceEpc()
+                .withEpcStatus(HasEpc.YES)
+                .withAutoMatchedEpcDetails(epcDetails)
 
-        fun beforePropertyComplianceEpcLookup() = beforePropertyComplianceCheckMatchedEpc().withCheckMatchedEpcResult(false)
+        fun beforePropertyComplianceEpcLookup() = beforePropertyComplianceCheckAutoMatchedEpc().withCheckAutoMatchedEpcResult(false)
 
-        fun beforePropertyComplianceEpcNotFound() =
-            beforePropertyComplianceEpcLookup().withNullLookedUpEpcDetails().withEpcLookupCertificateNumber()
+        fun beforePropertyComplianceCheckMatchedEpc(epcDetails: EpcDataModel = MockEpcData.createEpcDataModel()) =
+            beforePropertyComplianceEpcLookup().withEpcLookupCertificateNumber().withLookedUpEpcDetails(epcDetails)
+
+        fun beforePropertyComplianceEpcExpiryCheck(epcRating: String) =
+            beforePropertyComplianceCheckAutoMatchedEpc(
+                MockEpcData.createEpcDataModel(energyRating = epcRating, expiryDate = MockEpcData.expiryDateInThePast),
+            ).withCheckAutoMatchedEpcResult(true)
+
+        fun beforePropertyComplianceEpcExpired(epcRating: String) =
+            beforePropertyComplianceEpcExpiryCheck(epcRating)
+                .withEpcExpiryCheckStep(false)
+
+        fun beforePropertyComplianceMeesExemptionCheck() =
+            beforePropertyComplianceCheckAutoMatchedEpc(MockEpcData.createEpcDataModel(energyRating = "G"))
+                .withCheckAutoMatchedEpcResult(true)
+
+        fun beforePropertyComplianceMeesExemptionReason() =
+            beforePropertyComplianceMeesExemptionCheck()
+                .withMeesExemptionCheckStep(true)
+
+        fun beforePropertyComplianceLowEnergyRating() = beforePropertyComplianceMeesExemptionCheck().withMeesExemptionCheckStep(false)
 
         fun beforePropertyComplianceFireSafetyDeclaration() = beforePropertyComplianceEpc().withMissingEpcExemption()
 

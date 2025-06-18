@@ -16,7 +16,7 @@ class InviteLaUsersTests : JourneyTestWithSeedData("data-local.sql") {
         whenever(absoluteUrlProvider.buildInvitationUri(anyString()))
             .thenReturn(URI("www.prsd.gov.uk/register-la-user/test-token"))
 
-        val invitePage = navigator.goToInviteNewLaUser(1)
+        val invitePage = navigator.goToInviteNewLaUser(2)
         invitePage.submitMatchingEmail("test@example.com")
         val successPage = assertPageIs(page, InviteNewLaUserSuccessPage::class)
         assertThat(successPage.confirmationBanner).containsText("You've sent test@example.com an invite to the database")

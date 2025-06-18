@@ -1,9 +1,11 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels
 
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.toJavaLocalDate
 import kotlinx.serialization.Serializable
 import org.json.JSONObject
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import java.util.Locale
 
 @Serializable
 data class EpcDataModel(
@@ -13,7 +15,19 @@ data class EpcDataModel(
     val expiryDate: LocalDate,
     val latestCertificateNumberForThisProperty: String? = null,
 ) {
-    fun isLatestCertificateForThisProperty() = certificateNumber == latestCertificateNumberForThisProperty
+    val energyRatingUppercase: String
+        get() = energyRating.uppercase(Locale.getDefault())
+
+    val expiryDateAsJavaLocalDate: java.time.LocalDate
+        get() = expiryDate.toJavaLocalDate()
+
+    fun isLatestCertificateForThisProperty() =
+        certificateNumber == latestCertificateNumberForThisProperty ||
+            latestCertificateNumberForThisProperty == null
+
+    fun isPastExpiryDate(): Boolean = expiryDate < DateTimeHelper().getCurrentDateInUK()
+
+    fun isEnergyRatingEOrBetter(): Boolean = energyRatingUppercase in "A".."E"
 
     companion object {
         fun parseCertificateNumberOrNull(certificateNumber: String): String? {
