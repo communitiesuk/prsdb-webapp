@@ -21,10 +21,19 @@ import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_URL
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
+import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.NRLA_UK_REGULATIONS_URL
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_COMPLIANCE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
+import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_COMPLIANCES_URL
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.PROPERTY_COMPLIANCE_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
@@ -33,7 +42,9 @@ import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.discardRemainingFields
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.getFirstFileField
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.pageModels.PropertyComplianceConfirmationViewModel
 import uk.gov.communities.prsdb.webapp.services.FileUploader
+import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
 import java.security.Principal
@@ -48,6 +59,7 @@ class PropertyComplianceController(
     private val fileUploader: FileUploader,
     private val propertyComplianceJourneyFactory: PropertyComplianceJourneyFactory,
     private val validator: Validator,
+    private val propertyComplianceService: PropertyComplianceService,
 ) {
     @GetMapping
     fun index(
@@ -177,6 +189,42 @@ class PropertyComplianceController(
                 subpage,
                 principal,
             )
+    }
+
+    @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
+    fun getConfirmation(
+        @PathVariable propertyOwnershipId: Long,
+        principal: Principal,
+        model: Model,
+    ): String {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+
+        if (!propertyComplianceService.wasPropertyComplianceAddedThisSession(propertyOwnershipId)) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No property compliance was added for property ownership $propertyOwnershipId in this session",
+            )
+        }
+
+        val propertyCompliance =
+            propertyComplianceService.getComplianceForProperty(propertyOwnershipId) ?: throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "No property compliance found for property ownership $propertyOwnershipId",
+            )
+
+        val viewModel = PropertyComplianceConfirmationViewModel(propertyCompliance)
+
+        model.addAttribute("propertyAddress", propertyCompliance.propertyOwnership.property.address.singleLineAddress)
+        model.addAttribute("viewModel", viewModel)
+        model.addAttribute("gasSafeRegisterUrl", GAS_SAFE_REGISTER)
+        model.addAttribute("rcpElectricalInfoUrl", RCP_ELECTRICAL_INFO_URL)
+        model.addAttribute("rcpElectricalRegisterUrl", RCP_ELECTRICAL_REGISTER_URL)
+        model.addAttribute("electricalSafetyStandardsUrl", ELECTRICAL_SAFETY_STANDARDS_URL)
+        model.addAttribute("getNewEpcUrl", GET_NEW_EPC_URL)
+        model.addAttribute("registerMeesExemptionUrl", REGISTER_PRS_EXEMPTION_URL)
+        model.addAttribute("propertiesWithoutComplianceUrl", INCOMPLETE_COMPLIANCES_URL)
+        model.addAttribute("dashboardUrl", LANDLORD_DASHBOARD_URL)
+        return viewModel.template
     }
 
     private fun throwErrorIfUserIsNotAuthorized(
