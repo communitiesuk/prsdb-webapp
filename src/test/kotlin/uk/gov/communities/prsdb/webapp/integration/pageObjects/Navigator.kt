@@ -160,7 +160,7 @@ class Navigator(
     }
 
     fun goToLandlordRegistrationStartPage(): StartPageLandlordRegistration {
-        navigate("/register-as-a-landlord")
+        navigate(RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
         return createValidPage(page, StartPageLandlordRegistration::class)
     }
 
