@@ -1499,7 +1499,7 @@ class PropertyComplianceJourney(
             eicrIssueDate = filteredJourneyData.getEicrIssueDate()?.toJavaLocalDate(),
             eicrExemptionReason = filteredJourneyData.getEicrExemptionReason(),
             eicrExemptionOtherReason = filteredJourneyData.getEicrExemptionOtherReason(),
-            epcUrl = epcCertificateUrlProvider.getEpcCertificateUrl(epcDetails?.certificateNumber ?: ""),
+            epcUrl = epcDetails?.let { epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber) },
             epcExpiryDate = epcDetails?.expiryDate?.toJavaLocalDate(),
             tenancyStartedBeforeEpcExpiry = filteredJourneyData.getDidTenancyStartBeforeEpcExpiry(),
             epcEnergyRating = epcDetails?.energyRating,
