@@ -33,7 +33,7 @@ class LandlordRegistrationCheckAnswersPageTests {
     fun setup() {
         localAuthorityService = mock()
         journeyDataService = mock()
-        page = LandlordRegistrationCheckAnswersPage()
+        page = LandlordRegistrationCheckAnswersPage(journeyDataService)
         validator = mock()
         whenever(validator.supports(any<Class<*>>())).thenReturn(true)
         pageData = mock()

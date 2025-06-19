@@ -12,10 +12,13 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 abstract class CheckAnswersPage(
     content: Map<String, Any>,
     private val journeyDataService: JourneyDataService,
+    templateName: String = "forms/checkAnswersForm",
+    shouldDisplaySectionHeader: Boolean = false,
 ) : AbstractPage(
         formModel = CheckAnswersFormModel::class,
-        templateName = "forms/checkAnswersForm",
+        templateName = templateName,
         content = content,
+        shouldDisplaySectionHeader = shouldDisplaySectionHeader,
     ) {
     final override fun enrichModel(
         modelAndView: ModelAndView,

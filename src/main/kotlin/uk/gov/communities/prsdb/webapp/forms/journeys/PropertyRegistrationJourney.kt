@@ -550,7 +550,7 @@ class PropertyRegistrationJourney(
     private fun checkAnswersStep() =
         Step(
             id = RegisterPropertyStepId.CheckAnswers,
-            page = PropertyRegistrationCheckAnswersPage(localAuthorityService),
+            page = PropertyRegistrationCheckAnswersPage(journeyDataService, localAuthorityService),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.Declaration, null) },
         )
 
