@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -124,7 +123,7 @@ class LandlordDashboardUrlTests(
 
         // Act, Assert
         mvc
-            .post("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.Declaration.urlPathSegment}") {
+            .post("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.Declaration.urlPathSegment}") {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 content = encodedDeclarationContent
                 with(csrf())
