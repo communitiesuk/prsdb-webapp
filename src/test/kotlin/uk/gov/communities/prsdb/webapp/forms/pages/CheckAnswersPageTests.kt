@@ -79,9 +79,9 @@ class CheckAnswersPageTests {
 
         override fun furtherEnrichModel(
             modelAndView: ModelAndView,
-            filteredJourneyData: JourneyData?,
+            filteredJourneyData: JourneyData,
         ) {
-            filteredJourneyData?.entries?.forEach { (key, value) ->
+            filteredJourneyData.entries.forEach { (key, value) ->
                 if (key != SUMMARY_ROW_KEY) {
                     modelAndView.addObject(key, value)
                 }

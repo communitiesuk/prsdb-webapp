@@ -32,7 +32,7 @@ abstract class CheckAnswersPage(
 
     protected open fun furtherEnrichModel(
         modelAndView: ModelAndView,
-        filteredJourneyData: JourneyData?,
+        filteredJourneyData: JourneyData,
     ) {}
 
     override fun enrichFormData(formData: PageData?): PageData? {
