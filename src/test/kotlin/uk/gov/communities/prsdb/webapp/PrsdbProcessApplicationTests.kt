@@ -1,13 +1,19 @@
 package uk.gov.communities.prsdb.webapp
 
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ConfigurableApplicationContext
+import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
+import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
+import uk.gov.communities.prsdb.webapp.config.NotifyConfig
+import uk.gov.communities.prsdb.webapp.local.services.EmailNotificationStubService
+import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
+import kotlin.reflect.KClass
 
 @Import(TestcontainersConfiguration::class)
 @SpringBootTest
@@ -20,40 +26,65 @@ class PrsdbProcessApplicationTests {
 
     @Test
     fun `only necessary PRSDB beans are available in non web mode`() {
-        val expectedBeanMap =
-            mapOf(
-                "prsdbWebappApplication" to "uk.gov.communities.prsdb.webapp.PrsdbWebappApplication",
-                "notifyConfig" to "uk.gov.communities.prsdb.webapp.config.NotifyConfig$\$SpringCGLIB$$0",
-                "uk.gov.communities.prsdb.webapp.TestcontainersConfiguration" to
-                    "uk.gov.communities.prsdb.webapp.TestcontainersConfiguration",
-                "emailNotificationStubService" to "uk.gov.communities.prsdb.webapp.local.services.EmailNotificationStubService",
-                "notifyEmailNotificationService" to "uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService",
-            )
+        val expectedBeansByName =
+            listOf(
+                // Beans added by component annotation scanning use their simple name as the bean name by default
+                PrsdbWebappApplication::class.java.simpleName,
+                EmailNotificationStubService::class.java.simpleName,
+                NotifyEmailNotificationService::class.java.simpleName,
+                NotifyConfig::class.java.simpleName,
+                // Beans with explicit names can retrieve their name by reflecting on the annotation using the `getExplicitBeanName` function
+                // e.g. getExplicitBeanName<Component>(YourComponentClassName::class),
+                // Beans added by @Import annotations use their fully qualified class name as the bean name by default
+                TestcontainersConfiguration::class.java.name,
+            ).map { it.lowercase() }
+                .sorted()
 
-        val beanNameAndClassMap =
+        val beanNames =
             context!!
                 .beanDefinitionNames
-                .mapNotNull { name -> (name to context!!.beanFactory.getBeanDefinition(name).beanClassName) }
-                .filter { it.second?.contains("uk.gov.communities.prsdb.webapp") ?: false }
-                .associate { it }
+                .filter {
+                    context!!
+                        .beanFactory
+                        .getBeanDefinition(it)
+                        .beanClassName
+                        ?.contains("uk.gov.communities.prsdb.webapp") ?: false
+                }.map { it.lowercase() }
+                .sorted()
 
-        assertEquals(
-            expectedBeanMap,
-            beanNameAndClassMap,
-        ) { buildHelpfulErrorMessage(expectedBeanMap, beanNameAndClassMap) }
+        val allMatch =
+            expectedBeansByName
+                .foldIndexed(true) { index, allMatchesSoFar: Boolean, name ->
+                    allMatchesSoFar && beanNames[index] == name
+                }
+
+        if (!allMatch) {
+            throw AssertionError(
+                buildHelpfulErrorMessage(
+                    expectedBeansByName,
+                    beanNames,
+                ),
+            )
+        }
     }
 
+    private inline fun <reified TAnnotation : Annotation> getExplicitBeanName(klass: KClass<*>): String =
+        when (TAnnotation::class) {
+            Component::class -> klass.java.getAnnotation(Component::class.java)?.value
+            Service::class -> klass.java.getAnnotation(Service::class.java)?.value
+            Configuration::class -> klass.java.getAnnotation(Configuration::class.java)?.value
+            else -> throw IllegalArgumentException("Unsupported annotation type: ${TAnnotation::class}")
+        } ?: klass.java.simpleName
+
     fun buildHelpfulErrorMessage(
-        expected: Map<String, String>,
-        actual: Map<String, String?>,
+        expectedBeans: List<String>,
+        actualBeans: List<String>,
     ): String {
-        val expectedBeansMissing =
-            expected.keys.filter { !actual.containsKey(it) }
-        val unexpectedBeans =
-            actual.keys.filter { !expected.containsKey(it) }
+        val missingBeans = expectedBeans.filter { !actualBeans.contains(it) }
+        val unexpectedBeans = actualBeans.filter { !expectedBeans.contains(it) }
 
         val combinedMessage =
-            if (expectedBeansMissing.isNotEmpty() && unexpectedBeans.isNotEmpty()) {
+            if (missingBeans.isNotEmpty() && unexpectedBeans.isNotEmpty()) {
                 """There are beans missing that are expected and unexpected beans present in non web server mode.
                 |This could be because some beans have been renamed, or there may be multiple problems that need addressing:
                 """.trimMargin()
@@ -61,22 +92,17 @@ class PrsdbProcessApplicationTests {
                 null
             }
         val missingBeansMessage =
-            if (expectedBeansMissing.isNotEmpty()) {
+            if (missingBeans.isNotEmpty()) {
                 """The following beans expected for non web server mode are missing - check they haven't been changed to web only or removed (or remove them from the expected list):
-                |$expectedBeansMissing
+                |${missingBeans.joinToString("\n- ", prefix = "- ")}
                 """.trimMargin()
             } else {
                 null
             }
         val unexpectedBeansMessage =
             if (unexpectedBeans.isNotEmpty()) {
-                """The following beans are being created in non web server mode but have not been added to the expected list. 
-                |For convenience they are formatted as map entries so IF RELEVANT can be copied and pasted into the expected map:
-                |${
-                    unexpectedBeans.joinToString(",\n") { missingName ->
-                        "\"$missingName\" to \"${actual[missingName]}\""
-                    }}
-                |You may need to escape special characters like $.
+                """The following beans are being created in non web server mode but have not been added to the expected list: 
+                |${unexpectedBeans.joinToString("\n- ", prefix = "- ")}
                 """.trimMargin()
             } else {
                 null
