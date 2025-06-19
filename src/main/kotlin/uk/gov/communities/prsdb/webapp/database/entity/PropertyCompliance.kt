@@ -90,7 +90,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     val isEpcExpired: Boolean?
         get() {
-            val isPastExpiryDate = epcExpiryDate?.let { !it.isAfter(LocalDate.now()) } ?: return null
+            val isPastExpiryDate = epcExpiryDate?.isBefore(LocalDate.now()) ?: return null
             return if (!isPastExpiryDate) {
                 false
             } else {

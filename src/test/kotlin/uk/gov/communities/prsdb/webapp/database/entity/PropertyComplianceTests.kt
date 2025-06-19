@@ -39,6 +39,36 @@ class PropertyComplianceTests {
         assertNull(propertyCompliance.eicrExpiryDate)
     }
 
+    @ParameterizedTest(name = "{1} when expiry date {0}")
+    @MethodSource("provideGasCertIssueDates")
+    fun `isGasSafetyCertExpired is`(
+        issueDate: LocalDate,
+        expectedIsExpired: Boolean,
+    ) {
+        val propertyCompliance = PropertyComplianceBuilder().withGasSafetyCert(issueDate).build()
+        assertEquals(expectedIsExpired, propertyCompliance.isGasSafetyCertExpired)
+    }
+
+    @ParameterizedTest(name = "{1} when expiry date {0}")
+    @MethodSource("provideEicrIssueDates")
+    fun `isEicrExpired is`(
+        issueDate: LocalDate,
+        expectedIsExpired: Boolean,
+    ) {
+        val propertyCompliance = PropertyComplianceBuilder().withEicr(issueDate).build()
+        assertEquals(expectedIsExpired, propertyCompliance.isEicrExpired)
+    }
+
+    @ParameterizedTest(name = "{1} when expiry date {0}")
+    @MethodSource("provideEpcExpiryDates")
+    fun `isEpcExpired is`(
+        expiryDate: LocalDate,
+        expectedIsExpired: Boolean,
+    ) {
+        val propertyCompliance = PropertyComplianceBuilder().withEpc(expiryDate).build()
+        assertEquals(expectedIsExpired, propertyCompliance.isEpcExpired)
+    }
+
     @ParameterizedTest(name = "{1} when certs {0}")
     @MethodSource("providePropertyCompliancesWithExpectedExpiryStatuses")
     fun `isXExpired returns`(
@@ -102,6 +132,30 @@ class PropertyComplianceTests {
                 .withLowEpcRating()
                 .withMeesExemption()
                 .build()
+
+        @JvmStatic
+        private fun provideGasCertIssueDates() =
+            arrayOf(
+                arguments(named("was yesterday", LocalDate.now().minusDays(1).minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())), true),
+                arguments(named("is today", LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())), true),
+                arguments(named("is tomorrow", LocalDate.now().plusDays(1).minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())), false),
+            )
+
+        @JvmStatic
+        private fun provideEicrIssueDates() =
+            arrayOf(
+                arguments(named("was yesterday", LocalDate.now().minusDays(1).minusYears(EICR_VALIDITY_YEARS.toLong())), true),
+                arguments(named("is today", LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong())), true),
+                arguments(named("is tomorrow", LocalDate.now().plusDays(1).minusYears(EICR_VALIDITY_YEARS.toLong())), false),
+            )
+
+        @JvmStatic
+        private fun provideEpcExpiryDates() =
+            arrayOf(
+                arguments(named("was yesterday", LocalDate.now().minusDays(1)), true),
+                arguments(named("is today", LocalDate.now()), false),
+                arguments(named("is tomorrow", LocalDate.now().plusDays(1)), false),
+            )
 
         @JvmStatic
         private fun providePropertyCompliancesWithExpectedExpiryStatuses() =

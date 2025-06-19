@@ -50,14 +50,12 @@ class PropertyComplianceBuilder {
     fun withEpc(expiryDate: LocalDate = LocalDate.now().plusYears(1)): PropertyComplianceBuilder {
         propertyCompliance.epcUrl = "epc-url"
         propertyCompliance.epcExpiryDate = expiryDate
+        if (expiryDate.isBefore(LocalDate.now())) propertyCompliance.tenancyStartedBeforeEpcExpiry = false
         propertyCompliance.epcEnergyRating = "C"
         return this
     }
 
-    fun withExpiredEpc(): PropertyComplianceBuilder {
-        propertyCompliance.tenancyStartedBeforeEpcExpiry = false
-        return this.withEpc(expiryDate = LocalDate.now().minusYears(1))
-    }
+    fun withExpiredEpc(): PropertyComplianceBuilder = this.withEpc(expiryDate = LocalDate.now().minusYears(1))
 
     fun withTenancyStartedBeforeEpcExpiry(): PropertyComplianceBuilder {
         propertyCompliance.tenancyStartedBeforeEpcExpiry = true
