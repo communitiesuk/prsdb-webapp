@@ -38,7 +38,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
 
     @Nested
-    inner class LandlordRegistrationStartPage {
+    inner class LandlordRegistrationStartPage : NestedSinglePageTestWithSeedData("data-mockuser-not-landlord.sql") {
         @Test
         fun `registerAsALandlord page renders`(page: Page) {
             val landlordRegistrationStartPage = navigator.goToLandlordRegistrationStartPage()
@@ -434,7 +434,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
     }
 
     @Nested
-    inner class LandlordRegistrationConfirmation {
+    inner class LandlordRegistrationConfirmation : NestedSinglePageTestWithSeedData("data-mockuser-not-landlord.sql") {
         @Test
         fun `Navigating here with an incomplete form returns a 500 error page`(page: Page) {
             navigator.navigateToLandlordRegistrationConfirmationPage()
