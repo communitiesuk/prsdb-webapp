@@ -41,23 +41,23 @@ class LandlordRegistrationCheckAnswersPageTests {
         journeyDataBuilder = JourneyDataBuilder.landlordDefault(localAuthorityService)
     }
 
-    private fun getFormData(journeyData: JourneyData): List<SummaryListRowViewModel> {
+    private fun getSummaryListData(journeyData: JourneyData): List<SummaryListRowViewModel> {
         whenever(journeyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
         val bindingResult = page.bindDataToFormModel(validator, pageData)
         val result = page.getModelAndView(bindingResult, prevStepUrl, journeyData, SectionHeaderViewModel("any-key", 0, 0))
 
-        val formData = result.model["formData"] as List<*>
-        return formData.filterIsInstance<SummaryListRowViewModel>()
+        val summaryListData = result.model["summaryListData"] as List<*>
+        return summaryListData.filterIsInstance<SummaryListRowViewModel>()
     }
 
     @Test
-    fun `formData has the correct name and DOB (verified)`() {
+    fun `summaryListData has the correct name and DOB (verified)`() {
         val name = "Arthur Dent"
         val dob = LocalDate.of(2001, 1, 1)
         val journeyData = journeyDataBuilder.withVerifiedUser(name, dob).build()
 
-        val formData = getFormData(journeyData)
+        val summaryListData = getSummaryListData(journeyData)
 
         assertEquals(
             SummaryListRowViewModel(
@@ -65,7 +65,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 name,
                 null,
             ),
-            formData.single {
+            summaryListData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.name"
             },
         )
@@ -75,19 +75,19 @@ class LandlordRegistrationCheckAnswersPageTests {
                 dob,
                 null,
             ),
-            formData.single {
+            summaryListData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.dateOfBirth"
             },
         )
     }
 
     @Test
-    fun `formData has the correct name and DOB (unverified)`() {
+    fun `summaryListData has the correct name and DOB (unverified)`() {
         val name = "Arthur Dent"
         val dob = LocalDate.of(200, 1, 1)
         val journeyData = journeyDataBuilder.withUnverifiedUser(name, dob).build()
 
-        val formData = getFormData(journeyData)
+        val summaryListData = getSummaryListData(journeyData)
 
         assertEquals(
             SummaryListRowViewModel(
@@ -96,7 +96,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 "${LandlordRegistrationStepId.Name.urlPathSegment}?changingAnswerFor=" +
                     LandlordRegistrationStepId.Name.urlPathSegment,
             ),
-            formData.single {
+            summaryListData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.name"
             },
         )
@@ -107,19 +107,19 @@ class LandlordRegistrationCheckAnswersPageTests {
                 "${LandlordRegistrationStepId.DateOfBirth.urlPathSegment}?changingAnswerFor=" +
                     LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
             ),
-            formData.single {
+            summaryListData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.dateOfBirth"
             },
         )
     }
 
     @Test
-    fun `formData has the correct email and phone number`() {
+    fun `summaryListData has the correct email and phone number`() {
         val emailAddress = "example@email.com"
         val phoneNumber = "07123456789"
         val journeyData = journeyDataBuilder.withEmailAddress(emailAddress).withPhoneNumber(phoneNumber).build()
 
-        val formData = getFormData(journeyData)
+        val summaryListData = getSummaryListData(journeyData)
 
         assertEquals(
             SummaryListRowViewModel(
@@ -128,7 +128,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 "${LandlordRegistrationStepId.Email.urlPathSegment}?changingAnswerFor=" +
                     LandlordRegistrationStepId.Email.urlPathSegment,
             ),
-            formData.single {
+            summaryListData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.email"
             },
         )
@@ -139,17 +139,17 @@ class LandlordRegistrationCheckAnswersPageTests {
                 "${LandlordRegistrationStepId.PhoneNumber.urlPathSegment}?changingAnswerFor=" +
                     LandlordRegistrationStepId.PhoneNumber.urlPathSegment,
             ),
-            formData.single {
+            summaryListData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.telephoneNumber"
             },
         )
     }
 
     @Test
-    fun `formData has the correct lives in UK status`() {
+    fun `summaryListData has the correct lives in UK status`() {
         val journeyData = journeyDataBuilder.build()
 
-        val formData = getFormData(journeyData)
+        val summaryListData = getSummaryListData(journeyData)
 
         assertEquals(
             SummaryListRowViewModel(
@@ -158,17 +158,17 @@ class LandlordRegistrationCheckAnswersPageTests {
                 "${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}?changingAnswerFor=" +
                     LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
             ),
-            formData.single {
+            summaryListData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesResident"
             },
         )
     }
 
     @Test
-    fun `formData has the correct selected address`() {
+    fun `summaryListData has the correct selected address`() {
         val journeyData = journeyDataBuilder.build()
 
-        val formData = getFormData(journeyData)
+        val summaryListData = getSummaryListData(journeyData)
 
         assertEquals(
             SummaryListRowViewModel(
@@ -177,14 +177,14 @@ class LandlordRegistrationCheckAnswersPageTests {
                 "${LandlordRegistrationStepId.LookupAddress.urlPathSegment}?changingAnswerFor=" +
                     LandlordRegistrationStepId.LookupAddress.urlPathSegment,
             ),
-            formData.single {
+            summaryListData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.contactAddress"
             },
         )
     }
 
     @Test
-    fun `formData has the correct manual  address`() {
+    fun `summaryListData has the correct manual  address`() {
         val addressLineOne = "1 Example Road"
         val townOrCity = "Townville"
         val postcode = "EG1 2BA"
@@ -193,7 +193,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 .withManualAddress(addressLineOne, townOrCity, postcode)
                 .build()
 
-        val formData = getFormData(journeyData)
+        val summaryListData = getSummaryListData(journeyData)
 
         assertEquals(
             SummaryListRowViewModel(
@@ -202,14 +202,14 @@ class LandlordRegistrationCheckAnswersPageTests {
                 "${LandlordRegistrationStepId.ManualAddress.urlPathSegment}?changingAnswerFor=" +
                     LandlordRegistrationStepId.ManualAddress.urlPathSegment,
             ),
-            formData.single {
+            summaryListData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.contactAddress"
             },
         )
     }
 
     @Test
-    fun `formData has the correct non England or Wales and selected contact addresses`() {
+    fun `summaryListData has the correct non England or Wales and selected contact addresses`() {
         val countryOfResidence = "Germany"
         val nonEnglandOrWalesAddress = "test address"
         val selectedAddress = "1 Example Road"
@@ -221,7 +221,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                     selectedAddress,
                 ).build()
 
-        val formData = getFormData(journeyData)
+        val summaryListData = getSummaryListData(journeyData)
 
         assertEquals(
             SummaryListRowViewModel(
@@ -230,7 +230,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment +
                     "?changingAnswerFor=${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}",
             ),
-            formData.single {
+            summaryListData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence"
             },
         )
@@ -241,7 +241,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment +
                     "?changingAnswerFor=${LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment}",
             ),
-            formData.single {
+            summaryListData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress"
             },
         )
@@ -252,14 +252,14 @@ class LandlordRegistrationCheckAnswersPageTests {
                 LandlordRegistrationStepId.LookupContactAddress.urlPathSegment +
                     "?changingAnswerFor=${LandlordRegistrationStepId.LookupContactAddress.urlPathSegment}",
             ),
-            formData.single {
+            summaryListData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress"
             },
         )
     }
 
     @Test
-    fun `formData has the correct non England or Wales and manual contact addresses`() {
+    fun `summaryListData has the correct non England or Wales and manual contact addresses`() {
         val countryOfResidence = "Germany"
         val nonEnglandOrWalesAddress = "test address"
         val addressLineOne = "1 Example Road"
@@ -275,7 +275,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                     postcode,
                 ).build()
 
-        val formData = getFormData(journeyData)
+        val summaryListData = getSummaryListData(journeyData)
 
         assertEquals(
             SummaryListRowViewModel(
@@ -284,7 +284,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment +
                     "?changingAnswerFor=${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}",
             ),
-            formData.single {
+            summaryListData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence"
             },
         )
@@ -295,7 +295,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment +
                     "?changingAnswerFor=${LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment}",
             ),
-            formData.single {
+            summaryListData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress"
             },
         )
@@ -304,20 +304,22 @@ class LandlordRegistrationCheckAnswersPageTests {
                 "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress",
                 AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode).singleLineAddress,
                 "${LandlordRegistrationStepId.ManualContactAddress.urlPathSegment}?changingAnswerFor=" +
-                    "${LandlordRegistrationStepId.ManualContactAddress.urlPathSegment}",
+                    LandlordRegistrationStepId.ManualContactAddress.urlPathSegment,
             ),
-            formData.single {
+            summaryListData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress"
             },
         )
     }
 
     @Test
-    fun `formData does not contain country of residence for national landlords`() {
+    fun `summaryListData does not contain country of residence for national landlords`() {
         val journeyData = journeyDataBuilder.build()
 
-        val formData = getFormData(journeyData)
+        val summaryListData = getSummaryListData(journeyData)
 
-        assertTrue(formData.none { it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress" })
+        assertTrue(
+            summaryListData.none { it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress" },
+        )
     }
 }
