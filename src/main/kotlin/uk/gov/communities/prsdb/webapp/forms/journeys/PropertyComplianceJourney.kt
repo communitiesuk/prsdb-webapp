@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTACT_EPC_ASSESSOR_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_IMPROVEMENT_GUIDE_URL
@@ -1498,7 +1499,7 @@ class PropertyComplianceJourney(
             eicrIssueDate = filteredJourneyData.getEicrIssueDate()?.toJavaLocalDate(),
             eicrExemptionReason = filteredJourneyData.getEicrExemptionReason(),
             eicrExemptionOtherReason = filteredJourneyData.getEicrExemptionOtherReason(),
-            epcUrl = epcCertificateUrlProvider.getEpcCertificateUrl(epcDetails?.certificateNumber ?: ""),
+            epcUrl = epcDetails?.let { epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber) },
             epcExpiryDate = epcDetails?.expiryDate?.toJavaLocalDate(),
             tenancyStartedBeforeEpcExpiry = filteredJourneyData.getDidTenancyStartBeforeEpcExpiry(),
             epcEnergyRating = epcDetails?.energyRating,
@@ -1507,10 +1508,11 @@ class PropertyComplianceJourney(
             hasFireSafetyDeclaration = filteredJourneyData.getHasFireSafetyDeclaration()!!,
         )
 
+        propertyComplianceService.addToPropertiesWithComplianceAddedThisSession(propertyOwnershipId)
+
         propertyOwnershipService.deleteIncompleteComplianceForm(propertyOwnershipId)
 
-        // TODO PRSD-962: Redirect to confirmation page
-        return LANDLORD_DASHBOARD_URL
+        return CONFIRMATION_PATH_SEGMENT
     }
 
     private fun getEpcLookupCertificateNumberFromSession(): String {
