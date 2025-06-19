@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -37,8 +38,7 @@ class PrsdbProcessApplicationTests {
                 // e.g. getExplicitBeanName<Component>(YourComponentClassName::class),
                 // Beans added by @Import annotations use their fully qualified class name as the bean name by default
                 TestcontainersConfiguration::class.java.name,
-            ).map { it.lowercase() }
-                .sorted()
+            ).map { it.lowercase() }.toSet()
 
         val beanNames =
             context!!
@@ -50,20 +50,12 @@ class PrsdbProcessApplicationTests {
                         .beanClassName
                         ?.contains("uk.gov.communities.prsdb.webapp") ?: false
                 }.map { it.lowercase() }
-                .sorted()
+                .toSet()
 
-        val allMatch =
-            expectedBeansByName
-                .foldIndexed(true) { index, allMatchesSoFar: Boolean, name ->
-                    allMatchesSoFar && beanNames[index] == name
-                }
-
-        if (!allMatch) {
-            throw AssertionError(
-                buildHelpfulErrorMessage(
-                    expectedBeansByName,
-                    beanNames,
-                ),
+        assertEquals(expectedBeansByName, beanNames) {
+            buildHelpfulErrorMessage(
+                expectedBeansByName.toList(),
+                beanNames.toList(),
             )
         }
     }
