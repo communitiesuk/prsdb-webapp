@@ -84,7 +84,7 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
             searchLandlordRegisterPage.searchBar.search("L-CKSQ-3SX9")
             searchLandlordRegisterPage.getLandlordLink(rowIndex = 0).clickAndWait()
 
-            assertContains(page.url(), "${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/1")
+            assertContains(page.url(), LandlordDetailsController.getLandlordDetailsPath(1L))
         }
 
         @Test
@@ -281,7 +281,7 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
             searchPropertyRegisterPage.searchBar.search("P-C5YY-J34H")
             searchPropertyRegisterPage.getLandlordLink(rowIndex = 0).clickAndWait()
 
-            assertContains(page.url(), "${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/1")
+            assertContains(page.url(), LandlordDetailsController.getLandlordDetailsPath(1L))
         }
 
         @Test

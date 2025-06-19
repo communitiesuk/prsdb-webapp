@@ -43,7 +43,7 @@ class LandlordDetailsControllerTests(
     inner class GetUserLandlordDetailsTests {
         @Test
         fun `getUserLandlordDetails returns a redirect for an unauthenticated user`() {
-            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_ROUTE).andExpect {
+            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
                 status { is3xxRedirection() }
             }
         }
@@ -51,7 +51,7 @@ class LandlordDetailsControllerTests(
         @Test
         @WithMockUser
         fun `getUserLandlordDetails returns 403 for an unauthorized user`() {
-            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_ROUTE).andExpect {
+            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
                 status { isForbidden() }
             }
         }
@@ -63,7 +63,7 @@ class LandlordDetailsControllerTests(
             whenever(landlordService.retrieveLandlordByBaseUserId("user")).thenReturn(landlord)
             whenever(propertyOwnershipService.getRegisteredPropertiesForLandlordUser("user")).thenReturn(emptyList())
 
-            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_ROUTE).andExpect {
+            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
                 status { isOk() }
                 model { attribute("name", landlord.name) }
             }
@@ -141,7 +141,7 @@ class LandlordDetailsControllerTests(
                     argThat { pageData -> pageData["email"] == "newEmail@example.com" },
                     argThat { principal -> principal.name == "user" },
                 ),
-            ).thenReturn(ModelAndView("redirect:${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}"))
+            ).thenReturn(ModelAndView("redirect:${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}"))
 
             mvc
                 .post(updateLandlordEmailPath) {
@@ -150,13 +150,13 @@ class LandlordDetailsControllerTests(
                     with(csrf())
                 }.andExpect {
                     status { is3xxRedirection() }
-                    redirectedUrl(LandlordDetailsController.LANDLORD_DETAILS_ROUTE)
+                    redirectedUrl(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
                 }
         }
     }
 
     @Nested
-    inner class GetLandlordDetailsTests {
+    inner class GetLandlordDetailsAsLaUserTests {
         private val landlord = MockLandlordData.createLandlord()
 
         @BeforeEach
@@ -167,7 +167,7 @@ class LandlordDetailsControllerTests(
 
         @Test
         fun `getLandlordDetails returns a redirect for an unauthenticated user`() {
-            mvc.get("${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/${landlord.id}").andExpect {
+            mvc.get(LandlordDetailsController.getLandlordDetailsPath(landlord.id)).andExpect {
                 status { is3xxRedirection() }
             }
         }
@@ -175,7 +175,7 @@ class LandlordDetailsControllerTests(
         @Test
         @WithMockUser
         fun `getLandlordDetails returns 403 for an unauthorized user`() {
-            mvc.get("${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/${landlord.id}").andExpect {
+            mvc.get(LandlordDetailsController.getLandlordDetailsPath(landlord.id)).andExpect {
                 status { isForbidden() }
             }
         }
@@ -183,7 +183,7 @@ class LandlordDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LA_USER"])
         fun `getLandlordDetails returns 200 for a valid request from an LA user`() {
-            mvc.get("${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/${landlord.id}").andExpect {
+            mvc.get(LandlordDetailsController.getLandlordDetailsPath(landlord.id)).andExpect {
                 status { isOk() }
                 model { attribute("name", landlord.name) }
             }
@@ -192,7 +192,7 @@ class LandlordDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `getLandlordDetails returns 200 for a valid request from an LA admin`() {
-            mvc.get("${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/${landlord.id}").andExpect {
+            mvc.get(LandlordDetailsController.getLandlordDetailsPath(landlord.id)).andExpect {
                 status { isOk() }
                 model { attribute("name", landlord.name) }
             }

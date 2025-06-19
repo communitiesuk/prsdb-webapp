@@ -51,7 +51,7 @@ class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
             detailsPage.getLandlordNameLinkFromKeyDetails("Alexander Smith").clickAndWait()
 
             assertPageIs(page, LandlordDetailsPage::class)
-            Assertions.assertEquals(LandlordDetailsController.LANDLORD_DETAILS_ROUTE, URI(page.url()).path)
+            Assertions.assertEquals(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE, URI(page.url()).path)
         }
 
         @Test
@@ -120,7 +120,7 @@ class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
             detailsPage.getLandlordNameLinkFromKeyDetails("Alexander Smith").clickAndWait()
 
             assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
-            Assertions.assertEquals("${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/1", URI(page.url()).path)
+            Assertions.assertEquals(LandlordDetailsController.getLandlordDetailsPath(1L), URI(page.url()).path)
         }
 
         @Test
