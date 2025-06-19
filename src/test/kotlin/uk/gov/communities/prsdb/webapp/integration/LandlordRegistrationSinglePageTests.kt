@@ -6,13 +6,17 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
+import org.junit.jupiter.api.ClassOrderer
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestClassOrder
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
+import org.springframework.core.Ordered
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
@@ -34,11 +38,15 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.VerifiedI
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedInternationalPhoneNumber
 import java.time.LocalDate
 
+// We are specifying the order the some of these tests run in to make sure that tests using "data-mockuser-not-landlord.sql"
+// are run before the database is re-seeded with "data-local.sql"
+@TestClassOrder(ClassOrderer.OrderAnnotation::class)
 class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-mockuser-not-landlord.sql") {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
 
     @Nested
-    inner class LandlordRegistrationStartPage : NestedSinglePageTestWithSeedData("data-mockuser-not-landlord.sql") {
+    @Order(1)
+    inner class LandlordRegistrationStartPage {
         @Test
         fun `registerAsALandlord page renders`(page: Page) {
             val landlordRegistrationStartPage = navigator.goToLandlordRegistrationStartPage()
@@ -69,6 +77,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
     }
 
     @Nested
+    @Order(Ordered.LOWEST_PRECEDENCE)
     inner class AlreadyRegistered : NestedSinglePageTestWithSeedData("data-local.sql") {
         @Test
         fun `the 'Start Now' button directs a registered landlord to the landlord dashboard page`(page: Page) {
@@ -80,6 +89,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
     }
 
     @Nested
+    @Order(Ordered.LOWEST_PRECEDENCE)
     inner class LandlordRegistrationStepVerifyIdentity : NestedSinglePageTestWithSeedData("data-local.sql") {
         @Test
         fun `Navigating here as a registered landlord redirects to the landlord dashboard page`(page: Page) {
@@ -434,7 +444,8 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
     }
 
     @Nested
-    inner class LandlordRegistrationConfirmation : NestedSinglePageTestWithSeedData("data-mockuser-not-landlord.sql") {
+    @Order(2)
+    inner class LandlordRegistrationConfirmation {
         @Test
         fun `Navigating here with an incomplete form returns a 500 error page`(page: Page) {
             navigator.navigateToLandlordRegistrationConfirmationPage()
