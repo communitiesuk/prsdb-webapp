@@ -34,7 +34,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.pageModels.PropertyComplianceConfirmationViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessages
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -499,15 +499,15 @@ class PropertyComplianceControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `getConfirmation returns 200 for if the landlord added compliance details for the property this session`() {
             val propertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
-            val expectedViewModel = PropertyComplianceConfirmationViewModel(propertyCompliance)
+            val expectedConfirmationMessages = PropertyComplianceConfirmationMessages(propertyCompliance)
 
             whenever(propertyComplianceService.wasPropertyComplianceAddedThisSession(validPropertyOwnershipId)).thenReturn(true)
             whenever(propertyComplianceService.getComplianceForProperty(validPropertyOwnershipId)).thenReturn(propertyCompliance)
 
             mvc.get(validPropertyComplianceConfirmationUrl).andExpect {
                 status { isOk() }
-                model { attribute("viewModel", samePropertyValuesAs(expectedViewModel)) }
-                view { name(expectedViewModel.template) }
+                model { attribute("confirmationMessages", samePropertyValuesAs(expectedConfirmationMessages)) }
+                view { name("fullyCompliantPropertyConfirmation") }
             }
         }
     }

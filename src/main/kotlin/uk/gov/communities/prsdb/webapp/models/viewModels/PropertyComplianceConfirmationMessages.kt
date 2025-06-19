@@ -1,15 +1,13 @@
-package uk.gov.communities.prsdb.webapp.models.viewModels.pageModels
+package uk.gov.communities.prsdb.webapp.models.viewModels
 
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 
-class PropertyComplianceConfirmationViewModel(
+class PropertyComplianceConfirmationMessages(
     private val propertyCompliance: PropertyCompliance,
 ) {
     val nonCompliantMsgs = listOfNotNull(nonCompliantGasSafetyMsg, nonCompliantEicrMsg, nonCompliantEpcMsg)
 
     val compliantMsgs = listOfNotNull(compliantGasSafetyMsg, compliantEicrMsg, compliantEpcMsg, compliantLandlordResponsibilitiesMsg)
-
-    val template = if (nonCompliantMsgs.isEmpty()) "fullyCompliantPropertyConfirmation" else "partiallyCompliantPropertyConfirmation"
 
     private val nonCompliantGasSafetyMsg get() =
         when {

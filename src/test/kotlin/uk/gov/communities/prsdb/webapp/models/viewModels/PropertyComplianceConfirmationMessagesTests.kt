@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.viewModels.pageModels
+package uk.gov.communities.prsdb.webapp.models.viewModels
 
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.params.ParameterizedTest
@@ -8,14 +8,14 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import kotlin.test.assertEquals
 
-class PropertyComplianceConfirmationViewModelTests {
+class PropertyComplianceConfirmationMessagesTests {
     @ParameterizedTest(name = "when {0}")
     @MethodSource("providePropertyCompliancesWithNonCompliantMsgs")
     fun `nonCompliantMsgs align with the PropertyCompliance's status`(
         propertyCompliance: PropertyCompliance,
         expectedNonCompliantMsgs: List<String>,
     ) {
-        val viewModel = PropertyComplianceConfirmationViewModel(propertyCompliance)
+        val viewModel = PropertyComplianceConfirmationMessages(propertyCompliance)
         assertEquals(expectedNonCompliantMsgs, viewModel.nonCompliantMsgs)
     }
 
@@ -25,18 +25,8 @@ class PropertyComplianceConfirmationViewModelTests {
         propertyCompliance: PropertyCompliance,
         expectedCompliantMsgs: List<String>,
     ) {
-        val viewModel = PropertyComplianceConfirmationViewModel(propertyCompliance)
+        val viewModel = PropertyComplianceConfirmationMessages(propertyCompliance)
         assertEquals(expectedCompliantMsgs, viewModel.compliantMsgs)
-    }
-
-    @ParameterizedTest(name = "{1} when {0} certificates are compliant")
-    @MethodSource("providePropertyCompliancesWithTemplates")
-    fun `template is`(
-        propertyCompliance: PropertyCompliance,
-        expectedTemplate: String,
-    ) {
-        val viewModel = PropertyComplianceConfirmationViewModel(propertyCompliance)
-        assertEquals(expectedTemplate, viewModel.template)
     }
 
     companion object {
@@ -90,19 +80,6 @@ class PropertyComplianceConfirmationViewModelTests {
                 ),
                 Arguments.arguments(Named.named("some", lowRatingEpcPropertyCompliance), someCompliantCertMsgs),
                 Arguments.arguments(Named.named("no", PropertyComplianceBuilder().build()), noCompliantCertMsgs),
-            )
-
-        @JvmStatic
-        private fun providePropertyCompliancesWithTemplates() =
-            arrayOf(
-                Arguments.arguments(
-                    Named.named("all", PropertyComplianceBuilder.createWithInDateCerts()),
-                    "fullyCompliantPropertyConfirmation",
-                ),
-                Arguments.arguments(
-                    Named.named("not all", lowRatingEpcPropertyCompliance),
-                    "partiallyCompliantPropertyConfirmation",
-                ),
             )
 
         private val lowRatingEpcPropertyCompliance =
