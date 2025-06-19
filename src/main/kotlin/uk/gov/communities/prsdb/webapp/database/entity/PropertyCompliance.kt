@@ -9,7 +9,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
 import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
-import uk.gov.communities.prsdb.webapp.constants.EPC_HIGH_RATING_RANGE
+import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -101,7 +101,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     val isEpcRatingLow: Boolean?
         get() {
             val rating = epcEnergyRating?.uppercase() ?: return null
-            return if (rating in EPC_HIGH_RATING_RANGE) {
+            return if (rating in EPC_ACCEPTABLE_RATING_RANGE) {
                 false
             } else {
                 epcMeesExemptionReason == null
