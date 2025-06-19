@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
@@ -59,12 +58,12 @@ class RegisterPropertyControllerTests(
         whenever(propertyRegistrationJourneyFactory.create(any())).thenReturn(propertyRegistrationJourney)
         whenever(propertyRegistrationJourney.initialStepId).thenReturn(RegisterPropertyStepId.PlaceholderPage)
         whenever(journeyDataServiceFactory.create(any())).thenReturn(journeyDataService)
-        whenever(journeyDataService.journeyDataKey).thenReturn(REGISTER_PROPERTY_JOURNEY_URL)
+        whenever(journeyDataService.journeyDataKey).thenReturn(PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY)
     }
 
     @Test
     fun `index returns a redirect for unauthenticated user`() {
-        mvc.get("/register-property").andExpect {
+        mvc.get(RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE).andExpect {
             status { is3xxRedirection() }
         }
     }
@@ -73,7 +72,7 @@ class RegisterPropertyControllerTests(
     @WithMockUser
     fun `index returns 403 for an unauthorised user`() {
         mvc
-            .get("/register-property")
+            .get(RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
             .andExpect {
                 status { isForbidden() }
             }
@@ -83,7 +82,7 @@ class RegisterPropertyControllerTests(
     @WithMockUser(roles = ["LANDLORD"])
     fun `index returns 200 for a landlord user`() {
         mvc
-            .get("/register-property")
+            .get(RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
             .andExpect {
                 status { isOk() }
             }
@@ -108,7 +107,7 @@ class RegisterPropertyControllerTests(
         mvc
             .perform(
                 MockMvcRequestBuilders
-                    .get("/$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
+                    .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
             ).andExpect(MockMvcResultMatchers.status().isOk())
     }
@@ -128,7 +127,7 @@ class RegisterPropertyControllerTests(
         )
 
         mvc
-            .get("/$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
+            .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
             .andExpect { status { isBadRequest() } }
     }
 
@@ -145,7 +144,7 @@ class RegisterPropertyControllerTests(
         mvc
             .perform(
                 MockMvcRequestBuilders
-                    .get("/$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
+                    .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
             ).andExpect(MockMvcResultMatchers.status().isBadRequest)
     }
@@ -154,7 +153,7 @@ class RegisterPropertyControllerTests(
     @WithMockUser(roles = ["LANDLORD"])
     fun `getStart redirects to task-list after calling clear journey data method from propertyRegistrationService`() {
         mvc
-            .get("/$REGISTER_PROPERTY_JOURNEY_URL/$START_PAGE_PATH_SEGMENT")
+            .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$START_PAGE_PATH_SEGMENT")
             .andExpect {
                 status { is3xxRedirection() }
                 redirectedUrl(TASK_LIST_PATH_SEGMENT)
@@ -172,7 +171,7 @@ class RegisterPropertyControllerTests(
             propertyRegistrationService.getIncompletePropertyFormContextForLandlordIfNotExpired(contextId.toLong(), "user"),
         ).thenReturn(formContext)
         mvc
-            .get("/$REGISTER_PROPERTY_JOURNEY_URL/$RESUME_PAGE_PATH_SEGMENT?contextId=$contextId")
+            .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$RESUME_PAGE_PATH_SEGMENT?contextId=$contextId")
             .andExpect {
                 status { is3xxRedirection() }
                 redirectedUrl(TASK_LIST_PATH_SEGMENT)

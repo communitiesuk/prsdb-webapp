@@ -15,3 +15,5 @@ const val CONTEXT_ID = "contextId"
 const val COOKIE_TOKENS = "cookieTokens"
 
 const val BACK_URL_STORAGE_SESSION_ATTRIBUTE = "backUrlStorage"
+
+const val PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION = "propertiesWithComplianceAddedThisSession"

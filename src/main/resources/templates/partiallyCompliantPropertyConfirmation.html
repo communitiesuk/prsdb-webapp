@@ -1,0 +1,88 @@
+<!--/*@thymesVar id="propertyAddress" type="java.lang.String"*/-->
+<!--/*@thymesVar id="confirmationMessages" type="uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessages"*/-->
+<!--/*@thymesVar id="gasSafeRegisterUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="rcpElectricalInfoUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="rcpElectricalRegisterUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="electricalSafetyStandardsUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="getNewEpcUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="registerMeesExemptionUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="propertiesWithoutComplianceUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="dashboardUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{propertyCompliance.confirmation.title}, ~{::main}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div id="page-contents" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <header>
+            <h1 class="govuk-heading-l" th:text="#{propertyCompliance.partiallyCompliantConfirmation.heading}">propertyCompliance.partiallyCompliantConfirmation.heading</h1>
+            <p class="govuk-body" th:text="#{propertyCompliance.partiallyCompliantConfirmation.paragraph.one}">propertyCompliance.partiallyCompliantConfirmation.paragraph.one</p>
+            <p class="govuk-inset-text" th:text="${propertyAddress}">propertyAddress</p>
+        </header>
+        <section>
+            <h2 class="govuk-heading-s" th:text="#{propertyCompliance.partiallyCompliantConfirmation.compliant.heading}">propertyCompliance.partiallyCompliantConfirmation.compliant.heading</h2>
+            <p class="govuk-body" th:text="#{propertyCompliance.confirmation.compliant.bullet.heading}">propertyCompliance.confirmation.compliant.bullet.heading</p>
+            <ul class="govuk-list govuk-list--bullet" data-testid="compliant-messages">
+                <li th:each="compliantMsg : ${confirmationMessages.compliantMsgs}" th:text="#{${compliantMsg}}"></li>
+            </ul>
+        </section>
+        <section>
+            <h2 class="govuk-heading-s" th:text="#{propertyCompliance.partiallyCompliantConfirmation.nonCompliant.heading}">propertyCompliance.partiallyCompliantConfirmation.nonCompliant.heading</h2>
+            <p class="govuk-body" th:text="#{propertyCompliance.confirmation.nonCompliant.bullet.heading}">propertyCompliance.confirmation.nonCompliant.bullet.heading</p>
+            <ul class="govuk-list govuk-list--bullet" data-testid="non-compliant-messages">
+                <li th:each="nonCompliantMsg : ${confirmationMessages.nonCompliantMsgs}" th:text="#{${nonCompliantMsg}}"></li>
+            </ul>
+            <p class="govuk-body" th:text="#{propertyCompliance.partiallyCompliantConfirmation.paragraph.two}">propertyCompliance.partiallyCompliantConfirmation.paragraph.two</p>
+            <p class="govuk-body" th:text="#{propertyCompliance.partiallyCompliantConfirmation.paragraph.three}">propertyCompliance.partiallyCompliantConfirmation.paragraph.three</p>
+        </section>
+        <section>
+            <h2 class="govuk-heading-s" th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToGas.heading}">propertyCompliance.partiallyCompliantConfirmation.howToGas.heading</h2>
+            <p class="govuk-body" th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToGas.bullet.heading}">propertyCompliance.partiallyCompliantConfirmation.howToGas.bullet.heading</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li>
+                    <span th:remove="tag" th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToGas.bullet.one.beforeLink}">propertyCompliance.partiallyCompliantConfirmation.howToGas.bullet.one.beforeLink</span>
+                    <a th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToGas.bullet.one.link}" th:href="${gasSafeRegisterURL}" rel="noreferrer noopener" target="_blank">propertyCompliance.partiallyCompliantConfirmation.howToGas.bullet.one.link</a>
+                </li>
+                <li th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToGas.bullet.two}">propertyCompliance.partiallyCompliantConfirmation.howToGas.bullet.two</li>
+                <li th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToGas.bullet.three}">propertyCompliance.partiallyCompliantConfirmation.howToGas.bullet.three</li>
+            </ul>
+            <p class="govuk-body" th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToGas.paragraph.one}">propertyCompliance.partiallyCompliantConfirmation.howToGas.paragraph.one</p>
+            <p class="govuk-body" th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToGas.paragraph.two}">propertyCompliance.partiallyCompliantConfirmation.howToGas.paragraph.two</p>
+        </section>
+        <section>
+            <h2 class="govuk-heading-s" th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToEicr.heading}">propertyCompliance.partiallyCompliantConfirmation.howToEicr.heading</h2>
+            <p class="govuk-body">
+                <span th:remove="tag" th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToEicr.paragraph.one.beforeLink}">propertyCompliance.partiallyCompliantConfirmation.howToEicr.paragraph.one.beforeLink</span>
+                <a th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToEicr.paragraph.one.link}" th:href="${rcpElectricalInfoUrl}" rel="noreferrer noopener" target="_blank">propertyCompliance.partiallyCompliantConfirmation.howToEicr.paragraph.one.link
+                </a><span th:remove="tag" th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToEicr.paragraph.one.afterLink}">propertyCompliance.partiallyCompliantConfirmation.howToEicr.paragraph.one.afterLink</span>
+            </p>
+            <p class="govuk-body">
+                <span th:remove="tag" th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToEicr.paragraph.two.beforeLink}">propertyCompliance.partiallyCompliantConfirmation.howToEicr.paragraph.two.beforeLink</span>
+                <a th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToEicr.paragraph.two.link}" th:href="${rcpElectricalRegisterUrl}" rel="noreferrer noopener" target="_blank">propertyCompliance.partiallyCompliantConfirmation.howToEicr.paragraph.two.link
+                </a><span th:remove="tag" th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToEicr.paragraph.two.afterLink}">propertyCompliance.partiallyCompliantConfirmation.howToEicr.paragraph.two.afterLink</span>
+            </p>
+            <p class="govuk-body">
+                <span th:remove="tag" th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToEicr.paragraph.three.beforeLink}">propertyCompliance.partiallyCompliantConfirmation.howToEicr.paragraph.three.beforeLink</span>
+                <a th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToEicr.paragraph.three.link}" th:href="${electricalSafetyStandardsUrl}" rel="noreferrer noopener" target="_blank">propertyCompliance.partiallyCompliantConfirmation.howToEicr.paragraph.three.link
+                </a><span th:remove="tag" th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToEicr.paragraph.three.afterLink}">propertyCompliance.partiallyCompliantConfirmation.howToEicr.paragraph.three.afterLink</span>
+            </p>
+        </section>
+        <section>
+            <h2 class="govuk-heading-s" th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToEpc.heading}">propertyCompliance.partiallyCompliantConfirmation.howToEpc.heading</h2>
+            <p class="govuk-body">
+                <span th:remove="tag" th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToEpc.paragraph.one.beforeLink}">propertyCompliance.partiallyCompliantConfirmation.howToEpc.paragraph.one.beforeLink</span>
+                <a th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToEpc.paragraph.one.link}" th:href="${getNewEpcUrl}" rel="noreferrer noopener" target="_blank">propertyCompliance.partiallyCompliantConfirmation.howToEpc.paragraph.one.link
+                </a><span th:remove="tag" th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToEpc.paragraph.one.afterLink}">propertyCompliance.partiallyCompliantConfirmation.howToEpc.paragraph.one.afterLink</span>
+            </p>
+            <p class="govuk-body" th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToEpc.paragraph.two}">propertyCompliance.partiallyCompliantConfirmation.howToEpc.paragraph.two</p>
+            <p class="govuk-body">
+                <span th:remove="tag" th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToEpc.paragraph.three.beforeLink}">propertyCompliance.partiallyCompliantConfirmation.howToEpc.paragraph.three.beforeLink</span>
+                <a th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToEpc.paragraph.three.link}" th:href="${registerMeesExemptionUrl}" rel="noreferrer noopener" target="_blank">propertyCompliance.partiallyCompliantConfirmation.howToEpc.paragraph.three.link
+                </a><span th:remove="tag" th:text="#{propertyCompliance.partiallyCompliantConfirmation.howToEpc.paragraph.three.afterLink}">propertyCompliance.partiallyCompliantConfirmation.howToEpc.paragraph.three.afterLink</span>
+            </p>
+        </section>
+        <div class="govuk-button-group">
+            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${propertiesWithoutComplianceUrl}}, #{propertyCompliance.confirmation.addForAnotherProperty})}"></a>
+            <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${dashboardUrl}}, #{common.confirmationPage.goToDashboard})}"></a>
+        </div>
+    </div>
+</main>
+</html>

@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.ConfirmationBanner
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -10,7 +10,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 class ConfirmationPagePropertyDeregistration(
     page: Page,
     urlArguments: Map<String, String>,
-) : BasePage(page, "$DEREGISTER_PROPERTY_JOURNEY_URL/${urlArguments["propertyOwnershipId"]}/$CONFIRMATION_PATH_SEGMENT") {
+) : BasePage(
+        page,
+        DeregisterPropertyController.getPropertyDeregistrationBasePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
+            "/$CONFIRMATION_PATH_SEGMENT",
+    ) {
     val confirmationBanner = ConfirmationBanner(page)
     val goToDashboardButton = Button.byText(page, "Go to Dashboard")
 }

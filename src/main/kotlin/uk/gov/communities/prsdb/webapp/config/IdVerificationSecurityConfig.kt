@@ -16,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.config.filters.InvalidCoreIdentityFilter
 import uk.gov.communities.prsdb.webapp.config.filters.OauthTokenSecondaryValidatingFilter
 import uk.gov.communities.prsdb.webapp.config.resolvers.AdditionalParameterAddingOAuth2RequestResolver
 import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 
 @PrsdbWebConfiguration
@@ -30,7 +29,8 @@ class IdVerificationSecurityConfig(
     fun idVerificationFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .securityMatcher(
-                "/$REGISTER_LANDLORD_JOURNEY_URL/${RegisterLandlordController.IDENTITY_VERIFICATION_PATH_SEGMENT}",
+                "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/" +
+                    RegisterLandlordController.IDENTITY_VERIFICATION_PATH_SEGMENT,
                 "/id-verification/**",
             ).authorizeHttpRequests { requests ->
                 requests
