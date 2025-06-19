@@ -201,7 +201,7 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
 
             resultTable.getClickableCell(0, LANDLORD_COL_INDEX).link.clickAndWait()
 
-            val landlordPage = assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
+            val landlordPage = assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to "1"))
             landlordPage.backLink.clickAndWait()
 
             assertPageIs(page, SearchLandlordRegisterPage::class)
@@ -417,7 +417,7 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
 
             resultTable.getClickableCell(0, PROPERTY_LANDLORD_COL_INDEX).link.clickAndWait()
 
-            val landlordPage = assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
+            val landlordPage = assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to "1"))
             landlordPage.backLink.clickAndWait()
 
             assertPageIs(page, SearchPropertyRegisterPage::class)

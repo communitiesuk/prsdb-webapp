@@ -119,7 +119,7 @@ class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
             val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
             detailsPage.getLandlordNameLinkFromKeyDetails("Alexander Smith").clickAndWait()
 
-            assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
+            assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to "1"))
             Assertions.assertEquals(LandlordDetailsController.getLandlordDetailsPath(1L), URI(page.url()).path)
         }
 
@@ -130,7 +130,7 @@ class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
 
             detailsPage.getLandlordLinkFromLandlordDetails("Alexander Smith").clickAndWait()
 
-            val landlordDetailsPage = assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
+            val landlordDetailsPage = assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to "1"))
 
             landlordDetailsPage.backLink.clickAndWait()
             assertPageIs(
