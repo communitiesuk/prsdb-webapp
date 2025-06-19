@@ -64,14 +64,14 @@ class PropertyComplianceService(
         propertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)
 
     fun addToPropertiesWithComplianceAddedThisSession(propertyOwnershipId: Long) {
-        val currentList = getPropertiesWithComplianceAddedThisSession()
-        val updatedList = currentList + propertyOwnershipId
-        session.setAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION, updatedList)
+        val currentSet = getPropertiesWithComplianceAddedThisSession()
+        val updatedSet = currentSet + propertyOwnershipId
+        session.setAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION, updatedSet)
     }
 
     fun wasPropertyComplianceAddedThisSession(propertyOwnershipId: Long): Boolean =
         getPropertiesWithComplianceAddedThisSession().contains(propertyOwnershipId)
 
     private fun getPropertiesWithComplianceAddedThisSession() =
-        session.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION) as? List<Long> ?: emptyList()
+        session.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION) as? Set<Long> ?: emptySet()
 }

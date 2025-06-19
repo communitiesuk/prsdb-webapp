@@ -87,31 +87,42 @@ class PropertyComplianceServiceTests {
     }
 
     @Test
-    fun `addToPropertiesWithComplianceAddedThisSession adds the given property ownership ID to the session list`() {
+    fun `addToPropertiesWithComplianceAddedThisSession adds the given property ownership ID to the session set`() {
         val propertyOwnershipId = 123L
-        val initialList = listOf(456L, 789L)
-        whenever(mockSession.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION)).thenReturn(initialList)
+        val initialSet = setOf(456L, 789L)
+        whenever(mockSession.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION)).thenReturn(initialSet)
 
         propertyComplianceService.addToPropertiesWithComplianceAddedThisSession(propertyOwnershipId)
 
-        val expectedUpdatedList = initialList + propertyOwnershipId
-        verify(mockSession).setAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION, expectedUpdatedList)
+        val expectedUpdatedSet = initialSet + propertyOwnershipId
+        verify(mockSession).setAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION, expectedUpdatedSet)
     }
 
     @Test
-    fun `wasPropertyComplianceAddedThisSession returns true if the property ownership ID is in the session list`() {
+    fun `addToPropertiesWithComplianceAddedThisSession does nothing when the given property ownership ID is already in the session set`() {
         val propertyOwnershipId = 123L
-        val sessionList = listOf(456L, 789L, propertyOwnershipId)
-        whenever(mockSession.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION)).thenReturn(sessionList)
+        val initialSet = setOf(propertyOwnershipId, 789L)
+        whenever(mockSession.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION)).thenReturn(initialSet)
+
+        propertyComplianceService.addToPropertiesWithComplianceAddedThisSession(propertyOwnershipId)
+
+        verify(mockSession).setAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION, initialSet)
+    }
+
+    @Test
+    fun `wasPropertyComplianceAddedThisSession returns true if the property ownership ID is in the session set`() {
+        val propertyOwnershipId = 123L
+        val sessionSet = setOf(456L, 789L, propertyOwnershipId)
+        whenever(mockSession.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION)).thenReturn(sessionSet)
 
         assertTrue(propertyComplianceService.wasPropertyComplianceAddedThisSession(propertyOwnershipId))
     }
 
     @Test
-    fun `wasPropertyComplianceAddedThisSession returns false if the property ownership ID is not in the session list`() {
+    fun `wasPropertyComplianceAddedThisSession returns false if the property ownership ID is not in the session set`() {
         val propertyOwnershipId = 123L
-        val sessionList = listOf(456L, 789L)
-        whenever(mockSession.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION)).thenReturn(sessionList)
+        val sessionSet = listOf(456L, 789L)
+        whenever(mockSession.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION)).thenReturn(sessionSet)
 
         assertFalse(propertyComplianceService.wasPropertyComplianceAddedThisSession(propertyOwnershipId))
     }
