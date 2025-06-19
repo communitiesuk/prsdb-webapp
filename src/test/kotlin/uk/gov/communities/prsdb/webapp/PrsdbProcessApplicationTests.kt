@@ -74,7 +74,7 @@ class PrsdbProcessApplicationTests {
             Service::class -> klass.java.getAnnotation(Service::class.java)?.value
             Configuration::class -> klass.java.getAnnotation(Configuration::class.java)?.value
             else -> throw IllegalArgumentException("Unsupported annotation type: ${TAnnotation::class}")
-        } ?: klass.java.simpleName
+        } ?: throw IllegalArgumentException("${TAnnotation::class} present on ${klass.simpleName} but no explicit name provided")
 
     fun buildHelpfulErrorMessage(
         expectedBeans: List<String>,
