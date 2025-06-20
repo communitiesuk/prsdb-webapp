@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import kotlinx.datetime.toKotlinInstant
-import uk.gov.communities.prsdb.webapp.constants.STARTING_UPDATE_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
@@ -19,6 +18,8 @@ class PropertyDetailsViewModel(
     landlordDetailsUrl: String = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
 ) {
     val address: String = propertyOwnership.property.address.singleLineAddress
+
+    private val baseChangeLink = PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnership.id)
 
     val isTenantedKey: String = MessageKeyConverter.convert(propertyOwnership.isOccupied)
 
@@ -69,7 +70,7 @@ class PropertyDetailsViewModel(
                 addRow(
                     "propertyDetails.propertyRecord.ownershipType",
                     MessageKeyConverter.convert(propertyOwnership.ownershipType),
-                    createChangeLinkForStep(UpdatePropertyDetailsStepId.UpdateOwnershipType),
+                    "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment}",
                     withChangeLinks,
                 )
                 addRow(
@@ -81,33 +82,28 @@ class PropertyDetailsViewModel(
                             listOf(MessageKeyConverter.convert(it.licenseType), it.licenseNumber)
                         }
                     } ?: MessageKeyConverter.convert(LicensingType.NO_LICENSING),
-                    createChangeLinkForStep(UpdatePropertyDetailsStepId.UpdateLicensingType),
+                    "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment}",
                     withChangeLinks,
                 )
                 addRow(
                     "propertyDetails.propertyRecord.occupied",
                     isTenantedKey,
-                    createChangeLinkForStep(UpdatePropertyDetailsStepId.UpdateOccupancy),
+                    "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment}",
                     withChangeLinks,
                 )
                 if (propertyOwnership.isOccupied) {
                     addRow(
                         "propertyDetails.propertyRecord.numberOfHouseholds",
                         propertyOwnership.currentNumHouseholds,
-                        createChangeLinkForStep(UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds),
+                        "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment}",
                         withChangeLinks,
                     )
                     addRow(
                         "propertyDetails.propertyRecord.numberOfPeople",
                         propertyOwnership.currentNumTenants,
-                        createChangeLinkForStep(UpdatePropertyDetailsStepId.UpdateNumberOfPeople),
+                        "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment}",
                         withChangeLinks,
                     )
                 }
             }.toList()
-
-    private fun createChangeLinkForStep(stepId: UpdatePropertyDetailsStepId): String {
-        val baseChangeLink = PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnership.id)
-        return "$baseChangeLink/${stepId.urlPathSegment}?$STARTING_UPDATE_PARAMETER_NAME=true"
-    }
 }
