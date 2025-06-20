@@ -12,18 +12,20 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 abstract class CheckAnswersPage(
     content: Map<String, Any>,
     private val journeyDataService: JourneyDataService,
+    templateName: String = "forms/checkAnswersForm",
+    shouldDisplaySectionHeader: Boolean = false,
 ) : AbstractPage(
         formModel = CheckAnswersFormModel::class,
-        templateName = "forms/checkAnswersForm",
+        templateName = templateName,
         content = content,
+        shouldDisplaySectionHeader = shouldDisplaySectionHeader,
     ) {
     final override fun enrichModel(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData?,
     ) {
         filteredJourneyData!!
-        // TODO PRSD-1219: Rename "formData" to "summaryList" for all CYA pages/templates
-        modelAndView.addObject("formData", getSummaryList(filteredJourneyData))
+        modelAndView.addObject("summaryListData", getSummaryList(filteredJourneyData))
         modelAndView.addObject("submittedFilteredJourneyData", CheckAnswersFormModel.serializeJourneyData(filteredJourneyData))
         furtherEnrichModel(modelAndView, filteredJourneyData)
     }
@@ -32,7 +34,7 @@ abstract class CheckAnswersPage(
 
     protected open fun furtherEnrichModel(
         modelAndView: ModelAndView,
-        filteredJourneyData: JourneyData?,
+        filteredJourneyData: JourneyData,
     ) {}
 
     override fun enrichFormData(formData: PageData?): PageData? {

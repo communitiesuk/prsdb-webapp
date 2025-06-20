@@ -266,7 +266,7 @@ class PropertyDetailsUpdateJourney(
     private val checkLicensingAnswers =
         Step(
             id = UpdatePropertyDetailsStepId.CheckYourLicensingAnswers,
-            page = CheckLicensingAnswersPage(),
+            page = CheckLicensingAnswersPage(journeyDataService),
             nextAction = { _, _ -> Pair(stepFactory.occupancyStepId, null) },
             handleSubmitAndRedirect = { _, _, _ -> updatePropertyAndRedirect() },
         )

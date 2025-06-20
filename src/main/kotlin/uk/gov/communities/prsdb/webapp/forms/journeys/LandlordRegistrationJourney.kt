@@ -512,7 +512,7 @@ class LandlordRegistrationJourney(
     private fun checkAnswersStep() =
         Step(
             id = LandlordRegistrationStepId.CheckAnswers,
-            page = LandlordRegistrationCheckAnswersPage(),
+            page = LandlordRegistrationCheckAnswersPage(journeyDataService),
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Declaration, null) },
             saveAfterSubmit = false,
         )

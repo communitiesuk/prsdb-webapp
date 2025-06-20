@@ -38,18 +38,18 @@ class CheckAnswersPageTests {
 
         checkAnswersPage.enrichModel(modelAndView, filteredJourneyData)
 
-        assertEquals(modelAndView.modelMap["formData"], createSummaryList(filteredJourneyData))
+        assertEquals(modelAndView.modelMap["summaryListData"], createSummaryList(filteredJourneyData))
         assertEquals(modelAndView.modelMap["submittedFilteredJourneyData"], CheckAnswersFormModel.serializeJourneyData(filteredJourneyData))
         assertEquals(modelAndView.modelMap["furtherEnrichModelKey"], "furtherEnrichModelValue")
     }
 
     @Test
     fun `bindDataToFormModel adds journeyData to the formModel`() {
-        val formData = mapOf(CheckAnswersFormModel::submittedFilteredJourneyData.name to "{}")
+        val summaryListData = mapOf(CheckAnswersFormModel::submittedFilteredJourneyData.name to "{}")
         val journeyData = mapOf("key1" to "value1")
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
-        val bindingResult = checkAnswersPage.bindDataToFormModel(AlwaysTrueValidator(), formData)
+        val bindingResult = checkAnswersPage.bindDataToFormModel(AlwaysTrueValidator(), summaryListData)
 
         val formModel = bindingResult.target as CheckAnswersFormModel
         assertEquals(journeyData, formModel.storedJourneyData)
@@ -79,9 +79,9 @@ class CheckAnswersPageTests {
 
         override fun furtherEnrichModel(
             modelAndView: ModelAndView,
-            filteredJourneyData: JourneyData?,
+            filteredJourneyData: JourneyData,
         ) {
-            filteredJourneyData?.entries?.forEach { (key, value) ->
+            filteredJourneyData.entries.forEach { (key, value) ->
                 if (key != SUMMARY_ROW_KEY) {
                     modelAndView.addObject(key, value)
                 }
@@ -90,7 +90,7 @@ class CheckAnswersPageTests {
     }
 
     companion object {
-        const val SUMMARY_ROW_KEY = "formDataRowKey"
+        const val SUMMARY_ROW_KEY = "summaryListRowKey"
 
         private fun createSummaryList(journeyData: JourneyData) =
             listOf(SummaryListRowViewModel(SUMMARY_ROW_KEY, journeyData[SUMMARY_ROW_KEY]!!, changeUrl = null))
