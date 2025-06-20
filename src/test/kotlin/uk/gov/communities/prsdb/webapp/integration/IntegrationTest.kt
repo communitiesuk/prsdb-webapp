@@ -4,6 +4,9 @@ import com.microsoft.playwright.BrowserContext
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.junit.UsePlaywright
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.ClassOrderer
+import org.junit.jupiter.api.ClassOrdererContext
+import org.junit.jupiter.api.TestClassOrder
 import org.junit.jupiter.api.TestInstance
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.context.SpringBootTest
@@ -23,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.Navigator
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.service.notify.NotificationClient
+import kotlin.reflect.full.isSubclassOf
 
 @Import(TestcontainersConfiguration::class)
 @SpringBootTest(
@@ -32,6 +36,7 @@ import uk.gov.service.notify.NotificationClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @UsePlaywright
 @ActiveProfiles(profiles = ["local", "local-no-auth"])
+@TestClassOrder(IntegrationTest.IntegrationTestOrderer::class)
 abstract class IntegrationTest {
     @LocalServerPort
     val port: Int = 0
@@ -104,6 +109,13 @@ abstract class IntegrationTest {
 
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     abstract class NestedIntegrationTest
+
+    class IntegrationTestOrderer : ClassOrderer {
+        override fun orderClasses(context: ClassOrdererContext?) {
+            // Makes NestedIntegrationTests run last
+            context?.classDescriptors?.sortBy { it.testClass.kotlin.isSubclassOf(NestedIntegrationTest::class) }
+        }
+    }
 
     fun createPageAndNavigator(browserContext: BrowserContext): Pair<Page, Navigator> {
         val page = browserContext.newPage()
