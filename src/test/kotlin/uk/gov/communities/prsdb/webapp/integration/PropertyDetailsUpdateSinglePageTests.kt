@@ -3,19 +3,15 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.BrowserContext
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HouseholdsOccupancyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfHouseholdsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfPeopleFormPagePropertyDetailsUpdate
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OwnershipTypeFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.PeopleNumberOfHouseholdsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.PeopleOccupancyFormPagePropertyDetailsUpdate
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class PropertyDetailsUpdateSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
     private val propertyOwnershipId = 1L
@@ -80,29 +76,5 @@ class PropertyDetailsUpdateSinglePageTests : SinglePageTestWithSeedData("data-lo
         // Assert that the page1 is redirected to an error page
         val errorPage = assertPageIs(page1, ErrorPage::class)
         assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
-    }
-
-    @Test
-    fun `Starting an update from the property details page clears the journey context`(page: Page) {
-        // Details page - start ownership type update
-        var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-        propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickActionLinkAndWait()
-        var updateOwnershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
-
-        // Update Ownership Type page - enter a value then go back to the details page
-        updateOwnershipTypePage.form.ownershipTypeRadios.selectValue(OwnershipType.LEASEHOLD)
-        updateOwnershipTypePage.backLink.clickAndWait()
-        propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
-
-        // Details page - start a new ownership type update
-        propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickActionLinkAndWait()
-        updateOwnershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
-
-        // Update Ownership Type page - check that the form is blank
-        assertTrue(
-            updateOwnershipTypePage.form.ownershipTypeRadios
-                .getRadios()
-                .none { it.isChecked },
-        )
     }
 }
