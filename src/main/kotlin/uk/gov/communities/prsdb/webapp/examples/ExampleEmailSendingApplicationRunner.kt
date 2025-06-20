@@ -16,7 +16,7 @@ class ExampleEmailSendingApplicationRunner(
     private val context: ApplicationContext,
 ) : ApplicationRunner {
     override fun run(args: ApplicationArguments?) {
-        val recipientAddress = "address"
+        val recipientAddress = "alexander.read@softwire.com"
         val email = ExampleEmail(firstName = "John")
         emailSender.sendEmail(recipientAddress, email)
 
