@@ -6,4 +6,4 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.L
 
 class LandlordDetailsPage(
     page: Page,
-) : LandlordDetailsBasePage(page, LandlordDetailsController.LANDLORD_DETAILS_ROUTE)
+) : LandlordDetailsBasePage(page, LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)

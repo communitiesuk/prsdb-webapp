@@ -47,8 +47,7 @@ class PropertyDetailsController(
             propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, principal.name)
 
         val landlordDetailsUrl =
-            LandlordDetailsController
-                .getLandlordDetailsPath()
+            LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
                 .overrideBackLinkForUrl(backLinkStorageService.storeCurrentUrlReturningKey())
 
         val propertyDetails =

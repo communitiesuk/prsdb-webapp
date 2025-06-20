@@ -56,7 +56,7 @@ class LandlordDetailsUpdateJourney(
         initializeLookedUpAddressesIfNotInitialized()
     }
 
-    override val unreachableStepRedirect = LandlordDetailsController.LANDLORD_DETAILS_ROUTE
+    override val unreachableStepRedirect = LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
 
     override fun createOriginalJourneyData(): JourneyData {
         val landlord = landlordService.retrieveLandlordByBaseUserId(landlordBaseUserId)!!
@@ -109,7 +109,7 @@ class LandlordDetailsUpdateJourney(
                             "label" to "forms.email.label",
                             "showWarning" to true,
                             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
-                            BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
+                            BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE,
                         ),
                 ),
             handleSubmitAndRedirect = { _, _, _ -> updateLandlordWithChangesAndRedirect() },
@@ -132,7 +132,7 @@ class LandlordDetailsUpdateJourney(
                             "label" to "forms.name.label",
                             "showWarning" to true,
                             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
-                            BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
+                            BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE,
                         ),
                 ),
             handleSubmitAndRedirect = { _, _, _ -> updateLandlordWithChangesAndRedirect() },
@@ -154,7 +154,7 @@ class LandlordDetailsUpdateJourney(
                             "fieldSetHint" to "forms.dateOfBirth.fieldSetHint",
                             "showWarning" to true,
                             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
-                            BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
+                            BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE,
                         ),
                 ),
             handleSubmitAndRedirect = { _, _, _ -> updateLandlordWithChangesAndRedirect() },
@@ -178,7 +178,7 @@ class LandlordDetailsUpdateJourney(
                             "hint" to "forms.phoneNumber.hint",
                             "showWarning" to true,
                             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
-                            BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
+                            BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE,
                         ),
                 ),
             handleSubmitAndRedirect = { _, _, _ -> updateLandlordWithChangesAndRedirect() },
@@ -203,7 +203,7 @@ class LandlordDetailsUpdateJourney(
                             "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
                             "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
                             "submitButtonText" to "forms.buttons.continue",
-                            BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
+                            BACK_URL_ATTR_NAME to LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE,
                         ),
                     shouldDisplaySectionHeader = false,
                 ),
@@ -339,7 +339,7 @@ class LandlordDetailsUpdateJourney(
 
         journeyDataService.removeJourneyDataAndContextIdFromSession()
 
-        return LandlordDetailsController.LANDLORD_DETAILS_ROUTE
+        return LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
     }
 
     private fun getHouseNameOrNumberAndPostcode() =

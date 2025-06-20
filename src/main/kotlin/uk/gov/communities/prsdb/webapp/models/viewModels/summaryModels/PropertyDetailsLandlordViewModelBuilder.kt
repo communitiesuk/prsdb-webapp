@@ -9,7 +9,7 @@ class PropertyDetailsLandlordViewModelBuilder {
     companion object {
         fun fromEntity(
             landlord: Landlord,
-            landlordDetailsUrl: String = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
+            landlordDetailsUrl: String = LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE,
         ): List<SummaryListRowViewModel> =
             mutableListOf<SummaryListRowViewModel>()
                 .apply {
