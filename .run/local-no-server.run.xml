@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="local-no-server" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <option name="ACTIVE_PROFILES" value="local, web-server-deactivated, example-email-sender" />
+    <option name="ACTIVE_PROFILES" value="local, web-server-deactivated, example-scan-processor" />
     <option name="envFilePaths">
       <option value="$PROJECT_DIR$/.env" />
     </option>
