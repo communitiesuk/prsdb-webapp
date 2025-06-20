@@ -16,10 +16,16 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.constants.CANCEL_INVITATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.DELETE_USER_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.EDIT_USER_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.INVITE_NEW_USER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.MANAGE_USERS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
+import uk.gov.communities.prsdb.webapp.constants.SUCCESS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
@@ -50,7 +56,7 @@ class ManageLocalAuthorityUsersController(
     val localAuthorityService: LocalAuthorityService,
     val securityContextService: SecurityContextService,
 ) {
-    @GetMapping("/manage-users")
+    @GetMapping("/$MANAGE_USERS_PATH_SEGMENT")
     fun index(
         @PathVariable localAuthorityId: Int,
         model: Model,
@@ -70,7 +76,7 @@ class ManageLocalAuthorityUsersController(
             )
 
         if (pagedUserList.totalPages != 0 && pagedUserList.totalPages < page) {
-            return "redirect:/local-authority/{localAuthorityId}/manage-users"
+            return "redirect:/local-authority/{localAuthorityId}/$MANAGE_USERS_PATH_SEGMENT"
         }
 
         model.addAttribute("currentUserId", loggedInLaAdmin?.id)
@@ -88,7 +94,7 @@ class ManageLocalAuthorityUsersController(
         return "manageLAUsers"
     }
 
-    @GetMapping("/edit-user/{localAuthorityUserId}")
+    @GetMapping("/$EDIT_USER_PATH_SEGMENT/{localAuthorityUserId}")
     fun getEditUserAccessLevelPage(
         @PathVariable localAuthorityId: Int,
         @PathVariable localAuthorityUserId: Long,
@@ -101,7 +107,7 @@ class ManageLocalAuthorityUsersController(
         val localAuthorityUser =
             localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
 
-        model.addAttribute("backLinkPath", "../manage-users")
+        model.addAttribute("backLinkPath", "../$MANAGE_USERS_PATH_SEGMENT")
         model.addAttribute("localAuthorityUser", localAuthorityUser)
         model.addAttribute(
             "options",
@@ -124,7 +130,7 @@ class ManageLocalAuthorityUsersController(
         return "editLAUserAccess"
     }
 
-    @PostMapping("/edit-user/{localAuthorityUserId}")
+    @PostMapping("/$EDIT_USER_PATH_SEGMENT/{localAuthorityUserId}")
     fun updateUserAccessLevel(
         @PathVariable localAuthorityId: Int,
         @PathVariable localAuthorityUserId: Long,
@@ -137,10 +143,10 @@ class ManageLocalAuthorityUsersController(
         localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
 
         localAuthorityDataService.updateUserAccessLevel(localAuthorityUserAccessLevel, localAuthorityUserId)
-        return "redirect:/local-authority/{localAuthorityId}/manage-users"
+        return "redirect:/local-authority/{localAuthorityId}/$MANAGE_USERS_PATH_SEGMENT"
     }
 
-    @GetMapping("/delete-user/{localAuthorityUserId}")
+    @GetMapping("/$DELETE_USER_PATH_SEGMENT/{localAuthorityUserId}")
     fun confirmDeleteUser(
         @PathVariable localAuthorityId: Int,
         @PathVariable localAuthorityUserId: Long,
@@ -153,11 +159,11 @@ class ManageLocalAuthorityUsersController(
         val userToDelete =
             localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
         model.addAttribute("user", userToDelete)
-        model.addAttribute("backLinkPath", "../edit-user/$localAuthorityUserId")
+        model.addAttribute("backLinkPath", "../$EDIT_USER_PATH_SEGMENT/$localAuthorityUserId")
         return "deleteLAUser"
     }
 
-    @PostMapping("/delete-user/{localAuthorityUserId}")
+    @PostMapping("/$DELETE_USER_PATH_SEGMENT/{localAuthorityUserId}")
     fun deleteUser(
         @PathVariable localAuthorityId: Int,
         @PathVariable localAuthorityUserId: Long,
@@ -183,10 +189,10 @@ class ManageLocalAuthorityUsersController(
         localAuthorityDataService.deleteUser(localAuthorityUserId)
 
         redirectAttributes.addFlashAttribute("deletedUserName", user.userName)
-        return "redirect:../delete-user/success"
+        return "redirect:../$DELETE_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT"
     }
 
-    @GetMapping("/delete-user/success")
+    @GetMapping("/$DELETE_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT")
     fun deleteUserSuccess(
         @PathVariable localAuthorityId: Int,
         model: Model,
@@ -202,7 +208,7 @@ class ManageLocalAuthorityUsersController(
         return "deleteLAUserSuccess"
     }
 
-    @GetMapping("/invite-new-user")
+    @GetMapping("/$INVITE_NEW_USER_PATH_SEGMENT")
     fun inviteNewUser(
         @PathVariable localAuthorityId: Int,
         model: Model,
@@ -215,7 +221,7 @@ class ManageLocalAuthorityUsersController(
         return "inviteLAUser"
     }
 
-    @PostMapping("/invite-new-user", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
+    @PostMapping("/$INVITE_NEW_USER_PATH_SEGMENT", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
     fun sendInvitation(
         @PathVariable localAuthorityId: Int,
         model: Model,
@@ -243,14 +249,14 @@ class ManageLocalAuthorityUsersController(
             )
 
             redirectAttributes.addFlashAttribute("invitedEmailAddress", emailModel.email)
-            return "redirect:invite-new-user/success"
+            return "redirect:$INVITE_NEW_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT"
         } catch (retryException: TransientEmailSentException) {
             bindingResult.reject("addLAUser.error.retryable")
             return "inviteLAUser"
         }
     }
 
-    @GetMapping("/invite-new-user/success")
+    @GetMapping("/$INVITE_NEW_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT")
     fun successInvitedNewUser(
         @PathVariable localAuthorityId: Int,
         principal: Principal,
@@ -262,7 +268,7 @@ class ManageLocalAuthorityUsersController(
         return "inviteLAUserSuccess"
     }
 
-    @GetMapping("/cancel-invitation/{invitationId}")
+    @GetMapping("/$CANCEL_INVITATION_PATH_SEGMENT/{invitationId}")
     fun confirmCancelInvitation(
         @PathVariable localAuthorityId: Int,
         @PathVariable invitationId: Long,
@@ -281,13 +287,13 @@ class ManageLocalAuthorityUsersController(
             )
         }
 
-        model.addAttribute("backLinkPath", "../manage-users")
+        model.addAttribute("backLinkPath", "../$MANAGE_USERS_PATH_SEGMENT")
         model.addAttribute("email", invitation.invitedEmail)
 
         return "cancelLAUserInvitation"
     }
 
-    @PostMapping("/cancel-invitation/{invitationId}")
+    @PostMapping("/$CANCEL_INVITATION_PATH_SEGMENT/{invitationId}")
     fun cancelInvitation(
         @PathVariable localAuthorityId: Int,
         @PathVariable invitationId: Long,
@@ -303,10 +309,10 @@ class ManageLocalAuthorityUsersController(
 
         redirectAttributes.addFlashAttribute("deletedEmail", invitation.invitedEmail)
         redirectAttributes.addFlashAttribute("localAuthority", invitation.invitingAuthority)
-        return "redirect:../cancel-invitation/success"
+        return "redirect:../$CANCEL_INVITATION_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT"
     }
 
-    @GetMapping("/cancel-invitation/success")
+    @GetMapping("/$CANCEL_INVITATION_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT")
     fun cancelInvitationSuccess(
         @PathVariable localAuthorityId: String,
         model: Model,

@@ -6,7 +6,9 @@ import com.microsoft.playwright.options.RequestOptions
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.INVITE_NEW_USER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.MANAGE_USERS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
@@ -140,12 +142,12 @@ class Navigator(
     private val port: Int,
 ) {
     fun goToManageLaUsers(authorityId: Int): ManageLaUsersPage {
-        navigate("/local-authority/$authorityId/manage-users")
+        navigate("/local-authority/$authorityId/$MANAGE_USERS_PATH_SEGMENT")
         return createValidPage(page, ManageLaUsersPage::class)
     }
 
     fun goToInviteNewLaUser(authorityId: Int): InviteNewLaUserPage {
-        navigate("/local-authority/$authorityId/invite-new-user")
+        navigate("/local-authority/$authorityId/$INVITE_NEW_USER_PATH_SEGMENT")
         return createValidPage(page, InviteNewLaUserPage::class)
     }
 
