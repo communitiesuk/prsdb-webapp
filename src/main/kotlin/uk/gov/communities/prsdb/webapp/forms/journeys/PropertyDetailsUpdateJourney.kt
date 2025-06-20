@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory.Companion.getJourneyDataKey
 import uk.gov.communities.prsdb.webapp.forms.pages.CheckLicensingAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.CheckOccupancyAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -37,13 +38,13 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Ownership
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectiveLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import kotlin.reflect.KFunction
 
 class PropertyDetailsUpdateJourney(
     validator: Validator,
-    journeyDataService: JourneyDataService,
+    private val journeyDataServiceFactory: JourneyDataServiceFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyOwnershipId: Long,
     stepName: String,
@@ -52,7 +53,7 @@ class PropertyDetailsUpdateJourney(
         journeyType = JourneyType.PROPERTY_DETAILS_UPDATE,
         initialStepId = UpdatePropertyDetailsStepId.UpdateOwnershipType,
         validator = validator,
-        journeyDataService = journeyDataService,
+        journeyDataService = journeyDataServiceFactory.create(getJourneyDataKey(propertyOwnershipId, stepName)),
         stepName = stepName,
         isChangingAnswer = isChangingAnswer,
     ) {
@@ -326,9 +327,17 @@ class PropertyDetailsUpdateJourney(
 
         propertyOwnershipService.updatePropertyOwnership(propertyOwnershipId, propertyUpdate)
 
-        journeyDataService.removeJourneyDataAndContextIdFromSession()
+        clearRelatedJourneyContext()
 
         return RELATIVE_PROPERTY_DETAILS_PATH
+    }
+
+    private fun clearRelatedJourneyContext() {
+        stepFactory.stepGroupId.relatedGroups.forEach {
+            val groupJourneyDataKey = getJourneyDataKey(propertyOwnershipId, it)
+            val groupJourneyDataService = journeyDataServiceFactory.create(groupJourneyDataKey)
+            groupJourneyDataService.removeJourneyDataAndContextIdFromSession()
+        }
     }
 
     companion object {
