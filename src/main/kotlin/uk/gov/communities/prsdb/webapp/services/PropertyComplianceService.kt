@@ -35,9 +35,9 @@ class PropertyComplianceService(
         epcExemptionReason: EpcExemptionReason? = null,
         epcMeesExemptionReason: MeesExemptionReason? = null,
         hasFireSafetyDeclaration: Boolean = false,
-    ) {
+    ): PropertyCompliance {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
-        propertyComplianceRepository.save(
+        return propertyComplianceRepository.save(
             PropertyCompliance(
                 propertyOwnership = propertyOwnership,
                 hasFireSafetyDeclaration = hasFireSafetyDeclaration,
