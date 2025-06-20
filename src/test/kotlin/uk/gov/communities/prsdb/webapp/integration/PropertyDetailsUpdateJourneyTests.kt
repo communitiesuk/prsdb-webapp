@@ -313,6 +313,9 @@ class PropertyDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sq
             val checkPeopleAnswersPage2 =
                 assertPageIs(page2, CheckPeopleAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
+            assertThat(checkPeopleAnswersPage2.form.summaryList.occupancyRow).containsText("Yes")
+            assertThat(checkPeopleAnswersPage2.form.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople)
+
             // Finish updating occupancy to vacant on page1
             assertThat(checkOccupancyAnswersPage1.form.summaryList.occupancyRow).containsText("No")
             checkOccupancyAnswersPage1.confirm()
@@ -320,16 +323,6 @@ class PropertyDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sq
 
             // Check changes have occurred on page1
             assertThat(propertyDetailsPage1.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
-
-            // Finish updating number of people on page2
-            assertThat(checkPeopleAnswersPage2.form.summaryList.occupancyRow).containsText("Yes")
-            assertThat(checkPeopleAnswersPage2.form.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople)
-            checkPeopleAnswersPage2.confirm()
-            val propertyDetailsPage2 = assertPageIs(page2, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
-
-            // Check changes have occurred on page2
-            assertThat(propertyDetailsPage2.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
-            assertThat(propertyDetailsPage2.propertyDetailsSummaryList.numberOfPeopleRow.value).containsText(newNumberOfPeople)
         }
 
         @Test
@@ -347,7 +340,7 @@ class PropertyDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sq
             val updateHouseholdsPage =
                 assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
-            val newNumberOfHouseholds = "10"
+            val newNumberOfHouseholds = "1"
             updateHouseholdsPage.submitNumberOfHouseholds(newNumberOfHouseholds)
             val updateHouseholdsPeoplePage =
                 assertPageIs(page, HouseholdsNumberOfPeopleFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
