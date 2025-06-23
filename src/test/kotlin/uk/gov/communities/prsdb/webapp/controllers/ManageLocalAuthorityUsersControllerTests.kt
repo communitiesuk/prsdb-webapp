@@ -24,8 +24,13 @@ import uk.gov.communities.prsdb.webapp.constants.CANCEL_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELETE_USER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.EDIT_USER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INVITE_NEW_USER_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.MANAGE_USERS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SUCCESS_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaCancelInviteRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaDeleteUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaDeleteUserSuccessRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaEditUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaInviteNewUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaManageUsersRoute
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
@@ -75,7 +80,7 @@ class ManageLocalAuthorityUsersControllerTests(
 
     @Test
     fun `index returns a redirect for unauthenticated user`() {
-        mvc.get("/local-authority/$DEFAULT_LA_ID/$MANAGE_USERS_PATH_SEGMENT").andExpect {
+        mvc.get(getLaManageUsersRoute(DEFAULT_LA_ID)).andExpect {
             status { is3xxRedirection() }
         }
     }
@@ -84,7 +89,7 @@ class ManageLocalAuthorityUsersControllerTests(
     @WithMockUser
     fun `index returns 403 for unauthorized user`() {
         mvc
-            .get("/local-authority/$DEFAULT_LA_ID/$MANAGE_USERS_PATH_SEGMENT")
+            .get(getLaManageUsersRoute(DEFAULT_LA_ID))
             .andExpect {
                 status { isForbidden() }
             }
@@ -94,7 +99,7 @@ class ManageLocalAuthorityUsersControllerTests(
     @WithMockUser(roles = ["LA_USER"])
     fun `index returns 403 for a local authority (non-admin) user`() {
         mvc
-            .get("/local-authority/$DEFAULT_LA_ID/$MANAGE_USERS_PATH_SEGMENT")
+            .get(getLaManageUsersRoute(DEFAULT_LA_ID))
             .andExpect {
                 status { isForbidden() }
             }
@@ -113,7 +118,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
 
         mvc
-            .get("/local-authority/$DEFAULT_LA_ID/$MANAGE_USERS_PATH_SEGMENT")
+            .get(getLaManageUsersRoute(DEFAULT_LA_ID))
             .andExpect {
                 status { isOk() }
                 model {
@@ -130,7 +135,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .thenThrow(AccessDeniedException(""))
 
         mvc
-            .get("/local-authority/${DEFAULT_LA_ID}/$MANAGE_USERS_PATH_SEGMENT")
+            .get(getLaManageUsersRoute(DEFAULT_LA_ID))
             .andExpect {
                 status { isForbidden() }
             }
@@ -143,7 +148,7 @@ class ManageLocalAuthorityUsersControllerTests(
         whenever(localAuthorityDataService.getPaginatedUsersAndInvitations(eq(localAuthority), eq(0), anyOrNull(), anyOrNull()))
             .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
         mvc
-            .get("/local-authority/${NON_ADMIN_LA_ID}/$MANAGE_USERS_PATH_SEGMENT")
+            .get(getLaManageUsersRoute(NON_ADMIN_LA_ID))
             .andExpect {
                 status { isOk() }
                 model {
@@ -163,7 +168,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
 
         mvc
-            .get("/local-authority/$DEFAULT_LA_ID/$MANAGE_USERS_PATH_SEGMENT?page=0")
+            .get("${getLaManageUsersRoute(DEFAULT_LA_ID)}?page=0")
             .andExpect {
                 status { isNotFound() }
             }
@@ -198,7 +203,7 @@ class ManageLocalAuthorityUsersControllerTests(
 
     private fun postToSendInvitationAndAssertSuccess(laId: Int = DEFAULT_LA_ID) {
         mvc
-            .post("/local-authority/$laId/$INVITE_NEW_USER_PATH_SEGMENT") {
+            .post(getLaInviteNewUserRoute(laId)) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 content = urlEncodedConfirmedEmailDataModel("new-user@example.com")
                 with(csrf())
@@ -224,7 +229,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .thenThrow(AccessDeniedException(""))
 
         mvc
-            .get("/local-authority/$DEFAULT_LA_ID/$EDIT_USER_PATH_SEGMENT/1")
+            .get(getLaEditUserRoute(DEFAULT_LA_ID, 1))
             .andExpect {
                 status { isForbidden() }
             }
@@ -238,7 +243,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
 
         mvc
-            .get("/local-authority/$DEFAULT_LA_ID/$EDIT_USER_PATH_SEGMENT/$DEFAULT_LA_USER_ID")
+            .get(getLaEditUserRoute(DEFAULT_LA_ID, DEFAULT_LA_USER_ID))
             .andExpect {
                 status { isNotFound() }
             }
@@ -265,7 +270,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .thenReturn(loggedInUserModel)
 
         mvc
-            .get("/local-authority/$DEFAULT_LA_ID/$EDIT_USER_PATH_SEGMENT/${loggedInUserModel.id}")
+            .get(getLaEditUserRoute(DEFAULT_LA_ID, loggedInUserModel.id))
             .andExpect {
                 status { isForbidden() }
             }
@@ -279,7 +284,7 @@ class ManageLocalAuthorityUsersControllerTests(
         setupLocalAuthorityUserToEdit(localAuthority)
 
         mvc
-            .get("/local-authority/$DEFAULT_LA_ID/$EDIT_USER_PATH_SEGMENT/$DEFAULT_LA_USER_ID")
+            .get(getLaEditUserRoute(DEFAULT_LA_ID, DEFAULT_LA_USER_ID))
             .andExpect {
                 status { isOk() }
                 model { attributeExists("localAuthorityUser", "options") }
@@ -294,7 +299,7 @@ class ManageLocalAuthorityUsersControllerTests(
         setupLocalAuthorityUserToEdit(localAuthority)
 
         mvc
-            .get("/local-authority/$NON_ADMIN_LA_ID/$EDIT_USER_PATH_SEGMENT/$DEFAULT_LA_USER_ID")
+            .get(getLaEditUserRoute(NON_ADMIN_LA_ID, DEFAULT_LA_USER_ID))
             .andExpect {
                 status { isOk() }
                 model { attributeExists("localAuthorityUser", "options") }
@@ -310,7 +315,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .thenReturn(Pair(loggedInUserModel, localAuthority))
 
         mvc
-            .post("/local-authority/$DEFAULT_LA_ID/$EDIT_USER_PATH_SEGMENT/${loggedInUserModel.id}") {
+            .post(getLaEditUserRoute(DEFAULT_LA_ID, loggedInUserModel.id)) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 content = "isManager=false"
                 with(csrf())
@@ -337,14 +342,14 @@ class ManageLocalAuthorityUsersControllerTests(
 
     private fun postUpdateUserAccessLevelAndAssertSuccess(laId: Int = DEFAULT_LA_ID) {
         mvc
-            .post("/local-authority/$laId/$EDIT_USER_PATH_SEGMENT/$DEFAULT_LA_USER_ID") {
+            .post(getLaEditUserRoute(laId, DEFAULT_LA_USER_ID)) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 content = "isManager=true"
                 with(csrf())
             }.andExpect {
                 status {
                     is3xxRedirection()
-                    redirectedUrl("/local-authority/$DEFAULT_LA_ID/$MANAGE_USERS_PATH_SEGMENT")
+                    redirectedUrl(getLaManageUsersRoute(DEFAULT_LA_ID))
                 }
             }
 
@@ -361,7 +366,7 @@ class ManageLocalAuthorityUsersControllerTests(
         setupLocalAuthorityUserToEdit(localAuthority)
 
         mvc
-            .get("/local-authority/$DEFAULT_LA_ID/$DELETE_USER_PATH_SEGMENT/$DEFAULT_LA_USER_ID")
+            .get(getLaDeleteUserRoute(DEFAULT_LA_ID, DEFAULT_LA_USER_ID))
             .andExpect {
                 status { isOk() }
                 model { attributeExists("user") }
@@ -375,7 +380,7 @@ class ManageLocalAuthorityUsersControllerTests(
         setupLocalAuthorityUserToEdit(localAuthority)
 
         mvc
-            .get("/local-authority/$NON_ADMIN_LA_ID/$DELETE_USER_PATH_SEGMENT/$DEFAULT_LA_USER_ID")
+            .get(getLaDeleteUserRoute(NON_ADMIN_LA_ID, DEFAULT_LA_USER_ID))
             .andExpect {
                 status { isOk() }
                 model { attributeExists("user") }
@@ -391,7 +396,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .thenReturn(Pair(loggedInUserModel, localAuthority))
 
         mvc
-            .post("/local-authority/$DEFAULT_LA_ID/$DELETE_USER_PATH_SEGMENT/${loggedInUserModel.id}") {
+            .post(getLaDeleteUserRoute(DEFAULT_LA_ID, loggedInUserModel.id)) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 content = "isManager=false"
                 with(csrf())
@@ -446,7 +451,7 @@ class ManageLocalAuthorityUsersControllerTests(
             )
 
         mvc
-            .post("/local-authority/$DEFAULT_LA_ID/$DELETE_USER_PATH_SEGMENT/$DEFAULT_LOGGED_IN_LA_USER_ID") {
+            .post(getLaDeleteUserRoute(DEFAULT_LA_ID, DEFAULT_LOGGED_IN_LA_USER_ID)) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 with(csrf())
             }.andExpect {
@@ -462,7 +467,7 @@ class ManageLocalAuthorityUsersControllerTests(
 
     private fun postDeleteUserAndAssertSuccess(laId: Int = DEFAULT_LA_ID) {
         mvc
-            .post("/local-authority/$laId/$DELETE_USER_PATH_SEGMENT/$DEFAULT_LA_USER_ID") {
+            .post(getLaDeleteUserRoute(laId, DEFAULT_LA_USER_ID)) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 with(csrf())
             }.andExpect {
@@ -484,7 +489,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .thenReturn(Pair(loggedInUserModel, localAuthority))
 
         mvc
-            .post("/local-authority/$DEFAULT_LA_ID/$DELETE_USER_PATH_SEGMENT/${loggedInUserModel.id}") {
+            .post(getLaDeleteUserRoute(DEFAULT_LA_ID, loggedInUserModel.id)) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 with(csrf())
             }.andExpect {
@@ -498,7 +503,7 @@ class ManageLocalAuthorityUsersControllerTests(
         setupLocalAuthorityForSystemOperator(DEFAULT_LA_ID)
 
         mvc
-            .get("/local-authority/$DEFAULT_LA_ID/$DELETE_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT") {
+            .get(getLaDeleteUserSuccessRoute(DEFAULT_LA_ID)) {
                 flashAttr("currentUserDeletedThemself", true)
             }
 
@@ -511,7 +516,7 @@ class ManageLocalAuthorityUsersControllerTests(
         setupLocalAuthorityForSystemOperator(DEFAULT_LA_ID)
 
         mvc
-            .get("/local-authority/$DEFAULT_LA_ID/$DELETE_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT")
+            .get(getLaDeleteUserSuccessRoute(DEFAULT_LA_ID))
 
         verify(securityContextService, never()).refreshContext()
     }
@@ -525,7 +530,7 @@ class ManageLocalAuthorityUsersControllerTests(
         whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
 
         mvc
-            .get("/local-authority/$DEFAULT_LA_ID/$CANCEL_INVITATION_PATH_SEGMENT/$DEFAULT_LA_INVITATION_ID")
+            .get(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID))
             .andExpect {
                 status { isOk() }
                 model { attribute("email", invitation.invitedEmail) }
@@ -541,7 +546,7 @@ class ManageLocalAuthorityUsersControllerTests(
         whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
 
         mvc
-            .get("/local-authority/$NON_ADMIN_LA_ID/$CANCEL_INVITATION_PATH_SEGMENT/$DEFAULT_LA_INVITATION_ID")
+            .get(getLaCancelInviteRoute(NON_ADMIN_LA_ID, DEFAULT_LA_INVITATION_ID))
             .andExpect {
                 status { isOk() }
                 model { attribute("email", invitation.invitedEmail) }
@@ -558,7 +563,7 @@ class ManageLocalAuthorityUsersControllerTests(
         whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
 
         mvc
-            .get("/local-authority/$DEFAULT_LA_ID/$CANCEL_INVITATION_PATH_SEGMENT/$DEFAULT_LA_INVITATION_ID")
+            .get(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID))
             .andExpect {
                 status { isForbidden() }
             }
@@ -573,7 +578,7 @@ class ManageLocalAuthorityUsersControllerTests(
         whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
 
         mvc
-            .get("/local-authority/$DEFAULT_LA_ID/$CANCEL_INVITATION_PATH_SEGMENT/$DEFAULT_LA_INVITATION_ID")
+            .get(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID))
             .andExpect {
                 status { isForbidden() }
             }
@@ -596,7 +601,7 @@ class ManageLocalAuthorityUsersControllerTests(
         whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
 
         mvc
-            .post("/local-authority/$DEFAULT_LA_ID/$CANCEL_INVITATION_PATH_SEGMENT/$DEFAULT_LA_INVITATION_ID") {
+            .post(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID)) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 with(csrf())
             }.andExpect {
@@ -616,7 +621,7 @@ class ManageLocalAuthorityUsersControllerTests(
         whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
 
         mvc
-            .post("/local-authority/$DEFAULT_LA_ID/$CANCEL_INVITATION_PATH_SEGMENT/$DEFAULT_LA_INVITATION_ID") {
+            .post(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID)) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 with(csrf())
             }.andExpect {

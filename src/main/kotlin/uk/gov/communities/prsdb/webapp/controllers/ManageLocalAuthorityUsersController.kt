@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
+import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CANCEL_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELETE_USER_PATH_SEGMENT
@@ -27,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.constants.SUCCESS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.LOCAL_AUTHORITY_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
@@ -46,7 +48,7 @@ import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LA_ADMIN', 'SYSTEM_OPERATOR')")
 @PrsdbController
-@RequestMapping("/$LOCAL_AUTHORITY_PATH_SEGMENT/{localAuthorityId}")
+@RequestMapping(LOCAL_AUTHORITY_ROUTE)
 class ManageLocalAuthorityUsersController(
     var invitationEmailSender: EmailNotificationService<LocalAuthorityInvitationEmail>,
     var cancellationEmailSender: EmailNotificationService<LocalAuthorityInvitationCancellationEmail>,
@@ -76,7 +78,7 @@ class ManageLocalAuthorityUsersController(
             )
 
         if (pagedUserList.totalPages != 0 && pagedUserList.totalPages < page) {
-            return "redirect:/local-authority/{localAuthorityId}/$MANAGE_USERS_PATH_SEGMENT"
+            return "redirect:${getLaManageUsersRoute(localAuthorityId)}"
         }
 
         model.addAttribute("currentUserId", loggedInLaAdmin?.id)
@@ -94,7 +96,7 @@ class ManageLocalAuthorityUsersController(
         return "manageLAUsers"
     }
 
-    @GetMapping("/$EDIT_USER_PATH_SEGMENT/{localAuthorityUserId}")
+    @GetMapping("/$EDIT_USER_ROUTE")
     fun getEditUserAccessLevelPage(
         @PathVariable localAuthorityId: Int,
         @PathVariable localAuthorityUserId: Long,
@@ -130,7 +132,7 @@ class ManageLocalAuthorityUsersController(
         return "editLAUserAccess"
     }
 
-    @PostMapping("/$EDIT_USER_PATH_SEGMENT/{localAuthorityUserId}")
+    @PostMapping("/$EDIT_USER_ROUTE")
     fun updateUserAccessLevel(
         @PathVariable localAuthorityId: Int,
         @PathVariable localAuthorityUserId: Long,
@@ -143,10 +145,10 @@ class ManageLocalAuthorityUsersController(
         localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
 
         localAuthorityDataService.updateUserAccessLevel(localAuthorityUserAccessLevel, localAuthorityUserId)
-        return "redirect:/local-authority/{localAuthorityId}/$MANAGE_USERS_PATH_SEGMENT"
+        return "redirect:${getLaManageUsersRoute(localAuthorityId)}"
     }
 
-    @GetMapping("/$DELETE_USER_PATH_SEGMENT/{localAuthorityUserId}")
+    @GetMapping("/$DELETE_USER_ROUTE")
     fun confirmDeleteUser(
         @PathVariable localAuthorityId: Int,
         @PathVariable localAuthorityUserId: Long,
@@ -163,7 +165,7 @@ class ManageLocalAuthorityUsersController(
         return "deleteLAUser"
     }
 
-    @PostMapping("/$DELETE_USER_PATH_SEGMENT/{localAuthorityUserId}")
+    @PostMapping("/$DELETE_USER_ROUTE")
     fun deleteUser(
         @PathVariable localAuthorityId: Int,
         @PathVariable localAuthorityUserId: Long,
@@ -268,7 +270,7 @@ class ManageLocalAuthorityUsersController(
         return "inviteLAUserSuccess"
     }
 
-    @GetMapping("/$CANCEL_INVITATION_PATH_SEGMENT/{invitationId}")
+    @GetMapping("/$CANCEL_INVITE_ROUTE")
     fun confirmCancelInvitation(
         @PathVariable localAuthorityId: Int,
         @PathVariable invitationId: Long,
@@ -293,7 +295,7 @@ class ManageLocalAuthorityUsersController(
         return "cancelLAUserInvitation"
     }
 
-    @PostMapping("/$CANCEL_INVITATION_PATH_SEGMENT/{invitationId}")
+    @PostMapping("/$CANCEL_INVITE_ROUTE")
     fun cancelInvitation(
         @PathVariable localAuthorityId: Int,
         @PathVariable invitationId: Long,
@@ -371,5 +373,43 @@ class ManageLocalAuthorityUsersController(
             // This is expected if the user is not an admin for the current LA
             return null
         }
+    }
+
+    companion object {
+        const val LOCAL_AUTHORITY_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/{localAuthorityId}"
+        const val EDIT_USER_ROUTE = "$EDIT_USER_PATH_SEGMENT/{localAuthorityUserId}"
+        const val DELETE_USER_ROUTE = "$DELETE_USER_PATH_SEGMENT/{localAuthorityUserId}"
+        const val CANCEL_INVITE_ROUTE = "$CANCEL_INVITATION_PATH_SEGMENT/{invitationId}"
+
+        private const val LA_MANAGE_USERS_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$MANAGE_USERS_PATH_SEGMENT"
+        private const val LA_EDIT_USER_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$EDIT_USER_ROUTE"
+        private const val LA_DELETE_USER_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$DELETE_USER_ROUTE"
+        private const val LA_DELETE_USER_SUCCESS_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$DELETE_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT"
+        private const val LA_INVITE_NEW_USER_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$INVITE_NEW_USER_PATH_SEGMENT"
+        private const val LA_CANCEL_INVITE_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$CANCEL_INVITE_ROUTE"
+
+        fun getLaManageUsersRoute(localAuthorityId: Int): String =
+            UriTemplate(LA_MANAGE_USERS_ROUTE).expand(localAuthorityId).toASCIIString()
+
+        fun getLaEditUserRoute(
+            localAuthorityId: Int,
+            localAuthorityUserId: Long,
+        ): String = UriTemplate(LA_EDIT_USER_ROUTE).expand(localAuthorityId, localAuthorityUserId).toASCIIString()
+
+        fun getLaDeleteUserRoute(
+            localAuthorityId: Int,
+            localAuthorityUserId: Long,
+        ): String = UriTemplate(LA_DELETE_USER_ROUTE).expand(localAuthorityId, localAuthorityUserId).toASCIIString()
+
+        fun getLaDeleteUserSuccessRoute(localAuthorityId: Int): String =
+            UriTemplate(LA_DELETE_USER_SUCCESS_ROUTE).expand(localAuthorityId).toASCIIString()
+
+        fun getLaInviteNewUserRoute(localAuthorityId: Int): String =
+            UriTemplate(LA_INVITE_NEW_USER_ROUTE).expand(localAuthorityId).toASCIIString()
+
+        fun getLaCancelInviteRoute(
+            localAuthorityId: Int,
+            localAuthorityUserId: Long,
+        ): String = UriTemplate(LA_CANCEL_INVITE_ROUTE).expand(localAuthorityId, localAuthorityUserId).toASCIIString()
     }
 }
