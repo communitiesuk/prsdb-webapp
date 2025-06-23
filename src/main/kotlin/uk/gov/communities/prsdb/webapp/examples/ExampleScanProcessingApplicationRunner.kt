@@ -22,7 +22,7 @@ class ExampleScanProcessingApplicationRunner(
     @Value("\${SCAN_RESULT_STATUS:DEFAULT}")
     lateinit var scanResultStatus: String
 
-    @Value("\${S3_OBJECT_KEY:noObjectSet")
+    @Value("\${S3_OBJECT_KEY:noObjectSet}")
     lateinit var objectKey: String
 
     override fun run(args: ApplicationArguments?) {
