@@ -12,7 +12,7 @@
             <p class="govuk-inset-text" th:text="${propertyAddress}">propertyAddress</p>
             <p class="govuk-body" th:text="#{propertyCompliance.confirmation.compliant.bullet.heading}">propertyCompliance.confirmation.compliant.bullet.heading</p>
             <ul class="govuk-list govuk-list--bullet" data-testid="compliant-messages">
-                <li th:each="compliantMsg : ${confirmationMessageKeys.compliantMsgKeys}" th:text="#{${compliantMsg}}"></li>
+                <li th:each="compliantMsgKey : ${confirmationMessageKeys.compliantMsgKeys}" th:text="#{${compliantMsgKey}}"></li>
             </ul>
             <p class="govuk-body" th:text="#{propertyCompliance.fullyCompliantConfirmation.paragraph.two}">propertyCompliance.fullyCompliantConfirmation.paragraph.two</p>
             <section>
