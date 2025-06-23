@@ -17,6 +17,8 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaInviteNewUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaManageUsersRoute
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
@@ -140,12 +142,12 @@ class Navigator(
     private val port: Int,
 ) {
     fun goToManageLaUsers(authorityId: Int): ManageLaUsersPage {
-        navigate("/local-authority/$authorityId/manage-users")
+        navigate(getLaManageUsersRoute(authorityId))
         return createValidPage(page, ManageLaUsersPage::class)
     }
 
     fun goToInviteNewLaUser(authorityId: Int): InviteNewLaUserPage {
-        navigate("/local-authority/$authorityId/invite-new-user")
+        navigate(getLaInviteNewUserRoute(authorityId))
         return createValidPage(page, InviteNewLaUserPage::class)
     }
 
