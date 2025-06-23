@@ -2,12 +2,12 @@ package uk.gov.communities.prsdb.webapp.models.viewModels
 
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 
-class PropertyComplianceConfirmationMessages(
+class PropertyComplianceConfirmationMessageKeys(
     private val propertyCompliance: PropertyCompliance,
 ) {
-    val nonCompliantMsgs = listOfNotNull(nonCompliantGasSafetyMsg, nonCompliantEicrMsg, nonCompliantEpcMsg)
+    val nonCompliantMsgKeys = listOfNotNull(nonCompliantGasSafetyMsg, nonCompliantEicrMsg, nonCompliantEpcMsg)
 
-    val compliantMsgs = listOfNotNull(compliantGasSafetyMsg, compliantEicrMsg, compliantEpcMsg, compliantLandlordResponsibilitiesMsg)
+    val compliantMsgKeys = listOfNotNull(compliantGasSafetyMsg, compliantEicrMsg, compliantEpcMsg, compliantLandlordResponsibilitiesMsg)
 
     private val nonCompliantGasSafetyMsg get() =
         when {

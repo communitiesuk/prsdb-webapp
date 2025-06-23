@@ -42,7 +42,7 @@ import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.discardRemainingFields
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.getFirstFileField
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessages
+import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -212,10 +212,10 @@ class PropertyComplianceController(
                 "No property compliance found for property ownership $propertyOwnershipId",
             )
 
-        val confirmationMessages = PropertyComplianceConfirmationMessages(propertyCompliance)
+        val confirmationMessageKeys = PropertyComplianceConfirmationMessageKeys(propertyCompliance)
 
         model.addAttribute("propertyAddress", propertyCompliance.propertyOwnership.property.address.singleLineAddress)
-        model.addAttribute("confirmationMessages", confirmationMessages)
+        model.addAttribute("confirmationMessages", confirmationMessageKeys)
         model.addAttribute("gasSafeRegisterUrl", GAS_SAFE_REGISTER)
         model.addAttribute("rcpElectricalInfoUrl", RCP_ELECTRICAL_INFO_URL)
         model.addAttribute("rcpElectricalRegisterUrl", RCP_ELECTRICAL_REGISTER_URL)
@@ -225,7 +225,7 @@ class PropertyComplianceController(
         model.addAttribute("propertiesWithoutComplianceUrl", INCOMPLETE_COMPLIANCES_URL)
         model.addAttribute("dashboardUrl", LANDLORD_DASHBOARD_URL)
 
-        return if (confirmationMessages.nonCompliantMsgs.isEmpty()) {
+        return if (confirmationMessageKeys.nonCompliantMsgKeys.isEmpty()) {
             "fullyCompliantPropertyConfirmation"
         } else {
             "partiallyCompliantPropertyConfirmation"

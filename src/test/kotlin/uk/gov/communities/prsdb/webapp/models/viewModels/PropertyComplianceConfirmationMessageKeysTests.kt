@@ -8,15 +8,15 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import kotlin.test.assertEquals
 
-class PropertyComplianceConfirmationMessagesTests {
+class PropertyComplianceConfirmationMessageKeysTests {
     @ParameterizedTest(name = "when {0}")
     @MethodSource("providePropertyCompliancesWithNonCompliantMsgs")
     fun `nonCompliantMsgs align with the PropertyCompliance's status`(
         propertyCompliance: PropertyCompliance,
         expectedNonCompliantMsgs: List<String>,
     ) {
-        val viewModel = PropertyComplianceConfirmationMessages(propertyCompliance)
-        assertEquals(expectedNonCompliantMsgs, viewModel.nonCompliantMsgs)
+        val viewModel = PropertyComplianceConfirmationMessageKeys(propertyCompliance)
+        assertEquals(expectedNonCompliantMsgs, viewModel.nonCompliantMsgKeys)
     }
 
     @ParameterizedTest(name = "when {0} certificates are compliant")
@@ -25,8 +25,8 @@ class PropertyComplianceConfirmationMessagesTests {
         propertyCompliance: PropertyCompliance,
         expectedCompliantMsgs: List<String>,
     ) {
-        val viewModel = PropertyComplianceConfirmationMessages(propertyCompliance)
-        assertEquals(expectedCompliantMsgs, viewModel.compliantMsgs)
+        val viewModel = PropertyComplianceConfirmationMessageKeys(propertyCompliance)
+        assertEquals(expectedCompliantMsgs, viewModel.compliantMsgKeys)
     }
 
     companion object {
