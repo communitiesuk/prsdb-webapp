@@ -1,8 +1,8 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels
 
-import org.junit.jupiter.api.Named
+import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
@@ -10,76 +10,61 @@ import kotlin.test.assertEquals
 
 class PropertyComplianceConfirmationMessageKeysTests {
     @ParameterizedTest(name = "when {0}")
-    @MethodSource("providePropertyCompliancesWithNonCompliantMsgs")
-    fun `nonCompliantMsgs align with the PropertyCompliance's status`(
+    @MethodSource("providePropertyCompliancesWithNonCompliantMsgKeys")
+    fun `nonCompliantMsgKeys align with the PropertyCompliance's status`(
         propertyCompliance: PropertyCompliance,
-        expectedNonCompliantMsgs: List<String>,
+        expectedNonCompliantMsgKeys: List<String>,
     ) {
         val viewModel = PropertyComplianceConfirmationMessageKeys(propertyCompliance)
-        assertEquals(expectedNonCompliantMsgs, viewModel.nonCompliantMsgKeys)
+        assertEquals(expectedNonCompliantMsgKeys, viewModel.nonCompliantMsgKeys)
     }
 
     @ParameterizedTest(name = "when {0} certificates are compliant")
-    @MethodSource("providePropertyCompliancesWithCompliantMsgs")
-    fun `compliantMsgs align with the PropertyCompliance's status`(
+    @MethodSource("providePropertyCompliancesWithCompliantMsgKeys")
+    fun `compliantMsgKeys align with the PropertyCompliance's status`(
         propertyCompliance: PropertyCompliance,
-        expectedCompliantMsgs: List<String>,
+        expectedCompliantMsgKeys: List<String>,
     ) {
         val viewModel = PropertyComplianceConfirmationMessageKeys(propertyCompliance)
-        assertEquals(expectedCompliantMsgs, viewModel.compliantMsgKeys)
+        assertEquals(expectedCompliantMsgKeys, viewModel.compliantMsgKeys)
     }
 
     companion object {
         @JvmStatic
-        private fun providePropertyCompliancesWithNonCompliantMsgs() =
+        private fun providePropertyCompliancesWithNonCompliantMsgKeys() =
             arrayOf(
-                Arguments.arguments(
-                    Named.named(
-                        "certificates are in date",
-                        PropertyComplianceBuilder.createWithInDateCerts(),
-                    ),
+                arguments(
+                    named("certificates are in date", PropertyComplianceBuilder.createWithInDateCerts()),
                     emptyList<String>(),
                 ),
-                Arguments.arguments(
-                    Named.named(
-                        "certificates are expired",
-                        PropertyComplianceBuilder.createWithExpiredCerts(),
-                    ),
-                    expiredCertMsgs,
+                arguments(
+                    named("certificates are expired", PropertyComplianceBuilder.createWithExpiredCerts()),
+                    expiredCertMsgKeys,
                 ),
-                Arguments.arguments(
-                    Named.named(
-                        "certificates have exemptions",
-                        PropertyComplianceBuilder.createWithCertExemptions(),
-                    ),
+                arguments(
+                    named("certificates have exemptions", PropertyComplianceBuilder.createWithCertExemptions()),
                     emptyList<String>(),
                 ),
-                Arguments.arguments(
-                    Named.named(
-                        "certificates are missing",
-                        PropertyComplianceBuilder.createWithMissingCerts(),
-                    ),
-                    missingCertMsgs,
+                arguments(
+                    named("certificates are missing", PropertyComplianceBuilder.createWithMissingCerts()),
+                    missingCertMsgKeys,
                 ),
-                Arguments.arguments(Named.named("EPC is low rated", lowRatingEpcPropertyCompliance), lowRatingEpcMsgs),
-                Arguments.arguments(
-                    Named.named(
-                        "EPC is low rated and expired",
-                        expiredAndLowRatingEpcPropertyCompliance,
-                    ),
-                    expiredAndLowRatingEpcMsgs,
+                arguments(
+                    named("EPC is low rated", lowRatingEpcPropertyCompliance),
+                    lowRatingEpcMsgKeys,
+                ),
+                arguments(
+                    named("EPC is low rated and expired", expiredAndLowRatingEpcPropertyCompliance),
+                    expiredAndLowRatingEpcMsgKeys,
                 ),
             )
 
         @JvmStatic
-        private fun providePropertyCompliancesWithCompliantMsgs() =
+        private fun providePropertyCompliancesWithCompliantMsgKeys() =
             arrayOf(
-                Arguments.arguments(
-                    Named.named("all", PropertyComplianceBuilder.createWithInDateCerts()),
-                    allCompliantCertMsgs,
-                ),
-                Arguments.arguments(Named.named("some", lowRatingEpcPropertyCompliance), someCompliantCertMsgs),
-                Arguments.arguments(Named.named("no", PropertyComplianceBuilder().build()), noCompliantCertMsgs),
+                arguments(named("all", PropertyComplianceBuilder.createWithInDateCerts()), allCompliantCertMsgKeys),
+                arguments(named("some", lowRatingEpcPropertyCompliance), someCompliantCertMsgKeys),
+                arguments(named("no", PropertyComplianceBuilder().build()), noCompliantCertMsgKeys),
             )
 
         private val lowRatingEpcPropertyCompliance =
@@ -98,25 +83,25 @@ class PropertyComplianceConfirmationMessageKeysTests {
                 .withLowEpcRating()
                 .build()
 
-        private val expiredCertMsgs =
+        private val expiredCertMsgKeys =
             listOf(
                 "propertyCompliance.confirmation.nonCompliant.bullet.gasSafety.expired",
                 "propertyCompliance.confirmation.nonCompliant.bullet.eicr.expired",
                 "propertyCompliance.confirmation.nonCompliant.bullet.epc.expired",
             )
 
-        private val missingCertMsgs =
+        private val missingCertMsgKeys =
             listOf(
                 "propertyCompliance.confirmation.nonCompliant.bullet.gasSafety.missing",
                 "propertyCompliance.confirmation.nonCompliant.bullet.eicr.missing",
                 "propertyCompliance.confirmation.nonCompliant.bullet.epc.missing",
             )
 
-        private val lowRatingEpcMsgs = listOf("propertyCompliance.confirmation.nonCompliant.bullet.epc.lowRating")
+        private val lowRatingEpcMsgKeys = listOf("propertyCompliance.confirmation.nonCompliant.bullet.epc.lowRating")
 
-        private val expiredAndLowRatingEpcMsgs = listOf("propertyCompliance.confirmation.nonCompliant.bullet.epc.expiredAndLowRating")
+        private val expiredAndLowRatingEpcMsgKeys = listOf("propertyCompliance.confirmation.nonCompliant.bullet.epc.expiredAndLowRating")
 
-        private val allCompliantCertMsgs =
+        private val allCompliantCertMsgKeys =
             listOf(
                 "propertyCompliance.confirmation.compliant.bullet.gasSafety",
                 "propertyCompliance.confirmation.compliant.bullet.eicr",
@@ -124,8 +109,8 @@ class PropertyComplianceConfirmationMessageKeysTests {
                 "propertyCompliance.confirmation.compliant.bullet.responsibilities",
             )
 
-        private val someCompliantCertMsgs = allCompliantCertMsgs - "propertyCompliance.confirmation.compliant.bullet.epc"
+        private val someCompliantCertMsgKeys = allCompliantCertMsgKeys - "propertyCompliance.confirmation.compliant.bullet.epc"
 
-        private val noCompliantCertMsgs = listOf("propertyCompliance.confirmation.compliant.bullet.responsibilities")
+        private val noCompliantCertMsgKeys = listOf("propertyCompliance.confirmation.compliant.bullet.responsibilities")
     }
 }

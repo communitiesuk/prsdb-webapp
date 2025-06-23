@@ -5,39 +5,40 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 class PropertyComplianceConfirmationMessageKeys(
     private val propertyCompliance: PropertyCompliance,
 ) {
-    val nonCompliantMsgKeys = listOfNotNull(nonCompliantGasSafetyMsg, nonCompliantEicrMsg, nonCompliantEpcMsg)
+    val nonCompliantMsgKeys = listOfNotNull(nonCompliantGasSafetyMsgKey, nonCompliantEicrMsgKey, nonCompliantEpcMsgKey)
 
-    val compliantMsgKeys = listOfNotNull(compliantGasSafetyMsg, compliantEicrMsg, compliantEpcMsg, compliantLandlordResponsibilitiesMsg)
+    val compliantMsgKeys =
+        listOfNotNull(compliantGasSafetyMsgKey, compliantEicrMsgKey, compliantEpcMsgKey, compliantLandlordResponsibilitiesMsgKey)
 
-    private val nonCompliantGasSafetyMsg get() =
+    private val nonCompliantGasSafetyMsgKey get() =
         when {
             propertyCompliance.isGasSafetyCertExpired == true -> "propertyCompliance.confirmation.nonCompliant.bullet.gasSafety.expired"
             propertyCompliance.isGasSafetyCertMissing -> "propertyCompliance.confirmation.nonCompliant.bullet.gasSafety.missing"
             else -> null
         }
 
-    private val compliantGasSafetyMsg get() =
-        if (nonCompliantGasSafetyMsg == null) {
+    private val compliantGasSafetyMsgKey get() =
+        if (nonCompliantGasSafetyMsgKey == null) {
             "propertyCompliance.confirmation.compliant.bullet.gasSafety"
         } else {
             null
         }
 
-    private val nonCompliantEicrMsg get() =
+    private val nonCompliantEicrMsgKey get() =
         when {
             propertyCompliance.isEicrExpired == true -> "propertyCompliance.confirmation.nonCompliant.bullet.eicr.expired"
             propertyCompliance.isEicrMissing -> "propertyCompliance.confirmation.nonCompliant.bullet.eicr.missing"
             else -> null
         }
 
-    private val compliantEicrMsg get() =
-        if (nonCompliantEicrMsg == null) {
+    private val compliantEicrMsgKey get() =
+        if (nonCompliantEicrMsgKey == null) {
             "propertyCompliance.confirmation.compliant.bullet.eicr"
         } else {
             null
         }
 
-    private val nonCompliantEpcMsg get() =
+    private val nonCompliantEpcMsgKey get() =
         when {
             propertyCompliance.isEpcExpiredAndLowRated() -> "propertyCompliance.confirmation.nonCompliant.bullet.epc.expiredAndLowRating"
             propertyCompliance.isEpcExpired == true -> "propertyCompliance.confirmation.nonCompliant.bullet.epc.expired"
@@ -46,14 +47,14 @@ class PropertyComplianceConfirmationMessageKeys(
             else -> null
         }
 
-    private val compliantEpcMsg get() =
-        if (nonCompliantEpcMsg == null) {
+    private val compliantEpcMsgKey get() =
+        if (nonCompliantEpcMsgKey == null) {
             "propertyCompliance.confirmation.compliant.bullet.epc"
         } else {
             null
         }
 
-    private val compliantLandlordResponsibilitiesMsg get() =
+    private val compliantLandlordResponsibilitiesMsgKey get() =
         "propertyCompliance.confirmation.compliant.bullet.responsibilities"
 
     private fun PropertyCompliance.isEpcExpiredAndLowRated(): Boolean = isEpcExpired == true && isEpcRatingLow == true

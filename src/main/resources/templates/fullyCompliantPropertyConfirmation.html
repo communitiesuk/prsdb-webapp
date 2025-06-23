@@ -1,5 +1,5 @@
 <!--/*@thymesVar id="propertyAddress" type="java.lang.String"*/-->
-<!--/*@thymesVar id="confirmationMessages" type="uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys"*/-->
+<!--/*@thymesVar id="confirmationMessageKeys" type="uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys"*/-->
 <!--/*@thymesVar id="propertiesWithoutComplianceUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="dashboardUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
@@ -12,7 +12,7 @@
             <p class="govuk-inset-text" th:text="${propertyAddress}">propertyAddress</p>
             <p class="govuk-body" th:text="#{propertyCompliance.confirmation.compliant.bullet.heading}">propertyCompliance.confirmation.compliant.bullet.heading</p>
             <ul class="govuk-list govuk-list--bullet" data-testid="compliant-messages">
-                <li th:each="compliantMsg : ${confirmationMessages.compliantMsgKeys}" th:text="#{${compliantMsg}}"></li>
+                <li th:each="compliantMsg : ${confirmationMessageKeys.compliantMsgKeys}" th:text="#{${compliantMsg}}"></li>
             </ul>
             <p class="govuk-body" th:text="#{propertyCompliance.fullyCompliantConfirmation.paragraph.two}">propertyCompliance.fullyCompliantConfirmation.paragraph.two</p>
             <section>

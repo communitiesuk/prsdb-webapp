@@ -215,7 +215,7 @@ class PropertyComplianceController(
         val confirmationMessageKeys = PropertyComplianceConfirmationMessageKeys(propertyCompliance)
 
         model.addAttribute("propertyAddress", propertyCompliance.propertyOwnership.property.address.singleLineAddress)
-        model.addAttribute("confirmationMessages", confirmationMessageKeys)
+        model.addAttribute("confirmationMessageKeys", confirmationMessageKeys)
         model.addAttribute("gasSafeRegisterUrl", GAS_SAFE_REGISTER)
         model.addAttribute("rcpElectricalInfoUrl", RCP_ELECTRICAL_INFO_URL)
         model.addAttribute("rcpElectricalRegisterUrl", RCP_ELECTRICAL_REGISTER_URL)
