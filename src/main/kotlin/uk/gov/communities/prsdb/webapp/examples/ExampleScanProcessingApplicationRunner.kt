@@ -24,20 +24,29 @@ class ExampleScanProcessingApplicationRunner(
     lateinit var scanResultJson: String
 
     override fun run(args: ApplicationArguments?) {
-        val scanResult: GuardDutyScanResult = GuardDutyScanResult.fromJson(scanResultJson)
+        try {
+            val scanResult: GuardDutyScanResult = GuardDutyScanResult.fromJson(scanResultJson)
 
-        val ownershipId = getPropertyOwnershipIdOrNull(scanResult.s3ObjectDetails?.objectKey ?: "")
-        val ownership = ownershipId?.let { propertyOwnershipRepository.findByIdAndIsActiveTrue(it) }
+            val ownershipId = getPropertyOwnershipIdOrNull(scanResult.s3ObjectDetails?.objectKey ?: "")
+            val ownership = ownershipId?.let { propertyOwnershipRepository.findByIdAndIsActiveTrue(it) }
 
-        if (ownership == null) {
+            if (ownership == null) {
+                val objectDetails: String = scanResult.s3ObjectDetails?.toString() ?: "No object details"
+                emailSender.sendEmail(
+                    "team-prsdb+unowned-scan-result@softwire.com",
+                    ExampleEmail("No ownership for file - $objectDetails"),
+                )
+            } else {
+                emailSender.sendEmail(
+                    ownership.primaryLandlord.email,
+                    ExampleEmail(scanResult.scanResultDetails?.scanResultStatus ?: ""),
+                )
+            }
+        } catch (e: Exception) {
+            println("Error processing scan result: ${e.message}")
             emailSender.sendEmail(
                 "team-prsdb+unowned-scan-result@softwire.com",
-                ExampleEmail("No ownership for file ${scanResult.s3ObjectDetails?.objectKey}"),
-            )
-        } else {
-            emailSender.sendEmail(
-                ownership.primaryLandlord.email,
-                ExampleEmail(scanResult.scanResultDetails?.scanResultStatus ?: ""),
+                ExampleEmail("Full json - $scanResultJson"),
             )
         }
 
