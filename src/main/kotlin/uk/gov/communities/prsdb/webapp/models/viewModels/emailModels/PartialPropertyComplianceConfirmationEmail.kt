@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
-class PartialPropertyComplianceConfirmationEmail(
+data class PartialPropertyComplianceConfirmationEmail(
     private val propertyAddress: String,
     private val compliantBulletPoints: EmailBulletPointList,
     private val nonCompliantBulletPoints: EmailBulletPointList,
