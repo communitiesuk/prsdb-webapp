@@ -15,6 +15,7 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
+import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
@@ -67,6 +68,7 @@ class PropertyDetailsController(
 
         model.addAttribute("propertyDetails", propertyDetails)
         model.addAttribute("landlordDetails", landlordViewModel)
+        model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         model.addAttribute("deleteRecordLink", DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
@@ -149,6 +151,7 @@ class PropertyDetailsController(
         model.addAttribute("lastModifiedDate", lastModifiedDate)
         model.addAttribute("lastModifiedBy", lastModifiedBy)
         model.addAttribute("landlordDetails", landlordViewModel)
+        model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         model.addAttribute("backUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
 
         return "propertyDetailsView"
