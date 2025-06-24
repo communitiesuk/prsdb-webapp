@@ -15,7 +15,7 @@ class PropertyDetailsViewModel(
     private val propertyOwnership: PropertyOwnership,
     private val withChangeLinks: Boolean = true,
     private val hideNullUprn: Boolean = true,
-    landlordDetailsUrl: String = LandlordDetailsController.LANDLORD_DETAILS_ROUTE,
+    landlordDetailsUrl: String = LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE,
 ) {
     val address: String = propertyOwnership.property.address.singleLineAddress
 

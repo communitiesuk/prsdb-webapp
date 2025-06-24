@@ -932,13 +932,13 @@ class Navigator(
     }
 
     fun goToLandlordDetails(): LandlordDetailsPage {
-        navigate("/landlord-details")
+        navigate(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
         return createValidPage(page, LandlordDetailsPage::class)
     }
 
     fun goToLandlordDetailsAsALocalAuthorityUser(id: Long): LocalAuthorityViewLandlordDetailsPage {
-        navigate("/landlord-details/$id")
-        return createValidPage(page, LocalAuthorityViewLandlordDetailsPage::class)
+        navigate(LandlordDetailsController.getLandlordDetailsForLaUserPath(id))
+        return createValidPage(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to id.toString()))
     }
 
     fun goToUpdateLandlordDetailsUpdateLookupAddressPage(): LookupAddressFormPageUpdateLandlordDetails {

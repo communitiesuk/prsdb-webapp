@@ -6,8 +6,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
@@ -85,7 +83,7 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
             searchLandlordRegisterPage.searchBar.search("L-CKSQ-3SX9")
             searchLandlordRegisterPage.getLandlordLink(rowIndex = 0).clickAndWait()
 
-            assertContains(page.url(), "${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/1")
+            assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to "1"))
         }
 
         @Test
@@ -202,7 +200,7 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
 
             resultTable.getClickableCell(0, LANDLORD_COL_INDEX).link.clickAndWait()
 
-            val landlordPage = assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
+            val landlordPage = assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to "1"))
             landlordPage.backLink.clickAndWait()
 
             assertPageIs(page, SearchLandlordRegisterPage::class)
@@ -272,8 +270,7 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("P-C5YY-J34H")
             searchPropertyRegisterPage.getPropertyLink(rowIndex = 0).clickAndWait()
-
-            assertContains(page.url(), PropertyDetailsController.getPropertyDetailsPath(1L, isLaView = true))
+            assertPageIs(page, PropertyDetailsPageLocalAuthorityView::class, mapOf("propertyOwnershipId" to "1"))
         }
 
         @Test
@@ -282,7 +279,7 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
             searchPropertyRegisterPage.searchBar.search("P-C5YY-J34H")
             searchPropertyRegisterPage.getLandlordLink(rowIndex = 0).clickAndWait()
 
-            assertContains(page.url(), "${LandlordDetailsController.LANDLORD_DETAILS_ROUTE}/1")
+            assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to "1"))
         }
 
         @Test
@@ -418,7 +415,7 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
 
             resultTable.getClickableCell(0, PROPERTY_LANDLORD_COL_INDEX).link.clickAndWait()
 
-            val landlordPage = assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
+            val landlordPage = assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to "1"))
             landlordPage.backLink.clickAndWait()
 
             assertPageIs(page, SearchPropertyRegisterPage::class)
