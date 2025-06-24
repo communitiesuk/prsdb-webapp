@@ -924,7 +924,7 @@ class Navigator(
     }
 
     fun goToLandlordDetailsAsALocalAuthorityUser(id: Long): LocalAuthorityViewLandlordDetailsPage {
-        navigate(LandlordDetailsController.getLandlordDetailsPath(id))
+        navigate(LandlordDetailsController.getLandlordDetailsForLaUserPath(id))
         return createValidPage(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to id.toString()))
     }
 

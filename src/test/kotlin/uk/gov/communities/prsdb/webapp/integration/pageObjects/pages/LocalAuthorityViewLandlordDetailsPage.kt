@@ -8,6 +8,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.L
 class LocalAuthorityViewLandlordDetailsPage(
     page: Page,
     urlArguments: Map<String, String>,
-) : LandlordDetailsBasePage(page, LandlordDetailsController.getLandlordDetailsPath(urlArguments["id"]!!.toLong())) {
+) : LandlordDetailsBasePage(page, LandlordDetailsController.getLandlordDetailsForLaUserPath(urlArguments["id"]!!.toLong())) {
     val insetText = InsetText(page)
 }

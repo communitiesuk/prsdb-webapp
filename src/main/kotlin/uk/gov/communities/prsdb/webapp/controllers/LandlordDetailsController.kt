@@ -117,7 +117,7 @@ class LandlordDetailsController(
         const val LANDLORD_DETAILS_FOR_LA_USER_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$LANDLORD_DETAILS_PATH_SEGMENT/{id}"
         const val UPDATE_ROUTE = "$LANDLORD_DETAILS_FOR_LANDLORD_ROUTE/$UPDATE_PATH_SEGMENT"
 
-        fun getLandlordDetailsPath(landlordId: Long? = null): String =
+        fun getLandlordDetailsForLaUserPath(landlordId: Long? = null): String =
             UriTemplate(LANDLORD_DETAILS_FOR_LA_USER_ROUTE)
                 .expand(landlordId)
                 .toASCIIString()

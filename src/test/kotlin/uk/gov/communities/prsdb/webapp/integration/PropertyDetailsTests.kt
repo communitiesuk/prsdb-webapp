@@ -120,7 +120,7 @@ class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
             detailsPage.getLandlordNameLinkFromKeyDetails("Alexander Smith").clickAndWait()
 
             assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to "1"))
-            Assertions.assertEquals(LandlordDetailsController.getLandlordDetailsPath(1L), URI(page.url()).path)
+            Assertions.assertEquals(LandlordDetailsController.getLandlordDetailsForLaUserPath(1L), URI(page.url()).path)
         }
 
         @Test

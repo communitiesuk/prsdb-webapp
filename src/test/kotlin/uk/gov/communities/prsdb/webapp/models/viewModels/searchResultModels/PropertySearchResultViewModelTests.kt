@@ -27,7 +27,7 @@ class PropertySearchResultViewModelTests {
                     PropertySearchResultLandlordViewModel(
                         id = propertyOwnership.primaryLandlord.id,
                         name = propertyOwnership.primaryLandlord.name,
-                        recordLink = LandlordDetailsController.getLandlordDetailsPath(propertyOwnership.primaryLandlord.id),
+                        recordLink = LandlordDetailsController.getLandlordDetailsForLaUserPath(propertyOwnership.primaryLandlord.id),
                     ),
                 recordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLaView = true),
             )

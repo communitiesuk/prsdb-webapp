@@ -24,7 +24,7 @@ class LandlordSearchResultsViewModelTests {
                 email = landlord.email,
                 phoneNumber = landlord.phoneNumber,
                 listedPropertyCount = 3,
-                recordLink = LandlordDetailsController.getLandlordDetailsPath(landlord.id),
+                recordLink = LandlordDetailsController.getLandlordDetailsForLaUserPath(landlord.id),
             )
 
         val landlordSearchResultViewModel =
