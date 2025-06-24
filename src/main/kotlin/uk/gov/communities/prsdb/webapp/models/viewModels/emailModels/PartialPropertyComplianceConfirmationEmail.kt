@@ -4,7 +4,7 @@ data class PartialPropertyComplianceConfirmationEmail(
     private val propertyAddress: String,
     private val compliantBulletPoints: EmailBulletPointList,
     private val nonCompliantBulletPoints: EmailBulletPointList,
-    private val updateComplianceUrl: String,
+    val updateComplianceUrl: String,
 ) : EmailTemplateModel {
     override val templateId = EmailTemplateId.PARTIAL_PROPERTY_COMPLIANCE_CONFIRMATION
 

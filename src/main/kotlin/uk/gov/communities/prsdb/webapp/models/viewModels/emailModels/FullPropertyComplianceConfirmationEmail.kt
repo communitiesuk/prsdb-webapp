@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 data class FullPropertyComplianceConfirmationEmail(
     private val propertyAddress: String,
     private val compliantBulletPoints: EmailBulletPointList,
-    private val dashboardUrl: String,
+    val dashboardUrl: String,
 ) : EmailTemplateModel {
     override val templateId = EmailTemplateId.FULL_PROPERTY_COMPLIANCE_CONFIRMATION
 
