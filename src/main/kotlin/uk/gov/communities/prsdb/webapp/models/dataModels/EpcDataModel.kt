@@ -57,7 +57,7 @@ data class EpcDataModel(
                 certificateNumber = epcData.getString("epcRrn"),
                 singleLineAddress = singleLineAddress,
                 energyRating = epcData.getString("currentEnergyEfficiencyBand"),
-                expiryDate = DateTimeHelper.getDateInUK(epcData.getString("expiryDate")),
+                expiryDate = LocalDate.parse(epcData.getString("expiryDate")),
                 latestCertificateNumberForThisProperty = epcData.getString("latestEpcRrnForAddress"),
             )
         }
