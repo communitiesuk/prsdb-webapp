@@ -48,8 +48,7 @@ class PropertyDetailsController(
         val propertyOwnership = propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, baseUserId)
 
         val landlordDetailsUrl =
-            LandlordDetailsController
-                .getLandlordDetailsPath()
+            LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
                 .overrideBackLinkForUrl(backLinkStorageService.storeCurrentUrlReturningKey())
 
         val propertyDetails =
@@ -130,7 +129,7 @@ class PropertyDetailsController(
         val lastModifiedBy = propertyOwnership.primaryLandlord.name
         val primaryLandlordDetailsUrl =
             LandlordDetailsController
-                .getLandlordDetailsPath(propertyOwnership.primaryLandlord.id)
+                .getLandlordDetailsForLaUserPath(propertyOwnership.primaryLandlord.id)
                 .overrideBackLinkForUrl(backLinkStorageService.storeCurrentUrlReturningKey())
 
         val propertyDetails =

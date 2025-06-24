@@ -34,7 +34,7 @@ data class PropertySearchResultViewModel(
                     name = propertyOwnership.primaryLandlord.name,
                     recordLink =
                         LandlordDetailsController
-                            .getLandlordDetailsPath(propertyOwnership.primaryLandlord.id)
+                            .getLandlordDetailsForLaUserPath(propertyOwnership.primaryLandlord.id)
                             .overrideBackLinkForUrl(currentUrlKey),
                 ),
             recordLink =
