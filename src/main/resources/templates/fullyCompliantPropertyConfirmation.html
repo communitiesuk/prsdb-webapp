@@ -1,0 +1,35 @@
+<!--/*@thymesVar id="propertyAddress" type="java.lang.String"*/-->
+<!--/*@thymesVar id="confirmationMessageKeys" type="uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys"*/-->
+<!--/*@thymesVar id="propertiesWithoutComplianceUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="dashboardUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{propertyCompliance.confirmation.title}, ~{::main}, false)}">
+    <main class="govuk-main-wrapper" id="main-content">
+        <div id="page-contents" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+            <div th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{propertyCompliance.fullyCompliantConfirmation.banner.text}, null)}"></div>
+            <h1 class="govuk-heading-l" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h1>
+            <p class="govuk-body" th:text="#{propertyCompliance.fullyCompliantConfirmation.paragraph.one}">propertyCompliance.fullyCompliantConfirmation.paragraph.one</p>
+            <p class="govuk-inset-text" th:text="${propertyAddress}">propertyAddress</p>
+            <p class="govuk-body" th:text="#{propertyCompliance.confirmation.compliant.bullet.heading}">propertyCompliance.confirmation.compliant.bullet.heading</p>
+            <ul class="govuk-list govuk-list--bullet" data-testid="compliant-messages">
+                <li th:each="compliantMsgKey : ${confirmationMessageKeys.compliantMsgKeys}" th:text="#{${compliantMsgKey}}"></li>
+            </ul>
+            <p class="govuk-body" th:text="#{propertyCompliance.fullyCompliantConfirmation.paragraph.two}">propertyCompliance.fullyCompliantConfirmation.paragraph.two</p>
+            <section>
+                <h2 class="govuk-heading-s" th:text="#{propertyCompliance.fullyCompliantConfirmation.upToDate.heading}">propertyCompliance.fullyCompliantConfirmation.upToDate.heading</h2>
+                <p class="govuk-body" th:text="#{propertyCompliance.fullyCompliantConfirmation.upToDate.paragraph.one}">propertyCompliance.fullyCompliantConfirmation.upToDate.paragraph.one</p>
+                <p class="govuk-body" th:text="#{propertyCompliance.fullyCompliantConfirmation.upToDate.paragraph.two}">propertyCompliance.fullyCompliantConfirmation.upToDate.paragraph.two</p>
+                <p class="govuk-body" th:text="#{propertyCompliance.fullyCompliantConfirmation.upToDate.bullet.heading}">propertyCompliance.fullyCompliantConfirmation.upToDate.bullet.heading</p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{propertyCompliance.fullyCompliantConfirmation.upToDate.bullet.one}">propertyCompliance.fullyCompliantConfirmation.upToDate.bullet.one</li>
+                    <li th:text="#{propertyCompliance.fullyCompliantConfirmation.upToDate.bullet.two}">propertyCompliance.fullyCompliantConfirmation.upToDate.bullet.two</li>
+                    <li th:text="#{propertyCompliance.fullyCompliantConfirmation.upToDate.bullet.three}">propertyCompliance.fullyCompliantConfirmation.upToDate.bullet.three</li>
+                </ul>
+            </section>
+            <div class="govuk-button-group">
+                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${propertiesWithoutComplianceUrl}}, #{propertyCompliance.confirmation.addForAnotherProperty})}"></a>
+                <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${dashboardUrl}}, #{common.confirmationPage.goToDashboard})}"></a>
+            </div>
+        </div>
+    </main>
+</html>

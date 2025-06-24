@@ -114,18 +114,7 @@ class LaUserRegistrationJourney(
     private fun checkAnswersStep() =
         Step(
             id = RegisterLaUserStepId.CheckAnswers,
-            page =
-                LaUserRegistrationCheckAnswersPage(
-                    formModel = NoInputFormModel::class,
-                    templateName = "forms/checkAnswersForm",
-                    content =
-                        mapOf(
-                            "title" to "registerLAUser.title",
-                            "summaryName" to "registerLaUser.checkAnswers.summaryName",
-                            "submitButtonText" to "forms.buttons.confirm",
-                        ),
-                    invitationService,
-                ),
+            page = LaUserRegistrationCheckAnswersPage(journeyDataService, invitationService),
             handleSubmitAndRedirect = { filteredJourneyData, _, _ -> checkAnswersHandleSubmitAndRedirect(filteredJourneyData) },
             saveAfterSubmit = false,
         )

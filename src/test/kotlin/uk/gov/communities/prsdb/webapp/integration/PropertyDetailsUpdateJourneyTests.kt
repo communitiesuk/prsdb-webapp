@@ -313,6 +313,9 @@ class PropertyDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sq
             val checkPeopleAnswersPage2 =
                 assertPageIs(page2, CheckPeopleAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
+            assertThat(checkPeopleAnswersPage2.form.summaryList.occupancyRow).containsText("Yes")
+            assertThat(checkPeopleAnswersPage2.form.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople)
+
             // Finish updating occupancy to vacant on page1
             assertThat(checkOccupancyAnswersPage1.form.summaryList.occupancyRow).containsText("No")
             checkOccupancyAnswersPage1.confirm()
@@ -320,16 +323,52 @@ class PropertyDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sq
 
             // Check changes have occurred on page1
             assertThat(propertyDetailsPage1.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
+        }
 
-            // Finish updating number of people on page2
-            assertThat(checkPeopleAnswersPage2.form.summaryList.occupancyRow).containsText("Yes")
-            assertThat(checkPeopleAnswersPage2.form.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople)
-            checkPeopleAnswersPage2.confirm()
-            val propertyDetailsPage2 = assertPageIs(page2, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
+        @Test
+        fun `Submitting an occupancy update clears the journey context for all the occupancy sub-journeys`(page: Page) {
+            // Details page - start a people update
+            var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+            propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.clickActionLinkAndWait()
+            var updatePeoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
-            // Check changes have occurred on page2
-            assertThat(propertyDetailsPage2.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
-            assertThat(propertyDetailsPage2.propertyDetailsSummaryList.numberOfPeopleRow.value).containsText(newNumberOfPeople)
+            // Update people page - go back to the details page and complete a households update instead
+            updatePeoplePage.backLink.clickAndWait()
+            propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
+
+            propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickActionLinkAndWait()
+            val updateHouseholdsPage =
+                assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+            val newNumberOfHouseholds = "1"
+            updateHouseholdsPage.submitNumberOfHouseholds(newNumberOfHouseholds)
+            val updateHouseholdsPeoplePage =
+                assertPageIs(page, HouseholdsNumberOfPeopleFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+            updateHouseholdsPeoplePage.submitNumOfPeople(newNumberOfHouseholds)
+            val checkHouseholdsAnswersPage =
+                assertPageIs(page, CheckHouseholdsAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+            checkHouseholdsAnswersPage.form.submit()
+            propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
+
+            // Details page - start another people update
+            propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.clickActionLinkAndWait()
+            updatePeoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+            val newNumberOfPeople = "3"
+            updatePeoplePage.submitNumOfPeople(newNumberOfPeople)
+            val checkPeopleAnswersPage =
+                assertPageIs(page, CheckPeopleAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+            // Check people answers page - check summary data includes newNumberOfHouseholds then complete update
+            assertThat(checkPeopleAnswersPage.form.summaryList.numberOfHouseholdsRow).containsText(newNumberOfHouseholds)
+            assertThat(checkPeopleAnswersPage.form.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople)
+            checkPeopleAnswersPage.form.submit()
+            propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
+
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow).containsText(newNumberOfHouseholds)
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow).containsText(newNumberOfPeople)
         }
     }
 }

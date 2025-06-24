@@ -12,9 +12,11 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistrationJourneyFactory
@@ -25,7 +27,7 @@ import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import java.security.Principal
 
 @PrsdbController
-@RequestMapping("/${REGISTER_LANDLORD_JOURNEY_URL}")
+@RequestMapping(LANDLORD_REGISTRATION_ROUTE)
 class RegisterLandlordController(
     private val landlordRegistrationJourneyFactory: LandlordRegistrationJourneyFactory,
     private val identityService: OneLoginIdentityService,
@@ -36,7 +38,7 @@ class RegisterLandlordController(
     fun index(model: Model): CharSequence {
         model.addAttribute(
             "registerAsALandlordInitialStep",
-            "/${REGISTER_LANDLORD_JOURNEY_URL}/${START_PAGE_PATH_SEGMENT}",
+            "$LANDLORD_REGISTRATION_ROUTE/${START_PAGE_PATH_SEGMENT}",
         )
         return "registerAsALandlord"
     }
@@ -116,5 +118,7 @@ class RegisterLandlordController(
 
     companion object {
         const val IDENTITY_VERIFICATION_PATH_SEGMENT = "verify-identity"
+
+        const val LANDLORD_REGISTRATION_ROUTE = "/$LANDLORD_PATH_SEGMENT/$REGISTER_LANDLORD_JOURNEY_URL"
     }
 }

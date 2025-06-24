@@ -36,4 +36,17 @@ enum class UpdatePropertyDetailsGroupIdentifier {
     Occupancy,
     NumberOfHouseholds,
     NumberOfPeople,
+    ;
+
+    val relatedGroups
+        get() =
+            if (this in occupancyRelatedGroups) {
+                occupancyRelatedGroups
+            } else {
+                listOf(this)
+            }
+
+    companion object {
+        private val occupancyRelatedGroups = listOf(Occupancy, NumberOfHouseholds, NumberOfPeople)
+    }
 }

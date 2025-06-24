@@ -29,14 +29,14 @@ class RegisterLandlordControllerTests(
 
     @Test
     fun `RegisterLandlordController returns 200 for unauthenticated user`() {
-        mvc.get("/register-as-a-landlord").andExpect {
+        mvc.get(RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE).andExpect {
             status { isOk() }
         }
     }
 
     @Test
     fun `RegisterLandlordController returns 308 for authenticated user with trailing slash`() {
-        mvc.get("/register-as-a-landlord/").andExpect {
+        mvc.get("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/").andExpect {
             status { isPermanentRedirect() }
         }
     }
@@ -46,7 +46,7 @@ class RegisterLandlordControllerTests(
     fun `getVerifyIdentity returns 302 for authenticated user with Landlord role`() {
         whenever(userRolesService.getHasLandlordUserRole(any())).thenReturn(true)
         mvc
-            .get("/register-as-a-landlord/verify-identity") {
+            .get("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/verify-identity") {
                 with(oidcLogin())
             }.andExpectAll {
                 status { is3xxRedirection() }
