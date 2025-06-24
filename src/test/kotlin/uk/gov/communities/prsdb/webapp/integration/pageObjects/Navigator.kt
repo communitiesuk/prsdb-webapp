@@ -964,7 +964,7 @@ class Navigator(
     }
 
     fun goToPropertyDetailsLandlordView(id: Long): PropertyDetailsPageLandlordView {
-        navigate("/property-details/$id")
+        navigate(PropertyDetailsController.getPropertyDetailsPath(id, isLaView = false))
         return createValidPage(
             page,
             PropertyDetailsPageLandlordView::class,
@@ -973,7 +973,7 @@ class Navigator(
     }
 
     fun goToPropertyDetailsLocalAuthorityView(id: Long): PropertyDetailsPageLocalAuthorityView {
-        navigate("/local-authority/property-details/$id")
+        navigate(PropertyDetailsController.getPropertyDetailsPath(id, isLaView = true))
         return createValidPage(
             page,
             PropertyDetailsPageLocalAuthorityView::class,

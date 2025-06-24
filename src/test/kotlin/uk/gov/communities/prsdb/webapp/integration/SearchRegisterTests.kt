@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
@@ -272,7 +273,7 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
             searchPropertyRegisterPage.searchBar.search("P-C5YY-J34H")
             searchPropertyRegisterPage.getPropertyLink(rowIndex = 0).clickAndWait()
 
-            assertContains(page.url(), "/local-authority/property-details/1")
+            assertContains(page.url(), PropertyDetailsController.getPropertyDetailsPath(1L, isLaView = true))
         }
 
         @Test
