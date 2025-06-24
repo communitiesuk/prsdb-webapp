@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
@@ -21,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersCont
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaManageUsersRoute
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
@@ -322,12 +322,12 @@ class Navigator(
 
     fun navigateToLaUserRegistrationLandingPage(token: UUID) {
         storeInvitationTokenInSession(token)
-        navigate("/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.LandingPage.urlPathSegment}")
+        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.LandingPage.urlPathSegment}")
     }
 
     fun skipToLaUserRegistrationLandingPage(token: UUID): LandingPageLaUserRegistration {
         storeInvitationTokenInSession(token)
-        navigate("/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.LandingPage.urlPathSegment}")
+        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.LandingPage.urlPathSegment}")
         return createValidPage(page, LandingPageLaUserRegistration::class)
     }
 
@@ -337,7 +337,7 @@ class Navigator(
             LaUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLaUserRegistrationName().build(),
         )
-        navigate("/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.Name.urlPathSegment}")
+        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.Name.urlPathSegment}")
         return createValidPage(page, NameFormPageLaUserRegistration::class)
     }
 
@@ -347,7 +347,7 @@ class Navigator(
             LaUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLaUserRegistrationEmail().build(),
         )
-        navigate("/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.Email.urlPathSegment}")
+        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.Email.urlPathSegment}")
         return createValidPage(page, EmailFormPageLaUserRegistration::class)
     }
 
@@ -357,12 +357,12 @@ class Navigator(
             LaUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLaUserRegistrationCheckAnswers().build(),
         )
-        navigate("/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.CheckAnswers.urlPathSegment}")
+        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.CheckAnswers.urlPathSegment}")
         return createValidPage(page, CheckAnswersPageLaUserRegistration::class)
     }
 
     fun navigateToLaUserRegistrationConfirmationPage() {
-        navigate("/$REGISTER_LA_USER_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
+        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
     }
 
     fun goToPropertyRegistrationStartPage(): RegisterPropertyStartPage {
