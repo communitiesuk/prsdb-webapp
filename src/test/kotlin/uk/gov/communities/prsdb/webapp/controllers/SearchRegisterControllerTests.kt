@@ -30,7 +30,7 @@ class SearchRegisterControllerTests(
 
     @Test
     fun `SearchRegisterController returns a redirect for unauthenticated user`() {
-        mvc.get("/search/landlord").andExpect {
+        mvc.get(SearchRegisterController.SEARCH_LANDLORD_URL).andExpect {
             status { is3xxRedirection() }
         }
     }
@@ -39,7 +39,7 @@ class SearchRegisterControllerTests(
     @WithMockUser
     fun `SearchRegisterController returns 403 for unauthorized user`() {
         mvc
-            .get("/search/landlord")
+            .get(SearchRegisterController.SEARCH_LANDLORD_URL)
             .andExpect {
                 status { isForbidden() }
             }
@@ -49,7 +49,7 @@ class SearchRegisterControllerTests(
     @WithMockUser(roles = ["LA_USER"])
     fun `SearchRegisterController returns 200 for authorized user`() {
         mvc
-            .get("/search/landlord")
+            .get(SearchRegisterController.SEARCH_LANDLORD_URL)
             .andExpect {
                 status { isOk() }
             }
@@ -80,7 +80,7 @@ class SearchRegisterControllerTests(
                 ),
             )
 
-        mvc.get("/search/landlord?searchTerm=PRSDB&page=2").andExpect {
+        mvc.get("${SearchRegisterController.SEARCH_LANDLORD_URL}?searchTerm=PRSDB&page=2").andExpect {
             status { isOk() }
         }
     }
@@ -88,7 +88,7 @@ class SearchRegisterControllerTests(
     @Test
     @WithMockUser(roles = ["LA_USER"])
     fun `searchForLandlords returns 404 if the requested page number is less than 1`() {
-        mvc.get("/search/landlord?searchTerm=PRSDB&page=0").andExpect {
+        mvc.get("${SearchRegisterController.SEARCH_LANDLORD_URL}?searchTerm=PRSDB&page=0").andExpect {
             status { isNotFound() }
         }
     }
@@ -108,7 +108,7 @@ class SearchRegisterControllerTests(
                 ),
             )
 
-        mvc.get("/search/landlord?searchTerm=PRSDB&page=3").andExpect {
+        mvc.get("${SearchRegisterController.SEARCH_LANDLORD_URL}?searchTerm=PRSDB&page=3").andExpect {
             status { is3xxRedirection() }
         }
     }
@@ -130,7 +130,7 @@ class SearchRegisterControllerTests(
             ),
         )
 
-        mvc.get("/search/property?searchTerm=PRSDB&page=2").andExpect {
+        mvc.get("${SearchRegisterController.SEARCH_PROPERTY_URL}?searchTerm=PRSDB&page=2").andExpect {
             status { isOk() }
         }
     }
@@ -138,7 +138,7 @@ class SearchRegisterControllerTests(
     @Test
     @WithMockUser(roles = ["LA_USER"])
     fun `searchForProperties returns 404 if the requested page number is less than 1`() {
-        mvc.get("/search/property?searchTerm=PRSDB&page=0").andExpect {
+        mvc.get("${SearchRegisterController.SEARCH_PROPERTY_URL}?searchTerm=PRSDB&page=0").andExpect {
             status { isNotFound() }
         }
     }
@@ -160,7 +160,7 @@ class SearchRegisterControllerTests(
             ),
         )
 
-        mvc.get("/search/property?searchTerm=PRSDB&page=3").andExpect {
+        mvc.get("${SearchRegisterController.SEARCH_PROPERTY_URL}?searchTerm=PRSDB&page=3").andExpect {
             status { is3xxRedirection() }
         }
     }

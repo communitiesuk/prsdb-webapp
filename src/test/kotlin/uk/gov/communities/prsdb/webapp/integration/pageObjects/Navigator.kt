@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
+import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDetailsUpdateJourneyFactory
@@ -152,12 +153,12 @@ class Navigator(
     }
 
     fun goToLandlordSearchPage(): SearchLandlordRegisterPage {
-        navigate("/search/landlord")
+        navigate(SearchRegisterController.SEARCH_LANDLORD_URL)
         return createValidPage(page, SearchLandlordRegisterPage::class)
     }
 
     fun goToPropertySearchPage(): SearchPropertyRegisterPage {
-        navigate("/search/property")
+        navigate(SearchRegisterController.SEARCH_PROPERTY_URL)
         return createValidPage(page, SearchPropertyRegisterPage::class)
     }
 
