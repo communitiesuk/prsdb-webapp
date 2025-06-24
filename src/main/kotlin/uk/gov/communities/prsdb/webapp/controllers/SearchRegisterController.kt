@@ -131,6 +131,6 @@ class SearchRegisterController(
     companion object {
         const val SEARCH_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$SEARCH_PATH_SEGMENT"
         const val SEARCH_LANDLORD_URL = "$SEARCH_ROUTE/$LANDLORD_PATH_SEGMENT"
-        const val SEARCH_PROPERTY_URL = "$SEARCH_ROUTE//$PROPERTY_PATH_SEGMENT"
+        const val SEARCH_PROPERTY_URL = "$SEARCH_ROUTE/$PROPERTY_PATH_SEGMENT"
     }
 }
