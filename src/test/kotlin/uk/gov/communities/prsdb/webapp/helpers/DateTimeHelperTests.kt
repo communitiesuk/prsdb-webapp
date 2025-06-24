@@ -8,7 +8,6 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toLocalDateTime
 import org.junit.jupiter.api.Named
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -168,13 +167,5 @@ class DateTimeHelperTests {
         val result = dateTimeHelper.isDateInPast(date)
 
         assertEquals(expectedResult, result)
-    }
-
-    @Test
-    fun `getDateInUK(String) returns the date in the UK for the date string specified`() {
-        val dateString = "2027-01-05T00:00:00.000Z"
-        val expectedDate = LocalDate(2027, 1, 5)
-
-        assertEquals(expectedDate, DateTimeHelper.getDateInUK(dateString))
     }
 }

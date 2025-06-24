@@ -45,7 +45,7 @@ class EpcLookupServiceTests {
                 "data": {
                     "epcRrn": "$certificateNumber",
                     "currentEnergyEfficiencyBand": "C",
-                    "expiryDate": "2027-01-05T00:00:00.000Z",
+                    "expiryDate": "2027-01-05",
                     "latestEpcRrnForAddress": "$certificateNumber",
                     "address": {
                         "addressLine1": "123 Test Street",
@@ -130,7 +130,7 @@ class EpcLookupServiceTests {
                 "data": {
                     "epcRrn": "1234-5678-9012-3456-7890",
                     "currentEnergyEfficiencyBand": "C",
-                    "expiryDate": "2027-01-05T00:00:00.000Z",
+                    "expiryDate": "2027-01-05",
                     "latestEpcRrnForAddress": "1234-5678-9012-3456-7890",
                     "address": {
                         "addressLine1": "123 Test Street",
