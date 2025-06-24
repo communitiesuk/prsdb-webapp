@@ -8,7 +8,6 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
-import uk.gov.communities.prsdb.webapp.models.dataModels.GuardDutyScanResult
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ExampleEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import kotlin.system.exitProcess
@@ -20,24 +19,25 @@ class ExampleScanProcessingApplicationRunner(
     private val context: ApplicationContext,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
 ) : ApplicationRunner {
-    @Value("\${SCAN_RESULT:{\"scanStatus\": \"DEFAULT\"}}")
-    lateinit var scanResultJson: String
+    @Value("\${SCAN_RESULT_STATUS:DEFAULT}")
+    lateinit var scanResultStatus: String
+
+    @Value("\${S3_OBJECT_KEY:noObjectSet}")
+    lateinit var objectKey: String
 
     override fun run(args: ApplicationArguments?) {
-        val scanResult: GuardDutyScanResult = GuardDutyScanResult.fromJson(scanResultJson)
-
-        val ownershipId = getPropertyOwnershipIdOrNull(scanResult.s3ObjectDetails?.objectKey ?: "")
+        val ownershipId = getPropertyOwnershipIdOrNull(objectKey)
         val ownership = ownershipId?.let { propertyOwnershipRepository.findByIdAndIsActiveTrue(it) }
 
         if (ownership == null) {
             emailSender.sendEmail(
                 "team-prsdb+unowned-scan-result@softwire.com",
-                ExampleEmail("No ownership for file ${scanResult.s3ObjectDetails?.objectKey}"),
+                ExampleEmail("No ownership for file $objectKey"),
             )
         } else {
             emailSender.sendEmail(
                 ownership.primaryLandlord.email,
-                ExampleEmail(scanResult.scanResultDetails?.scanResultStatus ?: ""),
+                ExampleEmail(scanResultStatus),
             )
         }
 
