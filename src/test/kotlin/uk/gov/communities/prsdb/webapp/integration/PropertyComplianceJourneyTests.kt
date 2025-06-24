@@ -7,9 +7,11 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
@@ -69,8 +71,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.ResponsibilityToTenantsPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PartialPropertyComplianceConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import java.net.URI
 import java.time.format.DateTimeFormatter
 import kotlin.test.assertContains
 import kotlin.test.assertFalse
@@ -82,7 +89,19 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
     private lateinit var fileUploader: FileUploader
 
     @MockitoBean
-    lateinit var epcRegisterClient: EpcRegisterClient
+    private lateinit var epcRegisterClient: EpcRegisterClient
+
+    @MockitoBean
+    private lateinit var fullComplianceConfirmationEmailService: EmailNotificationService<FullPropertyComplianceConfirmationEmail>
+
+    @MockitoBean
+    private lateinit var partialComplianceConfirmationEmailService: EmailNotificationService<PartialPropertyComplianceConfirmationEmail>
+
+    @BeforeEach
+    fun setUp() {
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(ABSOLUTE_DASHBOARD_URL))
+        whenever(absoluteUrlProvider.buildComplianceInformationUri(PROPERTY_OWNERSHIP_ID)).thenReturn(URI(ABSOLUTE_COMPLIANCE_INFO_URL))
+    }
 
     @Test
     fun `User can navigate whole journey if pages are filled in correctly (in-date certs, declaration)`(page: Page) {
@@ -211,6 +230,16 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("electrical safety"))
         assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("energy performance"))
         assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("your landlord responsibilities"))
+
+        // Check confirmation email
+        verify(fullComplianceConfirmationEmailService).sendEmail(
+            LANDLORD_EMAIL,
+            FullPropertyComplianceConfirmationEmail(
+                PROPERTY_ADDRESS,
+                EmailBulletPointList(listOf("gas safety", "electrical safety", "energy performance", "your landlord responsibilities")),
+                ABSOLUTE_DASHBOARD_URL,
+            ),
+        )
 
         // Go to Incomplete Compliances page
         confirmationPage.addForAnotherPropertyButton.clickAndWait()
@@ -366,6 +395,23 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         )
         assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("your landlord responsibilities"))
 
+        // Check confirmation email
+        verify(partialComplianceConfirmationEmailService).sendEmail(
+            LANDLORD_EMAIL,
+            PartialPropertyComplianceConfirmationEmail(
+                PROPERTY_ADDRESS,
+                EmailBulletPointList(listOf("your landlord responsibilities")),
+                EmailBulletPointList(
+                    listOf(
+                        "you have an expired gas safety certificate",
+                        "you have an expired Electrical Installation Condition Report (EICR)",
+                        "you have an expired energy performance certificate (EPC)",
+                    ),
+                ),
+                ABSOLUTE_COMPLIANCE_INFO_URL,
+            ),
+        )
+
         // Go to Incomplete Compliances page
         confirmationPage.addForAnotherPropertyButton.clickAndWait()
         assertPageIs(page, LandlordIncompleteCompiancesPage::class)
@@ -468,6 +514,16 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("energy performance"))
         assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("your landlord responsibilities"))
 
+        // Check confirmation email
+        verify(fullComplianceConfirmationEmailService).sendEmail(
+            LANDLORD_EMAIL,
+            FullPropertyComplianceConfirmationEmail(
+                PROPERTY_ADDRESS,
+                EmailBulletPointList(listOf("gas safety", "electrical safety", "energy performance", "your landlord responsibilities")),
+                ABSOLUTE_DASHBOARD_URL,
+            ),
+        )
+
         // Go to Dashboard
         confirmationPage.goToDashboardButton.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
@@ -551,6 +607,23 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         )
         assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("your landlord responsibilities"))
 
+        // Check confirmation email
+        verify(partialComplianceConfirmationEmailService).sendEmail(
+            LANDLORD_EMAIL,
+            PartialPropertyComplianceConfirmationEmail(
+                PROPERTY_ADDRESS,
+                EmailBulletPointList(listOf("your landlord responsibilities")),
+                EmailBulletPointList(
+                    listOf(
+                        "you have not added information about gas safety",
+                        "you have not added information about electrical safety",
+                        "you have not added information about energy performance",
+                    ),
+                ),
+                ABSOLUTE_COMPLIANCE_INFO_URL,
+            ),
+        )
+
         // Go to Dashboard
         confirmationPage.goToDashboardButton.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
@@ -625,8 +698,14 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
 
     companion object {
         private const val PROPERTY_OWNERSHIP_ID = 1L
+        private const val LANDLORD_EMAIL = "alex.surname@example.com"
+        private const val PROPERTY_ADDRESS = "1, Example Road, EG"
+
         private val urlArguments = mapOf("propertyOwnershipId" to PROPERTY_OWNERSHIP_ID.toString())
 
         private val currentDate = DateTimeHelper().getCurrentDateInUK()
+
+        private const val ABSOLUTE_DASHBOARD_URL = "www.prsd.gov.uk/dashboard"
+        private const val ABSOLUTE_COMPLIANCE_INFO_URL = "www.prsd.gov.uk/compliance-info"
     }
 }
