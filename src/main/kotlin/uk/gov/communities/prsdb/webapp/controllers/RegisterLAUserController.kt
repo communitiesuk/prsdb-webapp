@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.INVALID_LINK_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDING_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.LA_USER_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -35,7 +36,7 @@ class RegisterLAUserController(
 ) {
     @GetMapping
     fun acceptInvitation(
-        @RequestParam(value = "token", required = true) token: String,
+        @RequestParam(value = TOKEN, required = true) token: String,
     ): CharSequence {
         // This is using a CharSequence instead of returning a String to handle an error that otherwise occurs in
         // the LocalAuthorityInvitationService method that creates the invitation url using MvcUriComponentsBuilder.fromMethodName
