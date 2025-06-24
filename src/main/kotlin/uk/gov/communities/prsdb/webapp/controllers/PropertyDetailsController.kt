@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 import kotlinx.datetime.toKotlinInstant
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -15,6 +16,7 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
+import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
@@ -41,11 +43,9 @@ class PropertyDetailsController(
     @GetMapping(LANDLORD_PROPERTY_DETAILS_ROUTE)
     fun getPropertyDetails(
         @PathVariable propertyOwnershipId: Long,
-        model: Model,
-        principal: Principal,
-    ): String {
-        val propertyOwnership =
-            propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, principal.name)
+    ): ModelAndView {
+        val baseUserId = SecurityContextHolder.getContext().authentication.name
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, baseUserId)
 
         val landlordDetailsUrl =
             LandlordDetailsController
@@ -66,12 +66,13 @@ class PropertyDetailsController(
                 landlordDetailsUrl,
             )
 
-        model.addAttribute("propertyDetails", propertyDetails)
-        model.addAttribute("landlordDetails", landlordViewModel)
-        model.addAttribute("deleteRecordLink", DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
-        model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
-
-        return "propertyDetailsView"
+        val modelAndView = ModelAndView("propertyDetailsView")
+        modelAndView.addObject("propertyDetails", propertyDetails)
+        modelAndView.addObject("landlordDetails", landlordViewModel)
+        modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
+        modelAndView.addObject("deleteRecordLink", DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
+        modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
+        return modelAndView
     }
 
     @PreAuthorize("hasRole('LANDLORD')")
@@ -150,6 +151,7 @@ class PropertyDetailsController(
         model.addAttribute("lastModifiedDate", lastModifiedDate)
         model.addAttribute("lastModifiedBy", lastModifiedBy)
         model.addAttribute("landlordDetails", landlordViewModel)
+        model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         model.addAttribute("backUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
 
         return "propertyDetailsView"
