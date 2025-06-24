@@ -8,10 +8,10 @@ import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
+import uk.gov.communities.prsdb.webapp.controllers.InviteLocalAuthorityAdminController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_COMPLIANCES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -1101,7 +1101,7 @@ class Navigator(
     }
 
     fun goToInviteLaAdmin(): InviteLaAdminPage {
-        navigate("/$SYSTEM_OPERATOR_PATH_SEGMENT/invite-la-admin")
+        navigate(InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_ROUTE)
         return createValidPage(page, InviteLaAdminPage::class)
     }
 

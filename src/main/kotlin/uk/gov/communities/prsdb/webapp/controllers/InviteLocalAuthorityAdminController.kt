@@ -15,7 +15,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INVITE_LA_ADMIN_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.InviteLocalAuthorityAdminController.Companion.INVITE_LA_ADMIN_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.requestModels.InviteLocalAuthorityAdminModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityAdminInvitationEmail
@@ -27,7 +29,7 @@ import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 
 @PreAuthorize("hasRole('SYSTEM_OPERATOR')")
 @PrsdbController
-@RequestMapping("/$SYSTEM_OPERATOR_PATH_SEGMENT/$INVITE_LA_ADMIN_PATH_SEGMENT")
+@RequestMapping(INVITE_LA_ADMIN_ROUTE)
 class InviteLocalAuthorityAdminController(
     private val localAuthorityService: LocalAuthorityService,
     private val invitationEmailSender: EmailNotificationService<LocalAuthorityAdminInvitationEmail>,
@@ -73,7 +75,7 @@ class InviteLocalAuthorityAdminController(
 
             redirectAttributes.addFlashAttribute("invitedEmailAddress", inviteLocalAuthorityAdminModel.email)
             redirectAttributes.addFlashAttribute("localAuthorityName", localAuthority.name)
-            return "redirect:/$SYSTEM_OPERATOR_PATH_SEGMENT/$INVITE_LA_ADMIN_PATH_SEGMENT/$CONFIRMATION_PATH_SEGMENT"
+            return "redirect:$INVITE_LA_ADMIN_CONFIRMATION_ROUTE"
         } catch (retryException: TransientEmailSentException) {
             bindingResult.reject("addLAUser.error.retryable")
             return "inviteLocalAuthorityAdminUser"
@@ -105,7 +107,7 @@ class InviteLocalAuthorityAdminController(
     }
 
     companion object {
-        const val INVITE_LA_ADMIN_ROUTE = "/$SYSTEM_OPERATOR_PATH_SEGMENT/$INVITE_LA_ADMIN_PATH_SEGMENT"
+        const val INVITE_LA_ADMIN_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$SYSTEM_OPERATOR_PATH_SEGMENT/$INVITE_LA_ADMIN_PATH_SEGMENT"
 
         const val INVITE_LA_ADMIN_CONFIRMATION_ROUTE = "$INVITE_LA_ADMIN_ROUTE/$CONFIRMATION_PATH_SEGMENT"
     }
