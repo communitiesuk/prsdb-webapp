@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_URL
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.NRLA_UK_REGULATIONS_URL
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_COMPLIANCE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
@@ -260,7 +261,7 @@ class PropertyComplianceController(
     ): Boolean = fileUploader.uploadFile(uploadFileName, file.inputStream.withMaxLength(fileLength))
 
     companion object {
-        const val PROPERTY_COMPLIANCE_ROUTE = "/$PROPERTY_COMPLIANCE_PATH_SEGMENT/{propertyOwnershipId}"
+        const val PROPERTY_COMPLIANCE_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_COMPLIANCE_PATH_SEGMENT/{propertyOwnershipId}"
 
         private const val PROPERTY_COMPLIANCE_TASK_LIST_ROUTE = "$PROPERTY_COMPLIANCE_ROUTE/$TASK_LIST_PATH_SEGMENT"
 

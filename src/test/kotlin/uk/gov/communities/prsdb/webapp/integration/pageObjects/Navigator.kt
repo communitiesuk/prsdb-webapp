@@ -932,13 +932,13 @@ class Navigator(
     }
 
     fun goToLandlordDetails(): LandlordDetailsPage {
-        navigate("/landlord-details")
+        navigate(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
         return createValidPage(page, LandlordDetailsPage::class)
     }
 
     fun goToLandlordDetailsAsALocalAuthorityUser(id: Long): LocalAuthorityViewLandlordDetailsPage {
-        navigate("/landlord-details/$id")
-        return createValidPage(page, LocalAuthorityViewLandlordDetailsPage::class)
+        navigate(LandlordDetailsController.getLandlordDetailsForLaUserPath(id))
+        return createValidPage(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to id.toString()))
     }
 
     fun goToUpdateLandlordDetailsUpdateLookupAddressPage(): LookupAddressFormPageUpdateLandlordDetails {
@@ -964,7 +964,7 @@ class Navigator(
     }
 
     fun goToPropertyDetailsLandlordView(id: Long): PropertyDetailsPageLandlordView {
-        navigate("/property-details/$id")
+        navigate(PropertyDetailsController.getPropertyDetailsPath(id, isLaView = false))
         return createValidPage(
             page,
             PropertyDetailsPageLandlordView::class,
@@ -973,7 +973,7 @@ class Navigator(
     }
 
     fun goToPropertyDetailsLocalAuthorityView(id: Long): PropertyDetailsPageLocalAuthorityView {
-        navigate("/local-authority/property-details/$id")
+        navigate(PropertyDetailsController.getPropertyDetailsPath(id, isLaView = true))
         return createValidPage(
             page,
             PropertyDetailsPageLocalAuthorityView::class,

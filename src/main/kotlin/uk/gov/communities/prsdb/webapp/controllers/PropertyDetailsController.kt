@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
@@ -39,7 +40,7 @@ class PropertyDetailsController(
     private val backLinkStorageService: BackUrlStorageService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
-    @GetMapping(PROPERTY_DETAILS_ROUTE)
+    @GetMapping(LANDLORD_PROPERTY_DETAILS_ROUTE)
     fun getPropertyDetails(
         @PathVariable propertyOwnershipId: Long,
     ): ModelAndView {
@@ -47,8 +48,7 @@ class PropertyDetailsController(
         val propertyOwnership = propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, baseUserId)
 
         val landlordDetailsUrl =
-            LandlordDetailsController
-                .getLandlordDetailsPath()
+            LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
                 .overrideBackLinkForUrl(backLinkStorageService.storeCurrentUrlReturningKey())
 
         val propertyDetails =
@@ -129,7 +129,7 @@ class PropertyDetailsController(
         val lastModifiedBy = propertyOwnership.primaryLandlord.name
         val primaryLandlordDetailsUrl =
             LandlordDetailsController
-                .getLandlordDetailsPath(propertyOwnership.primaryLandlord.id)
+                .getLandlordDetailsForLaUserPath(propertyOwnership.primaryLandlord.id)
                 .overrideBackLinkForUrl(backLinkStorageService.storeCurrentUrlReturningKey())
 
         val propertyDetails =
@@ -157,17 +157,17 @@ class PropertyDetailsController(
     }
 
     companion object {
-        const val PROPERTY_DETAILS_ROUTE = "/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
+        const val LANDLORD_PROPERTY_DETAILS_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
 
-        const val UPDATE_PROPERTY_DETAILS_ROUTE = "$PROPERTY_DETAILS_ROUTE/$UPDATE_PATH_SEGMENT"
+        const val UPDATE_PROPERTY_DETAILS_ROUTE = "$LANDLORD_PROPERTY_DETAILS_ROUTE/$UPDATE_PATH_SEGMENT"
 
-        const val LA_PROPERTY_DETAILS_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT$PROPERTY_DETAILS_ROUTE"
+        const val LA_PROPERTY_DETAILS_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
 
         fun getPropertyDetailsPath(
             propertyOwnershipId: Long,
             isLaView: Boolean = false,
         ): String =
-            UriTemplate(if (isLaView) LA_PROPERTY_DETAILS_ROUTE else PROPERTY_DETAILS_ROUTE)
+            UriTemplate(if (isLaView) LA_PROPERTY_DETAILS_ROUTE else LANDLORD_PROPERTY_DETAILS_ROUTE)
                 .expand(propertyOwnershipId)
                 .toASCIIString()
 

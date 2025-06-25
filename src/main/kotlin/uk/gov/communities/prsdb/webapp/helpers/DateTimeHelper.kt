@@ -39,8 +39,6 @@ class DateTimeHelper(
                 null
             }
 
-        fun getDateInUK(dateString: String): LocalDate = getDateInUK(Instant.parse(dateString))
-
         fun get28DaysFromDate(date: LocalDate): LocalDate = date.plus(DatePeriod(days = 28))
     }
 }

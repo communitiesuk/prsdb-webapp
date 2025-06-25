@@ -155,7 +155,7 @@ class EpcDataModelTests {
                 "data": {
                     "epcRrn": "$certificateNumber",
                     "currentEnergyEfficiencyBand": "C",
-                    "expiryDate": "2027-01-05T00:00:00.000Z",
+                    "expiryDate": "2027-01-05",
                     "latestEpcRrnForAddress": "$certificateNumber",
                     "address": {
                         "addressLine1": "123 Test Street",
