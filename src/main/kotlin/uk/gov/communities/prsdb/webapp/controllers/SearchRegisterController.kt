@@ -10,10 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SEARCH_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController.Companion.SEARCH_ROUTE
 import uk.gov.communities.prsdb.webapp.helpers.URIQueryBuilder
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.LandlordSearchRequestModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.PropertySearchRequestModel
@@ -25,7 +27,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
 @PrsdbController
-@RequestMapping("/$SEARCH_PATH_SEGMENT")
+@RequestMapping(SEARCH_ROUTE)
 @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
 class SearchRegisterController(
     private val landlordService: LandlordService,
@@ -127,7 +129,8 @@ class SearchRegisterController(
         }"
 
     companion object {
-        const val SEARCH_LANDLORD_URL = "/$SEARCH_PATH_SEGMENT/$LANDLORD_PATH_SEGMENT"
-        const val SEARCH_PROPERTY_URL = "/$SEARCH_PATH_SEGMENT/$PROPERTY_PATH_SEGMENT"
+        const val SEARCH_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$SEARCH_PATH_SEGMENT"
+        const val SEARCH_LANDLORD_URL = "$SEARCH_ROUTE/$LANDLORD_PATH_SEGMENT"
+        const val SEARCH_PROPERTY_URL = "$SEARCH_ROUTE/$PROPERTY_PATH_SEGMENT"
     }
 }

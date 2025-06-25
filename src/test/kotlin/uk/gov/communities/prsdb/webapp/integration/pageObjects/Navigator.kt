@@ -8,10 +8,10 @@ import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
+import uk.gov.communities.prsdb.webapp.controllers.InviteLocalAuthorityAdminController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_COMPLIANCES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
+import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDetailsUpdateJourneyFactory
@@ -152,12 +153,12 @@ class Navigator(
     }
 
     fun goToLandlordSearchPage(): SearchLandlordRegisterPage {
-        navigate("/search/landlord")
+        navigate(SearchRegisterController.SEARCH_LANDLORD_URL)
         return createValidPage(page, SearchLandlordRegisterPage::class)
     }
 
     fun goToPropertySearchPage(): SearchPropertyRegisterPage {
-        navigate("/search/property")
+        navigate(SearchRegisterController.SEARCH_PROPERTY_URL)
         return createValidPage(page, SearchPropertyRegisterPage::class)
     }
 
@@ -1100,7 +1101,7 @@ class Navigator(
     }
 
     fun goToInviteLaAdmin(): InviteLaAdminPage {
-        navigate("/$SYSTEM_OPERATOR_PATH_SEGMENT/invite-la-admin")
+        navigate(InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_ROUTE)
         return createValidPage(page, InviteLaAdminPage::class)
     }
 

@@ -1,13 +1,14 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.SearchRegisterBasePage
 
 class SearchLandlordRegisterPage(
     page: Page,
-) : SearchRegisterBasePage(page, "/search/landlord") {
+) : SearchRegisterBasePage(page, SearchRegisterController.SEARCH_LANDLORD_URL) {
     fun getLandlordLink(rowIndex: Int) = resultTable.getClickableCell(rowIndex, LANDLORD_COL_INDEX).link
 
     fun getPropertySearchLink() = Link(noResultErrorMessage.locator("a"))
