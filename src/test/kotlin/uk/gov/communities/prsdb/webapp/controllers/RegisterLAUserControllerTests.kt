@@ -16,8 +16,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LANDING_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
@@ -50,7 +51,7 @@ class RegisterLAUserControllerTests(
     @Test
     @WithMockUser
     fun `acceptInvitation endpoint stores valid token in session`() {
-        mvc.get("/register-local-authority-user?token=$validToken").andExpect {
+        mvc.get("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}?$TOKEN=$validToken").andExpect {
             status { is3xxRedirection() }
         }
 
@@ -61,7 +62,7 @@ class RegisterLAUserControllerTests(
     @Test
     @WithMockUser
     fun `acceptInvitation endpoint rejects invalid token`() {
-        mvc.get("/register-local-authority-user?token=$invalidToken").andExpect {
+        mvc.get("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}?$TOKEN=$invalidToken").andExpect {
             status { is3xxRedirection() }
         }
 
@@ -81,7 +82,7 @@ class RegisterLAUserControllerTests(
         mvc
             .perform(
                 MockMvcRequestBuilders
-                    .get("/$REGISTER_LA_USER_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
+                    .get("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
                     .sessionAttr(LA_USER_ID, laUserId),
             ).andExpect(MockMvcResultMatchers.status().isOk())
     }
@@ -96,7 +97,7 @@ class RegisterLAUserControllerTests(
         whenever(localAuthorityDataService.getLocalAuthorityUserOrNull(laUserId)).thenReturn(localAuthorityUser)
 
         mvc
-            .get("/$REGISTER_LA_USER_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
+            .get("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
             .andExpect { status { isBadRequest() } }
     }
 
@@ -111,7 +112,7 @@ class RegisterLAUserControllerTests(
         mvc
             .perform(
                 MockMvcRequestBuilders
-                    .get("/$REGISTER_LA_USER_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
+                    .get("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
                     .sessionAttr(LA_USER_ID, laUserId),
             ).andExpect(MockMvcResultMatchers.status().isBadRequest)
     }
@@ -121,11 +122,11 @@ class RegisterLAUserControllerTests(
     fun `getLandingPage returns 302 for authenticated user with Local Authority role`() {
         whenever(userRolesService.getHasLocalAuthorityRole(any())).thenReturn(true)
         mvc
-            .get("/register-local-authority-user/landing-page") {
+            .get("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/$LANDING_PAGE_PATH_SEGMENT") {
                 with(oidcLogin())
             }.andExpectAll {
                 status { is3xxRedirection() }
-                redirectedUrl("/local-authority/dashboard")
+                redirectedUrl(LocalAuthorityDashboardController.LOCAL_AUTHORITY_DASHBOARD_URL)
             }
     }
 }

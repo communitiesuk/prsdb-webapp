@@ -13,8 +13,11 @@ import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INVALID_LINK_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDING_PAGE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.LA_USER_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
@@ -24,7 +27,7 @@ import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import java.security.Principal
 
 @PrsdbController
-@RequestMapping("/${REGISTER_LA_USER_JOURNEY_URL}")
+@RequestMapping(LA_USER_REGISTRATION_ROUTE)
 class RegisterLAUserController(
     private val laUserRegistrationJourneyFactory: LaUserRegistrationJourneyFactory,
     private val invitationService: LocalAuthorityInvitationService,
@@ -33,14 +36,14 @@ class RegisterLAUserController(
 ) {
     @GetMapping
     fun acceptInvitation(
-        @RequestParam(value = "token", required = true) token: String,
+        @RequestParam(value = TOKEN, required = true) token: String,
     ): CharSequence {
         // This is using a CharSequence instead of returning a String to handle an error that otherwise occurs in
         // the LocalAuthorityInvitationService method that creates the invitation url using MvcUriComponentsBuilder.fromMethodName
         // see https://github.com/spring-projects/spring-hateoas/issues/155 for details
         if (invitationService.tokenIsValid(token)) {
             invitationService.storeTokenInSession(token)
-            return "redirect:${REGISTER_LA_USER_JOURNEY_URL}/${RegisterLaUserStepId.LandingPage.urlPathSegment}"
+            return "redirect:${LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.LandingPage.urlPathSegment}"
         }
 
         return "redirect:$INVALID_LINK_PAGE_PATH_SEGMENT"
@@ -153,5 +156,9 @@ class RegisterLAUserController(
         } else {
             token
         }
+    }
+
+    companion object {
+        const val LA_USER_REGISTRATION_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$REGISTER_LA_USER_JOURNEY_URL"
     }
 }
