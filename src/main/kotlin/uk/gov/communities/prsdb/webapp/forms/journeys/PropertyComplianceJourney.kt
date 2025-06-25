@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import kotlinx.datetime.toJavaLocalDate
+import org.springframework.context.MessageSource
 import org.springframework.http.HttpStatus
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
@@ -31,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.FileUploadPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -40,6 +42,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAutoMatchedEpcIsCorrect
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getDidTenancyStartBeforeEpcExpiry
@@ -95,9 +98,15 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemp
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PartialPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -112,6 +121,10 @@ class PropertyComplianceJourney(
     private val propertyComplianceService: PropertyComplianceService,
     private val propertyOwnershipId: Long,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
+    private val messageSource: MessageSource,
+    private val fullPropertyComplianceConfirmationEmailService: EmailNotificationService<FullPropertyComplianceConfirmationEmail>,
+    private val partialPropertyComplianceConfirmationEmailService: EmailNotificationService<PartialPropertyComplianceConfirmationEmail>,
+    private val urlProvider: AbsoluteUrlProvider,
 ) : JourneyWithTaskList<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE,
         initialStepId = initialStepId,
@@ -1488,25 +1501,28 @@ class PropertyComplianceJourney(
 
         val epcDetails = filteredJourneyData.getAcceptedEpcDetails()
 
-        propertyComplianceService.createPropertyCompliance(
-            propertyOwnershipId = propertyOwnershipId,
-            gasSafetyCertS3Key = gasSafetyCertFilename,
-            gasSafetyCertIssueDate = filteredJourneyData.getGasSafetyCertIssueDate()?.toJavaLocalDate(),
-            gasSafetyCertEngineerNum = filteredJourneyData.getGasSafetyCertEngineerNum(),
-            gasSafetyCertExemptionReason = filteredJourneyData.getGasSafetyCertExemptionReason(),
-            gasSafetyCertExemptionOtherReason = filteredJourneyData.getGasSafetyCertExemptionOtherReason(),
-            eicrS3Key = eicrFilename,
-            eicrIssueDate = filteredJourneyData.getEicrIssueDate()?.toJavaLocalDate(),
-            eicrExemptionReason = filteredJourneyData.getEicrExemptionReason(),
-            eicrExemptionOtherReason = filteredJourneyData.getEicrExemptionOtherReason(),
-            epcUrl = epcDetails?.let { epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber) },
-            epcExpiryDate = epcDetails?.expiryDate?.toJavaLocalDate(),
-            tenancyStartedBeforeEpcExpiry = filteredJourneyData.getDidTenancyStartBeforeEpcExpiry(),
-            epcEnergyRating = epcDetails?.energyRating,
-            epcExemptionReason = filteredJourneyData.getEpcExemptionReason(),
-            epcMeesExemptionReason = filteredJourneyData.getMeesExemptionReason(),
-            hasFireSafetyDeclaration = filteredJourneyData.getHasFireSafetyDeclaration()!!,
-        )
+        val propertyCompliance =
+            propertyComplianceService.createPropertyCompliance(
+                propertyOwnershipId = propertyOwnershipId,
+                gasSafetyCertS3Key = gasSafetyCertFilename,
+                gasSafetyCertIssueDate = filteredJourneyData.getGasSafetyCertIssueDate()?.toJavaLocalDate(),
+                gasSafetyCertEngineerNum = filteredJourneyData.getGasSafetyCertEngineerNum(),
+                gasSafetyCertExemptionReason = filteredJourneyData.getGasSafetyCertExemptionReason(),
+                gasSafetyCertExemptionOtherReason = filteredJourneyData.getGasSafetyCertExemptionOtherReason(),
+                eicrS3Key = eicrFilename,
+                eicrIssueDate = filteredJourneyData.getEicrIssueDate()?.toJavaLocalDate(),
+                eicrExemptionReason = filteredJourneyData.getEicrExemptionReason(),
+                eicrExemptionOtherReason = filteredJourneyData.getEicrExemptionOtherReason(),
+                epcUrl = epcDetails?.let { epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber) },
+                epcExpiryDate = epcDetails?.expiryDate?.toJavaLocalDate(),
+                tenancyStartedBeforeEpcExpiry = filteredJourneyData.getDidTenancyStartBeforeEpcExpiry(),
+                epcEnergyRating = epcDetails?.energyRating,
+                epcExemptionReason = filteredJourneyData.getEpcExemptionReason(),
+                epcMeesExemptionReason = filteredJourneyData.getMeesExemptionReason(),
+                hasFireSafetyDeclaration = filteredJourneyData.getHasFireSafetyDeclaration()!!,
+            )
+
+        sendConfirmationEmail(propertyCompliance)
 
         propertyComplianceService.addToPropertiesWithComplianceAddedThisSession(propertyOwnershipId)
 
@@ -1543,6 +1559,36 @@ class PropertyComplianceJourney(
         propertyOwnershipService
             .getPropertyOwnership(propertyOwnershipId)
             .property.address.singleLineAddress
+
+    private fun sendConfirmationEmail(propertyCompliance: PropertyCompliance) {
+        val landlordEmail = propertyCompliance.propertyOwnership.primaryLandlord.email
+        val propertyAddress = propertyCompliance.propertyOwnership.property.address.singleLineAddress
+
+        val confirmationMsgKeys = PropertyComplianceConfirmationMessageKeys(propertyCompliance)
+        val compliantMsgs = confirmationMsgKeys.compliantMsgKeys.map { messageSource.getMessageForKey(it) }
+        val nonCompliantMsgs = confirmationMsgKeys.nonCompliantMsgKeys.map { messageSource.getMessageForKey(it) }
+
+        if (nonCompliantMsgs.isEmpty()) {
+            fullPropertyComplianceConfirmationEmailService.sendEmail(
+                landlordEmail,
+                FullPropertyComplianceConfirmationEmail(
+                    propertyAddress,
+                    EmailBulletPointList(compliantMsgs),
+                    urlProvider.buildLandlordDashboardUri().toString(),
+                ),
+            )
+        } else {
+            partialPropertyComplianceConfirmationEmailService.sendEmail(
+                landlordEmail,
+                PartialPropertyComplianceConfirmationEmail(
+                    propertyAddress,
+                    EmailBulletPointList(compliantMsgs),
+                    EmailBulletPointList(nonCompliantMsgs),
+                    urlProvider.buildComplianceInformationUri(propertyOwnershipId).toString(),
+                ),
+            )
+        }
+    }
 
     companion object {
         val initialStepId = PropertyComplianceStepId.GasSafety

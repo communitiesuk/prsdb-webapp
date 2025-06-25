@@ -10,6 +10,7 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION
@@ -34,35 +35,38 @@ class PropertyComplianceServiceTests {
     private lateinit var propertyComplianceService: PropertyComplianceService
 
     @Test
-    fun `createPropertyCompliance creates a compliance record`() {
+    fun `createPropertyCompliance creates and returns a compliance record`() {
         val expectedPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
 
         whenever(mockPropertyOwnershipService.getPropertyOwnership(expectedPropertyCompliance.propertyOwnership.id))
             .thenReturn(expectedPropertyCompliance.propertyOwnership)
+        whenever(mockPropertyComplianceRepository.save(any())).thenReturn(expectedPropertyCompliance)
 
-        propertyComplianceService.createPropertyCompliance(
-            propertyOwnershipId = expectedPropertyCompliance.propertyOwnership.id,
-            gasSafetyCertS3Key = expectedPropertyCompliance.gasSafetyCertS3Key,
-            gasSafetyCertIssueDate = expectedPropertyCompliance.gasSafetyCertIssueDate,
-            gasSafetyCertEngineerNum = expectedPropertyCompliance.gasSafetyCertEngineerNum,
-            gasSafetyCertExemptionReason = expectedPropertyCompliance.gasSafetyCertExemptionReason,
-            gasSafetyCertExemptionOtherReason = expectedPropertyCompliance.gasSafetyCertExemptionOtherReason,
-            eicrS3Key = expectedPropertyCompliance.eicrS3Key,
-            eicrIssueDate = expectedPropertyCompliance.eicrIssueDate,
-            eicrExemptionReason = expectedPropertyCompliance.eicrExemptionReason,
-            eicrExemptionOtherReason = expectedPropertyCompliance.eicrExemptionOtherReason,
-            epcUrl = expectedPropertyCompliance.epcUrl,
-            epcExpiryDate = expectedPropertyCompliance.epcExpiryDate,
-            tenancyStartedBeforeEpcExpiry = expectedPropertyCompliance.tenancyStartedBeforeEpcExpiry,
-            epcEnergyRating = expectedPropertyCompliance.epcEnergyRating,
-            epcExemptionReason = expectedPropertyCompliance.epcExemptionReason,
-            epcMeesExemptionReason = expectedPropertyCompliance.epcMeesExemptionReason,
-            hasFireSafetyDeclaration = expectedPropertyCompliance.hasFireSafetyDeclaration,
-        )
+        val returnedPropertyCompliance =
+            propertyComplianceService.createPropertyCompliance(
+                propertyOwnershipId = expectedPropertyCompliance.propertyOwnership.id,
+                gasSafetyCertS3Key = expectedPropertyCompliance.gasSafetyCertS3Key,
+                gasSafetyCertIssueDate = expectedPropertyCompliance.gasSafetyCertIssueDate,
+                gasSafetyCertEngineerNum = expectedPropertyCompliance.gasSafetyCertEngineerNum,
+                gasSafetyCertExemptionReason = expectedPropertyCompliance.gasSafetyCertExemptionReason,
+                gasSafetyCertExemptionOtherReason = expectedPropertyCompliance.gasSafetyCertExemptionOtherReason,
+                eicrS3Key = expectedPropertyCompliance.eicrS3Key,
+                eicrIssueDate = expectedPropertyCompliance.eicrIssueDate,
+                eicrExemptionReason = expectedPropertyCompliance.eicrExemptionReason,
+                eicrExemptionOtherReason = expectedPropertyCompliance.eicrExemptionOtherReason,
+                epcUrl = expectedPropertyCompliance.epcUrl,
+                epcExpiryDate = expectedPropertyCompliance.epcExpiryDate,
+                tenancyStartedBeforeEpcExpiry = expectedPropertyCompliance.tenancyStartedBeforeEpcExpiry,
+                epcEnergyRating = expectedPropertyCompliance.epcEnergyRating,
+                epcExemptionReason = expectedPropertyCompliance.epcExemptionReason,
+                epcMeesExemptionReason = expectedPropertyCompliance.epcMeesExemptionReason,
+                hasFireSafetyDeclaration = expectedPropertyCompliance.hasFireSafetyDeclaration,
+            )
 
         val propertyComplianceCaptor = captor<PropertyCompliance>()
         verify(mockPropertyComplianceRepository).save(propertyComplianceCaptor.capture())
         assertTrue(ReflectionEquals(expectedPropertyCompliance, "id").matches(propertyComplianceCaptor.value))
+        assertEquals(expectedPropertyCompliance, returnedPropertyCompliance)
     }
 
     @Test

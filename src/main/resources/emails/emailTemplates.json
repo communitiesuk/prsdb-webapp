@@ -52,5 +52,17 @@
     "name": "Landlord (with properties) deregistration confirmation",
     "subject": "GOV.UK - You have deleted your landlord record and properties from the PRS database",
     "bodyLocation": "/emails/LandlordWithPropertiesDeregistrationConfirmation.md"
+  },
+  {
+    "id": "2782faf2-6123-4352-9d36-03df1bb45a3d",
+    "name": "Full Property Compliance Confirmation",
+    "subject": "GOV.UK – You have added compliance information for a property",
+    "bodyLocation": "/emails/FullPropertyComplianceConfirmation.md"
+  },
+  {
+    "id": "2b686d25-1a07-4b4b-bf5d-52455c9392ad",
+    "name": "Partial Property Compliance Confirmation",
+    "subject": "GOV.UK – You need to take action to provide compliance for a property",
+    "bodyLocation": "/emails/PartialPropertyComplianceConfirmation.md"
   }
 ]

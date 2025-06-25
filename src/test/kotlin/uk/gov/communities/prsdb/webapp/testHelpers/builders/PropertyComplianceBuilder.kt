@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
+import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
@@ -7,12 +8,21 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
 
 class PropertyComplianceBuilder {
     private val propertyCompliance = PropertyCompliance()
 
     fun build() = propertyCompliance
+
+    fun withPropertyOwnership(
+        propertyOwnership: PropertyOwnership = MockLandlordData.createPropertyOwnership(),
+    ): PropertyComplianceBuilder {
+        ReflectionTestUtils.setField(propertyCompliance, "propertyOwnership", propertyOwnership)
+        return this
+    }
 
     fun withGasSafetyCert(issueDate: LocalDate = LocalDate.now()): PropertyComplianceBuilder {
         propertyCompliance.gasSafetyCertS3Key = "gas-key"
@@ -80,6 +90,7 @@ class PropertyComplianceBuilder {
     companion object {
         fun createWithInDateCerts() =
             PropertyComplianceBuilder()
+                .withPropertyOwnership()
                 .withGasSafetyCert()
                 .withEicr()
                 .withEpc()
@@ -87,6 +98,7 @@ class PropertyComplianceBuilder {
 
         fun createWithExpiredCerts() =
             PropertyComplianceBuilder()
+                .withPropertyOwnership()
                 .withExpiredGasSafetyCert()
                 .withExpiredEicr()
                 .withExpiredEpc()
@@ -94,6 +106,7 @@ class PropertyComplianceBuilder {
 
         fun createWithCertExemptions() =
             PropertyComplianceBuilder()
+                .withPropertyOwnership()
                 .withGasSafetyCertExemption()
                 .withEicrExemption()
                 .withEpcExemption()
@@ -101,6 +114,7 @@ class PropertyComplianceBuilder {
 
         fun createWithMissingCerts() =
             PropertyComplianceBuilder()
+                .withPropertyOwnership()
                 .build()
     }
 }
