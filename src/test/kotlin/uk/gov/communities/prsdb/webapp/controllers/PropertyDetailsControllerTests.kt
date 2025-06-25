@@ -41,7 +41,7 @@ class PropertyDetailsControllerTests(
     inner class GetPropertyDetailsLandlordViewTests {
         @Test
         fun `getPropertyDetails returns a redirect for an unauthenticated user`() {
-            mvc.get("/property-details/1").andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLaView = false)).andExpect {
                 status { is3xxRedirection() }
             }
         }
@@ -49,7 +49,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser
         fun `getPropertyDetails returns 403 for an unauthorized user`() {
-            mvc.get("/property-details/1").andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLaView = false)).andExpect {
                 status { status { isForbidden() } }
             }
         }
@@ -57,7 +57,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `getPropertyDetails returns 403 for an unauthorized user with la admin role`() {
-            mvc.get("/property-details/1").andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLaView = false)).andExpect {
                 status { status { isForbidden() } }
             }
         }
@@ -65,7 +65,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LA_USER"])
         fun `getPropertyDetails returns 403 for an unauthorized user with la user role`() {
-            mvc.get("/property-details/1").andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLaView = false)).andExpect {
                 status { status { isForbidden() } }
             }
         }
@@ -80,7 +80,7 @@ class PropertyDetailsControllerTests(
                     propertyOwnership,
                 )
 
-            mvc.get("/property-details/${propertyOwnership.id}").andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLaView = false)).andExpect {
                 status { status { isOk() } }
             }
         }
@@ -90,7 +90,7 @@ class PropertyDetailsControllerTests(
     inner class GetPropertyDetailsLaViewTests {
         @Test
         fun `getPropertyDetailsLaView returns a redirect for an unauthenticated user`() {
-            mvc.get("/local-authority/property-details/1").andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLaView = true)).andExpect {
                 status { is3xxRedirection() }
             }
         }
@@ -98,7 +98,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser
         fun `getPropertyDetailsLaView returns 403 for an unauthorized user`() {
-            mvc.get("/local-authority/property-details/1").andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLaView = true)).andExpect {
                 status { status { isForbidden() } }
             }
         }
@@ -106,7 +106,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `getPropertyDetailsLaView returns 403 for an unauthorized user with only the landlord role`() {
-            mvc.get("/local-authority/property-details/1").andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLaView = true)).andExpect {
                 status { status { isForbidden() } }
             }
         }
@@ -121,7 +121,7 @@ class PropertyDetailsControllerTests(
                     propertyOwnership,
                 )
 
-            mvc.get("/local-authority/property-details/1").andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLaView = true)).andExpect {
                 status { status { isOk() } }
             }
         }
@@ -136,7 +136,7 @@ class PropertyDetailsControllerTests(
                     propertyOwnership,
                 )
 
-            mvc.get("/local-authority/property-details/1").andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLaView = true)).andExpect {
                 status { status { isOk() } }
             }
         }

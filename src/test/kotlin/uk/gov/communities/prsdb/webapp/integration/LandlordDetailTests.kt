@@ -101,7 +101,7 @@ class LandlordDetailTests : SinglePageTestWithSeedData("data-local.sql") {
                 )
 
             propertyDetailsView.backLink.clickAndWait()
-            assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class)
+            assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to propertyOwnershipId.toString()))
         }
     }
 }

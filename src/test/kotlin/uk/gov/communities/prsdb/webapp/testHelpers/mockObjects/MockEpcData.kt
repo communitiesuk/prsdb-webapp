@@ -43,7 +43,7 @@ class MockEpcData {
                 "data": {
                     "epcRrn": "$certificateNumber",
                     "currentEnergyEfficiencyBand": "$energyRating",
-                    "expiryDate": "${formatLocalDateToISO(expiryDate)}",
+                    "expiryDate": "$expiryDate",
                     "latestEpcRrnForAddress": "$latestCertificateNumberForThisProperty",
                     "address": {
                         "addressLine1": "123 Test Street",
