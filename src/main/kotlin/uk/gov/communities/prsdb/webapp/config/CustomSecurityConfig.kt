@@ -24,6 +24,7 @@ import org.springframework.security.web.csrf.CsrfTokenRepository
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebConfiguration
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
+import uk.gov.communities.prsdb.webapp.constants.ERROR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
@@ -48,7 +49,7 @@ class CustomSecurityConfig(
                     .permitAll()
                     .requestMatchers("/assets/**")
                     .permitAll()
-                    .requestMatchers("/error/**")
+                    .requestMatchers("/$ERROR_PATH_SEGMENT/**")
                     .permitAll()
                     .requestMatchers("/check/**")
                     .permitAll()
