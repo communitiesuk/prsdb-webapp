@@ -49,7 +49,7 @@ class CustomSecurityConfig(
                     .permitAll()
                     .requestMatchers("/assets/**")
                     .permitAll()
-                    .requestMatchers("/$ERROR_PATH_SEGMENT/**")
+                    .requestMatchers("landlord/$ERROR_PATH_SEGMENT/**")
                     .permitAll()
                     .requestMatchers("/check/**")
                     .permitAll()
