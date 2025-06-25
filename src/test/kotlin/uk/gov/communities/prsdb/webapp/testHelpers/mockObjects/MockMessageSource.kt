@@ -10,16 +10,20 @@ class MockMessageSource : MessageSource {
         args: Array<out Any>?,
         defaultMessage: String?,
         locale: Locale,
-    ): String = code
+    ): String = getMockMessage(code)
 
     override fun getMessage(
         code: String,
         args: Array<out Any>?,
         locale: Locale,
-    ): String = code
+    ): String = getMockMessage(code)
 
     override fun getMessage(
         resolvable: MessageSourceResolvable,
         locale: Locale,
-    ): String = ""
+    ): String = getMockMessage(resolvable.codes?.get(0) ?: "")
+
+    companion object {
+        fun getMockMessage(code: String) = "Message for $code"
+    }
 }

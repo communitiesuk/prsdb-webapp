@@ -26,7 +26,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
@@ -806,7 +805,7 @@ class PropertyComplianceJourneyTests {
             setUpMocks(compliantPropertyCompliance, isPropertyCompliant = true)
 
             val expectedCompliantMessageKeys = PropertyComplianceConfirmationMessageKeys(compliantPropertyCompliance).compliantMsgKeys
-            val expectedCompliantMessages = expectedCompliantMessageKeys.map { mockMessageSource.getMessageForKey(it) }
+            val expectedCompliantMessages = expectedCompliantMessageKeys.map { MockMessageSource.getMockMessage(it) }
 
             val expectedEmailModel =
                 FullPropertyComplianceConfirmationEmail(
@@ -832,8 +831,8 @@ class PropertyComplianceJourneyTests {
             setUpMocks(nonCompliantPropertyCompliance, isPropertyCompliant = false)
 
             val expectedMessageKeys = PropertyComplianceConfirmationMessageKeys(nonCompliantPropertyCompliance)
-            val expectedCompliantMessages = expectedMessageKeys.compliantMsgKeys.map { mockMessageSource.getMessageForKey(it) }
-            val expectedNonCompliantMessages = expectedMessageKeys.nonCompliantMsgKeys.map { mockMessageSource.getMessageForKey(it) }
+            val expectedCompliantMessages = expectedMessageKeys.compliantMsgKeys.map { MockMessageSource.getMockMessage(it) }
+            val expectedNonCompliantMessages = expectedMessageKeys.nonCompliantMsgKeys.map { MockMessageSource.getMockMessage(it) }
 
             val expectedEmailModel =
                 PartialPropertyComplianceConfirmationEmail(
