@@ -48,4 +48,9 @@ class UserRolesService(
         val roles = getRolesForSubjectId(subjectId)
         return roles.contains(ROLE_LA_USER) || roles.contains(ROLE_LA_ADMIN)
     }
+
+    fun getHasLocalAuthorityAdminRole(subjectId: String): Boolean {
+        val roles = getRolesForSubjectId(subjectId)
+        return roles.contains(ROLE_LA_ADMIN)
+    }
 }
