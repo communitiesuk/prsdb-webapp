@@ -1504,12 +1504,10 @@ class PropertyComplianceJourney(
         val propertyCompliance =
             propertyComplianceService.createPropertyCompliance(
                 propertyOwnershipId = propertyOwnershipId,
-                gasSafetyCertS3Key = gasSafetyCertFilename,
                 gasSafetyCertIssueDate = filteredJourneyData.getGasSafetyCertIssueDate()?.toJavaLocalDate(),
                 gasSafetyCertEngineerNum = filteredJourneyData.getGasSafetyCertEngineerNum(),
                 gasSafetyCertExemptionReason = filteredJourneyData.getGasSafetyCertExemptionReason(),
                 gasSafetyCertExemptionOtherReason = filteredJourneyData.getGasSafetyCertExemptionOtherReason(),
-                eicrS3Key = eicrFilename,
                 eicrIssueDate = filteredJourneyData.getEicrIssueDate()?.toJavaLocalDate(),
                 eicrExemptionReason = filteredJourneyData.getEicrExemptionReason(),
                 eicrExemptionOtherReason = filteredJourneyData.getEicrExemptionOtherReason(),
