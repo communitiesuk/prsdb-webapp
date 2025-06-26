@@ -55,7 +55,7 @@ epc:
 
 server:
   error:
-    path: landlord/error
+    path: /error
 
 local:
   emails:

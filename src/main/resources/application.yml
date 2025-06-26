@@ -63,7 +63,7 @@ epc:
 
 server:
   error:
-    path: landlord/error
+    path: /error
 
 aws:
   s3:
