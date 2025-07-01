@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ScanResult
 import uk.gov.communities.prsdb.webapp.services.UploadedFilenameParser.Companion.FileNameInfo
 
@@ -14,7 +15,9 @@ class VirusScanProcessingService(
     ) {
         when (scanResultStatus) {
             ScanResult.NoThreats -> {
-                dequarantiner.dequarantine(fileNameInfo.toObjectKey())
+                if (!dequarantiner.dequarantine(fileNameInfo.toObjectKey())) {
+                    throw PrsdbWebException("Failed to dequarantine file: ${fileNameInfo.toObjectKey()}")
+                }
             }
             ScanResult.Threats -> TODO("PRSD-1284")
             ScanResult.Unsupported -> TODO("PRSD-1284")

@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.s3.S3AsyncClient
 import software.amazon.awssdk.transfer.s3.S3TransferManager
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 
 @Service
 class AwsS3FileDequarantiner(
@@ -33,7 +32,7 @@ class AwsS3FileDequarantiner(
                 .response()
 
         if (!copyResponse.sdkHttpResponse().isSuccessful) {
-            throw PrsdbWebException("Failed to transfer $objectKey to $safeBucketName")
+            return false
         }
 
         val deleteResponse =
