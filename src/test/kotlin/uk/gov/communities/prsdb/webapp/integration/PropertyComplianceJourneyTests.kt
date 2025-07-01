@@ -7,9 +7,11 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
@@ -21,10 +23,13 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompleteCompiancesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.CheckAndSubmitPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.CheckAutoMatchedEpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.CheckMatchedEpcPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.ConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionMissingPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionPagePropertyCompliance
@@ -66,10 +71,17 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.ResponsibilityToTenantsPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PartialPropertyComplianceConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import java.net.URI
 import java.time.format.DateTimeFormatter
+import kotlin.test.assertContains
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql") {
@@ -77,10 +89,22 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
     private lateinit var fileUploader: FileUploader
 
     @MockitoBean
-    lateinit var epcRegisterClient: EpcRegisterClient
+    private lateinit var epcRegisterClient: EpcRegisterClient
+
+    @MockitoBean
+    private lateinit var fullComplianceConfirmationEmailService: EmailNotificationService<FullPropertyComplianceConfirmationEmail>
+
+    @MockitoBean
+    private lateinit var partialComplianceConfirmationEmailService: EmailNotificationService<PartialPropertyComplianceConfirmationEmail>
+
+    @BeforeEach
+    fun setUp() {
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(ABSOLUTE_DASHBOARD_URL))
+        whenever(absoluteUrlProvider.buildComplianceInformationUri(PROPERTY_OWNERSHIP_ID)).thenReturn(URI(ABSOLUTE_COMPLIANCE_INFO_URL))
+    }
 
     @Test
-    fun `User can navigate whole journey if pages are filled in correctly (in-date certs)`(page: Page) {
+    fun `User can navigate whole journey if pages are filled in correctly (in-date certs, declaration)`(page: Page) {
         // Start page
         val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
         assertThat(startPage.heading).containsText("Add compliance information")
@@ -184,13 +208,46 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         // Keep Property Safe page
         BaseComponent.assertThat(keepPropertySafePage.heading).containsText("Keeping this property safe")
         keepPropertySafePage.agreeAndSubmit()
-        assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
+        val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
-        // TODO PRSD-1153 - continue test
+        // Responsibility To Tenants page
+        BaseComponent
+            .assertThat(
+                responsibilityToTenantsPage.heading,
+            ).containsText("Make sure you follow your legal responsibilities to your tenants")
+        responsibilityToTenantsPage.agreeAndSubmit()
+        val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
+
+        // TODO PRSD-962 - test checkAndSubmitPage
+        checkAndSubmitPage.form.submit()
+
+        // Confirmation page
+        val confirmationPage = assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
+        BaseComponent
+            .assertThat(confirmationPage.confirmationBanner)
+            .containsText("You have added compliance information for this property")
+        assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("gas safety"))
+        assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("electrical safety"))
+        assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("energy performance"))
+        assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("your landlord responsibilities"))
+
+        // Check confirmation email
+        verify(fullComplianceConfirmationEmailService).sendEmail(
+            LANDLORD_EMAIL,
+            FullPropertyComplianceConfirmationEmail(
+                PROPERTY_ADDRESS,
+                EmailBulletPointList(listOf("gas safety", "electrical safety", "energy performance", "your landlord responsibilities")),
+                ABSOLUTE_DASHBOARD_URL,
+            ),
+        )
+
+        // Go to Incomplete Compliances page
+        confirmationPage.addForAnotherPropertyButton.clickAndWait()
+        assertPageIs(page, LandlordIncompleteCompiancesPage::class)
     }
 
     @Test
-    fun `User can navigate whole journey if pages are filled in correctly (outdated certs)`(page: Page) {
+    fun `User can navigate whole journey if pages are filled in correctly (outdated certs, declaration)`(page: Page) {
         // Start page
         val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
         assertThat(startPage.heading).containsText("Add compliance information")
@@ -299,7 +356,65 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         assertTrue(epcExpiredPage.page.content().contains("5 January 2022"))
         assertFalse(epcExpiredPage.page.content().contains("The expired certificate shows an energy rating below E"))
         epcExpiredPage.continueButton.clickAndWait()
-        assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
+        val fireSafetyDeclarationPage = assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
+
+        // Fire Safety Declaration page
+        BaseComponent.assertThat(fireSafetyDeclarationPage.heading).containsText("Fire safety in your property")
+        assertThat(
+            fireSafetyDeclarationPage.form.fieldHeading,
+        ).containsText("Have you followed all fire safety responsibilities relevant for this property?")
+        fireSafetyDeclarationPage.submitHasDeclaredFireSafety()
+        val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
+
+        // Keep Property Safe page
+        BaseComponent.assertThat(keepPropertySafePage.heading).containsText("Keeping this property safe")
+        keepPropertySafePage.agreeAndSubmit()
+        val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
+
+        // Responsibility To Tenants page
+        BaseComponent
+            .assertThat(
+                responsibilityToTenantsPage.heading,
+            ).containsText("Make sure you follow your legal responsibilities to your tenants")
+        responsibilityToTenantsPage.agreeAndSubmit()
+        val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
+
+        // TODO PRSD-962 - test checkAndSubmitPage
+        checkAndSubmitPage.form.submit()
+
+        // Confirmation page
+        val confirmationPage = assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
+        assertContains(confirmationPage.heading.getText(), "You need to take action")
+        assertNotNull(confirmationPage.nonCompliantMessages.getElementByTextOrNull("you have an expired gas safety certificate"))
+        assertNotNull(
+            confirmationPage.nonCompliantMessages
+                .getElementByTextOrNull("you have an expired Electrical Installation Condition Report (EICR)"),
+        )
+        assertNotNull(
+            confirmationPage.nonCompliantMessages.getElementByTextOrNull("you have an expired energy performance certificate (EPC)"),
+        )
+        assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("your landlord responsibilities"))
+
+        // Check confirmation email
+        verify(partialComplianceConfirmationEmailService).sendEmail(
+            LANDLORD_EMAIL,
+            PartialPropertyComplianceConfirmationEmail(
+                PROPERTY_ADDRESS,
+                EmailBulletPointList(listOf("your landlord responsibilities")),
+                EmailBulletPointList(
+                    listOf(
+                        "you have an expired gas safety certificate",
+                        "you have an expired Electrical Installation Condition Report (EICR)",
+                        "you have an expired energy performance certificate (EPC)",
+                    ),
+                ),
+                ABSOLUTE_COMPLIANCE_INFO_URL,
+            ),
+        )
+
+        // Go to Incomplete Compliances page
+        confirmationPage.addForAnotherPropertyButton.clickAndWait()
+        assertPageIs(page, LandlordIncompleteCompiancesPage::class)
     }
 
     @Test
@@ -384,9 +499,34 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
                 responsibilityToTenantsPage.heading,
             ).containsText("Make sure you follow your legal responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
-        assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
+        val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
-        // TODO PRSD-962 - continue test
+        // TODO PRSD-962 - test checkAndSubmitPage
+        checkAndSubmitPage.form.submit()
+
+        // Confirmation page
+        val confirmationPage = assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
+        BaseComponent
+            .assertThat(confirmationPage.confirmationBanner)
+            .containsText("You have added compliance information for this property")
+        assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("gas safety"))
+        assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("electrical safety"))
+        assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("energy performance"))
+        assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("your landlord responsibilities"))
+
+        // Check confirmation email
+        verify(fullComplianceConfirmationEmailService).sendEmail(
+            LANDLORD_EMAIL,
+            FullPropertyComplianceConfirmationEmail(
+                PROPERTY_ADDRESS,
+                EmailBulletPointList(listOf("gas safety", "electrical safety", "energy performance", "your landlord responsibilities")),
+                ABSOLUTE_DASHBOARD_URL,
+            ),
+        )
+
+        // Go to Dashboard
+        confirmationPage.goToDashboardButton.clickAndWait()
+        assertPageIs(page, LandlordDashboardPage::class)
     }
 
     @Test
@@ -450,9 +590,43 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
 
         // Responsibility To Tenants page
         responsibilityToTenantsPage.agreeAndSubmit()
-        assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
+        val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
-        // TODO PRSD-962 - continue test
+        // TODO PRSD-962 - test checkAndSubmitPage
+        checkAndSubmitPage.form.submit()
+
+        // Confirmation page
+        val confirmationPage = assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
+        assertContains(confirmationPage.heading.getText(), "You need to take action")
+        assertNotNull(confirmationPage.nonCompliantMessages.getElementByTextOrNull("you have not added information about gas safety"))
+        assertNotNull(
+            confirmationPage.nonCompliantMessages.getElementByTextOrNull("you have not added information about electrical safety"),
+        )
+        assertNotNull(
+            confirmationPage.nonCompliantMessages.getElementByTextOrNull("you have not added information about energy performance"),
+        )
+        assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("your landlord responsibilities"))
+
+        // Check confirmation email
+        verify(partialComplianceConfirmationEmailService).sendEmail(
+            LANDLORD_EMAIL,
+            PartialPropertyComplianceConfirmationEmail(
+                PROPERTY_ADDRESS,
+                EmailBulletPointList(listOf("your landlord responsibilities")),
+                EmailBulletPointList(
+                    listOf(
+                        "you have not added information about gas safety",
+                        "you have not added information about electrical safety",
+                        "you have not added information about energy performance",
+                    ),
+                ),
+                ABSOLUTE_COMPLIANCE_INFO_URL,
+            ),
+        )
+
+        // Go to Dashboard
+        confirmationPage.goToDashboardButton.clickAndWait()
+        assertPageIs(page, LandlordDashboardPage::class)
     }
 
     @Test
@@ -524,8 +698,14 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
 
     companion object {
         private const val PROPERTY_OWNERSHIP_ID = 1L
+        private const val LANDLORD_EMAIL = "alex.surname@example.com"
+        private const val PROPERTY_ADDRESS = "1, Example Road, EG"
+
         private val urlArguments = mapOf("propertyOwnershipId" to PROPERTY_OWNERSHIP_ID.toString())
 
         private val currentDate = DateTimeHelper().getCurrentDateInUK()
+
+        private const val ABSOLUTE_DASHBOARD_URL = "www.prsd.gov.uk/dashboard"
+        private const val ABSOLUTE_COMPLIANCE_INFO_URL = "www.prsd.gov.uk/compliance-info"
     }
 }

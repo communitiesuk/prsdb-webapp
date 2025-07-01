@@ -6,21 +6,24 @@ import com.microsoft.playwright.options.RequestOptions
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
+import uk.gov.communities.prsdb.webapp.controllers.InviteLocalAuthorityAdminController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_COMPLIANCES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaInviteNewUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaManageUsersRoute
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
+import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
+import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDetailsUpdateJourneyFactory
@@ -140,27 +143,27 @@ class Navigator(
     private val port: Int,
 ) {
     fun goToManageLaUsers(authorityId: Int): ManageLaUsersPage {
-        navigate("/local-authority/$authorityId/manage-users")
+        navigate(getLaManageUsersRoute(authorityId))
         return createValidPage(page, ManageLaUsersPage::class)
     }
 
     fun goToInviteNewLaUser(authorityId: Int): InviteNewLaUserPage {
-        navigate("/local-authority/$authorityId/invite-new-user")
+        navigate(getLaInviteNewUserRoute(authorityId))
         return createValidPage(page, InviteNewLaUserPage::class)
     }
 
     fun goToLandlordSearchPage(): SearchLandlordRegisterPage {
-        navigate("/search/landlord")
+        navigate(SearchRegisterController.SEARCH_LANDLORD_URL)
         return createValidPage(page, SearchLandlordRegisterPage::class)
     }
 
     fun goToPropertySearchPage(): SearchPropertyRegisterPage {
-        navigate("/search/property")
+        navigate(SearchRegisterController.SEARCH_PROPERTY_URL)
         return createValidPage(page, SearchPropertyRegisterPage::class)
     }
 
     fun goToLandlordRegistrationStartPage(): StartPageLandlordRegistration {
-        navigate("/register-as-a-landlord")
+        navigate(RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
         return createValidPage(page, StartPageLandlordRegistration::class)
     }
 
@@ -169,12 +172,12 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationConfirmIdentity().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.ConfirmIdentity.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.ConfirmIdentity.urlPathSegment}")
         return createValidPage(page, ConfirmIdentityFormPageLandlordRegistration::class)
     }
 
     fun navigateToLandlordRegistrationVerifyIdentityPage() {
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.VerifyIdentity.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.VerifyIdentity.urlPathSegment}")
     }
 
     fun skipToLandlordRegistrationNamePage(): NameFormPageLandlordRegistration {
@@ -182,7 +185,7 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationName().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.Name.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.Name.urlPathSegment}")
         return createValidPage(page, NameFormPageLandlordRegistration::class)
     }
 
@@ -191,7 +194,7 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationDob().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.DateOfBirth.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.DateOfBirth.urlPathSegment}")
         return createValidPage(page, DateOfBirthFormPageLandlordRegistration::class)
     }
 
@@ -200,7 +203,7 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationEmail().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.Email.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.Email.urlPathSegment}")
         return createValidPage(page, EmailFormPageLandlordRegistration::class)
     }
 
@@ -209,7 +212,7 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationPhoneNumber().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.PhoneNumber.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.PhoneNumber.urlPathSegment}")
         return createValidPage(page, PhoneNumberFormPageLandlordRegistration::class)
     }
 
@@ -218,7 +221,9 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationCountryOfResidence().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}")
+        navigate(
+            "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}",
+        )
         return createValidPage(page, CountryOfResidenceFormPageLandlordRegistration::class)
     }
 
@@ -227,7 +232,7 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationLookupAddress().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.LookupAddress.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.LookupAddress.urlPathSegment}")
         return createValidPage(page, LookupAddressFormPageLandlordRegistration::class)
     }
 
@@ -236,7 +241,7 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationSelectAddress().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.SelectAddress.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.SelectAddress.urlPathSegment}")
         return createValidPage(page, SelectAddressFormPageLandlordRegistration::class)
     }
 
@@ -245,7 +250,7 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationManualAddress().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.ManualAddress.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.ManualAddress.urlPathSegment}")
         return createValidPage(page, ManualAddressFormPageLandlordRegistration::class)
     }
 
@@ -254,7 +259,10 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationNonEnglandOrWalesAddress().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment}")
+        navigate(
+            "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/" +
+                LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment,
+        )
         return createValidPage(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
     }
 
@@ -263,7 +271,9 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationLookupContactAddress().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.LookupContactAddress.urlPathSegment}")
+        navigate(
+            "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.LookupContactAddress.urlPathSegment}",
+        )
         return createValidPage(page, LookupContactAddressFormPageLandlordRegistration::class)
     }
 
@@ -272,7 +282,9 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationSelectContactAddress().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.SelectContactAddress.urlPathSegment}")
+        navigate(
+            "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.SelectContactAddress.urlPathSegment}",
+        )
         return createValidPage(page, SelectContactAddressFormPageLandlordRegistration::class)
     }
 
@@ -281,7 +293,9 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationManualContactAddress().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.ManualContactAddress.urlPathSegment}")
+        navigate(
+            "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.ManualContactAddress.urlPathSegment}",
+        )
         return createValidPage(page, ManualContactAddressFormPageLandlordRegistration::class)
     }
 
@@ -290,7 +304,7 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationCheckAnswers().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.CheckAnswers.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.CheckAnswers.urlPathSegment}")
         return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
     }
 
@@ -299,17 +313,22 @@ class Navigator(
             LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLandlordRegistrationDeclaration().build(),
         )
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/${LandlordRegistrationStepId.Declaration.urlPathSegment}")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.Declaration.urlPathSegment}")
         return createValidPage(page, DeclarationFormPageLandlordRegistration::class)
     }
 
     fun navigateToLandlordRegistrationConfirmationPage() {
-        navigate("/$REGISTER_LANDLORD_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
+        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+    }
+
+    fun navigateToLaUserRegistrationLandingPage(token: UUID) {
+        storeInvitationTokenInSession(token)
+        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.LandingPage.urlPathSegment}")
     }
 
     fun skipToLaUserRegistrationLandingPage(token: UUID): LandingPageLaUserRegistration {
         storeInvitationTokenInSession(token)
-        navigate("/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.LandingPage.urlPathSegment}")
+        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.LandingPage.urlPathSegment}")
         return createValidPage(page, LandingPageLaUserRegistration::class)
     }
 
@@ -319,7 +338,7 @@ class Navigator(
             LaUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLaUserRegistrationName().build(),
         )
-        navigate("/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.Name.urlPathSegment}")
+        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.Name.urlPathSegment}")
         return createValidPage(page, NameFormPageLaUserRegistration::class)
     }
 
@@ -329,7 +348,7 @@ class Navigator(
             LaUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLaUserRegistrationEmail().build(),
         )
-        navigate("/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.Email.urlPathSegment}")
+        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.Email.urlPathSegment}")
         return createValidPage(page, EmailFormPageLaUserRegistration::class)
     }
 
@@ -339,26 +358,26 @@ class Navigator(
             LaUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLaUserRegistrationCheckAnswers().build(),
         )
-        navigate("/$REGISTER_LA_USER_JOURNEY_URL/${RegisterLaUserStepId.CheckAnswers.urlPathSegment}")
+        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.CheckAnswers.urlPathSegment}")
         return createValidPage(page, CheckAnswersPageLaUserRegistration::class)
     }
 
     fun navigateToLaUserRegistrationConfirmationPage() {
-        navigate("/$REGISTER_LA_USER_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
+        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
     }
 
     fun goToPropertyRegistrationStartPage(): RegisterPropertyStartPage {
-        navigate("/register-property")
+        navigate(RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
         return createValidPage(page, RegisterPropertyStartPage::class)
     }
 
     fun goToPropertyRegistrationTaskList(): TaskListPagePropertyRegistration {
-        navigate("/register-property/$TASK_LIST_PATH_SEGMENT")
+        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$TASK_LIST_PATH_SEGMENT")
         return createValidPage(page, TaskListPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationLookupAddressPage(): LookupAddressFormPagePropertyRegistration {
-        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.LookupAddress.urlPathSegment}")
+        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.LookupAddress.urlPathSegment}")
         return createValidPage(page, LookupAddressFormPagePropertyRegistration::class)
     }
 
@@ -369,7 +388,7 @@ class Navigator(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforePropertyRegistrationSelectAddress(customLookedUpAddresses).build(),
         )
-        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.SelectAddress.urlPathSegment}")
+        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.SelectAddress.urlPathSegment}")
         return createValidPage(page, SelectAddressFormPagePropertyRegistration::class)
     }
 
@@ -378,7 +397,7 @@ class Navigator(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforePropertyRegistrationManualAddress().build(),
         )
-        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.ManualAddress.urlPathSegment}")
+        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.ManualAddress.urlPathSegment}")
         return createValidPage(page, ManualAddressFormPagePropertyRegistration::class)
     }
 
@@ -387,7 +406,7 @@ class Navigator(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforePropertyRegistrationSelectLocalAuthority().build(),
         )
-        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.LocalAuthority.urlPathSegment}")
+        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.LocalAuthority.urlPathSegment}")
         return createValidPage(page, SelectLocalAuthorityFormPagePropertyRegistration::class)
     }
 
@@ -396,7 +415,7 @@ class Navigator(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforePropertyRegistrationPropertyType().build(),
         )
-        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.PropertyType.urlPathSegment}")
+        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.PropertyType.urlPathSegment}")
         return createValidPage(page, PropertyTypeFormPagePropertyRegistration::class)
     }
 
@@ -405,7 +424,7 @@ class Navigator(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforePropertyRegistrationOwnershipType().build(),
         )
-        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.OwnershipType.urlPathSegment}")
+        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.OwnershipType.urlPathSegment}")
         return createValidPage(page, OwnershipTypeFormPagePropertyRegistration::class)
     }
 
@@ -414,7 +433,7 @@ class Navigator(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforePropertyRegistrationLicensingType().build(),
         )
-        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.LicensingType.urlPathSegment}")
+        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.LicensingType.urlPathSegment}")
         return createValidPage(page, LicensingTypeFormPagePropertyRegistration::class)
     }
 
@@ -423,7 +442,7 @@ class Navigator(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforePropertyRegistrationSelectiveLicence().build(),
         )
-        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.SelectiveLicence.urlPathSegment}")
+        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.SelectiveLicence.urlPathSegment}")
         return createValidPage(page, SelectiveLicenceFormPagePropertyRegistration::class)
     }
 
@@ -432,7 +451,7 @@ class Navigator(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforePropertyRegistrationHmoMandatoryLicence().build(),
         )
-        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment}")
+        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment}")
         return createValidPage(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
     }
 
@@ -441,7 +460,7 @@ class Navigator(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforePropertyRegistrationHmoAdditionalLicence().build(),
         )
-        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment}")
+        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment}")
         return createValidPage(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
     }
 
@@ -450,7 +469,7 @@ class Navigator(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforePropertyRegistrationOccupancy().build(),
         )
-        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.Occupancy.urlPathSegment}")
+        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.Occupancy.urlPathSegment}")
         return createValidPage(page, OccupancyFormPagePropertyRegistration::class)
     }
 
@@ -459,7 +478,7 @@ class Navigator(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforePropertyRegistrationHouseholds().build(),
         )
-        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment}")
+        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment}")
         return createValidPage(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
     }
 
@@ -468,7 +487,7 @@ class Navigator(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforePropertyRegistrationPeople().build(),
         )
-        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.NumberOfPeople.urlPathSegment}")
+        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.NumberOfPeople.urlPathSegment}")
         return createValidPage(page, NumberOfPeopleFormPagePropertyRegistration::class)
     }
 
@@ -477,7 +496,7 @@ class Navigator(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforePropertyRegistrationCheckAnswers().build(),
         )
-        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.CheckAnswers.urlPathSegment}")
+        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.CheckAnswers.urlPathSegment}")
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 
@@ -486,12 +505,12 @@ class Navigator(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforePropertyRegistrationDeclaration().build(),
         )
-        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/${RegisterPropertyStepId.Declaration.urlPathSegment}")
+        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.Declaration.urlPathSegment}")
         return createValidPage(page, DeclarationFormPagePropertyRegistration::class)
     }
 
     fun navigateToPropertyRegistrationConfirmationPage() {
-        navigate("/$REGISTER_PROPERTY_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT")
+        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
     }
 
     fun goToPropertyComplianceStartPage(propertyOwnershipId: Long): StartPagePropertyCompliance {
@@ -914,13 +933,13 @@ class Navigator(
     }
 
     fun goToLandlordDetails(): LandlordDetailsPage {
-        navigate("/landlord-details")
+        navigate(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
         return createValidPage(page, LandlordDetailsPage::class)
     }
 
     fun goToLandlordDetailsAsALocalAuthorityUser(id: Long): LocalAuthorityViewLandlordDetailsPage {
-        navigate("/landlord-details/$id")
-        return createValidPage(page, LocalAuthorityViewLandlordDetailsPage::class)
+        navigate(LandlordDetailsController.getLandlordDetailsForLaUserPath(id))
+        return createValidPage(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to id.toString()))
     }
 
     fun goToUpdateLandlordDetailsUpdateLookupAddressPage(): LookupAddressFormPageUpdateLandlordDetails {
@@ -946,7 +965,7 @@ class Navigator(
     }
 
     fun goToPropertyDetailsLandlordView(id: Long): PropertyDetailsPageLandlordView {
-        navigate("/property-details/$id")
+        navigate(PropertyDetailsController.getPropertyDetailsPath(id, isLaView = false))
         return createValidPage(
             page,
             PropertyDetailsPageLandlordView::class,
@@ -955,7 +974,7 @@ class Navigator(
     }
 
     fun goToPropertyDetailsLocalAuthorityView(id: Long): PropertyDetailsPageLocalAuthorityView {
-        navigate("/local-authority/property-details/$id")
+        navigate(PropertyDetailsController.getPropertyDetailsPath(id, isLaView = true))
         return createValidPage(
             page,
             PropertyDetailsPageLocalAuthorityView::class,
@@ -1049,7 +1068,7 @@ class Navigator(
     }
 
     fun goToLandlordDeregistrationAreYouSurePage(): AreYouSureFormPageLandlordDeregistration {
-        navigate("/$DEREGISTER_LANDLORD_JOURNEY_URL/${DeregisterLandlordStepId.AreYouSure.urlPathSegment}")
+        navigate("${DeregisterLandlordController.LANDLORD_DEREGISTRATION_ROUTE}/${DeregisterLandlordStepId.AreYouSure.urlPathSegment}")
         return createValidPage(page, AreYouSureFormPageLandlordDeregistration::class)
     }
 
@@ -1082,7 +1101,7 @@ class Navigator(
     }
 
     fun goToInviteLaAdmin(): InviteLaAdminPage {
-        navigate("/$SYSTEM_OPERATOR_PATH_SEGMENT/invite-la-admin")
+        navigate(InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_ROUTE)
         return createValidPage(page, InviteLaAdminPage::class)
     }
 

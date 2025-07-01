@@ -3,7 +3,7 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="summaryName" type="java.lang.String"*/-->
-<!--/*@thymesVar id="formData" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="summaryListData" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="showWarning" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
@@ -13,7 +13,7 @@
         <h1 class="govuk-fieldset__heading" th:text="#{forms.checkAnswers.heading}">forms.checkAnswers.heading</h1>
     </legend>
     <h2 class="govuk-heading-m" th:text="#{${summaryName}}"></h2>
-    <dl th:replace="~{fragments/summaryList :: summaryList(${formData})}"></dl>
+    <dl th:replace="~{fragments/summaryList :: summaryList(${summaryListData})}"></dl>
     <th:block th:if="${showWarning}">
         <div th:replace="~{fragments/warningText :: warningText(#{forms.update.warning})}">forms.update.warning</div>
     </th:block>

@@ -13,11 +13,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.getPropertyDeregistrationPath
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyService
@@ -45,7 +43,7 @@ class DeregisterPropertyControllerTests(
     @Test
     fun `getJourneyStep for the initial step returns a redirect for an unauthenticated user`() {
         mvc
-            .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/1/$initialStepIdUrlSegment")
+            .get(DeregisterPropertyController.getPropertyDeregistrationPath(1))
             .andExpect {
                 status { is3xxRedirection() }
             }
@@ -55,7 +53,7 @@ class DeregisterPropertyControllerTests(
     @WithMockUser
     fun `getJourneyStep for the initial step returns 403 for a user who is not a landlord`() {
         mvc
-            .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/1/$initialStepIdUrlSegment")
+            .get(DeregisterPropertyController.getPropertyDeregistrationPath(1))
             .andExpect {
                 status { isForbidden() }
             }
@@ -73,7 +71,7 @@ class DeregisterPropertyControllerTests(
 
         // Act, Assert
         mvc
-            .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$initialStepIdUrlSegment")
+            .get(DeregisterPropertyController.getPropertyDeregistrationPath(1))
             .andExpect {
                 status { isNotFound() }
             }
@@ -91,7 +89,7 @@ class DeregisterPropertyControllerTests(
 
         // Act, Assert
         mvc
-            .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$initialStepIdUrlSegment")
+            .get(DeregisterPropertyController.getPropertyDeregistrationPath(1))
             .andExpect {
                 status { isOk() }
             }
@@ -107,7 +105,7 @@ class DeregisterPropertyControllerTests(
 
         // Assert
         assertEquals(
-            "/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/${DeregisterPropertyStepId.AreYouSure.urlPathSegment}",
+            DeregisterPropertyController.getPropertyDeregistrationPath(1),
             propertyDeregistrationPath,
         )
     }
@@ -122,7 +120,7 @@ class DeregisterPropertyControllerTests(
         ).thenReturn(mutableListOf(Pair(propertyOwnershipId, propertyId)))
 
         mvc
-            .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$CONFIRMATION_PATH_SEGMENT")
+            .get("${DeregisterPropertyController.getPropertyDeregistrationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT")
             .andExpect {
                 status { isOk() }
             }
@@ -137,7 +135,7 @@ class DeregisterPropertyControllerTests(
         val propertyOwnershipId = 1.toLong()
 
         mvc
-            .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$CONFIRMATION_PATH_SEGMENT")
+            .get("${DeregisterPropertyController.getPropertyDeregistrationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT")
             .andExpect {
                 status { isNotFound() }
             }
@@ -152,7 +150,7 @@ class DeregisterPropertyControllerTests(
             .thenReturn(deregisteredPropertyEntities)
 
         mvc
-            .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$CONFIRMATION_PATH_SEGMENT")
+            .get("${DeregisterPropertyController.getPropertyDeregistrationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT")
             .andExpect {
                 status { isNotFound() }
             }
@@ -171,7 +169,7 @@ class DeregisterPropertyControllerTests(
 
         // Act, Assert
         mvc
-            .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$CONFIRMATION_PATH_SEGMENT")
+            .get("${DeregisterPropertyController.getPropertyDeregistrationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT")
             .andExpect {
                 status { is5xxServerError() }
             }
@@ -192,7 +190,7 @@ class DeregisterPropertyControllerTests(
 
         // Act, Assert
         mvc
-            .get("/$DEREGISTER_PROPERTY_JOURNEY_URL/$propertyOwnershipId/$CONFIRMATION_PATH_SEGMENT")
+            .get("${DeregisterPropertyController.getPropertyDeregistrationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT")
             .andExpect {
                 status { is5xxServerError() }
             }

@@ -13,6 +13,8 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController.Companion.LANDLORD_DEREGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDeregistrationJourneyFactory
@@ -23,7 +25,7 @@ import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.security.Principal
 
 @PrsdbController
-@RequestMapping("/$DEREGISTER_LANDLORD_JOURNEY_URL")
+@RequestMapping(LANDLORD_DEREGISTRATION_ROUTE)
 class DeregisterLandlordController(
     private val landlordDeregistrationJourneyFactory: LandlordDeregistrationJourneyFactory,
     private val landlordService: LandlordService,
@@ -108,6 +110,8 @@ class DeregisterLandlordController(
     companion object {
         const val CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT = "check-user-properties"
 
-        val LANDLORD_DEREGISTRATION_PATH = "/$DEREGISTER_LANDLORD_JOURNEY_URL/${LandlordDeregistrationJourney.initialStepId.urlPathSegment}"
+        const val LANDLORD_DEREGISTRATION_ROUTE = "/$LANDLORD_PATH_SEGMENT/$DEREGISTER_LANDLORD_JOURNEY_URL"
+
+        val LANDLORD_DEREGISTRATION_PATH = "$LANDLORD_DEREGISTRATION_ROUTE/${LandlordDeregistrationJourney.initialStepId.urlPathSegment}"
     }
 }

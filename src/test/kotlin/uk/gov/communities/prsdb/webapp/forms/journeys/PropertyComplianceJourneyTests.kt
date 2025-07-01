@@ -7,26 +7,34 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PartialPropertyComplianceConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -34,9 +42,12 @@ import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyPageDataBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
+import java.net.URI
 import kotlin.test.assertContains
 
 @ExtendWith(MockitoExtension::class)
@@ -57,6 +68,17 @@ class PropertyComplianceJourneyTests {
 
     @Mock
     private lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
+
+    private val mockMessageSource = MockMessageSource()
+
+    @Mock
+    private lateinit var mockFullComplianceEmailService: EmailNotificationService<FullPropertyComplianceConfirmationEmail>
+
+    @Mock
+    private lateinit var mockPartialComplianceEmailService: EmailNotificationService<PartialPropertyComplianceConfirmationEmail>
+
+    @Mock
+    private lateinit var mockUrlProvider: AbsoluteUrlProvider
 
     @Nested
     inner class LoadJourneyDataIfNotLoadedTests {
@@ -735,18 +757,22 @@ class PropertyComplianceJourneyTests {
 
     @Nested
     inner class CheckAndSubmitHandleSubmitAndRedirectTests {
-        @Test
-        fun `checkAndSubmitHandleSubmitAndRedirect creates a compliance record and deletes the corresponding form context`() {
-            val propertyOwnershipId = 1L
-            whenever(mockJourneyDataService.getJourneyDataFromSession())
-                .thenReturn(JourneyPageDataBuilder.beforePropertyComplianceCheckAnswers().build())
+        private val expectedLandlordDashboardUri = URI("landlord-dashboard-uri")
+        private val expectedComplianceInfoUri = URI("compliance-info-uri")
 
-            completeStep(
-                PropertyComplianceStepId.CheckAndSubmit,
-                JourneyDataBuilder().withCheckedAnswers().build(),
-                propertyOwnershipId,
-                stubPropertyOwnership = false,
-            )
+        @Suppress("ktlint:standard:max-line-length")
+        @Test
+        fun `checkAndSubmitHandleSubmitAndRedirect creates a compliance record, deletes the corresponding form context and redirects to the confirmation page`() {
+            val propertyOwnershipId = 1L
+            setUpMocks()
+
+            val returnedModelAndView =
+                completeStep(
+                    PropertyComplianceStepId.CheckAndSubmit,
+                    JourneyDataBuilder().withCheckedAnswers().build(),
+                    propertyOwnershipId,
+                    stubPropertyOwnership = false,
+                )
 
             verify(mockPropertyComplianceService)
                 .createPropertyCompliance(
@@ -768,7 +794,100 @@ class PropertyComplianceJourneyTests {
                     anyOrNull(),
                     anyOrNull(),
                 )
+            verify(mockPropertyComplianceService).addToPropertiesWithComplianceAddedThisSession(propertyOwnershipId)
             verify(mockPropertyOwnershipService).deleteIncompleteComplianceForm(propertyOwnershipId)
+            assertEquals("redirect:$CONFIRMATION_PATH_SEGMENT", returnedModelAndView.viewName)
+        }
+
+        @Test
+        fun `checkAndSubmitHandleSubmitAndRedirect sends a fully compliant confirmation email for a compliant property`() {
+            val compliantPropertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+            setUpMocks(compliantPropertyCompliance, isPropertyCompliant = true)
+
+            val expectedCompliantMessageKeys = PropertyComplianceConfirmationMessageKeys(compliantPropertyCompliance).compliantMsgKeys
+            val expectedCompliantMessages = expectedCompliantMessageKeys.map { MockMessageSource.getMockMessage(it) }
+
+            val expectedEmailModel =
+                FullPropertyComplianceConfirmationEmail(
+                    compliantPropertyCompliance.propertyOwnership.property.address.singleLineAddress,
+                    EmailBulletPointList(expectedCompliantMessages),
+                    expectedLandlordDashboardUri.toString(),
+                )
+
+            completeStep(
+                PropertyComplianceStepId.CheckAndSubmit,
+                JourneyDataBuilder().withCheckedAnswers().build(),
+                compliantPropertyCompliance.propertyOwnership.id,
+                stubPropertyOwnership = false,
+            )
+
+            verify(mockFullComplianceEmailService)
+                .sendEmail(compliantPropertyCompliance.propertyOwnership.primaryLandlord.email, expectedEmailModel)
+        }
+
+        @Test
+        fun `checkAndSubmitHandleSubmitAndRedirect sends a partially compliant confirmation email for non-compliant property`() {
+            val nonCompliantPropertyCompliance = PropertyComplianceBuilder.createWithMissingCerts()
+            setUpMocks(nonCompliantPropertyCompliance, isPropertyCompliant = false)
+
+            val expectedMessageKeys = PropertyComplianceConfirmationMessageKeys(nonCompliantPropertyCompliance)
+            val expectedCompliantMessages = expectedMessageKeys.compliantMsgKeys.map { MockMessageSource.getMockMessage(it) }
+            val expectedNonCompliantMessages = expectedMessageKeys.nonCompliantMsgKeys.map { MockMessageSource.getMockMessage(it) }
+
+            val expectedEmailModel =
+                PartialPropertyComplianceConfirmationEmail(
+                    nonCompliantPropertyCompliance.propertyOwnership.property.address.singleLineAddress,
+                    EmailBulletPointList(expectedCompliantMessages),
+                    EmailBulletPointList(expectedNonCompliantMessages),
+                    expectedComplianceInfoUri.toString(),
+                )
+
+            completeStep(
+                PropertyComplianceStepId.CheckAndSubmit,
+                JourneyDataBuilder().withCheckedAnswers().build(),
+                nonCompliantPropertyCompliance.propertyOwnership.id,
+                stubPropertyOwnership = false,
+            )
+
+            verify(mockPartialComplianceEmailService)
+                .sendEmail(nonCompliantPropertyCompliance.propertyOwnership.primaryLandlord.email, expectedEmailModel)
+        }
+
+        private fun setUpMocks(
+            propertyCompliance: PropertyCompliance = PropertyComplianceBuilder.createWithInDateCerts(),
+            isPropertyCompliant: Boolean = true,
+        ) {
+            whenever(mockJourneyDataService.getJourneyDataFromSession())
+                .thenReturn(JourneyPageDataBuilder.beforePropertyComplianceCheckAnswers().build())
+
+            whenever(
+                mockPropertyComplianceService.createPropertyCompliance(
+                    eq(propertyCompliance.propertyOwnership.id),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                ),
+            ).thenReturn(propertyCompliance)
+
+            if (isPropertyCompliant) {
+                whenever(mockUrlProvider.buildLandlordDashboardUri()).thenReturn(expectedLandlordDashboardUri)
+            } else {
+                whenever(mockUrlProvider.buildComplianceInformationUri(propertyCompliance.propertyOwnership.id))
+                    .thenReturn(expectedComplianceInfoUri)
+            }
         }
     }
 
@@ -781,6 +900,10 @@ class PropertyComplianceJourneyTests {
             propertyComplianceService = mockPropertyComplianceService,
             propertyOwnershipId = propertyOwnershipId,
             epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
+            messageSource = mockMessageSource,
+            fullPropertyComplianceConfirmationEmailService = mockFullComplianceEmailService,
+            partialPropertyComplianceConfirmationEmailService = mockPartialComplianceEmailService,
+            urlProvider = mockUrlProvider,
         )
 
     private fun completeStep(

@@ -4,6 +4,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.serialization.Serializable
 import org.json.JSONObject
+import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import java.util.Locale
 
@@ -27,7 +28,7 @@ data class EpcDataModel(
 
     fun isPastExpiryDate(): Boolean = expiryDate < DateTimeHelper().getCurrentDateInUK()
 
-    fun isEnergyRatingEOrBetter(): Boolean = energyRatingUppercase in "A".."E"
+    fun isEnergyRatingEOrBetter(): Boolean = energyRatingUppercase in EPC_ACCEPTABLE_RATING_RANGE
 
     companion object {
         fun parseCertificateNumberOrNull(certificateNumber: String): String? {

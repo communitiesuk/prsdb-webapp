@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.servlet.http.HttpSession
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -13,6 +15,7 @@ import java.time.LocalDate
 class PropertyComplianceService(
     private val propertyComplianceRepository: PropertyComplianceRepository,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val session: HttpSession,
 ) {
     fun createPropertyCompliance(
         propertyOwnershipId: Long,
@@ -32,9 +35,9 @@ class PropertyComplianceService(
         epcExemptionReason: EpcExemptionReason? = null,
         epcMeesExemptionReason: MeesExemptionReason? = null,
         hasFireSafetyDeclaration: Boolean = false,
-    ) {
+    ): PropertyCompliance {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
-        propertyComplianceRepository.save(
+        return propertyComplianceRepository.save(
             PropertyCompliance(
                 propertyOwnership = propertyOwnership,
                 hasFireSafetyDeclaration = hasFireSafetyDeclaration,
@@ -56,4 +59,20 @@ class PropertyComplianceService(
             ),
         )
     }
+
+    fun getComplianceForProperty(propertyOwnershipId: Long): PropertyCompliance? =
+        propertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)
+
+    fun addToPropertiesWithComplianceAddedThisSession(propertyOwnershipId: Long) {
+        val currentSet = getPropertiesWithComplianceAddedThisSession()
+        val updatedSet = currentSet + propertyOwnershipId
+        session.setAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION, updatedSet)
+    }
+
+    fun wasPropertyComplianceAddedThisSession(propertyOwnershipId: Long): Boolean =
+        getPropertiesWithComplianceAddedThisSession().contains(propertyOwnershipId)
+
+    @Suppress("UNCHECKED_CAST")
+    private fun getPropertiesWithComplianceAddedThisSession() =
+        session.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION) as? Set<Long> ?: emptySet()
 }

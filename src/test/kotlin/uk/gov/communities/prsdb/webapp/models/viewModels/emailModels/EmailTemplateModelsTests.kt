@@ -56,6 +56,23 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/LandlordWithPropertiesDeregistrationConfirmation.md",
                 ),
+                EmailTemplateTestData(
+                    FullPropertyComplianceConfirmationEmail(
+                        "1 Street Name, Town, Country, AB1 2CD",
+                        EmailBulletPointList(listOf("certificate 1", "certificate 2")),
+                        "https://emample.com",
+                    ),
+                    "/emails/FullPropertyComplianceConfirmation.md",
+                ),
+                EmailTemplateTestData(
+                    PartialPropertyComplianceConfirmationEmail(
+                        "1 Street Name, Town, Country, AB1 2CD",
+                        EmailBulletPointList(listOf("certificate 1", "certificate 2")),
+                        EmailBulletPointList(listOf("certificate 3", "certificate 4")),
+                        "https://emample.com",
+                    ),
+                    "/emails/PartialPropertyComplianceConfirmation.md",
+                ),
             )
 
         private fun createLocalAuthority(

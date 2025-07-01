@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaInviteNewUserRoute
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
@@ -101,7 +102,7 @@ class InvitationUrlTests(
 
         // Act
         mvc
-            .post("/local-authority/123/invite-new-user") {
+            .post(getLaInviteNewUserRoute(123)) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 content = encodedConfirmedEmailContent
                 with(csrf())

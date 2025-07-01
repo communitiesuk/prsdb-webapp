@@ -24,6 +24,7 @@ import org.springframework.security.web.csrf.CsrfTokenRepository
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebConfiguration
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @PrsdbWebConfiguration
@@ -41,7 +42,7 @@ class CustomSecurityConfig(
                     .permitAll()
                     .requestMatchers("/healthcheck")
                     .permitAll()
-                    .requestMatchers("/register-as-a-landlord")
+                    .requestMatchers(RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
                     .permitAll()
                     .requestMatchers("/signout")
                     .permitAll()

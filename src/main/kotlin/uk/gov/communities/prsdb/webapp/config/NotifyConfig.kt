@@ -2,10 +2,10 @@ package uk.gov.communities.prsdb.webapp.config
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebConfiguration
+import org.springframework.context.annotation.Configuration
 import uk.gov.service.notify.NotificationClient
 
-@PrsdbWebConfiguration
+@Configuration
 class NotifyConfig {
     @Value("\${notify.api-key}")
     lateinit var apiKey: String

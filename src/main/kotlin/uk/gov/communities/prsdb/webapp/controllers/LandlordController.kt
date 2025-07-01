@@ -17,10 +17,8 @@ import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTIES_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_BASE_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
@@ -28,7 +26,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeleteIncompletePropertyRegistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompleteComplianceViewModelBuilder
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompletePropertiesViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompletePropertyViewModelBuilder
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -66,10 +64,13 @@ class LandlordController(
         model.addAttribute("landlordName", landlord.name)
         model.addAttribute("lrn", RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber))
 
-        model.addAttribute("registerPropertyUrl", "/$REGISTER_PROPERTY_JOURNEY_URL")
+        model.addAttribute("registerPropertyUrl", RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
         model.addAttribute("viewIncompletePropertiesUrl", INCOMPLETE_PROPERTIES_URL)
-        model.addAttribute("viewPropertiesUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT#$REGISTERED_PROPERTIES_PATH_SEGMENT")
-        model.addAttribute("viewLandlordRecordUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT")
+        model.addAttribute(
+            "viewPropertiesUrl",
+            "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$REGISTERED_PROPERTIES_FRAGMENT",
+        )
+        model.addAttribute("viewLandlordRecordUrl", LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
         model.addAttribute("viewIncompleteCompliancesUrl", INCOMPLETE_COMPLIANCES_URL)
 
         model.addAttribute("updatesToPilotUrl", "#")
@@ -93,12 +94,17 @@ class LandlordController(
         val incompleteProperties =
             propertyRegistrationService.getIncompletePropertiesForLandlord(principal.name)
 
-        val incompletePropertiesViewModel =
-            IncompletePropertiesViewModel(incompleteProperties, backUrlStorageService.storeCurrentUrlReturningKey())
+        val incompletePropertyViewModels =
+            incompleteProperties.mapIndexed { index, dataModel ->
+                IncompletePropertyViewModelBuilder.fromDataModel(index, dataModel, backUrlStorageService.storeCurrentUrlReturningKey())
+            }
 
-        model.addAttribute("incompleteProperties", incompletePropertiesViewModel.incompleteProperties)
-        model.addAttribute("registerPropertyUrl", "/$REGISTER_PROPERTY_JOURNEY_URL")
-        model.addAttribute("viewRegisteredPropertiesUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT#$REGISTERED_PROPERTIES_PATH_SEGMENT")
+        model.addAttribute("incompleteProperties", incompletePropertyViewModels)
+        model.addAttribute("registerPropertyUrl", RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
+        model.addAttribute(
+            "viewRegisteredPropertiesUrl",
+            "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$REGISTERED_PROPERTIES_FRAGMENT",
+        )
 
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
@@ -159,7 +165,10 @@ class LandlordController(
             }
 
         model.addAttribute("incompleteCompliances", incompleteComplianceViewModels)
-        model.addAttribute("viewRegisteredPropertiesUrl", "/$LANDLORD_DETAILS_PATH_SEGMENT#$REGISTERED_PROPERTIES_PATH_SEGMENT")
+        model.addAttribute(
+            "viewRegisteredPropertiesUrl",
+            "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$REGISTERED_PROPERTIES_FRAGMENT",
+        )
 
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 

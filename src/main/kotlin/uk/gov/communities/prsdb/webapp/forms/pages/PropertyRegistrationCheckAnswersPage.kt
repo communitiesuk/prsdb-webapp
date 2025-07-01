@@ -6,60 +6,54 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper as DataHelper
 
 class PropertyRegistrationCheckAnswersPage(
+    journeyDataService: JourneyDataService,
     private val localAuthorityService: LocalAuthorityService,
-) : AbstractPage(
-        NoInputFormModel::class,
-        "forms/propertyRegistrationCheckAnswersForm",
-        mapOf(
-            "title" to "registerProperty.title",
-            "submitButtonText" to "forms.buttons.saveAndContinue",
-        ),
+) : CheckAnswersPage(
+        content =
+            mapOf(
+                "title" to "registerProperty.title",
+                "submitButtonText" to "forms.buttons.saveAndContinue",
+            ),
+        journeyDataService = journeyDataService,
+        templateName = "forms/propertyRegistrationCheckAnswersForm",
         shouldDisplaySectionHeader = true,
     ) {
-    override fun enrichModel(
+    override fun getSummaryList(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> = emptyList()
+
+    override fun furtherEnrichModel(
         modelAndView: ModelAndView,
-        filteredJourneyData: JourneyData?,
+        filteredJourneyData: JourneyData,
     ) {
-        addPropertyDetailsToModel(modelAndView, filteredJourneyData!!)
+        modelAndView.addObject("propertyName", getPropertyName(filteredJourneyData))
+        modelAndView.addObject("propertyDetails", getPropertyDetailsSummaryList(filteredJourneyData))
+        modelAndView.addObject("showUprnDetail", !DataHelper.isManualAddressChosen(filteredJourneyData))
     }
 
-    private fun addPropertyDetailsToModel(
-        modelAndView: ModelAndView,
-        journeyData: JourneyData,
-    ) {
-        val propertyName = getPropertyName(journeyData)
-        val propertyDetails = getPropertyDetailsSummary(journeyData)
+    private fun getPropertyName(filteredJourneyData: JourneyData) = DataHelper.getAddress(filteredJourneyData)!!.singleLineAddress
 
-        modelAndView.addObject("propertyDetails", propertyDetails)
-        modelAndView.addObject("propertyName", propertyName)
-        modelAndView.addObject("showUprnDetail", !DataHelper.isManualAddressChosen(journeyData))
-    }
+    private fun getPropertyDetailsSummaryList(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> =
+        getAddressRows(filteredJourneyData) +
+            getPropertyTypeRow(filteredJourneyData) +
+            getOwnershipTypeRow(filteredJourneyData) +
+            getLicensingTypeRow(filteredJourneyData) +
+            getTenancyRows(filteredJourneyData)
 
-    private fun getPropertyName(journeyData: JourneyData) = DataHelper.getAddress(journeyData)!!.singleLineAddress
-
-    private fun getPropertyDetailsSummary(journeyData: JourneyData): List<SummaryListRowViewModel> =
-        getAddressDetails(journeyData) +
-            getPropertyTypeDetails(journeyData) +
-            getOwnershipTypeDetails(journeyData) +
-            getLicensingTypeDetails(journeyData) +
-            getTenancyDetails(journeyData)
-
-    private fun getAddressDetails(journeyData: JourneyData): List<SummaryListRowViewModel> {
+    private fun getAddressRows(journeyData: JourneyData): List<SummaryListRowViewModel> {
         val address = DataHelper.getAddress(journeyData)!!
         return if (DataHelper.isManualAddressChosen(journeyData)) {
-            getManualAddressDetails(address)
+            getManualAddressRows(address)
         } else {
-            getSelectedAddressDetails(address)
+            getSelectedAddressRows(address)
         }
     }
 
-    private fun getSelectedAddressDetails(address: AddressDataModel): List<SummaryListRowViewModel> =
+    private fun getSelectedAddressRows(address: AddressDataModel): List<SummaryListRowViewModel> =
         listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.address",
@@ -78,7 +72,7 @@ class PropertyRegistrationCheckAnswersPage(
             ),
         )
 
-    private fun getManualAddressDetails(address: AddressDataModel): List<SummaryListRowViewModel> =
+    private fun getManualAddressRows(address: AddressDataModel): List<SummaryListRowViewModel> =
         listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.address",
@@ -92,9 +86,9 @@ class PropertyRegistrationCheckAnswersPage(
             ),
         )
 
-    private fun getPropertyTypeDetails(journeyData: JourneyData): SummaryListRowViewModel {
-        val propertyType = DataHelper.getPropertyType(journeyData)!!
-        val customType = DataHelper.getCustomPropertyType(journeyData)
+    private fun getPropertyTypeRow(filteredJourneyData: JourneyData): SummaryListRowViewModel {
+        val propertyType = DataHelper.getPropertyType(filteredJourneyData)!!
+        val customType = DataHelper.getCustomPropertyType(filteredJourneyData)
         return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.type",
             getPropertyTypeSummaryValue(propertyType, customType),
@@ -112,20 +106,19 @@ class PropertyRegistrationCheckAnswersPage(
             propertyType
         }
 
-    private fun getOwnershipTypeDetails(journeyData: JourneyData) =
+    private fun getOwnershipTypeRow(filteredJourneyData: JourneyData) =
         SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.ownership",
-            DataHelper.getOwnershipType(journeyData)!!,
+            DataHelper.getOwnershipType(filteredJourneyData)!!,
             RegisterPropertyStepId.OwnershipType.urlPathSegment,
         )
 
-    private fun getLicensingTypeDetails(journeyData: JourneyData): SummaryListRowViewModel {
+    private fun getLicensingTypeRow(journeyData: JourneyData): SummaryListRowViewModel {
         val licensingType = DataHelper.getLicensingType(journeyData)!!
         val licenceNumber = DataHelper.getLicenseNumber(journeyData)!!
-        val licensingSummaryValue = getLicensingSummaryValue(licenceNumber, licensingType)
         return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.licensing",
-            licensingSummaryValue,
+            getLicensingSummaryValue(licenceNumber, licensingType),
             RegisterPropertyStepId.LicensingType.urlPathSegment,
         )
     }
@@ -140,28 +133,22 @@ class PropertyRegistrationCheckAnswersPage(
             licensingType
         }
 
-    private fun getTenancyDetails(journeyData: JourneyData): List<SummaryListRowViewModel> {
-        val occupied = DataHelper.getIsOccupied(journeyData)!!
-        return if (occupied) {
-            getOccupyingTenantsDetails(journeyData)
-        } else {
-            listOf(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.occupied",
-                    false,
-                    RegisterPropertyStepId.Occupancy.urlPathSegment,
-                ),
-            )
+    private fun getTenancyRows(journeyData: JourneyData) =
+        mutableListOf<SummaryListRowViewModel>().apply {
+            val occupied = DataHelper.getIsOccupied(journeyData)!!
+            add(getOccupancyStatusRow(occupied))
+            if (occupied) addAll(getOccupyingTenantsRows(journeyData))
         }
-    }
 
-    private fun getOccupyingTenantsDetails(journeyData: JourneyData): List<SummaryListRowViewModel> =
+    private fun getOccupancyStatusRow(occupied: Boolean) =
+        SummaryListRowViewModel.forCheckYourAnswersPage(
+            "forms.checkPropertyAnswers.propertyDetails.occupied",
+            occupied,
+            RegisterPropertyStepId.Occupancy.urlPathSegment,
+        )
+
+    private fun getOccupyingTenantsRows(journeyData: JourneyData): List<SummaryListRowViewModel> =
         listOf(
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                "forms.checkPropertyAnswers.propertyDetails.occupied",
-                true,
-                RegisterPropertyStepId.Occupancy.urlPathSegment,
-            ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.households",
                 DataHelper.getNumberOfHouseholds(journeyData),

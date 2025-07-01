@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.ReasonFormPage
 
@@ -10,5 +10,6 @@ class ReasonPagePropertyDeregistration(
     urlArguments: Map<String, String>,
 ) : ReasonFormPage(
         page,
-        "/$DEREGISTER_PROPERTY_JOURNEY_URL/${urlArguments["propertyOwnershipId"]}/${DeregisterPropertyStepId.Reason.urlPathSegment}",
+        DeregisterPropertyController.getPropertyDeregistrationBasePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
+            "/${DeregisterPropertyStepId.Reason.urlPathSegment}",
     )

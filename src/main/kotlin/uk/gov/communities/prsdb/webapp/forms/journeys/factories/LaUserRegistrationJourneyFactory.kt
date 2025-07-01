@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys.factories
 
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebComponent
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
@@ -29,6 +29,6 @@ class LaUserRegistrationJourneyFactory(
         )
 
     companion object {
-        const val JOURNEY_DATA_KEY = REGISTER_LA_USER_JOURNEY_URL
+        const val JOURNEY_DATA_KEY = RegisterLAUserController.LA_USER_REGISTRATION_ROUTE
     }
 }
