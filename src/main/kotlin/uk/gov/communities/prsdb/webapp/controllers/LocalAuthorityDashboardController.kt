@@ -10,7 +10,9 @@ import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController.Companion.SEARCH_LANDLORD_URL
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController.Companion.SEARCH_PROPERTY_URL
+import uk.gov.communities.prsdb.webapp.models.viewModels.NavigationLinkViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
+import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
@@ -18,6 +20,7 @@ import java.security.Principal
 @RequestMapping("/$LOCAL_AUTHORITY_PATH_SEGMENT")
 class LocalAuthorityDashboardController(
     val localAuthorityDataService: LocalAuthorityDataService,
+    val userRolesService: UserRolesService,
 ) {
     @GetMapping
     fun index(model: Model): String = "redirect:$LOCAL_AUTHORITY_DASHBOARD_URL"
@@ -28,6 +31,21 @@ class LocalAuthorityDashboardController(
         principal: Principal,
     ): String {
         val localAuthorityUser = localAuthorityDataService.getLocalAuthorityUser(principal.name)
+
+        val isAdmin = userRolesService.getHasLocalAuthorityAdminRole(principal.name)
+
+        if (isAdmin) {
+            model.addAttribute(
+                "navLinks",
+                listOf(
+                    NavigationLinkViewModel(
+                        ManageLocalAuthorityUsersController.getLaManageUsersRoute(localAuthorityUser.localAuthority.id),
+                        "navLink.manageUsers.title",
+                        false,
+                    ),
+                ),
+            )
+        }
 
         model.addAttribute("userName", localAuthorityUser.name)
         model.addAttribute("localAuthority", localAuthorityUser.localAuthority.name)

@@ -216,4 +216,63 @@ class UserRolesServiceTests {
         // Assert
         Assertions.assertFalse(hasLocalAuthorityUserRole)
     }
+
+    @Test
+    fun `getHasLocalAuthorityAdminRole returns true for a local authority admin`() {
+        // Arrange
+        val baseUser = MockOneLoginUserData.createOneLoginUser()
+        val user = MockLocalAuthorityData.createLocalAuthorityUser(baseUser, isManager = true)
+
+        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+            .thenReturn(user)
+
+        // Act
+        val hasLocalAuthorityUserRole = userRolesService.getHasLocalAuthorityAdminRole(baseUser.id)
+
+        // Assert
+        Assertions.assertTrue(hasLocalAuthorityUserRole)
+    }
+
+    @Test
+    fun `getHasLocalAuthorityAdminRole returns false for a standard local authority user`() {
+        // Arrange
+        val baseUser = MockOneLoginUserData.createOneLoginUser()
+        val user = MockLocalAuthorityData.createLocalAuthorityUser(baseUser, isManager = false)
+
+        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+            .thenReturn(user)
+
+        // Act
+        val hasLocalAuthorityUserRole = userRolesService.getHasLocalAuthorityAdminRole(baseUser.id)
+
+        // Assert
+        Assertions.assertFalse(hasLocalAuthorityUserRole)
+    }
+
+    @Test
+    fun `getHasLocalAuthorityAdminRole returns false for a landlord user`() {
+        // Arrange
+        val baseUser = MockOneLoginUserData.createOneLoginUser()
+        val user = MockLandlordData.createLandlord(baseUser)
+        whenever(landlordRepository.findByBaseUser_Id(baseUser.id))
+            .thenReturn(user)
+
+        // Act
+        val hasLocalAuthorityUserRole = userRolesService.getHasLocalAuthorityAdminRole(baseUser.id)
+
+        // Assert
+        Assertions.assertFalse(hasLocalAuthorityUserRole)
+    }
+
+    @Test
+    fun `getHasLocalAuthorityAdminRole returns false for a user without roles`() {
+        // Arrange
+        val baseUser = MockOneLoginUserData.createOneLoginUser()
+
+        // Act
+        val hasLocalAuthorityUserRole = userRolesService.getHasLocalAuthorityAdminRole(baseUser.id)
+
+        // Assert
+        Assertions.assertFalse(hasLocalAuthorityUserRole)
+    }
 }
