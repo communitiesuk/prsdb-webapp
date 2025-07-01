@@ -46,7 +46,7 @@ class RegisterLAUserController(
             return "redirect:${LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.LandingPage.urlPathSegment}"
         }
 
-        return "redirect:$INVALID_LINK_PAGE_PATH_SEGMENT"
+        return "redirect:$LA_USER_REGISTRATION_INVALID_LINK_ROUTE"
     }
 
     @GetMapping("/$LANDING_PAGE_PATH_SEGMENT")
@@ -57,7 +57,7 @@ class RegisterLAUserController(
         val token = getValidTokenFromSessionOrNull()
         if (token == null) {
             invitationService.clearTokenFromSession()
-            return ModelAndView("redirect:$INVALID_LINK_PAGE_PATH_SEGMENT")
+            return ModelAndView("redirect:$LA_USER_REGISTRATION_INVALID_LINK_ROUTE")
         }
 
         val invitation = invitationService.getInvitationFromToken(token)
@@ -86,7 +86,7 @@ class RegisterLAUserController(
         val token = getValidTokenFromSessionOrNull()
         if (token == null) {
             invitationService.clearTokenFromSession()
-            return ModelAndView("redirect:$INVALID_LINK_PAGE_PATH_SEGMENT")
+            return ModelAndView("redirect:$LA_USER_REGISTRATION_INVALID_LINK_ROUTE")
         }
 
         return laUserRegistrationJourneyFactory
@@ -108,7 +108,7 @@ class RegisterLAUserController(
         val token = getValidTokenFromSessionOrNull()
         if (token == null) {
             invitationService.clearTokenFromSession()
-            return ModelAndView("redirect:$INVALID_LINK_PAGE_PATH_SEGMENT")
+            return ModelAndView("redirect:$LA_USER_REGISTRATION_INVALID_LINK_ROUTE")
         }
 
         return laUserRegistrationJourneyFactory
@@ -160,5 +160,7 @@ class RegisterLAUserController(
 
     companion object {
         const val LA_USER_REGISTRATION_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$REGISTER_LA_USER_JOURNEY_URL"
+
+        const val LA_USER_REGISTRATION_INVALID_LINK_ROUTE = "$LA_USER_REGISTRATION_ROUTE/$INVALID_LINK_PAGE_PATH_SEGMENT"
     }
 }
