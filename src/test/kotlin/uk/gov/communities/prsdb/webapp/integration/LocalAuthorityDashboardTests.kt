@@ -53,7 +53,6 @@ class LocalAuthorityDashboardTests : SinglePageTestWithSeedData("data-local.sql"
         @Test
         fun `the manage users button is visible and when clicked redirects to the manage users page`(page: Page) {
             val dashboard = navigator.goToLocalAuthorityDashboard()
-            println(dashboard.page.content())
             dashboard.manageUsersButton.clickAndWait()
             assertPageIs(page, ManageLaUsersPage::class)
         }
