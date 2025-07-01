@@ -1,6 +1,10 @@
 package uk.gov.communities.prsdb.webapp.helpers.converters
 
+import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 
@@ -17,6 +21,10 @@ class MessageKeyConverter {
                 is PropertyType -> convertPropertyType(enum)
                 is OwnershipType -> convertOwnershipType(enum)
                 is LicensingType -> convertLicensingType(enum)
+                is GasSafetyExemptionReason -> convertGasSafetyExemptionReason(enum)
+                is EicrExemptionReason -> convertEicrExemptionReason(enum)
+                is EpcExemptionReason -> convertEpcExemptionReason(enum)
+                is MeesExemptionReason -> convertMeesExemptionReason(enum)
                 else -> throw NotImplementedError(
                     "Was not able to convert Enum as ${this::class.simpleName} does not have a conversion for ${enum::class.simpleName}",
                 )
@@ -43,6 +51,44 @@ class MessageKeyConverter {
                 PropertyType.SEMI_DETACHED_HOUSE -> "forms.propertyType.radios.option.semiDetachedHouse.label"
                 PropertyType.TERRACED_HOUSE -> "forms.propertyType.radios.option.terracedHouse.label"
                 PropertyType.FLAT -> "forms.propertyType.radios.option.flat.label"
+            }
+
+        private fun convertGasSafetyExemptionReason(gasSafetyExemptionReason: GasSafetyExemptionReason): String =
+            when (gasSafetyExemptionReason) {
+                GasSafetyExemptionReason.NO_GAS_SUPPLY -> "forms.gasSafetyExemptionReason.radios.option.noGasSupply.label"
+                GasSafetyExemptionReason.LONG_LEASE -> "forms.gasSafetyExemptionReason.radios.longLease.label"
+                GasSafetyExemptionReason.OTHER -> "commonText.other"
+            }
+
+        private fun convertEicrExemptionReason(eicrExemptionReason: EicrExemptionReason): String =
+            when (eicrExemptionReason) {
+                EicrExemptionReason.LONG_LEASE -> "forms.eicrExemptionReason.radios.longLease.label"
+                EicrExemptionReason.STUDENT_ACCOMMODATION -> "forms.eicrExemptionReason.radios.studentAccommodation.label"
+                EicrExemptionReason.LIVE_IN_LANDLORD -> "forms.eicrExemptionReason.radios.liveInLandlord.label"
+                EicrExemptionReason.OTHER -> "commonText.other"
+            }
+
+        private fun convertEpcExemptionReason(epcExemptionReason: EpcExemptionReason): String =
+            when (epcExemptionReason) {
+                EpcExemptionReason.LISTED_BUILDING -> "forms.epcExemptionReason.radios.listedBuilding.label"
+                EpcExemptionReason.ANNUAL_USE_LESS_THAN_4_MONTHS -> "forms.epcExemptionReason.radios.annualUseLessThan4Months.label"
+                EpcExemptionReason.ANNUAL_ENERGY_CONSUMPTION_LESS_THAN_25_PERCENT ->
+                    "forms.epcExemptionReason.radios.annualEnergyConsumptionLessThan25Percent.label"
+                EpcExemptionReason.TEMPORARY_BUILDING -> "forms.epcExemptionReason.radios.temporaryBuilding.label"
+                EpcExemptionReason.STANDALONE_SMALL_BUILDING -> "forms.epcExemptionReason.radios.standaloneSmallBuilding.label"
+                EpcExemptionReason.DUE_FOR_DEMOLITION -> "forms.epcExemptionReason.radios.dueForDemolition.label"
+            }
+
+        private fun convertMeesExemptionReason(meesExemptionReason: MeesExemptionReason): String =
+            when (meesExemptionReason) {
+                MeesExemptionReason.LISTED_BUILDING -> "forms.meesExemptionReason.radios.listedBuilding.label"
+                MeesExemptionReason.SMALL_DETACHED_BUILDING -> "forms.meesExemptionReason.radios.smallDetachedBuilding.label"
+                MeesExemptionReason.HIGH_COST -> "forms.meesExemptionReason.radios.highCost.label"
+                MeesExemptionReason.ALL_IMPROVEMENTS_MADE -> "forms.meesExemptionReason.radios.allImprovementsMade.label"
+                MeesExemptionReason.WALL_INSULATION -> "forms.meesExemptionReason.radios.wallInsulation.label"
+                MeesExemptionReason.THIRD_PARTY_CONSENT -> "forms.meesExemptionReason.radios.thirdPartyConsent.label"
+                MeesExemptionReason.PROPERTY_DEVALUATION -> "forms.meesExemptionReason.radios.propertyDevaluation.label"
+                MeesExemptionReason.NEW_LANDLORD -> "forms.meesExemptionReason.radios.newLandlord.label"
             }
     }
 }
