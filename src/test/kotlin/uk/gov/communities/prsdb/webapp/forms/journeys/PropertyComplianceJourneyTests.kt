@@ -904,7 +904,7 @@ class PropertyComplianceJourneyTests {
             fullPropertyComplianceConfirmationEmailService = mockFullComplianceEmailService,
             partialPropertyComplianceConfirmationEmailService = mockPartialComplianceEmailService,
             urlProvider = mockUrlProvider,
-            isChangingAnswer = false,
+            changingAnswerFor = null,
         )
 
     private fun completeStep(

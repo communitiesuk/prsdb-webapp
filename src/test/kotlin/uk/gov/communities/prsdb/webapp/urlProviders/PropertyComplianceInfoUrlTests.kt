@@ -129,9 +129,9 @@ class PropertyComplianceInfoUrlTests(
                 mockEmailNotificationService,
                 mockEmailNotificationService,
                 AbsoluteUrlProvider(),
-                isChangingAnswer = false,
+                changingAnswerFor = null,
             )
-        whenever(mockPropertyComplianceJourneyFactory.create(any(), any())).thenReturn(propertyComplianceJourney)
+        whenever(mockPropertyComplianceJourneyFactory.create(any(), anyOrNull())).thenReturn(propertyComplianceJourney)
 
         // Act, Assert
         mvc

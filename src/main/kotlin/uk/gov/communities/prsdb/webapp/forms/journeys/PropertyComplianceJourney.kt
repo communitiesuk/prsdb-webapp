@@ -126,7 +126,7 @@ class PropertyComplianceJourney(
     private val fullPropertyComplianceConfirmationEmailService: EmailNotificationService<FullPropertyComplianceConfirmationEmail>,
     private val partialPropertyComplianceConfirmationEmailService: EmailNotificationService<PartialPropertyComplianceConfirmationEmail>,
     private val urlProvider: AbsoluteUrlProvider,
-    private val isChangingAnswer: Boolean,
+    changingAnswerFor: String?,
 ) : JourneyWithTaskList<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE,
         initialStepId = initialStepId,
@@ -149,6 +149,9 @@ class PropertyComplianceJourney(
             journeyDataService.loadJourneyDataIntoSession(formContext)
         }
     }
+
+    private val isChangingAnswer = changingAnswerFor != null
+    private val changingAnswerForStep = PropertyComplianceStepId.entries.find { it.urlPathSegment == changingAnswerFor }
 
     override val stepRouter = GroupedStepRouter(this)
     override val checkYourAnswersStepId = PropertyComplianceStepId.CheckAndSubmit
@@ -1332,7 +1335,7 @@ class PropertyComplianceJourney(
             return updateEpcDetailsInSessionAndRedirectToNextStep(epcStep, filteredJourneyData, epcDetails, autoMatchedEpc = true)
         }
 
-        return getRedirectForNextStep(epcStep, filteredJourneyData, null)
+        return getRedirectForNextStep(epcStep, filteredJourneyData, null, changingAnswerForStep)
     }
 
     private fun updateEpcDetailsInSessionAndRedirectToNextStep(
@@ -1343,7 +1346,7 @@ class PropertyComplianceJourney(
     ): String {
         val newFilteredJourneyData = filteredJourneyData.withEpcDetails(epcDetails, autoMatchedEpc)
         journeyDataService.addToJourneyDataIntoSession(newFilteredJourneyData)
-        return getRedirectForNextStep(currentStep, newFilteredJourneyData, null)
+        return getRedirectForNextStep(currentStep, newFilteredJourneyData, null, changingAnswerForStep)
     }
 
     private fun resetCheckMatchedEpcInSessionIfChangedEpcDetails(newEpcDetails: EpcDataModel?) {
@@ -1405,10 +1408,11 @@ class PropertyComplianceJourney(
                 checkMatchedEpcStep,
                 filteredJourneyData,
                 null,
-                overriddenRedirectStepId = PropertyComplianceStepId.EpcLookup,
+                changingAnswerForStep,
+                PropertyComplianceStepId.EpcLookup,
             )
         }
-        return getRedirectForNextStep(checkMatchedEpcStep, filteredJourneyData, null)
+        return getRedirectForNextStep(checkMatchedEpcStep, filteredJourneyData, null, changingAnswerForStep)
     }
 
     private fun epcLookupStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
