@@ -1,7 +1,10 @@
-<div th:fragment="warningText(text)" class="govuk-warning-text">
+<div class="govuk-warning-text" th:fragment="warningText(content)" th:with="isContentHtml=${isContentHtml ?: false}">
     <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
     <strong class="govuk-warning-text__text">
         <span class="govuk-visually-hidden" th:text="#{warningText.hiddenText}">warningText.hiddenText</span>
-        <span th:utext="${text}" th:remove="tag">text</span>
+        <th:block th:if="${isContentHtml}">
+            <span th:replace="${content}">content</span>
+        </th:block>
+        <span th:unless="${isContentHtml}" th:utext="${content}" th:remove="tag">content</span>
     </strong>
 </div>
