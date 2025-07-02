@@ -55,7 +55,7 @@ class MessageKeyConverter {
 
         private fun convertGasSafetyExemptionReason(gasSafetyExemptionReason: GasSafetyExemptionReason): String =
             when (gasSafetyExemptionReason) {
-                GasSafetyExemptionReason.NO_GAS_SUPPLY -> "forms.gasSafetyExemptionReason.radios.option.noGasSupply.label"
+                GasSafetyExemptionReason.NO_GAS_SUPPLY -> "forms.gasSafetyExemptionReason.radios.noGas.label"
                 GasSafetyExemptionReason.LONG_LEASE -> "forms.gasSafetyExemptionReason.radios.longLease.label"
                 GasSafetyExemptionReason.OTHER -> "commonText.other"
             }
