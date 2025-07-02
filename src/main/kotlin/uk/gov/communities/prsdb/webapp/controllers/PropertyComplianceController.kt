@@ -21,6 +21,7 @@ import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
+import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_URL
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
@@ -86,7 +87,7 @@ class PropertyComplianceController(
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
         return propertyComplianceJourneyFactory
-            .create(propertyOwnershipId)
+            .create(propertyOwnershipId, isChangingAnswer = false)
             .getModelAndViewForTaskList()
     }
 
@@ -95,6 +96,7 @@ class PropertyComplianceController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
+        @RequestParam(value = CHANGE_ANSWER_FOR_PARAMETER_NAME, required = false) changingAnswerFor: String? = null,
         principal: Principal,
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -103,8 +105,8 @@ class PropertyComplianceController(
 
         val stepModelAndView =
             propertyComplianceJourneyFactory
-                .create(propertyOwnershipId)
-                .getModelAndViewForStep(stepName, subpage)
+                .create(propertyOwnershipId, isChangingAnswer = changingAnswerFor != null)
+                .getModelAndViewForStep(stepName, subpage, changingAnswersForStep = changingAnswerFor)
 
         if (stepName.contains(FILE_UPLOAD_URL_SUBSTRING)) {
             val cookie = tokenCookieService.createCookieForValue(FILE_UPLOAD_COOKIE_NAME, request.requestURI)
@@ -119,6 +121,7 @@ class PropertyComplianceController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
+        @RequestParam(value = CHANGE_ANSWER_FOR_PARAMETER_NAME, required = false) changingAnswerFor: String? = null,
         @RequestParam formData: PageData,
         principal: Principal,
     ): ModelAndView {
@@ -129,8 +132,8 @@ class PropertyComplianceController(
         val annotatedFormData = formData + (UploadCertificateFormModel::isMetadataOnly.name to true)
 
         return propertyComplianceJourneyFactory
-            .create(propertyOwnershipId)
-            .completeStep(stepName, annotatedFormData, subpage, principal)
+            .create(propertyOwnershipId, isChangingAnswer = changingAnswerFor != null)
+            .completeStep(stepName, annotatedFormData, subpage, principal, changingAnswerFor)
     }
 
     @PostMapping("/{stepName}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -138,6 +141,7 @@ class PropertyComplianceController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
+        @RequestParam(value = CHANGE_ANSWER_FOR_PARAMETER_NAME, required = false) changingAnswerFor: String? = null,
         @RequestAttribute(MultipartFormDataFilter.ITERATOR_ATTRIBUTE) fileInputIterator: FileItemInputIterator,
         @CookieValue(name = FILE_UPLOAD_COOKIE_NAME) token: String,
         principal: Principal,
@@ -183,12 +187,13 @@ class PropertyComplianceController(
                 ).toPageData()
 
         return propertyComplianceJourneyFactory
-            .create(propertyOwnershipId)
+            .create(propertyOwnershipId, isChangingAnswer = changingAnswerFor != null)
             .completeStep(
                 stepName,
                 formData,
                 subpage,
                 principal,
+                changingAnswerFor,
             )
     }
 

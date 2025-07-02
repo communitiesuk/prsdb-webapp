@@ -278,8 +278,9 @@ class LandlordDashboardUrlTests(
                 mockEmailNotificationService,
                 mockEmailNotificationService,
                 AbsoluteUrlProvider(),
+                isChangingAnswer = false,
             )
-        whenever(mockPropertyComplianceJourneyFactory.create(any())).thenReturn(propertyComplianceJourney)
+        whenever(mockPropertyComplianceJourneyFactory.create(any(), any())).thenReturn(propertyComplianceJourney)
 
         // Act, Assert
         mvc
