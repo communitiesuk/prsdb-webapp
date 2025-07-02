@@ -75,10 +75,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withFireSafetyDeclaration(hasFireSafetyDeclaration)
                 .build()
 
-        // Act
-        val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
-
-        // Assert
         val expectedGasSafetyData =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -102,9 +98,6 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.GasSafetyEngineerNum.urlPathSegment,
                 ),
             )
-        val returnedGasSafetyData = summaryData["gasSafetyData"] as List<SummaryListRowViewModel>
-        assertIterableEquals(expectedGasSafetyData, returnedGasSafetyData)
-
         val expectedEicrData =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -123,9 +116,6 @@ class PropertyComplianceCheckAnswersPageTests {
                     null,
                 ),
             )
-        val returnedEicrData = summaryData["eicrData"] as List<SummaryListRowViewModel>
-        assertIterableEquals(expectedEicrData, returnedEicrData)
-
         val expectedEpcData =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -145,9 +135,6 @@ class PropertyComplianceCheckAnswersPageTests {
                     null,
                 ),
             )
-        val returnedEpcData = summaryData["epcData"] as List<SummaryListRowViewModel>
-        assertIterableEquals(expectedEpcData, returnedEpcData)
-
         val expectedResponsibilityData =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -166,7 +153,18 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
                 ),
             )
+
+        // Act
+        val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
+        val returnedGasSafetyData = summaryData["gasSafetyData"] as List<SummaryListRowViewModel>
+        val returnedEicrData = summaryData["eicrData"] as List<SummaryListRowViewModel>
+        val returnedEpcData = summaryData["epcData"] as List<SummaryListRowViewModel>
         val returnedResponsibilityData = summaryData["responsibilityData"] as List<SummaryListRowViewModel>
+
+        // Assert
+        assertIterableEquals(expectedGasSafetyData, returnedGasSafetyData)
+        assertIterableEquals(expectedEicrData, returnedEicrData)
+        assertIterableEquals(expectedEpcData, returnedEpcData)
         assertIterableEquals(expectedResponsibilityData, returnedResponsibilityData)
     }
 
@@ -184,10 +182,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withFireSafetyDeclaration(hasFireSafetyDeclaration)
                 .build()
 
-        // Act
-        val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = false)
-
-        // Assert
         val expectedGasSafetyData =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -201,9 +195,6 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.GasSafetyExemption.urlPathSegment,
                 ),
             )
-        val returnedGasSafetyData = summaryData["gasSafetyData"] as List<SummaryListRowViewModel>
-        assertIterableEquals(expectedGasSafetyData, returnedGasSafetyData)
-
         val expectedEicrData =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -217,9 +208,6 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.EicrExemption.urlPathSegment,
                 ),
             )
-        val returnedEicrData = summaryData["eicrData"] as List<SummaryListRowViewModel>
-        assertIterableEquals(expectedEicrData, returnedEicrData)
-
         val expectedEpcData =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -233,9 +221,6 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.EPC.urlPathSegment,
                 ),
             )
-        val returnedEpcData = summaryData["epcData"] as List<SummaryListRowViewModel>
-        assertIterableEquals(expectedEpcData, returnedEpcData)
-
         val expectedResponsibilityData =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -254,7 +239,18 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
                 ),
             )
+
+        // Act
+        val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = false)
+        val returnedGasSafetyData = summaryData["gasSafetyData"] as List<SummaryListRowViewModel>
+        val returnedEicrData = summaryData["eicrData"] as List<SummaryListRowViewModel>
+        val returnedEpcData = summaryData["epcData"] as List<SummaryListRowViewModel>
         val returnedResponsibilityData = summaryData["responsibilityData"] as List<SummaryListRowViewModel>
+
+        // Assert
+        assertIterableEquals(expectedGasSafetyData, returnedGasSafetyData)
+        assertIterableEquals(expectedEicrData, returnedEicrData)
+        assertIterableEquals(expectedEpcData, returnedEpcData)
         assertIterableEquals(expectedResponsibilityData, returnedResponsibilityData)
     }
 
@@ -278,10 +274,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withFireSafetyDeclaration(true)
                 .build()
 
-        // Act
-        val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
-
-        // Assert
         val expectedGasSafetyData =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -300,9 +292,6 @@ class PropertyComplianceCheckAnswersPageTests {
                     null,
                 ),
             )
-        val returnedGasSafetyData = summaryData["gasSafetyData"] as List<SummaryListRowViewModel>
-        assertIterableEquals(expectedGasSafetyData, returnedGasSafetyData)
-
         val expectedEicrData =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -321,9 +310,6 @@ class PropertyComplianceCheckAnswersPageTests {
                     null,
                 ),
             )
-        val returnedEicrData = summaryData["eicrData"] as List<SummaryListRowViewModel>
-        assertIterableEquals(expectedEicrData, returnedEicrData)
-
         val expectedEpcData =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -348,7 +334,16 @@ class PropertyComplianceCheckAnswersPageTests {
                     null,
                 ),
             )
+
+        // Act
+        val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
+        val returnedGasSafetyData = summaryData["gasSafetyData"] as List<SummaryListRowViewModel>
+        val returnedEicrData = summaryData["eicrData"] as List<SummaryListRowViewModel>
         val returnedEpcData = summaryData["epcData"] as List<SummaryListRowViewModel>
+
+        // Assert
+        assertIterableEquals(expectedGasSafetyData, returnedGasSafetyData)
+        assertIterableEquals(expectedEicrData, returnedEicrData)
         assertIterableEquals(expectedEpcData, returnedEpcData)
     }
 
@@ -372,10 +367,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withFireSafetyDeclaration(true)
                 .build()
 
-        // Act
-        val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = false)
-
-        // Assert
         val expectedGasSafetyData =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -389,9 +380,6 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.GasSafetyExemption.urlPathSegment,
                 ),
             )
-        val returnedGasSafetyData = summaryData["gasSafetyData"] as List<SummaryListRowViewModel>
-        assertIterableEquals(expectedGasSafetyData, returnedGasSafetyData)
-
         val expectedEicrData =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -405,9 +393,6 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.EicrExemption.urlPathSegment,
                 ),
             )
-        val returnedEicrData = summaryData["eicrData"] as List<SummaryListRowViewModel>
-        assertIterableEquals(expectedEicrData, returnedEicrData)
-
         val expectedEpcData =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -421,7 +406,16 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.EpcExemptionReason.urlPathSegment,
                 ),
             )
+
+        // Act
+        val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = false)
+        val returnedGasSafetyData = summaryData["gasSafetyData"] as List<SummaryListRowViewModel>
+        val returnedEicrData = summaryData["eicrData"] as List<SummaryListRowViewModel>
         val returnedEpcData = summaryData["epcData"] as List<SummaryListRowViewModel>
+
+        // Assert
+        assertIterableEquals(expectedGasSafetyData, returnedGasSafetyData)
+        assertIterableEquals(expectedEicrData, returnedEicrData)
         assertIterableEquals(expectedEpcData, returnedEpcData)
     }
 
@@ -437,11 +431,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withEpcNotFoundStep()
                 .withFireSafetyDeclaration(true)
                 .build()
-
-        // Act
-        val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = false)
-
-        // Assert
         val expectedEpcData =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -455,7 +444,12 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.EPC.urlPathSegment,
                 ),
             )
+
+        // Act
+        val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = false)
         val returnedEpcData = summaryData["epcData"] as List<SummaryListRowViewModel>
+
+        // Assert
         assertIterableEquals(expectedEpcData, returnedEpcData)
     }
 
@@ -476,10 +470,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withFireSafetyDeclaration(true)
                 .build()
 
-        // Act
-        val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
-
-        // Assert
         val expectedEpcData =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -505,7 +495,11 @@ class PropertyComplianceCheckAnswersPageTests {
                 ),
             )
 
+        // Act
+        val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
         val returnedEpcData = summaryData["epcData"] as List<SummaryListRowViewModel>
+
+        // Assert
         assertIterableEquals(expectedEpcData, returnedEpcData)
     }
 
@@ -526,10 +520,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withFireSafetyDeclaration(true)
                 .build()
 
-        // Act
-        val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
-
-        // Assert
         val expectedEpcData =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -555,7 +545,11 @@ class PropertyComplianceCheckAnswersPageTests {
                 ),
             )
 
+        // Act
+        val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
         val returnedEpcData = summaryData["epcData"] as List<SummaryListRowViewModel>
+
+        // Assert
         assertIterableEquals(expectedEpcData, returnedEpcData)
     }
 
@@ -577,10 +571,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withFireSafetyDeclaration(true)
                 .build()
 
-        // Act
-        val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
-
-        // Assert
         val expectedEpcData =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -611,7 +601,11 @@ class PropertyComplianceCheckAnswersPageTests {
                 ),
             )
 
+        // Act
+        val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
         val returnedEpcData = summaryData["epcData"] as List<SummaryListRowViewModel>
+
+        // Assert
         assertIterableEquals(expectedEpcData, returnedEpcData)
     }
 }
