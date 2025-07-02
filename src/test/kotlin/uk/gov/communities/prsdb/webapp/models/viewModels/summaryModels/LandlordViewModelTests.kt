@@ -345,30 +345,30 @@ class LandlordViewModelTests {
 
         // Assert
         for (i in viewModel.personalDetails.filter { detail -> detail.fieldHeading in changeableByAllLandlordsPersonalDetailKeys }) {
-            assertNotNull(i.changeUrl)
+            assertNotNull(i.action)
         }
 
         if (isVerified) {
             for (i in viewModel.personalDetails.filter { detail ->
                 detail.fieldHeading !in changeableByAllLandlordsPersonalDetailKeys
             }) {
-                assertNull(i.changeUrl)
+                assertNull(i.action)
             }
         } else {
             for (i in viewModel.personalDetails.filter { detail ->
                 detail.fieldHeading in changeableByUnverifiedLandlordsPersonalDetailKeys
             }) {
-                assertNotNull(i.changeUrl)
+                assertNotNull(i.action)
             }
             for (i in viewModel.personalDetails.filter { detail ->
                 detail.fieldHeading !in changeableByAllLandlordsPersonalDetailKeys + changeableByUnverifiedLandlordsPersonalDetailKeys
             }) {
-                assertNull(i.changeUrl)
+                assertNull(i.action)
             }
         }
 
         // TODO PRSD-746 change assertion for consentInformation once links have been added
-        viewModel.consentInformation.forEach { consentInformation -> assertNull(consentInformation.changeUrl) }
+        viewModel.consentInformation.forEach { consentInformation -> assertNull(consentInformation.action) }
     }
 
     @Test
@@ -380,7 +380,7 @@ class LandlordViewModelTests {
         val viewModel = LandlordViewModel(testLandlord, withChangeLinks = false)
 
         // Assert
-        viewModel.personalDetails.forEach { personalDetails -> assertNull(personalDetails.changeUrl) }
-        viewModel.consentInformation.forEach { consentInformation -> assertNull(consentInformation.changeUrl) }
+        viewModel.personalDetails.forEach { personalDetails -> assertNull(personalDetails.action) }
+        viewModel.consentInformation.forEach { consentInformation -> assertNull(consentInformation.action) }
     }
 }

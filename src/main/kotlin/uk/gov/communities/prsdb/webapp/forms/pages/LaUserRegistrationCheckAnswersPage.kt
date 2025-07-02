@@ -4,6 +4,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.helpers.LaUserRegistrationJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
@@ -39,12 +40,12 @@ class LaUserRegistrationCheckAnswersPage(
             SummaryListRowViewModel(
                 "registerLaUser.checkAnswers.rowHeading.name",
                 LaUserRegistrationJourneyDataHelper.getName(filteredJourneyData),
-                RegisterLaUserStepId.Name.urlPathSegment,
+                SummaryListActionViewModel("forms.links.change", RegisterLaUserStepId.Name.urlPathSegment),
             ),
             SummaryListRowViewModel(
                 "registerLaUser.checkAnswers.rowHeading.email",
                 LaUserRegistrationJourneyDataHelper.getEmail(filteredJourneyData),
-                RegisterLaUserStepId.Email.urlPathSegment,
+                SummaryListActionViewModel("forms.links.change", RegisterLaUserStepId.Email.urlPathSegment),
             ),
         )
     }

@@ -15,6 +15,8 @@ class LandlordViewModel(
 ) {
     private val isEnglandOrWalesResident = landlord.isEnglandOrWalesResident()
 
+    private val changeLinkMessageKey = "forms.links.change"
+
     val name: String = landlord.name
 
     // TODO PRSD-746 - add user consent information to this page once it is captured (this will need to be passed into the constructor since this is a view model)
@@ -25,13 +27,13 @@ class LandlordViewModel(
                     "landlordDetails.personalDetails.optionalChoices.legalChanges",
                     "TODO PRSD-746",
                     null,
-                    withChangeLinks,
+                    withActionLinks = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.optionalChoices.research",
                     "TODO PRSD-746",
                     null,
-                    withChangeLinks,
+                    withActionLinks = withChangeLinks,
                 )
             }
 
@@ -42,80 +44,89 @@ class LandlordViewModel(
                     "landlordDetails.personalDetails.registrationDate",
                     DateTimeHelper.getDateInUK(landlord.createdDate.toKotlinInstant()),
                     null,
-                    withChangeLinks,
+                    withActionLinks = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.lrn",
                     RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber),
                     null,
-                    withChangeLinks,
+                    withActionLinks = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.name",
                     landlord.name,
+                    changeLinkMessageKey,
                     if (!landlord.isVerified) "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.UpdateName.urlPathSegment}" else null,
-                    withChangeLinks,
+                    withActionLinks = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.dateOfBirth",
                     landlord.dateOfBirth,
+                    changeLinkMessageKey,
                     if (!landlord.isVerified) "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.UpdateDateOfBirth.urlPathSegment}" else null,
-                    withChangeLinks,
+                    withActionLinks = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.oneLoginVerified",
                     MessageKeyConverter.convert(landlord.isVerified),
                     null,
-                    withChangeLinks,
+                    withActionLinks = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.emailAddress",
                     landlord.email,
+                    changeLinkMessageKey,
                     "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.UpdateEmail.urlPathSegment}",
-                    withChangeLinks,
+                    withActionLinks = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.telephoneNumber",
                     landlord.phoneNumber,
+                    changeLinkMessageKey,
                     "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.UpdatePhoneNumber.urlPathSegment}",
-                    withChangeLinks,
+                    withActionLinks = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.englandOrWalesResident",
                     isEnglandOrWalesResident,
+                    changeLinkMessageKey,
                     // TODO: PRSD-688 "$UPDATE_ROUTE/country-of-residence",
                     null,
-                    withChangeLinks,
+                    withActionLinks = withChangeLinks,
                 )
                 if (isEnglandOrWalesResident) {
                     addRow(
                         "landlordDetails.personalDetails.contactAddress",
                         landlord.address.singleLineAddress,
+                        changeLinkMessageKey,
                         "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.LookupEnglandAndWalesAddress.urlPathSegment}",
-                        // TODO PRSD-355: Set to withChangeLinks
-                        withChangeLinks = false,
+                        // TODO PRSD-355: Set to withActionLinks
+                        withActionLinks = false,
                     )
                 } else {
                     addRow(
                         "landlordDetails.personalDetails.country",
                         landlord.countryOfResidence,
+                        changeLinkMessageKey,
                         // TODO: PRSD-688 "$UPDATE_ROUTE/country-of-residence",
                         null,
-                        withChangeLinks,
+                        withActionLinks = withChangeLinks,
                     )
                     addRow(
                         "landlordDetails.personalDetails.nonEnglandOrWalesAddress",
                         landlord.nonEnglandOrWalesAddress,
+                        changeLinkMessageKey,
                         // TODO: PRSD-688 "$UPDATE_ROUTE/address",
                         null,
-                        withChangeLinks,
+                        withActionLinks = withChangeLinks,
                     )
                     addRow(
                         "landlordDetails.personalDetails.englandOrWalesAddress",
                         landlord.address.singleLineAddress,
+                        changeLinkMessageKey,
                         // TODO: PRSD-688 "$UPDATE_ROUTE/contact-address",
                         null,
-                        withChangeLinks,
+                        withActionLinks = withChangeLinks,
                     )
                 }
             }.toList()

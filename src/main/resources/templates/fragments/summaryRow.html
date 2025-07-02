@@ -1,4 +1,4 @@
-<div th:fragment="summaryRow(heading, values, changeUrl, valueUrl)" class="govuk-summary-list__row">
+<div th:fragment="summaryRow(heading, values, action, valueUrl)" class="govuk-summary-list__row">
     <dt class="govuk-summary-list__key" th:text="#{${heading}}">
     </dt>
     <dd  class="govuk-summary-list__value" >
@@ -9,7 +9,7 @@
            th:text="${#messages.msgOrNull(value)} ?: ${{value}}">row.convertedFieldValue</p>
     </dd>
     <dd class="govuk-summary-list__actions">
-        <a th:if="${changeUrl} != null" class="govuk-link" th:href="@{${changeUrl} }" th:text="#{forms.links.change}">
+        <a th:if="${action} != null" class="govuk-link" th:href="@{${action.url} }" th:text="#{${action.text}}">
             <span class="govuk-visually-hidden" th:text="#{${heading}}">fieldHeading</span>
         </a>
     </dd>
