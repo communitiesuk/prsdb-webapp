@@ -55,6 +55,7 @@ class VirusScanProcessingServiceTests {
         val fileNameInfo = FileNameInfo(5L, FileCategory.GasSafetyCert, "txt")
         val scanResultStatus = scanResultStatus
 
+        // TODO PRSD-1284
         assertThrows<NotImplementedError> { virusScanProcessingService.processScan(fileNameInfo, scanResultStatus) }
     }
 }
