@@ -9,9 +9,9 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.models.dataModels.FileNameInfo
+import uk.gov.communities.prsdb.webapp.models.dataModels.FileNameInfo.FileCategory
 import uk.gov.communities.prsdb.webapp.models.dataModels.ScanResult
-import uk.gov.communities.prsdb.webapp.services.UploadedFilenameParser.Companion.FileCategory
-import uk.gov.communities.prsdb.webapp.services.UploadedFilenameParser.Companion.FileNameInfo
 
 class VirusScanProcessingServiceTests {
     private lateinit var virusScanProcessingService: VirusScanProcessingService
@@ -28,11 +28,11 @@ class VirusScanProcessingServiceTests {
         val fileNameInfo = FileNameInfo(5L, FileCategory.GasSafetyCert, "txt")
         val scanResultStatus = ScanResult.NoThreats
 
-        whenever(dequarantiner.dequarantine(fileNameInfo.toObjectKey())).thenReturn(true)
+        whenever(dequarantiner.dequarantine(fileNameInfo.toString())).thenReturn(true)
 
         virusScanProcessingService.processScan(fileNameInfo, scanResultStatus)
 
-        verify(dequarantiner).dequarantine(fileNameInfo.toObjectKey())
+        verify(dequarantiner).dequarantine(fileNameInfo.toString())
     }
 
     @Test
@@ -40,7 +40,7 @@ class VirusScanProcessingServiceTests {
         val fileNameInfo = FileNameInfo(5L, FileCategory.GasSafetyCert, "txt")
         val scanResultStatus = ScanResult.NoThreats
 
-        whenever(dequarantiner.dequarantine(fileNameInfo.toObjectKey())).thenReturn(false)
+        whenever(dequarantiner.dequarantine(fileNameInfo.toString())).thenReturn(false)
 
         assertThrows<PrsdbWebException> { virusScanProcessingService.processScan(fileNameInfo, scanResultStatus) }
     }

@@ -1,8 +1,26 @@
-package uk.gov.communities.prsdb.webapp.services
+package uk.gov.communities.prsdb.webapp.models.dataModels
 
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 
-class UploadedFilenameParser {
+data class FileNameInfo(
+    val propertyOwnershipId: Long,
+    val fileCategory: FileCategory,
+    val extension: String,
+) {
+    override fun toString() = "property_${propertyOwnershipId}_${fileCategory.categoryName}.$extension"
+
+    enum class FileCategory(
+        val categoryName: String,
+    ) {
+        Eirc("eicr"),
+        GasSafetyCert("gas_safety_certificate"),
+        ;
+
+        companion object {
+            fun fromCategoryNameOrNull(name: String): FileCategory? = FileCategory.entries.singleOrNull { it.categoryName == name }
+        }
+    }
+
     companion object {
         fun parse(fileName: String): FileNameInfo {
             val nameAndExtension = fileName.split('.')
@@ -29,25 +47,5 @@ class UploadedFilenameParser {
 
         private fun invalidFilenameException(fileName: String): PrsdbWebException =
             PrsdbWebException("Filename \"$fileName\" does not have form \"property_{propertyOwnershipId}_{fileCategory}.{extension}\"")
-
-        data class FileNameInfo(
-            val propertyOwnershipId: Long,
-            val fileCategory: FileCategory,
-            val extension: String,
-        ) {
-            fun toObjectKey() = "property_${propertyOwnershipId}_${fileCategory.categoryName}.$extension"
-        }
-
-        enum class FileCategory(
-            val categoryName: String,
-        ) {
-            Eirc("eicr"),
-            GasSafetyCert("gas_safety_certificate"),
-            ;
-
-            companion object {
-                fun fromCategoryNameOrNull(name: String): FileCategory? = FileCategory.entries.singleOrNull { it.categoryName == name }
-            }
-        }
     }
 }
