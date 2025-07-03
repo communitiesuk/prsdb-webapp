@@ -94,7 +94,7 @@ class PropertyComplianceControllerTests(
             tokenCookieService.createCookieForValue(validFileUploadCookie.name, validPropertyComplianceFileUploadUrl),
         ).thenReturn(validFileUploadCookie)
 
-        whenever(propertyComplianceJourneyFactory.create(validPropertyOwnershipId)).thenReturn(propertyComplianceJourney)
+        whenever(propertyComplianceJourneyFactory.create(eq(validPropertyOwnershipId), anyOrNull())).thenReturn(propertyComplianceJourney)
     }
 
     @Nested

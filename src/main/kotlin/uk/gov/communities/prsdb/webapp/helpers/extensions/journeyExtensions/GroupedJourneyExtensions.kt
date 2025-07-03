@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions
 
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 
-class GroupedUpdateJourneyExtensions {
+class GroupedJourneyExtensions {
     companion object {
         fun Map<String, Any>.withBackUrlIfNotNullAndNotChangingAnswer(
             backUrl: String?,
