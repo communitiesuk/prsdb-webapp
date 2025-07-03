@@ -26,9 +26,11 @@ import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardContro
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyComplianceDetailsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
+import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -38,6 +40,7 @@ class PropertyDetailsController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyDetailsUpdateJourneyFactory: PropertyDetailsUpdateJourneyFactory,
     private val backLinkStorageService: BackUrlStorageService,
+    private val propertyComplianceService: PropertyComplianceService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_PROPERTY_DETAILS_ROUTE)
@@ -50,6 +53,8 @@ class PropertyDetailsController(
         val landlordDetailsUrl =
             LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
                 .overrideBackLinkForUrl(backLinkStorageService.storeCurrentUrlReturningKey())
+
+        val propertyCompliance = propertyComplianceService.getComplianceForProperty(propertyOwnershipId)
 
         val propertyDetails =
             PropertyDetailsViewModel(
@@ -65,9 +70,19 @@ class PropertyDetailsController(
                 landlordDetailsUrl,
             )
 
+        val propertyComplianceDetails =
+            propertyCompliance?.let {
+                PropertyComplianceDetailsViewModel(
+                    propertyCompliance = propertyCompliance,
+                    withActionLinks = true,
+                    withNotificationMessages = true,
+                )
+            }
+
         val modelAndView = ModelAndView("propertyDetailsView")
         modelAndView.addObject("propertyDetails", propertyDetails)
         modelAndView.addObject("landlordDetails", landlordViewModel)
+        modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         modelAndView.addObject("deleteRecordLink", DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
         modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
