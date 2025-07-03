@@ -4,20 +4,21 @@
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="getNewEpcUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="expiryDateAsJavaLocalDate" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-<header>
-    <h1 class="govuk-heading-l" th:text="#{forms.epcExpired.heading}">forms.epcExpired.heading</h1>
-</header>
-<section>
-    <p class="govuk-body">
-        <span th:remove="tag" th:text="#{forms.epcExpired.paragraph.one.beforeLink(${{expiryDateAsJavaLocalDate}})}">forms.epcExpired.paragraph.one.beforeLink</span>
-        <a class="govuk-link" th:text="#{forms.epcExpired.paragraph.one.link}" th:href="${getNewEpcUrl}" rel="noreferrer noopener" target="_blank">
-            forms.epcExpired.paragraph.one.link
-        </a>
-    </p>
-    <p class="govuk-body" th:text="#{forms.epcExpired.paragraph.two}">forms.epcExpired.paragraph.two</p>
-    <p class="govuk-body" th:text="#{forms.epcExpired.paragraph.three}">forms.epcExpired.paragraph.three</p>
-</section>
-<button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinueToLandlordResponsibilities})}"></button>
+    <header>
+        <h1 class="govuk-heading-l" th:text="#{forms.epcExpired.heading}">forms.epcExpired.heading</h1>
+    </header>
+    <section>
+        <p class="govuk-body">
+            <span th:remove="tag" th:text="#{forms.epcExpired.paragraph.one.beforeLink(${{expiryDateAsJavaLocalDate}})}">forms.epcExpired.paragraph.one.beforeLink</span>
+            <a class="govuk-link" th:text="#{forms.epcExpired.paragraph.one.link}" th:href="${getNewEpcUrl}" rel="noreferrer noopener" target="_blank">
+                forms.epcExpired.paragraph.one.link
+            </a>
+        </p>
+        <p class="govuk-body" th:text="#{forms.epcExpired.paragraph.two}">forms.epcExpired.paragraph.two</p>
+        <p class="govuk-body" th:text="#{forms.epcExpired.paragraph.three}">forms.epcExpired.paragraph.three</p>
+    </section>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </html>

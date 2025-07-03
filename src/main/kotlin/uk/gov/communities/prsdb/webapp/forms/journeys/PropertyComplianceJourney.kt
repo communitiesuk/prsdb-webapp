@@ -382,7 +382,7 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
-                                "submitButtonText" to "forms.buttons.saveAndContinueToEICR",
+                                "submitButtonText" to getSubmitButtonTextOrDefaultIfChangingAnswer("forms.buttons.saveAndContinueToEICR"),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
@@ -399,6 +399,7 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                                "submitButtonText" to getSubmitButtonTextOrDefaultIfChangingAnswer("forms.buttons.saveAndContinueToEICR"),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
@@ -498,6 +499,7 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                                "submitButtonText" to getSubmitButtonTextOrDefaultIfChangingAnswer("forms.buttons.saveAndContinueToEICR"),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
@@ -514,6 +516,7 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                                "submitButtonText" to getSubmitButtonTextOrDefaultIfChangingAnswer("forms.buttons.saveAndContinueToEICR"),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
@@ -597,7 +600,7 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
-                                "submitButtonText" to "forms.buttons.saveAndContinueToEPC",
+                                "submitButtonText" to getSubmitButtonTextOrDefaultIfChangingAnswer("forms.buttons.saveAndContinueToEPC"),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
@@ -616,6 +619,7 @@ class PropertyComplianceJourney(
                                 "title" to "propertyCompliance.title",
                                 "rcpElectricalInfoUrl" to RCP_ELECTRICAL_INFO_URL,
                                 "rcpElectricalRegisterUrl" to RCP_ELECTRICAL_REGISTER_URL,
+                                "submitButtonText" to getSubmitButtonTextOrDefaultIfChangingAnswer("forms.buttons.saveAndContinueToEPC"),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
@@ -719,6 +723,7 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                                "submitButtonText" to getSubmitButtonTextOrDefaultIfChangingAnswer("forms.buttons.saveAndContinueToEPC"),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
@@ -737,6 +742,7 @@ class PropertyComplianceJourney(
                                 "title" to "propertyCompliance.title",
                                 "rcpElectricalInfoUrl" to RCP_ELECTRICAL_INFO_URL,
                                 "rcpElectricalRegisterUrl" to RCP_ELECTRICAL_REGISTER_URL,
+                                "submitButtonText" to getSubmitButtonTextOrDefaultIfChangingAnswer("forms.buttons.saveAndContinueToEPC"),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
@@ -792,6 +798,8 @@ class PropertyComplianceJourney(
                                 "title" to "propertyCompliance.title",
                                 "findEpcUrl" to FIND_EPC_URL,
                                 "getNewEpcUrl" to GET_NEW_EPC_URL,
+                                "submitButtonText" to
+                                    getSubmitButtonTextOrDefaultIfChangingAnswer("forms.buttons.saveAndContinueToLandlordResponsibilities"),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
@@ -935,6 +943,8 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                                "submitButtonText" to
+                                    getSubmitButtonTextOrDefaultIfChangingAnswer("forms.buttons.saveAndContinueToLandlordResponsibilities"),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
@@ -1028,6 +1038,10 @@ class PropertyComplianceJourney(
                                 "registerMeesExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
                                 "epcImprovementGuideUrl" to EPC_IMPROVEMENT_GUIDE_URL,
                                 "expiryDateAsJavaLocalDate" to (getAcceptedEpcDetailsFromSession()?.expiryDateAsJavaLocalDate ?: ""),
+                                "submitButtonText" to
+                                    getSubmitButtonTextOrDefaultIfChangingAnswer(
+                                        "forms.buttons.saveAndContinueToLandlordResponsibilities",
+                                    ),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
@@ -1135,6 +1149,10 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                                "submitButtonText" to
+                                    getSubmitButtonTextOrDefaultIfChangingAnswer(
+                                        "forms.buttons.saveAndContinueToLandlordResponsibilities",
+                                    ),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
@@ -1153,6 +1171,10 @@ class PropertyComplianceJourney(
                                 "title" to "propertyCompliance.title",
                                 "epcImprovementGuideUrl" to EPC_IMPROVEMENT_GUIDE_URL,
                                 "registerPrsExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
+                                "submitButtonText" to
+                                    getSubmitButtonTextOrDefaultIfChangingAnswer(
+                                        "forms.buttons.saveAndContinueToLandlordResponsibilities",
+                                    ),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
@@ -1553,6 +1575,13 @@ class PropertyComplianceJourney(
         propertyOwnershipService
             .getPropertyOwnership(propertyOwnershipId)
             .property.address.singleLineAddress
+
+    private fun getSubmitButtonTextOrDefaultIfChangingAnswer(submitButtonText: String) =
+        if (isChangingAnswer) {
+            "forms.buttons.saveAndContinue"
+        } else {
+            submitButtonText
+        }
 
     private fun sendConfirmationEmail(propertyCompliance: PropertyCompliance) {
         val landlordEmail = propertyCompliance.propertyOwnership.primaryLandlord.email
