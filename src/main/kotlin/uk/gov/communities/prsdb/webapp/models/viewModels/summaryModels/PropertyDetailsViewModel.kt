@@ -30,7 +30,7 @@ class PropertyDetailsViewModel(
             SummaryListRowViewModel(
                 "propertyDetails.keyDetails.registeredLandlord",
                 propertyOwnership.primaryLandlord.name,
-                SummaryListActionViewModel("stand in text", landlordDetailsUrl),
+                valueUrl = landlordDetailsUrl,
             ),
             SummaryListRowViewModel(
                 "propertyDetails.keyDetails.isTenanted",

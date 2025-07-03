@@ -27,13 +27,13 @@ class LandlordViewModel(
                     "landlordDetails.personalDetails.optionalChoices.legalChanges",
                     "TODO PRSD-746",
                     null,
-                    withActionLinks = withChangeLinks,
+                    withActionLink = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.optionalChoices.research",
                     "TODO PRSD-746",
                     null,
-                    withActionLinks = withChangeLinks,
+                    withActionLink = withChangeLinks,
                 )
             }
 
@@ -44,47 +44,47 @@ class LandlordViewModel(
                     "landlordDetails.personalDetails.registrationDate",
                     DateTimeHelper.getDateInUK(landlord.createdDate.toKotlinInstant()),
                     null,
-                    withActionLinks = withChangeLinks,
+                    withActionLink = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.lrn",
                     RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber),
                     null,
-                    withActionLinks = withChangeLinks,
+                    withActionLink = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.name",
                     landlord.name,
                     changeLinkMessageKey,
                     if (!landlord.isVerified) "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.UpdateName.urlPathSegment}" else null,
-                    withActionLinks = withChangeLinks,
+                    withActionLink = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.dateOfBirth",
                     landlord.dateOfBirth,
                     changeLinkMessageKey,
                     if (!landlord.isVerified) "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.UpdateDateOfBirth.urlPathSegment}" else null,
-                    withActionLinks = withChangeLinks,
+                    withActionLink = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.oneLoginVerified",
                     MessageKeyConverter.convert(landlord.isVerified),
                     null,
-                    withActionLinks = withChangeLinks,
+                    withActionLink = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.emailAddress",
                     landlord.email,
                     changeLinkMessageKey,
                     "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.UpdateEmail.urlPathSegment}",
-                    withActionLinks = withChangeLinks,
+                    withActionLink = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.telephoneNumber",
                     landlord.phoneNumber,
                     changeLinkMessageKey,
                     "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.UpdatePhoneNumber.urlPathSegment}",
-                    withActionLinks = withChangeLinks,
+                    withActionLink = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.englandOrWalesResident",
@@ -92,7 +92,7 @@ class LandlordViewModel(
                     changeLinkMessageKey,
                     // TODO: PRSD-688 "$UPDATE_ROUTE/country-of-residence",
                     null,
-                    withActionLinks = withChangeLinks,
+                    withActionLink = withChangeLinks,
                 )
                 if (isEnglandOrWalesResident) {
                     addRow(
@@ -101,7 +101,7 @@ class LandlordViewModel(
                         changeLinkMessageKey,
                         "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.LookupEnglandAndWalesAddress.urlPathSegment}",
                         // TODO PRSD-355: Set to withActionLinks
-                        withActionLinks = false,
+                        withActionLink = false,
                     )
                 } else {
                     addRow(
@@ -110,7 +110,7 @@ class LandlordViewModel(
                         changeLinkMessageKey,
                         // TODO: PRSD-688 "$UPDATE_ROUTE/country-of-residence",
                         null,
-                        withActionLinks = withChangeLinks,
+                        withActionLink = withChangeLinks,
                     )
                     addRow(
                         "landlordDetails.personalDetails.nonEnglandOrWalesAddress",
@@ -118,7 +118,7 @@ class LandlordViewModel(
                         changeLinkMessageKey,
                         // TODO: PRSD-688 "$UPDATE_ROUTE/address",
                         null,
-                        withActionLinks = withChangeLinks,
+                        withActionLink = withChangeLinks,
                     )
                     addRow(
                         "landlordDetails.personalDetails.englandOrWalesAddress",
@@ -126,7 +126,7 @@ class LandlordViewModel(
                         changeLinkMessageKey,
                         // TODO: PRSD-688 "$UPDATE_ROUTE/contact-address",
                         null,
-                        withActionLinks = withChangeLinks,
+                        withActionLink = withChangeLinks,
                     )
                 }
             }.toList()

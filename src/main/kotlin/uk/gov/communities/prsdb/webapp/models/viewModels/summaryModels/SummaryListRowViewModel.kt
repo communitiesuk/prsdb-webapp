@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 data class SummaryListRowViewModel(
     val fieldHeading: String,
     val fieldValue: Any?,
-    val action: SummaryListActionViewModel?,
+    val action: SummaryListRowActionViewModel? = null,
     val valueUrl: String? = null,
 ) {
     fun getConvertedFieldValue(): Any? =
@@ -38,13 +38,19 @@ data class SummaryListRowViewModel(
             SummaryListRowViewModel(
                 fieldHeading = fieldHeading,
                 fieldValue = fieldValue,
-                action = actionUrl?.let { SummaryListActionViewModel("forms.links.change", "$it?$CHANGE_ANSWER_FOR_PARAMETER_NAME=$it") },
+                action =
+                    actionUrl?.let {
+                        SummaryListRowActionViewModel(
+                            "forms.links.change",
+                            "$it?$CHANGE_ANSWER_FOR_PARAMETER_NAME=$it",
+                        )
+                    },
                 valueUrl = valueUrl,
             )
     }
 }
 
-data class SummaryListActionViewModel(
+data class SummaryListRowActionViewModel(
     val text: String,
     val url: String,
 )

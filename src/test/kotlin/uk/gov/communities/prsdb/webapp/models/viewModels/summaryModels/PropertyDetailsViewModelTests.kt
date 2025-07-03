@@ -101,7 +101,7 @@ class PropertyDetailsViewModelTests {
                 .single { it.fieldHeading == "propertyDetails.keyDetails.registeredLandlord" }
 
         assertEquals(landlordName, keyDetailsLandlord.fieldValue)
-        assertEquals(landlordDetailsUrl, keyDetailsLandlord.action?.url)
+        assertEquals(landlordDetailsUrl, keyDetailsLandlord.valueUrl)
     }
 
     @Test
