@@ -485,6 +485,18 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withUploadedGasSafetyCertName(
+        uploadName: String,
+        engineerNum: String = "1234567",
+        issueDate: LocalDate = LocalDate.now(),
+    ): JourneyDataBuilder =
+        this
+            .withGasSafetyCertStatus(true)
+            .withGasSafetyIssueDate(issueDate)
+            .withGasSafeEngineerNum(engineerNum)
+            .withOriginalGasSafetyCertName(uploadName)
+            .withGasSafetyUploadedConfirmation()
+
     fun withGasSafetyCertStatus(hasGasSafetyCert: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafety.urlPathSegment] =
             mapOf(GasSafetyFormModel::hasCert.name to hasGasSafetyCert)
@@ -509,7 +521,15 @@ class JourneyDataBuilder(
 
     fun withOriginalGasSafetyCertName(originalName: String): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafetyUpload.urlPathSegment] =
-            mapOf(GasSafetyUploadCertificateFormModel::name.name to originalName)
+            mapOf(
+                GasSafetyUploadCertificateFormModel::name.name to originalName,
+                GasSafetyUploadCertificateFormModel::isMetadataOnly.name to false,
+            )
+        return this
+    }
+
+    fun withGasSafetyUploadedConfirmation(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.GasSafetyUploadConfirmation.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 
@@ -539,6 +559,16 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withUploadedEicrName(
+        uploadName: String,
+        issueDate: LocalDate = LocalDate.now(),
+    ): JourneyDataBuilder =
+        this
+            .withEicrStatus(true)
+            .withEicrIssueDate(issueDate)
+            .withOriginalEicrName(uploadName)
+            .withEicrUploadedConfirmation()
+
     fun withEicrStatus(hasEICR: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EICR.urlPathSegment] = mapOf(EicrFormModel::hasCert.name to hasEICR)
         return this
@@ -556,7 +586,10 @@ class JourneyDataBuilder(
 
     fun withOriginalEicrName(originalName: String): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EicrUpload.urlPathSegment] =
-            mapOf(EicrUploadCertificateFormModel::name.name to originalName)
+            mapOf(
+                EicrUploadCertificateFormModel::name.name to originalName,
+                EicrUploadCertificateFormModel::isMetadataOnly.name to false,
+            )
         return this
     }
 
@@ -583,6 +616,11 @@ class JourneyDataBuilder(
         withEicrStatus(false)
         withEicrExemptionStatus(false)
         journeyData[PropertyComplianceStepId.EicrExemptionMissing.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withEicrUploadedConfirmation(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EicrUploadConfirmation.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 

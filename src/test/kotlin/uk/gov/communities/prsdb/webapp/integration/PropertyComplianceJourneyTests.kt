@@ -10,6 +10,7 @@ import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -74,8 +75,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PartialPropertyComplianceConfirmationEmail
-import uk.gov.communities.prsdb.webapp.services.AwsS3FileDequarantiner
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.FileDequarantiner
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.net.URI
@@ -93,7 +94,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
     private lateinit var epcRegisterClient: EpcRegisterClient
 
     @MockitoBean
-    private lateinit var s3FileDequarantiner: AwsS3FileDequarantiner
+    private lateinit var fileDequarantiner: FileDequarantiner
 
     @MockitoBean
     private lateinit var fullComplianceConfirmationEmailService: EmailNotificationService<FullPropertyComplianceConfirmationEmail>
@@ -221,6 +222,9 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
             ).containsText("Make sure you follow your legal responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
+
+        whenever(fileDequarantiner.isFileDequarantined(anyOrNull()))
+            .thenReturn(true)
 
         // TODO PRSD-962 - test checkAndSubmitPage
         checkAndSubmitPage.form.submit()

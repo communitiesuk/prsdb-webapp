@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -855,6 +856,98 @@ class PropertyComplianceJourneyTests {
 
             verify(mockPartialComplianceEmailService)
                 .sendEmail(nonCompliantPropertyCompliance.propertyOwnership.primaryLandlord.email, expectedEmailModel)
+        }
+
+        @Test
+        fun `checkAndSubmitHandleSubmitAndRedirect saves file names to the record if they have been quarantined`() {
+            setUpMocks()
+            whenever(dequarantiner.isFileDequarantined(any()))
+                .thenReturn(true) // Simulate that files have been dequarantined
+
+            val originalJourneyData =
+                JourneyPageDataBuilder
+                    .beforePropertyComplianceCheckAnswers()
+                    .withUploadedGasSafetyCertName("gas-safety")
+                    .withUploadedEicrName("eicr-certificate")
+                    .build()
+
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
+
+            completeStep(
+                PropertyComplianceStepId.CheckAndSubmit,
+                JourneyDataBuilder()
+                    .withCheckedAnswers()
+                    .build(),
+                1L,
+                stubPropertyOwnership = false,
+            )
+
+            verify(mockPropertyComplianceService)
+                .createPropertyCompliance(
+                    anyOrNull(),
+                    // but not null
+                    any(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    // but not null
+                    any(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                )
+        }
+
+        @Test
+        fun `checkAndSubmitHandleSubmitAndRedirect does not save file names to the record if they are still being scanned`() {
+            setUpMocks()
+
+            val originalJourneyData =
+                JourneyPageDataBuilder
+                    .beforePropertyComplianceCheckAnswers()
+                    .withUploadedGasSafetyCertName("gas-safety")
+                    .withUploadedEicrName("eicr-certificate")
+                    .build()
+
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
+
+            completeStep(
+                PropertyComplianceStepId.CheckAndSubmit,
+                JourneyDataBuilder()
+                    .withCheckedAnswers()
+                    .build(),
+                1L,
+                stubPropertyOwnership = false,
+            )
+
+            verify(mockPropertyComplianceService)
+                .createPropertyCompliance(
+                    anyOrNull(),
+                    isNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    isNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                )
         }
 
         private fun setUpMocks(
