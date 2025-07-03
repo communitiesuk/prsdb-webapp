@@ -13,7 +13,7 @@ class AwsS3FileDequarantiner(
     @Value("\${aws.s3.quarantineBucket}")
     lateinit var quarantineBucketName: String
 
-    @Value("\${S3_SAFE_BUCKET_KEY:noBucketSet}")
+    @Value("\${aws.s3.safeBucket}")
     lateinit var safeBucketName: String
 
     override fun dequarantine(objectKey: String): Boolean {

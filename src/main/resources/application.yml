@@ -68,6 +68,7 @@ server:
 aws:
   s3:
     quarantineBucket: ${AWS_QUARANTINE_BUCKET:prsdb-quarantine-integration}
+    safeBucket: ${S3_SAFE_BUCKET_KEY:prsdb-uploaded-files-integration}
 ---
 
 spring:

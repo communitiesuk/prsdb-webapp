@@ -17,3 +17,4 @@ os-places:
 aws:
   s3:
     quarantineBucket: 'quarantine-bucket'
+    safeBucket: 'safe-bucket'
