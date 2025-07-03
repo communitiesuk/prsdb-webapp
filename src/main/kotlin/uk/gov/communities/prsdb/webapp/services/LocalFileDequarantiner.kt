@@ -10,9 +10,7 @@ import java.io.File
 @Profile("local")
 class LocalFileDequarantiner : FileDequarantiner {
     override fun dequarantine(objectKey: String): Boolean {
-        File(".local-uploads").mkdir()
-        val destinationRoute = ".local-uploads/$objectKey"
-        val destinationFile = File(destinationRoute)
-        return destinationFile.isFile
+        val localFile = File(".local-uploads/$objectKey")
+        return localFile.exists()
     }
 }
