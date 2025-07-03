@@ -21,6 +21,8 @@ class PropertyDetailsViewModel(
 
     private val baseChangeLink = PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnership.id)
 
+    private val changeLinkMessageKey = "forms.links.change"
+
     val isTenantedKey: String = MessageKeyConverter.convert(propertyOwnership.isOccupied)
 
     val keyDetails: List<SummaryListRowViewModel> =
@@ -28,7 +30,7 @@ class PropertyDetailsViewModel(
             SummaryListRowViewModel(
                 "propertyDetails.keyDetails.registeredLandlord",
                 propertyOwnership.primaryLandlord.name,
-                landlordDetailsUrl,
+                valueUrl = landlordDetailsUrl,
             ),
             SummaryListRowViewModel(
                 "propertyDetails.keyDetails.isTenanted",
@@ -70,6 +72,7 @@ class PropertyDetailsViewModel(
                 addRow(
                     "propertyDetails.propertyRecord.ownershipType",
                     MessageKeyConverter.convert(propertyOwnership.ownershipType),
+                    changeLinkMessageKey,
                     "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment}",
                     withChangeLinks,
                 )
@@ -82,12 +85,14 @@ class PropertyDetailsViewModel(
                             listOf(MessageKeyConverter.convert(it.licenseType), it.licenseNumber)
                         }
                     } ?: MessageKeyConverter.convert(LicensingType.NO_LICENSING),
+                    changeLinkMessageKey,
                     "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment}",
                     withChangeLinks,
                 )
                 addRow(
                     "propertyDetails.propertyRecord.occupied",
                     isTenantedKey,
+                    changeLinkMessageKey,
                     "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment}",
                     withChangeLinks,
                 )
@@ -95,12 +100,14 @@ class PropertyDetailsViewModel(
                     addRow(
                         "propertyDetails.propertyRecord.numberOfHouseholds",
                         propertyOwnership.currentNumHouseholds,
+                        changeLinkMessageKey,
                         "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment}",
                         withChangeLinks,
                     )
                     addRow(
                         "propertyDetails.propertyRecord.numberOfPeople",
                         propertyOwnership.currentNumTenants,
+                        changeLinkMessageKey,
                         "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment}",
                         withChangeLinks,
                     )

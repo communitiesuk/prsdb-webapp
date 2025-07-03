@@ -101,7 +101,7 @@ class PropertyDetailsViewModelTests {
                 .single { it.fieldHeading == "propertyDetails.keyDetails.registeredLandlord" }
 
         assertEquals(landlordName, keyDetailsLandlord.fieldValue)
-        assertEquals(landlordDetailsUrl, keyDetailsLandlord.changeUrl)
+        assertEquals(landlordDetailsUrl, keyDetailsLandlord.valueUrl)
     }
 
     @Test
@@ -246,7 +246,7 @@ class PropertyDetailsViewModelTests {
 
         val viewModel = PropertyDetailsViewModel(propertyOwnership, withChangeLinks = true)
 
-        val changeLinkCount = viewModel.propertyRecord.count { it.changeUrl != null }
+        val changeLinkCount = viewModel.propertyRecord.count { it.action != null }
 
         assertEquals(5, changeLinkCount)
     }
@@ -269,7 +269,7 @@ class PropertyDetailsViewModelTests {
 
         val viewModel = PropertyDetailsViewModel(propertyOwnership, withChangeLinks = false)
 
-        val changeLinkCount = viewModel.propertyRecord.count { it.changeUrl != null }
+        val changeLinkCount = viewModel.propertyRecord.count { it.action != null }
 
         assertEquals(0, changeLinkCount)
     }
