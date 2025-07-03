@@ -109,6 +109,7 @@ import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
+import uk.gov.communities.prsdb.webapp.services.FileDequarantiner
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -125,6 +126,7 @@ class PropertyComplianceJourney(
     private val fullPropertyComplianceConfirmationEmailService: EmailNotificationService<FullPropertyComplianceConfirmationEmail>,
     private val partialPropertyComplianceConfirmationEmailService: EmailNotificationService<PartialPropertyComplianceConfirmationEmail>,
     private val urlProvider: AbsoluteUrlProvider,
+    private val dequarantiner: FileDequarantiner,
 ) : JourneyWithTaskList<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE,
         initialStepId = initialStepId,
@@ -1481,35 +1483,21 @@ class PropertyComplianceJourney(
         }
 
     private fun checkAndSubmitHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
-        val gasSafetyCertFilename =
-            filteredJourneyData.getGasSafetyCertOriginalName()?.let {
-                PropertyComplianceJourneyHelper.getCertFilename(
-                    propertyOwnershipId,
-                    PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
-                    it,
-                )
-            }
-
-        val eicrFilename =
-            filteredJourneyData.getEicrOriginalName()?.let {
-                PropertyComplianceJourneyHelper.getCertFilename(
-                    propertyOwnershipId,
-                    PropertyComplianceStepId.EicrUpload.urlPathSegment,
-                    it,
-                )
-            }
+        val gasSafetyCertKey =
+            getSafeKeyOrNull(filteredJourneyData.getGasSafetyCertOriginalName(), PropertyComplianceStepId.GasSafetyUpload)
+        val eicrCertKey = getSafeKeyOrNull(filteredJourneyData.getEicrOriginalName(), PropertyComplianceStepId.EicrUpload)
 
         val epcDetails = filteredJourneyData.getAcceptedEpcDetails()
 
         val propertyCompliance =
             propertyComplianceService.createPropertyCompliance(
                 propertyOwnershipId = propertyOwnershipId,
-                gasSafetyCertS3Key = gasSafetyCertFilename,
+                gasSafetyCertS3Key = gasSafetyCertKey,
                 gasSafetyCertIssueDate = filteredJourneyData.getGasSafetyCertIssueDate()?.toJavaLocalDate(),
                 gasSafetyCertEngineerNum = filteredJourneyData.getGasSafetyCertEngineerNum(),
                 gasSafetyCertExemptionReason = filteredJourneyData.getGasSafetyCertExemptionReason(),
                 gasSafetyCertExemptionOtherReason = filteredJourneyData.getGasSafetyCertExemptionOtherReason(),
-                eicrS3Key = eicrFilename,
+                eicrS3Key = eicrCertKey,
                 eicrIssueDate = filteredJourneyData.getEicrIssueDate()?.toJavaLocalDate(),
                 eicrExemptionReason = filteredJourneyData.getEicrExemptionReason(),
                 eicrExemptionOtherReason = filteredJourneyData.getEicrExemptionOtherReason(),
@@ -1529,6 +1517,28 @@ class PropertyComplianceJourney(
         propertyOwnershipService.deleteIncompleteComplianceForm(propertyOwnershipId)
 
         return CONFIRMATION_PATH_SEGMENT
+    }
+
+    private fun getSafeKeyOrNull(
+        originalFileName: String?,
+        stepId: PropertyComplianceStepId,
+    ): String? {
+        // If no file was uploaded, do not save a file in the compliance record
+        if (originalFileName == null) return null
+
+        val objectKey =
+            PropertyComplianceJourneyHelper.getCertFilename(
+                propertyOwnershipId,
+                stepId.urlPathSegment,
+                originalFileName,
+            )
+
+        // If the file has not yet been scanned, do not save it in the compliance record
+        return if (dequarantiner.isFileDequarantined(objectKey)) {
+            objectKey
+        } else {
+            null
+        }
     }
 
     private fun getEpcLookupCertificateNumberFromSession(): String {

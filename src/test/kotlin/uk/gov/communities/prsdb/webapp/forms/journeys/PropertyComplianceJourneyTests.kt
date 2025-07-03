@@ -37,6 +37,7 @@ import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
+import uk.gov.communities.prsdb.webapp.services.FileDequarantiner
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -79,6 +80,9 @@ class PropertyComplianceJourneyTests {
 
     @Mock
     private lateinit var mockUrlProvider: AbsoluteUrlProvider
+
+    @Mock
+    private lateinit var dequarantiner: FileDequarantiner
 
     @Nested
     inner class LoadJourneyDataIfNotLoadedTests {
@@ -904,6 +908,7 @@ class PropertyComplianceJourneyTests {
             fullPropertyComplianceConfirmationEmailService = mockFullComplianceEmailService,
             partialPropertyComplianceConfirmationEmailService = mockPartialComplianceEmailService,
             urlProvider = mockUrlProvider,
+            dequarantiner = dequarantiner,
         )
 
     private fun completeStep(

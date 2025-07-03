@@ -43,4 +43,24 @@ class AwsS3FileDequarantiner(
 
         return deleteResponse.sdkHttpResponse().isSuccessful
     }
+
+    override fun isFileDequarantined(objectKey: String): Boolean {
+        val response =
+            s3Client
+                .headObject { request ->
+                    request
+                        .bucket("prsdb-quarantine-integration")
+                        .key(objectKey)
+                }.toCompletableFuture()
+                .join()
+                .sdkHttpResponse()
+
+        return if (response?.isSuccessful == true) {
+            true
+        } else if (response?.statusCode() == 404) {
+            false
+        } else {
+            throw IllegalStateException("Unexpected response from S3: $response")
+        }
+    }
 }

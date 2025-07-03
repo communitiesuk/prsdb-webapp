@@ -278,6 +278,7 @@ class LandlordDashboardUrlTests(
                 mockEmailNotificationService,
                 mockEmailNotificationService,
                 AbsoluteUrlProvider(),
+                dequarantiner = mock(),
             )
         whenever(mockPropertyComplianceJourneyFactory.create(any())).thenReturn(propertyComplianceJourney)
 

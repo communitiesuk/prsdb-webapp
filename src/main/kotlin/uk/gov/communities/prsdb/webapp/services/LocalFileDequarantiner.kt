@@ -9,8 +9,12 @@ import java.io.File
 @Primary
 @Profile("local")
 class LocalFileDequarantiner : FileDequarantiner {
-    override fun dequarantine(objectKey: String): Boolean {
-        val localFile = File(".local-uploads/$objectKey")
-        return localFile.exists()
+    override fun dequarantine(objectKey: String) = isFileInLocalUploads(objectKey)
+
+    override fun isFileDequarantined(objectKey: String) = isFileInLocalUploads(objectKey)
+
+    private fun isFileInLocalUploads(objectKey: String): Boolean {
+        val file = File(".local-uploads/$objectKey")
+        return file.exists() && file.isFile
     }
 }

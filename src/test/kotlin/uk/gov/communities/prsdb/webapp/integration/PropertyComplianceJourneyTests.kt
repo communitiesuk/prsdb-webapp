@@ -74,6 +74,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PartialPropertyComplianceConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.AwsS3FileDequarantiner
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
@@ -90,6 +91,9 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
 
     @MockitoBean
     private lateinit var epcRegisterClient: EpcRegisterClient
+
+    @MockitoBean
+    private lateinit var s3FileDequarantiner: AwsS3FileDequarantiner
 
     @MockitoBean
     private lateinit var fullComplianceConfirmationEmailService: EmailNotificationService<FullPropertyComplianceConfirmationEmail>
