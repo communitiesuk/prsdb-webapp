@@ -1,12 +1,12 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
-import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
-class GasSafetyViewModelBuilder {
+class EicrViewModelBuilder {
     companion object {
         fun fromEntity(
             propertyCompliance: PropertyCompliance,
@@ -15,26 +15,22 @@ class GasSafetyViewModelBuilder {
             mutableListOf<SummaryListRowViewModel>()
                 .apply {
                     addRow(
-                        key = "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
-                        value = getGasCertificateMessageKey(propertyCompliance),
-                        valueUrl = getDownloadLinkOrNull(propertyCompliance.gasSafetyCertS3Key != null),
+                        key = "propertyDetails.complianceInformation.electricalSafety.eicr",
+                        value = getEicrMessageKey(propertyCompliance),
+                        valueUrl = getDownloadLinkOrNull(propertyCompliance.eicrS3Key != null),
                         actionText = "forms.links.change",
-                        // TODO PRSD-1244 add Update Gas Compliance Link
+                        // TODO PRSD-1246 add Update EICR Compliance Link
                         actionLink = "#",
                         withActionLink = withActionLinks,
                     )
-                    if (propertyCompliance.gasSafetyCertIssueDate != null) {
+                    if (propertyCompliance.eicrIssueDate != null) {
                         addRow(
                             key = "propertyDetails.complianceInformation.issueDate",
-                            value = propertyCompliance.gasSafetyCertIssueDate,
+                            value = propertyCompliance.eicrIssueDate,
                         )
                         addRow(
                             key = "propertyDetails.complianceInformation.validUntil",
-                            value = propertyCompliance.gasSafetyCertExpiryDate,
-                        )
-                        addRow(
-                            key = "propertyDetails.complianceInformation.gasSafety.gasSafeEngineerNumber",
-                            value = propertyCompliance.gasSafetyCertEngineerNum,
+                            value = propertyCompliance.eicrExpiryDate,
                         )
                     } else {
                         addRow(
@@ -44,31 +40,31 @@ class GasSafetyViewModelBuilder {
                     }
                 }.toList()
 
-        private fun getGasCertificateMessageKey(propertyCompliance: PropertyCompliance): String =
-            if (propertyCompliance.gasSafetyCertS3Key != null) {
-                if (propertyCompliance.isGasSafetyCertExpired!!) {
-                    "propertyDetails.complianceInformation.gasSafety.downloadExpiredCertificate"
+        private fun getEicrMessageKey(propertyCompliance: PropertyCompliance): String =
+            if (propertyCompliance.eicrS3Key != null) {
+                if (propertyCompliance.isEicrExpired!!) {
+                    "propertyDetails.complianceInformation.electricalSafety.downloadExpiredEicr"
                 } else {
-                    "propertyDetails.complianceInformation.gasSafety.downloadCertificate"
+                    "propertyDetails.complianceInformation.electricalSafety.downloadEicr"
                 }
-            } else if (propertyCompliance.gasSafetyCertIssueDate != null) {
+            } else if (propertyCompliance.eicrIssueDate != null) {
                 "propertyDetails.complianceInformation.expired"
-            } else if (propertyCompliance.hasGasSafetyExemption) {
+            } else if (propertyCompliance.hasEicrExemption) {
                 "propertyDetails.complianceInformation.exempt"
             } else {
                 "propertyDetails.complianceInformation.notAdded"
             }
 
         private fun getExemptionReasonValue(propertyCompliance: PropertyCompliance): Any =
-            when (propertyCompliance.gasSafetyCertExemptionReason) {
+            when (propertyCompliance.eicrExemptionReason) {
                 null -> "propertyDetails.complianceInformation.noExemption"
-                GasSafetyExemptionReason.OTHER ->
+                EicrExemptionReason.OTHER ->
                     listOf(
-                        MessageKeyConverter.convert(GasSafetyExemptionReason.OTHER),
-                        propertyCompliance.gasSafetyCertExemptionOtherReason,
+                        MessageKeyConverter.convert(EicrExemptionReason.OTHER),
+                        propertyCompliance.eicrExemptionOtherReason,
                     )
 
-                else -> MessageKeyConverter.convert(propertyCompliance.gasSafetyCertExemptionReason!!)
+                else -> MessageKeyConverter.convert(propertyCompliance.eicrExemptionReason!!)
             }
 
         // TODO PRSD-976 add link to download certificate and appropriate messages when required
