@@ -14,7 +14,7 @@ abstract class GroupedUpdateJourney<T : GroupedUpdateStepId<*>>(
     validator: Validator,
     journeyDataService: JourneyDataService,
     stepName: String,
-    protected val isChangingAnswer: Boolean,
+    protected val isCheckingAnswers: Boolean,
 ) : UpdateJourney<T>(journeyType, initialStepId, validator, journeyDataService, stepName) {
     abstract override val stepRouter: GroupedUpdateStepRouter<T>
 
@@ -26,12 +26,12 @@ abstract class GroupedUpdateJourney<T : GroupedUpdateStepId<*>>(
 
     fun getModelAndViewForStep(
         submittedPageData: PageData? = null,
-        changingAnswersForStep: String? = null,
-    ): ModelAndView = getModelAndViewForStep(stepName, null, submittedPageData, changingAnswersForStep)
+        checkingAnswersForStep: String? = null,
+    ): ModelAndView = getModelAndViewForStep(stepName, null, submittedPageData, checkingAnswersForStep)
 
     fun completeStep(
         formData: PageData,
         principal: Principal,
-        changingAnswersForStep: String? = null,
-    ): ModelAndView = completeStep(stepName, formData, null, principal, changingAnswersForStep)
+        checkingAnswersForStep: String? = null,
+    ): ModelAndView = completeStep(stepName, formData, null, principal, checkingAnswersForStep)
 }

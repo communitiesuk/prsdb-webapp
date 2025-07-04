@@ -8,6 +8,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
@@ -96,7 +97,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 name,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    "${LandlordRegistrationStepId.Name.urlPathSegment}?changingAnswerFor=" +
+                    "${LandlordRegistrationStepId.Name.urlPathSegment}?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=" +
                         LandlordRegistrationStepId.Name.urlPathSegment,
                 ),
             ),
@@ -110,7 +111,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 dob,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    "${LandlordRegistrationStepId.DateOfBirth.urlPathSegment}?changingAnswerFor=" +
+                    "${LandlordRegistrationStepId.DateOfBirth.urlPathSegment}?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=" +
                         LandlordRegistrationStepId.DateOfBirth.urlPathSegment,
                 ),
             ),
@@ -134,7 +135,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 emailAddress,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    "${LandlordRegistrationStepId.Email.urlPathSegment}?changingAnswerFor=" +
+                    "${LandlordRegistrationStepId.Email.urlPathSegment}?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=" +
                         LandlordRegistrationStepId.Email.urlPathSegment,
                 ),
             ),
@@ -148,7 +149,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 phoneNumber,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    "${LandlordRegistrationStepId.PhoneNumber.urlPathSegment}?changingAnswerFor=" +
+                    "${LandlordRegistrationStepId.PhoneNumber.urlPathSegment}?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=" +
                         LandlordRegistrationStepId.PhoneNumber.urlPathSegment,
                 ),
             ),
@@ -170,7 +171,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 true,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    "${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}?changingAnswerFor=" +
+                    "${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=" +
                         LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
                 ),
             ),
@@ -192,7 +193,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 DEFAULT_ADDRESS,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    "${LandlordRegistrationStepId.LookupAddress.urlPathSegment}?changingAnswerFor=" +
+                    "${LandlordRegistrationStepId.LookupAddress.urlPathSegment}?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=" +
                         LandlordRegistrationStepId.LookupAddress.urlPathSegment,
                 ),
             ),
@@ -220,7 +221,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode).singleLineAddress,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    "${LandlordRegistrationStepId.ManualAddress.urlPathSegment}?changingAnswerFor=" +
+                    "${LandlordRegistrationStepId.ManualAddress.urlPathSegment}?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=" +
                         LandlordRegistrationStepId.ManualAddress.urlPathSegment,
                 ),
             ),
@@ -252,7 +253,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 SummaryListRowActionViewModel(
                     "forms.links.change",
                     LandlordRegistrationStepId.CountryOfResidence.urlPathSegment +
-                        "?changingAnswerFor=${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}",
+                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}",
                 ),
             ),
             summaryListData.single {
@@ -266,7 +267,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 SummaryListRowActionViewModel(
                     "forms.links.change",
                     LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment +
-                        "?changingAnswerFor=${LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment}",
+                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment}",
                 ),
             ),
             summaryListData.single {
@@ -280,7 +281,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 SummaryListRowActionViewModel(
                     "forms.links.change",
                     LandlordRegistrationStepId.LookupContactAddress.urlPathSegment +
-                        "?changingAnswerFor=${LandlordRegistrationStepId.LookupContactAddress.urlPathSegment}",
+                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LandlordRegistrationStepId.LookupContactAddress.urlPathSegment}",
                 ),
             ),
             summaryListData.single {
@@ -315,7 +316,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 SummaryListRowActionViewModel(
                     "forms.links.change",
                     LandlordRegistrationStepId.CountryOfResidence.urlPathSegment +
-                        "?changingAnswerFor=${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}",
+                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}",
                 ),
             ),
             summaryListData.single {
@@ -329,7 +330,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 SummaryListRowActionViewModel(
                     "forms.links.change",
                     LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment +
-                        "?changingAnswerFor=${LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment}",
+                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment}",
                 ),
             ),
             summaryListData.single {
@@ -342,7 +343,7 @@ class LandlordRegistrationCheckAnswersPageTests {
                 AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode).singleLineAddress,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    "${LandlordRegistrationStepId.ManualContactAddress.urlPathSegment}?changingAnswerFor=" +
+                    "${LandlordRegistrationStepId.ManualContactAddress.urlPathSegment}?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=" +
                         LandlordRegistrationStepId.ManualContactAddress.urlPathSegment,
                 ),
             ),

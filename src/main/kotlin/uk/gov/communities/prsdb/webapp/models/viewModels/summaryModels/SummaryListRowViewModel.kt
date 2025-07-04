@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toJavaLocalDate
-import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
+import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
@@ -42,7 +42,7 @@ data class SummaryListRowViewModel(
                     actionUrl?.let {
                         SummaryListRowActionViewModel(
                             "forms.links.change",
-                            "$it?$CHANGE_ANSWER_FOR_PARAMETER_NAME=$it",
+                            "$it?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=$it",
                         )
                     },
                 valueUrl = valueUrl,

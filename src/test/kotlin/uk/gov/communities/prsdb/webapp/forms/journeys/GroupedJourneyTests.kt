@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter
+import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -72,9 +73,9 @@ class GroupedJourneyTests {
     }
 
     @Nested
-    inner class ChangingAnswersTests {
+    inner class CheckingAnswersTests {
         @Test
-        fun `completeStep redirects to next step with same changingAnswerFor when within group`() {
+        fun `completeStep redirects to next step with same checkingAnswersFor when within group`() {
             // Arrange
             val groupedJourney =
                 TestGroupedJourney(
@@ -111,7 +112,7 @@ class GroupedJourneyTests {
             // Assert
             assertEquals(
                 "redirect:${TestGroupedStepId.GroupOneStepTwo.urlPathSegment}?" +
-                    "changingAnswerFor=${TestGroupedStepId.GroupOneStepOne.urlPathSegment}",
+                    "$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${TestGroupedStepId.GroupOneStepOne.urlPathSegment}",
                 result.viewName,
             )
         }
