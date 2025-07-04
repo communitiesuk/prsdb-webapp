@@ -2,9 +2,9 @@
 
 ## Status
 
-Draft
+Accepted
 
-Date of decision: {yyyy-MM-dd}
+Date of decision: 2025-07-03
 
 ## Context and Problem Statement
 
@@ -28,7 +28,10 @@ How should we restrict access to the pilot?
 
 ## Decision Outcome
 
-TBC
+Associate unique passcodes with user account, limiting the total number of accounts created, because it prevents users
+from sharing their passcodes and allows us to limit the number of users who can access the pilot, but stops short of
+implementing an invitation flow for Local Authorities to invite users, which would be more work and not reusable after
+the pilot.
 
 ## Pros and Cons of the Options
 
