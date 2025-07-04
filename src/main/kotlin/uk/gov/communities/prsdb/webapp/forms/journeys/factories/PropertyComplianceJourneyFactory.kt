@@ -30,7 +30,7 @@ class PropertyComplianceJourneyFactory(
 ) {
     fun create(
         propertyOwnershipId: Long,
-        changingAnswerFor: String? = null,
+        checkingAnswersFor: String? = null,
     ) = PropertyComplianceJourney(
         validator,
         journeyDataService = journeyDataServiceFactory.create(getJourneyDataKey(propertyOwnershipId)),
@@ -43,7 +43,7 @@ class PropertyComplianceJourneyFactory(
         fullPropertyComplianceConfirmationEmailService,
         partialPropertyComplianceConfirmationEmailService,
         absoluteUrlProvider,
-        changingAnswerFor,
+        checkingAnswersFor,
     )
 
     companion object {

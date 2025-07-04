@@ -104,11 +104,13 @@ class PropertyComplianceCheckAnswersPage(
                 "forms.checkComplianceAnswers.responsibilities.keepPropertySafe",
                 true,
                 PropertyComplianceStepId.KeepPropertySafe.urlPathSegment,
+                actionValue = "forms.links.view",
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkComplianceAnswers.responsibilities.responsibilityToTenants",
                 true,
                 PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
+                actionValue = "forms.links.view",
             ),
         )
 

@@ -158,7 +158,7 @@ class PropertyDetailsControllerTests(
                 propertyDetailsUpdateJourneyFactory.create(
                     propertyOwnership.id,
                     UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment,
-                    isChangingAnswer = false,
+                    isCheckingAnswer = false,
                 ),
             ).thenReturn(propertyDetailsUpdateJourney)
         }
