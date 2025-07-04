@@ -17,6 +17,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+import software.amazon.awssdk.services.s3.S3AsyncClient
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
@@ -64,6 +65,9 @@ abstract class IntegrationTest {
 
     @MockitoBean
     lateinit var s3: S3TransferManager
+
+    @MockitoBean
+    lateinit var s3client: S3AsyncClient
 
     /**
      * The mock One Login URLs are hard-coded with port 8080 in the local-no-auth profile config. However, our tests
