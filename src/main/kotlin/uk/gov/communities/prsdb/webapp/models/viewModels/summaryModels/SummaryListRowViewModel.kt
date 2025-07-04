@@ -34,6 +34,7 @@ data class SummaryListRowViewModel(
             fieldValue: Any?,
             actionUrl: String?,
             valueUrl: String? = null,
+            actionValue: String = "forms.links.change",
         ): SummaryListRowViewModel =
             SummaryListRowViewModel(
                 fieldHeading = fieldHeading,
@@ -41,7 +42,7 @@ data class SummaryListRowViewModel(
                 action =
                     actionUrl?.let {
                         SummaryListRowActionViewModel(
-                            "forms.links.change",
+                            actionValue,
                             "$it?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=$it",
                         )
                     },
