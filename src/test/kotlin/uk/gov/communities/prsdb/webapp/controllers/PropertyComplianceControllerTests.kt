@@ -488,7 +488,7 @@ class PropertyComplianceControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `getConfirmation returns 500 if the landlord added compliance details this session but no compliance record is found`() {
             whenever(propertyComplianceService.wasPropertyComplianceAddedThisSession(validPropertyOwnershipId)).thenReturn(true)
-            whenever(propertyComplianceService.getComplianceForProperty(validPropertyOwnershipId)).thenReturn(null)
+            whenever(propertyComplianceService.getComplianceForPropertyOrNull(validPropertyOwnershipId)).thenReturn(null)
 
             mvc.get(validPropertyComplianceConfirmationUrl).andExpect {
                 status { is5xxServerError() }
@@ -502,7 +502,7 @@ class PropertyComplianceControllerTests(
             val expectedConfirmationMessageKeys = PropertyComplianceConfirmationMessageKeys(propertyCompliance)
 
             whenever(propertyComplianceService.wasPropertyComplianceAddedThisSession(validPropertyOwnershipId)).thenReturn(true)
-            whenever(propertyComplianceService.getComplianceForProperty(validPropertyOwnershipId)).thenReturn(propertyCompliance)
+            whenever(propertyComplianceService.getComplianceForPropertyOrNull(validPropertyOwnershipId)).thenReturn(propertyCompliance)
 
             mvc.get(validPropertyComplianceConfirmationUrl).andExpect {
                 status { isOk() }
